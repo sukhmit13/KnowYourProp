@@ -1,0 +1,29 @@
+- [Data refresh scheduler](data-refresh-scheduler.md) — unified scheduler for all static datasets; singleton guards, 6h check interval, callbacks for cache-clear.
+- [Socrata SoQL quirks](socrata-soql-quirks.md) — field names and query pitfalls for Chicago Data Portal datasets used in this project.
+- [SBA CSV URL auto-detection](sba-url-detection.md) — sba_config.json holds live URLs; sbaLoans.ts reads them; dataRefresh.ts queries CKAN API weekly.
+- [HomeGrown program](homegrown-program.md) — Chicago DOH grant up to $70K; Zone A/B via FFIEC tracts; needs zone_b_tracts.json before implementation; cannot stack with TaxSmart MCC.
+- [Property context guardrails](property-context-guardrails.md) — extraction must stay cache-only (hidden live-fetch traps); derived metrics need verified:true; coverage field owned by saveContext; lock is in-process only.
+- [Insight report evidence](insight-report-evidence.md) — geo-null silently drops zoning/transit/demo/childcare blocks with no markers; prod→dev run replication needs 4 tables; DIAG measures fullContext only.
+- [Owner intel & IL SOS access](owner-intel-sos-access.md) — ilsos.gov 403s datacenter IPs; SOS scraping must use ScrapingBee (quota resets monthly); fail loudly to manual link.
+- [claude-sonnet-5 API quirks](claude-sonnet-5-api-quirks.md) — rejects temperature; thinking tokens eat max_tokens; join all text blocks and fail hard on truncation/empty output.
+- [Report design system](report-design-system.md) — shared CSS primitives for report restyles; verify design-subagent passes with tsc baseline + Playwright; subagents break imports/JSX.
+- [Metra station name matching](metra-station-matching.md) — GTFS vs RTAMS survey names differ; alias table + hint-only fuzzy match, ambiguous → 404, never guess.
+- [Contractor rankings pipeline](contractor-rankings-pipeline.md) — permits-only data; rank by trade-specific counts, compute activity live, rebuilds fail hard + atomic.
+- [Auth & run ownership](auth-run-ownership.md) — new run endpoints need cookie+bearer auth, case-insensitive email ownership, 404 for non-owned; paid calls need lock+cooldown.
+- [Incentives single hierarchy](incentives-hierarchy.md) — one availability→type hierarchy; counts/cards derive from one shared map; CSS order doesn't apply in print.
+- [ZBA attorney index rebuild](zba-attorney-index.md) — atomic swap + sanity floors (incl. 70% ward rate); monthly via scheduler; spawn not exec; lightweight ward geocoding.
+- [ZBA PDF naming variants](zba-pdf-naming.md) — city mixes abbreviated/full month names in ZBA PDF URLs; always try both or the feed silently goes stale.
+- [AI takeaway guardrails](ai-takeaway-guardrails.md) — cached report takeaways: server-derived inputs only, number-tracing + metric/favor validators, fail closed to null.
+- [Linked takeaway chips](linked-takeaway-chips.md) — jump chips map AI bullets' `metric` to anchors client-side (no server change, works with cached takeaways); tacard = neutral professional-card template.
+- [RunDetail hook placement](rundetail-hooks-order.md) — new hooks must sit above the page's early returns; bearer token from localStorage on authed fetches.
+- [Report PDF export](report-pdf-export.md) — Playwright-rendered document; srcdoc hardening, host allowlist, render semaphore, measure insight page height (never assume 1056px).
+- [News coverage takeaway](news-coverage-takeaway.md) — site-specific news AI takeaway: <b>-only HTML sanitizer, parcel-tier verification rules, prod column ALTER at republish.
+- [Listing snapshot lookup](listing-snapshot-lookup.md) — AI listing-status search: stale MLS aggregator trap, highest-MLS-wins prompt rules, Redfin blocks all our fetch routes.
+- [Maturity estimation rules](maturity-estimation.md) — recorded date always wins; LOCs never ballooned; legacy cached docs (no is_credit_line flag) suppress estimates; estimates never assert past-due.
+- [Recorder doc ingest](recorder-doc-ingest.md) — session-scoped recorder tokens, dId base64 identity check, per-page OCR heuristic, db:push blocked by legacy tables.
+- [Debt read-window ingest](debt-read-window.md) — OCR only docs ≥ saleAnchor−6mo; pre-window = index-only stubs; tax liens/no-anchor/unknown-date always read; zero-worker download fails hard.
+- [Paywall/session/cache traps](paywall-session-cache-traps.md) — subscriber-sees-paywall triage: stale bundle → session kick → /preview funnel → z-index click trap; build stamp in sidebar.
+- [Assemblage detection](assemblage-detection.md) — Companion Parcel gate = verified shared deed + adjacency, never owner-name match; hedged control + debt-scope-gated claims.
+- [Liens distress resolution](lien-distress-resolution.md) — genuine-sale anchor clears prior lis pendens; one shared resolver for chip/headline/KPI; impossible dates never resolve.
+- [Valuation NOI model](valuation-noi-model.md) — transparent NOI build-up; one NOI everywhere; dual DSCR (economic + rent÷PITIA); never rent−taxes−insurance.
+- [JSX comment placement](jsx-comment-placement.md) — a {/* comment */} directly inside a .map() arrow parenthesized return breaks the Babel build; put comments above the map call.

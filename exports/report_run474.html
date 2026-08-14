@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Property Insight Report — 522 N Claremont Ave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --font-display:'Instrument Serif', Georgia, serif;
+    --font-body:'Inter', -apple-system, sans-serif;
+    --font-mono:'JetBrains Mono', ui-monospace, monospace;
+    --paper:#faf9f6; --card:#ffffff; --ink:#141414; --ink2:#565651; --muted:#8b8a84; --line:#eae8e2;
+    --brand:#2b3a9e; --brandHi:#3446bd; --brandDeep:#1e2a6e; --brandSoft:#ecedf9; --gold:#f3b31f;
+    --risk-mark:#d13b26; --risk-bg:#fbecea; --risk-border:#d13b26; --risk-text:#9e2b1c;
+    --caution-mark:#d98c00; --caution-bg:#fdf5e2; --caution-border:#f3b31f; --caution-text:#946200;
+    --strength-mark:#2f7d3f; --strength-bg:#edf6ef; --strength-border:#2f7d3f; --strength-text:#245f30;
+    --neutral-mark:#0e8fa6; --neutral-bg:#e9f4f6; --neutral-border:#0e8fa6; --neutral-text:#0b6d7f;
+    --radius-card:10px;
+  }
+  @page{ size: letter portrait; margin: 0.45in; }
+  *{ box-sizing:border-box; }
+  html,body{ background:var(--paper); margin:0; padding:0; }
+  body{
+    font-family:var(--font-body); color:var(--ink); font-size:9.3pt; line-height:1.38;
+    -webkit-font-smoothing:antialiased; -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .page{ max-width:8.1in; margin:0 auto; }
+  .mono-label{ font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.1em; }
+
+  /* Masthead */
+  .masthead{
+    display:grid; grid-template-columns: 1.5fr 1fr; gap:22px;
+    background:linear-gradient(135deg, var(--brand), var(--brandDeep));
+    color:#fff; border-radius:var(--radius-card) var(--radius-card) 0 0;
+    padding:16px 20px; page-break-inside:avoid;
+  }
+  .masthead .eyebrow{ font-family:var(--font-mono); font-size:8.5pt; color:rgba(255,255,255,0.7); }
+  .masthead h1{ font-family:var(--font-display); font-weight:400; font-size:27pt; margin:2px 0 6px 0; line-height:1.05; }
+  .masthead .meta{ font-size:9pt; color:rgba(255,255,255,0.8); }
+  .take{ border-left:1px solid rgba(255,255,255,0.18); padding-left:18px; }
+  .take .eyebrow{ font-family:var(--font-mono); font-size:8.5pt; color:var(--gold); }
+  .take h2{ font-family:var(--font-display); font-weight:400; font-size:14.5pt; color:#fff; margin:4px 0 6px 0; line-height:1.2; }
+  .take p{ font-size:8.9pt; color:rgba(255,255,255,0.82); margin:0; }
+  .gold-rule{ height:2px; background:var(--gold); }
+
+  /* Stat strip */
+  .stats{
+    display:grid; grid-template-columns:repeat(6,1fr); background:var(--card);
+    border-bottom:1px solid var(--line); page-break-inside:avoid;
+  }
+  .stat{ padding:9px 10px; border-left:1px solid var(--line); }
+  .stat:first-child{ border-left:none; }
+  .stat .label{ font-family:var(--font-mono); font-size:7pt; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; }
+  .stat .value{ font-family:var(--font-display); font-size:13.5pt; color:var(--ink); margin:2px 0 1px 0; line-height:1.15; }
+  .stat .value.flag{ color:var(--risk-mark); }
+  .stat .qual{ font-size:7.6pt; color:var(--muted); line-height:1.25; }
+
+  /* Section bar */
+  .section-bar{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--brand); color:#fff; padding:6px 12px; margin-top:12px;
+    font-family:var(--font-mono); font-size:8pt; letter-spacing:0.08em; text-transform:uppercase;
+    page-break-inside:avoid;
+  }
+  .section-bar .note{ color:rgba(255,255,255,0.65); text-transform:none; letter-spacing:0; font-family:var(--font-body); font-size:8pt; }
+
+  /* Cards */
+  .cards{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:9px; }
+  .card{
+    border-radius:var(--radius-card); padding:10px 12px; page-break-inside:avoid;
+  }
+  .card h3{ font-family:var(--font-body); font-weight:700; font-size:10.2pt; margin:0 0 4px 0; color:var(--ink); }
+  .card p{ margin:0; font-size:8.7pt; color:var(--ink2); }
+  .card .mark{ display:inline-block; width:8px; height:8px; margin-right:6px; border-radius:2px; }
+
+  .card.risk{ background:var(--risk-bg); border-left:3px solid var(--risk-border); }
+  .card.risk .mark{ background:var(--risk-mark); }
+  .card.caution{ background:var(--caution-bg); border-left:3px solid var(--caution-border); }
+  .card.caution .mark{ background:var(--caution-mark); }
+  .card.strength{ background:var(--strength-bg); border-left:3px solid var(--strength-border); }
+  .card.strength .mark{ background:var(--strength-mark); }
+  .card.neutral{ background:var(--neutral-bg); border-left:3px solid var(--neutral-border); }
+  .card.neutral .mark{ background:var(--neutral-mark); }
+
+  /* Action steps */
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:9px; }
+  .step{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius-card); padding:9px 11px; page-break-inside:avoid; }
+  .step .chip{
+    display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
+    background:var(--brand); color:#fff; font-family:var(--font-mono); font-size:9.5pt;
+    border-radius:0; margin-bottom:5px;
+  }
+  .step h4{ font-size:9.6pt; margin:0 0 3px 0; color:var(--ink); font-weight:700; }
+  .step p{ font-size:8.3pt; color:var(--ink2); margin:0; }
+
+  /* Footer */
+  .footer{
+    border-top:1px solid var(--line); margin-top:10px; padding-top:6px;
+    font-family:var(--font-mono); font-size:7.3pt; color:var(--muted); line-height:1.5;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- MASTHEAD -->
+  <div class="masthead">
+    <div>
+      <div class="eyebrow">PROPERTY INSIGHT REPORT</div>
+      <h1>522 N Claremont Ave</h1>
+      <div class="meta">West Town · Chicago, IL 60612 · RT-4 zoning · 2,967 SF lot · 1,638 SF building · Built 1879</div>
+    </div>
+    <div class="take">
+      <div class="eyebrow">OUR TAKE</div>
+      <h2>Real entitlement upside, real title risk.</h2>
+      <p>This RT-4 lot already carries more unused FAR than the existing building, sits in an Opportunity Zone, and has genuinely strong transit access — a clean setup for an as-of-right addition or multi-unit conversion. But the ownership record is doing a lot of the talking: a 2019 lis pendens, a 2021 self-transfer paired with a large refinance, a fresh 2025 mortgage, and a currently delinquent tax account. Underwrite this as a title-and-payoff problem first, a construction project second.</p>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+
+  <!-- STAT STRIP -->
+  <div class="stats">
+    <div class="stat">
+      <div class="label">Last Sold</div>
+      <div class="value">Quit Claim, 5/17/21</div>
+      <div class="qual">Self-transfer, Kalsi Sukhmit → Kalsi Sukhmit; amount not captured — not an arm's-length sale</div>
+    </div>
+    <div class="stat">
+      <div class="label">Prior Sale</div>
+      <div class="value">$475,000</div>
+      <div class="qual">Trustees Deed, 11/22/2013</div>
+    </div>
+    <div class="stat">
+      <div class="label">Zoning</div>
+      <div class="value">RT-4</div>
+      <div class="qual">Two-flat/townhouse/multi-unit; up to 3 units as-of-right</div>
+    </div>
+    <div class="stat">
+      <div class="label">Property Taxes</div>
+      <div class="value flag">$16,262.60 /yr</div>
+      <div class="qual">2024 full year. 2025 figure shown ($8,944.47) looks like a partial installment; account is delinquent</div>
+    </div>
+    <div class="stat">
+      <div class="label">Title Status</div>
+      <div class="value flag">Lis Pendens ('19)</div>
+      <div class="qual">Foreclosure-alert record; resolution not confirmed in this evidence</div>
+    </div>
+    <div class="stat">
+      <div class="label">Opportunity Zone</div>
+      <div class="value">Yes</div>
+      <div class="qual">Federal OZ designation; not in a TIF district</div>
+    </div>
+  </div>
+
+  <!-- SECTION BAR -->
+  <div class="section-bar">
+    <div>What the Public Record Says About This Asset</div>
+    <div class="note">Independent of what you plan to do with it</div>
+  </div>
+
+  <!-- CARDS -->
+  <div class="cards">
+
+    <div class="card risk">
+      <h3><span class="mark"></span>This ownership record reads like a decade of financial pressure — and the tax account is delinquent again right now.</h3>
+      <p>Kalsi Sukhmit bought the property in 2013 for $475,000 with a $380,000 mortgage, then shows a state tax lien in 2017 (released the same year) and a lis pendens (foreclosure-alert filing) recorded 11/26/2019. In 2021 the owner quit-claimed the property to themself — grantor and grantee both Kalsi Sukhmit — the same day a new $712,500 mortgage was recorded, a self-transfer paired with a large refinance. A second mortgage of $198,000 followed 8/28/2025. No release is on record for the 2021 loan, so the two most recent mortgages total $910,500 ($712,500 + $198,000) in recorded debt, and the property tax account is currently marked delinquent. Whether the 2019 lis pendens was ever formally resolved isn't clear here — confirm with a full title search and counsel before offering.</p>
+    </div>
+
+    <div class="card caution">
+      <h3><span class="mark"></span>The tax figure being shown is likely half the real bill — and the real bill is rising.</h3>
+      <p>The evidence lists 2025 taxes at $8,944.47 ($745/month), but that's almost exactly 55% of the 2024 full-year amount ($16,262.60 × 0.55 = $8,944.43) — the standard Cook County first-installment ratio. Treat $16,262.60 as the real annual carrying cost: about $1,355/month ($16,262.60 ÷ 12), not $745. That 2024 figure is also 42% above 2023's $11,451.94 ($4,810.66 higher). Payment status is listed as delinquent — confirm the exact amount owed and any redemption deadline with the Treasurer before closing.</p>
+    </div>
+
+    <div class="card strength">
+      <h3><span class="mark"></span>There's more unused building capacity here than exists in the building itself.</h3>
+      <p>RT-4 zoning caps this 2,967 SF lot at 1.2 FAR, or 3,560 SF of buildable area (2,967 × 1.2). The existing 1,638 SF building sits at 0.55 FAR, leaving 1,922 SF of remaining capacity — more square footage than the current structure. RT-4 allows up to 3 units per standard lot as-of-right, and the funnel flags no zoning-relief requirement, consistent with an as-of-right addition or multi-unit conversion. The parcel also sits in a federally designated Opportunity Zone. Height is capped at 38 ft / 3 stories.</p>
+    </div>
+
+    <div class="card neutral">
+      <h3><span class="mark"></span>There's no recent arm's-length sale to benchmark value against.</h3>
+      <p>The last true purchase on record is the 2013 Trustees Deed at $475,000. Every transfer since — the 2021 quit-claim deed — moved title from Kalsi Sukhmit to Kalsi Sukhmit with no sale amount, not to a new buyer. Any valuation here has to be built off the 2013 basis, not a fresh market transaction.</p>
+    </div>
+
+    <div class="card strength">
+      <h3><span class="mark"></span>Transit access here is genuinely strong, independent of what gets built.</h3>
+      <p>The Western Ave Metra station (Milwaukee North/West, North Central Service) is 0.19 miles away and qualifies the site as TOD-eligible. CTA bus routes 65 (Grand) and 49/X49 (Western) stop roughly 0.06–0.07 miles out, and the Damen Green Line station is 0.62 miles away. Real support for future residential demand once the title and tax issues are cleared — but it doesn't offset the risk items above.</p>
+    </div>
+
+    <div class="card caution">
+      <h3><span class="mark"></span>Full build-out to 3 units still has to clear a parking test on a small lot.</h3>
+      <p>RT-4 requires 1 parking space per unit. Fitting 3 on-site spaces on a 2,967 SF lot alongside any addition is a real physical constraint, not just paperwork — confirm a workable site plan with an architect before underwriting the full 1,922 SF of remaining FAR as usable.</p>
+    </div>
+
+  </div>
+
+  <!-- ACTION STEPS -->
+  <div class="section-bar">
+    <div>Before You Move Forward</div>
+    <div class="note">Three things to do before you make an offer</div>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="chip">1</div>
+      <h4>Run a full title search.</h4>
+      <p>Have counsel confirm the disposition of the 2019 lis pendens and current payoff status of the $712,500 (2021) and $198,000 (2025) recorded mortgages before waiving title or financing contingencies.</p>
+    </div>
+    <div class="step">
+      <div class="chip">2</div>
+      <h4>Call the Treasurer.</h4>
+      <p>Confirm the exact delinquent amount owed and redemption deadline. Underwrite carrying cost off the 2024 full-year figure ($16,262.60), not the partial 2025 installment.</p>
+    </div>
+    <div class="step">
+      <div class="chip">3</div>
+      <h4>Pressure-test parking before density.</h4>
+      <p>If the plan involves adding units, confirm with an architect that 3 on-site spaces (1/unit) actually fit on the 2,967 SF lot before assuming the full 1,922 SF of remaining FAR is buildable.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Report generated July 23, 2026 · Sources: Cook County Assessor, Cook County Treasurer, Cook County Recorder of Deeds, CTA/Metra transit data.<br>
+    Informational only — not legal, financial, or investment advice. Confirm all figures with primary sources and licensed professionals before transacting.
+  </div>
+
+</div>
+</body>
+</html>

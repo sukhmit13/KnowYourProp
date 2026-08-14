@@ -1,0 +1,104 @@
+{
+  "loopnet:60647": {
+    "pendingRunId": "zeabJx9C7xRw0B494",
+    "pendingDatasetId": "5DmKaJKRUDthMSDml",
+    "ts": 1773951642962
+  },
+  "loopnet:60612": {
+    "result": {
+      "listings": [
+        {
+          "address": "2455 W Grand Ave, Chicago, IL",
+          "sizeSqFt": 2750,
+          "pricePerSqFtYear": 12,
+          "totalMonthly": 2750,
+          "leaseType": null,
+          "propertyType": "Industrial",
+          "onCorridor": true,
+          "distanceMiles": 0.18
+        },
+        {
+          "address": "2461 W Grand Ave, Chicago, IL",
+          "sizeSqFt": 7300,
+          "pricePerSqFtYear": 12,
+          "totalMonthly": 7300,
+          "leaseType": null,
+          "propertyType": "Retail",
+          "onCorridor": true,
+          "distanceMiles": 0.19
+        },
+        {
+          "address": "452 N Claremont Ave, Chicago, IL",
+          "sizeSqFt": 7300,
+          "pricePerSqFtYear": 19,
+          "totalMonthly": 11558,
+          "leaseType": null,
+          "propertyType": "Industrial",
+          "onCorridor": false,
+          "distanceMiles": 0.05
+        },
+        {
+          "address": "2450 W Hubbard St, Chicago, IL",
+          "sizeSqFt": 7500,
+          "pricePerSqFtYear": 10,
+          "totalMonthly": 6250,
+          "leaseType": null,
+          "propertyType": "Industrial",
+          "onCorridor": false,
+          "distanceMiles": 0.19
+        },
+        {
+          "address": "2003 W Fulton St, Chicago, IL",
+          "sizeSqFt": 13958,
+          "pricePerSqFtYear": 14,
+          "totalMonthly": 16284,
+          "leaseType": null,
+          "propertyType": "Office",
+          "onCorridor": false,
+          "distanceMiles": 0.51
+        },
+        {
+          "address": "1837 W Fulton St, Chicago, IL",
+          "sizeSqFt": 1700,
+          "pricePerSqFtYear": 24,
+          "totalMonthly": 3400,
+          "leaseType": null,
+          "propertyType": "Retail",
+          "onCorridor": false,
+          "distanceMiles": 0.68
+        },
+        {
+          "address": "2333 W Madison St, Chicago, IL",
+          "sizeSqFt": 1040,
+          "pricePerSqFtYear": 25,
+          "totalMonthly": 2167,
+          "leaseType": null,
+          "propertyType": "Retail",
+          "onCorridor": false,
+          "distanceMiles": 0.72
+        },
+        {
+          "address": "2806 W Lake St, Chicago, IL",
+          "sizeSqFt": 1000,
+          "pricePerSqFtYear": 38.4,
+          "totalMonthly": 3200,
+          "leaseType": null,
+          "propertyType": "Retail",
+          "onCorridor": false,
+          "distanceMiles": 0.73
+        }
+      ],
+      "count": 8,
+      "avgPricePerSqFtYear": 19.3,
+      "medianSqFt": 7300,
+      "minSqFt": 1000,
+      "maxSqFt": 13958,
+      "radiusMilesUsed": 0.75,
+      "corridorListingCount": 2,
+      "fetchedAt": "2026-03-19T20:22:03.688Z",
+      "proxyUsed": "residential",
+      "status": "complete"
+    },
+    "ts": 1773951723968
+  }
+}

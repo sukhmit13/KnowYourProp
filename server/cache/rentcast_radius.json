@@ -1,0 +1,2437 @@
+{
+  "41.91,-87.71": {
+    "lat": 41.9052,
+    "lng": -87.7118,
+    "radiusMiles": 0.75,
+    "totalListings": 96,
+    "overall": {
+      "avgRent": 1818,
+      "medianRent": 1450,
+      "minRent": 995,
+      "maxRent": 5500,
+      "avgDaysOnMarket": 207,
+      "medianDaysOnMarket": 55
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1258,
+        "medianRent": 1275,
+        "minRent": 995,
+        "maxRent": 1295,
+        "avgPricePerSqft": 4.05,
+        "medianSqft": 315,
+        "avgDaysOnMarket": 442,
+        "totalListings": 28,
+        "fmrComparison": {
+          "fmr": 2050,
+          "marketVsFmrPct": -38,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1478,
+        "medianRent": 1450,
+        "minRent": 1250,
+        "maxRent": 1975,
+        "avgPricePerSqft": 2.5,
+        "medianSqft": 579,
+        "avgDaysOnMarket": 188,
+        "totalListings": 17,
+        "fmrComparison": {
+          "fmr": 2190,
+          "marketVsFmrPct": -34,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 1877,
+        "medianRent": 1795,
+        "minRent": 1200,
+        "maxRent": 3500,
+        "avgPricePerSqft": 2.07,
+        "medianSqft": 867,
+        "avgDaysOnMarket": 86,
+        "totalListings": 31,
+        "fmrComparison": {
+          "fmr": 2470,
+          "marketVsFmrPct": -27,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2615,
+        "medianRent": 2500,
+        "minRent": 1400,
+        "maxRent": 5500,
+        "avgPricePerSqft": 1.67,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 93,
+        "totalListings": 16,
+        "fmrComparison": {
+          "fmr": 3180,
+          "marketVsFmrPct": -21,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3538,
+        "medianRent": 3700,
+        "minRent": 3000,
+        "maxRent": 4250,
+        "avgPricePerSqft": 1.76,
+        "medianSqft": 2100,
+        "avgDaysOnMarket": 48,
+        "totalListings": 4,
+        "fmrComparison": {
+          "fmr": 3680,
+          "marketVsFmrPct": 1,
+          "tier": "average"
+        }
+      }
+    ],
+    "fetchedAt": 1772600558882
+  },
+  "41.89,-87.69": {
+    "lat": 41.891471216945,
+    "lng": -87.686795567366,
+    "radiusMiles": 0.75,
+    "totalListings": 83,
+    "overall": {
+      "avgRent": 2775,
+      "medianRent": 2400,
+      "minRent": 1350,
+      "maxRent": 9438,
+      "avgDaysOnMarket": 256,
+      "medianDaysOnMarket": 35
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2525,
+        "medianRent": 2550,
+        "minRent": 2500,
+        "maxRent": 2550,
+        "avgPricePerSqft": 2.83,
+        "medianSqft": 900,
+        "avgDaysOnMarket": 583,
+        "totalListings": 2,
+        "fmrComparison": {
+          "fmr": 1530,
+          "marketVsFmrPct": 67,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1941,
+        "medianRent": 1950,
+        "minRent": 1350,
+        "maxRent": 2472,
+        "avgPricePerSqft": 2.79,
+        "medianSqft": 700,
+        "avgDaysOnMarket": 426,
+        "totalListings": 9,
+        "fmrComparison": {
+          "fmr": 1630,
+          "marketVsFmrPct": 20,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2534,
+        "medianRent": 2300,
+        "minRent": 1800,
+        "maxRent": 9438,
+        "avgPricePerSqft": 2.42,
+        "medianSqft": 950,
+        "avgDaysOnMarket": 267,
+        "totalListings": 51,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": 25,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 3671,
+        "medianRent": 3600,
+        "minRent": 1990,
+        "maxRent": 5300,
+        "avgPricePerSqft": 2,
+        "medianSqft": 1800,
+        "avgDaysOnMarket": 132,
+        "totalListings": 20,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 52,
+          "tier": "luxury"
+        }
+      }
+    ],
+    "fetchedAt": 1779155601785
+  },
+  "41.93,-87.71": {
+    "lat": 41.932665362535,
+    "lng": -87.713172954096,
+    "radiusMiles": 0.75,
+    "totalListings": 163,
+    "overall": {
+      "avgRent": 2142,
+      "medianRent": 1950,
+      "minRent": 1100,
+      "maxRent": 4616,
+      "avgDaysOnMarket": 267,
+      "medianDaysOnMarket": 75
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1491,
+        "medianRent": 1495,
+        "minRent": 1100,
+        "maxRent": 1950,
+        "avgPricePerSqft": 3.32,
+        "medianSqft": 450,
+        "avgDaysOnMarket": 293,
+        "totalListings": 36,
+        "fmrComparison": {
+          "fmr": 1650,
+          "marketVsFmrPct": -9,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1961,
+        "medianRent": 1850,
+        "minRent": 1400,
+        "maxRent": 3701,
+        "avgPricePerSqft": 3.05,
+        "medianSqft": 606,
+        "avgDaysOnMarket": 317,
+        "totalListings": 59,
+        "fmrComparison": {
+          "fmr": 1770,
+          "marketVsFmrPct": 5,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2501,
+        "medianRent": 2300,
+        "minRent": 1600,
+        "maxRent": 4616,
+        "avgPricePerSqft": 2.56,
+        "medianSqft": 900,
+        "avgDaysOnMarket": 217,
+        "totalListings": 39,
+        "fmrComparison": {
+          "fmr": 1990,
+          "marketVsFmrPct": 16,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2787,
+        "medianRent": 2850,
+        "minRent": 2000,
+        "maxRent": 3585,
+        "avgPricePerSqft": 2.38,
+        "medianSqft": 1195,
+        "avgDaysOnMarket": 170,
+        "totalListings": 26,
+        "fmrComparison": {
+          "fmr": 2560,
+          "marketVsFmrPct": 11,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3282,
+        "medianRent": 3395,
+        "minRent": 2850,
+        "maxRent": 3600,
+        "avgPricePerSqft": 2.26,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 488,
+        "totalListings": 3,
+        "fmrComparison": {
+          "fmr": 2960,
+          "marketVsFmrPct": 15,
+          "tier": "average"
+        }
+      }
+    ],
+    "fetchedAt": 1779147204800
+  },
+  "41.88,-87.70": {
+    "lat": 41.883603445091,
+    "lng": -87.695074607968,
+    "radiusMiles": 0.75,
+    "totalListings": 40,
+    "overall": {
+      "avgRent": 2519,
+      "medianRent": 2350,
+      "minRent": 950,
+      "maxRent": 4000,
+      "avgDaysOnMarket": 116,
+      "medianDaysOnMarket": 35
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1210,
+        "medianRent": 1295,
+        "minRent": 950,
+        "maxRent": 1495,
+        "avgPricePerSqft": 2.59,
+        "medianSqft": 500,
+        "avgDaysOnMarket": 103,
+        "totalListings": 4,
+        "fmrComparison": {
+          "fmr": 1530,
+          "marketVsFmrPct": -15,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2057,
+        "medianRent": 1960,
+        "minRent": 1960,
+        "maxRent": 2250,
+        "avgPricePerSqft": 2.77,
+        "medianSqft": 707,
+        "avgDaysOnMarket": 149,
+        "totalListings": 3,
+        "fmrComparison": {
+          "fmr": 1630,
+          "marketVsFmrPct": 20,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2838,
+        "medianRent": 2800,
+        "minRent": 1392,
+        "maxRent": 3995,
+        "avgPricePerSqft": 1.08,
+        "medianSqft": 2600,
+        "avgDaysOnMarket": 90,
+        "totalListings": 20,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": 52,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2430,
+        "medianRent": 2350,
+        "minRent": 1700,
+        "maxRent": 3450,
+        "avgPricePerSqft": 1.79,
+        "medianSqft": 1314,
+        "avgDaysOnMarket": 170,
+        "totalListings": 11,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": -1,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3125,
+        "medianRent": 4000,
+        "minRent": 2249,
+        "maxRent": 4000,
+        "avgPricePerSqft": 1.72,
+        "medianSqft": 2328,
+        "avgDaysOnMarket": 66,
+        "totalListings": 2,
+        "fmrComparison": {
+          "fmr": 2740,
+          "marketVsFmrPct": 46,
+          "tier": "nice"
+        }
+      }
+    ],
+    "fetchedAt": 1772610108681
+  },
+  "42.00,-87.69": {
+    "lat": 41.996460963724,
+    "lng": -87.68976307155,
+    "radiusMiles": 0.75,
+    "totalListings": 102,
+    "overall": {
+      "avgRent": 1873,
+      "medianRent": 1750,
+      "minRent": 1299,
+      "maxRent": 5000,
+      "avgDaysOnMarket": 135,
+      "medianDaysOnMarket": 97
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1300,
+        "medianRent": 1300,
+        "minRent": 1299,
+        "maxRent": 1300,
+        "avgPricePerSqft": 2.36,
+        "medianSqft": 550,
+        "avgDaysOnMarket": 144,
+        "totalListings": 12,
+        "fmrComparison": {
+          "fmr": 1520,
+          "marketVsFmrPct": -14,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1594,
+        "medianRent": 1600,
+        "minRent": 1475,
+        "maxRent": 1855,
+        "avgPricePerSqft": 2.29,
+        "medianSqft": 700,
+        "avgDaysOnMarket": 146,
+        "totalListings": 30,
+        "fmrComparison": {
+          "fmr": 1620,
+          "marketVsFmrPct": -1,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 1901,
+        "medianRent": 1895,
+        "minRent": 1445,
+        "maxRent": 2995,
+        "avgPricePerSqft": 2.11,
+        "medianSqft": 900,
+        "avgDaysOnMarket": 158,
+        "totalListings": 44,
+        "fmrComparison": {
+          "fmr": 1830,
+          "marketVsFmrPct": 4,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2676,
+        "medianRent": 2400,
+        "minRent": 2100,
+        "maxRent": 5000,
+        "avgPricePerSqft": 1.71,
+        "medianSqft": 1400,
+        "avgDaysOnMarket": 46,
+        "totalListings": 13,
+        "fmrComparison": {
+          "fmr": 2360,
+          "marketVsFmrPct": 2,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3065,
+        "medianRent": 2995,
+        "minRent": 2900,
+        "maxRent": 3300,
+        "avgPricePerSqft": 1.87,
+        "medianSqft": 1600,
+        "avgDaysOnMarket": 35,
+        "totalListings": 3,
+        "fmrComparison": {
+          "fmr": 2730,
+          "marketVsFmrPct": 10,
+          "tier": "average"
+        }
+      }
+    ],
+    "fetchedAt": 1772615657767
+  },
+  "41.88,-87.66": {
+    "lat": 41.881612299829,
+    "lng": -87.662573345083,
+    "radiusMiles": 0.75,
+    "totalListings": 321,
+    "overall": {
+      "avgRent": 3386,
+      "medianRent": 2962,
+      "minRent": 1833,
+      "maxRent": 15000,
+      "avgDaysOnMarket": 355,
+      "medianDaysOnMarket": 65
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2349,
+        "medianRent": 2290,
+        "minRent": 1833,
+        "maxRent": 3650,
+        "avgPricePerSqft": 4.59,
+        "medianSqft": 499,
+        "avgDaysOnMarket": 341,
+        "totalListings": 59,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": 3,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2940,
+        "medianRent": 2875,
+        "minRent": 1850,
+        "maxRent": 4625,
+        "avgPricePerSqft": 4,
+        "medianSqft": 719,
+        "avgDaysOnMarket": 327,
+        "totalListings": 153,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 21,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 4451,
+        "medianRent": 4078,
+        "minRent": 1950,
+        "maxRent": 15000,
+        "avgPricePerSqft": 3.72,
+        "medianSqft": 1095,
+        "avgDaysOnMarket": 404,
+        "totalListings": 76,
+        "fmrComparison": {
+          "fmr": 2670,
+          "marketVsFmrPct": 53,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 4897,
+        "medianRent": 5000,
+        "minRent": 2595,
+        "maxRent": 7995,
+        "avgPricePerSqft": 3.33,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 412,
+        "totalListings": 32,
+        "fmrComparison": {
+          "fmr": 3440,
+          "marketVsFmrPct": 45,
+          "tier": "nice"
+        }
+      }
+    ],
+    "fetchedAt": 1775617154117
+  },
+  "41.91,-87.69": {
+    "lat": 41.910339942069,
+    "lng": -87.69118395278,
+    "radiusMiles": 0.75,
+    "totalListings": 168,
+    "overall": {
+      "avgRent": 2691,
+      "medianRent": 2445,
+      "minRent": 1250,
+      "maxRent": 10607,
+      "avgDaysOnMarket": 252,
+      "medianDaysOnMarket": 46
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1426,
+        "medianRent": 1350,
+        "minRent": 1250,
+        "maxRent": 2600,
+        "avgPricePerSqft": 4.21,
+        "medianSqft": 321,
+        "avgDaysOnMarket": 426,
+        "totalListings": 36,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": -27,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2289,
+        "medianRent": 2300,
+        "minRent": 1325,
+        "maxRent": 3150,
+        "avgPricePerSqft": 3.27,
+        "medianSqft": 703,
+        "avgDaysOnMarket": 342,
+        "totalListings": 33,
+        "fmrComparison": {
+          "fmr": 1970,
+          "marketVsFmrPct": 17,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2809,
+        "medianRent": 2500,
+        "minRent": 1450,
+        "maxRent": 9555,
+        "avgPricePerSqft": 2.5,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 178,
+        "totalListings": 68,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": 13,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 4341,
+        "medianRent": 3800,
+        "minRent": 1990,
+        "maxRent": 10607,
+        "avgPricePerSqft": 2.62,
+        "medianSqft": 1450,
+        "avgDaysOnMarket": 121,
+        "totalListings": 25,
+        "fmrComparison": {
+          "fmr": 2860,
+          "marketVsFmrPct": 33,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 4265,
+        "medianRent": 4000,
+        "minRent": 3395,
+        "maxRent": 6250,
+        "avgPricePerSqft": 2.35,
+        "medianSqft": 1700,
+        "avgDaysOnMarket": 95,
+        "totalListings": 6,
+        "fmrComparison": {
+          "fmr": 3310,
+          "marketVsFmrPct": 21,
+          "tier": "nice"
+        }
+      }
+    ],
+    "fetchedAt": 1776511694435
+  },
+  "41.89,-87.70": {
+    "lat": 41.885421853298,
+    "lng": -87.699272536015,
+    "radiusMiles": 0.75,
+    "totalListings": 43,
+    "overall": {
+      "avgRent": 2284,
+      "medianRent": 2265,
+      "minRent": 1150,
+      "maxRent": 4000,
+      "avgDaysOnMarket": 138,
+      "medianDaysOnMarket": 27
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2087,
+        "medianRent": 2028,
+        "minRent": 1385,
+        "maxRent": 2510,
+        "avgPricePerSqft": 2.41,
+        "medianSqft": 843,
+        "avgDaysOnMarket": 89,
+        "totalListings": 10,
+        "fmrComparison": {
+          "fmr": 1630,
+          "marketVsFmrPct": 24,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2371,
+        "medianRent": 2800,
+        "minRent": 1150,
+        "maxRent": 3985,
+        "avgPricePerSqft": 1.08,
+        "medianSqft": 2600,
+        "avgDaysOnMarket": 84,
+        "totalListings": 18,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": 52,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2260,
+        "medianRent": 2400,
+        "minRent": 1600,
+        "maxRent": 2750,
+        "avgPricePerSqft": 1.83,
+        "medianSqft": 1314,
+        "avgDaysOnMarket": 277,
+        "totalListings": 12,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 1,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3125,
+        "medianRent": 4000,
+        "minRent": 2249,
+        "maxRent": 4000,
+        "avgPricePerSqft": 1.72,
+        "medianSqft": 2328,
+        "avgDaysOnMarket": 85,
+        "totalListings": 2,
+        "fmrComparison": {
+          "fmr": 2740,
+          "marketVsFmrPct": 46,
+          "tier": "nice"
+        }
+      }
+    ],
+    "fetchedAt": 1774308066840
+  },
+  "41.90,-87.67": {
+    "lat": 41.900623083772,
+    "lng": -87.674665016048,
+    "radiusMiles": 0.75,
+    "totalListings": 225,
+    "overall": {
+      "avgRent": 3221,
+      "medianRent": 2800,
+      "minRent": 850,
+      "maxRent": 10903,
+      "avgDaysOnMarket": 190,
+      "medianDaysOnMarket": 30
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2095,
+        "medianRent": 2225,
+        "minRent": 1199,
+        "maxRent": 2550,
+        "avgPricePerSqft": 4.74,
+        "medianSqft": 469,
+        "avgDaysOnMarket": 205,
+        "totalListings": 16,
+        "fmrComparison": {
+          "fmr": 2050,
+          "marketVsFmrPct": 9,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2345,
+        "medianRent": 2395,
+        "minRent": 850,
+        "maxRent": 3140,
+        "avgPricePerSqft": 3.42,
+        "medianSqft": 700,
+        "avgDaysOnMarket": 286,
+        "totalListings": 35,
+        "fmrComparison": {
+          "fmr": 2190,
+          "marketVsFmrPct": 9,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 3103,
+        "medianRent": 2800,
+        "minRent": 1800,
+        "maxRent": 8247,
+        "avgPricePerSqft": 2.8,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 177,
+        "totalListings": 111,
+        "fmrComparison": {
+          "fmr": 2470,
+          "marketVsFmrPct": 13,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 4054,
+        "medianRent": 3900,
+        "minRent": 2095,
+        "maxRent": 10903,
+        "avgPricePerSqft": 2.79,
+        "medianSqft": 1400,
+        "avgDaysOnMarket": 168,
+        "totalListings": 57,
+        "fmrComparison": {
+          "fmr": 3180,
+          "marketVsFmrPct": 23,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 5625,
+        "medianRent": 5185,
+        "minRent": 3150,
+        "maxRent": 10400,
+        "avgPricePerSqft": 2.23,
+        "medianSqft": 2330,
+        "avgDaysOnMarket": 25,
+        "totalListings": 6,
+        "fmrComparison": {
+          "fmr": 3680,
+          "marketVsFmrPct": 41,
+          "tier": "nice"
+        }
+      }
+    ],
+    "fetchedAt": 1777679088723
+  },
+  "41.91,-87.67": {
+    "lat": 41.912446438555,
+    "lng": -87.672122892095,
+    "radiusMiles": 0.75,
+    "totalListings": 188,
+    "overall": {
+      "avgRent": 3064,
+      "medianRent": 2616,
+      "minRent": 1425,
+      "maxRent": 14190,
+      "avgDaysOnMarket": 258,
+      "medianDaysOnMarket": 46
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2087,
+        "medianRent": 2195,
+        "minRent": 1425,
+        "maxRent": 2499,
+        "avgPricePerSqft": 4.68,
+        "medianSqft": 469,
+        "avgDaysOnMarket": 197,
+        "totalListings": 21,
+        "fmrComparison": {
+          "fmr": 2050,
+          "marketVsFmrPct": 7,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2368,
+        "medianRent": 2450,
+        "minRent": 1675,
+        "maxRent": 3500,
+        "avgPricePerSqft": 3.51,
+        "medianSqft": 699,
+        "avgDaysOnMarket": 349,
+        "totalListings": 62,
+        "fmrComparison": {
+          "fmr": 2190,
+          "marketVsFmrPct": 12,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 3199,
+        "medianRent": 3200,
+        "minRent": 1850,
+        "maxRent": 5200,
+        "avgPricePerSqft": 3.17,
+        "medianSqft": 1008,
+        "avgDaysOnMarket": 245,
+        "totalListings": 74,
+        "fmrComparison": {
+          "fmr": 2470,
+          "marketVsFmrPct": 30,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 4455,
+        "medianRent": 4295,
+        "minRent": 2100,
+        "maxRent": 14190,
+        "avgPricePerSqft": 2.96,
+        "medianSqft": 1450,
+        "avgDaysOnMarket": 157,
+        "totalListings": 27,
+        "fmrComparison": {
+          "fmr": 3180,
+          "marketVsFmrPct": 35,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 7095,
+        "medianRent": 6495,
+        "minRent": 5185,
+        "maxRent": 11500,
+        "avgPricePerSqft": 2.32,
+        "medianSqft": 2800,
+        "avgDaysOnMarket": 81,
+        "totalListings": 4,
+        "fmrComparison": {
+          "fmr": 3680,
+          "marketVsFmrPct": 76,
+          "tier": "luxury"
+        }
+      }
+    ],
+    "fetchedAt": 1776207375750
+  },
+  "41.85,-87.64": {
+    "lat": 41.85094675601,
+    "lng": -87.638931604656,
+    "radiusMiles": 0.75,
+    "totalListings": 28,
+    "overall": {
+      "avgRent": 2630,
+      "medianRent": 2370,
+      "minRent": 1261,
+      "maxRent": 7700,
+      "avgDaysOnMarket": 419,
+      "medianDaysOnMarket": 176
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 4788,
+        "medianRent": 7700,
+        "minRent": 1875,
+        "maxRent": 7700,
+        "avgPricePerSqft": 2.19,
+        "medianSqft": 3510,
+        "avgDaysOnMarket": 537,
+        "totalListings": 2,
+        "fmrComparison": {
+          "fmr": 1640,
+          "marketVsFmrPct": 370,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2160,
+        "medianRent": 2225,
+        "minRent": 1350,
+        "maxRent": 2475,
+        "avgPricePerSqft": 3.04,
+        "medianSqft": 731,
+        "avgDaysOnMarket": 613,
+        "totalListings": 9,
+        "fmrComparison": {
+          "fmr": 1750,
+          "marketVsFmrPct": 27,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2594,
+        "medianRent": 2750,
+        "minRent": 1261,
+        "maxRent": 3500,
+        "avgPricePerSqft": 2.57,
+        "medianSqft": 1070,
+        "avgDaysOnMarket": 345,
+        "totalListings": 11,
+        "fmrComparison": {
+          "fmr": 1970,
+          "marketVsFmrPct": 40,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2682,
+        "medianRent": 2600,
+        "minRent": 1500,
+        "maxRent": 3895,
+        "avgPricePerSqft": 2,
+        "medianSqft": 1300,
+        "avgDaysOnMarket": 223,
+        "totalListings": 6,
+        "fmrComparison": {
+          "fmr": 2540,
+          "marketVsFmrPct": 2,
+          "tier": "average"
+        }
+      }
+    ],
+    "fetchedAt": 1772745213701
+  },
+  "41.90,-87.68": {
+    "lat": 41.895904120245,
+    "lng": -87.680750407915,
+    "radiusMiles": 0.75,
+    "totalListings": 110,
+    "overall": {
+      "avgRent": 3230,
+      "medianRent": 2795,
+      "minRent": 1295,
+      "maxRent": 12000,
+      "avgDaysOnMarket": 147,
+      "medianDaysOnMarket": 28
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1530,
+        "medianRent": 1495,
+        "minRent": 1295,
+        "maxRent": 1800,
+        "avgPricePerSqft": 2.99,
+        "medianSqft": 500,
+        "avgDaysOnMarket": 23,
+        "totalListings": 3,
+        "fmrComparison": {
+          "fmr": 2050,
+          "marketVsFmrPct": -27,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2191,
+        "medianRent": 2300,
+        "minRent": 1800,
+        "maxRent": 2739,
+        "avgPricePerSqft": 2.8,
+        "medianSqft": 820,
+        "avgDaysOnMarket": 134,
+        "totalListings": 7,
+        "fmrComparison": {
+          "fmr": 2190,
+          "marketVsFmrPct": 5,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2665,
+        "medianRent": 2595,
+        "minRent": 1650,
+        "maxRent": 4673,
+        "avgPricePerSqft": 2.6,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 152,
+        "totalListings": 63,
+        "fmrComparison": {
+          "fmr": 2470,
+          "marketVsFmrPct": 5,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 4145,
+        "medianRent": 4395,
+        "minRent": 1990,
+        "maxRent": 8000,
+        "avgPricePerSqft": 2.93,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 161,
+        "totalListings": 33,
+        "fmrComparison": {
+          "fmr": 3180,
+          "marketVsFmrPct": 38,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 7667,
+        "medianRent": 8869,
+        "minRent": 3050,
+        "maxRent": 12000,
+        "avgPricePerSqft": 3.17,
+        "medianSqft": 2800,
+        "avgDaysOnMarket": 68,
+        "totalListings": 4,
+        "fmrComparison": {
+          "fmr": 3680,
+          "marketVsFmrPct": 141,
+          "tier": "luxury"
+        }
+      }
+    ],
+    "fetchedAt": 1772745843945
+  },
+  "41.92,-87.68": {
+    "lat": 41.918370893553,
+    "lng": -87.677566382551,
+    "radiusMiles": 0.75,
+    "totalListings": 126,
+    "overall": {
+      "avgRent": 3385,
+      "medianRent": 2795,
+      "minRent": 1200,
+      "maxRent": 14787,
+      "avgDaysOnMarket": 166,
+      "medianDaysOnMarket": 34
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2029,
+        "medianRent": 2130,
+        "minRent": 1200,
+        "maxRent": 2415,
+        "avgPricePerSqft": 4.37,
+        "medianSqft": 487,
+        "avgDaysOnMarket": 227,
+        "totalListings": 9,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": 16,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2542,
+        "medianRent": 2500,
+        "minRent": 1575,
+        "maxRent": 3495,
+        "avgPricePerSqft": 3.65,
+        "medianSqft": 684,
+        "avgDaysOnMarket": 195,
+        "totalListings": 42,
+        "fmrComparison": {
+          "fmr": 1970,
+          "marketVsFmrPct": 27,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 3185,
+        "medianRent": 2865,
+        "minRent": 1795,
+        "maxRent": 10784,
+        "avgPricePerSqft": 2.87,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 146,
+        "totalListings": 45,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": 29,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 4839,
+        "medianRent": 4400,
+        "minRent": 2500,
+        "maxRent": 14787,
+        "avgPricePerSqft": 3.24,
+        "medianSqft": 1356,
+        "avgDaysOnMarket": 146,
+        "totalListings": 26,
+        "fmrComparison": {
+          "fmr": 2860,
+          "marketVsFmrPct": 54,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 8098,
+        "medianRent": 10000,
+        "minRent": 3395,
+        "maxRent": 12500,
+        "avgPricePerSqft": 3.57,
+        "medianSqft": 2800,
+        "avgDaysOnMarket": 77,
+        "totalListings": 4,
+        "fmrComparison": {
+          "fmr": 3310,
+          "marketVsFmrPct": 202,
+          "tier": "luxury"
+        }
+      }
+    ],
+    "fetchedAt": 1772939999390
+  },
+  "41.80,-87.60": {
+    "lat": 41.800274817569,
+    "lng": -87.602765993515,
+    "radiusMiles": 0.75,
+    "totalListings": 144,
+    "overall": {
+      "avgRent": 2084,
+      "medianRent": 1900,
+      "minRent": 760,
+      "maxRent": 5200,
+      "avgDaysOnMarket": 410,
+      "medianDaysOnMarket": 425
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1418,
+        "medianRent": 1210,
+        "minRent": 760,
+        "maxRent": 4095,
+        "avgPricePerSqft": 3.1,
+        "medianSqft": 390,
+        "avgDaysOnMarket": 494,
+        "totalListings": 26,
+        "fmrComparison": {
+          "fmr": 1790,
+          "marketVsFmrPct": -32,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1600,
+        "medianRent": 1585,
+        "minRent": 1050,
+        "maxRent": 2135,
+        "avgPricePerSqft": 2.59,
+        "medianSqft": 611,
+        "avgDaysOnMarket": 535,
+        "totalListings": 25,
+        "fmrComparison": {
+          "fmr": 1920,
+          "marketVsFmrPct": -17,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2106,
+        "medianRent": 2000,
+        "minRent": 1450,
+        "maxRent": 4913,
+        "avgPricePerSqft": 2,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 371,
+        "totalListings": 53,
+        "fmrComparison": {
+          "fmr": 2160,
+          "marketVsFmrPct": -7,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2608,
+        "medianRent": 2500,
+        "minRent": 1800,
+        "maxRent": 5200,
+        "avgPricePerSqft": 1.92,
+        "medianSqft": 1300,
+        "avgDaysOnMarket": 352,
+        "totalListings": 29,
+        "fmrComparison": {
+          "fmr": 2780,
+          "marketVsFmrPct": -10,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3197,
+        "medianRent": 3400,
+        "minRent": 1950,
+        "maxRent": 4200,
+        "avgPricePerSqft": 1.51,
+        "medianSqft": 2252,
+        "avgDaysOnMarket": 286,
+        "totalListings": 10,
+        "fmrComparison": {
+          "fmr": 3220,
+          "marketVsFmrPct": 6,
+          "tier": "average"
+        }
+      }
+    ],
+    "fetchedAt": 1772961156140
+  },
+  "41.93,-87.72": {
+    "lat": 41.934085102534,
+    "lng": -87.715745284836,
+    "radiusMiles": 0.75,
+    "totalListings": 155,
+    "overall": {
+      "avgRent": 2130,
+      "medianRent": 1895,
+      "minRent": 1100,
+      "maxRent": 4616,
+      "avgDaysOnMarket": 274,
+      "medianDaysOnMarket": 77
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1490,
+        "medianRent": 1495,
+        "minRent": 1100,
+        "maxRent": 1875,
+        "avgPricePerSqft": 3.32,
+        "medianSqft": 450,
+        "avgDaysOnMarket": 304,
+        "totalListings": 35,
+        "fmrComparison": {
+          "fmr": 1650,
+          "marketVsFmrPct": -9,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1955,
+        "medianRent": 1850,
+        "minRent": 1400,
+        "maxRent": 3701,
+        "avgPricePerSqft": 3.05,
+        "medianSqft": 606,
+        "avgDaysOnMarket": 314,
+        "totalListings": 55,
+        "fmrComparison": {
+          "fmr": 1770,
+          "marketVsFmrPct": 5,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2455,
+        "medianRent": 2295,
+        "minRent": 1600,
+        "maxRent": 4616,
+        "avgPricePerSqft": 2.51,
+        "medianSqft": 916,
+        "avgDaysOnMarket": 230,
+        "totalListings": 38,
+        "fmrComparison": {
+          "fmr": 1990,
+          "marketVsFmrPct": 15,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2802,
+        "medianRent": 2895,
+        "minRent": 2000,
+        "maxRent": 3585,
+        "avgPricePerSqft": 2.52,
+        "medianSqft": 1150,
+        "avgDaysOnMarket": 181,
+        "totalListings": 24,
+        "fmrComparison": {
+          "fmr": 2560,
+          "marketVsFmrPct": 13,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3282,
+        "medianRent": 3395,
+        "minRent": 2850,
+        "maxRent": 3600,
+        "avgPricePerSqft": 2.26,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 488,
+        "totalListings": 3,
+        "fmrComparison": {
+          "fmr": 2960,
+          "marketVsFmrPct": 15,
+          "tier": "average"
+        }
+      }
+    ],
+    "fetchedAt": 1779147362676
+  },
+  "41.92,-87.70": {
+    "lat": 41.917550940965,
+    "lng": -87.697125299932,
+    "radiusMiles": 0.75,
+    "totalListings": 204,
+    "overall": {
+      "avgRent": 2593,
+      "medianRent": 2495,
+      "minRent": 1295,
+      "maxRent": 13001,
+      "avgDaysOnMarket": 316,
+      "medianDaysOnMarket": 83
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1669,
+        "medianRent": 1625,
+        "minRent": 1295,
+        "maxRent": 2404,
+        "avgPricePerSqft": 4.06,
+        "medianSqft": 400,
+        "avgDaysOnMarket": 347,
+        "totalListings": 44,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": -12,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2318,
+        "medianRent": 2400,
+        "minRent": 1415,
+        "maxRent": 3195,
+        "avgPricePerSqft": 3.47,
+        "medianSqft": 692,
+        "avgDaysOnMarket": 415,
+        "totalListings": 60,
+        "fmrComparison": {
+          "fmr": 1970,
+          "marketVsFmrPct": 22,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2888,
+        "medianRent": 2815,
+        "minRent": 1650,
+        "maxRent": 3995,
+        "avgPricePerSqft": 3.13,
+        "medianSqft": 900,
+        "avgDaysOnMarket": 279,
+        "totalListings": 70,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": 27,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 3506,
+        "medianRent": 3595,
+        "minRent": 2195,
+        "maxRent": 5000,
+        "avgPricePerSqft": 2.4,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 149,
+        "totalListings": 26,
+        "fmrComparison": {
+          "fmr": 2860,
+          "marketVsFmrPct": 26,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 5760,
+        "medianRent": 3695,
+        "minRent": 2950,
+        "maxRent": 13001,
+        "avgPricePerSqft": 2.17,
+        "medianSqft": 1700,
+        "avgDaysOnMarket": 198,
+        "totalListings": 4,
+        "fmrComparison": {
+          "fmr": 3310,
+          "marketVsFmrPct": 12,
+          "tier": "average"
+        }
+      }
+    ],
+    "fetchedAt": 1782185319353
+  },
+  "41.93,-87.70": {
+    "lat": 41.925218458032,
+    "lng": -87.701246972232,
+    "radiusMiles": 0.75,
+    "totalListings": 249,
+    "overall": {
+      "avgRent": 2283,
+      "medianRent": 2095,
+      "minRent": 1250,
+      "maxRent": 6995,
+      "avgDaysOnMarket": 310,
+      "medianDaysOnMarket": 72
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1560,
+        "medianRent": 1495,
+        "minRent": 1250,
+        "maxRent": 2292,
+        "avgPricePerSqft": 3.5,
+        "medianSqft": 427,
+        "avgDaysOnMarket": 341,
+        "totalListings": 62,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": -19,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2069,
+        "medianRent": 1895,
+        "minRent": 1450,
+        "maxRent": 3863,
+        "avgPricePerSqft": 3.05,
+        "medianSqft": 621,
+        "avgDaysOnMarket": 322,
+        "totalListings": 80,
+        "fmrComparison": {
+          "fmr": 1970,
+          "marketVsFmrPct": -4,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2685,
+        "medianRent": 2695,
+        "minRent": 1550,
+        "maxRent": 4616,
+        "avgPricePerSqft": 2.84,
+        "medianSqft": 950,
+        "avgDaysOnMarket": 287,
+        "totalListings": 75,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": 21,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 3261,
+        "medianRent": 3195,
+        "minRent": 1850,
+        "maxRent": 6995,
+        "avgPricePerSqft": 2.52,
+        "medianSqft": 1267,
+        "avgDaysOnMarket": 280,
+        "totalListings": 30,
+        "fmrComparison": {
+          "fmr": 2860,
+          "marketVsFmrPct": 12,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3545,
+        "medianRent": 3695,
+        "minRent": 3395,
+        "maxRent": 3695,
+        "avgPricePerSqft": 2.17,
+        "medianSqft": 1700,
+        "avgDaysOnMarket": 181,
+        "totalListings": 2,
+        "fmrComparison": {
+          "fmr": 3310,
+          "marketVsFmrPct": 12,
+          "tier": "average"
+        }
+      }
+    ],
+    "fetchedAt": 1776512360194
+  },
+  "39.94,-75.15": {
+    "lat": 39.939447472393,
+    "lng": -75.15154649856,
+    "radiusMiles": 0.75,
+    "totalListings": 292,
+    "overall": {
+      "avgRent": 2538,
+      "medianRent": 1950,
+      "minRent": 850,
+      "maxRent": 14995,
+      "avgDaysOnMarket": 148,
+      "medianDaysOnMarket": 57
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1566,
+        "medianRent": 1465,
+        "minRent": 850,
+        "maxRent": 2503,
+        "avgPricePerSqft": 2.93,
+        "medianSqft": 500,
+        "avgDaysOnMarket": 197,
+        "totalListings": 37
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1868,
+        "medianRent": 1750,
+        "minRent": 950,
+        "maxRent": 4791,
+        "avgPricePerSqft": 2.5,
+        "medianSqft": 700,
+        "avgDaysOnMarket": 135,
+        "totalListings": 131
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2872,
+        "medianRent": 2500,
+        "minRent": 1350,
+        "maxRent": 8106,
+        "avgPricePerSqft": 2.34,
+        "medianSqft": 1070,
+        "avgDaysOnMarket": 148,
+        "totalListings": 85
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 5195,
+        "medianRent": 3395,
+        "minRent": 1475,
+        "maxRent": 14995,
+        "avgPricePerSqft": 2.11,
+        "medianSqft": 1610,
+        "avgDaysOnMarket": 154,
+        "totalListings": 35
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3125,
+        "medianRent": 3000,
+        "minRent": 2100,
+        "maxRent": 4950,
+        "avgPricePerSqft": 2.14,
+        "medianSqft": 1400,
+        "avgDaysOnMarket": 52,
+        "totalListings": 4
+      }
+    ],
+    "fetchedAt": 1773215592309
+  },
+  "41.89,-87.65": {
+    "lat": 41.891224440905,
+    "lng": -87.649044818872,
+    "radiusMiles": 0.75,
+    "totalListings": 498,
+    "overall": {
+      "avgRent": 3353,
+      "medianRent": 2985,
+      "minRent": 1425,
+      "maxRent": 13500,
+      "avgDaysOnMarket": 321,
+      "medianDaysOnMarket": 44
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2375,
+        "medianRent": 2347,
+        "minRent": 1608,
+        "maxRent": 3239,
+        "avgPricePerSqft": 4.55,
+        "medianSqft": 516,
+        "avgDaysOnMarket": 262,
+        "totalListings": 118,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": 6,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2998,
+        "medianRent": 2861,
+        "minRent": 2200,
+        "maxRent": 5150,
+        "avgPricePerSqft": 3.95,
+        "medianSqft": 724,
+        "avgDaysOnMarket": 329,
+        "totalListings": 209,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 21,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 4215,
+        "medianRent": 4095,
+        "minRent": 1825,
+        "maxRent": 13500,
+        "avgPricePerSqft": 3.72,
+        "medianSqft": 1100,
+        "avgDaysOnMarket": 344,
+        "totalListings": 129,
+        "fmrComparison": {
+          "fmr": 2670,
+          "marketVsFmrPct": 53,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 5111,
+        "medianRent": 5300,
+        "minRent": 3295,
+        "maxRent": 9000,
+        "avgPricePerSqft": 3.99,
+        "medianSqft": 1327,
+        "avgDaysOnMarket": 419,
+        "totalListings": 34,
+        "fmrComparison": {
+          "fmr": 3440,
+          "marketVsFmrPct": 54,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3728,
+        "medianRent": 3100,
+        "minRent": 1425,
+        "maxRent": 5895,
+        "avgPricePerSqft": 1.72,
+        "medianSqft": 1800,
+        "avgDaysOnMarket": 181,
+        "totalListings": 6,
+        "fmrComparison": {
+          "fmr": 3980,
+          "marketVsFmrPct": -22,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 5,
+        "label": "5 Bedrooms",
+        "avgRent": 11478,
+        "medianRent": 12955,
+        "minRent": 10000,
+        "maxRent": 12955,
+        "avgPricePerSqft": 2.59,
+        "medianSqft": 4995,
+        "avgDaysOnMarket": 44,
+        "totalListings": 2
+      }
+    ],
+    "fetchedAt": 1775616154395
+  },
+  "41.97,-87.73": {
+    "lat": 41.96812911059,
+    "lng": -87.733039414893,
+    "radiusMiles": 0.75,
+    "totalListings": 55,
+    "overall": {
+      "avgRent": 2101,
+      "medianRent": 1895,
+      "minRent": 1100,
+      "maxRent": 6000,
+      "avgDaysOnMarket": 262,
+      "medianDaysOnMarket": 72
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1490,
+        "medianRent": 1350,
+        "minRent": 1200,
+        "maxRent": 2200,
+        "avgPricePerSqft": 2.08,
+        "medianSqft": 650,
+        "avgDaysOnMarket": 426,
+        "totalListings": 5,
+        "fmrComparison": {
+          "fmr": 1530,
+          "marketVsFmrPct": -12,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1419,
+        "medianRent": 1420,
+        "minRent": 1100,
+        "maxRent": 1625,
+        "avgPricePerSqft": 1.72,
+        "medianSqft": 825,
+        "avgDaysOnMarket": 427,
+        "totalListings": 5,
+        "fmrComparison": {
+          "fmr": 1630,
+          "marketVsFmrPct": -13,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 1932,
+        "medianRent": 1895,
+        "minRent": 1550,
+        "maxRent": 2650,
+        "avgPricePerSqft": 1.9,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 270,
+        "totalListings": 32,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": 3,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2727,
+        "medianRent": 2600,
+        "minRent": 1750,
+        "maxRent": 6000,
+        "avgPricePerSqft": 2.17,
+        "medianSqft": 1200,
+        "avgDaysOnMarket": 130,
+        "totalListings": 11,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 10,
+          "tier": "average"
+        }
+      }
+    ],
+    "fetchedAt": 1774041907257
+  },
+  "41.90,-87.69": {
+    "lat": 41.89885161715,
+    "lng": -87.686845653269,
+    "radiusMiles": 0.75,
+    "totalListings": 105,
+    "overall": {
+      "avgRent": 2868,
+      "medianRent": 2550,
+      "minRent": 1550,
+      "maxRent": 8750,
+      "avgDaysOnMarket": 136,
+      "medianDaysOnMarket": 20
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1991,
+        "medianRent": 1895,
+        "minRent": 1580,
+        "maxRent": 2800,
+        "avgPricePerSqft": 2.11,
+        "medianSqft": 900,
+        "avgDaysOnMarket": 228,
+        "totalListings": 16,
+        "fmrComparison": {
+          "fmr": 2190,
+          "marketVsFmrPct": -13,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2796,
+        "medianRent": 2450,
+        "minRent": 1850,
+        "maxRent": 8750,
+        "avgPricePerSqft": 2.88,
+        "medianSqft": 850,
+        "avgDaysOnMarket": 108,
+        "totalListings": 53,
+        "fmrComparison": {
+          "fmr": 2470,
+          "marketVsFmrPct": -1,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 3233,
+        "medianRent": 2995,
+        "minRent": 1990,
+        "maxRent": 5400,
+        "avgPricePerSqft": 2.07,
+        "medianSqft": 1450,
+        "avgDaysOnMarket": 156,
+        "totalListings": 31,
+        "fmrComparison": {
+          "fmr": 3180,
+          "marketVsFmrPct": -6,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 4849,
+        "medianRent": 5100,
+        "minRent": 4500,
+        "maxRent": 5100,
+        "avgPricePerSqft": 2.04,
+        "medianSqft": 2500,
+        "avgDaysOnMarket": 9,
+        "totalListings": 4,
+        "fmrComparison": {
+          "fmr": 3680,
+          "marketVsFmrPct": 39,
+          "tier": "nice"
+        }
+      }
+    ],
+    "fetchedAt": 1774414281686
+  },
+  "41.91,-87.65": {
+    "lat": 41.910882846026,
+    "lng": -87.64699775054,
+    "radiusMiles": 0.75,
+    "totalListings": 222,
+    "overall": {
+      "avgRent": 3175,
+      "medianRent": 2929,
+      "minRent": 860,
+      "maxRent": 15000,
+      "avgDaysOnMarket": 257,
+      "medianDaysOnMarket": 31
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2486,
+        "medianRent": 2640,
+        "minRent": 860,
+        "maxRent": 4100,
+        "avgPricePerSqft": 4.04,
+        "medianSqft": 653,
+        "avgDaysOnMarket": 187,
+        "totalListings": 99,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": 19,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2909,
+        "medianRent": 2850,
+        "minRent": 1003,
+        "maxRent": 5118,
+        "avgPricePerSqft": 3.76,
+        "medianSqft": 758,
+        "avgDaysOnMarket": 357,
+        "totalListings": 60,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 20,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 3961,
+        "medianRent": 4000,
+        "minRent": 2000,
+        "maxRent": 7075,
+        "avgPricePerSqft": 3.81,
+        "medianSqft": 1050,
+        "avgDaysOnMarket": 258,
+        "totalListings": 43,
+        "fmrComparison": {
+          "fmr": 2670,
+          "marketVsFmrPct": 50,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 4952,
+        "medianRent": 4900,
+        "minRent": 3500,
+        "maxRent": 6500,
+        "avgPricePerSqft": 3.27,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 261,
+        "totalListings": 15,
+        "fmrComparison": {
+          "fmr": 3440,
+          "marketVsFmrPct": 42,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 6067,
+        "medianRent": 5700,
+        "minRent": 5500,
+        "maxRent": 7000,
+        "avgPricePerSqft": 2.28,
+        "medianSqft": 2500,
+        "avgDaysOnMarket": 367,
+        "totalListings": 3,
+        "fmrComparison": {
+          "fmr": 3980,
+          "marketVsFmrPct": 43,
+          "tier": "nice"
+        }
+      }
+    ],
+    "fetchedAt": 1774472753593
+  },
+  "41.93,-87.65": {
+    "lat": 41.93275321195,
+    "lng": -87.650147146068,
+    "radiusMiles": 0.75,
+    "totalListings": 500,
+    "overall": {
+      "avgRent": 2337,
+      "medianRent": 2095,
+      "minRent": 1040,
+      "maxRent": 13000,
+      "avgDaysOnMarket": 256,
+      "medianDaysOnMarket": 76
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1642,
+        "medianRent": 1595,
+        "minRent": 1040,
+        "maxRent": 2895,
+        "avgPricePerSqft": 3.85,
+        "medianSqft": 414,
+        "avgDaysOnMarket": 306,
+        "totalListings": 208,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": -28,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2287,
+        "medianRent": 2200,
+        "minRent": 1550,
+        "maxRent": 6576,
+        "avgPricePerSqft": 3.14,
+        "medianSqft": 700,
+        "avgDaysOnMarket": 233,
+        "totalListings": 203,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": -7,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 3292,
+        "medianRent": 3200,
+        "minRent": 1990,
+        "maxRent": 6135,
+        "avgPricePerSqft": 3.2,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 149,
+        "totalListings": 60,
+        "fmrComparison": {
+          "fmr": 2670,
+          "marketVsFmrPct": 20,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 5440,
+        "medianRent": 4300,
+        "minRent": 3000,
+        "maxRent": 13000,
+        "avgPricePerSqft": 2.77,
+        "medianSqft": 1550,
+        "avgDaysOnMarket": 184,
+        "totalListings": 17,
+        "fmrComparison": {
+          "fmr": 3440,
+          "marketVsFmrPct": 25,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 6043,
+        "medianRent": 6495,
+        "minRent": 3800,
+        "maxRent": 7500,
+        "avgPricePerSqft": 3.61,
+        "medianSqft": 1800,
+        "avgDaysOnMarket": 437,
+        "totalListings": 11,
+        "fmrComparison": {
+          "fmr": 3980,
+          "marketVsFmrPct": 63,
+          "tier": "luxury"
+        }
+      }
+    ],
+    "fetchedAt": 1774472964640
+  },
+  "41.91,-87.70": {
+    "lat": 41.910232440652,
+    "lng": -87.702936299616,
+    "radiusMiles": 0.75,
+    "totalListings": 142,
+    "overall": {
+      "avgRent": 2390,
+      "medianRent": 2195,
+      "minRent": 1200,
+      "maxRent": 14132,
+      "avgDaysOnMarket": 202,
+      "medianDaysOnMarket": 30
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1303,
+        "medianRent": 1295,
+        "minRent": 1250,
+        "maxRent": 1450,
+        "avgPricePerSqft": 4.03,
+        "medianSqft": 321,
+        "avgDaysOnMarket": 435,
+        "totalListings": 28,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": -30,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1816,
+        "medianRent": 1650,
+        "minRent": 1200,
+        "maxRent": 2553,
+        "avgPricePerSqft": 2.2,
+        "medianSqft": 750,
+        "avgDaysOnMarket": 349,
+        "totalListings": 19,
+        "fmrComparison": {
+          "fmr": 1970,
+          "marketVsFmrPct": -16,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2388,
+        "medianRent": 2225,
+        "minRent": 1550,
+        "maxRent": 4500,
+        "avgPricePerSqft": 2.23,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 131,
+        "totalListings": 61,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": 0,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 3039,
+        "medianRent": 2812,
+        "minRent": 1950,
+        "maxRent": 4645,
+        "avgPricePerSqft": 2.01,
+        "medianSqft": 1400,
+        "avgDaysOnMarket": 48,
+        "totalListings": 25,
+        "fmrComparison": {
+          "fmr": 2860,
+          "marketVsFmrPct": -2,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 5191,
+        "medianRent": 3995,
+        "minRent": 3000,
+        "maxRent": 14132,
+        "avgPricePerSqft": 2.22,
+        "medianSqft": 1800,
+        "avgDaysOnMarket": 68,
+        "totalListings": 9,
+        "fmrComparison": {
+          "fmr": 3310,
+          "marketVsFmrPct": 21,
+          "tier": "nice"
+        }
+      }
+    ],
+    "fetchedAt": 1775616167193
+  },
+  "41.88,-87.68": {
+    "lat": 41.883148283621,
+    "lng": -87.679957362871,
+    "radiusMiles": 0.75,
+    "totalListings": 74,
+    "overall": {
+      "avgRent": 3214,
+      "medianRent": 2800,
+      "minRent": 1375,
+      "maxRent": 12750,
+      "avgDaysOnMarket": 328,
+      "medianDaysOnMarket": 61
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2171,
+        "medianRent": 2177,
+        "minRent": 2072,
+        "maxRent": 2228,
+        "avgPricePerSqft": 4.5,
+        "medianSqft": 484,
+        "avgDaysOnMarket": 620,
+        "totalListings": 5,
+        "fmrComparison": {
+          "fmr": 1530,
+          "marketVsFmrPct": 42,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2540,
+        "medianRent": 2530,
+        "minRent": 1960,
+        "maxRent": 2853,
+        "avgPricePerSqft": 3.56,
+        "medianSqft": 710,
+        "avgDaysOnMarket": 886,
+        "totalListings": 12,
+        "fmrComparison": {
+          "fmr": 1630,
+          "marketVsFmrPct": 55,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 3149,
+        "medianRent": 2850,
+        "minRent": 1375,
+        "maxRent": 9550,
+        "avgPricePerSqft": 2.85,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 234,
+        "totalListings": 35,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": 55,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 3349,
+        "medianRent": 3250,
+        "minRent": 1764,
+        "maxRent": 5750,
+        "avgPricePerSqft": 2.5,
+        "medianSqft": 1300,
+        "avgDaysOnMarket": 107,
+        "totalListings": 19,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 37,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 4950,
+        "medianRent": 5100,
+        "minRent": 4800,
+        "maxRent": 5100,
+        "avgPricePerSqft": 1.65,
+        "medianSqft": 3100,
+        "avgDaysOnMarket": 101,
+        "totalListings": 2,
+        "fmrComparison": {
+          "fmr": 2740,
+          "marketVsFmrPct": 86,
+          "tier": "luxury"
+        }
+      }
+    ],
+    "fetchedAt": 1777676408416
+  }
+}

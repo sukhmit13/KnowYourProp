@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Property Insight Report — 3014 W Irving Park Rd</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --font-display:'Instrument Serif', Georgia, serif;
+    --font-body:'Inter', -apple-system, sans-serif;
+    --font-mono:'JetBrains Mono', ui-monospace, monospace;
+    --paper:#faf9f6; --card:#ffffff; --ink:#141414; --ink2:#565651; --muted:#8b8a84;
+    --line:#eae8e2; --brand:#2b3a9e; --brandHi:#3446bd; --brandDeep:#1e2a6e; --brandSoft:#ecedf9; --gold:#f3b31f;
+    --risk-mark:#d13b26; --risk-bg:#fbecea; --risk-border:#d13b26; --risk-text:#9e2b1c;
+    --caution-mark:#d98c00; --caution-bg:#fdf5e2; --caution-border:#f3b31f; --caution-text:#946200;
+    --strength-mark:#2f7d3f; --strength-bg:#edf6ef; --strength-border:#2f7d3f; --strength-text:#245f30;
+    --neutral-mark:#0e8fa6; --neutral-bg:#e9f4f6; --neutral-border:#0e8fa6; --neutral-text:#0b6d7f;
+    --radius-card:10px;
+  }
+  @page{ size:letter portrait; margin:0.45in; }
+  *{ box-sizing:border-box; }
+  html,body{ background:var(--paper); color:var(--ink); font-family:var(--font-body); font-size:9.5pt; line-height:1.4; -webkit-font-smoothing:antialiased; -webkit-print-color-adjust:exact; print-color-adjust:exact; margin:0; padding:0; }
+  .page{ max-width:8in; margin:0 auto; }
+  .mono-label{ font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.09em; }
+
+  /* Masthead */
+  .masthead{ background:linear-gradient(135deg, var(--brand), var(--brandDeep)); color:#fff; border-radius:var(--radius-card) var(--radius-card) 0 0; padding:16px 20px; display:grid; grid-template-columns:1.5fr 1fr; gap:16px; page-break-inside:avoid; }
+  .masthead .eyebrow{ font-size:8.5pt; color:rgba(255,255,255,0.7); margin-bottom:4px; }
+  .masthead h1{ font-family:var(--font-display); font-size:27pt; margin:2px 0 4px; font-weight:400; line-height:1.05; }
+  .masthead .meta{ font-size:8.8pt; color:rgba(255,255,255,0.8); }
+  .take{ border-left:1px solid rgba(255,255,255,0.18); padding-left:16px; }
+  .take .eyebrow{ color:var(--gold); font-size:8.5pt; margin-bottom:4px; }
+  .take .verdict{ font-family:var(--font-display); font-size:15pt; font-weight:400; margin:2px 0 6px; line-height:1.15; }
+  .take p{ font-size:8.8pt; color:rgba(255,255,255,0.8); margin:0; }
+  .gold-rule{ height:2px; background:var(--gold); }
+
+  /* Stat strip */
+  .stats{ background:var(--card); display:grid; grid-template-columns:repeat(6,1fr); page-break-inside:avoid; }
+  .stat{ padding:9px 8px; border-right:1px solid var(--line); }
+  .stat:last-child{ border-right:none; }
+  .stat .label{ font-size:7pt; color:var(--muted); margin-bottom:3px; }
+  .stat .value{ font-family:var(--font-display); font-size:13.5pt; color:var(--ink); line-height:1.1; }
+  .stat .value.flag{ color:var(--risk-mark); }
+  .stat .qual{ font-size:7.6pt; color:var(--muted); margin-top:2px; }
+
+  /* Section bar */
+  .sectionbar{ background:var(--brand); color:#fff; display:flex; justify-content:space-between; align-items:center; padding:6px 14px; margin-top:10px; font-size:8pt; page-break-inside:avoid; }
+  .sectionbar .note{ color:rgba(255,255,255,0.65); }
+
+  /* Cards */
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:9px; }
+  .card{ background:var(--bg); border-left:3px solid var(--border); border-radius:var(--radius-card); padding:11px 13px; page-break-inside:avoid; }
+  .card.risk{ --bg:var(--risk-bg); --border:var(--risk-border); }
+  .card.caution{ --bg:var(--caution-bg); --border:var(--caution-border); }
+  .card.strength{ --bg:var(--strength-bg); --border:var(--strength-border); }
+  .card.neutral{ --bg:var(--neutral-bg); --border:var(--neutral-border); }
+  .card .headline{ font-weight:700; font-size:10.3pt; margin:0 0 4px; }
+  .card .headline .mark{ display:inline-block; width:7px; height:7px; margin-right:6px; }
+  .card.risk .headline .mark, .card.caution .headline .mark{ background:var(--mark); }
+  .card.risk .headline .mark{ --mark:var(--risk-mark); background:var(--risk-mark); }
+  .card.caution .headline .mark{ background:var(--caution-mark); }
+  .card.strength .headline .mark{ color:var(--strength-mark); font-weight:700; }
+  .card.neutral .headline .mark{ background:var(--neutral-mark); }
+  .card p{ margin:0; font-size:8.4pt; color:var(--ink2); }
+
+  /* Action steps */
+  .actions{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px; margin-top:9px; }
+  .action{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius-card); padding:10px 12px; page-break-inside:avoid; }
+  .action .chip{ width:20px; height:20px; background:var(--brand); color:#fff; font-family:var(--font-mono); font-size:9.5pt; display:flex; align-items:center; justify-content:center; margin-bottom:6px; }
+  .action .ahead{ font-weight:700; font-size:9.3pt; margin:0 0 3px; }
+  .action p{ margin:0; font-size:8.1pt; color:var(--ink2); }
+
+  /* Footer */
+  .footer{ border-top:1px solid var(--line); margin-top:10px; padding-top:6px; font-size:7.3pt; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="masthead">
+    <div>
+      <div class="eyebrow mono-label">Property Insight Report</div>
+      <h1>3014 W Irving Park Rd</h1>
+      <div class="meta">Irving Park · Chicago, IL 60618 · B3-1 Community Shopping · 5,850 SF Lot · Built 1915</div>
+    </div>
+    <div class="take">
+      <div class="eyebrow mono-label">Our Take</div>
+      <div class="verdict">Zoning-clean and demand-rich, but the title needs a hard look before you sign.</div>
+      <p>Day Care Center is an as-of-right use here and Irving Park is a documented childcare desert with a demographic profile that fits a bilingual program. Set against that: an unresolved 2012 foreclosure filing, a prior ownership stretch that lost value, and an active mortgage that needs clearing before closing. Bank on the location and use case — treat the paper trail as homework, not a formality.</p>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+
+  <div class="stats">
+    <div class="stat"><div class="label mono-label">Last Sold</div><div class="value">$411,000</div><div class="qual">4/24/2014 · Deed to Happy Arts LLC</div></div>
+    <div class="stat"><div class="label mono-label">Prior Sale</div><div class="value">$465,500</div><div class="qual">11/18/2002 · -11.7% by 2014 sale</div></div>
+    <div class="stat"><div class="label mono-label">Zoning</div><div class="value">B3-1</div><div class="qual">Day Care Center: as-of-right</div></div>
+    <div class="stat"><div class="label mono-label">Property Taxes</div><div class="value">$16,289.71</div><div class="qual">2024 full year · ~$1,357/mo</div></div>
+    <div class="stat"><div class="label mono-label">Title Status</div><div class="value flag">Flagged</div><div class="qual">3 lis pendens/foreclosure recs.</div></div>
+    <div class="stat"><div class="label mono-label">TIF District</div><div class="value">None</div><div class="qual">Not in TIF · no landmark noted</div></div>
+  </div>
+
+  <div class="sectionbar">
+    <span class="mono-label">What the Public Record Says About This Asset</span>
+    <span class="note">Independent of what you plan to do with it</span>
+  </div>
+
+  <div class="grid">
+
+    <div class="card risk">
+      <div class="headline"><span class="mark"></span>A 2012 foreclosure filing on this parcel was never marked released — and it followed a stretch where the property lost value.</div>
+      <p>The parcel shows three lis pendens/foreclosure records: 1987 and 2001 are both marked RELEASED, but the LIS PENDENS FORECLOSURE recorded 2/9/2012 carries no release notation in this record. The prior owner sold in 2002 for $465,500; the current owner, Happy Arts LLC, bought in 2014 for $411,000 — an 11.7% decline — two years after the 2012 filing. Together, this points to a financially strained ownership stretch, not a one-off event. Confirm the 2012 filing was formally satisfied with a title company before relying on clean title.</p>
+    </div>
+
+    <div class="card strength">
+      <div class="headline"><span class="mark">✓</span>Day Care Center is already a permitted use here — you don't need zoning relief to open.</div>
+      <p>B3-1 (Community Shopping) lists Day Care Center as a permitted use under Public and Civic, with no special-use permit required — consistent with the funnel's own flag that zoning relief isn't needed. This clears the single biggest entitlement risk that usually slows childcare deals. The same zone also permits many fallback commercial uses (retail, medical office, restaurant) as-of-right, giving the site backup flexibility if plans change.</p>
+    </div>
+
+    <div class="card strength">
+      <div class="headline"><span class="mark">✓</span>Irving Park is a certified childcare desert, and the bilingual angle matches the neighborhood.</div>
+      <p>Irving Park community area logs 3,486 children under 5 against 965 licensed slots — 3.61 children per slot, above the 3.0 threshold that defines a childcare desert. ZIP 60618 overall is labeled "Underserved" (2.18 children per slot). Irving Park's population is 38.5% Hispanic/Latino, directly supporting demand for a bilingual program. This is genuine, evidence-backed demand for the exact program and language model proposed.</p>
+    </div>
+
+    <div class="card caution">
+      <div class="headline"><span class="mark"></span>The tax bill jumped from 2023 to 2024, and the 2025 figure on file is only a partial installment.</div>
+      <p>Confirmed full-year tax rose from $14,244.64 (2023) to $16,289.71 (2024). The 2025 figure shown, $8,959.34, equals exactly 55% of the 2024 total — consistent with a first-installment estimate, not a full-year bill. Underwrite carrying cost off the confirmed 2024 amount (~$1,357/month), not the partial 2025 figure. Payment status is listed as current.</p>
+    </div>
+
+    <div class="card caution">
+      <div class="headline"><span class="mark"></span>FAR headroom is down to 935 square feet, and the 1915 building needs a licensing-readiness check.</div>
+      <p>Current building (6,085 sf) puts FAR at 1.04 against a zoning max of 1.2 (7,020 sf) — only 935 sf of buildable area remains. Height allowance (38 ft / 3 stories) leaves room above the current 2 stories, but floor area, not height, is the real ceiling on expansion. Separately, a 1915 structure will need verification that egress and life-safety conditions meet state day-care licensing standards before build-out costs are finalized.</p>
+    </div>
+
+    <div class="card caution">
+      <div class="headline"><span class="mark"></span>The current owner carries a $798,000 mortgage, modified in 2021 — confirm it's cleared before you close.</div>
+      <p>Happy Arts LLC bought the property in 2014 for $411,000, then recorded a $798,000 mortgage in 2016 — nearly double the purchase price — followed by a modification in 2021. Whatever the loan funded, it remains an active, modified obligation of significant size that must be satisfied or assumed in any sale. Get current payoff and lien status from a title company before structuring the deal.</p>
+    </div>
+
+    <div class="card neutral">
+      <div class="headline"><span class="mark"></span>A bus stop at the front door helps daily drop-off, but this isn't a transit-driven site.</div>
+      <p>The Rte 80 Irving Park bus stop at Irving Park & Sacramento sits 0.03 mi away — effectively at the door — useful for family drop-off on foot or by bus. The nearest CTA rail (Francisco, Brown Line) is 0.84 mi out, and the site is not TOD eligible. Treat transit as a walkability convenience for families, not a demand driver in itself.</p>
+    </div>
+
+  </div>
+
+  <div class="sectionbar">
+    <span class="mono-label">Before You Move Forward</span>
+    <span class="note">Three things to do before you make an offer</span>
+  </div>
+
+  <div class="actions">
+    <div class="action">
+      <div class="chip">1</div>
+      <div class="ahead">Clear the title question</div>
+      <p>Get title-company confirmation that the 2012 lis pendens foreclosure was released, and pull current payoff/lien status on the 2016 mortgage (modified 2021).</p>
+    </div>
+    <div class="action">
+      <div class="chip">2</div>
+      <div class="ahead">Check licensing readiness</div>
+      <p>Have a life-safety/egress walk-through done against state day-care licensing standards before budgeting build-out for the 1915 structure.</p>
+    </div>
+    <div class="action">
+      <div class="chip">3</div>
+      <div class="ahead">Underwrite off the confirmed tax year</div>
+      <p>Use the 2024 full-year tax bill ($16,289.71) for carrying-cost planning — the 2025 figure on file is a partial installment, not the full-year liability.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Report generated July 23, 2026 · Sources: Cook County Assessor, Cook County Recorder of Deeds, Cook County Treasurer, City of Chicago zoning data, community demographic and childcare-access data · Informational only — not legal, financial, or investment advice.
+  </div>
+
+</div>
+</body>
+</html>

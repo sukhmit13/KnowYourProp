@@ -1,0 +1,1125 @@
+{
+  "41.903_-87.667_indian_restaurant": {
+    "result": {
+      "places": [
+        {
+          "name": "Lilac Tiger",
+          "address": "1742 W Division St, Chicago, IL 60622, USA",
+          "rating": 4.5,
+          "reviewsCount": 213,
+          "distanceMiles": 0.25,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJdx9QB7rTD4gRYNNe_1LeTzg",
+          "phone": null
+        },
+        {
+          "name": "Cumin Restaurant - Wicker Park",
+          "address": "1414 N Milwaukee Ave, Chicago, IL 60622, USA",
+          "rating": 4.2,
+          "reviewsCount": 372,
+          "distanceMiles": 0.45,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJU84MEO3TD4gRursjIpogN18",
+          "phone": null
+        },
+        {
+          "name": "Kama - Wicker Park",
+          "address": "1560 N Milwaukee Ave, Chicago, IL 60622, USA",
+          "rating": 4.5,
+          "reviewsCount": 452,
+          "distanceMiles": 0.67,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJT64lKH3TD4gRUEUs4YCPdmA",
+          "phone": null
+        },
+        {
+          "name": "VAJRA | Indian",
+          "address": "2039 W North Ave, Chicago, IL 60647, USA",
+          "rating": 4.2,
+          "reviewsCount": 369,
+          "distanceMiles": 0.79,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJOw30ZMrTD4gRtFN66xuJYgI",
+          "phone": null
+        }
+      ],
+      "count": 4,
+      "searchTerm": "indian restaurant",
+      "avgRating": 4.3,
+      "fetchedAt": "2026-06-25T14:08:10.643Z",
+      "status": "complete"
+    },
+    "ts": 1782396490643
+  },
+  "41.918_-87.697_coffee_shop_cafe": {
+    "result": {
+      "places": [
+        {
+          "name": "Caffè Umbria",
+          "address": "2545 W Armitage Ave, Chicago, IL 60647, USA",
+          "rating": 4.7,
+          "reviewsCount": 434,
+          "distanceMiles": 0.29,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJP7HmlZjSD4gRxve1IagUwtM",
+          "phone": null
+        },
+        {
+          "name": "Colectivo Coffee Logan Square",
+          "address": "2261 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.4,
+          "reviewsCount": 716,
+          "distanceMiles": 0.33,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJtXXOxJ3SD4gRwYaAEhuk0p8",
+          "phone": null
+        },
+        {
+          "name": "Logan Collective",
+          "address": "3026 W Armitage Ave, Chicago, IL 60647, USA",
+          "rating": 4.7,
+          "reviewsCount": 41,
+          "distanceMiles": 0.33,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJFyT2ScPND4gRVgBgNp_62C4",
+          "phone": null
+        },
+        {
+          "name": "Cafe Mustache",
+          "address": "2313 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.5,
+          "reviewsCount": 849,
+          "distanceMiles": 0.4,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJaQvkeWLND4gR7dWuaDjRh5A",
+          "phone": null
+        },
+        {
+          "name": "Arwa Yemeni Coffee",
+          "address": "1953 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 5,
+          "reviewsCount": 45,
+          "distanceMiles": 0.49,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJP-2UGADTD4gRLIYTlkbAZd8",
+          "phone": null
+        },
+        {
+          "name": "Familia Cafe",
+          "address": "2800 W North Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 44,
+          "distanceMiles": 0.49,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJXVutXgDTD4gRgoCx6-GXDaw",
+          "phone": null
+        },
+        {
+          "name": "Dark Matter Coffee - Electric Mud Coffee Bar",
+          "address": "1856 N Western Ave, Chicago, IL 60647, USA",
+          "rating": 4.8,
+          "reviewsCount": 338,
+          "distanceMiles": 0.5,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJP0-k9m7TD4gR_VnoFu5XSWE",
+          "phone": null
+        },
+        {
+          "name": "Gaslight Coffee Roasters",
+          "address": "2385 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.5,
+          "reviewsCount": 786,
+          "distanceMiles": 0.5,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJC5zA_GLND4gRM8au6lVnREs",
+          "phone": null
+        },
+        {
+          "name": "Sip of Hope Coffee",
+          "address": "3039 W Fullerton Ave, Chicago, IL 60647, USA",
+          "rating": 4.9,
+          "reviewsCount": 592,
+          "distanceMiles": 0.59,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJA9aZ82TND4gRa7wQ2Th9pd8",
+          "phone": null
+        },
+        {
+          "name": "Damn Fine Coffee Bar",
+          "address": "3317 W Armitage Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 463,
+          "distanceMiles": 0.71,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJMWUv3WnND4gRHi5d9G-8Jvs",
+          "phone": null
+        },
+        {
+          "name": "Ipsento 606",
+          "address": "1813 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.5,
+          "reviewsCount": 1154,
+          "distanceMiles": 0.74,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ7VDy2r3SD4gRo7aJ8aaxQ1w",
+          "phone": null
+        }
+      ],
+      "count": 11,
+      "searchTerm": "Coffee Shop / Cafe",
+      "avgRating": 4.7,
+      "fetchedAt": "2026-07-02T21:37:46.806Z",
+      "status": "complete"
+    },
+    "ts": 1783028266806
+  },
+  "41.918_-87.697_indian_retail_store": {
+    "result": {
+      "places": [],
+      "count": 0,
+      "searchTerm": "indian retail store",
+      "avgRating": null,
+      "fetchedAt": "2026-08-11T18:30:50.376Z",
+      "status": "complete"
+    },
+    "ts": 1786473050376
+  },
+  "41.918_-87.697_chai_retail_store": {
+    "result": {
+      "places": [
+        {
+          "name": "Logan Collective",
+          "address": "3026 W Armitage Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 44,
+          "distanceMiles": 0.33,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJFyT2ScPND4gRVgBgNp_62C4",
+          "phone": null
+        },
+        {
+          "name": "Arwa Yemeni Coffee",
+          "address": "1953 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.8,
+          "reviewsCount": 73,
+          "distanceMiles": 0.49,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJP-2UGADTD4gRLIYTlkbAZd8",
+          "phone": null
+        },
+        {
+          "name": "Gaslight Coffee Roasters",
+          "address": "2385 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.5,
+          "reviewsCount": 789,
+          "distanceMiles": 0.5,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJC5zA_GLND4gRM8au6lVnREs",
+          "phone": null
+        },
+        {
+          "name": "Damn Fine Coffee Bar",
+          "address": "3317 W Armitage Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 464,
+          "distanceMiles": 0.71,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJMWUv3WnND4gRHi5d9G-8Jvs",
+          "phone": null
+        },
+        {
+          "name": "thrd coffee",
+          "address": "1816 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.5,
+          "reviewsCount": 303,
+          "distanceMiles": 0.71,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJfVX41QPTD4gRL3M-99bkwx4",
+          "phone": null
+        },
+        {
+          "name": "Dayglow",
+          "address": "1757 N Kimball Ave, Chicago, IL 60647, USA",
+          "rating": 4.4,
+          "reviewsCount": 396,
+          "distanceMiles": 0.78,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJSVpcZU_ND4gR21J8bcTuVGc",
+          "phone": null
+        },
+        {
+          "name": "New Wave Coffee",
+          "address": "2557 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.3,
+          "reviewsCount": 699,
+          "distanceMiles": 0.83,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJKd7f4HrND4gRaGzZzDNgCBY",
+          "phone": null
+        }
+      ],
+      "count": 7,
+      "searchTerm": "chai retail store",
+      "avgRating": 4.5,
+      "fetchedAt": "2026-08-11T18:29:35.880Z",
+      "status": "complete"
+    },
+    "ts": 1786472975880
+  },
+  "41.918_-87.697_tea_retail_store": {
+    "result": {
+      "places": [],
+      "count": 0,
+      "searchTerm": "tea retail store",
+      "avgRating": null,
+      "fetchedAt": "2026-07-23T16:33:23.182Z",
+      "status": "complete"
+    },
+    "ts": 1784824403182
+  },
+  "41.918_-87.697_boba_retail_store": {
+    "result": {
+      "places": [
+        {
+          "name": "TE'AMO Boba Bar - Logan Square",
+          "address": "2497 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.8,
+          "reviewsCount": 93,
+          "distanceMiles": 0.72,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ22v8UgDND4gRHgy-rIi3V5g",
+          "phone": null
+        }
+      ],
+      "count": 1,
+      "searchTerm": "boba retail store",
+      "avgRating": 4.8,
+      "fetchedAt": "2026-08-11T18:16:20.811Z",
+      "status": "complete"
+    },
+    "ts": 1786472180811
+  },
+  "41.918_-87.697_matcha_retail_store": {
+    "result": {
+      "places": [
+        {
+          "name": "Arwa Yemeni Coffee",
+          "address": "1953 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.9,
+          "reviewsCount": 49,
+          "distanceMiles": 0.49,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJP-2UGADTD4gRLIYTlkbAZd8",
+          "phone": null
+        },
+        {
+          "name": "Frera Desserts",
+          "address": "1722 N Western Ave #1, Chicago, IL 60647, USA",
+          "rating": 4.8,
+          "reviewsCount": 145,
+          "distanceMiles": 0.59,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ3e96gTjTD4gRi4swUYxjRKI",
+          "phone": null
+        },
+        {
+          "name": "Dayglow",
+          "address": "1757 N Kimball Ave, Chicago, IL 60647, USA",
+          "rating": 4.4,
+          "reviewsCount": 384,
+          "distanceMiles": 0.78,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJSVpcZU_ND4gR21J8bcTuVGc",
+          "phone": null
+        }
+      ],
+      "count": 3,
+      "searchTerm": "matcha retail store",
+      "avgRating": 4.7,
+      "fetchedAt": "2026-07-05T13:56:58.594Z",
+      "status": "complete"
+    },
+    "ts": 1783259818594
+  },
+  "41.954_-87.704_bilingual_daycare": {
+    "result": {
+      "places": [
+        {
+          "name": "Rayito de Sol Spanish Immersion Early Learning Center",
+          "address": "2550 W Addison St, Chicago, IL 60618, USA",
+          "rating": 4.9,
+          "reviewsCount": 110,
+          "distanceMiles": 0.72,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJkaQnK5_TD4gR4RlGXcwu8sU",
+          "phone": null
+        },
+        {
+          "name": "Concordia Place on Whipple",
+          "address": "3300 N Whipple St, Chicago, IL 60618, USA",
+          "rating": 4.3,
+          "reviewsCount": 38,
+          "distanceMiles": 0.85,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJbeKpjoPND4gR_pMw9xDrdZc",
+          "phone": null
+        },
+        {
+          "name": "Sunnyside Daycare",
+          "address": "3542 W Sunnyside Ave, Chicago, IL 60625, USA",
+          "rating": 5,
+          "reviewsCount": 17,
+          "distanceMiles": 0.94,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJJWB82OnND4gRIFXI34s0v9Q",
+          "phone": null
+        }
+      ],
+      "count": 3,
+      "searchTerm": "bilingual daycare",
+      "avgRating": 4.7,
+      "fetchedAt": "2026-08-11T18:16:05.349Z",
+      "status": "complete"
+    },
+    "ts": 1786472165349
+  },
+  "41.921_-87.687_multi_unit_residential": {
+    "result": {
+      "places": [
+        {
+          "name": "The Apartment Source",
+          "address": "2533 W Fullerton Ave, Chicago, IL 60647, USA",
+          "rating": 4.7,
+          "reviewsCount": 1090,
+          "distanceMiles": 0.33,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJWdBZ4gXTD4gRktOpomiz-4c",
+          "phone": null
+        },
+        {
+          "name": "Domain Property Management",
+          "address": "2624 W Fullerton Ave, Chicago, IL 60647, USA",
+          "rating": 4.8,
+          "reviewsCount": 57,
+          "distanceMiles": 0.45,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJY3e_7hrTD4gRqRzqxYwZpHE",
+          "phone": null
+        },
+        {
+          "name": "Coast Multifamily Remodeling",
+          "address": "2325 N Damen Ave, Chicago, IL 60647, USA",
+          "rating": 5,
+          "reviewsCount": 21,
+          "distanceMiles": 0.49,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJvQ4wNRQvDogRM_I5Jmup0R4",
+          "phone": null
+        }
+      ],
+      "count": 3,
+      "searchTerm": "Multi-Unit Residential",
+      "avgRating": 4.8,
+      "fetchedAt": "2026-08-08T00:34:26.583Z",
+      "status": "complete"
+    },
+    "ts": 1786149266583
+  },
+  "41.910_-87.691_daycare_center": {
+    "result": {
+      "places": [
+        {
+          "name": "Nook North Daycare",
+          "address": "2345 W North Ave Unit 3, Chicago, IL 60647, USA",
+          "rating": 4.8,
+          "reviewsCount": 25,
+          "distanceMiles": 0.24,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJxUsrK17TD4gRRqQp5B9d5C8",
+          "phone": null
+        },
+        {
+          "name": "Wise Owl Daycare",
+          "address": "2734 W North Ave, Chicago, IL 60647, USA",
+          "rating": 4.8,
+          "reviewsCount": 72,
+          "distanceMiles": 0.25,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJpdwLPKfSD4gR-yF4eUFR-hI",
+          "phone": null
+        },
+        {
+          "name": "Schooner Learning Academy",
+          "address": "1667 N Western Ave, Chicago, IL 60647, USA",
+          "rating": 4.9,
+          "reviewsCount": 30,
+          "distanceMiles": 0.26,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJZTQVkZTTD4gRkAVyzENLdEk",
+          "phone": null
+        },
+        {
+          "name": "Centro Infantil Consuelo Lee Corretjer Childcare Center",
+          "address": "1345 N Rockwell St, Chicago, IL 60622, USA",
+          "rating": 4.4,
+          "reviewsCount": 13,
+          "distanceMiles": 0.29,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJdTy7GgDTD4gRtpVm8C6B9Tc",
+          "phone": null
+        },
+        {
+          "name": "Willow Tree Childcare and Developmental Center",
+          "address": "1800 N Western Ave, Chicago, IL 60647, USA",
+          "rating": 5,
+          "reviewsCount": 2,
+          "distanceMiles": 0.32,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJAeI006LSD4gRgIydFfkhQb4",
+          "phone": null
+        },
+        {
+          "name": "Learn & Grow Childcare",
+          "address": "2820 W North Ave, Chicago, IL 60647, USA",
+          "rating": 2.7,
+          "reviewsCount": 9,
+          "distanceMiles": 0.34,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ4VyKoVjND4gR0GfzYLMPLMQ",
+          "phone": null
+        },
+        {
+          "name": "Lutheran Day Early Childhood Center",
+          "address": "1802 N Fairfield Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 10,
+          "distanceMiles": 0.37,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJm48qXqDSD4gR9YpqtgbTKzg",
+          "phone": null
+        },
+        {
+          "name": "Roots Early Learning Center",
+          "address": "1604 N Richmond St, Chicago, IL 60647, USA",
+          "rating": 5,
+          "reviewsCount": 1,
+          "distanceMiles": 0.48,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJq8CieuvND4gRvI9vjkQJKdw",
+          "phone": null
+        },
+        {
+          "name": "Nurturing Niche, Inc.",
+          "address": "2600 W Division St, Chicago, IL 60622, USA",
+          "rating": 4.8,
+          "reviewsCount": 16,
+          "distanceMiles": 0.5,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJKdMMzpTTD4gRGEDWj3O4yp4",
+          "phone": null
+        },
+        {
+          "name": "Children's Learning Place",
+          "address": "1681 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.3,
+          "reviewsCount": 7,
+          "distanceMiles": 0.59,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJz3Jo6fjLD4gRhSu_2AKnqws",
+          "phone": null
+        },
+        {
+          "name": "Children's Place Association's Early Learning Center",
+          "address": "1800 N Humboldt Blvd, Chicago, IL 60647, USA",
+          "rating": 5,
+          "reviewsCount": 7,
+          "distanceMiles": 0.64,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ94l3K1zND4gRXpzg9ab7a-0",
+          "phone": null
+        },
+        {
+          "name": "Nook Bucktown #1 Childcare & Preschool",
+          "address": "2151 W Armitage Ave, Chicago, IL 60647, USA",
+          "rating": 4.9,
+          "reviewsCount": 43,
+          "distanceMiles": 0.67,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJn7Cg3ZXSD4gRmAmhebNubIc",
+          "phone": null
+        },
+        {
+          "name": "Nook Bucktown #2 Childcare & Preschool",
+          "address": "2105 W Armitage Ave, Chicago, IL 60647, USA",
+          "rating": 4.8,
+          "reviewsCount": 43,
+          "distanceMiles": 0.75,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ7y6zoJXSD4gRaoZV7rPRSsM",
+          "phone": null
+        },
+        {
+          "name": "West Town Daycare",
+          "address": "1017-33 N California Ave, Chicago, IL 60622, USA",
+          "rating": 4.7,
+          "reviewsCount": 28,
+          "distanceMiles": 0.78,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJb9jhHlTND4gRnmauHCQnnx0",
+          "phone": null
+        }
+      ],
+      "count": 14,
+      "searchTerm": "daycare center",
+      "avgRating": 4.6,
+      "fetchedAt": "2026-08-08T14:24:56.605Z",
+      "status": "complete"
+    },
+    "ts": 1786199096605
+  },
+  "41.934_-87.716_coffee_shop_cafe": {
+    "result": {
+      "places": [
+        {
+          "name": "Sipping Turtle Cafe",
+          "address": "2959 N Milwaukee Ave, Chicago, IL 60618, USA",
+          "rating": 4.5,
+          "reviewsCount": 386,
+          "distanceMiles": 0.11,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJBepZlcbND4gR0CQMLhZaC34",
+          "phone": null
+        },
+        {
+          "name": "The Brewed",
+          "address": "2843 N Milwaukee Ave, Chicago, IL 60618, USA",
+          "rating": 4.8,
+          "reviewsCount": 405,
+          "distanceMiles": 0.13,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJm2laVFDND4gRgzPCkRFYbFc",
+          "phone": null
+        },
+        {
+          "name": "Magnífico Coffee Roasters & Coffee Shop",
+          "address": "3063 N Milwaukee Ave, Chicago, IL 60618, USA",
+          "rating": 4.9,
+          "reviewsCount": 472,
+          "distanceMiles": 0.3,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJA1d7_tfND4gRRGuhW99ootk",
+          "phone": null
+        },
+        {
+          "name": "Wake N Bakery Logan Square",
+          "address": "2757 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 5,
+          "reviewsCount": 850,
+          "distanceMiles": 0.32,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJbTSYOAPND4gRVXn2EdephUc",
+          "phone": null
+        },
+        {
+          "name": "Terra Coffee",
+          "address": "3343 W Belmont Ave, Chicago, IL 60618, USA",
+          "rating": 5,
+          "reviewsCount": 260,
+          "distanceMiles": 0.4,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ3YRG23zND4gRkB56IC1xJns",
+          "phone": null
+        },
+        {
+          "name": "Necessary & Sufficient Coffee",
+          "address": "3624 W Wrightwood Ave, Chicago, IL 60647, USA",
+          "rating": 4.2,
+          "reviewsCount": 313,
+          "distanceMiles": 0.41,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJP1cwceTND4gRhnrVzX1YOWY",
+          "phone": null
+        },
+        {
+          "name": "Brew Brew Coffee and Tea",
+          "address": "3832 W Diversey Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 601,
+          "distanceMiles": 0.42,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJU2vrNQnND4gRbx62btvoPIo",
+          "phone": null
+        },
+        {
+          "name": "Chique°Latte Chicago",
+          "address": "2643 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 609,
+          "distanceMiles": 0.47,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJjcz2H6_ND4gReb7k5pzePKA",
+          "phone": null
+        },
+        {
+          "name": "Pedestrian Coffee & Ice Cream",
+          "address": "2642 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.7,
+          "reviewsCount": 111,
+          "distanceMiles": 0.47,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJT1fDYnPND4gR7Jx9ql45lPk",
+          "phone": null
+        },
+        {
+          "name": "Milli by Metric",
+          "address": "3110 N Kedzie Ave, Chicago, IL 60618, USA",
+          "rating": 4.5,
+          "reviewsCount": 256,
+          "distanceMiles": 0.48,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJA9h4DQDND4gRwC_6WPM5mHQ",
+          "phone": null
+        },
+        {
+          "name": "Same Day Cafe",
+          "address": "2651 N Kedzie Blvd, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 393,
+          "distanceMiles": 0.53,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJc-PAdnrND4gRXbWXxhKAgyA",
+          "phone": null
+        },
+        {
+          "name": "MeLatte Coffee Shop",
+          "address": "3304 W Fullerton Ave, Chicago, IL 60647, USA",
+          "rating": 4.9,
+          "reviewsCount": 408,
+          "distanceMiles": 0.68,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJG2hQNILND4gRzLexMQhxMBE",
+          "phone": null
+        },
+        {
+          "name": "Dark Matter Coffee - Caravanserai",
+          "address": "2901 W Belmont Ave, Chicago, IL 60618, USA",
+          "rating": 4.7,
+          "reviewsCount": 276,
+          "distanceMiles": 0.86,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJxy-0vpHND4gRyR7NXCzbdIs",
+          "phone": null
+        },
+        {
+          "name": "Blazed Bakery Chicago",
+          "address": "2415 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.9,
+          "reviewsCount": 496,
+          "distanceMiles": 0.98,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJa2ARjezND4gRCu3gUSG8LU0",
+          "phone": null
+        },
+        {
+          "name": "The Avondale Coffee Club",
+          "address": "3185 N Elston Ave, Chicago, IL 60618, USA",
+          "rating": 4.6,
+          "reviewsCount": 375,
+          "distanceMiles": 1,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJIWEOLHjTD4gRh7O0BZZ59Bk",
+          "phone": null
+        }
+      ],
+      "count": 15,
+      "searchTerm": "Coffee Shop / Cafe",
+      "avgRating": 4.7,
+      "fetchedAt": "2026-08-11T18:16:31.836Z",
+      "status": "complete"
+    },
+    "ts": 1786472191836
+  },
+  "41.912_-87.672_cannabis_dispensary": {
+    "result": {
+      "places": [
+        {
+          "name": "THC by Chitiva Wicker Park Bucktown",
+          "address": "1948 W North Ave, Chicago, IL 60622, USA",
+          "rating": 4.9,
+          "reviewsCount": 2010,
+          "distanceMiles": 0.28,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJy2QIBHLTD4gRDLZJArk_ME0",
+          "phone": null
+        },
+        {
+          "name": "Ivy Hall Dispensary - Bucktown",
+          "address": "1720 N Damen Ave, Chicago, IL 60647, USA",
+          "rating": 4.8,
+          "reviewsCount": 941,
+          "distanceMiles": 0.29,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJffSReXHTD4gRll9s2jGzouA",
+          "phone": null
+        },
+        {
+          "name": "nuEra Chicago Dispensary",
+          "address": "1308 W North Ave, Chicago, IL 60642, USA",
+          "rating": 4.7,
+          "reviewsCount": 1313,
+          "distanceMiles": 0.59,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJabxBIQLTD4gRIpV4jG3TSlU",
+          "phone": null
+        },
+        {
+          "name": "Spark'd Dispensary Wicker Park",
+          "address": "1212 N Ashland Ave, Chicago, IL 60622, USA",
+          "rating": 4.5,
+          "reviewsCount": 292,
+          "distanceMiles": 0.63,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJzQ_ulrvTD4gRYUdeNAgK_ts",
+          "phone": null
+        },
+        {
+          "name": "Dr. Greenthumb's Cannabis Dispensary - Bucktown/Sheffield Chicago",
+          "address": "2200 N Ashland Ave, Chicago, IL 60614, USA",
+          "rating": 4.9,
+          "reviewsCount": 1190,
+          "distanceMiles": 0.66,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJBQG0R_jTD4gRawmhjbDX9_M",
+          "phone": null
+        }
+      ],
+      "count": 5,
+      "searchTerm": "Cannabis Dispensary",
+      "avgRating": 4.8,
+      "fetchedAt": "2026-08-11T18:22:59.962Z",
+      "status": "complete"
+    },
+    "ts": 1786472579962
+  },
+  "41.891_-87.686_cannabis_dispensary": {
+    "result": {
+      "places": [
+        {
+          "name": "Bud and Rita's Dispensary West Town",
+          "address": "1914 W Chicago Ave, Chicago, IL 60622, USA",
+          "rating": 4.7,
+          "reviewsCount": 79,
+          "distanceMiles": 0.63,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJYztioXctDogR7iqxEZHQqS8",
+          "phone": null
+        }
+      ],
+      "count": 1,
+      "searchTerm": "Cannabis Dispensary",
+      "avgRating": 4.7,
+      "fetchedAt": "2026-08-13T18:40:30.983Z",
+      "status": "complete"
+    },
+    "ts": 1786646430983
+  },
+  "41.891_-87.686_recreational_dispensary": {
+    "result": {
+      "places": [
+        {
+          "name": "Bud and Rita's Dispensary West Town",
+          "address": "1914 W Chicago Ave, Chicago, IL 60622, USA",
+          "rating": 4.7,
+          "reviewsCount": 79,
+          "distanceMiles": 0.63,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJYztioXctDogR7iqxEZHQqS8",
+          "phone": null
+        }
+      ],
+      "count": 1,
+      "searchTerm": "recreational dispensary",
+      "avgRating": 4.7,
+      "fetchedAt": "2026-08-13T18:40:33.645Z",
+      "status": "complete"
+    },
+    "ts": 1786646433645
+  },
+  "41.891_-87.686_restaurant_no_liquor_": {
+    "result": {
+      "places": [
+        {
+          "name": "Piranhas Grill",
+          "address": "2351 W Grand Ave, Chicago, IL 60612, USA",
+          "rating": 3.8,
+          "reviewsCount": 88,
+          "distanceMiles": 0.06,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJQQ0uoDctDogRKqX8KBncmwo",
+          "phone": null
+        },
+        {
+          "name": "Hound Dog's Burger & Fusion Asian",
+          "address": "2257 W Grand Ave, Chicago, IL 60612, USA",
+          "rating": 4.7,
+          "reviewsCount": 234,
+          "distanceMiles": 0.09,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJEen_lU4tDogRQBET71CVlRc",
+          "phone": null
+        },
+        {
+          "name": "Tuman's Tap and Grill",
+          "address": "2159 W Chicago Ave, Chicago, IL 60622, USA",
+          "rating": 4.7,
+          "reviewsCount": 572,
+          "distanceMiles": 0.36,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJq2qPRkstDogRCrIeIyvV-mc",
+          "phone": null
+        },
+        {
+          "name": "Bear's Grill",
+          "address": "2132 W Washington Blvd, Chicago, IL 60612, USA",
+          "rating": null,
+          "reviewsCount": null,
+          "distanceMiles": 0.6,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJL05jDeMtDogR8F79ISoMzqI",
+          "phone": null
+        },
+        {
+          "name": "Sari's Restaurant & Bar",
+          "address": "2525 W Division St, Chicago, IL 60622, USA",
+          "rating": 4.9,
+          "reviewsCount": 79,
+          "distanceMiles": 0.83,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJK1kAf2LTD4gRDKbjLrU8Omg",
+          "phone": null
+        },
+        {
+          "name": "JJ Thai Street Food",
+          "address": "1715 W Chicago Ave, Chicago, IL 60622, USA",
+          "rating": 4.5,
+          "reviewsCount": 495,
+          "distanceMiles": 0.84,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJRXC74KItDogRS1jY87jf22g",
+          "phone": null
+        },
+        {
+          "name": "Al's Under the L",
+          "address": "2908 W Lake St, Chicago, IL 60612, USA",
+          "rating": 4.3,
+          "reviewsCount": 1195,
+          "distanceMiles": 0.85,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJjxTOCacyDogRctC1MQNHnLI",
+          "phone": null
+        },
+        {
+          "name": "Lucy's Fried Chicken & Smashburgers",
+          "address": "1043 N California Ave, Chicago, IL 60622, USA",
+          "rating": 4.5,
+          "reviewsCount": 1104,
+          "distanceMiles": 0.86,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJa3ZXUebTD4gRFH_hCD_gjUc",
+          "phone": null
+        },
+        {
+          "name": "Queenie’s Supper Club",
+          "address": "1901 W Madison St, Chicago, IL 60612, USA",
+          "rating": 4.2,
+          "reviewsCount": 87,
+          "distanceMiles": 0.92,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJD-x-I5wtDogRw8Lc0DJWUxc",
+          "phone": null
+        }
+      ],
+      "count": 9,
+      "searchTerm": "Restaurant (No Liquor)",
+      "avgRating": 4.5,
+      "fetchedAt": "2026-08-13T18:41:21.044Z",
+      "status": "complete"
+    },
+    "ts": 1786646481044
+  },
+  "41.891_-87.686_thai_restaurant": {
+    "result": {
+      "places": [
+        {
+          "name": "JJ Thai Street Food",
+          "address": "1715 W Chicago Ave, Chicago, IL 60622, USA",
+          "rating": 4.5,
+          "reviewsCount": 495,
+          "distanceMiles": 0.84,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJRXC74KItDogRS1jY87jf22g",
+          "phone": null
+        },
+        {
+          "name": "Silli Kori | Thai",
+          "address": "2053 W Division St, Chicago, IL 60622, USA",
+          "rating": 4.5,
+          "reviewsCount": 382,
+          "distanceMiles": 0.87,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ_QijSLbSD4gR8_o2ZnmPcoI",
+          "phone": null
+        }
+      ],
+      "count": 2,
+      "searchTerm": "Thai restaurant",
+      "avgRating": 4.5,
+      "fetchedAt": "2026-08-13T18:41:22.538Z",
+      "status": "complete"
+    },
+    "ts": 1786646482538
+  },
+  "41.925_-87.701_restaurant_no_liquor_": {
+    "result": {
+      "places": [
+        {
+          "name": "The Welcome Back Lounge",
+          "address": "2423 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 345,
+          "distanceMiles": 0.01,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJmWUqQG_ND4gRndPJ8Mg7IeE",
+          "phone": null
+        },
+        {
+          "name": "La Licor Panamericana",
+          "address": "2521 N California Ave, Chicago, IL 60647, USA",
+          "rating": 4.8,
+          "reviewsCount": 261,
+          "distanceMiles": 0.25,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJGbvb4iHTD4gRGnxakQbBIjg",
+          "phone": null
+        },
+        {
+          "name": "Logan 11 Bar & Kitchen",
+          "address": "2230 N California Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 1765,
+          "distanceMiles": 0.26,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJXUgV9Z3SD4gRLVz3vbRvRMI",
+          "phone": null
+        },
+        {
+          "name": "Taqueria Moran",
+          "address": "2226 N California Ave, Chicago, IL 60647, USA",
+          "rating": 4.5,
+          "reviewsCount": 1421,
+          "distanceMiles": 0.27,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJlwGi9Z3SD4gRg49iS6mS7p4",
+          "phone": null
+        },
+        {
+          "name": "Union",
+          "address": "2202 N California Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 288,
+          "distanceMiles": 0.3,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJc2iJr6jTD4gRL6JSc6HYb8Q",
+          "phone": null
+        },
+        {
+          "name": "Reno",
+          "address": "2607 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.5,
+          "reviewsCount": 1579,
+          "distanceMiles": 0.41,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJmX2EgHrND4gRIwZ-ODyEFMk",
+          "phone": null
+        },
+        {
+          "name": "Lonesome Rose (Logan Square)",
+          "address": "2101 N California Ave, Chicago, IL 60647, USA",
+          "rating": 4.5,
+          "reviewsCount": 2083,
+          "distanceMiles": 0.44,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJM8R4JZ7SD4gRUacn4EYFh4I",
+          "phone": null
+        },
+        {
+          "name": "El Cid",
+          "address": "2645 N Kedzie Ave, Chicago, IL 60647, USA",
+          "rating": 4.4,
+          "reviewsCount": 862,
+          "distanceMiles": 0.44,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ0XMVgHDND4gRp_Ury-m5I-Y",
+          "phone": null
+        },
+        {
+          "name": "Longman & Eagle",
+          "address": "2657 N Kedzie Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 2991,
+          "distanceMiles": 0.45,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJz29MdHrND4gR5pq83uUZbVo",
+          "phone": null
+        },
+        {
+          "name": "Gretel",
+          "address": "2833 W Armitage Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 942,
+          "distanceMiles": 0.57,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJue3PODPND4gRdM_HPknykZw",
+          "phone": null
+        },
+        {
+          "name": "Cafe Con Leche",
+          "address": "2714 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.5,
+          "reviewsCount": 2763,
+          "distanceMiles": 0.57,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJMfp633DND4gR3jR0TmYO0qQ",
+          "phone": null
+        },
+        {
+          "name": "The Harding Tavern",
+          "address": "2732 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.4,
+          "reviewsCount": 1105,
+          "distanceMiles": 0.61,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJl6sh33DND4gRShgsZxQe5zU",
+          "phone": null
+        },
+        {
+          "name": "Way Out",
+          "address": "3213 W Armitage Ave, Chicago, IL 60647, USA",
+          "rating": 4.5,
+          "reviewsCount": 145,
+          "distanceMiles": 0.65,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJMe5LOUjND4gR_cnwFCqxVwI",
+          "phone": null
+        },
+        {
+          "name": "Sanchez Bar and Grill",
+          "address": "2554 W Diversey Ave, Chicago, IL 60647, USA",
+          "rating": 4.9,
+          "reviewsCount": 54,
+          "distanceMiles": 0.67,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJO7sepTTTD4gRz5cZnM8zK2g",
+          "phone": null
+        },
+        {
+          "name": "Joy Chicago",
+          "address": "3315 W Armitage Ave, Chicago, IL 60647, USA",
+          "rating": 4.7,
+          "reviewsCount": 110,
+          "distanceMiles": 0.75,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJadHkUADND4gRwPp3pWZIbXc",
+          "phone": null
+        },
+        {
+          "name": "The Wolfhound Bar and Kitchen",
+          "address": "3188 N Elston Ave, Chicago, IL 60618, USA",
+          "rating": 4.7,
+          "reviewsCount": 338,
+          "distanceMiles": 0.97,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJhYDngCfND4gRwk6Nkm5yQSE",
+          "phone": null
+        },
+        {
+          "name": "Soul & Smoke - Avondale at Rockwell on the River",
+          "address": "3057 N Rockwell St, Chicago, IL 60618, USA",
+          "rating": 4.4,
+          "reviewsCount": 454,
+          "distanceMiles": 0.98,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ9boHDmvND4gR5a6U_CQdCoA",
+          "phone": null
+        }
+      ],
+      "count": 17,
+      "searchTerm": "Restaurant (No Liquor)",
+      "avgRating": 4.6,
+      "fetchedAt": "2026-08-13T18:43:14.245Z",
+      "status": "complete"
+    },
+    "ts": 1786646594245
+  },
+  "41.925_-87.701_thai_restaurant": {
+    "result": {
+      "places": [
+        {
+          "name": "Trike Noodles (Three Wheels Noodles)",
+          "address": "2339 N Milwaukee Ave, Chicago, IL 60647, USA",
+          "rating": 4.5,
+          "reviewsCount": 477,
+          "distanceMiles": 0.17,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ70W1I3vND4gRPozo9e25MeY",
+          "phone": null
+        },
+        {
+          "name": "Dena Kitchen",
+          "address": "3306 W Fullerton Ave, Chicago, IL 60647, USA",
+          "rating": 4.4,
+          "reviewsCount": 213,
+          "distanceMiles": 0.51,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJEXk4aG7ND4gRICLs3unleKE",
+          "phone": null
+        },
+        {
+          "name": "EaThai",
+          "address": "2901 N Kedzie Ave, Chicago, IL 60618, USA",
+          "rating": 4.7,
+          "reviewsCount": 520,
+          "distanceMiles": 0.68,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJyRnkUgnND4gRWJIlB-ANlu8",
+          "phone": null
+        },
+        {
+          "name": "Big Bird Sushi Bar & Thai",
+          "address": "3581 W Belden Ave, Chicago, IL 60647, USA",
+          "rating": 4.8,
+          "reviewsCount": 314,
+          "distanceMiles": 0.82,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJY_DTg3PND4gRdJjHOUoGMnA",
+          "phone": null
+        },
+        {
+          "name": "Sweet Rice Chicago",
+          "address": "1904 N Western Ave, Chicago, IL 60647, USA",
+          "rating": 4.6,
+          "reviewsCount": 350,
+          "distanceMiles": 0.94,
+          "url": "https://www.google.com/maps/place/?q=place_id:ChIJ0eEZbCvTD4gR2tO1ngECS6Y",
+          "phone": null
+        }
+      ],
+      "count": 5,
+      "searchTerm": "Thai restaurant",
+      "avgRating": 4.6,
+      "fetchedAt": "2026-08-13T18:43:16.660Z",
+      "status": "complete"
+    },
+    "ts": 1786646596660
+  }
+}

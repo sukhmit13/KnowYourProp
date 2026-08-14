@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+  <style>
+    .a{stroke:#2b3a9e}.b{stroke:#f3b31f}.c{stroke:#2f7d3f}.d{stroke:#d13b26}
+    @media (prefers-color-scheme:dark){.a{stroke:#6f83e0}.c{stroke:#4fb56a}.d{stroke:#ef6a57}}
+  </style>
+  <path class="a" d="M1.5 5 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0"/>
+  <path class="b" d="M1.5 10 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0"/>
+  <path class="c" d="M1.5 15 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0"/>
+  <path class="d" d="M1.5 20 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0"/>
+</svg>

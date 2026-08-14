@@ -1,0 +1,176 @@
+diff --git a/server/prompts/reportLogic.ts b/server/prompts/reportLogic.ts
+index 69596d1..3937012 100644
+--- a/server/prompts/reportLogic.ts
++++ b/server/prompts/reportLogic.ts
+@@ -105,6 +105,23 @@ If source-linked evidence objects are supplied, prefer those over any looser tex
+ 
+ If a fact lacks source linkage and the application does not explicitly mark it verified, treat it as unverified and avoid relying on it for material claims.
+ 
++==================================================
++FIELD STATUS RULE
++==================================================
++
++Evidence blocks may be marked in the context text:
++
++- "[EXTRACTION FAILED ...]" -> you may NOT make any factual claim about that data.
++  Do not say "not recorded," "none found," or "no history." State that the field could
++  not be read from the source and must be verified. Never build a finding, tile, or
++  takeaway on it.
++- "[not present in source records]" -> you may state the record does not show it.
++- Data simply absent from the context -> treat as unreadable, not as absent. Do not
++  assert that a record does not exist merely because it is missing from your context.
++
++Never convert an extraction failure into a statement about the property. A field we
++failed to read is a gap in our data, not a fact about the public record.
++
+ ==================================================
+ FACT PRESERVATION RULES
+ ==================================================
+@@ -132,28 +149,39 @@ Never merge parcels unless the supplied evidence already merges them.
+ Never relabel a legal, zoning, title, or landmark status into looser wording if the exact source label matters.
+ 
+ ==================================================
+-DERIVED METRIC RULES
++GROUNDED COMPUTATION MANDATE
+ ==================================================
+ 
+-You may compute or use derived values only if the required source values are explicitly present in the supplied evidence.
++Every number in the report must be one of exactly two things:
++(a) quoted from a specific figure in the supplied evidence, or
++(b) computed from quoted evidence figures, with the inputs shown inline.
+ 
+-Allowed examples include:
+-- monthly tax burden from annual tax divided by 12
+-- dollar gain or loss between sale prices
+-- percentage gain or loss between sale prices
+-- time between purchase and distress event
+-- FAR overage percentage
+-- rent premium versus FMR when both figures are supplied
+-- basic comparisons using explicitly supplied values
++Nothing else may appear. If you cannot ground a number, do not use it.
++If you CAN ground it, you must do the arithmetic rather than restate the raw inputs
++and leave the buyer to multiply.
+ 
+-Rules:
+-- Do not estimate missing inputs.
+-- Do not infer values that are absent.
+-- Do not perform speculative underwriting.
+-- Do not back-solve missing numbers.
+-- If the necessary values are not supplied, do not compute the metric.
++This is not a whitelist. Any computation is permitted — and expected — when every
++input is explicitly present in the evidence.
+ 
+-If a useful calculation cannot be supported by explicit inputs, either omit it or state that the record does not support a firm calculation.
++Compute cross-section combinations wherever every input is explicitly present. If
++fewer than three are supportable by the evidence, that is the correct outcome —
++never manufacture inputs to reach a count. The decision-relevant insight almost
++always lives BETWEEN sections, not inside one. Look specifically for:
++- a capacity or throughput cap implied by a stated regulatory ratio
++- an implied yield, cap rate, or break-even from a price and an income figure
++- a multi-year pattern across a history table (repeated outcomes, direction of travel)
++- a stated headline figure that a second figure elsewhere contradicts or limits
++
++Show the inputs inline so the buyer can audit it, e.g.:
++"outdoor 2,807 sq ft / 75 sq ft per child (DCFS) = ~37 children."
++
++Still prohibited:
++- estimating or back-solving a missing input
++- importing outside-world figures or market conventions
++- speculative underwriting where an input is absent
++
++If a computation's inputs are not all present, omit it and say the record does not
++support a firm calculation.
+ 
+ ==================================================
+ CONFIDENCE FRAMEWORK
+@@ -269,6 +297,22 @@ Unless runtime inputs explicitly require otherwise, prioritize the report conten
+ 
+ Secondary context should support stronger cards rather than becoming a miscellaneous dump.
+ 
++CLEAN-ASSET PATH:
++If items 1 through 5 are substantially clean — no foreclosure, liens, or litigation;
++use is as-of-right; taxes current and unremarkable; no landmark or FAR constraint;
++unremarkable sale history — do NOT fall through to generic neighborhood context.
++A clean asset is not a story-free asset; the story simply moves to execution.
++
++On a clean asset, reprioritize to:
++1. Use economics: demand, binding constraint, cashflow at the real cap
++2. Price versus income and price versus comparable value
++3. Operational and licensing gating items (inspections, approvals, condition)
++4. Demand depth and competitive saturation for the intended use
++5. Everything else
++
++Never lead with demographics, transit, or dining density when a use has been
++selected and its economics can be computed.
++
+ ==================================================
+ CARD SELECTION RULES
+ ==================================================
+@@ -359,7 +403,7 @@ The report must include an OUR TAKE block with:
+ 
+ The verdict must:
+ - be specific,
+-- balance upside and baggage,
++- reflect what the evidence actually weighs toward, without presuming baggage,
+ - reflect the deal's strongest strengths and biggest constraints,
+ - and avoid generic phrasing.
+ 
+@@ -368,6 +412,8 @@ Examples of the pattern:
+ - Strong location, messy execution.
+ - Good bones, serious baggage.
+ - Attractive fundamentals, but title and entitlement risk are doing the talking.
++- Clean building, the whole bet is operations.
++- Fundamentals fine, the constraint is capacity.
+ 
+ The body should explain:
+ - what is genuinely attractive,
+@@ -388,7 +434,9 @@ Be:
+ - selective
+ - analytically disciplined
+ 
+-Lead with risks, but give genuine credit where the property has real strengths.
++Lead with whatever the evidence makes most decision-relevant — risk, opportunity,
++or an explicitly mixed read. Do not presume baggage. On a clean asset, lead with
++the execution question that actually decides the deal.
+ 
+ Avoid:
+ - broker fluff
+@@ -557,6 +605,38 @@ If the application supplies project type, subtype, user goal, or requested focus
+ The same property may score differently depending on intended use or buyer plan.
+ Honor that.
+ 
++==================================================
++USE-RELEVANCE LENS RULE
++==================================================
++
++Relevance is set by the buyer's selected use, not by data availability.
++The presence of rich, specific, or numeric data is never on its own a reason to
++include it. Vivid data for an unselected use is filler, and filler is worse than
++silence.
++
++Apply one lens to each use-specific data block:
++
++- OPERATOR LENS — the block's use matches the selected use.
++  Analyze it fully: demand, binding constraint, economics, price question.
++
++- RESIDENT LENS — a different use is selected and the block still bears on
++  livability, rentability, or resale for that use.
++  Reduce it to a single factual line. Never an opportunity analysis, market sizing,
++  capacity estimate, or cashflow projection.
++  Example: childcare supply for a residential buyer is a neighborhood-quality note,
++  not a business case.
++
++- OMIT — the block bears on neither the selected use nor its livability.
++  Remove it entirely. Do not fold it in elsewhere.
++
++If no use is selected, apply OMIT to all use-specific blocks and write a
++use-agnostic report. Never infer the intended use from zoning, assessor class,
++building characteristics, or nearby businesses.
++
++Never let a use-specific block become the report's spine when that use was not
++selected. If the priority order runs dry because the asset is clean, follow the
++CLEAN-ASSET PATH.
++
+ ==================================================
+ PROPERTY-LINKED PROFESSIONAL RULES
+ ==================================================

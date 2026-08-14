@@ -1,0 +1,69 @@
+modules = ["nodejs-20", "web", "python-3.11", "postgresql-16"]
+run = "npm run dev"
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
+
+[nix]
+channel = "stable-24_05"
+packages = ["alsa-lib", "at-spi2-atk", "atk", "cairo", "cups", "glib", "jq", "libdrm", "libxkbcommon", "mesa", "nspr", "nss", "pango", "poppler_utils", "unzip", "xorg.libX11", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXext", "xorg.libXfixes", "xorg.libXrandr", "xorg.libxcb"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3000
+
+[[ports]]
+localPort = 5090
+externalPort = 5000
+
+[[ports]]
+localPort = 5904
+externalPort = 3001
+
+[[ports]]
+localPort = 9999
+externalPort = 3002
+
+[env]
+PORT = "5000"
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["node", "./dist/index.js"]
+build = ["npm", "run", "build"]
+publicDir = "dist/public"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[userenv]
+
+[userenv.shared]
+RENTCAST_API_KEY = "83b88a99ee6644dbb973fc56611677c4"
+GOOGLE_PLACES_API_KEY = "AIzaSyA4diAvlpHY7V4XRw9Yx9yzwpyo3T2hy38"
+
+[userenv.development]
+APIFY_API_TOKEN = "apify_api_kgNfTbi7lezbjqHU8EJfZZs9QfQssR45Qu4p"
+
+[agent]
+integrations = ["stripe:1.0.0"]

@@ -1,0 +1,2234 @@
+{
+  "19147": {
+    "zipCode": "19147",
+    "lastUpdated": "2026-03-11T00:00:00.000Z",
+    "overall": {
+      "avgRent": 2190,
+      "medianRent": 1944,
+      "minRent": 775,
+      "maxRent": 10000,
+      "avgPricePerSqft": 2.3,
+      "avgDaysOnMarket": 76,
+      "medianDaysOnMarket": 37,
+      "totalListings": 382
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1404,
+        "medianRent": 1400,
+        "minRent": 775,
+        "maxRent": 1950,
+        "avgPricePerSqft": 2.78,
+        "medianSqft": 500,
+        "avgDaysOnMarket": 133,
+        "totalListings": 25
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1769,
+        "medianRent": 1650,
+        "minRent": 950,
+        "maxRent": 4791,
+        "avgPricePerSqft": 2.43,
+        "medianSqft": 658,
+        "avgDaysOnMarket": 67,
+        "totalListings": 161
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2331,
+        "medianRent": 2195,
+        "minRent": 1350,
+        "maxRent": 5995,
+        "avgPricePerSqft": 2.15,
+        "medianSqft": 1050,
+        "avgDaysOnMarket": 74,
+        "totalListings": 141
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 3374,
+        "medianRent": 3200,
+        "minRent": 1750,
+        "maxRent": 7970,
+        "avgPricePerSqft": 2.25,
+        "medianSqft": 1483,
+        "avgDaysOnMarket": 93,
+        "totalListings": 44
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 2990,
+        "medianRent": 2800,
+        "minRent": 2100,
+        "maxRent": 4950,
+        "avgPricePerSqft": 1.77,
+        "medianSqft": 1659,
+        "avgDaysOnMarket": 39,
+        "totalListings": 9
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-03",
+        "avgRent": 2190,
+        "medianRent": 1944,
+        "totalListings": 382
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 2178,
+        "medianRent": 1900,
+        "totalListings": 365
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 2122,
+        "medianRent": 1895,
+        "totalListings": 372
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 2111,
+        "medianRent": 1885,
+        "totalListings": 383
+      },
+      {
+        "month": "2025-11",
+        "avgRent": 2158,
+        "medianRent": 1895,
+        "totalListings": 399
+      },
+      {
+        "month": "2025-10",
+        "avgRent": 2169,
+        "medianRent": 1895,
+        "totalListings": 433
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1361,
+        "maxRent": 1652
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 1652,
+        "maxRent": 2236
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 2236,
+        "maxRent": 2916
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 2916,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1773215591966
+  },
+  "60607": {
+    "zipCode": "60607",
+    "lastUpdated": "2026-04-07T00:00:00.000Z",
+    "overall": {
+      "avgRent": 3230,
+      "medianRent": 2906,
+      "minRent": 900,
+      "maxRent": 10000,
+      "avgPricePerSqft": 3.89,
+      "avgDaysOnMarket": 61,
+      "medianDaysOnMarket": 27,
+      "totalListings": 752
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2253,
+        "medianRent": 2195,
+        "minRent": 1745,
+        "maxRent": 3650,
+        "avgPricePerSqft": 4.66,
+        "medianSqft": 465,
+        "avgDaysOnMarket": 53,
+        "totalListings": 131,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": -1,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2859,
+        "medianRent": 2825,
+        "minRent": 900,
+        "maxRent": 4625,
+        "avgPricePerSqft": 3.95,
+        "medianSqft": 740,
+        "avgDaysOnMarket": 59,
+        "totalListings": 325,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 19,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 3774,
+        "medianRent": 3766,
+        "minRent": 1600,
+        "maxRent": 9995,
+        "avgPricePerSqft": 3.34,
+        "medianSqft": 1100,
+        "avgDaysOnMarket": 59,
+        "totalListings": 236,
+        "fmrComparison": {
+          "fmr": 2670,
+          "marketVsFmrPct": 41,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 5269,
+        "medianRent": 5293,
+        "minRent": 2400,
+        "maxRent": 9235,
+        "avgPricePerSqft": 3.61,
+        "medianSqft": 1323,
+        "avgDaysOnMarket": 105,
+        "totalListings": 54,
+        "fmrComparison": {
+          "fmr": 3440,
+          "marketVsFmrPct": 54,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 4900,
+        "medianRent": 4000,
+        "minRent": 3399,
+        "maxRent": 10000,
+        "avgPricePerSqft": 3.5,
+        "medianSqft": 1095,
+        "avgDaysOnMarket": 33,
+        "totalListings": 6,
+        "fmrComparison": {
+          "fmr": 3980,
+          "marketVsFmrPct": 1,
+          "tier": "average"
+        }
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-04",
+        "avgRent": 3230,
+        "medianRent": 2906,
+        "totalListings": 752
+      },
+      {
+        "month": "2026-03",
+        "avgRent": 3235,
+        "medianRent": 2935,
+        "totalListings": 699
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 3267,
+        "medianRent": 2960,
+        "totalListings": 547
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 3265,
+        "medianRent": 2909,
+        "totalListings": 423
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 3281,
+        "medianRent": 2950,
+        "totalListings": 472
+      },
+      {
+        "month": "2025-11",
+        "avgRent": 3290,
+        "medianRent": 2909,
+        "totalListings": 522
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1869,
+        "maxRent": 2270
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 2270,
+        "maxRent": 3070
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 3070,
+        "maxRent": 4005
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 4005,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1775617153770
+  },
+  "60610": {
+    "zipCode": "60610",
+    "lastUpdated": "2026-03-25T00:00:00.000Z",
+    "overall": {
+      "avgRent": 2873,
+      "medianRent": 2600,
+      "minRent": 1003,
+      "maxRent": 10000,
+      "avgPricePerSqft": 3.85,
+      "avgDaysOnMarket": 65,
+      "medianDaysOnMarket": 26,
+      "totalListings": 932
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2133,
+        "medianRent": 2068,
+        "minRent": 1105,
+        "maxRent": 3772,
+        "avgPricePerSqft": 4.15,
+        "medianSqft": 518,
+        "avgDaysOnMarket": 54,
+        "totalListings": 370,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": -7,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2692,
+        "medianRent": 2578,
+        "minRent": 1003,
+        "maxRent": 4610,
+        "avgPricePerSqft": 3.73,
+        "medianSqft": 720,
+        "avgDaysOnMarket": 62,
+        "totalListings": 316,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 9,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 3907,
+        "medianRent": 3730,
+        "minRent": 2026,
+        "maxRent": 10000,
+        "avgPricePerSqft": 3.52,
+        "medianSqft": 1100,
+        "avgDaysOnMarket": 84,
+        "totalListings": 201,
+        "fmrComparison": {
+          "fmr": 2670,
+          "marketVsFmrPct": 40,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 5591,
+        "medianRent": 5600,
+        "minRent": 1330,
+        "maxRent": 9690,
+        "avgPricePerSqft": 3.52,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 89,
+        "totalListings": 38,
+        "fmrComparison": {
+          "fmr": 3440,
+          "marketVsFmrPct": 63,
+          "tier": "luxury"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 5722,
+        "medianRent": 6500,
+        "minRent": 1450,
+        "maxRent": 6995,
+        "avgPricePerSqft": 2.25,
+        "medianSqft": 2415,
+        "avgDaysOnMarket": 14,
+        "totalListings": 6,
+        "fmrComparison": {
+          "fmr": 3980,
+          "marketVsFmrPct": 63,
+          "tier": "luxury"
+        }
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-03",
+        "avgRent": 2873,
+        "medianRent": 2600,
+        "totalListings": 932
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 2851,
+        "medianRent": 2545,
+        "totalListings": 869
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 2815,
+        "medianRent": 2417,
+        "totalListings": 644
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 2849,
+        "medianRent": 2464,
+        "totalListings": 674
+      },
+      {
+        "month": "2025-11",
+        "avgRent": 2829,
+        "medianRent": 2435,
+        "totalListings": 737
+      },
+      {
+        "month": "2025-10",
+        "avgRent": 2880,
+        "medianRent": 2495,
+        "totalListings": 824
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1869,
+        "maxRent": 2270
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 2270,
+        "maxRent": 3070
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 3070,
+        "maxRent": 4005
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 4005,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1774472753542
+  },
+  "60612": {
+    "zipCode": "60612",
+    "lastUpdated": "2026-05-18T00:00:00.000Z",
+    "overall": {
+      "avgRent": 2612,
+      "medianRent": 2400,
+      "minRent": 950,
+      "maxRent": 9413,
+      "avgPricePerSqft": 2.78,
+      "avgDaysOnMarket": 63,
+      "medianDaysOnMarket": 30,
+      "totalListings": 275
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2069,
+        "medianRent": 2169,
+        "minRent": 950,
+        "maxRent": 2422,
+        "avgPricePerSqft": 4.25,
+        "medianSqft": 467,
+        "avgDaysOnMarket": 66,
+        "totalListings": 27,
+        "fmrComparison": {
+          "fmr": 1530,
+          "marketVsFmrPct": 42,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2275,
+        "medianRent": 2268,
+        "minRent": 1000,
+        "maxRent": 3995,
+        "avgPricePerSqft": 3.14,
+        "medianSqft": 707,
+        "avgDaysOnMarket": 49,
+        "totalListings": 64,
+        "fmrComparison": {
+          "fmr": 1630,
+          "marketVsFmrPct": 39,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2788,
+        "medianRent": 2500,
+        "minRent": 1100,
+        "maxRent": 9343,
+        "avgPricePerSqft": 2.63,
+        "medianSqft": 1090,
+        "avgDaysOnMarket": 59,
+        "totalListings": 113,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": 36,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2675,
+        "medianRent": 2450,
+        "minRent": 1600,
+        "maxRent": 5501,
+        "avgPricePerSqft": 2.04,
+        "medianSqft": 1255,
+        "avgDaysOnMarket": 67,
+        "totalListings": 62,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 3,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 4006,
+        "medianRent": 3700,
+        "minRent": 2249,
+        "maxRent": 9413,
+        "avgPricePerSqft": 2.2,
+        "medianSqft": 2000,
+        "avgDaysOnMarket": 131,
+        "totalListings": 9,
+        "fmrComparison": {
+          "fmr": 2740,
+          "marketVsFmrPct": 35,
+          "tier": "nice"
+        }
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-05",
+        "avgRent": 2612,
+        "medianRent": 2400,
+        "totalListings": 275
+      },
+      {
+        "month": "2026-04",
+        "avgRent": 2611,
+        "medianRent": 2413,
+        "totalListings": 283
+      },
+      {
+        "month": "2026-03",
+        "avgRent": 2692,
+        "medianRent": 2495,
+        "totalListings": 254
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 2697,
+        "medianRent": 2500,
+        "totalListings": 229
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 2639,
+        "medianRent": 2450,
+        "totalListings": 197
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 2521,
+        "medianRent": 2350,
+        "totalListings": 200
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1288,
+        "maxRent": 1564
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 1564,
+        "maxRent": 2116
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 2116,
+        "maxRent": 2760
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 2760,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1779155601778
+  },
+  "60614": {
+    "zipCode": "60614",
+    "lastUpdated": "2026-03-25T00:00:00.000Z",
+    "overall": {
+      "avgRent": 2898,
+      "medianRent": 2564,
+      "minRent": 860,
+      "maxRent": 10000,
+      "avgPricePerSqft": 3.65,
+      "avgDaysOnMarket": 52,
+      "medianDaysOnMarket": 20,
+      "totalListings": 839
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1740,
+        "medianRent": 1750,
+        "minRent": 860,
+        "maxRent": 4100,
+        "avgPricePerSqft": 4.13,
+        "medianSqft": 400,
+        "avgDaysOnMarket": 76,
+        "totalListings": 235,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": -21,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2511,
+        "medianRent": 2435,
+        "minRent": 1300,
+        "maxRent": 8376,
+        "avgPricePerSqft": 3.61,
+        "medianSqft": 700,
+        "avgDaysOnMarket": 55,
+        "totalListings": 298,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 3,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 3614,
+        "medianRent": 3623,
+        "minRent": 1300,
+        "maxRent": 6395,
+        "avgPricePerSqft": 3.41,
+        "medianSqft": 1050,
+        "avgDaysOnMarket": 36,
+        "totalListings": 196,
+        "fmrComparison": {
+          "fmr": 2670,
+          "marketVsFmrPct": 36,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 4748,
+        "medianRent": 4650,
+        "minRent": 1500,
+        "maxRent": 8970,
+        "avgPricePerSqft": 3.23,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 43,
+        "totalListings": 81,
+        "fmrComparison": {
+          "fmr": 3440,
+          "marketVsFmrPct": 35,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 6238,
+        "medianRent": 6000,
+        "minRent": 3750,
+        "maxRent": 10000,
+        "avgPricePerSqft": 2.98,
+        "medianSqft": 2400,
+        "avgDaysOnMarket": 30,
+        "totalListings": 27,
+        "fmrComparison": {
+          "fmr": 3980,
+          "marketVsFmrPct": 51,
+          "tier": "luxury"
+        }
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-03",
+        "avgRent": 2898,
+        "medianRent": 2564,
+        "totalListings": 839
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 2749,
+        "medianRent": 2399,
+        "totalListings": 762
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 2710,
+        "medianRent": 2295,
+        "totalListings": 690
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 2638,
+        "medianRent": 2195,
+        "totalListings": 650
+      },
+      {
+        "month": "2025-11",
+        "avgRent": 2627,
+        "medianRent": 2250,
+        "totalListings": 701
+      },
+      {
+        "month": "2025-10",
+        "avgRent": 2717,
+        "medianRent": 2350,
+        "totalListings": 739
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1869,
+        "maxRent": 2270
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 2270,
+        "maxRent": 3070
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 3070,
+        "maxRent": 4005
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 4005,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1774472964391
+  },
+  "60615": {
+    "zipCode": "60615",
+    "lastUpdated": "2026-03-08T00:00:00.000Z",
+    "overall": {
+      "avgRent": 2026,
+      "medianRent": 1830,
+      "minRent": 760,
+      "maxRent": 6000,
+      "avgPricePerSqft": 2.21,
+      "avgDaysOnMarket": 80,
+      "medianDaysOnMarket": 53,
+      "totalListings": 327
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1230,
+        "medianRent": 1170,
+        "minRent": 760,
+        "maxRent": 2599,
+        "avgPricePerSqft": 3.38,
+        "medianSqft": 398,
+        "avgDaysOnMarket": 81,
+        "totalListings": 61,
+        "fmrComparison": {
+          "fmr": 1790,
+          "marketVsFmrPct": -35,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1572,
+        "medianRent": 1595,
+        "minRent": 950,
+        "maxRent": 2195,
+        "avgPricePerSqft": 2.43,
+        "medianSqft": 650,
+        "avgDaysOnMarket": 69,
+        "totalListings": 55,
+        "fmrComparison": {
+          "fmr": 1920,
+          "marketVsFmrPct": -17,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 1993,
+        "medianRent": 1875,
+        "minRent": 1250,
+        "maxRent": 4913,
+        "avgPricePerSqft": 1.95,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 84,
+        "totalListings": 103,
+        "fmrComparison": {
+          "fmr": 2160,
+          "marketVsFmrPct": -13,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2462,
+        "medianRent": 2300,
+        "minRent": 1450,
+        "maxRent": 5200,
+        "avgPricePerSqft": 1.85,
+        "medianSqft": 1311,
+        "avgDaysOnMarket": 73,
+        "totalListings": 74,
+        "fmrComparison": {
+          "fmr": 2780,
+          "marketVsFmrPct": -17,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3369,
+        "medianRent": 3400,
+        "minRent": 1389,
+        "maxRent": 6000,
+        "avgPricePerSqft": 1.79,
+        "medianSqft": 1868,
+        "avgDaysOnMarket": 79,
+        "totalListings": 29,
+        "fmrComparison": {
+          "fmr": 3220,
+          "marketVsFmrPct": 6,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 5,
+        "label": "5 Bedrooms",
+        "avgRent": 3170,
+        "medianRent": 3650,
+        "minRent": 2200,
+        "maxRent": 3950,
+        "avgPricePerSqft": 1.68,
+        "medianSqft": 1900,
+        "avgDaysOnMarket": 246,
+        "totalListings": 5
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-03",
+        "avgRent": 2026,
+        "medianRent": 1830,
+        "totalListings": 327
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 2044,
+        "medianRent": 1800,
+        "totalListings": 302
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 2085,
+        "medianRent": 1845,
+        "totalListings": 312
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 2096,
+        "medianRent": 1900,
+        "totalListings": 312
+      },
+      {
+        "month": "2025-11",
+        "avgRent": 2101,
+        "medianRent": 1920,
+        "totalListings": 337
+      },
+      {
+        "month": "2025-10",
+        "avgRent": 2121,
+        "medianRent": 1920,
+        "totalListings": 380
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1512,
+        "maxRent": 1836
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 1836,
+        "maxRent": 2484
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 2484,
+        "maxRent": 3240
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 3240,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1772961156076
+  },
+  "60616": {
+    "zipCode": "60616",
+    "lastUpdated": "2026-03-05T00:00:00.000Z",
+    "overall": {
+      "avgRent": 2592,
+      "medianRent": 2469,
+      "minRent": 1025,
+      "maxRent": 8500,
+      "avgPricePerSqft": 2.53,
+      "avgDaysOnMarket": 61,
+      "medianDaysOnMarket": 22,
+      "totalListings": 274
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1565,
+        "medianRent": 1550,
+        "minRent": 1025,
+        "maxRent": 2330,
+        "avgPricePerSqft": 2.37,
+        "medianSqft": 587,
+        "avgDaysOnMarket": 51,
+        "totalListings": 47,
+        "fmrComparison": {
+          "fmr": 1640,
+          "marketVsFmrPct": -5,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2234,
+        "medianRent": 2240,
+        "minRent": 1100,
+        "maxRent": 3000,
+        "avgPricePerSqft": 2.93,
+        "medianSqft": 800,
+        "avgDaysOnMarket": 47,
+        "totalListings": 68,
+        "fmrComparison": {
+          "fmr": 1750,
+          "marketVsFmrPct": 28,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2830,
+        "medianRent": 2899,
+        "minRent": 1100,
+        "maxRent": 4050,
+        "avgPricePerSqft": 2.59,
+        "medianSqft": 1071,
+        "avgDaysOnMarket": 71,
+        "totalListings": 112,
+        "fmrComparison": {
+          "fmr": 1970,
+          "marketVsFmrPct": 47,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 3365,
+        "medianRent": 3273,
+        "minRent": 1500,
+        "maxRent": 7250,
+        "avgPricePerSqft": 1.92,
+        "medianSqft": 1575,
+        "avgDaysOnMarket": 53,
+        "totalListings": 37,
+        "fmrComparison": {
+          "fmr": 2540,
+          "marketVsFmrPct": 29,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 4341,
+        "medianRent": 3100,
+        "minRent": 1265,
+        "maxRent": 8500,
+        "avgPricePerSqft": 1.89,
+        "medianSqft": 2229,
+        "avgDaysOnMarket": 113,
+        "totalListings": 10,
+        "fmrComparison": {
+          "fmr": 2930,
+          "marketVsFmrPct": 6,
+          "tier": "average"
+        }
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-03",
+        "avgRent": 2592,
+        "medianRent": 2469,
+        "totalListings": 274
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 2591,
+        "medianRent": 2469,
+        "totalListings": 259
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 2652,
+        "medianRent": 2400,
+        "totalListings": 199
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 2597,
+        "medianRent": 2385,
+        "totalListings": 211
+      },
+      {
+        "month": "2025-11",
+        "avgRent": 2539,
+        "medianRent": 2430,
+        "totalListings": 256
+      },
+      {
+        "month": "2025-10",
+        "avgRent": 2575,
+        "medianRent": 2424,
+        "totalListings": 297
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1379,
+        "maxRent": 1675
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 1675,
+        "maxRent": 2266
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 2266,
+        "maxRent": 2955
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 2955,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1772745213696
+  },
+  "60618": {
+    "zipCode": "60618",
+    "lastUpdated": "2026-05-18T00:00:00.000Z",
+    "overall": {
+      "avgRent": 2380,
+      "medianRent": 2200,
+      "minRent": 950,
+      "maxRent": 6183,
+      "avgPricePerSqft": 2.43,
+      "avgDaysOnMarket": 43,
+      "medianDaysOnMarket": 17,
+      "totalListings": 586
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1489,
+        "medianRent": 1395,
+        "minRent": 950,
+        "maxRent": 5495,
+        "avgPricePerSqft": 2.72,
+        "medianSqft": 490,
+        "avgDaysOnMarket": 45,
+        "totalListings": 27,
+        "fmrComparison": {
+          "fmr": 1650,
+          "marketVsFmrPct": -15,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1806,
+        "medianRent": 1700,
+        "minRent": 975,
+        "maxRent": 2650,
+        "avgPricePerSqft": 2.64,
+        "medianSqft": 700,
+        "avgDaysOnMarket": 45,
+        "totalListings": 170,
+        "fmrComparison": {
+          "fmr": 1770,
+          "marketVsFmrPct": -4,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2379,
+        "medianRent": 2295,
+        "minRent": 1200,
+        "maxRent": 4680,
+        "avgPricePerSqft": 2.4,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 40,
+        "totalListings": 251,
+        "fmrComparison": {
+          "fmr": 1990,
+          "marketVsFmrPct": 15,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 3158,
+        "medianRent": 2995,
+        "minRent": 1800,
+        "maxRent": 6183,
+        "avgPricePerSqft": 2.21,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 46,
+        "totalListings": 124,
+        "fmrComparison": {
+          "fmr": 2560,
+          "marketVsFmrPct": 17,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 4016,
+        "medianRent": 4250,
+        "minRent": 2850,
+        "maxRent": 5900,
+        "avgPricePerSqft": 2.21,
+        "medianSqft": 1750,
+        "avgDaysOnMarket": 23,
+        "totalListings": 12,
+        "fmrComparison": {
+          "fmr": 2960,
+          "marketVsFmrPct": 44,
+          "tier": "nice"
+        }
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-05",
+        "avgRent": 2380,
+        "medianRent": 2200,
+        "totalListings": 586
+      },
+      {
+        "month": "2026-04",
+        "avgRent": 2377,
+        "medianRent": 2200,
+        "totalListings": 607
+      },
+      {
+        "month": "2026-03",
+        "avgRent": 2368,
+        "medianRent": 2200,
+        "totalListings": 556
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 2335,
+        "medianRent": 2095,
+        "totalListings": 484
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 2320,
+        "medianRent": 2000,
+        "totalListings": 420
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 2299,
+        "medianRent": 2025,
+        "totalListings": 385
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1393,
+        "maxRent": 1692
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 1692,
+        "maxRent": 2289
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 2289,
+        "maxRent": 2985
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 2985,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1779147204665
+  },
+  "60622": {
+    "zipCode": "60622",
+    "lastUpdated": "2026-05-01T00:00:00.000Z",
+    "overall": {
+      "avgRent": 2967,
+      "medianRent": 2650,
+      "minRent": 1199,
+      "maxRent": 9164,
+      "avgPricePerSqft": 2.85,
+      "avgDaysOnMarket": 36,
+      "medianDaysOnMarket": 16,
+      "totalListings": 721
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2106,
+        "medianRent": 2225,
+        "minRent": 1199,
+        "maxRent": 2700,
+        "avgPricePerSqft": 4.12,
+        "medianSqft": 515,
+        "avgDaysOnMarket": 42,
+        "totalListings": 35,
+        "fmrComparison": {
+          "fmr": 2050,
+          "marketVsFmrPct": 9,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2308,
+        "medianRent": 2250,
+        "minRent": 1350,
+        "maxRent": 3900,
+        "avgPricePerSqft": 3.15,
+        "medianSqft": 723,
+        "avgDaysOnMarket": 33,
+        "totalListings": 132,
+        "fmrComparison": {
+          "fmr": 2190,
+          "marketVsFmrPct": 3,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2848,
+        "medianRent": 2500,
+        "minRent": 1450,
+        "maxRent": 9164,
+        "avgPricePerSqft": 2.81,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 37,
+        "totalListings": 368,
+        "fmrComparison": {
+          "fmr": 2470,
+          "marketVsFmrPct": 1,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 3752,
+        "medianRent": 3550,
+        "minRent": 1990,
+        "maxRent": 8657,
+        "avgPricePerSqft": 2.53,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 34,
+        "totalListings": 168,
+        "fmrComparison": {
+          "fmr": 3180,
+          "marketVsFmrPct": 12,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 4514,
+        "medianRent": 4500,
+        "minRent": 3050,
+        "maxRent": 6750,
+        "avgPricePerSqft": 2.17,
+        "medianSqft": 2330,
+        "avgDaysOnMarket": 28,
+        "totalListings": 17,
+        "fmrComparison": {
+          "fmr": 3680,
+          "marketVsFmrPct": 22,
+          "tier": "nice"
+        }
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-05",
+        "avgRent": 2967,
+        "medianRent": 2650,
+        "totalListings": 721
+      },
+      {
+        "month": "2026-04",
+        "avgRent": 2973,
+        "medianRent": 2675,
+        "totalListings": 714
+      },
+      {
+        "month": "2026-03",
+        "avgRent": 2935,
+        "medianRent": 2600,
+        "totalListings": 604
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 2912,
+        "medianRent": 2600,
+        "totalListings": 507
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 2967,
+        "medianRent": 2650,
+        "totalListings": 406
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 2815,
+        "medianRent": 2595,
+        "totalListings": 346
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1729,
+        "maxRent": 2100
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 2100,
+        "maxRent": 2841
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 2841,
+        "maxRent": 3705
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 3705,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1777679088603
+  },
+  "60630": {
+    "zipCode": "60630",
+    "lastUpdated": "2026-03-20T00:00:00.000Z",
+    "overall": {
+      "avgRent": 1957,
+      "medianRent": 1850,
+      "minRent": 850,
+      "maxRent": 6000,
+      "avgPricePerSqft": 1.9,
+      "avgDaysOnMarket": 63,
+      "medianDaysOnMarket": 30,
+      "totalListings": 143
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1367,
+        "medianRent": 1255,
+        "minRent": 1150,
+        "maxRent": 2200,
+        "avgPricePerSqft": 2.28,
+        "medianSqft": 600,
+        "avgDaysOnMarket": 46,
+        "totalListings": 13,
+        "fmrComparison": {
+          "fmr": 1530,
+          "marketVsFmrPct": -18,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1442,
+        "medianRent": 1400,
+        "minRent": 850,
+        "maxRent": 2200,
+        "avgPricePerSqft": 1.91,
+        "medianSqft": 800,
+        "avgDaysOnMarket": 68,
+        "totalListings": 22,
+        "fmrComparison": {
+          "fmr": 1630,
+          "marketVsFmrPct": -14,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 1932,
+        "medianRent": 1850,
+        "minRent": 1450,
+        "maxRent": 2850,
+        "avgPricePerSqft": 1.88,
+        "medianSqft": 1000,
+        "avgDaysOnMarket": 69,
+        "totalListings": 76,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": 1,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2322,
+        "medianRent": 2100,
+        "minRent": 1020,
+        "maxRent": 6000,
+        "avgPricePerSqft": 1.81,
+        "medianSqft": 1200,
+        "avgDaysOnMarket": 55,
+        "totalListings": 27,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": -11,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3616,
+        "medianRent": 3499,
+        "minRent": 3150,
+        "maxRent": 4200,
+        "avgPricePerSqft": 1.72,
+        "medianSqft": 2000,
+        "avgDaysOnMarket": 35,
+        "totalListings": 3,
+        "fmrComparison": {
+          "fmr": 2740,
+          "marketVsFmrPct": 28,
+          "tier": "nice"
+        }
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-03",
+        "avgRent": 1957,
+        "medianRent": 1850,
+        "totalListings": 143
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 1990,
+        "medianRent": 1850,
+        "totalListings": 136
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 2170,
+        "medianRent": 1900,
+        "totalListings": 117
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 2056,
+        "medianRent": 1795,
+        "totalListings": 121
+      },
+      {
+        "month": "2025-11",
+        "avgRent": 1977,
+        "medianRent": 1700,
+        "totalListings": 144
+      },
+      {
+        "month": "2025-10",
+        "avgRent": 1973,
+        "medianRent": 1795,
+        "totalListings": 150
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1288,
+        "maxRent": 1564
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 1564,
+        "maxRent": 2116
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 2116,
+        "maxRent": 2760
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 2760,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1774041907063
+  },
+  "60642": {
+    "zipCode": "60642",
+    "lastUpdated": "2026-04-07T00:00:00.000Z",
+    "overall": {
+      "avgRent": 3040,
+      "medianRent": 2695,
+      "minRent": 1383,
+      "maxRent": 10000,
+      "avgPricePerSqft": 3.53,
+      "avgDaysOnMarket": 54,
+      "medianDaysOnMarket": 27,
+      "totalListings": 551
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 2212,
+        "medianRent": 2253,
+        "minRent": 1500,
+        "maxRent": 4900,
+        "avgPricePerSqft": 4.54,
+        "medianSqft": 500,
+        "avgDaysOnMarket": 82,
+        "totalListings": 90,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": 1,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2558,
+        "medianRent": 2583,
+        "minRent": 1400,
+        "maxRent": 3985,
+        "avgPricePerSqft": 3.71,
+        "medianSqft": 700,
+        "avgDaysOnMarket": 53,
+        "totalListings": 198,
+        "fmrComparison": {
+          "fmr": 2370,
+          "marketVsFmrPct": 9,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 3224,
+        "medianRent": 3200,
+        "minRent": 1595,
+        "maxRent": 6600,
+        "avgPricePerSqft": 3.17,
+        "medianSqft": 1010,
+        "avgDaysOnMarket": 46,
+        "totalListings": 187,
+        "fmrComparison": {
+          "fmr": 2670,
+          "marketVsFmrPct": 20,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 4549,
+        "medianRent": 4495,
+        "minRent": 1383,
+        "maxRent": 8000,
+        "avgPricePerSqft": 2.82,
+        "medianSqft": 1500,
+        "avgDaysOnMarket": 55,
+        "totalListings": 64,
+        "fmrComparison": {
+          "fmr": 3440,
+          "marketVsFmrPct": 31,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 5453,
+        "medianRent": 5100,
+        "minRent": 3100,
+        "maxRent": 9995,
+        "avgPricePerSqft": 2.72,
+        "medianSqft": 1800,
+        "avgDaysOnMarket": 28,
+        "totalListings": 9,
+        "fmrComparison": {
+          "fmr": 3980,
+          "marketVsFmrPct": 28,
+          "tier": "nice"
+        }
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-04",
+        "avgRent": 3040,
+        "medianRent": 2695,
+        "totalListings": 551
+      },
+      {
+        "month": "2026-03",
+        "avgRent": 3049,
+        "medianRent": 2695,
+        "totalListings": 518
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 3034,
+        "medianRent": 2735,
+        "totalListings": 407
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 3000,
+        "medianRent": 2750,
+        "totalListings": 317
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 2908,
+        "medianRent": 2750,
+        "totalListings": 320
+      },
+      {
+        "month": "2025-11",
+        "avgRent": 2972,
+        "medianRent": 2800,
+        "totalListings": 296
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1869,
+        "maxRent": 2270
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 2270,
+        "maxRent": 3070
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 3070,
+        "maxRent": 4005
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 4005,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1775616153738
+  },
+  "60647": {
+    "zipCode": "60647",
+    "lastUpdated": "2026-06-22T00:00:00.000Z",
+    "overall": {
+      "avgRent": 2385,
+      "medianRent": 2195,
+      "minRent": 1000,
+      "maxRent": 7990,
+      "avgPricePerSqft": 3.07,
+      "avgDaysOnMarket": 52,
+      "medianDaysOnMarket": 22,
+      "totalListings": 1023
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 0,
+        "label": "Studio",
+        "avgRent": 1554,
+        "medianRent": 1495,
+        "minRent": 1250,
+        "maxRent": 2700,
+        "avgPricePerSqft": 3.72,
+        "medianSqft": 398,
+        "avgDaysOnMarket": 64,
+        "totalListings": 218,
+        "fmrComparison": {
+          "fmr": 1840,
+          "marketVsFmrPct": -19,
+          "tier": "dated"
+        }
+      },
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 2144,
+        "medianRent": 2095,
+        "minRent": 1000,
+        "maxRent": 4500,
+        "avgPricePerSqft": 3.23,
+        "medianSqft": 650,
+        "avgDaysOnMarket": 54,
+        "totalListings": 333,
+        "fmrComparison": {
+          "fmr": 1970,
+          "marketVsFmrPct": 6,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 2688,
+        "medianRent": 2600,
+        "minRent": 1100,
+        "maxRent": 7990,
+        "avgPricePerSqft": 2.74,
+        "medianSqft": 950,
+        "avgDaysOnMarket": 50,
+        "totalListings": 313,
+        "fmrComparison": {
+          "fmr": 2220,
+          "marketVsFmrPct": 17,
+          "tier": "nice"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 3371,
+        "medianRent": 3250,
+        "minRent": 1750,
+        "maxRent": 6995,
+        "avgPricePerSqft": 2.44,
+        "medianSqft": 1400,
+        "avgDaysOnMarket": 36,
+        "totalListings": 143,
+        "fmrComparison": {
+          "fmr": 2860,
+          "marketVsFmrPct": 14,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3845,
+        "medianRent": 3500,
+        "minRent": 2750,
+        "maxRent": 6250,
+        "avgPricePerSqft": 2.14,
+        "medianSqft": 1800,
+        "avgDaysOnMarket": 106,
+        "totalListings": 14,
+        "fmrComparison": {
+          "fmr": 3310,
+          "marketVsFmrPct": 6,
+          "tier": "average"
+        }
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-06",
+        "avgRent": 2385,
+        "medianRent": 2195,
+        "totalListings": 1023
+      },
+      {
+        "month": "2026-05",
+        "avgRent": 2373,
+        "medianRent": 2195,
+        "totalListings": 990
+      },
+      {
+        "month": "2026-04",
+        "avgRent": 2354,
+        "medianRent": 2195,
+        "totalListings": 1002
+      },
+      {
+        "month": "2026-03",
+        "avgRent": 2318,
+        "medianRent": 2190,
+        "totalListings": 908
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 2292,
+        "medianRent": 2100,
+        "totalListings": 787
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 2315,
+        "medianRent": 2100,
+        "totalListings": 661
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1554,
+        "maxRent": 1887
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 1887,
+        "maxRent": 2553
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 2553,
+        "maxRent": 3330
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 3330,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1782185319242
+  },
+  "60659": {
+    "zipCode": "60659",
+    "lastUpdated": "2026-03-04T00:00:00.000Z",
+    "overall": {
+      "avgRent": 2124,
+      "medianRent": 1975,
+      "minRent": 1200,
+      "maxRent": 4200,
+      "avgPricePerSqft": 1.88,
+      "avgDaysOnMarket": 62,
+      "medianDaysOnMarket": 31,
+      "totalListings": 100
+    },
+    "byBedroom": [
+      {
+        "bedrooms": 1,
+        "label": "1 Bedroom",
+        "avgRent": 1480,
+        "medianRent": 1500,
+        "minRent": 1350,
+        "maxRent": 1650,
+        "avgPricePerSqft": 2.02,
+        "medianSqft": 700,
+        "avgDaysOnMarket": 65,
+        "totalListings": 15,
+        "fmrComparison": {
+          "fmr": 1620,
+          "marketVsFmrPct": -7,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 2,
+        "label": "2 Bedrooms",
+        "avgRent": 1813,
+        "medianRent": 1775,
+        "minRent": 1325,
+        "maxRent": 3500,
+        "avgPricePerSqft": 1.91,
+        "medianSqft": 900,
+        "avgDaysOnMarket": 83,
+        "totalListings": 43,
+        "fmrComparison": {
+          "fmr": 1830,
+          "marketVsFmrPct": -3,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 3,
+        "label": "3 Bedrooms",
+        "avgRent": 2517,
+        "medianRent": 2400,
+        "minRent": 1975,
+        "maxRent": 3900,
+        "avgPricePerSqft": 1.81,
+        "medianSqft": 1400,
+        "avgDaysOnMarket": 40,
+        "totalListings": 29,
+        "fmrComparison": {
+          "fmr": 2360,
+          "marketVsFmrPct": 2,
+          "tier": "average"
+        }
+      },
+      {
+        "bedrooms": 4,
+        "label": "4 Bedrooms",
+        "avgRent": 3250,
+        "medianRent": 3300,
+        "minRent": 2700,
+        "maxRent": 4200,
+        "avgPricePerSqft": 1.78,
+        "medianSqft": 1950,
+        "avgDaysOnMarket": 26,
+        "totalListings": 11,
+        "fmrComparison": {
+          "fmr": 2730,
+          "marketVsFmrPct": 21,
+          "tier": "nice"
+        }
+      }
+    ],
+    "trend": [
+      {
+        "month": "2026-03",
+        "avgRent": 2124,
+        "medianRent": 1975,
+        "totalListings": 100
+      },
+      {
+        "month": "2026-02",
+        "avgRent": 2071,
+        "medianRent": 1840,
+        "totalListings": 94
+      },
+      {
+        "month": "2026-01",
+        "avgRent": 2011,
+        "medianRent": 1800,
+        "totalListings": 86
+      },
+      {
+        "month": "2025-12",
+        "avgRent": 2008,
+        "medianRent": 1800,
+        "totalListings": 105
+      },
+      {
+        "month": "2025-11",
+        "avgRent": 1953,
+        "medianRent": 1800,
+        "totalListings": 128
+      },
+      {
+        "month": "2025-10",
+        "avgRent": 1969,
+        "medianRent": 1850,
+        "totalListings": 127
+      }
+    ],
+    "qualityTiers": [
+      {
+        "tier": "dated",
+        "label": "Dated",
+        "description": "Older units, basic finishes, may need updates",
+        "premiumDesc": "-15% to -30% below HUD FMR",
+        "minRent": 1281,
+        "maxRent": 1556
+      },
+      {
+        "tier": "average",
+        "label": "Average",
+        "description": "Standard finishes, functional condition",
+        "premiumDesc": "±15% of HUD FMR baseline",
+        "minRent": 1556,
+        "maxRent": 2105
+      },
+      {
+        "tier": "nice",
+        "label": "Nice",
+        "description": "Updated units, modern finishes, in-unit W/D, central AC",
+        "premiumDesc": "+15% to +50% above HUD FMR",
+        "minRent": 2105,
+        "maxRent": 2745
+      },
+      {
+        "tier": "luxury",
+        "label": "Luxury",
+        "description": "New construction, premium finishes, high-end amenities",
+        "premiumDesc": "+50% or more above HUD FMR",
+        "minRent": 2745,
+        "maxRent": null
+      }
+    ],
+    "fetchedAt": 1772615658268
+  }
+}

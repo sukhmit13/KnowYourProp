@@ -1,0 +1,80 @@
+77:[DIAG] fullContext chars: 7090 ~tokens: 1773
+78:[DIAG] EXTRACTION FAILED markers: 1
+79:[DIAG] sale window:   Most Recent Deed/Sale: DEED recorded 4/24/2014 — $411,000 — grantor: JANSSEN ERIC RECR — grantee: HAPPY ARTS LLC
+80:[DIAG] contains "Zoning": true
+81:[DIAG] contains "tax": true
+82:[DIAG] contains "Recorder": false
+83:[DIAG] contains "lien": false
+84:[DIAG] contains "rent": true
+85:[DIAG] contains "Day Care": true
+86:[DIAG] contains "transit": false
+87:[DIAG] contains "FORECLOSURE": true
+88:6:36:13 AM [express] GET /api/runs/447/insight-report/evidence 200 in 657ms
+101:[DIAG] fullContext chars: 4840 ~tokens: 1210
+102:[DIAG] EXTRACTION FAILED markers: 1
+103:[DIAG] sale window:   Most Recent Deed/Sale: QUIT CLAIM DEED recorded 5/17/2021 — amount not captured — grantor: KALSI SUKHMIT — grantee: KALSI SUKHMIT
+104:[DIAG] contains "Zoning": true
+105:[DIAG] contains "tax": true
+106:[DIAG] contains "Recorder": false
+107:[DIAG] contains "lien": false
+108:[DIAG] contains "rent": true
+109:[DIAG] contains "Day Care": true
+110:[DIAG] contains "transit": false
+111:[DIAG] contains "FORECLOSURE": true
+112:6:36:14 AM [express] GET /api/runs/390/insight-report/evidence 200 in 476ms
+362:[insight-report] Generating for run 478…
+363:[insight-report] Generating for run 474…
+365:[insight-report] Generating for run 447…
+366:[insight-report] Generating for run 390…
+408:[DIAG] fullContext chars: 3072 ~tokens: 768
+409:[DIAG] EXTRACTION FAILED markers: 5
+410:[DIAG] sale window:   Most Recent Deed/Sale: QUIT CLAIM DEED recorded 5/17/2021 — amount not captured — grantor: KALSI SUKHMIT — grantee: KALSI SUKHMIT
+411:[DIAG] contains "Zoning": true
+412:[DIAG] contains "tax": true
+413:[DIAG] contains "Recorder": false
+414:[DIAG] contains "lien": false
+415:[DIAG] contains "rent": true
+416:[DIAG] contains "Day Care": false
+417:[DIAG] contains "transit": true
+418:[DIAG] contains "FORECLOSURE": true
+426:[DIAG] fullContext chars: 3072 ~tokens: 768
+427:[DIAG] EXTRACTION FAILED markers: 5
+428:[DIAG] sale window:   Most Recent Deed/Sale: QUIT CLAIM DEED recorded 5/17/2021 — amount not captured — grantor: KALSI SUKHMIT — grantee: KALSI SUKHMIT
+429:[DIAG] contains "Zoning": true
+430:[DIAG] contains "tax": true
+431:[DIAG] contains "Recorder": false
+432:[DIAG] contains "lien": false
+433:[DIAG] contains "rent": true
+434:[DIAG] contains "Day Care": false
+435:[DIAG] contains "transit": true
+436:[DIAG] contains "FORECLOSURE": true
+440:[DIAG] fullContext chars: 7090 ~tokens: 1773
+441:[DIAG] EXTRACTION FAILED markers: 1
+442:[DIAG] sale window:   Most Recent Deed/Sale: DEED recorded 4/24/2014 — $411,000 — grantor: JANSSEN ERIC RECR — grantee: HAPPY ARTS LLC
+443:[DIAG] contains "Zoning": true
+444:[DIAG] contains "tax": true
+445:[DIAG] contains "Recorder": false
+446:[DIAG] contains "lien": false
+447:[DIAG] contains "rent": true
+448:[DIAG] contains "Day Care": true
+449:[DIAG] contains "transit": false
+450:[DIAG] contains "FORECLOSURE": true
+452:[DIAG] fullContext chars: 4725 ~tokens: 1181
+453:[DIAG] EXTRACTION FAILED markers: 1
+454:[DIAG] sale window:   Most Recent Deed/Sale: WARRANTY DEED recorded 11/9/2020 — $1,185 — grantor: SETLIFF WILLIAM W — grantee: PODDAR SUDIN
+455:[DIAG] contains "Zoning": true
+456:[DIAG] contains "tax": true
+457:[DIAG] contains "Recorder": false
+458:[DIAG] contains "lien": false
+459:[DIAG] contains "rent": true
+460:[DIAG] contains "Day Care": true
+461:[DIAG] contains "transit": false
+462:[DIAG] contains "FORECLOSURE": true
+904:[INSIGHT REPORT] run 478 token usage: input=15422 output=13076 stop_reason=end_turn prompt_chars=42896
+905:[insight-report] Saved for run 478
+906:[INSIGHT REPORT] run 447 token usage: input=16606 output=17645 stop_reason=end_turn prompt_chars=45382
+907:[insight-report] Saved for run 447
+908:[INSIGHT REPORT] run 474 token usage: input=14409 output=18084 stop_reason=end_turn prompt_chars=41205
+909:[insight-report] Saved for run 474
+910:[INSIGHT REPORT] run 390 token usage: input=14409 output=19822 stop_reason=end_turn prompt_chars=41205
+911:[insight-report] Saved for run 390</logs>

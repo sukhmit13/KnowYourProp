@@ -1,0 +1,33 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "5CzrYItgFexkMkzvEJfcA"
+uri = "file://exports/insight-report-522-n-claremont.pdf"
+type = "pdf"
+title = "522 N Claremont — report with updated tax logic (2024 full-year in tile, 2025 as trend signal)"
+
+[[outputs]]
+id = "UJPXMYONnrKRuOH1wOkmK"
+uri = "file://exports/regenerated_reports.zip"
+type = "unspecified"
+title = "Updated reports — 474 and 481 now with resolved zoning"
+
+[[outputs]]
+id = "h7TYrjjZ_u-abjtKgIrJ2"
+uri = "file://exports/regeneration_console_output.txt"
+type = "text"
+title = "Console output from the regenerations (DIAG + token usage)"
+
+[[outputs]]
+id = "XGf2hfdLFoNtTfgL1ZxRo"
+uri = "file://exports/reportLogic_stepD_diff.txt"
+type = "text"
+title = "Step 4 diff — reportLogic.ts prompt patches"
+
+[[outputs]]
+id = "mdatsIumQeMTcE-15YxR_"
+uri = "file://attached_assets/knowyourprop-report-sample.pdf"
+type = "pdf"
+title = "Full Property Report — sample (3014 W Irving Park Rd)"
+description = "Complete consultant-style PDF: snapshot with sale/assessment/appeal history, permits & violations, zoning with TOD/MMRP/NMTC, listing, market & valuation, financing & lending, crime, amenities, transit & demographics, incentives, and market discovery."

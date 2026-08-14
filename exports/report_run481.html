@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Property Insight Report — 2418 N Milwaukee Ave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --font-display:'Instrument Serif', Georgia, serif;
+    --font-body:'Inter', -apple-system, sans-serif;
+    --font-mono:'JetBrains Mono', ui-monospace, monospace;
+    --paper:#faf9f6; --card:#ffffff; --ink:#141414; --ink2:#565651; --muted:#8b8a84; --line:#eae8e2;
+    --brand:#2b3a9e; --brandHi:#3446bd; --brandDeep:#1e2a6e; --brandSoft:#ecedf9; --gold:#f3b31f;
+    --risk-mark:#d13b26; --risk-bg:#fbecea; --risk-border:#d13b26; --risk-text:#9e2b1c;
+    --caution-mark:#d98c00; --caution-bg:#fdf5e2; --caution-border:#f3b31f; --caution-text:#946200;
+    --strength-mark:#2f7d3f; --strength-bg:#edf6ef; --strength-border:#2f7d3f; --strength-text:#245f30;
+    --neutral-mark:#0e8fa6; --neutral-bg:#e9f4f6; --neutral-border:#0e8fa6; --neutral-text:#0b6d7f;
+    --radius-card:10px;
+  }
+  @page{ size: letter portrait; margin: 0.45in; }
+  *{ box-sizing:border-box; }
+  html,body{ background:var(--paper); margin:0; padding:0; }
+  body{
+    font-family:var(--font-body); color:var(--ink); font-size:9.3pt; line-height:1.38;
+    -webkit-font-smoothing:antialiased; -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    width:7.6in; margin:0 auto;
+  }
+  .mono-cap{ font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.09em; }
+  /* MASTHEAD */
+  .masthead{
+    background:linear-gradient(135deg, var(--brand), var(--brandDeep));
+    border-radius:var(--radius-card) var(--radius-card) 0 0;
+    padding:16px 20px; color:#fff; display:grid; grid-template-columns:1.55fr 1fr; gap:18px;
+    page-break-inside:avoid;
+  }
+  .masthead .eyebrow{ font-size:8pt; color:rgba(255,255,255,0.72); margin-bottom:4px; }
+  .masthead h1{ font-family:var(--font-display); font-weight:400; font-size:26pt; margin:0 0 5px 0; line-height:1.05; }
+  .masthead .meta{ font-size:8.7pt; color:rgba(255,255,255,0.82); }
+  .take{ border-left:1px solid rgba(255,255,255,0.22); padding-left:16px; }
+  .take .eyebrow{ font-size:8pt; color:var(--gold); margin-bottom:4px; }
+  .take .verdict{ font-family:var(--font-display); font-size:15.5pt; color:#fff; line-height:1.15; margin:0 0 6px 0; }
+  .take p{ font-size:8.6pt; color:rgba(255,255,255,0.82); margin:0; line-height:1.42; }
+  .gold-rule{ height:2px; background:var(--gold); }
+  /* STAT STRIP */
+  .stats{ background:var(--card); display:grid; grid-template-columns:repeat(6,1fr); page-break-inside:avoid; }
+  .stat{ padding:9px 8px; border-right:1px solid var(--line); }
+  .stat:last-child{ border-right:none; }
+  .stat .label{ font-size:7pt; color:var(--muted); margin-bottom:4px; }
+  .stat .value{ font-family:var(--font-display); font-size:14.5pt; color:var(--ink); line-height:1.1; }
+  .stat .value.flag{ color:var(--risk-mark); }
+  .stat .qual{ font-size:7.6pt; color:var(--muted); margin-top:3px; line-height:1.3; }
+  /* SECTION BAR */
+  .section-bar{
+    background:var(--brand); color:#fff; padding:6px 14px; display:flex; justify-content:space-between; align-items:center;
+    page-break-inside:avoid;
+  }
+  .section-bar .title{ font-size:8.6pt; }
+  .section-bar .note{ font-size:7.8pt; color:rgba(255,255,255,0.68); font-family:var(--font-body); text-transform:none; letter-spacing:0; }
+  /* CARDS */
+  .cards{ display:grid; grid-template-columns:1fr 1fr; gap:9px; padding:11px 0; }
+  .card{
+    background:var(--bg); border-left:3px solid var(--border); border-radius:var(--radius-card);
+    padding:10px 12px; page-break-inside:avoid;
+  }
+  .card.risk{ --bg:var(--risk-bg); --border:var(--risk-border); }
+  .card.caution{ --bg:var(--caution-bg); --border:var(--caution-border); }
+  .card.strength{ --bg:var(--strength-bg); --border:var(--strength-border); }
+  .card.neutral{ --bg:var(--neutral-bg); --border:var(--neutral-border); }
+  .card .headline{ font-family:var(--font-body); font-weight:700; font-size:10.2pt; color:var(--ink); margin:0 0 4px 0; }
+  .card .headline .mark{ display:inline-block; width:7px; height:7px; margin-right:6px; }
+  .card.risk .mark, .card.caution .mark{ background:var(--mark); }
+  .card.risk .mark{ background:var(--risk-mark); }
+  .card.caution .mark{ background:var(--caution-mark); }
+  .card.strength .mark{ color:var(--strength-mark); }
+  .card.neutral .mark{ background:var(--neutral-mark); }
+  .card p{ font-size:8.6pt; color:var(--ink2); margin:0; line-height:1.4; }
+  /* ACTION STEPS */
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:9px; padding:2px 0 10px 0; }
+  .step{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius-card); padding:10px 11px; page-break-inside:avoid; }
+  .step .chip{ width:20px; height:20px; background:var(--brand); color:#fff; font-family:var(--font-mono); font-size:9.5pt; display:flex; align-items:center; justify-content:center; margin-bottom:6px; }
+  .step .headline{ font-weight:700; font-size:9.6pt; margin:0 0 3px 0; }
+  .step p{ font-size:8.3pt; color:var(--ink2); margin:0; line-height:1.38; }
+  /* FOOTER */
+  .footer{ border-top:1px solid var(--line); padding:8px 2px 0 2px; font-size:7.6pt; color:var(--muted); page-break-inside:avoid; }
+</style>
+</head>
+<body>
+
+  <div class="masthead">
+    <div>
+      <div class="eyebrow mono-cap">Property Insight Report</div>
+      <h1>2418 N Milwaukee Ave</h1>
+      <div class="meta">Logan Square · Chicago, IL 60647 · Zoned C1-5 (Neighborhood Commercial) · Fullerton/Milwaukee TIF District</div>
+    </div>
+    <div class="take">
+      <div class="eyebrow mono-cap">Our Take</div>
+      <div class="verdict">Flexible zoning, a title already in foreclosure.</div>
+      <p>The base zoning here is genuinely low-friction — a wide range of retail, office, medical, and residential-above-ground-floor uses are allowed as-of-right, and the funnel confirms no zoning relief is needed. But the ownership record is the opposite of clean: the current owner closed for $4,780,000 in April 2025, then recorded mortgages totaling roughly $79.4M against the parcel over the following eight months, and a lis pendens foreclosure was filed December 12, 2025. Treat this as a title-and-lender problem first, a real estate problem second.</p>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="label mono-cap">Last Sold</div>
+      <div class="value">$4,780,000</div>
+      <div class="qual">4/3/2025 · Special Warranty Deed</div>
+    </div>
+    <div class="stat">
+      <div class="label mono-cap">Prior Owner</div>
+      <div class="value" style="font-size:12pt;">GW Logan Sq LLC</div>
+      <div class="qual">Grantor · sale price not captured in records</div>
+    </div>
+    <div class="stat">
+      <div class="label mono-cap">Zoning</div>
+      <div class="value">C1-5</div>
+      <div class="qual">Neighborhood Commercial · no relief required</div>
+    </div>
+    <div class="stat">
+      <div class="label mono-cap">Property Taxes</div>
+      <div class="value" style="font-size:12.5pt;">$125,084.96/yr</div>
+      <div class="qual">2024 confirmed · 2025 shows $68,796.68 — verify</div>
+    </div>
+    <div class="stat">
+      <div class="label mono-cap">Title Status</div>
+      <div class="value flag" style="font-size:12pt;">Lis Pendens Foreclosure</div>
+      <div class="qual">Recorded 12/12/2025</div>
+    </div>
+    <div class="stat">
+      <div class="label mono-cap">TIF District</div>
+      <div class="value" style="font-size:12.5pt;">Fullerton/Milwaukee</div>
+      <div class="qual">Overlay present · terms not detailed in source</div>
+    </div>
+  </div>
+
+  <div class="section-bar">
+    <div class="title mono-cap">What the Public Record Says About This Asset</div>
+    <div class="note">Independent of what you plan to do with it</div>
+  </div>
+
+  <div class="cards">
+
+    <div class="card risk">
+      <div class="headline"><span class="mark"></span>The owner bought for $4.78M and is already in foreclosure eight months later.</div>
+      <p>J2 Hollander LLC purchased the parcel from GW Logan Sq LLC on 4/3/2025 for $4,780,000. Within the same year, records show a $61,608,550 mortgage (7/2/2025) and a second $17,800,000 mortgage (12/1/2025) recorded against the property — nearly 13x the purchase price (61,608,550 ÷ 4,780,000), consistent with cross-collateralized portfolio debt rather than financing sized to this parcel alone. A release recorded 12/5/2025 was followed one week later by a Lis Pendens Foreclosure (12/12/2025). A mechanics lien filed 5/28/2025 has since been released, and a continuing financing statement was still being recorded as recently as 6/22/2026. Confirm with counsel and a title company which loan is in default and whether this parcel is cross-collateralized before assuming a clean close.</p>
+    </div>
+
+    <div class="card caution">
+      <div class="headline"><span class="mark"></span>This parcel has been under near-continuous refinancing since at least 2022.</div>
+      <p>The Recorder's Office shows 37 total recorded documents against this address, including mortgage amendments dated 11/29/2022, 5/24/2023, and 4/25/2024 — all before the April 2025 sale. Paired with the new debt stack recorded after closing, the pattern points to a parcel that has carried heavy leverage across multiple ownership periods, not just under the current owner. Chain-of-title review should confirm no prior-lender interest survived the 2025 sale unresolved.</p>
+    </div>
+
+    <div class="card caution">
+      <div class="headline"><span class="mark"></span>The 2025 tax figure breaks from a two-year pattern — verify before you budget.</div>
+      <p>Taxes ran $123,918.23 in 2023 and $125,084.96 in 2024 — stable and heavy, about $10,424/month (125,084.96 ÷ 12). The 2025 figure supplied, $68,796.68 ($5,733/month), is roughly 45% lower ((125,084.96 − 68,796.68) ÷ 125,084.96) with no assessed-value or appeal data in the record to explain the drop. Payment status is listed as current. Until 2025 is confirmed as a genuine full-year total rather than a partial installment, underwrite carrying cost at the confirmed 2024 level.</p>
+    </div>
+
+    <div class="card strength">
+      <div class="headline"><span class="mark">✓</span>Most likely commercial and residential uses are allowed here without a hearing.</div>
+      <p>C1-5 permits retail, restaurants (no liquor), offices, medical/dental, personal services, and residential above the ground floor as-of-right, plus civic uses like day care and assisted living. The funnel confirms no zoning relief is required for the plan on file — a genuinely low-friction entitlement position.</p>
+    </div>
+
+    <div class="card caution">
+      <div class="headline"><span class="mark"></span>The higher-margin formats — full bar, liquor restaurant, hotel — all need a special use permit.</div>
+      <p>A liquor-serving restaurant, tavern/bar, brewpub, hotel/motel, cannabis dispensary, non-accessory parking, and entertainment/theater uses are listed as requiring a special use permit here, not as-of-right. If the intended use shifts toward any of these, budget for a discretionary hearing and added timeline risk.</p>
+    </div>
+
+    <div class="card caution">
+      <div class="headline"><span class="mark"></span>You can't yet size the building, and full parking minimums still apply.</div>
+      <p>Lot size could not be read from the source, so buildable floor area under the 1.2 FAR cap and 38-ft height limit is not computable here — get a survey before assuming any expansion or added density. Separately, despite sitting 0.32 mi from the California Blue Line stop and 0.03 mi from a bus stop (Rte 74 Fullerton), the record marks this site as not TOD eligible, so the 1 space/unit residential parking minimum is not relieved.</p>
+    </div>
+
+    <div class="card strength">
+      <div class="headline"><span class="mark">✓</span>The corner sits on real transit convergence, which supports the commercial reading of the zoning.</div>
+      <p>The property is 0.03 mi from a CTA bus stop (Rte 74 Fullerton) and 0.32 mi from the California Blue Line station, with four additional CTA rail stops within roughly a mile. That density of access is a genuine locational strength for the retail, office, and personal-service uses already allowed as-of-right — though it doesn't offset the title or capacity questions above.</p>
+    </div>
+
+  </div>
+
+  <div class="section-bar">
+    <div class="title mono-cap">Before You Move Forward</div>
+    <div class="note">Three things to do before you make an offer</div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="chip">1</div>
+      <div class="headline">Get a title report and talk to counsel.</div>
+      <p>Confirm which lender's loan the 12/12/2025 lis pendens foreclosure relates to, whether the parcel is cross-collateralized under the $61,608,550 and $17,800,000 mortgages, and what it takes to clear title before closing.</p>
+    </div>
+    <div class="step">
+      <div class="chip">2</div>
+      <div class="headline">Confirm the real 2025 tax number.</div>
+      <p>The $68,796.68 figure breaks from the $123,918.23 (2023) / $125,084.96 (2024) pattern. Verify directly at the Cook County Treasurer before budgeting carrying cost.</p>
+    </div>
+    <div class="step">
+      <div class="chip">3</div>
+      <div class="headline">Order a survey before planning any expansion.</div>
+      <p>Lot size could not be confirmed from the source, so buildable area under the 1.2 FAR cap and 38-ft height limit is unknown. Get a current survey and zoning compliance check first.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Generated July 23, 2026 · Sources: Cook County Recorder of Deeds, Cook County Treasurer (cookcountytreasurer.com), Chicago zoning ordinance data, CTA route/station data · This report is for informational purposes only and does not constitute legal, financial, or investment advice.
+  </div>
+
+</body>
+</html>
