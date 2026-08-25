@@ -1,0 +1,98 @@
+# Replit Prompt — Property Tax section + site-wide Linked Takeaway pattern
+
+Two parts. **Part A** is a cross-site pattern (linked takeaway bullets) that applies to EVERY section's takeaway. **Part B** is the full Property Tax section build. Front-end / CSS + markup. Values shown are placeholders bound to real data.
+
+## Tokens (reuse existing)
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f; --goodSoft:#e9f4ec; --caution:#f0a41c; --cautionText:#96600a; --bad:#d13b26;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+
+---
+
+# PART A — Linked Takeaway bullets (apply to ALL section takeaways site-wide)
+
+Every takeaway bullet becomes a jump link to the subsection that holds its evidence. This turns each section's takeaway into a mini table of contents. Roll this out to every section that has a takeaway (Crime, Transit, Development, Schools, Property Tax, …), not just this one.
+
+Bullet row = colored favorability dot + text (flex:1) + a small "jump chip" that scroll-anchors to the evidence subsection:
+```css
+.cn{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.5;color:var(--ink2);padding:8px 0;border-top:1px solid #dde1f6}
+.cn:first-of-type{border-top:0}
+.cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+.cn.g .dt{background:var(--good)} .cn.c .dt{background:var(--caution)} .cn.n .dt{background:#9aa1b0} .cn.b .dt{background:var(--bad)}
+.cn .txt{flex:1}  .cn b{color:var(--ink);font-weight:600}
+.jump{flex:none;margin-top:1px;display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);background:var(--card);border:1px solid #dfe3f7;border-radius:7px;padding:4px 9px;text-decoration:none;white-space:nowrap}
+.jump svg{width:10px;height:10px;stroke:var(--indigo);fill:none}   /* down-arrow */
+```
+```html
+<div class="cn c"><span class="dt"></span>
+  <span class="txt"><b>The bill is up ~9%, but the assessment isn't.</b> …rate-driven.</span>
+  <a class="jump" href="#assess">Assessed Value <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a>
+</div>
+```
+- Give each **evidence subsection an `id`** and set scroll offset so it doesn't hide under the sticky property header:
+  `.cardbox[id]{scroll-margin-top:90px}` (tune 90px to your header height). Use smooth scrolling.
+- The jump chip label = the target subsection's name; the arrow is **down** (evidence is below).
+- On mobile, if the chip crowds the text, let it drop below the bullet (allow wrap) rather than truncating.
+
+### Data-driven version (for generated takeaways)
+For sections whose takeaway is produced by the Claude engine, add a **`section` field to each bullet** in the output schema so the jump target is data-driven, not hardcoded:
+`{ "headline": string, "bullets": [ { "text": string, "favor": "good|neutral|bad", "section": "<anchor-id>" } ] }`
+The front-end renders the chip from `bullet.section` (map the id → display label). Sections with **hardcoded** takeaways (Property Tax, Development/FAR) just author the `href` directly.
+
+---
+
+# PART B — Property Tax section (full build)
+
+Parent section **Property Tax** uses the filled indigo square; the four subsections use **indigo outline icons** (dollar-sign for Tax Bill / Assessed Value / Exemptions, a scale for Appeal History + Attorney). Header shell + hierarchy exactly as the Development section.
+
+## 1. Property Tax — header badge + linked takeaway
+- Header badge: green **"Taxes current"** (paid/current = good). If taxes were delinquent, this must flip to red — drive from data.
+- Takeaway (Part A styling) with these four bullets and jump targets:
+  - **Paid and current** → `#bill` (good)
+  - **Bill up ~9%, but assessment flat / rate-driven** → `#assess` (caution)
+  - **Actively appealed, 4 of 8 won** → `#appeal` (neutral)
+  - **No exemptions on file** → `#exempt` (neutral)
+- **Takeaway logic (important):** compare the current assessed value to the prior year. If the assessed value **rose**, the bill increase is assessment-driven; if it's **flat or down** but the bill still rose (as here — 2025 held flat at $108,835), the increase is **rate/levy-driven** — say so. Don't claim "assessment is climbing" when it isn't.
+
+## 2. Tax Bill  `<div class="cardbox" id="bill">`
+Hero current bill ($ big serif) + "1st installment only / full-year will be higher" note, then a compact year history: year (+ "1st inst." tag), YoY change, amount, and a green **"Paid"** chip. External "Full details at Cook County Treasurer" link.
+
+## 3. Assessed Value  `<div class="cardbox" id="assess">`
+Three tiles (Assessed Total, Est. Market Value, Breakdown Land/Building) + a **20-year trend line chart**. **Series colors: Total Assessed = blue `#2f6fd0`, Building = orange `#e07b2e`, Land = green-dashed `#2f9e46`** (keep the familiar blue/orange/green here — a labeled multi-line chart reads categorically).
+
+## 4. Exemptions  `<div class="cardbox" id="exempt">`
+"No exemptions applied" note, then an eligibility grid of exemption cards (name, EAV reduction, eligibility) each with a **neutral grey "Not on file" tag** — NOT red. For an investment property, not having homeowner exemptions is expected, not a problem. Apply-link to cookcountyassessor.com.
+
+## 5. Appeal History  `<div class="cardbox" id="appeal">`
+One card per tax year: year + outcome badge + assessor value vs Board-of-Review value + appellant/attorney. Outcome badges: **DECREASE = green** (a reduction is good for the owner), **NO CHANGE = neutral grey**. Show the reduction amount in green on wins.
+
+## 6. Tax Appeal Representation — attorney summary card (right after Appeal History, same `#appeal` block or its own)
+A compact summary card per attorney who filed appeals on this parcel, leading with the **win/no-change record**:
+```css
+.tacard{border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+.tatop{display:flex;align-items:center;gap:12px}
+.taav{width:40px;height:40px;border-radius:10px;background:var(--indigoSoft);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:19px;color:var(--indigo)}
+.tarec{margin-left:auto;text-align:right}
+.tarec .big{font-family:var(--disp);font-size:26px;color:var(--ink)} .tarec .big b{color:var(--good);font-weight:400}
+.tarec .lab{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.tawl{display:flex;height:9px;border-radius:999px;overflow:hidden;margin:14px 0 9px;gap:3px}
+.tawl .win{background:var(--good);border-radius:999px} .tawl .no{background:#dcdbd4;border-radius:999px}
+.tafoot{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11.5px;color:var(--ink2)} .tafoot .b{color:var(--ink);font-weight:600}
+.tayl{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--good);background:var(--goodSoft);border-radius:5px;padding:2px 7px}
+```
+- Record display: big **`4`–4** with "Won · No change" label; a green/grey split `.tawl` bar (win flex = wins, no flex = no-change); footer with filings count, total assessed reduction, and winning-year chips.
+- **Compute from the appeal record:** wins = # of Board-of-Review reductions, no-change = # of appeals with no reduction, total reduced = sum of reductions.
+- **Guardrails (important — this evaluates a real professional):**
+  - The record is **this parcel only**. Print that disclaimer. Do NOT present it as the firm's overall win rate — you can't support that claim.
+  - Professionals stay **neutral** (no good/bad rating of the attorney). The *outcomes* (reductions) can be green because a reduction is good for the owner — but that's coloring the outcome, not grading the attorney.
+  - "Find other attorneys" should be a single neutral link ("public filings · not an endorsement"), NOT a curated/ranked list — unless you deliberately decide to be in the referral business (which adds accuracy + liability obligations). Lighter-touch alternative: link to the county's public list of filers in the township.
+- **Reuse this same card for contractors/architects under Permit History** — except they have no win/loss, so the record becomes **activity** (permits pulled, work type, years active on this parcel), which fits the neutral rule even more cleanly.
+
+## Consistency checklist
+- Every takeaway bullet is a jump link to its evidence subsection (Part A) — roll out to all sections.
+- Parent = indigo square; subsections = indigo outline icon.
+- Assessment chart = blue/orange/green.
+- "Taxes current"/"Paid"/appeal "Decrease" = green; "No change" + "Not on file" = neutral (never red for an expected-absent exemption).
+- Attorney/contractor cards: parcel-scoped record, professionals neutral, "find others" is a neutral link not a ranking.

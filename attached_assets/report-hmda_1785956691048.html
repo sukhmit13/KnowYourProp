@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--bad:#d13b26;
+    --c1:#3f51c5;--c2:#f4610a;--c3:#7c4dcf;--c4:#e0a615;--green:#2f7d3f;
+    --p1:#4068d0;--p2:#e8b018;--p3:#f87058;--p4:#68c0b0;--p5:#38a850;--p6:#f888b0;--p7:#a060f0;--p8:#90b8f0;--p9:#986848;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1080px;margin:0 auto}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:11px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .sh .ic{color:var(--indigo);font-size:15px}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+  .sh .ca{margin-left:auto;color:var(--muted)}
+
+  .toprow{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .seg{display:inline-flex;gap:3px;background:#f1f0ec;border:1px solid var(--line);border-radius:9px;padding:3px}
+  .seg span{font-size:12px;font-weight:600;color:var(--ink2);padding:6px 13px;border-radius:6px}
+  .seg span.on{background:var(--indigo);color:#fff}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin-bottom:12px}
+  .clbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:11px}
+  .rankgrid{display:grid;grid-template-columns:1fr auto auto;gap:8px 28px;font-size:13px;align-items:baseline}
+  .rankgrid .h{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase}
+  .rankgrid .lb{color:var(--ink2)}
+  .rankgrid .v{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .rankgrid .v.old{color:var(--muted);font-weight:600}
+  .up{color:var(--good);font-weight:700} .dn{color:var(--bad);font-weight:700}
+  .ranknote{font-size:10.5px;color:var(--muted);margin-top:10px}
+
+  .rate{display:flex;align-items:baseline;gap:10px}
+  .rate .n{font-family:var(--disp);font-size:34px;line-height:1;color:var(--ink)}
+  .rate .x{font-size:12px;color:var(--ink2)}
+  .ratenote{font-size:11px;color:var(--muted);margin-top:8px}
+
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+  .kpi{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;text-align:center}
+  .kpi .n{font-family:var(--disp);font-size:32px;line-height:1;color:var(--ink)}
+  .kpi .l{font-size:12px;color:var(--ink2);margin-top:7px}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .mblock{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 18px}
+  .mhd{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+  .mhd .i{color:var(--indigo)}
+  .donutrow{display:flex;align-items:center;gap:18px}
+  .donut{width:88px;height:88px;border-radius:50%;flex:none;position:relative}
+  .donut::after{content:"";position:absolute;inset:27%;background:var(--card);border-radius:50%}
+  .leg{flex:1;display:flex;flex-direction:column;gap:6px}
+  .lr{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2)}
+  .lr .d{width:9px;height:9px;border-radius:2px;flex:none}
+  .lr .p{margin-left:auto;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+
+  /* bars */
+  .bars{display:flex;flex-direction:column;gap:9px}
+  .brow{display:grid;grid-template-columns:120px 1fr 44px;gap:10px;align-items:center;font-size:11.5px}
+  .brow .bl{color:var(--ink2)}
+  .brow .bt{height:14px;background:#f1efe9;border-radius:4px;overflow:hidden}
+  .brow .bt span{display:block;height:100%;border-radius:4px}
+  .brow .bv{text-align:right;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+
+  .lenders{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin-top:12px}
+  .lrow{display:grid;grid-template-columns:1fr 60px 90px 60px;gap:12px;align-items:center;font-size:12px;padding:8px 0;border-top:1px solid var(--line)}
+  .lrow:first-of-type{border-top:0}
+  .lrow .nm{font-weight:600;color:var(--ink)}
+  .lrow .rt{color:var(--ink2);font-variant-numeric:tabular-nums}
+  .lrow .bt{height:8px;background:#f1efe9;border-radius:4px;overflow:hidden}
+  .lrow .bt span{display:block;height:100%;background:var(--c1);border-radius:4px}
+  .lrow .sh{text-align:right;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .showall{font-size:12px;color:var(--indigo);font-weight:600;margin-top:11px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sh"><span class="ic">▨</span><span class="t">Local Mortgage Market Activity</span><span class="ca">▾</span></div>
+
+  <div class="toprow">
+    <span class="seg"><span class="on">Logan Square</span><span>Census Tract 832200</span></span>
+    <span class="seg"><span class="on">2025</span><span>2024</span></span>
+  </div>
+
+  <!-- ranking -->
+  <div class="card">
+    <div class="clbl">City Ranking — Logan Square vs. 77 Community Areas</div>
+    <div class="rankgrid">
+      <span></span><span class="h">2025</span><span class="h">2024</span>
+      <span class="lb">Applications</span><span class="v">#5 of 77 <span class="up">▲</span></span><span class="v old">#6 of 77</span>
+      <span class="lb">Closed Loans</span><span class="v">#5 of 77</span><span class="v old">#5 of 77</span>
+    </div>
+    <div class="ranknote"><span class="up">▲</span> improved rank vs. prior year · <span class="dn">▼</span> declined</div>
+  </div>
+
+  <!-- avg rate -->
+  <div class="card">
+    <div class="clbl">Avg Interest Rate — 2025 Closed First-Lien Loans</div>
+    <div class="rate"><span class="n">6.397%</span><span class="x">avg rate across 108 closed first-lien loans in this census tract</span></div>
+    <div class="ratenote">Includes conventional, FHA, and VA first-lien originations reported in HMDA. Excludes HELOCs and second mortgages.</div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis">
+    <div class="kpi"><div class="n">2,572</div><div class="l">All Applications</div></div>
+    <div class="kpi"><div class="n">1,315</div><div class="l">Originated · 51.1%</div></div>
+    <div class="kpi"><div class="n">238</div><div class="l">Denied · 9.3%</div></div>
+  </div>
+
+  <div class="two">
+    <!-- LOAN TYPE donut -->
+    <div class="mblock">
+      <div class="mhd"><span class="i">◗</span>Loan Type</div>
+      <div class="donutrow">
+        <div class="donut" style="background:conic-gradient(var(--p1) 0 97.4%,var(--p2) 97.4% 99.1%,var(--p3) 99.1% 100%)"></div>
+        <div class="leg">
+          <div class="lr"><span class="d" style="background:var(--p1)"></span>Conventional<span class="p">97.4%</span></div>
+          <div class="lr"><span class="d" style="background:var(--p2)"></span>FHA<span class="p">1.7%</span></div>
+          <div class="lr"><span class="d" style="background:var(--p3)"></span>VA<span class="p">1.0%</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- OCCUPANCY donut -->
+    <div class="mblock">
+      <div class="mhd"><span class="i">⌂</span>Occupancy</div>
+      <div class="donutrow">
+        <div class="donut" style="background:conic-gradient(var(--p7) 0 87.8%,var(--p2) 87.8% 100%)"></div>
+        <div class="leg">
+          <div class="lr"><span class="d" style="background:var(--p7)"></span>Principal Residence<span class="p">87.8%</span></div>
+          <div class="lr"><span class="d" style="background:var(--p2)"></span>Investment Property<span class="p">11.8%</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- LOAN PRODUCT donut -->
+    <div class="mblock">
+      <div class="mhd"><span class="i">▤</span>Loan Product Type</div>
+      <div class="donutrow">
+        <div class="donut" style="background:conic-gradient(var(--p5) 0 80.9%,var(--p3) 80.9% 97.3%,var(--p1) 97.3% 99%,var(--p2) 99% 100%)"></div>
+        <div class="leg">
+          <div class="lr"><span class="d" style="background:var(--p5)"></span>Conventional · First Lien<span class="p">80.9%</span></div>
+          <div class="lr"><span class="d" style="background:var(--p3)"></span>Conventional · Subordinate<span class="p">16.4%</span></div>
+          <div class="lr"><span class="d" style="background:var(--p1)"></span>FHA · First Lien<span class="p">1.7%</span></div>
+          <div class="lr"><span class="d" style="background:var(--p2)"></span>VA · First Lien<span class="p">1.0%</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- PROPERTY TYPE donut -->
+    <div class="mblock">
+      <div class="mhd"><span class="i">⌂</span>Property Type</div>
+      <div class="donutrow">
+        <div class="donut" style="background:conic-gradient(var(--p3) 0 97.6%,var(--p1) 97.6% 100%)"></div>
+        <div class="leg">
+          <div class="lr"><span class="d" style="background:var(--p3)"></span>Single Family (1–4 units)<span class="p">97.6%</span></div>
+          <div class="lr"><span class="d" style="background:var(--p1)"></span>Multifamily<span class="p">2.4%</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- PROPERTY VALUE bars (ordered → sequential ramp) -->
+    <div class="mblock">
+      <div class="mhd"><span class="i">$</span>Property Value <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">· distribution</span></div>
+      <div class="bars">
+        <div class="brow"><span class="bl">$100k–$200k</span><span class="bt"><span style="width:2%;background:#cdd3f0"></span></span><span class="bv">0.7%</span></div>
+        <div class="brow"><span class="bl">$200k–$300k</span><span class="bt"><span style="width:10%;background:#aab4e8"></span></span><span class="bv">3.2%</span></div>
+        <div class="brow"><span class="bl">$300k–$500k</span><span class="bt"><span style="width:54%;background:#8290db"></span></span><span class="bv">16.4%</span></div>
+        <div class="brow"><span class="bl">$500k–$750k</span><span class="bt"><span style="width:100%;background:#5a68c4"></span></span><span class="bv">30.6%</span></div>
+        <div class="brow"><span class="bl">$750k–$1M</span><span class="bt"><span style="width:75%;background:#3f4ba8"></span></span><span class="bv">22.8%</span></div>
+        <div class="brow"><span class="bl">&gt;$1M</span><span class="bt"><span style="width:86%;background:#2b3a8c"></span></span><span class="bv">26.4%</span></div>
+      </div>
+    </div>
+    <!-- DENIAL REASONS bars (ranked) -->
+    <div class="mblock">
+      <div class="mhd"><span class="i" style="color:var(--bad)">⊘</span>Denial Reasons <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">· % of applications</span></div>
+      <div class="bars">
+        <div class="brow"><span class="bl">Debt-to-income</span><span class="bt"><span style="width:100%;background:#d13b26"></span></span><span class="bv">3.5%</span></div>
+        <div class="brow"><span class="bl">Collateral</span><span class="bt"><span style="width:60%;background:#d13b26"></span></span><span class="bv">2.1%</span></div>
+        <div class="brow"><span class="bl">Credit app. incomplete</span><span class="bt"><span style="width:43%;background:#d95c4a"></span></span><span class="bv">1.5%</span></div>
+        <div class="brow"><span class="bl">Credit history</span><span class="bt"><span style="width:31%;background:#d95c4a"></span></span><span class="bv">1.1%</span></div>
+        <div class="brow"><span class="bl">Other</span><span class="bt"><span style="width:17%;background:#e58a78"></span></span><span class="bv">0.6%</span></div>
+        <div class="brow"><span class="bl">Insufficient cash</span><span class="bt"><span style="width:6%;background:#e58a78"></span></span><span class="bv">0.2%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- active lenders -->
+  <div class="lenders">
+    <div class="clbl">Active Lenders · top by application volume</div>
+    <div class="lrow"><span class="nm">Guaranteed Rate, Inc.</span><span class="rt">6.53%</span><span class="bt"><span style="width:100%"></span></span><span class="sh">11.1% (285)</span></div>
+    <div class="lrow"><span class="nm">JPMorgan Chase Bank, N.A.</span><span class="rt">6.35%</span><span class="bt"><span style="width:66%"></span></span><span class="sh">7.3% (189)</span></div>
+    <div class="lrow"><span class="nm">CrossCountry Mortgage, LLC</span><span class="rt">6.65%</span><span class="bt"><span style="width:39%"></span></span><span class="sh">4.3% (111)</span></div>
+    <div class="lrow"><span class="nm">The Huntington National Bank</span><span class="rt">6.50%</span><span class="bt"><span style="width:28%"></span></span><span class="sh">3.1% (81)</span></div>
+    <div class="showall">Show all 238 lenders ›</div>
+  </div>
+</div>
+</body>
+</html>

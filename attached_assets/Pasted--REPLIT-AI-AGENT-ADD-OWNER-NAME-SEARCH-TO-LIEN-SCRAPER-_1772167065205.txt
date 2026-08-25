@@ -1,0 +1,923 @@
+# REPLIT AI AGENT - ADD OWNER NAME SEARCH TO LIEN SCRAPER
+
+---
+
+## TASK
+
+Add owner-specific lien search to your existing Cook County Recorder scraper. Extract owner name from property deeds, then search for personal liens against that owner.
+
+---
+
+## WHAT YOU ALREADY HAVE
+
+Your existing `recorder_scraper.py` has:
+- ✅ `search_by_pin(pin)` - Searches property by PIN
+- ✅ Returns mortgages, liens, releases, deeds
+- ✅ CAPTCHA solving with existing API key
+
+**Don't rebuild this. Just add to it.**
+
+---
+
+## WHAT TO ADD
+
+### 1. Owner Name Extraction (New Function)
+Extract current owner from existing deed data
+
+### 2. Search by Owner Name (New Method)
+Search Cook County Recorder by NAME instead of PIN
+
+### 3. Updated Coordinator (Modify Existing)
+Run both searches automatically and combine results
+
+---
+
+## CRITICAL REQUIREMENTS
+
+### 🔑 USE EXISTING 2CAPTCHA API KEY
+
+```python
+# ✅ CORRECT - Already configured
+import os
+api_key = os.getenv('TWOCAPTCHA_API_KEY')
+
+# This is already in your captcha_solver.py
+# Just reuse it - don't create new solver
+```
+
+### ⚡ ASYNC LOADING STILL REQUIRED
+
+Keep the async background search approach from before. Owner search happens in the same background thread as property search.
+
+---
+
+## FILE 1: UPDATE `recorder_scraper.py`
+
+### Add New Method: `search_by_name()`
+
+**Location:** Add to existing `RecorderScraper` class
+
+```python
+class RecorderScraper:
+    
+    # Your existing __init__ and search_by_pin methods stay the same
+    
+    def search_by_name(self, owner_name):
+        """
+        Search Cook County Recorder by OWNER NAME
+        
+        Finds personal liens that attach to ALL property the owner has:
+        - IRS tax liens
+        - Court judgments
+        - Child support liens
+        - State tax liens
+        
+        Args:
+            owner_name: Current property owner (e.g., "JOHN SMITH")
+            
+        Returns:
+            dict: Categorized owner-specific liens
+        """
+        print(f"\n{'='*60}")
+        print(f"[RECORDER] Searching owner liens: {owner_name}")
+        print(f"{'='*60}")
+        
+        # Setup headless Chrome (same as search_by_pin)
+        options = Options()
+        options.add_argument('--headless=new')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--window-size=1920,1080')
+        options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+        
+        driver = None
+        
+        try:
+            driver = webdriver.Chrome(options=options)
+            driver.set_page_load_timeout(30)
+            
+            # Navigate to search page (same URL as PIN search)
+            print("[RECORDER] Loading search page...")
+            driver.get(f"{self.base_url}/Search")
+            time.sleep(3)
+            
+            # Find NAME input field (different from PIN input)
+            name_input = self._find_name_input(driver)
+            name_input.clear()
+            name_input.send_keys(owner_name)
+            print(f"[RECORDER] Entered owner name: {owner_name}")
+            
+            # Check for CAPTCHA (same as PIN search)
+            if self._has_captcha(driver):
+                print("[RECORDER] CAPTCHA detected, solving...")
+                solved = self.captcha_solver.solve_recaptcha_v2(driver, driver.current_url)
+                
+                if not solved:
+                    print("[RECORDER] CAPTCHA solving failed")
+                    self._save_debug_html(driver, "owner_captcha_failed")
+                    return None
+                
+                time.sleep(2)
+            
+            # Find and click search button (same as PIN search)
+            search_button = self._find_search_button(driver)
+            search_button.click()
+            print("[RECORDER] Clicked search button")
+            
+            # Wait for results
+            time.sleep(5)
+            self._save_debug_html(driver, "owner_results_page")
+            
+            # Parse results (SAME parsing method as PIN search)
+            documents = self._parse_documents(driver)
+            
+            if not documents:
+                print("[RECORDER] No documents found for owner")
+                return {
+                    'irs_liens': [],
+                    'state_tax_liens': [],
+                    'judgment_liens': [],
+                    'child_support_liens': [],
+                    'other_owner_liens': []
+                }
+            
+            # Categorize owner-specific liens
+            categorized = self._categorize_owner_liens(documents)
+            
+            print(f"[RECORDER] Found owner liens:")
+            print(f"  - IRS liens: {len(categorized['irs_liens'])}")
+            print(f"  - State tax liens: {len(categorized['state_tax_liens'])}")
+            print(f"  - Judgment liens: {len(categorized['judgment_liens'])}")
+            print(f"  - Child support liens: {len(categorized['child_support_liens'])}")
+            print(f"  - Other liens: {len(categorized['other_owner_liens'])}")
+            
+            return categorized
+            
+        except Exception as e:
+            print(f"[RECORDER] ✗ Error searching owner: {e}")
+            if driver:
+                self._save_debug_html(driver, "owner_error")
+                driver.save_screenshot('debug_owner_error.png')
+            return None
+        
+        finally:
+            if driver:
+                driver.quit()
+    
+    def _find_name_input(self, driver):
+        """
+        Find the owner name input field
+        Try common selector patterns
+        """
+        # Try common name field selectors
+        name_selectors = [
+            ('id', 'name'),
+            ('id', 'txtName'),
+            ('id', 'ownerName'),
+            ('id', 'NameSearch'),
+            ('name', 'name'),
+            ('name', 'owner'),
+        ]
+        
+        for selector_type, selector_value in name_selectors:
+            try:
+                if selector_type == 'id':
+                    name_input = driver.find_element(By.ID, selector_value)
+                else:
+                    name_input = driver.find_element(By.NAME, selector_value)
+                print(f"[RECORDER] Found name input: {selector_type}='{selector_value}'")
+                return name_input
+            except:
+                continue
+        
+        # Fallback: look for any text input that might be name field
+        print("[RECORDER] Trying fallback name input detection")
+        inputs = driver.find_elements(By.CSS_SELECTOR, "input[type='text']")
+        if len(inputs) > 1:
+            # If multiple inputs, name field is often second one
+            return inputs[1]
+        
+        raise Exception("Could not find name input field")
+    
+    def _categorize_owner_liens(self, documents):
+        """
+        Categorize liens by type - OWNER-SPECIFIC ONLY
+        
+        These are liens filed against the PERSON, not the property.
+        They attach to ALL real estate the person owns.
+        """
+        categorized = {
+            'irs_liens': [],           # Federal tax liens
+            'state_tax_liens': [],     # Illinois tax liens
+            'judgment_liens': [],      # Court judgments
+            'child_support_liens': [], # Child/spousal support
+            'other_owner_liens': []    # Other personal liens
+        }
+        
+        for doc in documents:
+            doc_type = doc['document_type'].upper()
+            
+            # IRS / Federal tax liens
+            if any(kw in doc_type for kw in [
+                'IRS', 'FEDERAL TAX', 'INTERNAL REVENUE'
+            ]):
+                categorized['irs_liens'].append(doc)
+            
+            # State tax liens
+            elif any(kw in doc_type for kw in [
+                'STATE TAX', 'ILLINOIS', 'DEPT OF REVENUE', 'IDOR'
+            ]):
+                categorized['state_tax_liens'].append(doc)
+            
+            # Court judgments
+            elif any(kw in doc_type for kw in [
+                'JUDGMENT', 'CIVIL JUDGMENT', 'MONEY JUDGMENT'
+            ]):
+                categorized['judgment_liens'].append(doc)
+            
+            # Child/spousal support
+            elif any(kw in doc_type for kw in [
+                'CHILD SUPPORT', 'SPOUSAL SUPPORT', 'ALIMONY'
+            ]):
+                categorized['child_support_liens'].append(doc)
+            
+            # Other liens against owner
+            elif 'LIEN' in doc_type:
+                categorized['other_owner_liens'].append(doc)
+        
+        return categorized
+```
+
+---
+
+## FILE 2: CREATE `owner_extraction.py`
+
+**Location:** `scrapers/owner_extraction.py`
+
+```python
+"""
+Owner Name Extraction
+Extract current owner from property deed records
+"""
+
+import re
+
+
+def get_current_owner(recorder_data):
+    """
+    Extract current owner name from property deeds
+    
+    Args:
+        recorder_data: Results from recorder.search_by_pin()
+        
+    Returns:
+        str: Current owner name or None
+    """
+    deeds = recorder_data.get('deeds', [])
+    
+    if not deeds:
+        print("[OWNER] No deeds found in property data")
+        return None
+    
+    # Sort by recorded date (most recent first)
+    deeds_sorted = sorted(
+        deeds,
+        key=lambda d: d.get('recorded_date', ''),
+        reverse=True
+    )
+    
+    # Most recent deed = current ownership
+    latest_deed = deeds_sorted[0]
+    
+    # Grantee = buyer = current owner
+    owner_name = latest_deed.get('grantee', '')
+    
+    if not owner_name:
+        print("[OWNER] No grantee found in latest deed")
+        return None
+    
+    print(f"[OWNER] Raw owner from deed: {owner_name}")
+    
+    # Clean and normalize the name
+    owner_name = clean_owner_name(owner_name)
+    
+    print(f"[OWNER] Cleaned owner name: {owner_name}")
+    
+    return owner_name
+
+
+def get_all_owners(recorder_data):
+    """
+    Extract ALL owners (handles joint ownership)
+    
+    Args:
+        recorder_data: Results from recorder.search_by_pin()
+        
+    Returns:
+        list: List of owner names
+    """
+    deeds = recorder_data.get('deeds', [])
+    
+    if not deeds:
+        return []
+    
+    # Get latest deed
+    deeds_sorted = sorted(
+        deeds,
+        key=lambda d: d.get('recorded_date', ''),
+        reverse=True
+    )
+    
+    latest_deed = deeds_sorted[0]
+    grantee = latest_deed.get('grantee', '')
+    
+    if not grantee:
+        return []
+    
+    # Check for joint ownership (AND separator)
+    if ' AND ' in grantee.upper():
+        owners = grantee.upper().split(' AND ')
+        return [clean_owner_name(o) for o in owners if o.strip()]
+    
+    # Single owner
+    return [clean_owner_name(grantee)]
+
+
+def clean_owner_name(name):
+    """
+    Clean and normalize owner name for searching
+    
+    Examples:
+        "JOHN SMITH AND JANE SMITH" → "JOHN SMITH"
+        "SMITH, JOHN" → "JOHN SMITH"
+        "JOHN SMITH TRUSTEE" → "JOHN SMITH"
+        "THE SMITH FAMILY TRUST" → "SMITH"
+        "ABC PROPERTIES LLC" → "ABC PROPERTIES LLC"
+    
+    Args:
+        name: Raw owner name from deed
+        
+    Returns:
+        str: Cleaned name
+    """
+    if not name:
+        return None
+    
+    # Convert to uppercase for consistency
+    name = name.upper().strip()
+    
+    # Handle "AND" - take first person only
+    if ' AND ' in name:
+        name = name.split(' AND ')[0].strip()
+    
+    # Remove trustee/trust suffixes
+    # "JOHN SMITH TRUSTEE OF THE SMITH FAMILY TRUST" → "JOHN SMITH"
+    name = re.sub(r'\s+TRUSTEE.*', '', name)
+    name = re.sub(r'\s+AS TRUSTEE.*', '', name)
+    
+    # Handle trust names
+    # "THE SMITH FAMILY TRUST" → "SMITH"
+    if ' TRUST' in name and not any(word in name for word in ['SMITH', 'JONES']):
+        # Keep as-is for corporate trusts
+        pass
+    elif ' TRUST' in name:
+        # Extract family name from trust
+        name = re.sub(r'\s+TRUST.*', '', name)
+        name = re.sub(r'^THE\s+', '', name)
+    
+    # Handle "LAST, FIRST" format
+    if ',' in name and len(name.split(',')) == 2:
+        parts = name.split(',')
+        last_name = parts[0].strip()
+        first_name = parts[1].strip()
+        name = f"{first_name} {last_name}"
+    
+    # Remove extra whitespace
+    name = ' '.join(name.split())
+    
+    return name
+
+
+def is_corporate_owner(name):
+    """
+    Check if owner is a corporation/LLC
+    
+    Args:
+        name: Owner name
+        
+    Returns:
+        bool: True if corporate entity
+    """
+    if not name:
+        return False
+    
+    corporate_keywords = [
+        'LLC', 'INC', 'CORP', 'LTD', 'LP', 'COMPANY',
+        'CORPORATION', 'LIMITED', 'CO.', 'L.L.C.'
+    ]
+    
+    name_upper = name.upper()
+    return any(kw in name_upper for kw in corporate_keywords)
+```
+
+---
+
+## FILE 3: UPDATE `lien_search.py`
+
+**Modify existing `_perform_search` method:**
+
+```python
+class LienSearch:
+    
+    # Keep existing __init__ and other methods
+    
+    def _perform_search(self, pin, address, task_store=None, task_id=None):
+        """
+        Perform comprehensive lien search
+        NOW INCLUDES: Property search + Owner search
+        
+        Args:
+            pin: Property PIN
+            address: Property address
+            task_store: Optional task status dict for async updates
+            task_id: Optional task ID for async updates
+            
+        Returns:
+            dict: Complete lien search results
+        """
+        from scrapers.owner_extraction import get_current_owner
+        
+        # Update progress
+        if task_store and task_id:
+            task_store[task_id]['progress'] = 'Searching property records...'
+        
+        # STEP 1: Search property by PIN
+        print(f"[LIEN SEARCH] Step 1: Searching property by PIN...")
+        recorder_data = self.recorder.search_by_pin(pin)
+        
+        if not recorder_data:
+            return self._generate_error_report(pin, address, "Failed to retrieve property records")
+        
+        # STEP 2: Extract current owner from deeds
+        if task_store and task_id:
+            task_store[task_id]['progress'] = 'Extracting property owner...'
+        
+        print(f"[LIEN SEARCH] Step 2: Extracting current owner...")
+        owner_name = get_current_owner(recorder_data)
+        
+        if not owner_name:
+            print(f"[LIEN SEARCH] WARNING: Could not determine owner")
+            # Continue without owner search
+            owner_liens = None
+        else:
+            # STEP 3: Search owner-specific liens
+            if task_store and task_id:
+                task_store[task_id]['progress'] = f'Searching liens against owner ({owner_name})...'
+            
+            print(f"[LIEN SEARCH] Step 3: Searching owner liens for {owner_name}...")
+            owner_liens = self.recorder.search_by_name(owner_name)
+        
+        # STEP 4: Compile comprehensive report
+        if task_store and task_id:
+            task_store[task_id]['progress'] = 'Compiling report...'
+        
+        print(f"[LIEN SEARCH] Step 4: Compiling comprehensive report...")
+        report = self._compile_report(
+            recorder_data,
+            owner_liens,
+            pin,
+            address,
+            owner_name
+        )
+        
+        return report
+    
+    def _compile_report(self, recorder_data, owner_liens, pin, address, owner_name):
+        """
+        Compile property + owner data into comprehensive report
+        
+        Args:
+            recorder_data: Property-specific data from PIN search
+            owner_liens: Owner-specific liens from name search
+            pin: Property PIN
+            address: Property address
+            owner_name: Current owner name
+            
+        Returns:
+            dict: Complete lien search report
+        """
+        # Extract property data
+        mortgages = recorder_data.get('mortgages', [])
+        property_liens = recorder_data.get('liens', [])
+        foreclosures = recorder_data.get('foreclosures', [])
+        releases = recorder_data.get('releases', [])
+        
+        # Filter active property liens (not released)
+        active_property_liens = self._filter_active(property_liens, releases)
+        
+        # Categorize property liens
+        property_lien_categories = self._categorize_property_liens(active_property_liens)
+        
+        # Calculate property lien total
+        property_lien_total = sum(
+            lien.get('amount', 0) 
+            for lien in active_property_liens
+        )
+        
+        # Calculate owner lien total
+        owner_lien_total = 0
+        if owner_liens:
+            for category in owner_liens.values():
+                owner_lien_total += sum(
+                    lien.get('amount', 0) 
+                    for lien in category
+                )
+        
+        # Total liens
+        total_lien_amount = property_lien_total + owner_lien_total
+        
+        # Overall status
+        has_issues = (
+            len(foreclosures) > 0 or
+            len(active_property_liens) > 0 or
+            owner_lien_total > 0
+        )
+        
+        # Generate warnings
+        warnings = self._generate_warnings(
+            foreclosures,
+            active_property_liens,
+            owner_liens,
+            mortgages,
+            owner_name
+        )
+        
+        # Build report
+        report = {
+            'pin': pin,
+            'address': address,
+            'owner': owner_name,
+            'searched_at': datetime.now().isoformat(),
+            'overall_status': 'ISSUES FOUND' if has_issues else 'CLEAR',
+            
+            'summary': {
+                'active_mortgages': len(mortgages),
+                'property_liens': len(active_property_liens),
+                'property_lien_amount': property_lien_total,
+                'owner_liens': sum(len(category) for category in owner_liens.values()) if owner_liens else 0,
+                'owner_lien_amount': owner_lien_total,
+                'total_lien_amount': total_lien_amount,
+                'foreclosure_cases': len(foreclosures)
+            },
+            
+            'mortgages': mortgages,
+            
+            'property_liens': property_lien_categories,
+            
+            'owner_liens': owner_liens if owner_liens else {
+                'irs_liens': [],
+                'state_tax_liens': [],
+                'judgment_liens': [],
+                'child_support_liens': [],
+                'other_owner_liens': []
+            },
+            
+            'foreclosures': foreclosures,
+            
+            'warnings': warnings,
+            
+            'sources_searched': {
+                'recorder_by_pin': bool(recorder_data),
+                'recorder_by_owner': bool(owner_liens)
+            }
+        }
+        
+        return report
+    
+    def _categorize_property_liens(self, liens):
+        """Categorize property-specific liens"""
+        categorized = {
+            'tax': [],
+            'water': [],
+            'judgment': [],
+            'mechanic': [],
+            'hoa': [],
+            'other': []
+        }
+        
+        for lien in liens:
+            lien_type = lien.get('document_type', '').lower()
+            
+            if 'tax' in lien_type or 'irs' in lien_type:
+                categorized['tax'].append(lien)
+            elif 'water' in lien_type or 'sewer' in lien_type:
+                categorized['water'].append(lien)
+            elif 'judgment' in lien_type:
+                categorized['judgment'].append(lien)
+            elif 'mechanic' in lien_type or 'contractor' in lien_type:
+                categorized['mechanic'].append(lien)
+            elif 'hoa' in lien_type or 'association' in lien_type:
+                categorized['hoa'].append(lien)
+            else:
+                categorized['other'].append(lien)
+        
+        return categorized
+    
+    def _generate_warnings(self, foreclosures, property_liens, owner_liens, mortgages, owner_name):
+        """Generate prioritized warnings"""
+        warnings = []
+        
+        # CRITICAL: Foreclosures
+        if foreclosures:
+            fc = foreclosures[0]
+            warnings.append({
+                'level': 'CRITICAL',
+                'priority': 1,
+                'title': 'ACTIVE FORECLOSURE',
+                'message': f'Foreclosure filed {fc.get("recorded_date")}',
+                'action': 'Property in foreclosure - sale may not be possible'
+            })
+        
+        # CRITICAL: IRS liens
+        if owner_liens and owner_liens.get('irs_liens'):
+            irs_total = sum(l.get('amount', 0) for l in owner_liens['irs_liens'])
+            warnings.append({
+                'level': 'CRITICAL',
+                'priority': 2,
+                'title': 'IRS TAX LIEN AGAINST OWNER',
+                'message': f'${irs_total:,.2f} IRS lien against {owner_name}',
+                'action': f'This lien attaches to ALL property owned by {owner_name}'
+            })
+        
+        # HIGH: Court judgments
+        if owner_liens and owner_liens.get('judgment_liens'):
+            judgment_total = sum(l.get('amount', 0) for l in owner_liens['judgment_liens'])
+            warnings.append({
+                'level': 'HIGH',
+                'priority': 3,
+                'title': 'COURT JUDGMENT AGAINST OWNER',
+                'message': f'${judgment_total:,.2f} court judgment against {owner_name}',
+                'action': f'This judgment attaches to ALL property owned by {owner_name}'
+            })
+        
+        # HIGH: Property liens
+        if property_liens:
+            property_total = sum(l.get('amount', 0) for l in property_liens)
+            warnings.append({
+                'level': 'HIGH',
+                'priority': 4,
+                'title': 'PROPERTY LIENS FOUND',
+                'message': f'{len(property_liens)} lien(s) totaling ${property_total:,.2f}',
+                'action': 'All liens must be cleared before closing'
+            })
+        
+        # MEDIUM: Child support
+        if owner_liens and owner_liens.get('child_support_liens'):
+            support_total = sum(l.get('amount', 0) for l in owner_liens['child_support_liens'])
+            warnings.append({
+                'level': 'MEDIUM',
+                'priority': 5,
+                'title': 'CHILD SUPPORT LIEN',
+                'message': f'${support_total:,.2f} child support lien against {owner_name}',
+                'action': 'Must be resolved before closing'
+            })
+        
+        # MEDIUM: Multiple mortgages
+        if len(mortgages) > 2:
+            warnings.append({
+                'level': 'MEDIUM',
+                'priority': 6,
+                'title': 'MULTIPLE MORTGAGES',
+                'message': f'{len(mortgages)} active mortgages',
+                'action': 'May indicate financial distress - verify all are current'
+            })
+        
+        # Sort by priority
+        warnings.sort(key=lambda x: x['priority'])
+        
+        return warnings
+    
+    def _generate_error_report(self, pin, address, error_message):
+        """Generate error report when search fails"""
+        return {
+            'pin': pin,
+            'address': address,
+            'error': error_message,
+            'overall_status': 'ERROR',
+            'summary': {},
+            'warnings': [{
+                'level': 'CRITICAL',
+                'title': 'SEARCH ERROR',
+                'message': error_message
+            }]
+        }
+```
+
+---
+
+## TESTING
+
+### Test Script
+
+Create `test_owner_search.py`:
+
+```python
+"""
+Test owner name extraction and search
+"""
+
+from scrapers.lien_search import search_liens_sync
+
+# Test with a real PIN
+result = search_liens_sync(
+    pin='13-36-429-021-0000',  # Replace with test PIN
+    address='2540 W NORTH AVE'  # Replace with test address
+)
+
+print("\n" + "="*60)
+print("LIEN SEARCH RESULTS")
+print("="*60)
+
+print(f"\nProperty: {result['address']}")
+print(f"PIN: {result['pin']}")
+print(f"Owner: {result['owner']}")
+print(f"\nOverall Status: {result['overall_status']}")
+
+print(f"\n--- SUMMARY ---")
+print(f"Property Liens: {result['summary']['property_liens']} (${result['summary']['property_lien_amount']:,.2f})")
+print(f"Owner Liens: {result['summary']['owner_liens']} (${result['summary']['owner_lien_amount']:,.2f})")
+print(f"Total: ${result['summary']['total_lien_amount']:,.2f}")
+
+if result['warnings']:
+    print(f"\n--- WARNINGS ---")
+    for warning in result['warnings']:
+        print(f"[{warning['level']}] {warning['title']}")
+        print(f"  {warning['message']}")
+
+print("\n" + "="*60)
+```
+
+---
+
+## OUTPUT FORMAT
+
+### JSON Response Structure
+
+```json
+{
+  "pin": "13-36-429-021-0000",
+  "address": "2540 W NORTH AVE",
+  "owner": "JOHN SMITH",
+  "searched_at": "2026-02-26T15:30:00",
+  "overall_status": "ISSUES FOUND",
+  
+  "summary": {
+    "active_mortgages": 1,
+    "property_liens": 1,
+    "property_lien_amount": 6500,
+    "owner_liens": 3,
+    "owner_lien_amount": 48500,
+    "total_lien_amount": 55000,
+    "foreclosure_cases": 0
+  },
+  
+  "mortgages": [
+    {
+      "document_number": "2020-12345678",
+      "document_type": "MORTGAGE",
+      "grantee": "Wells Fargo Bank",
+      "amount": 450000
+    }
+  ],
+  
+  "property_liens": {
+    "tax": [],
+    "water": [],
+    "judgment": [],
+    "mechanic": [
+      {
+        "document_number": "2024-01234567",
+        "document_type": "MECHANIC'S LIEN",
+        "amount": 6500,
+        "recorded_date": "01/20/2024"
+      }
+    ],
+    "hoa": [],
+    "other": []
+  },
+  
+  "owner_liens": {
+    "irs_liens": [
+      {
+        "document_number": "2024-03456789",
+        "document_type": "IRS TAX LIEN",
+        "amount": 25000,
+        "recorded_date": "03/15/2024"
+      }
+    ],
+    "state_tax_liens": [],
+    "judgment_liens": [
+      {
+        "document_number": "2023-08901234",
+        "document_type": "JUDGMENT LIEN",
+        "amount": 15000,
+        "recorded_date": "08/20/2023"
+      }
+    ],
+    "child_support_liens": [
+      {
+        "document_number": "2022-06123456",
+        "document_type": "CHILD SUPPORT LIEN",
+        "amount": 8500,
+        "recorded_date": "06/10/2022"
+      }
+    ],
+    "other_owner_liens": []
+  },
+  
+  "foreclosures": [],
+  
+  "warnings": [
+    {
+      "level": "CRITICAL",
+      "priority": 2,
+      "title": "IRS TAX LIEN AGAINST OWNER",
+      "message": "$25,000 IRS lien against JOHN SMITH",
+      "action": "This lien attaches to ALL property owned by JOHN SMITH"
+    },
+    {
+      "level": "HIGH",
+      "priority": 3,
+      "title": "COURT JUDGMENT AGAINST OWNER",
+      "message": "$15,000 court judgment against JOHN SMITH",
+      "action": "This judgment attaches to ALL property owned by JOHN SMITH"
+    },
+    {
+      "level": "HIGH",
+      "priority": 4,
+      "title": "PROPERTY LIENS FOUND",
+      "message": "1 lien(s) totaling $6,500",
+      "action": "All liens must be cleared before closing"
+    },
+    {
+      "level": "MEDIUM",
+      "priority": 5,
+      "title": "CHILD SUPPORT LIEN",
+      "message": "$8,500 child support lien against JOHN SMITH",
+      "action": "Must be resolved before closing"
+    }
+  ],
+  
+  "sources_searched": {
+    "recorder_by_pin": true,
+    "recorder_by_owner": true
+  }
+}
+```
+
+---
+
+## COST
+
+**Before (PIN search only):**
+- 1 CAPTCHA solve = $0.003
+
+**After (PIN + Owner search):**
+- 2 CAPTCHA solves = $0.006
+
+**With 30-day caching:**
+- Average cost = $0.003 (50% cache hit rate)
+
+---
+
+## TIMELINE
+
+**Implementation time: 2-3 hours**
+
+1. Add `search_by_name()` method to RecorderScraper - 1 hour
+2. Create owner_extraction.py - 30 minutes
+3. Update lien_search.py coordinator - 1 hour
+4. Test with real properties - 30 minutes
+
+---
+
+## CRITICAL NOTES
+
+1. ✅ **Use existing CAPTCHA solver** - Don't create new one
+2. ✅ **Async loading** - Owner search runs in same background thread
+3. ✅ **30-day caching** - Cache includes both property + owner search results
+4. ✅ **Error handling** - Continue even if owner name can't be extracted
+5. ✅ **Debug files** - Save HTML on errors for troubleshooting
+
+---
+
+## START HERE
+
+1. Add `search_by_name()` to `recorder_scraper.py`
+2. Create `owner_extraction.py` with name extraction functions
+3. Update `_perform_search()` in `lien_search.py` to include owner search
+4. Update `_compile_report()` to combine property + owner liens
+5. Test with known properties
+
+**The scraper structure stays the same - you're just adding one more search step!**

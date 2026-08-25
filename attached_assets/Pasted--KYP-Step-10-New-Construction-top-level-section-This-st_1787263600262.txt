@@ -1,0 +1,384 @@
+# KYP — Step 10: New Construction → top-level section
+
+### This step is a **consolidation** first and a redesign second. Read §1 before writing any CSS.
+
+There are currently **four** places on the page that answer "is anything being built near this
+property?", and three of them compute it independently, from the same Socrata dataset, with
+different windows, geographies and filters. Two of the three are wrong. Styling one of them
+without deleting the others just makes the disagreement prettier.
+
+🔴 **Scope:** change only what this document specifies. Do not restyle, refactor, or "make
+consistent" any other section. Do not touch Permits & Violations (section 03) — that section is
+about permits **on this parcel**; this one is about permits **near** it. They are different
+questions and must stay separate sections.
+
+| What | Today | After |
+|---|---|---|
+| New Construction | nested under Proximity Details, `RunDetail.tsx:15178–15547` | top-level section `10` |
+| Surface B — "New Construction Permits (City Records)" | second list, `RunDetail.tsx:19836–19895` | **deleted** |
+| Surface C — "N in ½ mile" fact tile | `RunDetail.tsx:16039–16048` | **deleted** |
+| Socrata clients on `ydr8-5enu` | 5, none shared | 1 shared module |
+| Scope toggle | Community / ZIP / Nearby, ignored by the badge and takeaway | **removed** — 1 mile is the subject, community area is the benchmark |
+| Year chart | stacked, 3 categorical hues incl. amber | 1 indigo series on `.kyp-hbar` |
+| Category "avg value · skewed" | mean, with an apology | **median**, stated |
+| Permit list | only renders in `nearby` mode, which is not the default | always renders |
+
+---
+
+## 1. Consolidation — do this first
+
+### 1A. Delete Surface C, do not fix it
+
+`RunDetail.tsx:16039–16048` renders `proximityData.newConstruction.countInHalfMilePast5Years`
+as **"N in ½ mile · Past 5 years"**.
+
+Look at `server/pinResolver.ts:1684`:
+
+```ts
+const url = `${PROXIMITY_API_BASE}?pin10=${pin10}&$order=year DESC&$limit=5`;
+```
+
+One row per assessment year, capped at five. Each row's `nearest_new_construction_pin10` is
+**the single nearest new-construction parcel in that year**. The code then counts distinct
+PINs among those ≤5 rows and labels the result as a count of new construction in a half mile.
+
+It is structurally incapable of exceeding **5**, and it is not measuring buildings — it is
+measuring *how many of the last five assessment years had their nearest new build inside a half
+mile*. A block with sixty new buildings and a block with three both render the same number.
+
+Delete the tile. Leave the rest of `fetchProximityData` alone — foreclosures and vacant land
+use different fields on the same response and are out of scope. Remove only the
+`newConstruction` block from the returned object and its render site.
+
+### 1B. Delete Surface B, serve from Surface A's cache
+
+`server/upcomingDevelopments.ts:227` fetches `ydr8-5enu` for `PERMIT - NEW CONSTRUCTION` over a
+**6-month** window (`:223`), with **no accessory-structure filter** and **no dedup**. Its
+results render as `stage === 1` items at `RunDetail.tsx:19836–19895`.
+
+`server/newConstruction.ts` already caches a **citywide 3-year** array of the same permit type,
+already excludes accessory structures (`:174–199`), already dedups. Surface B's result set is a
+strict subset of it, minus the two filters — which means B shows garages and duplicate rows
+that A correctly hides, side by side, on the same page.
+
+- Remove the stage-1 fetch from `upcomingDevelopments.ts`.
+- `upcomingDevelopments` keeps **only** its stage-2 items (the Block Club / news-derived
+  proposed developments). That section is now purely "things announced but not yet permitted,"
+  which is a real and distinct thing.
+- Delete the stage-1 `<Collapsible>` at `:19836–19895`.
+
+### 1C. One client for `ydr8-5enu`
+
+Five modules hit this dataset with zero shared code and incompatible categorization functions.
+Extract one:
+
+```ts
+// server/chicagoPermits.ts
+export type PermitCategory = 'singleFamily' | 'multifamily' | 'commercial';
+export interface NewConstructionPermit {
+  permitNumber: string;
+  address: string;
+  lat: number; lng: number;
+  issueDate: string;          // ISO
+  reportedCost: number;
+  category: PermitCategory;
+  units: number | null;
+  stories: number | null;
+  buildingUse: string | null;
+  architectName: string | null;
+  contractorName: string | null;
+  ownerName: string | null;
+  communityArea: string;
+}
+export async function getNewConstructionCitywide(): Promise<NewConstructionPermit[]>;  // cached
+export function categorizePermit(row: any): PermitCategory;                            // ONE impl
+export function isAccessoryStructure(row: any): boolean;                               // ONE impl
+```
+
+Every caller — `newConstruction.ts`, `upcomingDevelopments.ts`, `Compare.tsx`'s backend, and the
+PDF builder — reads from this. Do not leave a second copy of `categorizePermit` anywhere. If
+two call sites need different windows, filter the cached array; do not issue a second fetch.
+
+### 1D. Feed the report snapshot
+
+Neither surface appears in `reportSnapshot`, so **no new-construction data reaches the AI
+report or the PDF**. Add the section's computed figures (see §3) to the snapshot alongside the
+other sections' entries.
+
+---
+
+## 2. Server — `server/newConstruction.ts`
+
+### 2A. The subject is 1 mile; community area is a benchmark
+
+Return one object, not three scopes:
+
+```ts
+export interface NewConstructionResponse {
+  // subject — within 1 mile of the parcel
+  nearby: {
+    permits: NewConstructionPermit[];   // all of them, nearest first
+    totalCount: number;
+    byCategory: Record<PermitCategory, { count: number; medianCost: number }>;
+    byYear: Record<string, number>;     // total only — no category split
+    last12: number;                     // issued in the trailing 12 months
+    prior12: number;                    // issued in months 13–24
+    changePct: number | null;           // null when prior12 === 0
+    activeCount: number;                // issued within 18 months
+    nearestActiveMiles: number | null;
+    nearestActiveAddress: string | null;
+    permittedUnits: number;             // Σ units across multifamily permits
+    permittedUnitBuildings: number;
+    largestUnitCount: number;
+  };
+  // benchmark only — one number, never its own view
+  communityAreaName: string;
+  communityAreaTotal: number;           // same window, same filters
+  periodStart: string; periodEnd: string;
+  latestIssueDate: string;
+}
+```
+
+### 2B. Delete the ZIP scope entirely
+
+`:440` filters `p.contact_1_zipcode === zipCode`. That is the **permit applicant's mailing
+ZIP**, not the property's — a developer headquartered in Naperville drops out of the count for
+the ZIP they are building in. The field cannot answer the question, and community area already
+covers "the neighbourhood." Remove `zipCode`, `zip`, and the toggle option.
+
+### 2C. Median, not mean
+
+`computeStats` returns `avgCost` and a `skewed` flag. Reported permit cost is right-skewed by
+construction — one tower sits in the same column as twenty two-flats. The code detects the skew
+and prints the mean anyway with `· skewed` appended.
+
+Return **`medianCost`** and delete `avgCost` and `skewed`. Label it "median" in the UI.
+
+While you are here: two different averages for the same category are currently visible at once
+— the community tiles divide total cost by **all** permits, the nearby tiles divide by
+**priced** permits only. Median resolves this, but state the denominator in the source line:
+*"Median of permits reporting a cost; N of M reported none."*
+
+### 2D. One trend algorithm
+
+Two disagree on screen today: server `trendDirection` (trailing 12 vs prior 12, ±10%) drives
+the collapsed badge, client `trendWord` (full calendar years + monotonicity) drives the
+expanded chip. A section can show "Trending Up" collapsed and "Stable" expanded.
+
+Keep **trailing 12 vs prior 12**, on the nearby scope. Delete `trendWord` from `RunDetail.tsx`.
+Rationale: calendar-year monotonicity needs three full years to say anything and goes silent
+in Q1; the trailing window always has an answer and matches what "up 83%" means to a reader.
+
+---
+
+## 3. Promote to a top-level section
+
+Register `10 · NEW CONSTRUCTION` in the section registry, the jump menu, the reorder list, the
+visibility toggle and the PDF, exactly as Step 8 did for `09`.
+
+**Header contract — one title, one takeaway, one badge:**
+
+```
+10 · NEW CONSTRUCTION — {takeaway}   [badge]  ⓘ  👁  ⌃
+```
+
+There is no scope toggle, so nothing can desynchronise the badge from the body. Delete
+`newConstructionViewMode` (`RunDetail.tsx:755`), `nearbyPermitFilter`'s tile UI, the
+`section-new-construction` `<Collapsible>` wrapper, and the `newConstructionSub` key. Two
+section keys existed with the jump menu at `:3232` pointing at the second one — after this step
+there is one.
+
+---
+
+## 4. CSS — `kyp-base.css`
+
+Three additions. **All three are modifiers on components that already exist.** Do not create a
+new bar chart, a new card, or a new chip.
+
+```css
+/* year row = the same object as a ranked count row */
+.kyp-hbar.yr .hl{font-family:var(--mono);font-size:12.5px;font-weight:700;display:block}
+.kyp-hbar.yr .hl .ytd{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.06em;color:var(--indigo);display:block;margin-top:2px}
+.kyp-hbar .pace{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:6px;padding:3px 7px;flex:none;white-space:nowrap}
+
+/* two charts stacked in one section must share a label gutter, or they read as
+   two different components. The gutter belongs to the chart, not the bar. */
+.kyp-bars.g150 .kyp-hbar .hl,.kyp-bars.g150 .kyp-hbar .hl.chips{width:150px}
+
+/* a build is the same object as a nearby business — this is the extra field grid */
+.kyp-bizcard{display:flex;flex-direction:column}
+.kyp-bizcard .kyp-docref{margin-top:auto}
+.kyp-bizcard a.bnm{text-decoration:none}
+.kyp-bizcard a.bnm:hover{text-decoration:underline}
+.kyp-bizcard .bfields{display:grid;grid-template-columns:repeat(auto-fit,minmax(102px,1fr));gap:7px 16px;margin-top:11px;padding-top:10px;border-top:1px dashed var(--line)}
+.kyp-bizcard .bfields .k{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px}
+.kyp-bizcard .bfields .v{font-size:12px;font-weight:600;color:var(--ink);line-height:1.3}
+.kyp-lstat .pill.ind{background:var(--indigo)}
+```
+
+**Delete** the entire `.ncbox` block (`index.css:2035–2082`) and the `.nc-*` rules
+(`:787–804`). Every one of them is replaced by an existing component:
+
+| Old | New |
+|---|---|
+| `.ncbox .ybrow` / `.ybbar` / `.sfc` / `.mfc` / `.commc` | `.kyp-hbar.yr` |
+| `.ncbox .g3` / `.tcard` | `.kyp-blocks.hero` + `.kyp-terms` |
+| `.ncbox .toggle` | *(gone — no toggle)* |
+| `.ncbox .trend` | `.kyp-block.grn` breakdown rows |
+| `.nc-perm` / `.nc-addr` / `.nc-fields` / `.nc-f` | `.kyp-bizcard` + `.bfields` |
+| `.nc-stile` | `.kyp-hbar.click` mix rows |
+| `.nc-dot` swatches | `.kyp-liccat` chips |
+
+⚠️ **Remove `--sf`, `--mf`, `--comm` from the `.ncbox` token block.** `--comm: #f59e0b` is a
+near-neighbour of the caution token `#e07a2e`, so every commercial segment in every stacked bar
+currently reads as a warning stripe. No categorical scale may borrow a verdict hue.
+
+---
+
+## 5. Body layout
+
+```
+[ hero blocks ×3 ]
+[ gated supply callout — .kyp-disc, conditional ]
+[ status strip — .kyp-lstat ]
+PERMITS BY YEAR · WITHIN 1 MILE      .kyp-bars.g150 > .kyp-hbar.yr    (indigo, one series)
+  └ .kyp-barkey — pace caveat
+BUILDS BY TYPE · CLICK A ROW TO FILTER  .kyp-bars.g150 > .kyp-hbar.click.ind + .kyp-liccat
+  └ .kyp-terms — median cost per type
+  └ .kyp-barkey — median-not-mean note
+THE BUILDS  ·  N · nearest first      .kyp-subhead + .kyp-bizgrid > .kyp-bizcard
+  └ each card: address link, .bdist, .kyp-liccat, .bfields, .kyp-docref
+[ .kyp-morelink ]  [ .kyp-footnote — counting method ]  [ .kyp-src ]
+```
+
+Clicking a type row filters **the card list**, same interaction as the licence mix in `09`.
+Reuse that handler; do not write a second one.
+
+The permit number is a **document reference** — the same object as a recorder document — so it
+uses `.kyp-docref` and links to the Chicago Data Portal permit record. The address links to
+Maps. Do not put the address in `.kyp-docref` and do not link the permit number to Maps.
+
+---
+
+## 6. 🔒 Colour — encodes the CLAIM, never the category
+
+New construction near a property is genuinely ambiguous, and the section must not pretend
+otherwise. Three numbers, three different claims.
+
+| Block | Number | Colour | Because |
+|---|---|---|---|
+| 1 | builds within 1 mile | **indigo** | a count with no benchmark makes no claim; the community-area figure sits in its breakdown rows as context, not as a verdict |
+| 2 | trend `+N%` | **green** if `changePct ≥ +10`, **indigo** if within ±10, **indigo** if falling | capital arriving lifts land value for every owner type. Cooling construction is not a defect — never orange, never red |
+| 3 | permitted units | **gated — see §7** | |
+
+**Nothing in this section is ever red.** Red requires the record to be authoritative on the
+question, or the fact to describe something unlawful or unfinanceable (§11). A permit for a
+building near you is neither. There is no count of nearby construction that makes a property
+defective.
+
+⚠️ **Every filled block's label must state the claim in words, not the category.** Green
+`#2f7d3f` and orange `#e07a2e` sit 25.6 ΔE apart to normal vision but only **7.9 (protan) /
+5.9 (tritan)** — a colour-blind reader sees blocks 2 and 3 as the same colour. The label is the
+only thing that separates them.
+
+```
+✗  NEW UNITS PERMITTED WITHIN 1 MI
+✓  NEW UNITS COMING — COMPETING SUPPLY
+```
+
+---
+
+## 7. 🔒 Gated logic
+
+Compute these; do not tell the user to check anything manually.
+
+1. **The unit-supply flag (block 3).** Orange **only when all of:** the subject property has
+   `units >= 5` (assessor class or listing unit count), **and** `permittedUnits >= 25`, **and**
+   `permittedUnits >= 2 × subjectUnits`. Otherwise **indigo**, label
+   `NEW UNITS COMING — NEARBY SUPPLY`, no callout. A house buyer and an owner-user get no claim
+   from the same 340 units; a 12-unit landlord does. This is the *"a million-dollar house does
+   not mean you have cash to fix the toilet"* rule: land value up ≠ cashflow up.
+
+2. **Render the `.kyp-disc` callout only when the flag fires**, and have it name the gate in
+   plain language ("this property is a 12-unit rental"). A dormant rule renders nothing.
+
+3. **`changePct = null` when `prior12 === 0`.** A rise from zero is not a percentage. Render
+   "first new construction within a mile in two years" and colour the block **indigo** — one
+   permit after a dry spell is not a trend.
+
+4. **Suppress the trend block entirely when `last12 + prior12 < 4`.** Percentages on tiny
+   counts are noise: 2 → 4 is "up 100%" and means nothing. Show the raw counts instead.
+
+5. **`activeCount`** = issued within 18 months. This is a *proxy* for "under construction," and
+   the status strip must say so — "likely still building," never "under construction."
+
+6. **Nearest-active proximity.** If `nearestActiveMiles < 0.1`, add a `.kyp-loc` callout:
+   construction inside two blocks is a real near-term disruption claim. Between 0.1 and 1 mile
+   it is context and stays in the status strip. **Distance alone never turns a block orange** —
+   only the callout appears.
+
+7. **YTD pace is a projection and must be labelled one.** Keep the existing straight-line
+   calculation and the "spring and summer are peak filing season" caveat. Never let the
+   projected figure enter the trend calculation.
+
+8. **Benchmark honesty.** `communityAreaTotal` is a raw count over a much larger area — it is
+   **not** normalised and must never be compared to the 1-mile figure as a ratio. Print it as
+   context only: "West Town: 218 over the same window."
+
+9. **Citywide fallback must not silently lie.** Today, when no community-area match is found,
+   the code falls back to citywide numbers while the banner says "No neighborhood-specific
+   results found" — and the summary bullet above it still reads "15 new construction permits in
+   Beverly." If the community-area lookup fails, **omit the benchmark row**. Do not substitute
+   a different geography under the same label.
+
+10. **Units are the applicant's figure at filing.** They are not re-verified at completion and
+    projects get value-engineered down. Say so in `.kyp-src`. Never present `permittedUnits` as
+    delivered supply.
+
+---
+
+## 8. Bugs found while mapping — fix 1–6, log the rest
+
+1. **`pinResolver.ts:1684` `$limit=5`** — the ½-mile count is structurally capped at 5 and
+   measures years, not buildings. *Fixed by deletion (§1A).*
+2. **`newConstruction.ts:440` filters on `contact_1_zipcode`** — applicant's mailing ZIP, not
+   the property's. *Fixed by deletion (§2B).*
+3. **Two trend algorithms visible at once** — server `trendDirection` in the collapsed badge,
+   client `trendWord` in the expanded chip. *Fixed in §2D.*
+4. **Two "average value" figures for one category** — different denominators re zero-cost
+   permits. *Fixed in §2C.*
+5. **The count chip and the whole takeaway ignore the view toggle** — the toggle changes the
+   tiles and chart, the sentence above them keeps describing the community area. *Fixed by
+   removing the toggle (§2A).*
+6. **Citywide fallback contradicts its own banner.** *Fixed in §7.9.*
+7. **The permit list only renders in `nearby` mode, and the default is `community`
+   (`:755`).** On load the user sees a whole community area's statistics and zero actual
+   nearby buildings — the list is two clicks away. *Fixed by §3.*
+8. **Surface B has no accessory filter and no dedup**, so it shows garages and duplicate permit
+   rows that Surface A correctly hides, on the same page. *Fixed by deletion (§1B).*
+9. **`Compare.tsx:1317–1358`** runs a fourth implementation. Point it at
+   `getNewConstructionCitywide()`; do not restyle it in this step. **Log only if it needs more
+   than a call-site swap.**
+10. **No new-construction data reaches `reportSnapshot`**, so the AI report and the PDF are
+    blind to it. *Fixed in §1D.*
+
+---
+
+## ✅ Done-when
+
+- [ ] `10 · NEW CONSTRUCTION` is top-level, in the jump menu, reorder list, visibility toggle
+      and PDF.
+- [ ] Searching the repo for `ydr8-5enu` returns **one** module.
+- [ ] Searching for `categorizePermit` / accessory-filter logic returns **one** implementation
+      each.
+- [ ] The "N in ½ mile" tile and the stage-1 permit list are gone; Upcoming Developments shows
+      only news-derived proposed projects.
+- [ ] No scope toggle exists; the badge, takeaway and body cannot disagree.
+- [ ] The year chart is **one indigo series**; `--sf` / `--mf` / `--comm` no longer exist.
+- [ ] No category label anywhere uses green, orange, red or amber.
+- [ ] Every filled block's label states its claim in words.
+- [ ] Category cost figures say **median** and state the denominator.
+- [ ] The supply callout renders for a 12-unit subject with 340 nearby permitted units, and
+      renders **nothing** for a single-family subject with the same 340.
+- [ ] Crime and New Business Licenses render **unchanged** — `.kyp-hbar.yr` and `.kyp-bars.g150`
+      are additive; confirm visually before shipping.

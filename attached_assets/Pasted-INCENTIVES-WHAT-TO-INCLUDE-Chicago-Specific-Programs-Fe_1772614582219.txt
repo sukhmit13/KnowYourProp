@@ -1,0 +1,403 @@
+INCENTIVES - WHAT TO INCLUDE
+Chicago-Specific Programs:
+Federal:
+
+✅ Opportunity Zones (federal tax benefit)
+✅ Historic Tax Credits (20-40% credits)
+✅ New Markets Tax Credits
+✅ Energy efficiency incentives
+
+State (Illinois):
+
+✅ EDGE Tax Credits (job creation)
+✅ Enterprise Zone benefits
+✅ Historic Preservation credits
+✅ Film production credits (if relevant)
+
+City (Chicago):
+
+✅ TIF Districts (tax increment financing)
+✅ Class L Property Tax (historic buildings)
+✅ Industrial Corridor incentives
+✅ Small Business Improvement Fund
+✅ Neighborhood Opportunity Fund
+✅ Affordable housing incentives
+
+Utility Programs:
+
+✅ ComEd energy efficiency rebates
+✅ Peoples Gas incentives
+✅ Water conservation credits
+
+
+Data Sources:
+Federal:
+
+Opportunity Zone mapping (HUD)
+Historic registry (National Park Service)
+
+State:
+
+DCEO (Dept of Commerce & Economic Opportunity)
+IHPA (Illinois Historic Preservation Agency)
+
+City:
+
+Chicago TIF district map (public data)
+DPD (Dept of Planning & Development)
+BACP (Business Affairs & Consumer Protection)
+
+Most of this is FREE public data! ✅
+
+ZONING COMPLIANCE - WHAT TO INCLUDE
+Core Zoning Info:
+Basic:
+
+✅ Current zoning designation (e.g., "B3-2")
+✅ Zoning district description
+✅ Allowed uses (as-of-right)
+✅ Conditional uses (need approval)
+
+Technical:
+
+✅ FAR (Floor Area Ratio) limits
+✅ Height restrictions
+✅ Setback requirements
+✅ Parking minimums
+✅ Lot coverage limits
+✅ Open space requirements
+
+Historical:
+
+✅ Previous zoning changes
+✅ Variance history
+✅ Special use permits
+✅ Planned developments (PDs)
+
+Compliance Analysis:
+
+✅ Current use vs allowed use
+✅ Non-conforming status
+✅ Required approvals for changes
+✅ Variance likelihood
+
+
+Data Sources:
+Chicago:
+
+Chicago Zoning Map (GIS)
+Zoning Ordinance (Chicago Municipal Code)
+Zoning Board of Appeals decisions
+PD database (Planned Developments)
+
+All publicly available! ✅
+
+EXAMPLE REPORT OUTPUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMERCIAL PROPERTY INTELLIGENCE REPORT
+1234 W Division St, Chicago IL
+
+Property Type: Mixed-Use Building
+Current Use: Retail + Office
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🏗️ DEVELOPMENT PIPELINE (Your #1 Priority)
+
+Active Nearby Projects:
+- 1250 W Division - 200-unit residential (approved)
+- 1300 W Division - Retail redevelopment (under construction)
+- Division St corridor study (in progress)
+
+Recent Zoning Changes:
+- 2024: Division St corridor upzoning (B2 → B3)
+- 2023: Adjacent lot rezoned for mixed-use
+
+Impact: HIGH - Major development activity, values rising
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💰 INCENTIVES & PROGRAMS
+
+✅ ELIGIBLE FOR:
+
+1. TIF District: West Town
+   • Estimated rebate: $50K-150K (construction)
+   • Application deadline: 60 days before construction
+   • Contact: DPD TIF Unit (312-744-4190)
+
+2. Opportunity Zone: Census Tract 8104
+   • Federal capital gains deferral/reduction
+   • 10-year hold = no capital gains tax
+   • Investment value: Potentially $100K+ in tax savings
+
+3. Class L Property Tax (Historic)
+   • Building eligible (built 1905)
+   • 12-year property tax reduction
+   • Savings: ~$15K/year = $180K total
+
+4. Small Business Improvement Fund
+   • Up to $150K for facade/interior
+   • 50% match required
+   • Rolling applications
+
+TOTAL POTENTIAL INCENTIVES: $330K-480K
+
+⚠️ NOT ELIGIBLE FOR:
+- Enterprise Zone (outside zone)
+- New Markets Tax Credit (doesn't qualify)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 ZONING COMPLIANCE
+
+Current Zoning: B3-2 (Community Shopping District)
+
+ALLOWED USES (as-of-right):
+✅ Retail
+✅ Office
+✅ Restaurant/bar
+✅ Personal services
+✅ Residential (above ground floor)
+
+CONDITIONAL USES (need approval):
+⚠️ Nightclub
+⚠️ Gas station
+⚠️ Drive-through
+
+DEVELOPMENT STANDARDS:
+- FAR: 2.2 maximum (current: 1.8 - under limit ✅)
+- Height: 45 feet max (current: 35 feet ✅)
+- Parking: 1 space per 200 sqft retail
+- Current parking: 8 spaces (need 10 - non-conforming ⚠️)
+
+COMPLIANCE STATUS:
+✅ Current use compliant
+⚠️ Parking deficiency (grandfathered)
+✅ No violations on record
+
+REDEVELOPMENT OPTIONS:
+- Can add 1 floor (within height limit)
+- Would need variance for parking if expanding retail
+- Mixed-use residential encouraged by zoning
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💵 COMPARABLE SALES (Your #2 Priority)
+
+Recent Commercial Sales (1 mile radius):
+- 1300 W Chicago - $425/sqft (2024)
+- 1500 W Division - $380/sqft (2024)
+- 1200 W Grand - $410/sqft (2023)
+
+Median: $405/sqft
+Subject property size: 5,000 sqft
+Estimated value: $2,025,000
+
+Cap Rate Analysis:
+- Area average: 6.5%
+- This property: 6.8% (current NOI)
+- Market: Fair value
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🏢 COMMERCIAL RENTAL ANALYSIS (Your #3 Priority)
+
+Retail Rent Comps (Division St corridor):
+- Ground floor retail: $35-45/sqft/year
+- Second floor office: $20-25/sqft/year
+
+Tenant Mix (0.5 mile):
+- 40% Restaurant/bar
+- 30% Retail
+- 20% Office
+- 10% Services
+
+Vacancy Rate: 8% (healthy market)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚖️ LIENS & ENCUMBRANCES (Your #4 Priority)
+
+✅ NO LIENS FOUND
+Clean title
+
+Recent history:
+- Mortgage paid off 2023
+- No tax liens
+- No mechanic's liens
+- No judgments
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 INVESTMENT SUMMARY
+
+Purchase Considerations:
+✅ In TIF district ($50-150K rebate potential)
+✅ Opportunity Zone (capital gains benefits)
+✅ Historic tax credit eligible ($180K savings)
+✅ Zoning allows expansion (add 1 floor)
+✅ Clean title
+⚠️ Parking variance needed if expanding retail
+✅ Strong development pipeline nearby
+
+TOTAL INCENTIVE VALUE: $330-480K
+On $2M property = 16-24% value boost
+
+Recommended Actions:
+1. Apply for Class L before purchase
+2. Contact DPD re: TIF application
+3. Consult CPA re: Opportunity Zone structure
+4. Consider variance for parking before expansion
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRICING WITH THESE FEATURES
+Your Reports Are Now Worth MORE:
+Old Pricing:
+
+$25 residential
+$50 commercial
+
+New Pricing (with incentives + zoning):
+
+$25 residential (unchanged)
+$75-100 commercial ← Justified!
+
+Why:
+
+Finding ONE incentive = $50K-150K value
+Your report ROI: 500-2000x
+Commercial investors will happily pay $100
+
+CoStar charges $10,000/year and doesn't have this!
+
+MARKETING MESSAGE - UPDATED
+Your New Positioning:
+"Commercial property intelligence focused on 
+incentives + development pipeline
+
+Built for my own commercial deals in Chicago.
+
+Features competitors don't have:
+✅ Comprehensive incentive analysis (TIF, OZ, historic credits)
+✅ Zoning compliance + redevelopment options  
+✅ Development pipeline (zoning apps + permits)
+✅ Commercial comps + cap rates
+✅ Rental analysis
+
+$75-100/property
+
+One TIF district finding = $50K-150K in rebates
+One historic credit = $180K in tax savings
+One Opportunity Zone = $100K+ in capital gains deferral
+
+Report pays for itself 1,000x over.
+
+CoStar: $10,000/year
+Us: $75-100/report
+
+Built by commercial investor for commercial investors."
+
+IMPLEMENTATION PRIORITY
+Tell Replit AI:
+"Adding two critical commercial features:
+
+1. INCENTIVES & PROGRAMS:
+   
+   Federal level:
+   - Opportunity Zones (map overlay)
+   - Historic Tax Credits (eligibility check)
+   - New Markets Tax Credits
+   
+   State level (Illinois):
+   - Enterprise Zones
+   - EDGE credits
+   - Historic preservation credits
+   
+   City level (Chicago):
+   - TIF Districts (map + eligibility)
+   - Class L Property Tax (historic buildings)
+   - Small Business Improvement Fund
+   - Neighborhood Opportunity Fund
+   
+   For each: Show eligibility, estimated value, 
+   application process, contact info
+
+2. ZONING COMPLIANCE:
+   
+   Basic info:
+   - Current zoning designation
+   - Allowed uses (as-of-right)
+   - Conditional uses
+   
+   Technical requirements:
+   - FAR limits vs current
+   - Height restrictions vs current
+   - Parking requirements vs current
+   - Setback requirements
+   
+   Compliance analysis:
+   - Is current use conforming?
+   - What approvals needed for changes?
+   - Redevelopment potential
+   
+   Historical:
+   - Previous zoning changes
+   - Variance history
+   
+Data sources:
+- TIF districts: Chicago Open Data
+- Opportunity Zones: HUD mapping
+- Historic registry: National Park Service
+- Zoning: Chicago zoning map + ordinance
+- Enterprise zones: Illinois DCEO
+
+These are my #1 and #2 most valuable features for 
+commercial investing. Development pipeline is already 
+great, these complete the package."
+
+REVENUE PROJECTION - REVISED
+With Premium Commercial Reports:
+Month 1-2: Build + Test
+
+Perfect incentives + zoning features
+Test on YOUR deals
+Refine
+
+Month 3: Launch
+
+10 commercial investors @ $100 = $1,000
+20 residential investors @ $25 = $500
+Total: $1,500/month
+
+Month 6: Scale
+
+30 commercial investors @ $100 = $3,000
+50 residential investors @ $25 = $1,250
+Total: $4,250/month
+
+Month 12:
+
+50 commercial @ $100 = $5,000
+100 residential @ $25 = $2,500
+Total: $7,500/month
+
+Commercial focus = higher revenue per customer!
+
+THE BOTTOM LINE
+Adding incentives + zoning compliance makes this a:
+✅ TRUE commercial intelligence platform
+✅ Differentiated from all competitors
+✅ Worth $75-100/report (not $25)
+✅ Can save investors $100K-500K per deal
+Your competitive advantages:
+
+Development pipeline (already have)
+Incentives (adding)
+Zoning compliance (adding)
+Commercial comps (have)
+Price: $100 vs $10K+ for CoStar
+
+This is not "another property data tool."
+This is "commercial development intelligence that finds $100K+ in hidden value." 🏆
+One investor saves $150K from finding a TIF district in your report = 1,500x ROI on their $100. They'll use you for every deal after that! 🎯

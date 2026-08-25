@@ -1,0 +1,40 @@
+# Replit Prompt — Reuse the existing today's-rate value in the HMDA section (single source of truth)
+
+You already fetch today's mortgage rate for the **valuation calculator**. Do **NOT** add a second fetch for the HMDA / Local Mortgage Market Activity section. Instead, read the **same** rate value the calculator uses, and surface it in two places: the rate card display and the takeaway generator input. One source, two consumers — so the calculator and the HMDA section can never show different "today" rates.
+
+## 1) Point the HMDA section at the existing rate (no new fetch)
+- Find the value/service that already supplies today's rate to the valuation calculator (e.g. a `currentMortgageRate` field, a rates service/hook, or a cached row). Use that as the source.
+- Map it into the three fields the HMDA display + takeaway expect:
+  - `market_rate_today`  ← the calculator's current rate
+  - `market_rate_asof`   ← the date/timestamp that rate was fetched/valid for
+  - `market_rate_source` ← the label for what it is (e.g. "Freddie Mac PMMS 30-yr")
+- If the calculator's value is stored once centrally, both features should import it from that one place — don't copy the number into a second constant.
+
+## 2) Normalize before displaying (common gotchas)
+- **Units:** the calculator may hold the rate as a decimal (`0.068`) or a percent (`6.8`). Convert to a percent number for display (`6.80%`). Confirm which one it is before wiring — a decimal shown raw would read "0.068%".
+- **Rounding:** display to 2 decimals (`6.80%`); keep full precision internally for the comparison math.
+- **Product/label match:** the HMDA card labels this the "30-yr fixed market benchmark." If the calculator's rate is actually a different product (e.g. an ARM, a blended, or a commercial rate), change `market_rate_source` / the card label to match what it truly is — don't mislabel it as 30-yr fixed if it isn't.
+- **`as_of` must travel with it.** If the calculator stores the rate but not when it was fetched, capture that timestamp at fetch time and store it alongside — the HMDA section's stale-check depends on it.
+
+## 3) Display (already spec'd — just bind the reused value)
+The rate card's `.ratecmp` chip and note (from the HMDA takeaway prompt) bind directly:
+```html
+<div class="ratecmp">
+  <span class="today">Today ~{market_rate_today}%</span>
+  <span class="cmpnote">30-yr fixed market benchmark · {market_rate_source}, as of {market_rate_asof} — a snapshot, vs. the {year} full-year average at left</span>
+</div>
+```
+
+## 4) Feed the takeaway generator the reused value
+Pass `market_rate_today` / `market_rate_asof` / `market_rate_source` into the HMDA takeaway input object (they're already in that contract). Everything downstream — the "a touch below today's ~X%" phrasing, the code-computed direction, the stale fail-closed — works unchanged. The takeaway still never states a rate from model knowledge; it only echoes this reused field.
+
+## 5) Stale handling stays (shared benefit)
+Keep the fail-closed rule: if `market_rate_asof` is older than your refresh window (~2 weeks for a weekly benchmark), hide the `.ratecmp` chip and drop the "today's rate" clause from the takeaway. Because the source is shared, if the calculator's rate is fresh, the HMDA section is automatically fresh too.
+
+## CRITICAL DETAILS
+1. **One source, no second fetch** — the HMDA section reads the SAME rate value as the valuation calculator. Import from the single source; never duplicate the fetch or the constant.
+2. **Normalize units** (decimal vs percent) and **round to 2 dp** for display; keep precision for the comparison.
+3. **`as_of` travels with the rate** so the stale-check works; capture the fetch timestamp if it isn't already stored.
+4. **Label matches reality** — only call it "30-yr fixed" if that's what the calculator's rate actually is; otherwise relabel.
+5. **Takeaway input reuses the same field** — no model-generated rate, direction computed in code, stale → fail closed (all unchanged from the HMDA takeaway prompt).
+```

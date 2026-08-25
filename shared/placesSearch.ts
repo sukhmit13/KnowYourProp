@@ -6,7 +6,7 @@
  * and hit the same Google Places cache keys. Do not fork this logic.
  */
 
-/** Map a project type to a generic Places keyword ('' if none applies). */
+/** Map a project use to a generic Places keyword ('' if none applies). */
 export function projectTypeKeyword(projectType: string | null | undefined): string {
   const pt = (projectType || '').toLowerCase();
   if (pt.includes('restaurant') || pt.includes('bar') || pt.includes('tavern') || pt.includes('food')) return 'restaurant';
@@ -24,13 +24,13 @@ export function isDaycareProjectType(projectType: string | null | undefined): bo
 }
 
 /**
- * Derive the Places search term from the selected project type and the
+ * Derive the Places search term from the selected project use and the
  * user's freeform concept description. Mirrors the RunDetail behavior:
  * - Day Care: "<freeform> daycare" or "daycare center"
  * - Other types: freeform split on commas, each term suffixed with the
  *   project-type keyword when not already present; falls back to the raw
- *   project type when no usable freeform text exists.
- * Returns null when no project type is set.
+ *   project use when no usable freeform text exists.
+ * Returns null when no project use is set.
  */
 export function derivePlacesSearchTerm(
   projectType: string | null | undefined,

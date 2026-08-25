@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;
+    --amberSoft:#fdf4dd;--amberText:#8f6a08;--amberLine:#ecd9a0;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:34px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0;box-shadow:0 1px 3px rgba(20,20,20,.04);overflow:hidden}
+  .pad{padding:20px 24px 22px}
+
+  /* header */
+  .sh{display:flex;align-items:center;gap:9px;padding:18px 24px 14px;border-bottom:1px solid var(--line)}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .status{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--good)}
+  .sh .status .d{width:8px;height:8px;border-radius:50%;background:var(--good);flex:none}
+  .sh .asof{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:12px;font-weight:500}
+
+  /* unverified banner — clean, accent only (no fill) */
+  .unv{display:flex;gap:12px;align-items:flex-start;background:#fff;border-bottom:1px solid var(--line);border-left:3px solid #e0a92e;padding:13px 24px 13px 21px}
+  .unv .ic{width:30px;height:30px;border-radius:8px;background:var(--amberSoft);border:1px solid var(--amberLine);display:flex;align-items:center;justify-content:center;flex:none}
+  .unv .ic svg{width:16px;height:16px;stroke:var(--amberText)}
+  .unv .h{font-size:12.5px;font-weight:700;color:var(--amberText);letter-spacing:.01em}
+  .unv .s{font-size:11.5px;color:var(--ink2);line-height:1.45;margin-top:2px}
+  .unv .s b{font-weight:600;color:var(--ink)}
+
+  /* source row */
+  .src{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;font-size:12px;color:var(--muted);padding:13px 24px 0}
+  .src a{color:var(--indigo);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+  .src a svg{width:12px;height:12px;stroke:var(--indigo)}
+  .src .dot{color:var(--line)}
+
+  /* tiles */
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 4px}
+  .tile{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .tile .l{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .tile .n{font-family:var(--disp);font-size:28px;line-height:1;color:var(--ink)}
+  .tile .s{font-size:10px;color:var(--muted);margin-top:6px}
+
+  .blk{margin-top:20px}
+  .blkh{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:10px}
+  .summary{font-size:13px;color:var(--ink2);line-height:1.6}
+  .summary b{color:var(--ink);font-weight:600}
+
+  /* highlights grouped */
+  .hgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px 26px}
+  .hgl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .li{display:flex;gap:9px;margin-bottom:9px;font-size:12.5px;line-height:1.45;color:var(--ink2)}
+  .li:last-child{margin-bottom:0}
+  .li .dot{width:5px;height:5px;border-radius:50%;background:var(--indigo);flex:none;margin-top:6px}
+  .li b{color:var(--ink);font-weight:600}
+
+  /* disclosures — neutral, not alarm */
+  .disc{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+  .disc .dh{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+  .disc .dh svg{width:15px;height:15px;stroke:var(--indigo);flex:none}
+  .disc .dh .t{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+  .drow{display:flex;gap:9px;font-size:12.5px;line-height:1.45;color:var(--ink2);margin-bottom:8px}
+  .drow:last-of-type{margin-bottom:0}
+  .drow .dd{width:5px;height:5px;border-radius:50%;background:var(--muted);flex:none;margin-top:6px}
+  .drow b{color:var(--ink);font-weight:600}
+
+  /* cross-check CTA */
+  .cc{display:flex;align-items:center;gap:12px;background:var(--indigoSoft);border:1px solid #dfe3f7;border-radius:11px;padding:13px 16px;text-decoration:none;margin-top:14px}
+  .cc .ic{width:30px;height:30px;border-radius:8px;background:var(--indigo);display:flex;align-items:center;justify-content:center;flex:none}
+  .cc .ic svg{width:15px;height:15px;stroke:#fff}
+  .cc .h{display:block;font-size:12.5px;font-weight:600;color:var(--indigo)}
+  .cc .s{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+  .cc .arr{margin-left:auto;color:var(--indigo);font-size:15px}
+
+  /* footer */
+  .foot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);margin-top:20px;padding-top:14px;font-size:11.5px;color:var(--muted)}
+  .foot svg{width:13px;height:13px;stroke:var(--muted)}
+  .foot .by{margin-left:auto;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+
+    <div class="sh">
+      <span class="sq"></span><span class="t">Active Listing</span>
+      <span class="status"><span class="d"></span>Active</span>
+      <span class="asof">as of Aug 3, 2026</span>
+    </div>
+
+    <div class="unv">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg></span>
+      <span>
+        <span class="h">Listing claim — not verified</span>
+        <span class="s">What the public listing says — <b>Zillow, Redfin, LoopNet, brokerage sites.</b> This is the seller's side, not city records. Cross-check anything that matters below.</span>
+      </span>
+    </div>
+
+    <div class="pad">
+      <div class="src">
+        <span>Source:</span>
+        <a href="#">View original listing on Coldwell Banker <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg></a>
+        <span class="dot">·</span><span>MLS 12625082</span>
+        <span class="dot">·</span><span>Listed Apr 21, 2026</span>
+      </div>
+
+      <div class="tiles">
+        <div class="tile"><div class="l">List Price</div><div class="n">$1,099,000</div><div class="s">asking</div></div>
+        <div class="tile"><div class="l">Floor Area</div><div class="n">5,183</div><div class="s">sq ft · per listing</div></div>
+        <div class="tile"><div class="l">Lot Size</div><div class="n">5,850</div><div class="s">sq ft · per listing</div></div>
+        <div class="tile"><div class="l">Config</div><div class="n">3 units</div><div class="s">theater + 2 apts</div></div>
+      </div>
+
+      <div class="blk">
+        <div class="blkh">What the Listing Says</div>
+        <div class="summary">A mixed-use property: a <b>5,183 SF, 150-seat theater</b> with 25′ ceilings plus <b>two renovated 2BD/1BA apartments</b>. Marketed as an owner-user opportunity with in-place apartment revenue and a commercial lease running through December, on the high-traffic Irving Park Road corridor.</div>
+      </div>
+
+      <div class="blk">
+        <div class="blkh">Listing Highlights</div>
+        <div class="hgrid">
+          <div>
+            <div class="hgl">The Building</div>
+            <div class="li"><span class="dot"></span><span><b>150-seat theater</b>, 25′ ceilings, 5,183 SF — turn-key build-out with stage, seating, bar &amp; dressing rooms.</span></div>
+            <div class="li"><span class="dot"></span><span><b>Two 2BD/1BA apartments</b>, fully renovated in 2016.</span></div>
+          </div>
+          <div>
+            <div class="hgl">The Location</div>
+            <div class="li"><span class="dot"></span><span><b>41,000+ vehicles/day</b> on Irving Park Road.</span></div>
+            <div class="li"><span class="dot"></span><span>Convenient <b>CTA bus &amp; Blue Line</b> access.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="blk">
+        <div class="disc">
+          <div class="dh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span class="t">Disclosed by Seller</span></div>
+          <div class="drow"><span class="dd"></span><span><b>Commercial tenant lease in place through December</b> — the property is tenant-occupied.</span></div>
+          <div class="drow"><span class="dd"></span><span><b>Residential units are income-producing</b> (currently rented).</span></div>
+        </div>
+      </div>
+
+      <a class="cc" href="#">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+        <span>
+          <span class="h">Cross-check these claims against official records</span>
+          <span class="s">Permit &amp; Building History · Pre-Title Check — below</span>
+        </span>
+        <span class="arr">↓</span>
+      </a>
+
+      <div class="foot">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Re-check listing
+        <span class="by">Listed by Strauss Realty Ltd (per J.W. Reedy Realty)</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

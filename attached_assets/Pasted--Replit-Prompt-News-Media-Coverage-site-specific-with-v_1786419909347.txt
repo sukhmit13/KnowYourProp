@@ -1,0 +1,149 @@
+# Replit Prompt — News & Media Coverage (site-specific, with verification) — build to spec — FINAL
+
+Build the **News & Media Coverage** section: a **Standard Takeaway** box (consistent with every other section, meta content only), then articles grouped by relevance tier (**This parcel → Adjacent/co-parcels**), each card leading with a one-line **Takeaway**, and parcel-direct cards carrying a **Current status** verification line. Content comes from the **News Takeaway generation prompt**. Implement CSS/HTML **verbatim**; check CRITICAL DETAILS.
+
+> **Scope:** site-specific only (articles naming the subject parcel or an immediate co-parcel). **No corridor** here — corridor signals live in the separate Corridor Intelligence section.
+
+## 🔴 Governing rules
+1. **Report-data-first** (shared rule): the Current status verification reuses THIS report's own already-displayed data (Business Licenses / current-use, then listing, then permits) — never a fresh external lookup, never a value that could contradict another section. It links to the section it came from.
+2. **Consistent Standard Takeaway box** (same component as every section). Its bullets are META — a verdict (does the press name the subject directly?) + the caveat — NOT restatements of the article cards.
+3. **Verification is parcel-tier only**, three-state (`consistent` / `appears_superseded` / `no_update`), dated, "appears" not "did", traceable via a link into the source section. `no_update` is the default when report data is silent.
+4. **Paraphrase, always linked** — render the generated `takeaway`, never raw article body; `url` required for the Read link; no verbatim quotes.
+5. **No sentiment color** — neutral cards; only the caveat bullet + amber age flag carry accent. No green/red.
+6. **Fail-closed** — zero matched articles → render nothing (no empty state).
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --takeBorder:#dde1f6; --takeDivider:#e3e5f4;
+--good:#2f7d3f; --caution:#f0a41c; --cautionText:#96600a;
+--disp:"Instrument Serif"; --mono:"JetBrains Mono"; --sans:"Inter";
+--take-label:11px; --take-title:21px; --take-body:13px;
+```
+
+## Input contract (from the generation prompt + code)
+```json
+{
+  "section": { "title":"…", "rows":[ {"tone":"insight|caution","html":"…","chip":{"label":"…","href":"#parcel"}|null} ] },
+  "articles": [
+    { "id":"a1", "tier":"parcel|adjacent", "matched_address":"2821 N Milwaukee Ave",
+      "title":"…", "takeaway":"…", "attribution":"…", "source":"Block Club Chicago", "date":"2024-12-17",
+      "url":"https://…", "age_flag":"~20 mo old"|null, "headline_only":false,
+      "verification": {"state":"consistent|appears_superseded|no_update","text":"…","source_anchor":"#licenses"}|null }
+  ],
+  "sources_line": "Block Club Chicago, Crain's Chicago Business, The Real Deal, Chicago YIMBY, Chicago Tribune, Chicago Sun-Times"
+}
+```
+
+## 1) Header + Standard Takeaway (verbatim)
+```css
+.secthead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:6px}
+.secthead .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+.secsub{font-size:12.5px;color:var(--muted);margin-bottom:18px;padding-left:21px;line-height:1.5}
+
+.take{background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:12px;padding:18px 20px 19px;margin-bottom:24px}
+.take-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.take-label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:var(--take-label);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo)}
+.take-label svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+.take-title{font-family:var(--disp);font-size:var(--take-title);line-height:1.28;color:var(--ink);margin-bottom:14px}
+.take-row{display:flex;align-items:flex-start;gap:11px;padding:10px 0}
+.take-row + .take-row{border-top:1px solid var(--takeDivider)}
+.take-row .dot{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.take-row.caution .dot{background:var(--caution)}
+.take-row.insight .dot{background:var(--indigo)}
+.take-row .body{flex:1;font-size:var(--take-body);line-height:1.5;color:var(--ink2)}
+.take-row .body b{color:var(--ink);font-weight:600}
+.take-chip{flex:none;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid var(--takeBorder);border-radius:8px;padding:6px 11px;white-space:nowrap}
+.take-chip svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+```
+```html
+<div class="secthead"><span class="sq"></span>News &amp; Media Coverage</div>
+<div class="secsub">Press that explicitly names this parcel or an immediate co-parcel — sourced from {sources_line}.</div>
+<div class="take">
+  <div class="take-head"><span class="take-label"><svg …lightbulb…></svg>Takeaway</span></div>
+  <div class="take-title">{section.title}</div>
+  <!-- render section.rows: verdict insight (chip → #parcel) + caution caveat. NO corridor row. -->
+</div>
+```
+
+## 2) Tier group headers (verbatim)
+```css
+.tier{display:flex;align-items:center;gap:9px;margin:22px 0 12px}
+.tier .tl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.tier .ct{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted)}
+.tier .rule{flex:1;height:1px;background:var(--line)}
+```
+Render `This parcel · {subject_address}` and `Adjacent & co-parcels` only if that tier has ≥1 article. `.ct` = count. No corridor tier.
+
+## 3) Article card + Current status verification (verbatim)
+```css
+.arts{display:flex;flex-direction:column;gap:10px}
+.art{border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+.art.parcel{border-color:var(--takeBorder);box-shadow:inset 3px 0 0 var(--indigo)}
+.arttop{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.rbadge{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;padding:3px 8px;white-space:nowrap}
+.rbadge.parcel{background:var(--indigo);color:#fff}
+.rbadge.adj{background:var(--indigoSoft);color:var(--indigo);border:1px solid var(--takeBorder)}
+.artmeta{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.02em}
+.artmeta b{color:var(--ink2);font-weight:600}
+.artage{margin-left:auto;font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--cautionText);background:#fdf3df;border:1px solid #f0d79a;border-radius:6px;padding:3px 8px}
+.arttitle{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.35;margin-bottom:9px}
+.arttitle a{color:var(--ink);text-decoration:none;border-bottom:1.5px solid var(--takeBorder)}
+.arttake{display:flex;gap:9px;align-items:flex-start}
+.arttake .tk{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:5px;padding:3px 7px;flex:none;margin-top:1px}
+.arttake .tx{font-size:13px;color:var(--ink);line-height:1.5;font-weight:500}
+.artattr{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px;line-height:1.45}
+.artverify{display:flex;gap:9px;align-items:flex-start;margin-top:11px;padding-top:11px;border-top:1px dashed var(--line)}
+.vpill{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:6px;padding:4px 8px;flex:none;white-space:nowrap}
+.vpill svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+.vtx{font-size:12px;color:var(--ink2);line-height:1.5}
+.vtx b{color:var(--ink);font-weight:600}
+.vlink{color:var(--indigo);text-decoration:none;border-bottom:1.5px solid var(--takeBorder);font-weight:600}
+.artread{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;margin-top:11px}
+.artread svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+```
+```html
+<div class="art {tier==parcel?'parcel':''}">
+  <div class="arttop">
+    <span class="rbadge {parcel|adj}">{This parcel | Adjacent · {co-parcel #}}</span>
+    <span class="artmeta"><b>{source}</b> · {date}</span>
+    {age_flag ? '<span class="artage">'+age_flag+'</span>' : ''}
+  </div>
+  <div class="arttitle"><a href="{url}">{title}</a></div>
+  <div class="arttake"><span class="tk">Takeaway</span><span class="tx">{takeaway}</span></div>
+  <div class="artattr">{attribution}</div>
+  <!-- verification: render ONLY when article.verification != null (parcel-tier + checkable claim) -->
+  {verification ? '
+  <div class="artverify">
+    <span class="vpill"><svg …status-glyph…></svg>Current status · '+STATE_LABEL+'</span>
+    <span class="vtx">'+verification.text_with_vlink_to_source_anchor+'</span>
+  </div>' : ''}
+  {url ? '<a class="artread" href="{url}">Read at {source} ↗</a>' : ''}
+</div>
+```
+- `STATE_LABEL`: `consistent` → "consistent"; `appears_superseded` → "appears superseded"; `no_update` → "no update on file".
+- The verification `text` embeds a `<a class="vlink" href="{source_anchor}">…</a>` on the phrase naming the source ("business licenses on file") so the reader can jump to the section that backs the verdict. `source_anchor` comes from the report (e.g. `#licenses`).
+- Verification renders on **parcel-tier cards only**; never on `adjacent`.
+- Pill/state carry **no favorability color** — all indigo/neutral; the meaning is in the words.
+
+## 4) Source line (verbatim)
+```css
+.src{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.03em;padding-top:16px;margin-top:24px;border-top:1px solid var(--line);line-height:1.5}
+```
+`Coverage summarized from original reporting; every headline links to its source. Summaries are paraphrased, not reproduced — verify current status at the linked article. Corridor-level signals appear in the separate Corridor Intelligence section. Sources: {sources_line}`
+
+## LOGIC
+1. **Tier in code** (parcel vs adjacent). Groups render parcel → adjacent; within a group, date desc. No corridor.
+2. **Age flag in code** (`as_of − date > ~12 mo`).
+3. **Verification is report-data-first** — the generator built `verification` from the report's own Business Licenses / listing / permits (priority order), defaulting to `no_update` when silent. The renderer only binds it and links to `source_anchor`; it does not compute status or fetch anything.
+4. **Render only what exists** — omit an empty tier entirely; omit `.artverify` when `verification` is null.
+5. **Fail-closed** — `section == null` → render nothing.
+
+## CRITICAL DETAILS
+1. **Consistent Standard Takeaway box** (11px label / 21px serif headline / 13px body / far-right centered chip) — same as every section; content is META (verdict + caveat), never a card restatement.
+2. **Report-data-first verification** — Current status reuses the report's OWN sections (licenses → listing → permits), is dated, "appears" not "did", three-state with `no_update` default, and links into the source section. Never an external lookup; never contradicts another section.
+3. **Parcel-tier only** for verification; **paraphrase-only** takeaways; **every headline links out**; no verbatim quotes.
+4. **No corridor** anywhere in this section.
+5. **No sentiment color** — neutral cards + verification; only the caveat bullet + amber age flag carry accent. No green/red.
+6. **Fail-closed** on zero coverage.
+7. **Serif (`--disp`) ONLY** on the section takeaway headline. Article titles Inter 600; takeaways Inter 500; meta/attribution/verification/badges Mono.

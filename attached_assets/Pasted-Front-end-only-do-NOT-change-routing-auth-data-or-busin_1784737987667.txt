@@ -1,0 +1,23 @@
+Front-end only — do NOT change routing, auth, data, or business logic.
+
+Goal: replace the bottom-of-page call-to-action buttons ("Run a report", "Run your first analysis", "Run a report →") with a working address search bar, so the user can start a report directly from any page instead of being sent back to the homepage.
+
+Critical — reuse, don't rebuild: Use the exact same address-search component the homepage hero already uses (same input, same autocomplete, same submit handler, same route into the report/funnel flow). Do NOT write a new search bar or a new submit handler — import and reuse the existing homepage component so behavior stays identical everywhere. Submitting an address from any of these bars must do precisely what submitting from the homepage does.
+
+Place the reused search bar into the closing sections of these pages, replacing the button that's there now:
+
+How It Works — dark closer ("Catch it before you offer…")
+FAQ — dark closer ("Still deciding? Run one property.")
+About — light/cream closer ("See what the record says about your property.")
+Homepage — any secondary/bottom CTA button that currently links back to the top (keep the main hero bar as-is; just swap the lower button for the same bar)
+
+Styling (match the attached closer-search.png and keep the existing design tokens — Instrument Serif, Inter, deep indigo 
+#2b3a9e):
+
+The bar is a white rounded field (radius ~14px) with a left location icon in indigo, a full-width address input with placeholder "Enter a Chicago property address…", and an indigo submit button labeled "Run report →" on the right.
+On the dark closers, give the field a soft drop shadow so it lifts off the black card; keep the headline and subtext above it. Add small muted helper text below: "Any Chicago or Cook County address · answer in minutes".
+On the light About closer, use the same bar with a thin border (
+#e5e2da) and lighter shadow instead of the heavy one.
+Max width ~560px, centered.
+
+Keep each closer's existing headline and supporting line. Only the button becomes the bar. Everything else stays intact.

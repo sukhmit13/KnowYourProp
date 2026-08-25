@@ -1,19 +1,26 @@
 import { useEffect, useState, useCallback, useRef, memo, useMemo } from "react";
+import ReactDOM from "react-dom";
 import { useRoute, useLocation } from "wouter";
+import { buildScanSections } from "@/components/report/scanBuilder";
+import { AccordionSection } from "@/components/report/AccordionSection";
+import { NewBusinessLicensesSection } from "@/components/report/NewBusinessLicensesSection";
+import { NewConstructionSection } from "@/components/report/NewConstructionSection";
+import { OwnershipTitleSection, deriveSaleHistory } from "@/components/report/OwnershipTitleSection";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { levelRating, closestSchool, closestBoundarySchool, ratingFavor, ratingScore, ratingTier } from "@/lib/schoolsDisplay";
-import { useListingSnapshot, useGenerateListingSnapshot, useUpdateRunLabel, useRun, usePublicRun, useGeocodeLookup, useZoningInfo, useBusinessUses, useZoningCompatibility, useChildcareAccess, useCommunityAreaChildcareAccess, useGroceryAccess, useCommunityAreaGroceryAccess, useSbifEligibility, useNmtcEligibility, useMmrpEligibility, useHubZoneEligibility, useQctEligibility, useChaOpportunityArea, useTransitProximity, useTODStatus, useEvStations, useGasStations, useHotels, useRestaurants, useCoffeeShops, useBars, useNearbyDayCares, usePropertyTax, useRefreshPropertyTax, useLienSearch, useRefreshLienSearch, useOwnerLienSearch, usePinLookup, useProximityData, useMichelinNearby, useMuralsNearby, useDesignatedLandmarksNearby, useZbaWardSummary, useZbaCitySummary, useEVRegistrations, useCannabisDispensariesByZip, useUpdateProjectType, useUpdateFunnelAnswers, useUpdateManualProperty, useCensusACS, useCombinedPermitViolations, useCrimeStats, useCrimeTractRanking, useCrimeTakeaway, useGenerateCrimeTakeaway, useHmdaTakeaway, useGenerateHmdaTakeaway, useNewsTakeaway, useGenerateNewsTakeaway, useNeighborhoodNewsTakeaway, useGenerateNeighborhoodNewsTakeaway, usePeopleTakeaway, useGeneratePeopleTakeaway, useTransitTakeaway, useGenerateTransitTakeaway, useElectionData, useVehicleOwnership, useSeniorsData, useSeniorsZipData, useLanguageData, useLanguageZipData, useChildcareEnhancedData, useChildcareEnhancedZipData, useLandmarkStatus, useChildcareCapacity, useChildcareCapacityZip, useFairMarketRent, useCtaRidership, useCtaBusRidership, useMetraRidership, useMetraLineRidership, useNewConstruction, useNearbyNewConstruction, useNearbyBusinessLicenses, useNearbyArtGalleries, useAddressNews, useNeighborhoodNews, useCorridorNews, useVacantBuildingsNearby, useMortgageRate, useToggleFavorite, useHmdaStats, usePlacesOfWorship, useUpcomingDevelopments, useComparableSales, useSBALoans, useSchoolsNearby, useAirbnbStats, useRentcast, useRentcastRadius, useJBANearby, useLocationIncentives, useZbaApprovals, useRelatedParcels, useCityOwnedLots, useLoopNet, usePeerspace, useZoningHistory, useTransactionTrends, useSidewalkCafe, useBusinessLicenseHistory, useGooglePlaces, useTrafficCount, useLodesData, useListingData, useIncentivesCheck, useSbaRates, useDebtSnapshot, useBuildDebtSnapshot } from "@/hooks/use-runs";
+import { useListingSnapshot, useGenerateListingSnapshot, useUpdateRunLabel, useRun, usePublicRun, useGeocodeLookup, useZoningInfo, useBusinessUses, useZoningCompatibility, useChildcareAccess, useCommunityAreaChildcareAccess, useGroceryAccess, useCommunityAreaGroceryAccess, useSbifEligibility, useNmtcEligibility, useMmrpEligibility, useHubZoneEligibility, useQctEligibility, useChaOpportunityArea, useTransitProximity, useTODStatus, useEvStations, useGasStations, useHotels, useRestaurants, useCoffeeShops, useBars, useNearbyDayCares, usePropertyTax, useRefreshPropertyTax, useLienSearch, usePinLookup, useProximityData, useMichelinNearby, useMuralsNearby, useDesignatedLandmarksNearby, useZbaWardSummary, useZbaCitySummary, useEVRegistrations, useCannabisDispensariesByZip, useUpdateProjectType, useUpdateFunnelAnswers, useUpdateManualProperty, useCensusACS, useCombinedPermitViolations, useCrimeStats, useCrimeTractRanking, useCrimeTakeaway, useGenerateCrimeTakeaway, useHmdaTakeaway, useGenerateHmdaTakeaway, useNewsTakeaway, useGenerateNewsTakeaway, useNeighborhoodNewsTakeaway, useGenerateNeighborhoodNewsTakeaway, usePeopleTakeaway, useGeneratePeopleTakeaway, useTransitTakeaway, useGenerateTransitTakeaway, useElectionData, useVehicleOwnership, useSeniorsData, useSeniorsZipData, useLanguageData, useLanguageZipData, useChildcareEnhancedData, useChildcareEnhancedZipData, useLandmarkStatus, useChildcareCapacity, useChildcareCapacityZip, useFairMarketRent, useCtaRidership, useCtaBusRidership, useMetraRidership, useMetraLineRidership, useNewConstruction, useNearbyNewConstruction, useNearbyBusinessLicenses, useNearbyArtGalleries, useAddressNews, useNeighborhoodNews, useCorridorNews, useVacantBuildingsNearby, useMortgageRate, useToggleFavorite, useHmdaStats, usePlacesOfWorship, useUpcomingDevelopments, useComparableSales, useSBALoans, useSchoolsNearby, useAirbnbStats, useRentcast, useRentcastRadius, useJBANearby, useLocationIncentives, useZbaApprovals, useRelatedParcels, useCityOwnedLots, useLoopNet, usePeerspace, useZoningHistory, useTransactionTrends, useSidewalkCafe, useBusinessLicenseHistory, useGooglePlaces, useTrafficCount, useLodesData, useListingData, useIncentivesCheck, useSbaRates, useDebtSnapshot, useBuildDebtSnapshot } from "@/hooks/use-runs";
 import { buildDebtCardModel } from "@shared/debtCardModel";
 import { detectAssemblage, buildAssemblageTakeaway } from "@shared/assemblage";
 import { resolveDistress } from "@shared/lienDistress";
+import { buildListingChecks, classifyDisclosures, daysOnMarketVerdict, hasValidatedArmLengthSaleAfterFinding, listingClaimLabel } from "@shared/listingChecks";
 import { Leaf, Printer, Menu, X, Search, ClipboardList } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { Sidebar } from "@/components/Sidebar";
-import { FunnelModal, type FunnelAnswers } from "@/components/FunnelModal";
+import { FunnelModal, ROLES, TRANSACTION_TYPES, REFERRAL_OPTIONS, type FunnelAnswers } from "@/components/FunnelModal";
 import { PrintSettingsDialog, type PrintSection } from "@/components/PrintSettingsDialog";
 import { ReportChat } from "@/components/ReportChat";
 import { PropertyMap } from "@/components/PropertyMap";
@@ -34,61 +41,19 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Building2, Ruler, Map as MapIcon, Layers, CheckCircle2, XCircle, Home, Store, Factory, AlertTriangle, ClipboardCheck, Baby, Info, DollarSign, ExternalLink, User, Vote, Train, Bus, RefreshCw, Receipt, Zap, Fuel, Hotel, Utensils, Coffee, Wine, ShoppingCart, Phone, Mail, Eye, Globe, Briefcase, TrendingUp, TrendingDown, Star, Users, ChevronDown, ChevronUp, ChevronRight, Landmark, Building, Award, Calculator, TreePine, Pencil, Plus, History, FileText, Scale, Waves, Bike, Plane, BarChart3, HardHat, Navigation, Palette, Newspaper, GraduationCap, Link2, CreditCard, Lock, Mic, Gavel, Car, Tag, Copy, BookOpen, EyeOff, Calendar } from "lucide-react";
+import { MapPin, Building2, Ruler, Map as MapIcon, Layers, CheckCircle2, XCircle, Home, Store, Factory, AlertTriangle, ClipboardCheck, Baby, Info, DollarSign, ExternalLink, User, Vote, Train, Bus, RefreshCw, Receipt, Zap, Fuel, Hotel, Utensils, Coffee, Wine, ShoppingCart, Mail, Eye, Globe, Briefcase, TrendingUp, TrendingDown, Star, Users, ChevronDown, ChevronUp, ChevronRight, Landmark, Building, Award, Calculator, TreePine, Pencil, Plus, History, FileText, Scale, Waves, Bike, Plane, BarChart3, HardHat, Navigation, Palette, Newspaper, GraduationCap, Link2, CreditCard, Lock, Mic, Gavel, Car, Tag, Copy, BookOpen, EyeOff, Calendar } from "lucide-react";
 import { yearsTile, heightTile, parkingTile, zoningMeaningBullets } from "@/lib/wardZoningDisplay";
+import { CHICAGO_ZONING_DATA } from "@shared/zoningData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { formatAddress } from "@/lib/formatAddress";
 import { derivePlacesSearchTerm } from "@shared/placesSearch";
+import { groupLicenseEstablishments, licenseEstablishmentKey, titleCaseBusiness as titleCaseBiz } from "@shared/businessLicenses";
 import { computeValuationMetrics, computeNoiModel, computeDscrLoanRatio, type ValuationSnapshot } from "@/lib/valuation";
 import StatTile from "@/components/StatTile";
 import InsightReportSection from "@/components/InsightReportSection";
-
-// Helper to format numbers with comma separators for display
-// Group nearby business licenses into unique establishments (name + normalized address)
-// so one restaurant holding food + liquor + entertainment licenses counts as ONE business.
-interface LicenseEstablishment {
-  name: string;
-  address: string;
-  distanceMiles: number;
-  licenses: { licenseType: string; licenseCategory: string; startDate: string }[];
-  comboLabel: string;
-}
-const LICENSE_CAT_PRETTY: Record<string, string> = {
-  food: 'Retail Food', liquor: 'Liquor / Tavern', entertainment: 'Entertainment',
-  manufacturing: 'Manufacturing', hotel: 'Hotel / Motel', gallery: 'Art Gallery',
-};
-const LICENSE_CAT_ORDER = ['food', 'liquor', 'entertainment', 'gallery', 'hotel', 'manufacturing'];
-function normalizeLicenseAddr(addr: string): string {
-  const toks = (addr || '').toUpperCase().replace(/[.,#]/g, ' ').split(/\s+/).filter(Boolean);
-  // strip trailing unit/floor tokens, conservatively: bare numbers/letters are only
-  // stripped when they FOLLOW a street-type word (AVE, ST, BLVD...), so real address
-  // components are never removed; unit markers (STE/UNIT/APT...) always strip.
-  const streetTypeRe = /^(AVE|AVENUE|ST|STREET|BLVD|BOULEVARD|RD|ROAD|DR|DRIVE|PL|PLACE|CT|COURT|LN|LANE|WAY|PKWY|TER|SQ|PLZ|BROADWAY)$/;
-  const unitMarkerRe = /^(STE|SUITE|UNIT|APT|RM|FL|FLR|FLOOR|BSMT|BASEMENT|REAR|LOWER|UPPER|MEZZ|MEZZANINE)$/;
-  const bareUnitRe = /^(\d+(ST|ND|RD|TH)?|[A-Z]|\d+[A-Z]|#\w*)$/;
-  const hasStreetType = (arr: string[]) => arr.some(t => streetTypeRe.test(t));
-  while (toks.length > 3) {
-    const last = toks[toks.length - 1];
-    const rest = toks.slice(0, -1);
-    if (unitMarkerRe.test(last)) { toks.pop(); continue; }
-    // bare unit token only strips if a street-type word remains before it
-    if (bareUnitRe.test(last) && hasStreetType(rest) && !streetTypeRe.test(last)) { toks.pop(); continue; }
-    break;
-  }
-  return toks.join(' ');
-}
-function titleCaseBiz(s: string): string {
-  if (!s) return s;
-  const keepUpper = /^(LLC|INC|CO|II|III|IV|BBQ|GYG|USA|SGD|PE|&)$/i;
-  return s.split(/\s+/).map(w => {
-    if (keepUpper.test(w.replace(/[.,]/g, ''))) return w.toUpperCase();
-    if (/^\d/.test(w)) return w.toLowerCase().replace(/(st|nd|rd|th)$/, m => m); // 1st, 2624
-    return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-  }).join(' ');
-}
 
 function proRoleIcon(role: string) {
   const r = (role || '').toLowerCase();
@@ -103,32 +68,6 @@ function proRoleIcon(role: string) {
   return <svg {...common}><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/></svg>;
 }
 
-function groupLicenseEstablishments(licenses: any[]): LicenseEstablishment[] {
-  const map = new Map<string, LicenseEstablishment & { cats: Set<string> }>();
-  for (const l of licenses || []) {
-    const key = `${(l.businessName || '').toUpperCase().trim()}|${normalizeLicenseAddr(l.address || '')}`;
-    let e = map.get(key);
-    if (!e) {
-      e = { name: l.businessName, address: l.address, distanceMiles: l.distanceMiles, licenses: [], comboLabel: '', cats: new Set<string>() };
-      map.set(key, e);
-    }
-    e.distanceMiles = Math.min(e.distanceMiles, l.distanceMiles);
-    e.licenses.push({ licenseType: l.licenseType, licenseCategory: l.licenseCategory, startDate: l.startDate });
-    e.cats.add(l.licenseCategory);
-  }
-  const out: LicenseEstablishment[] = [];
-  Array.from(map.values()).forEach(e => {
-    const cats = LICENSE_CAT_ORDER.filter(c => e.cats.has(c));
-    const extras = Array.from(e.cats).filter(c => !LICENSE_CAT_ORDER.includes(c));
-    const names = [...cats, ...extras].map(c => LICENSE_CAT_PRETTY[c] || 'Other');
-    e.comboLabel = names.length === 1 ? `${names[0]} only` : names.join(' + ');
-    e.licenses.sort((a, b) => (b.startDate || '').localeCompare(a.startDate || ''));
-    const { cats: _cats, ...rest } = e;
-    out.push(rest);
-  });
-  out.sort((a, b) => a.distanceMiles - b.distanceMiles);
-  return out;
-}
 
 function formatNumberWithCommas(value: string): string {
   // Remove non-numeric chars except decimal point
@@ -145,6 +84,130 @@ function formatNumberWithCommas(value: string): string {
 // Helper to parse comma-formatted string to number
 function parseFormattedNumber(value: string): number {
   return parseFloat(value.replace(/,/g, '')) || 0;
+}
+
+function zoningHistoryDateLabel(value: unknown): string | null {
+  if (!value) return null;
+  const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
+  return Number.isNaN(date.getTime())
+    ? null
+    : date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+function zoningHistoryDate(value: unknown, short = false): string {
+  if (!value) return 'Not in the record';
+  const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return 'Not in the record';
+  return date.toLocaleDateString('en-US', short
+    ? { month: 'short', day: 'numeric', year: 'numeric' }
+    : { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+function normalizedZoningAddress(value: string | undefined | null): string {
+  return String(value || '')
+    .toUpperCase()
+    .replace(/\b(NORTH)\b/g, 'N')
+    .replace(/\b(SOUTH)\b/g, 'S')
+    .replace(/\b(EAST)\b/g, 'E')
+    .replace(/\b(WEST)\b/g, 'W')
+    .replace(/\b(AVENUE|AVE|STREET|ST|ROAD|RD|BOULEVARD|BLVD|DRIVE|DR|PLACE|PL|COURT|CT|LANE|LN|WAY|PARKWAY|PKWY)\.?\b/g, '')
+    .replace(/[^A-Z0-9 ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function buildZoningHistoryView(
+  items: any[] | undefined,
+  currentZone: string | null | undefined,
+  subjectAddress: string | undefined,
+  coverage?: any,
+) {
+  const rawItems = Array.isArray(items) ? items : [];
+  const councilItems = rawItems.filter((item) => item.type === 'legistar');
+  const zbaItems = rawItems.filter((item) => item.type === 'zba');
+  const priority: Record<string, number> = { Approved: 4, Denied: 4, Withdrawn: 3, Continued: 1, Recorded: 2 };
+  const zbaByCase = new Map<string, any[]>();
+  for (const item of zbaItems) {
+    const key = `${item.ordinanceId || item.title}|${normalizedZoningAddress(item.matchedAddress)}`;
+    zbaByCase.set(key, [...(zbaByCase.get(key) || []), item]);
+  }
+  const caseRows = Array.from(zbaByCase.values()).map((hearings) => {
+    const ordered = [...hearings].sort((a, b) =>
+      ((priority[b.decision] || 0) - (priority[a.decision] || 0))
+      || String(b.date || '').localeCompare(String(a.date || '')),
+    );
+    const final = { ...ordered[0] };
+    const prior = hearings
+      .filter((item) => item !== ordered[0] && item.date)
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    final.hearingDates = prior.map((item) => item.date);
+    return final;
+  });
+  const rows = [...councilItems, ...caseRows].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  const isMapAmendment = (item: any) =>
+    !!(item.fromZone || item.toZone || /reclassif|map amendment|rezon/i.test(item.title || ''));
+  const isEnacted = (item: any) =>
+    !!item.passedDate && !/\b(withdrawn|failed|denied|not passed|tabled)\b/i.test(String(item.status || ''));
+  // A Council filing records an application, not an actual district change,
+  // until the City record supplies a passage date.
+  const rezoning = councilItems.find((item) => isMapAmendment(item) && isEnacted(item));
+  // A description can be copied across a continuation, denial, or withdrawal.
+  // Only a final approved case can support wording about what the Board ordered.
+  const boardConfiguration = caseRows.find((item) =>
+    item.decision === 'Approved'
+    && /(?:two[- ]story.*two.*dwelling.*front.*one.*dwelling.*rear|front building.*rear building)/i.test(item.description || ''),
+  );
+  const developmentAddress = rezoning?.developmentAddress;
+  const developmentElsewhere = !!developmentAddress
+    && normalizedZoningAddress(developmentAddress) !== normalizedZoningAddress(subjectAddress);
+  const subjectYear = Number(String(boardConfiguration?.date || rezoning?.passedDate || rezoning?.date || '').slice(0, 4));
+  const yearsAgo = subjectYear ? Math.max(0, new Date().getFullYear() - subjectYear) : null;
+  const approvedCase = caseRows.find((item) => item.decision === 'Approved' || item.decision === 'Denied');
+  const coverageIsBounded = coverage?.cityCouncil?.complete !== true || coverage?.zba?.checked !== true;
+  let takeaway = coverageIsBounded
+    ? 'No confirmed zoning action found in the checked record — archive coverage is partial.'
+    : currentZone
+      ? `No rezoning or ZBA case on record — ${currentZone} since the 2004 code rewrite.`
+      : 'No rezoning or ZBA case on record.';
+  if (boardConfiguration) {
+    takeaway = `Subdivided in ${String(boardConfiguration.date).slice(0, 4)} — the Board's order kept all three units, front and rear.`;
+  } else if (developmentElsewhere && rezoning) {
+    takeaway = `Split from ${developmentAddress}’s zoning lot in ${String(rezoning.passedDate || rezoning.date).slice(0, 4)} — the filing names development on the other parcel.`;
+  } else if (rezoning?.toZone) {
+    takeaway = `Rezoned to ${rezoning.toZone} in ${String(rezoning.passedDate || rezoning.date).slice(0, 4)}${yearsAgo != null ? ` — ${yearsAgo} years ago.` : '.'}`;
+  } else if (approvedCase) {
+    takeaway = `${approvedCase.decision} at the Zoning Board — ${approvedCase.ordinanceId || 'recorded case'} in ${String(approvedCase.date).slice(0, 4)}.`;
+  }
+  return {
+    rawItems,
+    rows,
+    caseRows,
+    rawHearingCount: zbaItems.length,
+    actionCount: councilItems.length + caseRows.length,
+    councilItems,
+    zbaItems,
+    rezoning,
+    hasUnenactedMapFiling: councilItems.some((item) => isMapAmendment(item) && !isEnacted(item)),
+    boardConfiguration,
+    developmentAddress,
+    developmentElsewhere,
+    takeaway,
+  };
+}
+
+function zoningCouncilActionLabel(item: any): string {
+  if (item.fromZone || item.toZone || /reclassif|map amendment|rezon/i.test(item.title || '')) {
+    return 'City Council map amendment';
+  }
+  return item.actionType ? `City Council ${String(item.actionType).toLowerCase()}` : 'City Council zoning action';
+}
+
+function zoningHistoryCoverageText(coverage: any): string | null {
+  if (!coverage) return null;
+  const city = coverage.cityCouncil?.note;
+  const zba = coverage.zba?.note;
+  const parts = [city ? `City Council: ${city}` : null, zba ? `ZBA: ${zba}` : null].filter(Boolean);
+  return parts.length ? parts.join(' ') : null;
 }
 
 const COOK_COUNTY_CLASS_DESCRIPTIONS: Record<string, string> = {
@@ -337,30 +400,30 @@ const PRINT_SECTIONS: PrintSection[] = [
   { id: 'map', label: 'Location Map', defaultChecked: true, group: 'Location & Overview' },
   { id: 'listing-snapshot', label: 'Active Listing Snapshot', defaultChecked: true, group: 'Location & Overview' },
 
-  // Project Type & Zoning
-  { id: 'project-type', label: 'Project Type & Zoning Compatibility', defaultChecked: true, group: 'Project Type & Zoning' },
-  { id: 'ward', label: 'Ward & Alderperson', defaultChecked: true, level: 1, group: 'Project Type & Zoning' },
-  { id: 'zoning-details', label: 'Zoning Details', defaultChecked: true, level: 1, group: 'Project Type & Zoning' },
+  // Project Use & Zoning
+  { id: 'project-type', label: 'Project Use & Zoning Compatibility', defaultChecked: true, group: 'Project Use & Zoning' },
+  { id: 'ward', label: 'Ward & Alderperson', defaultChecked: true, level: 1, group: 'Project Use & Zoning' },
+  { id: 'zoning-details', label: 'Zoning Details', defaultChecked: true, level: 1, group: 'Project Use & Zoning' },
 
-  // Project Type Analysis (project-type-specific sections)
-  { id: 'childcare', label: 'Childcare Access', defaultChecked: true, group: 'Project Type Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
-  { id: 'childcare-demographics', label: 'Childcare Demographics', defaultChecked: true, level: 1, group: 'Project Type Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
-  { id: 'parents-labor', label: 'Parents in Labor Force', defaultChecked: true, level: 1, group: 'Project Type Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
-  { id: 'daycare-estimator', label: 'Day Care Needs Estimator', defaultChecked: true, level: 1, group: 'Project Type Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
-  { id: 'site-daycare-details', label: 'Site Day Care Details', defaultChecked: true, level: 1, group: 'Project Type Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
-  { id: 'childcare-capacity', label: 'Childcare Capacity', defaultChecked: true, level: 1, group: 'Project Type Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
-  { id: 'nearby-business-daycare-centers', label: 'Nearby Day Care Centers', defaultChecked: true, level: 1, group: 'Project Type Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
-  { id: 'grocery', label: 'Grocery Access', defaultChecked: true, group: 'Project Type Analysis', requiresProjectType: ['Grocery Store'] },
-  { id: 'vehicle-ownership', label: 'Vehicle Ownership / Auto Dependency', defaultChecked: true, group: 'Project Type Analysis', requiresProjectType: ['Auto Service', 'Gas Station', 'EV Charging Station', 'Auto Repair Shop', 'Auto Body Shop'] },
-  { id: 'seniors', label: 'Senior Population Analysis', defaultChecked: true, group: 'Project Type Analysis' },
-  { id: 'nearby-business', label: 'Nearby Filling Stations', defaultChecked: true, group: 'Project Type Analysis', requiresProjectType: ['Gas Station'] },
-  { id: 'ev-registrations', label: 'EV Registration Trends', defaultChecked: true, group: 'Project Type Analysis', requiresProjectType: ['EV Charging Station'] },
-  { id: 'nearby-business-ev', label: 'Nearby EV Charging Stations', defaultChecked: true, level: 1, group: 'Project Type Analysis', requiresProjectType: ['EV Charging Station'] },
-  { id: 'nearby-business-hotels', label: 'Nearby Hotels', defaultChecked: true, group: 'Project Type Analysis', requiresProjectType: ['Hotel', 'Hotel / Motel'] },
-  { id: 'nearby-business-restaurants', label: 'Nearby Restaurants', defaultChecked: true, group: 'Project Type Analysis', requiresProjectType: ['Restaurant (No Liquor)', 'Restaurant (With Liquor)'] },
-  { id: 'nearby-business-coffee', label: 'Nearby Coffee Shops', defaultChecked: true, group: 'Project Type Analysis', requiresProjectType: ['Coffee Shop / Cafe'] },
-  { id: 'nearby-business-bars', label: 'Nearby Bars & Lounges', defaultChecked: true, group: 'Project Type Analysis', requiresProjectType: ['Bar / Tavern'] },
-  { id: 'cannabis', label: 'Cannabis Dispensaries', defaultChecked: true, group: 'Project Type Analysis', requiresProjectType: ['Cannabis Dispensary', 'Cannabis Infuser', 'Cannabis Craft Grower', 'Cannabis Transporter'] },
+  // Project Use Analysis (project-type-specific sections)
+  { id: 'childcare', label: 'Childcare Access', defaultChecked: true, group: 'Project Use Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
+  { id: 'childcare-demographics', label: 'Childcare Demographics', defaultChecked: true, level: 1, group: 'Project Use Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
+  { id: 'parents-labor', label: 'Parents in Labor Force', defaultChecked: true, level: 1, group: 'Project Use Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
+  { id: 'daycare-estimator', label: 'Day Care Needs Estimator', defaultChecked: true, level: 1, group: 'Project Use Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
+  { id: 'site-daycare-details', label: 'Site Day Care Details', defaultChecked: true, level: 1, group: 'Project Use Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
+  { id: 'childcare-capacity', label: 'Childcare Capacity', defaultChecked: true, level: 1, group: 'Project Use Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
+  { id: 'nearby-business-daycare-centers', label: 'Nearby Day Care Centers', defaultChecked: true, level: 1, group: 'Project Use Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
+  { id: 'grocery', label: 'Grocery Access', defaultChecked: true, group: 'Project Use Analysis', requiresProjectType: ['Grocery Store'] },
+  { id: 'vehicle-ownership', label: 'Vehicle Ownership / Auto Dependency', defaultChecked: true, group: 'Project Use Analysis', requiresProjectType: ['Auto Service', 'Gas Station', 'EV Charging Station', 'Auto Repair Shop', 'Auto Body Shop'] },
+  { id: 'seniors', label: 'Senior Population Analysis', defaultChecked: true, group: 'Project Use Analysis' },
+  { id: 'nearby-business', label: 'Nearby Filling Stations', defaultChecked: true, group: 'Project Use Analysis', requiresProjectType: ['Gas Station'] },
+  { id: 'ev-registrations', label: 'EV Registration Trends', defaultChecked: true, group: 'Project Use Analysis', requiresProjectType: ['EV Charging Station'] },
+  { id: 'nearby-business-ev', label: 'Nearby EV Charging Stations', defaultChecked: true, level: 1, group: 'Project Use Analysis', requiresProjectType: ['EV Charging Station'] },
+  { id: 'nearby-business-hotels', label: 'Nearby Hotels', defaultChecked: true, group: 'Project Use Analysis', requiresProjectType: ['Hotel', 'Hotel / Motel'] },
+  { id: 'nearby-business-restaurants', label: 'Nearby Restaurants', defaultChecked: true, group: 'Project Use Analysis', requiresProjectType: ['Restaurant (No Liquor)', 'Restaurant (With Liquor)'] },
+  { id: 'nearby-business-coffee', label: 'Nearby Coffee Shops', defaultChecked: true, group: 'Project Use Analysis', requiresProjectType: ['Coffee Shop / Cafe'] },
+  { id: 'nearby-business-bars', label: 'Nearby Bars & Lounges', defaultChecked: true, group: 'Project Use Analysis', requiresProjectType: ['Bar / Tavern'] },
+  { id: 'cannabis', label: 'Cannabis Dispensaries', defaultChecked: true, group: 'Project Use Analysis', requiresProjectType: ['Cannabis Dispensary', 'Cannabis Infuser', 'Cannabis Craft Grower', 'Cannabis Transporter'] },
 
   // Location-Based Incentives
   { id: 'location-incentives', label: 'Location-Based Incentives', defaultChecked: true, group: 'Location-Based Incentives' },
@@ -379,6 +442,8 @@ const PRINT_SECTIONS: PrintSection[] = [
   { id: 'adu', label: 'ADU Zone Eligibility', defaultChecked: true, level: 1, group: 'Location-Based Incentives' },
 
   // Property Details
+  { id: 'permits', label: 'Permits & Violations', defaultChecked: true, group: 'Permits & Violations' },
+  { id: 'ownership', label: 'Ownership & Title', defaultChecked: true, group: 'Ownership & Title' },
   { id: 'property-info', label: 'Property Details', defaultChecked: true, group: 'Property Details' },
   { id: 'pre-title-check', label: 'Pre-Title Check (Liens & Flags)', defaultChecked: true, level: 1, group: 'Property Details' },
   { id: 'hmda-stats', label: 'Local Mortgage Market (HMDA)', defaultChecked: true, level: 1, group: 'Property Details' },
@@ -391,6 +456,9 @@ const PRINT_SECTIONS: PrintSection[] = [
   { id: 'rentcast-market', label: 'Long-Term Rental Market (RentCast)', defaultChecked: true, level: 1, group: 'Development Potential' },
 
   // Proximity & Neighborhood
+  { id: 'crime', label: 'Safety & Crime', defaultChecked: true, group: 'Safety & Crime' },
+  { id: 'new-business-licenses', label: 'New Business Licenses', defaultChecked: true, group: 'Safety & Crime' },
+  { id: 'new-construction', label: 'New Construction', defaultChecked: true, group: 'Proximity & Neighborhood' },
   { id: 'proximity-details', label: 'Proximity & Neighborhood Intelligence', defaultChecked: true, group: 'Proximity & Neighborhood' },
   { id: 'schools', label: 'Nearby CPS Schools', defaultChecked: true, level: 1, group: 'Proximity & Neighborhood' },
   { id: 'worship', label: 'Places of Worship', defaultChecked: true, level: 1, group: 'Proximity & Neighborhood' },
@@ -425,14 +493,11 @@ interface SectionStates {
   proximityDetails: boolean;
   transitAccess: boolean;
   projectTypeInfo: boolean;
-  listingSnapshot: boolean;
   dob: boolean;
   newConstruction: boolean;
   recentLicenses: boolean;
   landmark: boolean;
   parcel: boolean;
-  saleHistory: boolean;
-  liens: boolean;
   assessedValue: boolean;
   exemptionHistory: boolean;
   appealHistory: boolean;
@@ -502,6 +567,7 @@ interface SectionStates {
   googlePlacesSection: boolean;
   googlePlacesDaycareSection: boolean;
   businessLicenseHistory: boolean;
+  zoningHistory: boolean;
 }
 
 // Official CHRS designation colors — NOT brand colors; do not change to indigo.
@@ -519,9 +585,9 @@ const DEFAULT_SECTION_STATES: SectionStates = {
   neighborhoodProfile: false, addressNews: false, neighborhoodNews: false, corridorNews: false,
   locationIncentives: false, propertyDetails: false, developmentPotential: false,
   farAnalysis: true, fmrSubsection: true, vacantBuildings: false, cityOwnedLots: false,
-  proximityDetails: false, transitAccess: false, projectTypeInfo: false, listingSnapshot: false,
+  proximityDetails: false, transitAccess: false, projectTypeInfo: false,
   dob: false, newConstruction: false, recentLicenses: false, landmark: false,
-  parcel: false, saleHistory: false, liens: false, assessedValue: false, exemptionHistory: false, appealHistory: false,
+  parcel: false, assessedValue: false, exemptionHistory: false, appealHistory: false,
   propertyTaxInfo: false, crime: false, proximity: false, entertainment: false,
   michelinSub: false, jbaSub: false, muralsSub: false, artGalleriesSub: false,
   landmarksDesignatedSub: false, tod: false, sbif: false, nmtc: false,
@@ -626,7 +692,7 @@ const DRILLABLE_TYPES: Record<string, { prompt: string; example: string }> = {
 
 // Module-level memoized component — defined OUTSIDE RunDetail so React.memo
 // is never bypassed by parent re-renders.  All props are primitives so shallow
-// comparison is exact.  Changing project type (or any other RunDetail state)
+// comparison is exact.  Changing project use (or any other RunDetail state)
 // cannot cause this component to re-render or unmount Mapbox.
 // Use-aware placeholder for the "Get specific — your concept" field
 function conceptPlaceholder(projectType: string | null): string {
@@ -713,6 +779,153 @@ const demographicChangeClass = (label: string, up: boolean | null) => {
   return direction ? (up === (direction === 'up') ? 'demo-good' : 'demo-bad') : 'demo-neutral';
 };
 
+// ===== Step 4d — News archive primitives (hybrid) =====
+// Bundle real logos in the repo, keyed by domain. Add files under client/public/logos/*.svg.
+const SOURCE_LOGOS: Record<string, string> = {
+  'blockclubchicago.org': '/logos/block-club.svg',
+  'chicagobusiness.com':  '/logos/crains.svg',
+  'therealdeal.com':      '/logos/trd.svg',
+  'chicagoyimby.com':     '/logos/yimby.svg',
+  'chicagotribune.com':   '/logos/tribune.svg',
+  'suntimes.com':         '/logos/sun-times.svg',
+  'chicago.eater.com':    '/logos/eater.svg',
+};
+// deterministic colored-plate tone for the fallback, by source name
+const PLATE_TONES = ['s-indigo', 's-green', 's-slate'];
+const domainOf = (url?: string) => { try { return new URL(url!).hostname.replace(/^www\./, ''); } catch { return ''; } };
+// Google News articles link through news.google.com — map the parsed publisher NAME to its real
+// domain so the logo shows the publisher, never Google. Unknown aggregator sources fall to the plate.
+const SOURCE_DOMAINS: Record<string, string> = {
+  'block club chicago': 'blockclubchicago.org',
+  "crain's chicago business": 'chicagobusiness.com', 'crain’s chicago business': 'chicagobusiness.com',
+  'the real deal': 'therealdeal.com',
+  'chicago yimby': 'chicagoyimby.com',
+  'chicago tribune': 'chicagotribune.com',
+  'chicago sun-times': 'suntimes.com', 'sun-times': 'suntimes.com',
+  'eater chicago': 'chicago.eater.com',
+  'chicago reader': 'chicagoreader.com',
+  'timeout chicago': 'timeout.com', 'time out chicago': 'timeout.com',
+  'the infatuation': 'theinfatuation.com',
+  'whatnow chicago': 'chicago.whatnow.com',
+  'dwell': 'dwell.com',
+  'dezeen': 'dezeen.com',
+  'wbez': 'wbez.org', 'wbez chicago': 'wbez.org',
+  'chicago magazine': 'chicagomag.com',
+  'nbc chicago': 'nbcchicago.com',
+  'abc7 chicago': 'abc7chicago.com',
+  'cbs chicago': 'cbsnews.com', 'cbs news chicago': 'cbsnews.com',
+  'fox 32 chicago': 'fox32chicago.com',
+  'wgn-tv': 'wgntv.com', 'wgn tv': 'wgntv.com', 'wgn9': 'wgntv.com',
+  'chicago agent magazine': 'chicagoagentmagazine.com',
+  'urbanize chicago': 'chicago.urbanize.city',
+  'curbed chicago': 'chicago.curbed.com',
+  'daily herald': 'dailyherald.com',
+  'patch': 'patch.com',
+  'bisnow': 'bisnow.com',
+  "the architect's newspaper": 'archpaper.com',
+};
+const publisherDomain = (url?: string, source?: string) => {
+  const dom = domainOf(url);
+  const aggregator = !dom || dom === 'google.com' || dom.endsWith('.google.com');
+  if (!aggregator) return dom;
+  const key = (source || '').toLowerCase().trim();
+  if (SOURCE_DOMAINS[key]) return SOURCE_DOMAINS[key];
+  // some feeds report the source as a bare domain ("chicagoyimby.com") — use it directly
+  return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(key) ? key.replace(/^www\./, '') : '';
+};
+// Only ever link to http(s) destinations (or in-page anchors) — a poisoned news record must not become a javascript: link.
+const safeUrl = (url?: string) => {
+  if (!url) return undefined;
+  if (url.startsWith('#')) return url;
+  try { const u = new URL(url); return u.protocol === 'http:' || u.protocol === 'https:' ? url : undefined; } catch { return undefined; }
+};
+const newsFmtD = (d?: string) => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+const newsStateLabel: Record<string, string> = { consistent: 'consistent', appears_superseded: 'appears superseded', no_update: 'no update on file' };
+// record-check verdict dot: consistent = good · appears_superseded = att · no_update = ctx
+const newsVClass = (state: string) => state === 'consistent' ? 'good' : state === 'appears_superseded' ? 'att' : 'ctx';
+// dev stage → tag: permitted/under_construction/complete = perm · approved = appr · proposed = prop
+const newsStatusCls = (stage: string) => stage === 'permitted' || stage === 'under_construction' || stage === 'complete' ? 'perm' : stage === 'approved' ? 'appr' : 'prop';
+const newsGoCorridor = (e: React.MouseEvent) => { e.preventDefault(); window.dispatchEvent(new CustomEvent('kyp-reveal-anchor', { detail: 'print-section-corridor-news' })); };
+
+function LogoTile({ url, source, date, lead }: { url?: string; source: string; date?: string; lead?: boolean }) {
+  const dom = publisherDomain(url, source);
+  const bundled = SOURCE_LOGOS[dom];
+  const favicon = dom ? `https://www.google.com/s2/favicons?domain=${dom}&sz=128` : '';
+  const [src, setSrc] = useState(bundled || favicon);
+  const [failed, setFailed] = useState(!bundled && !favicon);
+  if (failed) {                                   // colored source-plate fallback — never blank
+    const tone = PLATE_TONES[(source.charCodeAt(0) + source.length) % PLATE_TONES.length];
+    return (
+      <div className={`kyp-archthumb ${tone}`} style={lead ? { width: 88, height: 88 } : undefined}>
+        <div className="tsrc">{source}</div>{date && <div className="tdt">{date}</div>}
+      </div>
+    );
+  }
+  return (
+    <div className="kyp-archlogo" style={lead ? { width: 88, height: 88 } : undefined}>
+      <img src={src} alt={source}
+        onError={() => { if (src !== favicon && favicon) setSrc(favicon); else setFailed(true); }} />
+    </div>
+  );
+}
+
+// Site-Specific Coverage row (parcel/adjacent, with record-check)
+function NewsSiteCard({ m, g, idx, lead }: { m: any; g: any; idx: number; lead?: boolean }) {
+  return (
+    <div className={`kyp-archrow${lead ? ' lead' : ''}`} data-testid={`news-card-${m.tier}-${idx}`}>
+      <LogoTile url={m.url} source={m.source} date={newsFmtD(m.date)} lead={lead} />
+      <div className="kyp-archbody">
+        <div className="kyp-archkick">
+          <span className="kyp-archdate">{newsFmtD(m.date)}</span>
+          <span className={`kyp-archtag ${m.tier === 'parcel' ? '' : 'adj'}`}>{m.tier === 'parcel' ? 'This parcel' : `Adjacent · ${m.matched_address}`}</span>
+          {m.age_flag && <span className="kyp-archage">{m.age_flag}</span>}
+          {g?.verification && <span className={`kyp-archstatus ${newsVClass(g.verification.state)}`}><span className="d" />{newsStateLabel[g.verification.state] || g.verification.state}</span>}
+        </div>
+        {safeUrl(m.url) ? <a className="kyp-archtitle" href={safeUrl(m.url)} target="_blank" rel="noopener noreferrer">{m.title}</a> : <span className="kyp-archtitle">{m.title}</span>}
+        {g?.takeaway && <div className="kyp-archsum">{g.takeaway}</div>}
+        {g?.attribution && <div className="kyp-archattr">{g.attribution}</div>}
+        <div className="kyp-archfoot">
+          {g?.verification && <span className="kyp-archrec">{g.verification.text} {safeUrl(g.verification.source_anchor) && <a href={safeUrl(g.verification.source_anchor)}>View records</a>}</span>}
+          {safeUrl(m.url) && <a className="kyp-archread" href={safeUrl(m.url)} target="_blank" rel="noopener noreferrer">Read at {m.source} ↗</a>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Neighborhood culture row (light)
+function NewsArchCard({ a, testid }: { a: any; testid?: string }) {
+  return (
+    <div className="kyp-archrow" data-testid={testid}>
+      <LogoTile url={a.url} source={a.source} date={newsFmtD(a.date)} />
+      <div className="kyp-archbody">
+        <div className="kyp-archkick"><span className="kyp-archdate">{newsFmtD(a.date)}</span></div>
+        {safeUrl(a.url) ? <a className="kyp-archtitle" href={safeUrl(a.url)} target="_blank" rel="noopener noreferrer">{a.title}</a> : <span className="kyp-archtitle">{a.title}</span>}
+        <div className="kyp-archfoot">{safeUrl(a.url) && <a className="kyp-archread" href={safeUrl(a.url)} target="_blank" rel="noopener noreferrer">Read at {a.source} ↗</a>}</div>
+      </div>
+    </div>
+  );
+}
+
+// Neighborhood development row (stage tag + corridor cross-ref)
+function NewsDevCard({ p, testid }: { p: any; testid?: string }) {
+  return (
+    <div className="kyp-archrow" data-testid={testid}>
+      <LogoTile url={p.url} source={p.source} date={newsFmtD(p.date)} />
+      <div className="kyp-archbody">
+        <div className="kyp-archkick"><span className="kyp-archdate">{newsFmtD(p.date)}</span><span className={`kyp-stage ${newsStatusCls(p.stage)}`}>{p.stageLabel}</span></div>
+        {safeUrl(p.url) ? <a className="kyp-archtitle" href={safeUrl(p.url)} target="_blank" rel="noopener noreferrer">{p.title}</a> : <span className="kyp-archtitle">{p.title}</span>}
+        {p.oneLine && <div className="kyp-archsum">{p.oneLine}</div>}
+        <div className="kyp-archfoot">
+          {p.inPermitData && <a className="kyp-across" href="#print-section-corridor-news" onClick={newsGoCorridor}><svg viewBox="0 0 24 24" strokeWidth="2.2"><path d="M20 6 9 17l-5-5" /></svg>Same project in Corridor permit data — counted once</a>}
+          {!p.matchable && <span className="kyp-across" style={{ borderStyle: 'dashed', cursor: 'default', color: 'var(--kyp-muted)' }}>location not specified — not matched</span>}
+          {safeUrl(p.url) && <a className="kyp-archread" href={safeUrl(p.url)} target="_blank" rel="noopener noreferrer">Read at {p.source} ↗</a>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function RunDetail() {
   const [match, params] = useRoute("/run/:id");
   const [reportMatch, reportParams] = useRoute("/report/:id");
@@ -766,6 +979,8 @@ export default function RunDetail() {
   const [allSectionsExpanded, setAllSectionsExpanded] = useState(false);
 
   // Locally-managed collapsibles (not part of SectionStates) that must also open for print/expand-all
+  // KYP redesign hybrid-look flag (live-tester safe: URL-gated, default off)
+  const hybridInc: boolean = true; // Step 5: the new design is the only render — legacy (!hybridInc) branches are dead code, cleanup queued
   const [naIncOpen, setNaIncOpen] = useState(false);
   const [likelyIncOpen, setLikelyIncOpen] = useState(true);
   const [confirmIncOpen, setConfirmIncOpen] = useState(true);
@@ -776,8 +991,22 @@ export default function RunDetail() {
   const sectionStatesRef = useRef(sectionStates);
   const allSectionsExpandedRef = useRef(allSectionsExpanded);
   const [zbaExpanded, setZbaExpanded] = useState(false);
+  // Whole-card collapse for the top Ward & Alderperson and Zoning Details cards (default expanded; collapsed = abridged one-liner)
+  const [wardCardOpen, setWardCardOpen] = useState(false);
+  const [zoningCardOpen, setZoningCardOpen] = useState(false);
+  useEffect(() => { asidesRef.current = { wardCardOpen, zoningCardOpen }; }, [wardCardOpen, zoningCardOpen]);
   const [isCypOpen, setIsCypOpen] = useState(true);
+  const [cypModalOpen, setCypModalOpen] = useState(false);
+  useEffect(() => {
+    if (!cypModalOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setCypModalOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [cypModalOpen]);
   const localCollapsiblesRef = useRef({ naIncOpen, isTifCardOpen, isOppZoneCardOpen, isCypOpen, zbaExpanded });
+  // accOpen + top-card asides also need print snapshot/restore (rows default closed)
+  const accOpenRef = useRef<Record<string, boolean>>({});
+  const asidesRef = useRef({ wardCardOpen: false, zoningCardOpen: false });
   useEffect(() => { sectionStatesRef.current = sectionStates; }, [sectionStates]);
   useEffect(() => { allSectionsExpandedRef.current = allSectionsExpanded; }, [allSectionsExpanded]);
   useEffect(() => { localCollapsiblesRef.current = { naIncOpen, isTifCardOpen, isOppZoneCardOpen, isCypOpen, zbaExpanded }; }, [naIncOpen, isTifCardOpen, isOppZoneCardOpen, isCypOpen, zbaExpanded]);
@@ -790,7 +1019,7 @@ export default function RunDetail() {
     const tryScroll = () => {
       const el = document.getElementById(id);
       if (el) {
-        el.scrollIntoView({ block: 'start' });
+        window.dispatchEvent(new CustomEvent('kyp-reveal-anchor', { detail: id }));
       } else if (--attempts > 0) {
         setTimeout(tryScroll, 400);
       }
@@ -816,6 +1045,98 @@ export default function RunDetail() {
   // Tracks which incentive sub-sections are eligible so handlePrint can exclude non-eligible ones
   const incentiveEligibilityRef = useRef<Record<string, boolean>>({});
 
+  // ---- Step 5 accordion state: order / hidden / open (persisted per run) ----
+  const ACC_DEFAULT_ORDER = ["overview", "permits", "listing", "ownership", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
+  // Merge a saved order with the default list: drop unknown ids, and slot any
+  // NEW default ids in at their default position (right after their default
+  // predecessor) rather than dumping them at the end of the user's order.
+  const mergeAccOrder = (saved: string[], def: string[]): string[] => {
+    const out = saved.filter((x) => def.includes(x));
+    for (let idx = 0; idx < def.length; idx++) {
+      const idRow = def[idx];
+      if (out.includes(idRow)) continue;
+      const prev = def.slice(0, idx).reverse().find((p) => out.includes(p));
+      out.splice(prev ? out.indexOf(prev) + 1 : 0, 0, idRow);
+    }
+    return out;
+  };
+  const [accOrder, setAccOrder] = useState<string[]>(() => {
+    try {
+      const s = JSON.parse(localStorage.getItem(`kyp-acc-order-${id}`) || "null");
+      if (Array.isArray(s)) return mergeAccOrder(s, ACC_DEFAULT_ORDER);
+    } catch {}
+    return ACC_DEFAULT_ORDER;
+  });
+  const [accHidden, setAccHidden] = useState<Record<string, boolean>>(() => {
+    try { return JSON.parse(localStorage.getItem(`kyp-acc-hidden-${id}`) || "{}") || {}; } catch { return {}; }
+  });
+  const [accOpen, setAccOpen] = useState<Record<string, boolean>>({});
+  useEffect(() => { accOpenRef.current = accOpen; }, [accOpen]);
+  const [accDragId, setAccDragId] = useState<string | null>(null);
+  const [accOverId, setAccOverId] = useState<string | null>(null);
+  // Re-hydrate per-run accordion state when navigating between runs (same routed component)
+  const accHydratedIdRef = useRef(id);
+  useEffect(() => {
+    if (accHydratedIdRef.current === id) return;
+    let order = ACC_DEFAULT_ORDER;
+    try {
+      const s = JSON.parse(localStorage.getItem(`kyp-acc-order-${id}`) || "null");
+      if (Array.isArray(s)) order = mergeAccOrder(s, ACC_DEFAULT_ORDER);
+    } catch {}
+    let hidden: Record<string, boolean> = {};
+    try { hidden = JSON.parse(localStorage.getItem(`kyp-acc-hidden-${id}`) || "{}") || {}; } catch {}
+    setAccOrder(order);
+    setAccHidden(hidden);
+    setAccOpen({});
+    setAccDragId(null);
+    setAccOverId(null);
+    accHydratedIdRef.current = id;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+  useEffect(() => { if (accHydratedIdRef.current === id) try { localStorage.setItem(`kyp-acc-order-${id}`, JSON.stringify(accOrder)); } catch {} }, [accOrder, id]);
+  useEffect(() => { if (accHydratedIdRef.current === id) try { localStorage.setItem(`kyp-acc-hidden-${id}`, JSON.stringify(accHidden)); } catch {} }, [accHidden, id]);
+  const accMove = useCallback((src: string, tgt: string) => {
+    if (src === tgt) return;
+    setAccOrder((ord) => {
+      const next = ord.filter((x) => x !== src);
+      const i = next.indexOf(tgt);
+      next.splice(i < 0 ? next.length : i, 0, src);
+      return next;
+    });
+  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const accReset = useCallback(() => { setAccOrder(ACC_DEFAULT_ORDER); setAccHidden({}); }, []);
+
+  // Rows default closed, so any jump/deep-link to an anchor inside a row must
+  // open (and un-hide) that row before scrolling. Generic: finds the enclosing
+  // .kyp-accrow in the DOM (children stay mounted while closed).
+  const revealAnchor = useCallback((id: string, block: ScrollLogicalPosition = 'start') => {
+    // Retry: the anchor may not be mounted yet (nested collapsible opened in the
+    // same click), and its row must be open (display:none blocks scrollIntoView).
+    const attempt = (tries: number) => {
+      const el = document.getElementById(id);
+      const row = el?.closest('.kyp-accrow');
+      if (row && row.id.startsWith('section-')) {
+        const rid = row.id.slice('section-'.length);
+        setAccOpen((m) => (m[rid] === true ? m : { ...m, [rid]: true }));
+        setAccHidden((m) => (m[rid] ? { ...m, [rid]: false } : m));
+      }
+      const visible = el && (el as HTMLElement).offsetParent !== null;
+      if (visible) {
+        el!.scrollIntoView({ behavior: 'smooth', block });
+      } else if (tries > 0) {
+        setTimeout(() => attempt(tries - 1), 150);
+      }
+    };
+    setTimeout(() => attempt(8), 150);
+  }, []);
+  // Module-scope handlers (defined outside the component) reveal via this event.
+  useEffect(() => {
+    const h = (e: Event) => revealAnchor((e as CustomEvent<string>).detail);
+    window.addEventListener('kyp-reveal-anchor', h);
+    return () => window.removeEventListener('kyp-reveal-anchor', h);
+  }, [revealAnchor]);
+
   const setSectionOpen = useCallback((key: keyof SectionStates, value: boolean) => {
     setSectionStates(prev => ({ ...prev, [key]: value }));
   }, []);
@@ -830,6 +1151,9 @@ export default function RunDetail() {
     setIsOppZoneCardOpen(true);
     setIsCypOpen(true);
     setZbaExpanded(true);
+    setWardCardOpen(true);
+    setZoningCardOpen(true);
+    setAccOpen(Object.fromEntries(ACC_DEFAULT_ORDER.map((k) => [k, true]))); // open all accordion rows (default is closed)
     setAllSectionsExpanded(true);
   }, []);
 
@@ -842,6 +1166,9 @@ export default function RunDetail() {
     setIsOppZoneCardOpen(false);
     setIsCypOpen(false);
     setZbaExpanded(false);
+    setWardCardOpen(false);
+    setZoningCardOpen(false);
+    setAccOpen(Object.fromEntries(ACC_DEFAULT_ORDER.map((k) => [k, false]))); // collapse accordion rows
     setAllSectionsExpanded(false);
   }, []);
 
@@ -911,14 +1238,10 @@ export default function RunDetail() {
   const setIsCityOwnedLotsOpen = useCallback((v: boolean) => setSectionOpen('cityOwnedLots', v), [setSectionOpen]);
   const isProximityDetailsOpen = sectionStates.proximityDetails;
   const setIsProximityDetailsOpen = useCallback((v: boolean) => setSectionOpen('proximityDetails', v), [setSectionOpen]);
-  const isListingSnapshotOpen = sectionStates.listingSnapshot;
-  const setIsListingSnapshotOpen = useCallback((v: boolean) => setSectionOpen('listingSnapshot', v), [setSectionOpen]);
   const isTransitAccessOpen = sectionStates.transitAccess;
   const setIsTransitAccessOpen = useCallback((v: boolean) => setSectionOpen('transitAccess', v), [setSectionOpen]);
   const isProjectTypeInfoOpen = sectionStates.projectTypeInfo;
   const setIsProjectTypeInfoOpen = useCallback((v: boolean) => setSectionOpen('projectTypeInfo', v), [setSectionOpen]);
-  const isDobSectionOpen = sectionStates.dob;
-  const setIsDobSectionOpen = useCallback((v: boolean) => setSectionOpen('dob', v), [setSectionOpen]);
   const isNewConstructionSectionOpen = sectionStates.newConstruction;
   const setIsNewConstructionSectionOpen = useCallback((v: boolean) => setSectionOpen('newConstruction', v), [setSectionOpen]);
   const isRecentLicensesSectionOpen = sectionStates.recentLicenses;
@@ -927,10 +1250,6 @@ export default function RunDetail() {
   const setIsLandmarkSectionOpen = useCallback((v: boolean) => setSectionOpen('landmark', v), [setSectionOpen]);
   const isParcelSectionOpen = sectionStates.parcel;
   const setIsParcelSectionOpen = useCallback((v: boolean) => setSectionOpen('parcel', v), [setSectionOpen]);
-  const isSaleHistorySectionOpen = sectionStates.saleHistory;
-  const setIsSaleHistorySectionOpen = useCallback((v: boolean) => setSectionOpen('saleHistory', v), [setSectionOpen]);
-  const isLiensSectionOpen = sectionStates.liens;
-  const setIsLiensSectionOpen = useCallback((v: boolean) => setSectionOpen('liens', v), [setSectionOpen]);
   const isAssessedValueSectionOpen = sectionStates.assessedValue;
   const setIsAssessedValueSectionOpen = useCallback((v: boolean) => setSectionOpen('assessedValue', v), [setSectionOpen]);
   const isExemptionHistorySectionOpen = sectionStates.exemptionHistory;
@@ -939,11 +1258,14 @@ export default function RunDetail() {
   const setIsAppealHistorySectionOpen = useCallback((v: boolean) => setSectionOpen('appealHistory', v), [setSectionOpen]);
   const isPropertyTaxInfoSectionOpen = sectionStates.propertyTaxInfo;
   const setIsPropertyTaxInfoSectionOpen = useCallback((v: boolean) => setSectionOpen('propertyTaxInfo', v), [setSectionOpen]);
-  const isCrimeSectionOpen = sectionStates.crime;
-  const setIsCrimeSectionOpen = useCallback((v: boolean) => setSectionOpen('crime', v), [setSectionOpen]);
   const [crimeRadius, setCrimeRadius] = useState<'nearby' | 'quarterMile'>('quarterMile');
   // Favorability tier for crime badges/rank tiles: color follows the data, never blanket-red
   const crimeFavor = (saferThanPercent: number) => saferThanPercent >= 75 ? 'good' : saferThanPercent >= 30 ? 'neu' : 'bad';
+  // ONE crime verdict scale (hybrid) — green (safe) → orange (watch) → red (bad). Tune the two cutoffs here.
+  // ≥50 = at/above city median → green · 30–49 = below median → orange · <30 = bottom third → red
+  const crimeTier = (p: number) => p >= 50 ? 'good' : p >= 30 ? 'att' : 'bad';
+  const tierFill = (t: string) => t === 'good' ? 'var(--kyp-green)' : t === 'att' ? 'var(--kyp-orange)' : 'var(--kyp-bad)';
+  const tierBlock = (t: string) => t === 'good' ? 'grn' : t === 'att' ? 'orange' : 'red';
   const isProximitySectionOpen = sectionStates.proximity;
   const setIsProximitySectionOpen = useCallback((v: boolean) => setSectionOpen('proximity', v), [setSectionOpen]);
   const isEntertainmentSectionOpen = sectionStates.entertainment;
@@ -1007,8 +1329,8 @@ export default function RunDetail() {
   };
   const jumpTo = useCallback((id: string) => {
     jumpTargets[id]?.open?.();
-    // wait a tick so a just-opened collapsible has rendered before scrolling
-    setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+    // opens the enclosing accordion row (rows default closed), then scrolls
+    revealAnchor(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setSectionOpen]);
   const renderJump = (id: string | undefined) => {
@@ -1098,7 +1420,7 @@ export default function RunDetail() {
   const run = isStandaloneReport ? publicRun : regularRun;
   const isRunLoading = isStandaloneReport ? isPublicRunLoading : isRegularRunLoading;
   const { data: listingData } = useListingData(run?.id);
-  const { data: listingSnapshot, isFetched: listingSnapshotFetched } = useListingSnapshot(run?.id);
+  const { data: listingSnapshot, isFetched: listingSnapshotFetched, isError: isListingSnapshotError, error: listingSnapshotError } = useListingSnapshot(run?.id);
   const generateListingSnapshot = useGenerateListingSnapshot(run?.id);
   const updateRunLabel = useUpdateRunLabel();
   const [isEditingLabel, setIsEditingLabel] = useState(false);
@@ -1118,7 +1440,7 @@ export default function RunDetail() {
   const { isSubscriber, user: authUser } = useAuth();
   // Report is unlocked if user is a subscriber or the run has been purchased
   const isReportUnlocked = isSubscriber || !!run?.purchasedAt;
-  // Project type locks after 90 days — subscribers are never locked
+  // Project use locks after 90 days — subscribers are never locked
   const isProjectTypeLocked = !isSubscriber && !!run && (() => {
     const startDate = run.createdAt || run.purchasedAt;
     if (!startDate) return false;
@@ -1140,6 +1462,7 @@ export default function RunDetail() {
   const [manualStories, setManualStories] = useState<string>("");
   const [showManualEntryForm, setShowManualEntryForm] = useState(false);
   const [showOlderViolationsList, setShowOlderViolationsList] = useState(false);
+  const [showAllPermits, setShowAllPermits] = useState(false);
   const [isEditingDaycareDetails, setIsEditingDaycareDetails] = useState(false);
 
   // Quick Cashflow Calculator state (for daycare)
@@ -1226,9 +1549,9 @@ export default function RunDetail() {
     }
   }, [mortgageRateData, hasSetFreddieMacRate, valuationLoanType]);
 
-  // Re-geocode only when the run ID or address changes — NOT on project type change.
+  // Re-geocode only when the run ID or address changes — NOT on project use change.
   // Including lastProjectType here would cause geocode.reset() to fire on every
-  // project type save, clearing facts and unmounting the map.
+  // project use save, clearing facts and unmounting the map.
   useEffect(() => {
     if (run?.address && isReportUnlocked) {
       geocode.reset();
@@ -1240,8 +1563,8 @@ export default function RunDetail() {
     setPinManuallyEdited(false);
   }, [run?.id, run?.address, isReportUnlocked]);
 
-  // Restore project type and concept state when the run loads or its saved
-  // project type changes. Kept separate so it never triggers a geocode reset.
+  // Restore project use and concept state when the run loads or its saved
+  // project use changes. Kept separate so it never triggers a geocode reset.
   useEffect(() => {
     if (!run?.id) return;
     if (run.lastProjectType) {
@@ -1411,7 +1734,7 @@ export default function RunDetail() {
     setShowManualEntryForm(false);
   };
 
-  // Save project type when it changes
+  // Save project use when it changes
   const handleProjectTypeChange = (projectType: string | null) => {
     if (isProjectTypeLocked) return;
     setSelectedProjectType(projectType);
@@ -1563,7 +1886,7 @@ export default function RunDetail() {
   const { data: zoningInfo, isLoading: isLoadingZoning } = useZoningInfo(facts?.zoning);
   const { data: compatibility } = useZoningCompatibility(selectedProjectType, facts?.zoning || null);
 
-  // Childcare hooks - fetch when Day Care or School project type is selected
+  // Childcare hooks - fetch when Day Care or School project use is selected
   const isDaycare = selectedProjectType === 'Day Care Center';
   const isDaycareOrSchool = isDaycare || selectedProjectType === 'School (Private)';
   // Childcare access fetches for EVERY search (also shown under Schools → Day Care for primary-residence buyers)
@@ -1574,7 +1897,7 @@ export default function RunDetail() {
   const { data: childcareCapacityData, isLoading: isLoadingCapacity } = useChildcareCapacity(isDaycareOrSchool ? facts?.communityArea : undefined);
   const { data: childcareCapacityZipData, isLoading: isLoadingCapacityZip } = useChildcareCapacityZip(isDaycareOrSchool ? facts?.zipCode : undefined);
 
-  // Grocery hooks - fetch when Grocery Store project type is selected (with lat/lon for distance)
+  // Grocery hooks - fetch when Grocery Store project use is selected (with lat/lon for distance)
   const isGrocery = selectedProjectType === 'Grocery Store';
   const { data: groceryData, isLoading: isLoadingGrocery } = useGroceryAccess(isGrocery ? facts?.zipCode : undefined, facts?.lat, facts?.lon);
   const { data: communityGroceryData, isLoading: isLoadingCommunityGrocery } = useCommunityAreaGroceryAccess(isGrocery ? facts?.communityArea : undefined, facts?.lat, facts?.lon);
@@ -1733,7 +2056,7 @@ export default function RunDetail() {
     };
   }, [todData, sbifData, nmtcData, mmrpData, locationIncentivesData, nofEligible, investSwEligible, hubzoneData, qctData, chaOpportunityData, facts?.zoning, facts?.tifName, selectedProjectCategory, facts?.aduZone]);
 
-  // Business location hooks - fetch when relevant project type is selected
+  // Business location hooks - fetch when relevant project use is selected
   const isGasStation = selectedProjectType === 'Gas Station';
   const isAutoRepair = selectedProjectType === 'Auto Repair Shop';
   const isAutoBody = selectedProjectType === 'Auto Body Shop';
@@ -1830,6 +2153,14 @@ export default function RunDetail() {
     legalDescriptionPins.length > 0 ? legalDescriptionPins : undefined
   );
   const relatedParcels = relatedParcelsData?.relatedParcels ?? [];
+  // Proven Sale History derivation carried forward from the retired legacy block:
+  // CCAO+Recorder dedupe (by doc or amount ±45 days), truncated-price correction,
+  // timezone-safe YYYY / YYYY-MM / YYYY-MM-DD parsing, approx-date flags, seller/buyer/
+  // deed/doc provenance, shared-deed flag, non-arm's-length flags, and the sorted journey.
+  const saleDerivation = useMemo(
+    () => deriveSaleHistory({ pinLookupData, lienData, relatedParcels }),
+    [pinLookupData, lienData, relatedParcels],
+  );
   useEffect(() => {
     const normalizedPin = (submittedPin ?? '').replace(/\D/g, '');
     if (normalizedPin.length !== 14 || facts?.city === 'philadelphia') return;
@@ -1840,7 +2171,8 @@ export default function RunDetail() {
     // regenerates; unchanged docs → cheap cache hit, no LLM call).
     const recordStale = !!(debtSnapRec && lienData.scrapedAt && (debtSnapRec as any).updatedAt
       && new Date(lienData.scrapedAt).getTime() > new Date((debtSnapRec as any).updatedAt).getTime());
-    if (debtSnapRec && !recordStale) return;
+    const snapshotSchemaIsCurrent = debtSnapRec?.snap?.schema_version === 3;
+    if (debtSnapRec && !recordStale && snapshotSchemaIsCurrent) return;
     // Don't consume the per-pin attempt before the related-parcels lookup
     // settles — otherwise blanket detection routinely misses its co-parcel
     // evidence for the mount. (Disabled query ⇒ isLoading false ⇒ proceeds.)
@@ -1897,7 +2229,7 @@ export default function RunDetail() {
   // ── Location incentives: single availability→type hierarchy (rebuild) ──
   // state: 0 = likely relevant, 1 = needs confirmation, 3 = not applicable.
   // This maps the SAME eligibility results the sections already compute — do not invent new conclusions here.
-  // SBIF: selected project type is on SomerCor's ineligible-use list → not applicable regardless of TIF status
+  // SBIF: selected project use is on SomerCor's ineligible-use list → not applicable regardless of TIF status
   const sbifIneligibleUse = !!selectedProjectType && SBIF_INELIGIBLE_PROJECT_TYPES.includes(selectedProjectType);
 
   const incMeta = (() => {
@@ -1939,8 +2271,8 @@ export default function RunDetail() {
       'qct': { state: qctData?.eligible ? 0 : 3, type: 2, idx: 3, badge: qctData?.eligible ? 'QCT Tract' : 'Not Eligible', show: !isCommercialProjectType },
       'hubzone': { state: hubzoneData?.eligible ? 0 : 3, type: 2, idx: 4, badge: hubzoneData?.eligible ? 'Eligible Tract' : 'Not Eligible', show: isCommercialProjectType },
       'sbif': {
-        // Ineligible use → NA. Otherwise: authorized TIF + known project type → likely relevant;
-        // authorized TIF (or unverifiable list) without a project type → prompt user to select one.
+        // Ineligible use → NA. Otherwise: authorized TIF + known project use → likely relevant;
+        // authorized TIF (or unverifiable list) without a project use → prompt user to select one.
         state: sbifIneligibleUse ? 3
           : !sbifData?.sbif?.authorized && sbifData?.sbif?.status !== 'unknown' ? 3
           : !selectedProjectType ? 1
@@ -1948,7 +2280,7 @@ export default function RunDetail() {
         type: 3, idx: 1,
         badge: sbifIneligibleUse ? 'Ineligible Use'
           : !sbifData?.sbif?.authorized && sbifData?.sbif?.status !== 'unknown' ? 'Not Eligible'
-          : !selectedProjectType ? 'Select Project Type'
+          : !selectedProjectType ? 'Select Project Use'
           : sbifData?.sbif?.authorized ? 'Authorized · TIF Open' : 'Verify Manually',
         show: true,
       },
@@ -2078,17 +2410,12 @@ export default function RunDetail() {
       subjectDebtScope,
     });
   }, [coParcel, submittedPin, facts?.formattedAddress, facts?.zoning, run?.address, derivedOwnerName, pinLookupData?.saleHistory, coParcelResolvedOwner, debtSnapRec]);
-  // Co-parcel story now lives inside Sale History (double-lot panel) — the old standalone section is retired.
+  // Co-parcel story now lives inside Ownership & Title.
   const scrollToCompanionParcel = useCallback(() => {
-    setSectionOpen('propertyDetails', true);
-    setSectionOpen('saleHistory', true);
-    setTimeout(() => (document.getElementById('asmb-double-lot') || document.getElementById('section-sale-history'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 250);
-  }, [setSectionOpen]);
-
-  const refreshLienSearch = useRefreshLienSearch();
-  const ownerLienSearch = useOwnerLienSearch();
-  const [isEditingOwnerName, setIsEditingOwnerName] = useState(false);
-  const [ownerNameInput, setOwnerNameInput] = useState('');
+    setAccHidden((m) => ({ ...m, ownership: false }));
+    setAccOpen((m) => ({ ...m, ownership: true }));
+    setTimeout(() => revealAnchor(document.getElementById('asmb-double-lot') ? 'asmb-double-lot' : 'section-ownership'), 100);
+  }, [revealAnchor]);
 
   const { data: michelinData, isLoading: isLoadingMichelin } = useMichelinNearby(
     geocode.data?.lat,
@@ -2269,12 +2596,12 @@ export default function RunDetail() {
   // Election data hook
   const { data: electionData, isLoading: isLoadingElection } = useElectionData(facts?.communityArea);
 
-  // Vehicle ownership hook - fetch when auto service project type is selected
+  // Vehicle ownership hook - fetch when auto service project use is selected
   const { data: vehicleData, isLoading: isLoadingVehicle } = useVehicleOwnership(
     isAutoService ? facts?.communityArea : null
   );
 
-  // Seniors data hooks - fetch only for senior care project types (not daycare)
+  // Seniors data hooks - fetch only for senior care project uses (not daycare)
   const { data: seniorsData, isLoading: isLoadingSeniors } = useSeniorsData(
     isSeniorCare ? facts?.communityArea : null
   );
@@ -2298,7 +2625,7 @@ export default function RunDetail() {
     facts?.zipCode,
   );
   // Only fetch Crexi commercial lease data when property is NOT purely residential zoning,
-  // OR when user has selected a commercial project type.
+  // OR when user has selected a commercial project use.
   const isResidentialZoning = !isLoadingZoning && !!facts?.zoning && zoningInfo?.category === 'residential';
   const shouldFetchCrexi = (!isResidentialZoning || isCommercialProjectType) && !!facts?.zipCode;
   const { data: loopnetData, isLoading: isLoadingLoopnet } = useLoopNet(
@@ -2316,7 +2643,7 @@ export default function RunDetail() {
     shouldFetchCrexi,
   );
 
-  // Google Places only fires once a project type is explicitly set (non-daycare projects).
+  // Google Places only fires once a project use is explicitly set (non-daycare projects).
   // Term derivation lives in @shared/placesSearch so the insight-report evidence
   // builder derives identical terms and hits the same Places cache keys.
   const googlePlacesSearchTerm = selectedProjectType && !isDaycare && placesConfirmed
@@ -2343,15 +2670,33 @@ export default function RunDetail() {
   // Fair Market Rent hook
   const { data: fmrData, isLoading: isLoadingFmr } = useFairMarketRent(facts?.zipCode);
 
-  const { data: newConstructionData, isLoading: isLoadingNewConstruction } = useNewConstruction(facts?.communityArea, facts?.zipCode);
+  const { data: newConstructionData, isLoading: isLoadingNewConstruction, isError: isErrorNewConstruction } = useNewConstruction(facts?.lat, facts?.lon, facts?.communityArea);
+  const [upcomingRadiusMi, setUpcomingRadiusMi] = useState<0.5 | 1>(0.5);
   const { data: addressNewsData, isLoading: isLoadingAddressNews } = useAddressNews(run?.address);
   const { data: coParcelAddressNewsData, isLoading: isLoadingCoParcelAddressNews } = useAddressNews(coParcelAddress);
   const { data: neighborhoodNewsData, isLoading: isLoadingNeighborhoodNews } = useNeighborhoodNews(facts?.communityArea);
   const { data: corridorNewsData, isLoading: isLoadingCorridorNews } = useCorridorNews(facts?.lat, facts?.lon, run?.address, facts?.neighborhood, facts?.communityArea);
   const { data: zbaApprovalsData, isLoading: isLoadingZbaApprovals } = useZbaApprovals(wardNumber);
-  const { data: zoningHistoryData, isLoading: isLoadingZoningHistory } = useZoningHistory(run?.address, wardNumber);
+  // Verified co-parcels (assemblage) are searched alongside the subject address —
+  // ordinances for a double lot are often filed under the companion's number or a range.
+  const zoningHistoryAlts = useMemo(
+    () => assemblage ? assemblage.members.filter((m) => m.role === 'companion').map((m) => m.address).filter(Boolean) : undefined,
+    [assemblage],
+  );
+  const { data: zoningHistoryData, isLoading: isLoadingZoningHistory } = useZoningHistory(run?.address, wardNumber, zoningHistoryAlts);
+  const zoningHistoryView = useMemo(
+    () => buildZoningHistoryView(zoningHistoryData?.items, facts?.zoning, run?.address, zoningHistoryData?.coverage),
+    [zoningHistoryData?.items, facts?.zoning, run?.address, zoningHistoryData?.coverage],
+  );
+  // The disabled legacy nested renderer has no takeaway; the live top-level
+  // section above is the only place the evidence summary is presented.
+  const zoningHistoryPlainLanguage = { headline: '', detail: '' };
+  const zoningHistoryCoverage = useMemo(
+    () => zoningHistoryCoverageText(zoningHistoryData?.coverage),
+    [zoningHistoryData?.coverage],
+  );
   const { data: bizLicenseHistoryData, isLoading: isLoadingBizLicenseHistory } = useBusinessLicenseHistory(run?.address);
-  const { data: upcomingDevsData, isLoading: isLoadingUpcomingDevs } = useUpcomingDevelopments(facts?.neighborhood, facts?.communityArea, facts?.lat, facts?.lon);
+  const { data: upcomingDevsData, isLoading: isLoadingUpcomingDevs } = useUpcomingDevelopments((facts as any)?.neighborhood ?? undefined, facts?.communityArea ?? undefined, facts?.lat, facts?.lon ?? undefined, upcomingRadiusMi);
   const { data: hmdaData, isLoading: isLoadingHmda } = useHmdaStats(facts?.tractGeoid, facts?.communityArea);
   const { data: transactionTrendsData, isLoading: isLoadingTransactionTrends } = useTransactionTrends(facts?.zipCode);
   const { data: schoolsData, isLoading: isLoadingSchools } = useSchoolsNearby(facts?.lat, facts?.lon);
@@ -2371,8 +2716,8 @@ export default function RunDetail() {
   const isOnCorridor = (_corridorName: string, distanceMiles: number) => {
     return distanceMiles === 0;
   };
-  const { data: nearbyLicensesData, isLoading: isLoadingNearbyLicenses } = useNearbyBusinessLicenses(facts?.lat, facts?.lon);
-  const { data: nearbyConstructionData, isLoading: isLoadingNearbyConstruction } = useNearbyNewConstruction(facts?.lat, facts?.lon);
+  const { data: nearbyLicensesData, isLoading: isLoadingNearbyLicenses, isError: isErrorNearbyLicenses } = useNearbyBusinessLicenses(facts?.lat, facts?.lon);
+  const { data: nearbyConstructionData, isLoading: isLoadingNearbyConstruction } = useNearbyNewConstruction(facts?.lat, facts?.lon, facts?.communityArea);
 
   // Building permits and violations - uses combined hook to check all associated addresses
   // Include co-parcel PIN so its permits/violations are fetched alongside the primary
@@ -2501,7 +2846,7 @@ export default function RunDetail() {
     if (facts.ward) lines.push(`WARD: ${facts.ward}`);
     if (facts.neighborhood) lines.push(`NEIGHBORHOOD: ${facts.neighborhood}`);
     if (facts.opportunityZone) lines.push(`OPPORTUNITY ZONE: Yes`);
-    if (selectedProjectType || run.lastProjectType) lines.push(`SELECTED PROJECT TYPE: ${selectedProjectType || run.lastProjectType}`);
+    if (selectedProjectType || run.lastProjectType) lines.push(`SELECTED PROJECT USE: ${selectedProjectType || run.lastProjectType}`);
     if (run.askingPrice) lines.push(`ASKING PRICE: $${Number(run.askingPrice).toLocaleString()}`);
     if ((run as any).lastFreeformDescription) lines.push(`PROJECT DESCRIPTION: ${(run as any).lastFreeformDescription}`);
 
@@ -2648,12 +2993,21 @@ export default function RunDetail() {
         lines.push(`  - ${dt}${dt ? ': ' : ''}${desc}`);
       }
     }
+    if (newConstructionData?.subject) {
+      const construction = newConstructionData.subject;
+      lines.push(`\nNEW CONSTRUCTION (within 1 mile):`);
+      lines.push(`  Qualifying permits: ${construction.totalPermits} (source period begins ${newConstructionData.periodStart})`);
+      lines.push(`  Likely still building (issued within 18 months): ${newConstructionData.activePermitCount}`);
+      if (construction.medianReportedCost != null) lines.push(`  Median reported cost: $${Number(construction.medianReportedCost).toLocaleString()}`);
+      if (construction.permittedUnits) lines.push(`  Units identified in nearby permits: ${construction.permittedUnits}`);
+      if (!newConstructionData.trend?.suppressed && newConstructionData.trend?.changePct != null) lines.push(`  12-month permit trend: ${newConstructionData.trend.changePct > 0 ? '+' : ''}${newConstructionData.trend.changePct}%`);
+    }
     const violationSummary = combinedPermitViolations?.violations;
     if (violationSummary && violationSummary.openViolations > 0) {
       lines.push(`  Open violations: ${violationSummary.openViolations} (${violationSummary.totalViolationsLast5Years} total last 5 yrs)`);
     }
 
-    // Childcare — only relevant for Day Care / School project types
+    // Childcare — only relevant for Day Care / School project uses
     const activeProjectType = selectedProjectType || run.lastProjectType || '';
     const isChildcareProject = ['Day Care Center', 'School (Private)'].includes(activeProjectType);
     if (isChildcareProject && childcareData) {
@@ -2735,7 +3089,7 @@ export default function RunDetail() {
     lienData, transitData, compPropertyClass, selectedProjectType,
     todData, sbifData, nmtcData, mmrpData, locationIncentivesData,
     rentcastData, fmrData, compsData, censusACSData, crimeData, crimeTractData,
-    combinedPermitViolations, childcareData, sbaLoansData,
+    combinedPermitViolations, newConstructionData, childcareData, sbaLoansData,
     valuationPurchasePrice, valuationLoanType, valuationInterestRate, mortgageRateData, loanTypePresets,
     zbaApprovalsData, wardNumber,
   ]);
@@ -2764,7 +3118,7 @@ export default function RunDetail() {
   useEffect(() => {
     if (!googlePlacesSearchTerm) return;
     if (isLoadingGooglePlaces || googlePlacesData) {
-      // If this project type has a dedicated analysis card, open that; otherwise open Development Potential
+      // If this project use has a dedicated analysis card, open that; otherwise open Development Potential
       if (isDaycareOrSchool || isGrocery || isGasStation || isAutoService || isSeniorCare || isHotel || isRestaurant || isCoffeeShop || isBar || isCannabis) {
         setSectionOpen('projectTypeInfo', true);
       } else {
@@ -2793,6 +3147,8 @@ export default function RunDetail() {
     const snapshotStates = { ...sectionStatesRef.current };
     const wasExpanded = allSectionsExpandedRef.current;
     const snapshotLocal = { ...localCollapsiblesRef.current };
+    const snapshotAccOpen = { ...accOpenRef.current };
+    const snapshotAsides = { ...asidesRef.current };
 
     // Disable all animations so every collapsible opens instantly (no 300ms Radix slide)
     document.body.setAttribute('data-print-expanding', 'true');
@@ -2846,6 +3202,9 @@ export default function RunDetail() {
         setIsOppZoneCardOpen(snapshotLocal.isOppZoneCardOpen);
         setIsCypOpen(snapshotLocal.isCypOpen);
         setZbaExpanded(snapshotLocal.zbaExpanded);
+        setAccOpen(snapshotAccOpen);
+        setWardCardOpen(snapshotAsides.wardCardOpen);
+        setZoningCardOpen(snapshotAsides.zoningCardOpen);
         setAllSectionsExpanded(wasExpanded);
         printInFlightRef.current = false;
       };
@@ -3003,7 +3362,7 @@ export default function RunDetail() {
   }, [permitsData, pinLookupData]);
 
   const dobFirmList = dobDerived?.professionals.map(p => ({ name: p.name, role: p.role })) || [];
-  const { data: dobEnrichment } = useQuery<{ results: Array<{ name: string; matched: boolean; citywide: { permits: number; totalValue: number; lastActiveYear: number | null; mix: string } | null; certs: string[] }>; asOf: string } | null>({
+  const { data: dobEnrichment, isLoading: isLoadingDobEnrichment } = useQuery<{ results: Array<{ name: string; matched: boolean; citywide: { permits: number; totalValue: number; lastActiveYear: number | null; mix: string } | null; certs: string[] }>; asOf: string } | null>({
     queryKey: ['/api/dob/professional-enrichment', dobFirmList.map(f => f.name).join('|')],
     enabled: dobFirmList.length > 0,
     queryFn: async () => {
@@ -3021,6 +3380,27 @@ export default function RunDetail() {
     refetchOnWindowFocus: false,
   });
   const dobEnrichFor = (name: string) => dobEnrichment?.results?.find(r => r.name === name) || null;
+
+  // ---- Step 6: Permits & Violations header takeaway (computed, not AI) ----
+  const dobScan = useMemo(() => {
+    if (!dobDerived || dobDerived.allPermits.length === 0) return null;
+    const d = dobDerived;
+    // Only trust an explicit count from a successful violations response; otherwise unknown (null)
+    const openViol = violationsData && !violationsData.parseError && !violationsData.apiError && typeof violationsData.openViolations === 'number'
+      ? violationsData.openViolations
+      : null;
+    const fmtK = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M` : n >= 1000 ? `$${Math.round(n / 1000)}K` : `$${Math.round(n)}`;
+    let headline: string;
+    if (d.totalCost > 0 && d.permitYears) {
+      headline = `${fmtK(d.totalCost)} of permitted work since ${d.permitYears.earliest}`;
+    } else {
+      headline = `${d.allPermits.length} permit${d.allPermits.length !== 1 ? 's' : ''} on record${d.permitYears ? `, ${d.permitYears.earliest}–${d.permitYears.latest}` : ''}`;
+    }
+    if (openViol === 0) headline += ' — **no open violations**.';
+    else if (openViol != null && openViol > 0) headline += ` — **${openViol} open violation${openViol !== 1 ? 's' : ''}**.`;
+    else headline += '.';
+    return { headline, openViolations: openViol, notClosedCount: d.notClosedCount };
+  }, [dobDerived, violationsData]);
 
   if (isRunLoading) {
     return (
@@ -3170,6 +3550,103 @@ export default function RunDetail() {
     </Tabs>
   );
 
+  // ---- Step 5: accordion row metadata (single source: scanBuilder + registry) ----
+  const accScanSections = buildScanSections({
+    dobScan,
+    transitTakeaway,
+    transitData,
+    crimeTakeaway,
+    crimeTractData: crimeTractData as any,
+    hmdaTakeaway,
+    compsData,
+    effectiveCompatibility,
+    assemblage,
+    incMeta,
+    debtSnap: debtSnapRec as any,
+    newsTakeaway: newsTakeaway as any,
+    hasSiteNews: !!(newsTakeaway?.meta?.length) || (addressNewsData?.articles?.length || 0) + (coParcelAddressNewsData?.articles?.length || 0) > 0,
+    nnTakeaway: nnTakeaway as any,
+    peopleTakeaway: peopleTakeawayRec as any,
+    lienDistress,
+    lienData,
+    isLoadingLiens,
+    businessLicenses: nearbyLicensesData,
+    newConstruction: newConstructionData,
+  });
+  const ACC_CUSTOM_META: Record<string, { title: string; summary: string; info: string[] }> = {
+    listing: { title: "Active Listing", summary: "Live listing status for this address — price, status and terms.", info: ["AI listing lookup", "Price, status & broker", "Rent roll / unit mix when published"] },
+    zoningHistory: { title: "Zoning History", summary: "Recorded City Council and Zoning Board actions for this parcel.", info: ["City Council filings", "Zoning Board decisions", "Filing documents and named professionals"] },
+    analysis: { title: "Project Use Analysis", summary: "Deep-dive analysis for your selected use.", info: ["Demand & demographics for your use", "Nearby competitors", "Use-specific estimators"] },
+    potential: { title: "Development Potential", summary: "FAR, buildable envelope and rental potential.", info: ["FAR & buildable envelope", "Market rents (RentCast)", "Short-term rental (Airbnb)", "Commercial listings"] },
+  };
+  const listingStillChecking = generateListingSnapshot.isPending
+    || (!listingSnapshot && !isListingSnapshotError);
+  const listingTakeaway = listingStillChecking ? (
+    <Skeleton className="h-4 w-64" data-testid="listing-takeaway-skeleton" />
+  ) : listingSnapshot?.status === "not_found" ? (
+    "Unlisted — no active listing found for this address."
+  ) : listingSnapshot?.status === "active" ? (
+    listingSnapshot.listPrice != null
+      ? `Listed at $${listingSnapshot.listPrice.toLocaleString()}${listingSnapshot.daysOnMarket != null ? `, ${listingSnapshot.daysOnMarket} days on market.` : "."}`
+      : `Listed${listingSnapshot.daysOnMarket != null ? `, ${listingSnapshot.daysOnMarket} days on market.` : "."}`
+  ) : listingSnapshot?.status === "pending" ? (
+    `Under contract${listingSnapshot.listPrice != null ? ` at $${listingSnapshot.listPrice.toLocaleString()}` : ""}${listingSnapshot.listedDate ? ` — listed ${listingSnapshot.listedDate}.` : "."}`
+  ) : listingSnapshot?.status === "off_market" ? (
+    `Withdrawn${listingSnapshot.soldDate ? ` ${listingSnapshot.soldDate}` : ""}${listingSnapshot.listPrice != null ? ` — last asked $${listingSnapshot.listPrice.toLocaleString()}.` : "."}`
+  ) : isListingSnapshotError ? (
+    "Listing check unavailable — try again."
+  ) : (
+    "Live listing status for this address — price, status and terms."
+  );
+  const listingBadge = listingStillChecking || !listingSnapshot
+    ? undefined
+    : listingSnapshot.status === "not_found"
+      ? "UNLISTED"
+      : listingSnapshot.status === "active"
+        ? `LISTED${listingSnapshot.daysOnMarket != null ? ` · ${listingSnapshot.daysOnMarket}D` : ""}`
+        : listingSnapshot.status === "pending"
+          ? "UNDER CONTRACT"
+          : "WITHDRAWN";
+  const zoningHistoryTakeaway = isLoadingZoningHistory ? (
+    <Skeleton className="h-4 w-72" data-testid="zoning-history-takeaway-skeleton" />
+  ) : zoningHistoryView.takeaway;
+  const zoningHistoryBadge = !isLoadingZoningHistory && zoningHistoryView.actionCount > 0 && facts?.zoning
+    ? `${zoningHistoryView.actionCount} action${zoningHistoryView.actionCount === 1 ? '' : 's'} · ${facts.zoning}`
+    : undefined;
+  const accProps = (rowId: string) => {
+    const scan = accScanSections.find((s) => s.id === rowId);
+    const custom = ACC_CUSTOM_META[rowId];
+    const title = scan?.title || custom?.title || rowId;
+    const summary = scan?.summary || custom?.summary || "";
+    const verdict: "good" | "watch" | "context" =
+      scan?.verdict?.tone === "good" ? "good" : scan?.verdict?.tone === "attention" ? "watch" : "context";
+    const pos = accOrder.indexOf(rowId);
+    return {
+      id: rowId,
+      index: (pos < 0 ? accOrder.length : pos) + 1,
+      order: (pos < 0 ? accOrder.length : pos) + 1,
+      eyebrow: title,
+      takeaway: rowId === "listing" ? listingTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : scan?.takeaway ?? summary,
+      verdict,
+      badge: rowId === "listing" ? listingBadge : rowId === "zoningHistory" ? zoningHistoryBadge : scan?.verdict?.label,
+      info: (scan?.info || custom?.info || []).join(" · "),
+      open: accOpen[rowId] === true,
+      onToggle: () => setAccOpen((m) => ({ ...m, [rowId]: !m[rowId] })),
+      off: !!accHidden[rowId],
+      onToggleOff: () => setAccHidden((m) => ({ ...m, [rowId]: !m[rowId] })),
+      dragging: accDragId === rowId,
+      over: accOverId === rowId,
+      dragHandlers: {
+        draggable: true,
+        onDragStart: () => setAccDragId(rowId),
+        onDragEnd: () => { setAccDragId(null); setAccOverId(null); },
+        onDragOver: (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); setAccOverId(rowId); },
+        onDragLeave: () => setAccOverId((o: string | null) => (o === rowId ? null : o)),
+        onDrop: (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); if (accDragId) accMove(accDragId, rowId); setAccOverId(null); },
+      },
+    };
+  };
+
   return (
     <div className="flex h-screen bg-background overflow-hidden print:block print:overflow-visible">
       {!isStandaloneReport && (
@@ -3201,12 +3678,12 @@ export default function RunDetail() {
       {sectionSearchOpen && (() => {
         const jumpSections = [
           { label: 'Zoning & Allowed Uses', icon: Scale, action: () => { return 'print-section-zoning-details'; } },
-          { label: 'Zoning History', icon: Gavel, action: () => { setSectionOpen('propertyDetails', true); setSectionOpen('zoningHistory', true); return 'subsection-zoning-history'; } },
+          { label: 'Zoning History', icon: Gavel, action: () => { setAccHidden((m) => ({ ...m, zoningHistory: false })); setAccOpen((m) => ({ ...m, zoningHistory: true })); return 'section-zoningHistory'; } },
           { label: 'Property Details', icon: Building2, action: () => { setSectionOpen('propertyDetails', true); return 'print-section-property-info'; } },
-          { label: 'Active Listing Snapshot', icon: Newspaper, action: () => { setSectionOpen('listingSnapshot', true); return 'print-section-listing-snapshot'; } },
-          { label: 'Permit & Building History', icon: ClipboardCheck, action: () => { setSectionOpen('propertyDetails', true); setSectionOpen('dob', true); return 'print-section-property-info'; } },
+          { label: 'Active Listing Snapshot', icon: Newspaper, action: () => { setAccOpen((open) => ({ ...open, listing: true })); return 'print-section-listing-snapshot'; } },
+          { label: 'Permits & Violations', icon: ClipboardCheck, action: () => 'section-permits' },
           { label: 'Historic Landmark Status', icon: Landmark, action: () => { setSectionOpen('propertyDetails', true); setSectionOpen('landmark', true); return 'print-section-property-info'; } },
-          { label: 'Sale History & Ownership', icon: History, action: () => { setSectionOpen('propertyDetails', true); setSectionOpen('saleHistory', true); return 'section-sale-history'; } },
+          { label: 'Ownership & Title', icon: History, action: () => { setAccHidden((m) => ({ ...m, ownership: false })); setAccOpen((m) => ({ ...m, ownership: true })); return 'section-ownership'; } },
           { label: 'Property Tax Records', icon: Receipt, action: () => { setSectionOpen('propertyDetails', true); setSectionOpen('propertyTaxInfo', true); return 'print-section-property-info'; } },
           { label: 'Pre-Title Check', icon: AlertTriangle, action: () => { setSectionOpen('preTitleCheck', true); return 'print-section-pre-title-check'; } },
           { label: 'Lien Search', icon: Lock, action: () => { setSectionOpen('preTitleCheck', true); return 'print-section-pre-title-check'; } },
@@ -3217,7 +3694,7 @@ export default function RunDetail() {
           { label: 'Location Incentives', icon: DollarSign, action: () => { setSectionOpen('locationIncentives', true); return 'print-section-location-incentives'; } },
           { label: 'Transit & Access', icon: Train, action: () => { setSectionOpen('transitAccess', true); return 'print-section-transit'; } },
           { label: 'Demographics & Population', icon: Users, action: () => { setSectionOpen('demographics', true); return 'print-section-demographics'; } },
-          { label: 'Crime Statistics', icon: AlertTriangle, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('crime', true); return 'section-crime'; } },
+          { label: 'Crime Statistics', icon: AlertTriangle, action: () => 'section-crime' },
           { label: 'Election & Voting Data', icon: Vote, action: () => { setSectionOpen('voting', true); return 'print-section-political'; } },
           { label: 'Schools Nearby', icon: GraduationCap, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('schools', true); return 'section-schools'; } },
           { label: 'Day Care / Childcare Access', icon: Baby, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('schools', true); return 'print-section-schools-daycare'; } },
@@ -3229,7 +3706,7 @@ export default function RunDetail() {
           { label: 'Market Rent Estimates', icon: DollarSign, action: () => { setSectionOpen('developmentPotential', true); setSectionOpen('rentcast', true); return 'section-rentcast'; } },
           { label: 'Upcoming Real Estate Developments', icon: HardHat, action: () => { setSectionOpen('upcomingDevelopments', true); return 'print-section-upcoming-developments'; } },
           { label: 'ZBA Activity', icon: Gavel, action: () => { setSectionOpen('upcomingDevelopments', true); setSectionOpen('zbaActivitySub', true); return 'print-section-upcoming-developments'; } },
-          { label: 'New Construction Nearby', icon: HardHat, action: () => { setSectionOpen('upcomingDevelopments', true); setSectionOpen('newConstructionSub', true); return 'print-section-upcoming-developments'; } },
+            { label: 'New Construction', icon: HardHat, action: () => 'section-newConstruction' },
           { label: 'Neighborhood Amenities', icon: Star, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('entertainment', true); return 'section-entertainment'; } },
           { label: 'Michelin Star Restaurants', icon: Star, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('entertainment', true); return 'ec-michelin'; } },
           { label: 'Public Art & Murals', icon: Palette, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('entertainment', true); return 'ec-murals'; } },
@@ -3249,7 +3726,7 @@ export default function RunDetail() {
             setTimeout(() => {
               const el = document.getElementById(scrollId);
               if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                revealAnchor(scrollId);
               } else if (attempts > 0) {
                 tryScroll(attempts - 1);
               }
@@ -3408,16 +3885,6 @@ export default function RunDetail() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <Button
                     variant="outline"
-                    onClick={() => setShowFunnelEdit(true)}
-                    className="flex items-center gap-2 no-print border-[#ddd4c6] text-[#565651] hover:bg-[#f5f3ef] hover:border-[#141414] hover:text-[#141414]"
-                    title="Edit your project context answers"
-                    data-testid="button-edit-context"
-                  >
-                    <ClipboardList className="w-4 h-4" />
-                    <span className="hidden sm:inline">Project Context</span>
-                  </Button>
-                  <Button
-                    variant="outline"
                     onClick={toggleAllSections}
                     className="flex items-center gap-2 no-print border-[#ddd4c6] text-[#565651] hover:bg-[#f5f3ef] hover:border-[#141414] hover:text-[#141414]"
                     title={allSectionsExpanded ? "Collapse all sections" : "Expand all sections"}
@@ -3446,21 +3913,6 @@ export default function RunDetail() {
                     <Link2 className="w-4 h-4" />
                     <span className="hidden sm:inline">Share</span>
                   </Button>
-                  {isReportUnlocked && (
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        // Same control as the in-report slot: scroll there, then trigger it
-                        document.getElementById('insight-report-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        setTimeout(() => insightTriggerRef.current?.(), 400);
-                      }}
-                      className="flex items-center gap-2 no-print border-[#ddd4c6] text-[#565651] hover:bg-[#f5f3ef] hover:border-[#141414] hover:text-[#141414]"
-                      data-testid="button-insight-report"
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span className="hidden sm:inline">Insight Report</span>
-                    </Button>
-                  )}
                   <Button
                     variant="outline"
                     onClick={() => setPrintDialogOpen(true)}
@@ -3635,6 +4087,7 @@ export default function RunDetail() {
           <div className={!isReportUnlocked ? "report-locked" : ""}>
           <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 space-y-8">
 
+
           {/* Property Map — rendered via module-level MapCard so project-type
                changes cannot cause a re-render or Mapbox reset */}
           {facts?.lat && facts?.lon && facts?.zipCode && facts?.communityArea && (
@@ -3729,331 +4182,297 @@ export default function RunDetail() {
               transition={{ delay: 0.13 }}
             >
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Ward & Alderman - Left Side */}
+                {/* Ward & Alderperson context card */}
                 {facts?.ward && facts?.alderman && (
-                  <Card id="print-section-ward" className="rounded-2xl overflow-hidden" style={{background:'#fff', borderColor:'var(--sb-line)', boxShadow:'var(--shadow-sm)'}}>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="chead chead-tight">
-                        Ward & Alderperson
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="font-body">
-                      <div className="wz-namerow">
-                        <div className="wz-name" style={{marginBottom:0}}>
-                          {facts.alderman}
-                        </div>
-                        <div className="wz-wardbadge" data-testid="badge-ward-number">
-                          <span className="l">Ward</span>
-                          <span className="n">{facts.ward}</span>
+                  <div className="kyp-ctxc" id="print-section-ward">
+                    <div className="top" role="button" tabIndex={0} aria-expanded={wardCardOpen}
+                      onClick={() => setWardCardOpen((o) => !o)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setWardCardOpen((o) => !o); } }}
+                      data-testid="toggle-ward-card">
+                      <div className="crest"><span className="n">{facts.ward}</span><span className="u">Ward</span></div>
+                      <div className="mid">
+                        <div className="k">Alderperson</div>
+                        <div className="nm">{facts.alderman}</div>
+                        <div className="sub" data-testid="ward-card-abridged">
+                          {facts.aldermanYearsInOffice && <><b>{yearsTile(facts.aldermanYearsInOffice).n} yrs</b> in office</>}
+                          {facts.aldermanYearsInOffice && facts.aldermanAttendance && <> · </>}
+                          {facts.aldermanAttendance && <>{facts.aldermanAttendance} attendance</>}
+                          {!facts.aldermanYearsInOffice && !facts.aldermanAttendance && (facts.aldermanWardOffice || null)}
                         </div>
                       </div>
-                      <div className="wz-contact">
+                      <div className="chev">{wardCardOpen ? '⌃' : '⌄'}</div>
+                    </div>
+                    <div className={`body${wardCardOpen ? '' : ' closed'}`}>
+                      <div className="kyp-cxrows">
                         {facts.aldermanPhone && (
-                          <div className="wz-crow">
-                            <Phone style={{color:'var(--ref-blue)'}} />
-                            <a href={`tel:${facts.aldermanPhone.replace(/[^0-9+]/g, '')}`} data-testid="link-alderman-phone">{facts.aldermanPhone}</a>
-                          </div>
+                          <div className="kyp-cxrow"><span className="i">✆</span><a href={`tel:${facts.aldermanPhone.replace(/[^0-9+]/g, '')}`} data-testid="link-alderman-phone">{facts.aldermanPhone}</a></div>
                         )}
                         {facts.aldermanEmail && (
-                          <div className="wz-crow">
-                            <Mail style={{color:'var(--ref-blue)'}} />
-                            <a href={`mailto:${facts.aldermanEmail}`} data-testid="link-alderman-email">{facts.aldermanEmail}</a>
-                          </div>
+                          <div className="kyp-cxrow"><span className="i">✉</span><a href={`mailto:${facts.aldermanEmail}`} data-testid="link-alderman-email">{facts.aldermanEmail}</a></div>
                         )}
                         {facts.aldermanWardOffice && (
-                          <div className="wz-crow">
-                            <MapPin style={{color:'var(--sb-muted)'}} />
-                            <a
-                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(facts.aldermanWardOffice)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="wz-addr"
-                              style={{fontWeight:400}}
-                              data-testid="link-alderman-office"
-                            >
-                              {facts.aldermanWardOffice}
-                            </a>
-                          </div>
+                          <div className="kyp-cxrow"><span className="i">⌖</span><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(facts.aldermanWardOffice)}`} target="_blank" rel="noopener noreferrer" data-testid="link-alderman-office">{facts.aldermanWardOffice}</a></div>
                         )}
                       </div>
                       {(facts.aldermanYearsInOffice || facts.aldermanAttendance) && (
-                        <div className="wz-akpis">
+                        <div className="kyp-cxstats">
                           {facts.aldermanYearsInOffice && (
-                            <div className="wz-tile">
-                              <div className="l">Years in Office</div>
-                              <div className="n" data-testid="text-alderman-years">{yearsTile(facts.aldermanYearsInOffice).n}</div>
-                              <div className="s">{yearsTile(facts.aldermanYearsInOffice).sub}</div>
+                            <div className="kyp-cxstat ind">
+                              <span className="n" data-testid="text-alderman-years">{yearsTile(facts.aldermanYearsInOffice).n}</span>
+                              <span><div className="l">Years in office</div><div className="s">{yearsTile(facts.aldermanYearsInOffice).sub}</div></span>
                             </div>
                           )}
                           {facts.aldermanAttendance && (
-                            <div className="wz-tile">
-                              <div className="l">Attendance</div>
-                              <div className="n" data-testid="text-alderman-attendance">{facts.aldermanAttendance}</div>
-                              <div className="s">this council session</div>
+                            <div className="kyp-cxstat dark">
+                              <span className="n" data-testid="text-alderman-attendance">{facts.aldermanAttendance}</span>
+                              <span><div className="l">Attendance</div><div className="s">this council session</div></span>
                             </div>
                           )}
                         </div>
                       )}
-                      <a className="wz-cta" href={facts.aldermanCouncilmaticUrl || "https://chicago.councilmatic.org/compare-council-members/"} target="_blank" rel="noopener noreferrer" data-testid="link-alderman-councilmatic">
-                        <span className="ic"><BookOpen /></span>
-                        <span className="body">
-                          <span className="h">Learn more about your alderperson's legislation &amp; donors</span>
-                          <span className="sub">Voting record &amp; campaign finance · via Councilmatic</span>
-                        </span>
+                      <a className="kyp-cxcta" href={facts.aldermanCouncilmaticUrl || "https://chicago.councilmatic.org/compare-council-members/"} target="_blank" rel="noopener noreferrer" data-testid="link-alderman-councilmatic">
+                        <span><span className="h" style={{display:'block'}}>Legislation &amp; donors</span><span className="s" style={{display:'block'}}>Voting record &amp; campaign finance · via Councilmatic</span></span>
                         <span className="arr">↗</span>
                       </a>
-                      <div className="wz-wtm">
-                        <div className="wz-wtmh">Why This Matters</div>
-                        <div className="wz-b"><span className="dot"></span><span className="txt"><b>Zoning changes start here.</b> Your alderperson introduces the rezoning or Planned Development ordinance, and City Council almost always follows their lead — a custom known as aldermanic prerogative.</span></div>
-                        <div className="wz-b"><span className="dot"></span><span className="txt"><b>Local permits need their support.</b> Special-use permits, liquor licenses, signs, sidewalk cafés, and curb cuts.</span></div>
-                        <div className="wz-b"><span className="dot"></span><span className="txt"><b>They control $1.5M a year</b> in discretionary ward funds for streets, lighting, and sidewalks.</span></div>
-                        <div className="wz-b"><span className="dot"></span><span className="txt"><b>It's custom, not law.</b> By-right projects don't need their approval — DPD, the Zoning Board of Appeals, and the Plan Commission make the official decisions.</span></div>
+                      <div className="kyp-cxwtm">
+                        <div className="kyp-cxwtmh">Why this matters</div>
+                        <div className="kyp-cxb"><span className="dot"></span><span><b>Zoning changes start here.</b> Your alderperson introduces the rezoning or Planned Development ordinance, and City Council almost always follows their lead — a custom known as aldermanic prerogative.</span></div>
+                        <div className="kyp-cxb"><span className="dot"></span><span><b>Local permits need their support.</b> Special-use permits, liquor licenses, signs, sidewalk cafés, and curb cuts.</span></div>
+                        <div className="kyp-cxb"><span className="dot"></span><span><b>They control $1.5M a year</b> in discretionary ward funds for streets, lighting, and sidewalks.</span></div>
+                        <div className="kyp-cxb"><span className="dot"></span><span><b>It's custom, not law.</b> By-right projects don't need their approval — DPD, the Zoning Board of Appeals, and the Plan Commission make the official decisions.</span></div>
                       </div>
                       {facts.aldermanUrl && (
-                        <a
-                          href={facts.aldermanUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 hover:underline mt-2"
-                          style={{fontSize:'12.5px', fontWeight:500, color:'var(--ref-blue)'}}
-                          data-testid="link-alderman-page"
-                        >
-                          View Full Ward {facts.ward} Page
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
+                        <a className="kyp-cxlink" href={facts.aldermanUrl} target="_blank" rel="noopener noreferrer" data-testid="link-alderman-page">View full Ward {facts.ward} page ↗</a>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 )}
 
-                {/* Zoning Details - Right Side */}
+                {/* Zoning Details context card */}
                 {facts?.zoning && (
-                  <Card id="print-section-zoning-details" className="rounded-2xl overflow-hidden" style={{background:'#fff', borderColor:'var(--sb-line)', boxShadow:'var(--shadow-sm)'}}>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="chead chead-tight">
-                      Zoning Details · {facts?.zoning || "Loading..."}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="font-body">
-                    {isLoadingZoning ? (
-                      <div className="space-y-3">
-                        <Skeleton className="h-6 w-2/3" />
-                        <Skeleton className="h-4 w-full" />
-                        <div className="flex gap-2">
-                          <Skeleton className="h-8 w-24" />
-                          <Skeleton className="h-8 w-24" />
-                          <Skeleton className="h-8 w-24" />
-                        </div>
+                  <div className="kyp-ctxc" id="print-section-zoning-details">
+                    <div className="top" role="button" tabIndex={0} aria-expanded={zoningCardOpen}
+                      onClick={() => setZoningCardOpen((o) => !o)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setZoningCardOpen((o) => !o); } }}
+                      data-testid="toggle-zoning-card">
+                      <div className="crest zone"><span className="n">{facts.zoning}</span><span className="u">Zoning</span></div>
+                      <div className="mid">
+                        <div className="k">Zoning district</div>
+                        <div className="nm">{zoningInfo?.name || facts.zoning}</div>
+                        {zoningInfo && (
+                          <div className="sub" data-testid="zoning-card-abridged">
+                            {[zoningInfo.residentialAllowed && 'residential', zoningInfo.commercialAllowed && 'commercial', zoningInfo.industrialAllowed && 'industrial'].filter(Boolean).join(' + ').replace(/^./, (c) => c.toUpperCase())}
+                            {zoningInfo.maxFAR && <> · <b>{zoningInfo.maxFAR} FAR</b></>}
+                          </div>
+                        )}
                       </div>
-                    ) : zoningInfo ? (
-                      <div>
-                        <p className="wz-ztitle">{zoningInfo.name}</p>
-                        <p className="wz-zdesc">{zoningInfo.description}</p>
-
-                        <div className="wz-cats">
-                          {[
-                            { label: 'Residential', allowed: zoningInfo.residentialAllowed, testId: 'badge-residential' },
-                            { label: 'Commercial', allowed: zoningInfo.commercialAllowed, testId: 'badge-commercial' },
-                            { label: 'Industrial', allowed: zoningInfo.industrialAllowed, testId: 'badge-industrial' },
-                          ].map(({ label, allowed, testId }) => (
-                            <span key={label} className={`wz-cat ${allowed ? 'on' : 'off'}`} data-testid={testId}>
-                              <span className="cd"></span>
-                              {label}
-                              <span className="mk">{allowed ? '✓' : '✕'}</span>
-                            </span>
-                          ))}
+                      <div className="chev">{zoningCardOpen ? '⌃' : '⌄'}</div>
+                    </div>
+                    <div className={`body${zoningCardOpen ? '' : ' closed'}`}>
+                      {isLoadingZoning ? (
+                        <div className="space-y-3 pt-4">
+                          <Skeleton className="h-6 w-2/3" />
+                          <Skeleton className="h-4 w-full" />
                         </div>
-
-                        <div className="wz-zmet">
-                          {zoningInfo.maxFAR && (
-                            <div className="wz-tile">
-                              <div className="l">Max FAR</div>
-                              <div className="n">{zoningInfo.maxFAR}</div>
-                              <div className="s">floor-area ratio</div>
-                            </div>
-                          )}
-                          {zoningInfo.maxHeight && (
-                            <div className="wz-tile">
-                              <div className="l">Max Height</div>
-                              <div className="n">{heightTile(zoningInfo.maxHeight).n}</div>
-                              {heightTile(zoningInfo.maxHeight).sub && <div className="s">{heightTile(zoningInfo.maxHeight).sub}</div>}
-                            </div>
-                          )}
-                          {zoningInfo.parkingMin && (
-                            <div className="wz-tile">
-                              <div className="l">Parking</div>
-                              <div className="n">{parkingTile(zoningInfo.parkingMin).n}</div>
-                              {parkingTile(zoningInfo.parkingMin).sub && <div className="s">{parkingTile(zoningInfo.parkingMin).sub}</div>}
-                            </div>
-                          )}
-                          {zoningInfo.minLotAreaPerUnit != null && (
-                            <div className="wz-tile">
-                              <div className="l">Min Lot Area</div>
-                              <div className="n">{zoningInfo.minLotAreaPerUnit.toLocaleString()}</div>
-                              <div className="s">sq ft per unit</div>
-                            </div>
-                          )}
-                        </div>
-
-                        <div>
-                          <p className="wz-zlbl">Allowed Uses — As of Right</p>
-                          <div className="wz-uses">
-                            {zoningInfo.allowedUses.map((use, i) => (
-                              <span key={i} className="wz-use" data-testid={`badge-use-${i}`}>{use}</span>
+                      ) : zoningInfo ? (
+                        <>
+                          <div className="kyp-cxrows">
+                            {[
+                              { label: 'Residential', allowed: zoningInfo.residentialAllowed, testId: 'badge-residential', note: zoningInfo.residentialAllowed && zoningInfo.commercialAllowed && (zoningInfo.allowedUses || []).join(' ').toLowerCase().includes('above') ? '— above ground floor' : null },
+                              { label: 'Commercial', allowed: zoningInfo.commercialAllowed, testId: 'badge-commercial', note: null },
+                              { label: 'Industrial', allowed: zoningInfo.industrialAllowed, testId: 'badge-industrial', note: null },
+                            ].map(({ label, allowed, testId, note }) => (
+                              <div key={label} className={`kyp-cxrow${allowed ? ' on' : ''}`} data-testid={testId}>
+                                <span className="mk">{allowed ? '✓' : '✕'}</span>
+                                <span className="w">{label}</span>
+                                {note && <span className="note">{note}</span>}
+                              </div>
                             ))}
                           </div>
-                        </div>
-                        <div className="wz-wtm" style={{marginTop:0, marginBottom:'18px'}}>
-                          <div className="wz-wtmh">What This Zoning Means</div>
-                          {zoningMeaningBullets(zoningInfo).map((b, i) => (
-                            <div key={i} className="wz-b"><span className="dot"></span><span className="txt"><b>{b.bold}</b> {b.text}</span></div>
-                          ))}
-                        </div>
-                        <div className="wz-zfoot">
-                          Data may not reflect recent rezonings.{' '}
-                          <a
-                            href="https://gisapps.chicago.gov/ZoningMapWeb/?liab=1&config=zoning"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Verify on the official map
-                          </a>
-                          {' '}— search by {submittedPin ? (
-                            <span className="mono-pin">{submittedPin.replace(/(\d{2})(\d{2})(\d{3})(\d{3})(\d{4})/, '$1-$2-$3-$4-$5')}</span>
-                          ) : run?.address ? (
-                            <span className="mono-pin">{run.address}</span>
-                          ) : 'PIN or address'}
-                          <br />
-                          <a
-                            className="wz-zlink"
-                            href="https://codelibrary.amlegal.com/codes/chicago/latest/chicagozoning_il/0-0-0-48750"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            data-testid="link-zoning-code"
-                          >
-                            <ExternalLink />
-                            Chicago Zoning Code — Use Standards &amp; Regulations
-                          </a>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        Zoning information not available for this code. Check with Chicago DPD for details.
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
+                          <div className="kyp-cxtiles">
+                            <div className="kyp-cxtile">
+                              <div className="l">Max FAR</div>
+                              <div className="n">{zoningInfo.maxFAR || 'None'}</div>
+                              <div className="s">{zoningInfo.maxFAR ? 'floor-area ratio' : 'not specified'}</div>
+                            </div>
+                            <div className="kyp-cxtile dark">
+                              <div className="l">Max Height</div>
+                              <div className="n">{zoningInfo.maxHeight ? heightTile(zoningInfo.maxHeight).n : 'None'}</div>
+                              <div className="s">{zoningInfo.maxHeight ? (heightTile(zoningInfo.maxHeight).sub || 'max height') : 'not specified'}</div>
+                            </div>
+                            <div className="kyp-cxtile slate">
+                              <div className="l">Parking</div>
+                              <div className="n">{zoningInfo.parkingMin ? parkingTile(zoningInfo.parkingMin).n : 'None'}</div>
+                              <div className="s">{zoningInfo.parkingMin ? (parkingTile(zoningInfo.parkingMin).sub || 'minimum') : 'not specified'}</div>
+                            </div>
+                            <div className="kyp-cxtile slate">
+                              <div className="l">Min Lot Area</div>
+                              <div className="n">{zoningInfo.minLotAreaPerUnit != null ? zoningInfo.minLotAreaPerUnit.toLocaleString() : 'None'}</div>
+                              <div className="s">{zoningInfo.minLotAreaPerUnit != null ? 'sq ft per unit' : 'not specified'}</div>
+                            </div>
+                          </div>
+                          {zoningInfo.allowedUses.length > 0 && (
+                            <>
+                              <div className="kyp-cxlbl">Allowed uses — as of right</div>
+                              <div className="kyp-cxuses">
+                                {zoningInfo.allowedUses.map((use, i) => (
+                                  <span key={i} className="kyp-cxuse" data-testid={`badge-use-${i}`}>{use}</span>
+                                ))}
+                              </div>
+                            </>
+                          )}
+                          <div className="kyp-cxwtm">
+                            <div className="kyp-cxwtmh">What this zoning means</div>
+                            {zoningMeaningBullets(zoningInfo).map((b, i) => (
+                              <div key={i} className="kyp-cxb"><span className="dot"></span><span><b>{b.bold}</b> {b.text}</span></div>
+                            ))}
+                          </div>
+                          <div className="kyp-cxfoot">
+                            Data may not reflect recent rezonings.{' '}
+                            <a href="https://gisapps.chicago.gov/ZoningMapWeb/?liab=1&config=zoning" target="_blank" rel="noopener noreferrer">Verify on the official map</a>
+                            {' '}— search by {submittedPin ? (
+                              <span className="pin">{submittedPin.replace(/(\d{2})(\d{2})(\d{3})(\d{3})(\d{4})/, '$1-$2-$3-$4-$5')}</span>
+                            ) : run?.address ? (
+                              <span className="pin">{run.address}</span>
+                            ) : 'PIN or address'}
+                          </div>
+                          <a className="kyp-cxlink" href="https://codelibrary.amlegal.com/codes/chicago/latest/chicagozoning_il/0-0-0-48750" target="_blank" rel="noopener noreferrer" data-testid="link-zoning-code">Chicago Zoning Code — Use Standards ↗</a>
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground pt-4">
+                          Zoning information not available for this code. Check with Chicago DPD for details.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             </motion.div>
           ) : null}
 
-          {/* Insight Report — button → checklist → in-section report (one slot, states swap) */}
-          {isReportUnlocked && run?.id && (
-            <InsightReportSection
-              runId={run.id}
-              canAccess={isReportUnlocked}
-              currentProjectType={selectedProjectType || (run as any)?.lastProjectType || null}
-              projectTypeComplete={!!(selectedProjectType || (run as any)?.lastProjectType)}
-              contextComplete={!!(run as any)?.lastFreeformDescription}
-              valuationComplete={!!(valuationPurchasePrice || sbaBusinessPrice || sbaRealEstatePrice || (run?.reportContext as any)?.valuation?.purchasePrice)}
-              onCompleteProjectType={() => {
-                setTimeout(() => document.getElementById('print-section-project-type')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
-              }}
-              onCompleteContext={() => setShowFunnelEdit(true)}
-              onCompleteValuation={() => {
-                setIsValuationCalculatorOpen(true);
-                setTimeout(() => document.getElementById('valuation-calculator-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
-              }}
-              registerTrigger={(fn) => { insightTriggerRef.current = fn; }}
-            />
-          )}
+          {/* Step 5 — Shape-your-report setup zone (3 optional steps) + accordion top bar */}
+          {isReportUnlocked && run?.id && (() => {
+            const useType = selectedProjectType || (run as any)?.lastProjectType || null;
+            const s1 = !!useType;
+            const s2 = !!((run as any)?.lastFreeformDescription || (run as any)?.lastRole || (run as any)?.lastTransactionType);
+            const s3 = !!(valuationPurchasePrice || sbaBusinessPrice || sbaRealEstatePrice || (run?.reportContext as any)?.valuation?.purchasePrice);
+            const done = [s1, s2, s3].filter(Boolean).length;
+            return (
+              <div className="kyp-setup" data-testid="setup-zone">
+                <div className="top">
+                  <div className="h">Shape your report <b>— optional, but it sharpens everything</b></div>
+                  <div className="kyp-meter">
+                    <div className="dots">{[0, 1, 2].map((i) => <i key={i} className={i < done ? "on" : ""} />)}</div>
+                    <span className="t">{done} of 3 · tailored</span>
+                  </div>
+                </div>
+                <div className="kyp-step">
+                  <span className={`n ${s1 ? "done" : "open"}`}>{s1 ? "✓" : "1"}</span>
+                  <div className="mid">
+                    <div className="st">Step One · Your intended use</div>
+                    {s1 ? (
+                      <div className="ln">{String(useType)}{effectiveCompatibility?.permission === "permitted" && <span className="kyp-usechip">✓ Allowed by right</span>}</div>
+                    ) : (<>
+                      <div className="ln">What do you plan to do with this property?</div>
+                      <div className="pay">See if your use is allowed here, and which incentives you qualify for.</div>
+                    </>)}
+                  </div>
+                  <button type="button" className={`cta ${s1 ? "ghost" : "pri"}`} data-testid="setup-step1"
+                     onClick={() => setCypModalOpen(true)}>
+                    {s1 ? "Change use" : "Choose use →"}
+                  </button>
+                </div>
+                <div className="kyp-step">
+                  <span className={`n ${s2 ? "done" : "open"}`}>{s2 ? "✓" : "2"}</span>
+                  <div className="mid">
+                    <div className="st">Step Two · Project context</div>
+                    {s2 ? (() => {
+                      const roleLabel = ROLES.find((r) => r.id === (run as any)?.lastRole)?.label || (run as any)?.lastRole;
+                      const txnLabel = TRANSACTION_TYPES.find((t) => t.id === (run as any)?.lastTransactionType)?.label?.replace(/\n/g, " ") || (run as any)?.lastTransactionType;
+                      const freeform = ((run as any)?.lastFreeformDescription || "").trim();
+                      const refs = (((run as any)?.lastReferralNeeds || []) as string[])
+                        .map((id) => REFERRAL_OPTIONS.find((o) => o.id === id)?.label.replace(/ Recommendations$/, "") || id);
+                      return (
+                        <>
+                          <div className="ln">{[roleLabel, txnLabel].filter(Boolean).join(" · ") || "Saved from intake"} <span className="em">· saved</span></div>
+                          {freeform && <div className="pay" data-testid="step2-freeform">“{freeform.length > 110 ? freeform.slice(0, 110) + "…" : freeform}”</div>}
+                          {refs.length > 0 && <div className="pay" data-testid="step2-referrals">Referrals: {refs.join(", ")}</div>}
+                        </>
+                      );
+                    })() : (<>
+                      <div className="ln">Tell us your goals — 5 quick questions, skip anytime</div>
+                      <div className="pay">Sharpens every takeaway and the Insight Report around your situation.</div>
+                    </>)}
+                  </div>
+                  <button type="button" className={`cta ${s2 ? "ghost" : "pri"}`} data-testid="setup-step2" onClick={() => setShowFunnelEdit(true)}>
+                    {s2 ? "Edit context" : "Start →"}
+                  </button>
+                </div>
+                <div className="kyp-step">
+                  <span className={`n ${s3 ? "done" : "open"}`}>{s3 ? "✓" : "3"}</span>
+                  <div className="mid">
+                    <div className="st">Step Three · Your numbers</div>
+                    {s3 ? (
+                      <div className="ln">Your numbers are in <span className="em">— cap rate, cash flow and DSCR use them</span></div>
+                    ) : (<>
+                      <div className="ln">Add your price &amp; financing.</div>
+                      <div className="pay">Unlocks a live cap rate, cash flow and DSCR at your actual terms — and a sharper Insight Report.</div>
+                    </>)}
+                  </div>
+                  <button type="button" className={`cta ${s3 ? "ghost" : "pri"}`} data-testid="setup-step3"
+                    onClick={() => { setAccHidden((m) => ({ ...m, valuation: false })); setAccOpen((m) => ({ ...m, valuation: true })); setIsValuationCalculatorOpen(true); setTimeout(() => document.getElementById("valuation-calculator-section")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60); }}>
+                    {s3 ? "Edit the deal" : "Enter the deal →"}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
 
-          {/* Check Your Project Type - Full Width Section */}
+          <div className="kyp-instr" data-testid="acc-instr">
+            <span>☰</span>
+            <span><b>Drag ⠿</b> to re-rank sections, hover a row to preview, tap the <b>eye</b> to hide, or click a row to collapse it to one line. <b>Color = verdict.</b> Sections start collapsed — open only what you need, or use Expand All.</span>
+          </div>
+          <div className="kyp-rbtop">
+            <div className="kyp-legend">
+              <span className="lg"><span className="d g" /> Good</span>
+              <span className="lg"><span className="d o" /> Needs a look</span>
+              <span className="lg"><span className="d c" /> Context / neutral</span>
+            </div>
+            <button type="button" className="kyp-reset" onClick={accReset} data-testid="acc-reset">↺ Reset order</button>
+          </div>
+          <div className="kyp-acc" data-testid="acc-list">
+
+          {/* Check Your Project Use - Full Width Section */}
           {facts?.zoning && (
+          <AccordionSection {...accProps("zoning")}>
             <motion.div
               id="print-section-project-type"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.13 }}
             >
-              <Collapsible open={isCypOpen} onOpenChange={setIsCypOpen}>
-              <Card className="border border-border">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="pb-2 cursor-pointer hover-elevate rounded-t-lg" data-testid="trigger-project-type">
-                    <div className="flex items-center justify-between gap-2">
-                      <CardTitle className="chead chead-tight flex items-center gap-2">
-                        Check Your Project Type
-                      </CardTitle>
-                      <span className="text-muted-foreground text-sm">{isCypOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                <CardContent className="space-y-4">
-                  <p className="screen-only text-xs text-muted-foreground">
-                    Pick your intended use to see whether <b className="text-foreground">this specific use</b> is permitted here, and what the path is if it isn't. The full allowed-use list and dimensions live in <b className="text-foreground">Zoning Details</b> above.
-                  </p>
-
+                <div className="space-y-4">
                   {businessUsesData && (
                     <div className="space-y-2">
-                      <div className="cyp-inbar screen-only">
-                        <div>
-                          <div className="cyp-fldl">Intended use</div>
-                          <div className="flex items-center gap-1">
-                            <ProjectTypeCombobox
-                              uses={businessUsesData.uses}
-                              categories={businessUsesData.categories}
-                              value={selectedProjectType}
-                              onValueChange={handleProjectTypeChange}
-                              placeholder="Select or type to search a use type..."
-                              disabled={isProjectTypeLocked}
-                            />
-                            {selectedProjectType && !isProjectTypeLocked && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                data-testid="button-clear-project-type"
-                                onClick={() => handleProjectTypeChange(null)}
-                                title="Clear project type"
-                              >
-                                <XCircle className="w-4 h-4 text-foreground" />
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="cyp-fldl">Get specific — your concept</div>
-                          <input
-                            type="text"
-                            className="cyp-txt"
-                            aria-label="Get specific — your concept"
-                            placeholder={conceptPlaceholder(selectedProjectType)}
-                            value={drillDownText}
-                            onChange={(e) => setDrillDownText(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === 'Enter') handleDrillDownSubmit(); }}
-                            disabled={isProjectTypeLocked || !selectedProjectType}
-                            data-testid="input-drill-down"
-                          />
-                          <div className="cyp-hint">
-                            The more specific, the sharper the <b>competition scan</b> and <b>tailoring</b>. Restaurant → cuisine · daycare → program / language · café → format · retail → category.
-                          </div>
-                          {selectedProjectType && placesConfirmed && (
-                            <div className="cyp-hint" data-testid="text-concept-status">
-                              {confirmedFreeform
-                                ? <>Scanning nearby for <b>"{confirmedFreeform}"</b>. Edit above and click Update to change.</>
-                                : <>Scanning nearby for <b>"{selectedProjectType}"</b>. Add a concept above and click Update to narrow the scan.</>}
-                            </div>
+                      <div className="screen-only flex items-center justify-between gap-3 flex-wrap" data-testid="trigger-project-type">
+                        <div className="text-sm min-w-0">
+                          {selectedProjectType ? (
+                            <span data-testid="text-selected-project-type">
+                              Checking: <b>{selectedProjectType}</b>
+                              {confirmedFreeform && <span className="text-muted-foreground"> — "{confirmedFreeform}"</span>}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">Pick your intended use to see whether it's permitted here — it also drives incentives and the competition scan.</span>
                           )}
                         </div>
                         <button
                           type="button"
                           className="cyp-upd"
-                          onClick={handleDrillDownSubmit}
-                          disabled={isProjectTypeLocked || !selectedProjectType}
-                          data-testid="button-drill-down-submit"
+                          onClick={() => setCypModalOpen(true)}
+                          disabled={isProjectTypeLocked}
+                          data-testid="button-open-project-type"
                         >
-                          {placesConfirmed ? "Update" : drillDownText.trim() ? "Save" : "Skip"}
+                          {selectedProjectType ? "Edit Project Use" : "Choose Project Use"}
                         </button>
                       </div>
 
@@ -4061,13 +4480,13 @@ export default function RunDetail() {
                       <div className="print-only hidden font-semibold text-sm border border-border rounded px-3 py-2">
                         {selectedProjectType
                           ? <><span className="text-muted-foreground font-normal">Selected Use: </span>{selectedProjectType}</>
-                          : <span className="text-muted-foreground italic">No project type selected</span>
+                          : <span className="text-muted-foreground italic">No project use selected</span>
                         }
                       </div>
                       {isProjectTypeLocked && (
                         <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                           <Lock className="w-3 h-3 flex-shrink-0" />
-                          Project type is locked — this report is past its 90-day active window. Data is fixed and the project type can no longer be changed.
+                          Project use is locked — this report is past its 90-day active window. Data is fixed and the project use can no longer be changed.
                         </p>
                       )}
                     </div>
@@ -4320,11 +4739,11 @@ export default function RunDetail() {
                     const conceptLabel = confirmedFreeform || selectedProjectType;
                     const goToCompetitors = () => {
                       if (isDaycare) {
-                        document.getElementById('print-section-daycare-estimator')?.scrollIntoView({ behavior: 'smooth' });
+                        revealAnchor('print-section-daycare-estimator');
                       } else {
                         setSectionOpen('developmentPotential', true);
                         setSectionOpen('googlePlacesSection', true);
-                        setTimeout(() => document.getElementById('section-google-places')?.scrollIntoView({ behavior: 'smooth' }), 150);
+                        revealAnchor('section-google-places');
                       }
                     };
                     return (
@@ -4347,51 +4766,129 @@ export default function RunDetail() {
                       <span>This use selection also <b>tailors your Insight Report</b> and sets the <b>valuation calculator's mode</b>.</span>
                     </div>
                   )}
-                </CardContent>
-                </CollapsibleContent>
-              </Card>
-              </Collapsible>
+                </div>
+
+              {/* Choose Project Use — pop-up, matches the funnel modal look */}
+              {cypModalOpen && ReactDOM.createPortal(
+                <div
+                  className="no-print fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+                  style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Choose Project Use"
+                  onClick={(e) => { if (e.target === e.currentTarget) setCypModalOpen(false); }}
+                >
+                  <div className="bg-white border border-[#eae8e2] rounded-[14px] shadow-[0_20px_46px_rgba(20,20,20,0.12),0_6px_16px_rgba(20,20,20,0.06)] w-full max-w-lg relative overflow-hidden" data-testid="modal-project-type">
+                    <button
+                      onClick={() => setCypModalOpen(false)}
+                      className="absolute top-2 right-2 p-2 text-[#8b8a84] hover:text-foreground transition-colors"
+                      aria-label="Close"
+                      data-testid="button-close-project-type"
+                    >
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                    <div className="px-6 pt-6 pb-5 space-y-4">
+                      <div>
+                        <div className="chead chead-tight">Choose Project Use</div>
+                        <p className="text-xs text-muted-foreground mt-1.5">
+                          Pick your intended use to see whether <b className="text-foreground">this specific use</b> is permitted here. Your pick also populates the zoning check, incentives, and the nearby-competition scan.
+                        </p>
+                      </div>
+                      {businessUsesData && (
+                        <>
+                          <div>
+                            <div className="cyp-fldl">Intended use</div>
+                            <div className="flex items-center gap-1">
+                              <ProjectTypeCombobox
+                                uses={businessUsesData.uses}
+                                categories={businessUsesData.categories}
+                                value={selectedProjectType}
+                                onValueChange={handleProjectTypeChange}
+                                placeholder="Select or type to search a use type..."
+                                disabled={isProjectTypeLocked}
+                              />
+                              {selectedProjectType && !isProjectTypeLocked && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  data-testid="button-clear-project-type"
+                                  onClick={() => handleProjectTypeChange(null)}
+                                  title="Clear project use"
+                                >
+                                  <XCircle className="w-4 h-4 text-foreground" />
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="cyp-fldl">Get specific — your concept</div>
+                            <input
+                              type="text"
+                              className="cyp-txt"
+                              aria-label="Get specific — your concept"
+                              placeholder={conceptPlaceholder(selectedProjectType)}
+                              value={drillDownText}
+                              onChange={(e) => setDrillDownText(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === 'Enter' && selectedProjectType && !isProjectTypeLocked) { handleDrillDownSubmit(); setCypModalOpen(false); } }}
+                              disabled={isProjectTypeLocked || !selectedProjectType}
+                              data-testid="input-drill-down"
+                            />
+                            <div className="cyp-hint">
+                              The more specific, the sharper the <b>competition scan</b> and <b>tailoring</b>. Restaurant → cuisine · daycare → program / language · café → format · retail → category.
+                            </div>
+                            {selectedProjectType && placesConfirmed && (
+                              <div className="cyp-hint" data-testid="text-concept-status">
+                                {confirmedFreeform
+                                  ? <>Scanning nearby for <b>"{confirmedFreeform}"</b>. Edit above and click Update to change.</>
+                                  : <>Scanning nearby for <b>"{selectedProjectType}"</b>. Add a concept above and click Update to narrow the scan.</>}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex justify-end">
+                            <button
+                              type="button"
+                              className="cyp-upd"
+                              onClick={() => { handleDrillDownSubmit(); setCypModalOpen(false); }}
+                              disabled={isProjectTypeLocked || !selectedProjectType || updateProjectType.isPending}
+                              data-testid="button-drill-down-submit"
+                            >
+                              {placesConfirmed ? "Update" : drillDownText.trim() ? "Save" : "Skip"}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>,
+                document.body
+              )}
             </motion.div>
+          </AccordionSection>
           )}
 
           {/* Active Listing Snapshot — on-demand AI web-search lookup of the live listing.
               THIRD-PARTY LISTING CLAIMS, not verified data — labeled prominently as such. */}
+          <AccordionSection {...accProps("listing")}>
           <motion.div
             id="print-section-listing-snapshot"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.18 }}
           >
-            <Collapsible open={isListingSnapshotOpen} onOpenChange={setIsListingSnapshotOpen}>
-              <Card className="border border-border">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="pb-2 cursor-pointer hover-elevate rounded-t-lg" data-testid="trigger-listing-snapshot">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="chead chead-icon">
-                        <Newspaper className="w-4 h-4" />
-                        Active Listing
-                      </CardTitle>
-                      <div className="flex items-center gap-2">
-                        {listingSnapshot ? (
-                          <span className={`lsn-pill${listingSnapshot.status === 'active' ? ' active' : ''}`} data-testid="pill-listing-status">
-                            <span className="d"></span>{listingSnapshot.statusLabel}
-                          </span>
-                        ) : !isListingSnapshotOpen ? (
-                          <Badge variant="secondary" className="text-xs">Not checked yet</Badge>
-                        ) : null}
-                        <span className="text-muted-foreground text-sm">{isListingSnapshotOpen ? '▼' : '▶'}</span>
+             <div data-testid="listing-snapshot-body" className="lsnwrap space-y-4">
+                    {isListingSnapshotError && !listingSnapshot && !generateListingSnapshot.isPending && (
+                      <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800" data-testid="listing-snapshot-load-error">
+                        <p className="font-medium">We couldn’t load the saved listing check.</p>
+                        <p className="mt-1 text-xs">{(listingSnapshotError as Error)?.message || 'Please try again.'}</p>
                       </div>
-                    </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent className="pt-0 space-y-4">
-                    {!listingSnapshot && !generateListingSnapshot.isPending && (
+                    )}
+
+                    {!listingSnapshot && !isListingSnapshotError && !generateListingSnapshot.isPending && (
                       <div className="flex flex-col items-start gap-2">
                         <Button
                           onClick={() => generateListingSnapshot.mutate()}
                           data-testid="button-check-listing"
-                          className="bg-[#2b3a9e] hover:bg-[#22307f] text-white"
+                          className="bg-[#2b3a9e] hover:bg-[#22307f] text-white no-print"
                         >
                           <Search className="w-4 h-4 mr-2" />
                           Check for active listing
@@ -4412,181 +4909,321 @@ export default function RunDetail() {
                       </div>
                     )}
 
-                    {listingSnapshot && !generateListingSnapshot.isPending && (
-                      <div data-testid="listing-snapshot-body" className="lsnwrap">
-                        {/* 1 — CURRENCY: how current is this data? (governs everything below) */}
-                        <div className="status">
-                          <div className="sx">
-                            <div className="hl" data-testid="text-listing-currency">
-                              {listingSnapshot.status === 'active' && (
-                                <>This property is <b>actively listed</b> — the details below are what the current listing claims.</>
-                              )}
-                              {listingSnapshot.status === 'pending' && (
-                                <>This property is <b>under contract</b> — the details below are what the listing claims.</>
-                              )}
-                              {listingSnapshot.status === 'off_market' && (
-                                <>No <b>active</b> listing. The details below are from the last known listing{listingSnapshot.listedDate ? ` (listed ${listingSnapshot.listedDate})` : ''} and may be outdated.</>
-                              )}
-                              {listingSnapshot.status === 'not_found' && (
-                                <>No listing found — nothing surfaced for this address in a web search. It appears off-market with no recent public listing.</>
-                              )}
-                            </div>
-                            <div className="meta">
-                              Checked {new Date(listingSnapshot.checkedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                              {listingSnapshot.sourceUrl && (
-                                <>
-                                  {' · '}Source:{' '}
-                                  <a
-                                    href={listingSnapshot.sourceUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    data-testid="link-original-listing"
-                                  >
-                                    {listingSnapshot.sourceName || 'View original listing'} ↗
-                                  </a>
-                                </>
-                              )}
-                              {listingSnapshot.listedDate && listingSnapshot.status !== 'off_market' && (
-                                <>{' · '}Listed {listingSnapshot.listedDate}</>
-                              )}
-                            </div>
-                            {generateListingSnapshot.isError && (
-                              <p className="lsn-err">{(generateListingSnapshot.error as Error)?.message || 'Lookup failed — please try again.'}</p>
-                            )}
+                    {listingSnapshot && !generateListingSnapshot.isPending && (() => {
+                      const parseApartments = (value: unknown): number | null => {
+                        const words: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12 };
+                        const text = String(value ?? '').trim().toLowerCase();
+                        const parsed = words[text] ?? Number(text);
+                        return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed) : null;
+                      };
+                      const finite = (value: unknown) => {
+                        const parsed = typeof value === 'number' ? value : Number(value);
+                        return Number.isFinite(parsed) ? parsed : null;
+                      };
+                      const apartments = parseApartments(propertyTaxData?.apartments);
+                      const lotSize = finite(propertyTaxData?.landSquareFeet);
+                      const zoningLotPerUnit = finite(zoningInfo?.minLotAreaPerUnit);
+                      const zoningMaxUnits = lotSize && zoningLotPerUnit && zoningLotPerUnit > 0 ? Math.floor(lotSize / zoningLotPerUnit) : null;
+                      const permitYears = (dobDerived?.allPermits ?? [])
+                        .map((permit: any) => new Date(permit.issueDate).getFullYear())
+                        .filter((year: number) => Number.isFinite(year));
+                      const checks = listingSnapshot.status === 'not_found' ? [] : buildListingChecks(listingSnapshot.claims, {
+                        annualTaxes: finite(propertyTaxData?.totalAnnualTaxAmount),
+                        lotSizeSf: lotSize,
+                        assessorApartments: apartments,
+                        yearBuilt: finite(propertyTaxData?.yearBuilt ?? pinLookupData?.characteristicsData?.yearBuilt),
+                        zoningMaxUnits,
+                        permitYears,
+                      });
+                      const violationDates = (violationsData?.violations ?? [])
+                        .map((violation: any) => new Date(violation.violationDate || violation.date || violation.openDate).getTime())
+                        .filter((time: number) => Number.isFinite(time));
+                      const latestFinding = violationDates.length ? Math.max(...violationDates) : null;
+                      const validatedArmLengthSale = latestFinding !== null
+                        && hasValidatedArmLengthSaleAfterFinding(saleDerivation?.journey, latestFinding);
+                      const disclosures = listingSnapshot.status === 'not_found'
+                        ? []
+                        : classifyDisclosures(listingSnapshot.disclosures, {
+                            hasArmLengthSaleAfterFinding: validatedArmLengthSale,
+                            hasPermittedWorkAfterFinding: false,
+                          });
+                      const snapshotUnits = finite(listingSnapshot.unitCount);
+                      const displayUnits = snapshotUnits && snapshotUnits > 0 ? snapshotUnits : apartments;
+                      const dom = daysOnMarketVerdict(listingSnapshot.daysOnMarket, displayUnits, listingSnapshot.listedDate);
+                      const material = checks.find((check) => check.result === 'wrong') ?? checks.find((check) => check.result === 'differs') ?? null;
+                      const checkedDate = listingSnapshot.checkedAt && !Number.isNaN(new Date(listingSnapshot.checkedAt).getTime())
+                        ? new Date(listingSnapshot.checkedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        : 'date unavailable';
+                      const sourceLabel = listingSnapshot.sourceName || 'Listing source';
+                       return (
+                         <div>
+                          <div className="kyp-lstat" data-testid="text-listing-currency">
+                            <span className="pill">{listingSnapshot.statusLabel}</span>
+                            <span><b>Seller-side listing claims</b>{listingSnapshot.listedDate ? ` · listed ${listingSnapshot.listedDate}` : ''} · checked {checkedDate}</span>
+                            {listingSnapshot.sourceUrl && <a href={listingSnapshot.sourceUrl} target="_blank" rel="noopener noreferrer" data-testid="link-original-listing">{sourceLabel} ↗</a>}
+                            <button type="button" className="rc no-print" onClick={() => generateListingSnapshot.mutate({ force: true })} data-testid="button-recheck-listing">Re-check now</button>
                           </div>
-                          <button
-                            type="button"
-                            className="recheck no-print"
-                            onClick={() => generateListingSnapshot.mutate({ force: true })}
-                            data-testid="button-recheck-listing"
-                          >
-                            <RefreshCw />
-                            Re-check now
-                          </button>
+
+                          {listingSnapshot.status === 'not_found' ? null : <>
+                            <div className="kyp-blocks">
+                              {listingSnapshot.listPrice != null && <div className="kyp-block ind"><span className="bclaim">Claimed</span><div className="bv">${listingSnapshot.listPrice.toLocaleString()}</div><div className="bl">Asking price</div><div className="bd">Seller’s current asking price</div></div>}
+                              <div className={`kyp-block ${material?.result === 'wrong' ? 'bad' : material ? 'orange' : 'slate'}`}>
+                                <span className="bclaim">Claimed</span>
+                                <div className="bv">{material?.claimLabel ?? '—'}</div>
+                                <div className="bl">{material ? listingClaimLabel(material.field) : 'Record check'}</div>
+                                <div className="bd">{material ? `${material.result === 'wrong' ? 'Conflicts with' : 'Differs from'} ${material.recordLabel}` : 'No disputed seller claim was found.'}</div>
+                              </div>
+                              {listingSnapshot.daysOnMarket != null && <div className={`kyp-block ${dom?.tone === 'red' ? 'bad' : dom?.tone === 'orange' ? 'orange' : 'ind'}`}>
+                                <span className="bclaim">Claimed</span><div className="bv">{listingSnapshot.daysOnMarket}</div><div className="bl">Days on market</div><div className="bd">{dom?.note ?? 'No verdict without a listing date.'}</div>
+                              </div>}
+                            </div>
+
+                            {disclosures.length > 0 && <><div className="kyp-title">What the seller disclosed</div>{disclosures.map((disclosure, index) => (
+                              <div key={index} className={`kyp-disc ${disclosure.kind === 'standard' ? 'noted' : disclosure.resolution ? 'cleared' : ''}`}>
+                                <span className="ic">{disclosure.resolution ? 'Cleared' : disclosure.kind === 'standard' ? 'Noted' : 'Finding'}</span>
+                                <div className="tx"><b>{disclosure.text}</b>{disclosure.resolution && <><br />{disclosure.resolution.because}</>}<br /><span>{disclosure.consequence}</span></div>
+                              </div>
+                            ))}</>}
+
+                            {checks.length > 0 && <><div className="kyp-title">Claims checked against the record</div>
+                              {checks.map((check, index) => <div className="kyp-xrow" key={`${check.field}-${index}`}>
+                                <div><span className="k">{listingClaimLabel(check.field)} <span className="kyp-prov claimed">Claimed</span></span><div className="v">{check.claimLabel}</div></div>
+                                <div><span className="k">{check.recordSource}</span><div className={`v ${check.result === 'unavailable' ? 'na' : ''}`}>{check.recordLabel}</div>{check.note && <div className="text-xs text-muted-foreground mt-1">{check.note}</div>}</div>
+                                <span className={`res ${check.result === 'match' ? 'ok' : check.result === 'differs' ? 'diff' : check.result === 'wrong' ? 'bad' : 'none'}`}>{check.result === 'unavailable' ? 'Unavailable' : check.result}</span>
+                              </div>)}
+                            </>}
+
+                            {listingSnapshot.remarksSummary && <><div className="datalabel">What the listing says</div><div className="lede">{listingSnapshot.remarksSummary}</div></>}
+                            {listingSnapshot.keyFacts?.length > 0 && <><div className="datalabel">Listing highlights</div><div className="cols"><ul>{listingSnapshot.keyFacts.slice(0, 10).map((fact, index) => <li key={index}>{fact}</li>)}</ul></div>{listingSnapshot.keyFacts.length > 10 && <div className="text-xs text-muted-foreground mt-2">+{listingSnapshot.keyFacts.length - 10} more listing highlights</div>}</>}
+                            {(listingSnapshot.status === 'off_market') && listingSnapshot.whyHistorical && <div className="stale" data-testid="text-why-historical"><b>Why this reads as historical:</b> {listingSnapshot.whyHistorical}</div>}
+                            {(listingSnapshot.soldPrice != null && (listingSnapshot.status === 'off_market' || listingSnapshot.status === 'pending')) && <div className="stale"><b>Sold{listingSnapshot.soldDate ? ` ${listingSnapshot.soldDate}` : ''}:</b> ${listingSnapshot.soldPrice.toLocaleString()}</div>}
+                            <div className="verify" data-testid="listing-verify-caution"><div className="vh"><AlertTriangle /><span className="t">Listing facts are seller-side claims</span></div><div className="vb">The checks above compare only published listing claims with available public records. They do not replace property inspection, title review, lease diligence, or a current tax bill. Days-on-market benchmarks use a 46-day all-residential, citywide median; 5+ unit thresholds are inferred from transaction-timeline norms, not a measured Chicago commercial median.</div></div>
+                            <div className="kyp-src">Source: {sourceLabel}{listingSnapshot.sourceUrl ? ` · ${listingSnapshot.sourceUrl}` : ''}</div>
+                          </>}
+                        </div>
+                      );
+                    })()}
+             </div>
+          </motion.div>
+          </AccordionSection>
+
+          {/* Zoning History — a first-class report section, collapsed by default. */}
+          <AccordionSection {...accProps("zoningHistory")}>
+            <motion.div
+              id="print-section-zoning-history"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.145 }}
+            >
+              {isLoadingZoningHistory ? (
+                <div className="seccard space-y-3" data-testid="zoning-history-loading">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-28 w-full" />
+                </div>
+              ) : (() => {
+                const view = zoningHistoryView;
+                const filing = view.rezoning;
+                const contacts = view.rawItems.filter((item: any) => item.zoningAttorney || item.architect);
+                const filingIsChecked = filing?.enriched === true;
+                const statusTone = (item: any) => item.type === 'legistar'
+                  ? 'border-indigo-300 bg-indigo-50/70 dark:border-indigo-900 dark:bg-indigo-950/30'
+                  : item.decision === 'Approved'
+                    ? 'border-emerald-300 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/30'
+                    : item.decision === 'Denied'
+                      ? 'border-red-300 bg-red-50/70 dark:border-red-900 dark:bg-red-950/30'
+                      : 'border-border bg-muted/30';
+                return (
+                  <div className="seccard space-y-5" data-testid="zoning-history-content">
+                    {view.actionCount === 0 ? (
+                      <div className="space-y-3" data-testid="zoning-history-empty">
+                        <p className="text-sm text-muted-foreground">
+                          No City Council zoning action or Zoning Board case was found for this address in the checked public record.
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          This does not establish that no application was ever filed. Planning applications do not appear here until they reach the legislative or Board record.
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="grid gap-3 md:grid-cols-3" data-testid="zoning-history-hero-facts">
+                          <div className="rounded-lg border border-indigo-300 bg-indigo-50/70 p-3 dark:border-indigo-900 dark:bg-indigo-950/30">
+                            <div className="text-[11px] font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Current district</div>
+                            <div className="mt-1 text-lg font-semibold text-foreground">{facts?.zoning || 'Not in the record'}</div>
+                            <div className="mt-1 text-xs text-muted-foreground">Current parcel designation</div>
+                          </div>
+                          <div className="rounded-lg border border-indigo-300 bg-indigo-50/70 p-3 dark:border-indigo-900 dark:bg-indigo-950/30">
+                            <div className="text-[11px] font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Confirmed district change</div>
+                            <div className="mt-1 text-sm font-semibold text-foreground">
+                              {filing?.fromZone && filing?.toZone ? `${filing.fromZone} → ${filing.toZone}` : filing?.toZone || 'No enacted map amendment found'}
+                            </div>
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              {filing ? `Passed ${zoningHistoryDate(filing.passedDate, true)}` : view.hasUnenactedMapFiling ? 'A filing is shown below; no passage date is recorded.' : 'No City Council matter found'}
+                            </div>
+                          </div>
+                          <div className="rounded-lg border border-border bg-muted/30 p-3">
+                            <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">ZBA record</div>
+                            <div className="mt-1 text-sm font-semibold text-foreground">
+                              {zoningHistoryData?.coverage?.zba?.checked === false
+                                ? 'Not checked'
+                                : `${view.caseRows.length} case${view.caseRows.length === 1 ? '' : 's'} · ${view.rawHearingCount} hearing${view.rawHearingCount === 1 ? '' : 's'}`}
+                            </div>
+                            <div className="mt-1 text-xs text-muted-foreground">Final disposition is shown once per case.</div>
+                          </div>
                         </div>
 
-                        {listingSnapshot.status !== 'not_found' && (
-                          <>
-                            {/* stat tiles */}
-                            {(listingSnapshot.listPrice != null || listingSnapshot.daysOnMarket != null || listingSnapshot.unitCount != null || listingSnapshot.soldPrice != null) && (
-                              <div className="tiles">
-                                {listingSnapshot.listPrice != null && (
-                                  <div className="tile">
-                                    <div className="tl">List Price</div>
-                                    <div className="tv">${listingSnapshot.listPrice.toLocaleString()}</div>
-                                    <div className="ts">asking{listingSnapshot.sourceName ? ` · per ${listingSnapshot.sourceName}` : ''}</div>
-                                  </div>
-                                )}
-                                {listingSnapshot.daysOnMarket != null && (
-                                  <div className="tile">
-                                    <div className="tl">Days on Market</div>
-                                    <div className="tv">{listingSnapshot.daysOnMarket}</div>
-                                    <div className="ts">per listing</div>
-                                  </div>
-                                )}
-                                {listingSnapshot.unitCount != null && (
-                                  <div className="tile">
-                                    <div className="tl">Config</div>
-                                    <div className="tv">{listingSnapshot.unitCount} {listingSnapshot.unitCount === 1 ? 'unit' : 'units'}</div>
-                                    <div className="ts">per listing</div>
-                                  </div>
-                                )}
-                                {listingSnapshot.soldPrice != null && (
-                                  <div className="tile">
-                                    <div className="tl">Sold{listingSnapshot.soldDate ? ` ${listingSnapshot.soldDate}` : ''}</div>
-                                    <div className="tv">${listingSnapshot.soldPrice.toLocaleString()}</div>
-                                    <div className="ts">per listing</div>
-                                  </div>
-                                )}
+                        {filing && (
+                          <section className="space-y-3" data-testid="zoning-history-district-change">
+                            <div className="flex items-center gap-2">
+                              <div className="h-px flex-1 bg-border" />
+                              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">What changed</h3>
+                              <div className="h-px flex-1 bg-border" />
+                            </div>
+                            <div className="grid gap-3 md:grid-cols-2">
+                              <div className="rounded-md border border-border p-3">
+                                <div className="text-xs font-medium text-muted-foreground">Before</div>
+                                <div className="mt-1 font-semibold">{filing.fromZone || 'Not stated in the checked filing'}</div>
+                              </div>
+                              <div className="rounded-md border border-indigo-300 bg-indigo-50/50 p-3 dark:border-indigo-900 dark:bg-indigo-950/20">
+                                <div className="text-xs font-medium text-indigo-700 dark:text-indigo-300">After</div>
+                                <div className="mt-1 font-semibold">{filing.toZone || facts?.zoning || 'Not stated in the checked filing'}</div>
+                              </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Introduced {zoningHistoryDate(filing.introducedDate || filing.date, true)} · passed {zoningHistoryDate(filing.passedDate || filing.date, true)}
+                              {filing.status ? ` · ${filing.status}` : ''}
+                            </p>
+                          </section>
+                        )}
+
+                        {filing && (
+                          <section className="rounded-lg border border-slate-300 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/30" data-testid="zoning-history-application-evidence">
+                            <h3 className="text-sm font-semibold">What the application says</h3>
+                            <p className="mt-1 text-xs text-muted-foreground">Applicant statements are shown as filed; they are not treated as proof of construction or occupancy.</p>
+                            {filingIsChecked ? (
+                              <ul className="mt-3 space-y-2 text-sm">
+                                <li><span className="font-medium">Applicant:</span> {filing.applicant || 'Not stated in the checked filing'}</li>
+                                <li><span className="font-medium">Existing condition:</span> {filing.existingPropertyContext || 'Not stated in the checked filing'}</li>
+                                <li><span className="font-medium">Reason:</span> {filing.applicationReason || 'Not stated in the checked filing'}</li>
+                                <li><span className="font-medium">Proposed use:</span> {filing.proposedUse || 'Not stated in the checked filing'}</li>
+                              </ul>
+                            ) : (
+                              <p className="mt-3 text-sm text-muted-foreground">Application narrative, applicant, and professional fields were not checked for this filing.</p>
+                            )}
+                            {view.developmentAddress && (
+                              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/30" data-testid="zoning-history-development-address">
+                                <span className="font-medium">Named development address:</span> {view.developmentAddress}
+                                {view.developmentElsewhere && <span className="block mt-1 text-xs text-muted-foreground">This is not the report address. Permit activity for this parcel is not used as an outcome for that stated development.</span>}
                               </div>
                             )}
+                          </section>
+                        )}
 
-                            {/* 2 — WHAT IT CLAIMS */}
-                            {listingSnapshot.remarksSummary && (
-                              <>
-                                <div className="datalabel">What the listing says</div>
-                                <div className="lede">{listingSnapshot.remarksSummary}</div>
-                              </>
-                            )}
-
-                            {listingSnapshot.keyFacts?.length > 0 && (
-                              <>
-                                <div className="datalabel">Listing highlights</div>
-                                <div className="cols">
-                                  <ul>
-                                    {listingSnapshot.keyFacts.slice(0, Math.ceil(listingSnapshot.keyFacts.length / 2)).map((f: string, i: number) => (
-                                      <li key={i}>{f}</li>
-                                    ))}
-                                  </ul>
-                                  <ul>
-                                    {listingSnapshot.keyFacts.slice(Math.ceil(listingSnapshot.keyFacts.length / 2)).map((f: string, i: number) => (
-                                      <li key={i}>{f}</li>
-                                    ))}
-                                  </ul>
+                        <section className="space-y-3" data-testid="zoning-history-records">
+                          <div className="flex items-center gap-2">
+                            <div className="h-px flex-1 bg-border" />
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Recorded actions</h3>
+                            <div className="h-px flex-1 bg-border" />
+                          </div>
+                          <div className="space-y-3">
+                            {view.rows.map((item: any, index: number) => (
+                              <article key={`${item.type}-${item.ordinanceId || item.title}-${item.date}-${index}`} className={`rounded-lg border p-4 ${statusTone(item)}`} data-testid={`zoning-history-row-${index}`}>
+                                <div className="flex flex-wrap items-start justify-between gap-2">
+                                  <div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{item.type === 'legistar' ? zoningCouncilActionLabel(item) : 'Zoning Board case'}</span>
+                                      {item.decision && <Badge variant={item.decision === 'Approved' ? 'default' : item.decision === 'Denied' ? 'destructive' : 'secondary'}>{item.decision}</Badge>}
+                                      {item.type === 'legistar' && item.status && <Badge variant="secondary">{item.status}</Badge>}
+                                      {item.ordinanceId && <span className="font-jbmono text-xs text-muted-foreground">{item.ordinanceId}</span>}
+                                    </div>
+                                    <h4 className="mt-1 text-sm font-semibold">{item.title}</h4>
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">{zoningHistoryDate(item.passedDate || item.date, true)}</span>
                                 </div>
-                              </>
-                            )}
-                          </>
+                                {item.type === 'legistar' && <p className="mt-2 text-xs text-muted-foreground">
+                                  Introduced {zoningHistoryDate(item.introducedDate || item.date, true)}
+                                  {item.passedDate ? ` · passed ${zoningHistoryDate(item.passedDate, true)}` : item.status ? ` · ${item.status}` : ' · passage not recorded'}
+                                </p>}
+                                {item.type === 'zba' && item.hearingDates?.length > 0 && <p className="mt-2 text-xs text-muted-foreground">Hearing track: {item.hearingDates.map((date: string) => zoningHistoryDate(date, true)).join(' → ')} → {zoningHistoryDate(item.date, true)}</p>}
+                                {item.description && <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>}
+                                {(item.zoningAttorney || item.architect || item.applicant) && (
+                                  <p className="mt-2 text-xs text-muted-foreground">
+                                    {item.applicant ? `Applicant: ${item.applicant}` : ''}
+                                    {item.zoningAttorney ? `${item.applicant ? ' · ' : ''}Counsel: ${item.zoningAttorney.name}${item.zoningAttorney.firm ? ` (${item.zoningAttorney.firm})` : ''}` : ''}
+                                    {item.architect ? `${item.applicant || item.zoningAttorney ? ' · ' : ''}Architect: ${item.architect.name}${item.architect.firm ? ` (${item.architect.firm})` : ''}` : ''}
+                                  </p>
+                                )}
+                                <div className="mt-3 flex flex-wrap gap-3 text-xs font-medium">
+                                  {item.attachmentUrl && <a href={item.attachmentUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline"><FileText className="h-3.5 w-3.5" />Source document</a>}
+                                  {item.councilmaticUrl && <a href={item.councilmaticUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline"><Globe className="h-3.5 w-3.5" />Councilmatic</a>}
+                                  {item.legistarUrl && <a href={item.legistarUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline"><ExternalLink className="h-3.5 w-3.5" />Legistar</a>}
+                                </div>
+                              </article>
+                            ))}
+                          </div>
+                        </section>
+
+                        {view.boardConfiguration && (
+                          <section className="rounded-lg border border-border bg-muted/20 p-4" data-testid="zoning-history-board-finding">
+                            <h3 className="text-sm font-semibold">Board finding</h3>
+                            <blockquote className="mt-2 border-l-2 border-primary pl-3 text-sm leading-relaxed text-muted-foreground">
+                              “{view.boardConfiguration.description}”
+                            </blockquote>
+                            <p className="mt-2 text-xs text-muted-foreground">This describes the Board record, not a certificate of occupancy or a finding about present lawful use.</p>
+                          </section>
                         )}
 
-                        {/* currency evidence note — supports the top status */}
-                        {(listingSnapshot.status === 'off_market' || listingSnapshot.status === 'not_found') && listingSnapshot.whyHistorical && (
-                          <div className="stale" data-testid="text-why-historical">
-                            <b>Why this reads as historical:</b> {listingSnapshot.whyHistorical}
-                          </div>
-                        )}
-
-                        {/* 3 — VERIFICATION: one consolidated caution + cross-check links */}
-                        {listingSnapshot.status !== 'not_found' && (
-                          <div className="verify" data-testid="listing-verify-caution">
-                            <div className="vh">
-                              <AlertTriangle />
-                              <span className="t">This is the seller's side — not verified against city records</span>
+                        <section className="rounded-lg border border-border p-4" data-testid="zoning-history-professionals">
+                          <h3 className="text-sm font-semibold">Counsel &amp; architect</h3>
+                          {contacts.length ? (
+                            <div className="mt-3 grid gap-3 md:grid-cols-2">
+                              {contacts.map((item: any, index: number) => (
+                                <div key={`${item.ordinanceId || index}-contact`} className="rounded-md bg-muted/40 p-3 text-sm">
+                                  {item.zoningAttorney && <p><span className="font-medium">Zoning counsel:</span> {item.zoningAttorney.name}{item.zoningAttorney.firm ? ` · ${item.zoningAttorney.firm}` : ''}</p>}
+                                  {item.architect && <p className={item.zoningAttorney ? 'mt-1' : ''}><span className="font-medium">Architect:</span> {item.architect.name}{item.architect.firm ? ` · ${item.architect.firm}` : ''}</p>}
+                                </div>
+                              ))}
                             </div>
-                            <div className="vb">
-                              Everything above is <b>public listing marketing</b> (Zillow, Redfin, LoopNet, brokerage sites), not official data. Unit count, condition, tenancy and price can all differ from the record — cross-check anything that matters<span className="no-print">:</span><span className="print-only"> against the Permit &amp; Building History and Pre-Title Check sections below.</span>
-                            </div>
-                            <div className="links no-print">
-                              <button
-                                type="button"
-                                className="lk"
-                                onClick={() => {
-                                  setSectionOpen('propertyDetails', true);
-                                  setSectionOpen('dob', true);
-                                  setTimeout(() => {
-                                    document.getElementById('print-section-property-info')?.scrollIntoView({ behavior: 'smooth' });
-                                  }, 150);
-                                }}
-                                data-testid="button-crosscheck-permits"
-                              >
-                                Permit &amp; Building History ↓
-                              </button>
-                              <button
-                                type="button"
-                                className="lk"
-                                onClick={() => {
-                                  setSectionOpen('preTitleCheck', true);
-                                  setTimeout(() => {
-                                    document.getElementById('print-section-pre-title-check')?.scrollIntoView({ behavior: 'smooth' });
-                                  }, 150);
-                                }}
-                                data-testid="button-crosscheck-pretitle"
-                              >
-                                Pre-Title Check ↓
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                          ) : (
+                            <p className="mt-2 text-sm text-muted-foreground">Not checked or not stated in the bounded filing extraction.</p>
+                          )}
+                        </section>
+                      </>
                     )}
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
-          </motion.div>
+                    {(zoningHistoryData?.pendingDpd?.length || 0) > 0 && (
+                      <section className="rounded-lg border border-amber-300 bg-amber-50/50 p-4 dark:border-amber-900 dark:bg-amber-950/20" data-testid="zoning-history-dpd-context">
+                        <h3 className="text-sm font-semibold">Current DPD application context</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">Exact address match on recent Chicago Plan Commission hearing pages. This is a filed application signal, not an approval, permit, or proof of construction.</p>
+                        <div className="mt-3 space-y-3">
+                          {zoningHistoryData.pendingDpd.map((application: any) => (
+                            <article key={application.id} className="rounded-md border border-border bg-background/70 p-3">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <a href={application.applicationUrl || application.hearingUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline">{application.address}</a>
+                                <Badge variant="outline">{application.status}</Badge>
+                              </div>
+                              <p className="mt-1 text-xs text-muted-foreground">{application.applicationType}{application.hearingDate ? ` · hearing page ${zoningHistoryDate(application.hearingDate, true)}` : ''}</p>
+                              {application.applicant && <p className="mt-2 text-xs text-muted-foreground">Applicant: {application.applicant}</p>}
+                              <p className="mt-2 text-sm text-muted-foreground">{application.proposal}</p>
+                              <a href={application.hearingUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-xs text-primary hover:underline">Official hearing page</a>
+                            </article>
+                          ))}
+                        </div>
+                        {zoningHistoryData?.dpdCoverage?.note && <p className="mt-3 text-xs text-muted-foreground">{zoningHistoryData.dpdCoverage.note}</p>}
+                      </section>
+                    )}
+
+                    <div className="border-t pt-3 text-xs text-muted-foreground" data-testid="zoning-history-coverage">
+                      {zoningHistoryCoverage || 'Coverage note unavailable.'}
+                      <span className="block mt-1">A City Council map amendment changes the district map; it is not, by itself, a permit, variance, certificate of occupancy, or proof that a proposed project was built.</span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </motion.div>
+          </AccordionSection>
 
 
-          {/* Zoning History Section — moved to Property Details sub-section */}
+          {/* Retired renderer retained temporarily below while the legacy Property Details block is removed. */}
           {false && run?.address && (
             <motion.div
               id="print-section-zoning-history-placeholder"
@@ -4797,7 +5434,7 @@ export default function RunDetail() {
                       {facts?.zoning && (
                         <div className="mt-4 pt-3 border-t">
                           <p className="text-xs text-muted-foreground">
-                            Current designation: <strong className="text-foreground">{facts.zoning}</strong>
+                            Current designation: <strong className="text-foreground">{facts?.zoning}</strong>
                             {zoningHistoryData?.ordinanceDate && (
                               <> — in effect since{' '}
                                 <strong className="text-foreground">
@@ -4815,8 +5452,9 @@ export default function RunDetail() {
             </motion.div>
           )}
 
-          {/* Project Type Specific Analysis - Collapsible Section */}
+          {/* Project Use Specific Analysis - Collapsible Section */}
           {(isDaycareOrSchool || isGrocery || isGasStation || isAutoService || isSeniorCare || isHotel || isRestaurant || isCoffeeShop || isBar || isCannabis) && (
+          <AccordionSection {...accProps("analysis")}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -6059,7 +6697,7 @@ export default function RunDetail() {
             </div>
           )}
 
-          {/* Vehicle Ownership Section - Only shown for auto service project types */}
+          {/* Vehicle Ownership Section - Only shown for auto service project uses */}
           {isAutoService && (
             <div id="print-section-vehicle-ownership">
               <Collapsible open={isAutoDependencyOpen} onOpenChange={setIsAutoDependencyOpen}>
@@ -6209,7 +6847,7 @@ export default function RunDetail() {
             </div>
           )}
 
-          {/* Senior Population Section - Shown only for senior care project types */}
+          {/* Senior Population Section - Shown only for senior care project uses */}
           {isSeniorCare && (
             <div id="print-section-seniors">
               <Collapsible open={isSeniorPopulationOpen} onOpenChange={setIsSeniorPopulationOpen}>
@@ -6482,7 +7120,7 @@ export default function RunDetail() {
             </div>
           )}
 
-          {/* EV Registrations Trend Chart - Shown for all auto service project types */}
+          {/* EV Registrations Trend Chart - Shown for all auto service project uses */}
           {isAutoService && (
             <div id="print-section-ev-registrations">
               <Collapsible open={isEvRegistrationsOpen} onOpenChange={setIsEvRegistrationsOpen}>
@@ -7127,7 +7765,7 @@ export default function RunDetail() {
             </div>
           )}
 
-          {/* Nearby Competitors (Google Maps) — inside project type analysis for all applicable types */}
+          {/* Nearby Competitors (Google Maps) — inside project use analysis for all applicable types */}
           {!isDaycare && googlePlacesSearchTerm && (googlePlacesData || isLoadingGooglePlaces) && (
             <div id="section-google-places-inline">
               <Collapsible open={isGooglePlacesOpen} onOpenChange={setIsGooglePlacesOpen}>
@@ -7283,9 +7921,11 @@ export default function RunDetail() {
               </Card>
             </Collapsible>
           </motion.div>
+          </AccordionSection>
           )}
 
           {/* Location Based Incentives - Collapsible Section */}
+          <AccordionSection {...accProps("incentives")}>
           <motion.div
             id="print-section-location-incentives"
             className="incwrap"
@@ -7293,84 +7933,86 @@ export default function RunDetail() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.15 }}
           >
-            <Collapsible open={isLocationIncentivesOpen} onOpenChange={setIsLocationIncentivesOpen}>
-              <Card className="border border-border overflow-visible">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className={`cursor-pointer hover-elevate ${isLocationIncentivesOpen ? 'pb-0' : 'pb-3'}`}>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="chead flex items-center gap-2">
-                        Location Based Incentives
-                      </CardTitle>
-                      <span className="text-muted-foreground text-sm">{isLocationIncentivesOpen ? '▼' : '▶'}</span>
-                    </div>
-                    {!isLocationIncentivesOpen && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {([[0, incMeta.counts.likely, 'likely relevant'], [1, incMeta.counts.confirm, 'need confirmation'], [3, incMeta.counts.na, 'not applicable']] as const).map(([s, n, label]) => (
-                          <span key={label} className="text-xs font-semibold rounded-full px-2.5 py-0.5" style={{ background: INC_STATE[s].soft, color: INC_STATE[s].fg }}>
-                            {INC_STATE[s].mk} {n} {label}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </CardHeader>
-                </CollapsibleTrigger>
-
-                <CollapsibleContent>
-                  <CardContent className="pt-0 flex flex-col gap-2">
+                  <div className="pt-0 flex flex-col gap-2">
 
                     {/* One hierarchy: availability (likely → confirm → not applicable) then incentive type.
                         CSS order = stateBase(1000/2000/3000) + type*100 + idx; headers/labels slot in between. */}
                     {/* Glance tiles — compact one-line rows: marker → number → label.
                         Counts are computed from the same map that renders the cards, so they can never drift */}
-                    <div className="take" style={{ order: -2 }}>
-                      <div className="take-label">TAKEAWAY</div>
-                      <h3 className="take-title">{tifDistrictName ? `The ${tifDistrictName} location unlocks the commercial incentives that matter for a parcel like this.` : 'Location is the first filter for Chicago incentive programs.'}</h3>
-                      <div className="take-row good"><span className="take-dot" /><span><strong>{tifDistrictName ? `Being in the ${tifDistrictName} TIF is the key.` : 'Start with the programs marked relevant.'}</strong> Review the related property tax, financing, and grant programs below.</span><a className="take-chip" href="#inc-group-relevant">RELEVANT PROGRAMS</a></div>
-                      <div className="take-row insight"><span className="take-dot" /><span><strong>{incMeta.counts.likely} of {incMeta.counts.likely + incMeta.counts.confirm + incMeta.counts.na} are likely relevant; {incMeta.counts.confirm} need confirmation.</strong> The remaining {incMeta.counts.na} programs do not fit the available parcel and project data.</span></div>
-                      <div className="take-row caution"><span className="take-dot" /><span><strong>Potentially eligible is a starting point, not a guarantee.</strong> Every program requires application and approval; confirm funding cycles before relying on any of them.</span></div>
-                    </div>
+                    {hybridInc ? (
+                      <div className="kyp-blocks" style={{ order: -1 }}>
+                        <div className="kyp-block grn"><div className="bv">{incMeta.counts.likely}</div>
+                          <div><div className="bl">Likely relevant</div><div className="bd">of {incMeta.counts.likely + incMeta.counts.confirm + incMeta.counts.na} checked</div></div></div>
+                        <div className="kyp-block orange"><div className="bv">{incMeta.counts.confirm}</div><span className="chip">Verify to claim</span>
+                          <div><div className="bl">Needs confirmation</div><div className="bd">may qualify</div></div></div>
+                        <div className="kyp-block slate"><div className="bv">{incMeta.counts.na}</div><span className="chip">No fit</span>
+                          <div><div className="bl">Not applicable</div><div className="bd">parcel / project data</div></div></div>
+                      </div>
+                    ) : (
                     <div className="buckets" style={{ order: -1 }}>
                       <div className="bkt good"><span className="bn">{incMeta.counts.likely}</span><span className="bl">Likely relevant</span></div>
                       <div className="bkt caution"><span className="bn">{incMeta.counts.confirm}</span><span className="bl">Needs confirmation</span></div>
                       <div className="bkt na"><span className="bn">{incMeta.counts.na}</span><span className="bl">Not applicable</span></div>
                     </div>
+                    )}
 
                     {/* Availability group headers — each folds its group of cards */}
                     {incMeta.counts.likely > 0 && (
-                      <button type="button" id="inc-group-relevant" className={`grouph good${likelyIncOpen ? ' openg' : ''}`} style={{ order: 999 }}
+                      <button type="button" id="inc-group-relevant" className={hybridInc ? `kyp-group on${likelyIncOpen ? ' openg' : ''}` : `grouph good${likelyIncOpen ? ' openg' : ''}`} style={{ order: 999 }}
                         onClick={() => setLikelyIncOpen(o => !o)} aria-expanded={likelyIncOpen} data-testid="button-toggle-likely-incentives">
+                        {hybridInc ? (<>
+                          <span className="kyp-gcount">{incMeta.counts.likely}</span>
+                          <span className="kyp-glabel">Likely relevant</span>
+                          <span className="kyp-grule" />
+                          <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 8, width: 14, height: 14, stroke: "var(--kyp-muted)", fill: "none" }}><path d="m6 9 6 6 6-6" /></svg>
+                        </>) : (<>
                         <span className="gd" />Likely relevant <span className="ct">· {incMeta.counts.likely}</span>
                         <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                        </>)}
                       </button>
                     )}
                     {incMeta.counts.confirm > 0 && (
-                      <button type="button" className={`grouph caution${confirmIncOpen ? ' openg' : ''}`} style={{ order: 1999 }}
+                      <button type="button" className={hybridInc ? `kyp-group warn${confirmIncOpen ? ' openg' : ''}` : `grouph caution${confirmIncOpen ? ' openg' : ''}`} style={{ order: 1999 }}
                         onClick={() => setConfirmIncOpen(o => !o)} aria-expanded={confirmIncOpen} data-testid="button-toggle-confirm-incentives">
+                        {hybridInc ? (<>
+                          <span className="kyp-gcount">{incMeta.counts.confirm}</span>
+                          <span className="kyp-glabel">Needs confirmation</span>
+                          <span className="kyp-grule" />
+                          <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 8, width: 14, height: 14, stroke: "var(--kyp-muted)", fill: "none" }}><path d="m6 9 6 6 6-6" /></svg>
+                        </>) : (<>
                         <span className="gd" />Needs confirmation <span className="ct">· {incMeta.counts.confirm}</span>
                         <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                        </>)}
                       </button>
                     )}
                     {incMeta.counts.na > 0 && (
-                      <button type="button" className={`grouph na${naIncOpen ? ' openg' : ''}`} style={{ order: 2999 }}
+                      <button type="button" className={hybridInc ? `kyp-group off${naIncOpen ? ' openg' : ''}` : `grouph na${naIncOpen ? ' openg' : ''}`} style={{ order: 2999 }}
                         onClick={() => setNaIncOpen(o => !o)} aria-expanded={naIncOpen} data-testid="button-toggle-na-incentives">
+                        {hybridInc ? (<>
+                          <span className="kyp-gcount">{incMeta.counts.na}</span>
+                          <span className="kyp-glabel">Not applicable</span>
+                          <span className="kyp-grule" />
+                          <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 8, width: 14, height: 14, stroke: "var(--kyp-muted)", fill: "none" }}><path d="m6 9 6 6 6-6" /></svg>
+                        </>) : (<>
                         <span className="gd" />Not applicable <span className="ct">· {incMeta.counts.na}</span>
                         <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                        </>)}
                       </button>
                     )}
 
                     {/* Type sub-labels: only within the Not Applicable group — eligible groups list flat by eligibility (each card keeps its type pill) */}
                     {naIncOpen && (
                       <span className="contents">
-                        {incMeta.typeHas(3, 1) && <IncentiveTypeLabel order={3100}>Property Tax</IncentiveTypeLabel>}
-                        {incMeta.typeHas(3, 2) && <IncentiveTypeLabel order={3200}>Financing &amp; Investor Credits</IncentiveTypeLabel>}
-                        {incMeta.typeHas(3, 3) && <IncentiveTypeLabel order={3300}>Grants &amp; Direct Funding</IncentiveTypeLabel>}
-                        {incMeta.typeHas(3, 4) && <IncentiveTypeLabel order={3400}>Zoning &amp; Development Rights</IncentiveTypeLabel>}
-                        {incMeta.typeHas(3, 5) && <IncentiveTypeLabel order={3500}>Context / Clean Energy</IncentiveTypeLabel>}
+                        {incMeta.typeHas(3, 1) && <IncentiveTypeLabel order={3100} variant={hybridInc ? "hybrid" : "current"}>Property Tax</IncentiveTypeLabel>}
+                        {incMeta.typeHas(3, 2) && <IncentiveTypeLabel order={3200} variant={hybridInc ? "hybrid" : "current"}>Financing &amp; Investor Credits</IncentiveTypeLabel>}
+                        {incMeta.typeHas(3, 3) && <IncentiveTypeLabel order={3300} variant={hybridInc ? "hybrid" : "current"}>Grants &amp; Direct Funding</IncentiveTypeLabel>}
+                        {incMeta.typeHas(3, 4) && <IncentiveTypeLabel order={3400} variant={hybridInc ? "hybrid" : "current"}>Zoning &amp; Development Rights</IncentiveTypeLabel>}
+                        {incMeta.typeHas(3, 5) && <IncentiveTypeLabel order={3500} variant={hybridInc ? "hybrid" : "current"}>Context / Clean Energy</IncentiveTypeLabel>}
                       </span>
                     )}
 
                     {/* TIF District card (moved out of the old takeaway list) */}
-                    <IncentiveCard id="print-section-tif" className={incMeta.hiddenCls('tif', naIncOpen)} style={{ order: incMeta.order('tif') }}
+                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-tif" className={incMeta.hiddenCls('tif', naIncOpen)} style={{ order: incMeta.order('tif') }}
                         state={incMeta.state('tif') === 0 ? "good" : incMeta.state('tif') === 1 ? "caution" : "na"}
                         name="TIF District (Tax Increment Financing)" type="Zoning" pill_label={incMeta.badge('tif')}
                         verdict={tifDistrictName ? <>This parcel is inside the <em>{tifDistrictName}</em> TIF district.</> : 'This parcel is not inside a TIF district.'}
@@ -7380,7 +8022,7 @@ export default function RunDetail() {
                         source="Chicago DPD" />
 
                     {/* Opportunity Zone card (moved out of the old takeaway list) */}
-                    <IncentiveCard id="print-section-opportunity-zone" className={incMeta.hiddenCls('opportunity-zone', naIncOpen)} style={{ order: incMeta.order('opportunity-zone') }}
+                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-opportunity-zone" className={incMeta.hiddenCls('opportunity-zone', naIncOpen)} style={{ order: incMeta.order('opportunity-zone') }}
                         state={incMeta.state('opportunity-zone') === 0 ? "good" : incMeta.state('opportunity-zone') === 1 ? "caution" : "na"}
                         name="Federal Opportunity Zone" type="Tax Credit" pill_label={incMeta.badge('opportunity-zone')}
                         verdict={facts?.opportunityZone ? 'This parcel is inside a federal Opportunity Zone.' : 'This parcel is not inside a federal Opportunity Zone.'}
@@ -7397,7 +8039,7 @@ export default function RunDetail() {
                     {isLoadingTOD ? (
                       <div id="print-section-tod" className={incMeta.hiddenCls('tod', naIncOpen)} style={{ order: incMeta.order('tod') }}><Skeleton className="h-16 w-full rounded-lg" /></div>
                     ) : todData ? (
-                      <IncentiveCard id="print-section-tod" className={incMeta.hiddenCls('tod', naIncOpen)} style={{ order: incMeta.order('tod') }}
+                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-tod" className={incMeta.hiddenCls('tod', naIncOpen)} style={{ order: incMeta.order('tod') }}
                         state={incMeta.state('tod') === 0 ? "good" : incMeta.state('tod') === 1 ? "caution" : "na"}
                         name="Transit-Oriented Development (TOD)" type="Zoning" pill_label={incMeta.badge('tod')}
                         verdict={<span data-testid="text-tod-status">{todData.inTOD ? <>Within TOD Area (<em>{todData.todType}</em>)</> : 'Not in TOD Area'}</span>}
@@ -7554,16 +8196,16 @@ export default function RunDetail() {
                     {isLoadingSbif ? (
                       <div id="print-section-sbif" className={incMeta.hiddenCls('sbif', naIncOpen)} style={{ order: incMeta.order('sbif') }}><Skeleton className="h-16 w-full rounded-lg" /></div>
                     ) : sbifData ? (
-                      <IncentiveCard id="print-section-sbif" className={incMeta.hiddenCls('sbif', naIncOpen)} style={{ order: incMeta.order('sbif') }}
+                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-sbif" className={incMeta.hiddenCls('sbif', naIncOpen)} style={{ order: incMeta.order('sbif') }}
                         state={incMeta.state('sbif') === 0 ? "good" : incMeta.state('sbif') === 1 ? "caution" : "na"}
                         name="SBIF — Small Business Improvement Fund" type="Grant" pill_label={incMeta.badge('sbif')}
                         verdict={sbifIneligibleUse ? <>Business type not eligible for SBIF</>
-                          : (incMeta.badge('sbif') === 'Select Project Type' ? <>Select a project type to verify SBIF eligibility</> : sbifData.sbif.statusLabel)}
-                        verdict_sub={incMeta.badge('sbif') === 'Select Project Type' ? <>
+                          : (incMeta.badge('sbif') === 'Select Project Use' ? <>Select a project use to verify SBIF eligibility</> : sbifData.sbif.statusLabel)}
+                        verdict_sub={incMeta.badge('sbif') === 'Select Project Use' ? <>
                           {sbifData.tif.districtName ? <>The property is in the <em>{sbifData.tif.districtName}</em> TIF{sbifData.sbif.authorized ? ', which is SBIF-authorized' : ''}. </> : null}
-                          SBIF excludes certain business types (national chains, liquor stores, gas stations, hotels, banks, and others) — choose a project type in Project Context above and we'll check it for you.
+                          SBIF excludes certain business types (national chains, liquor stores, gas stations, hotels, banks, and others) — choose a project use in Project Context above and we'll check it for you.
                         </> : sbifIneligibleUse ? <>
-                          The selected project type (<em>{selectedProjectType}</em>) is on the SBIF ineligible-use list (national chains, liquor stores, gas stations, hotels/motels, places of worship, currency exchanges, pawn shops, banks, storage warehouses, K-12 schools, start-up bars/taverns, and similar uses).
+                          The selected project use (<em>{selectedProjectType}</em>) is on the SBIF ineligible-use list (national chains, liquor stores, gas stations, hotels/motels, places of worship, currency exchanges, pawn shops, banks, storage warehouses, K-12 schools, start-up bars/taverns, and similar uses).
                           {sbifData.tif.districtName ? <> The property itself is in the <em>{sbifData.tif.districtName}</em> TIF{sbifData.sbif.authorized ? ', which is SBIF-authorized' : ''} — a different business use here could qualify.</> : null}
                         </> : <>
                           {sbifData.tif.districtName ? <>TIF District: <em>{sbifData.tif.districtName}</em>. </> : null}
@@ -7598,7 +8240,7 @@ export default function RunDetail() {
                     {isLoadingNmtc ? (
                       <div id="print-section-nmtc" className={incMeta.hiddenCls('nmtc', naIncOpen)} style={{ order: incMeta.order('nmtc') }}><Skeleton className="h-16 w-full rounded-lg" /></div>
                     ) : nmtcData ? (
-                      <IncentiveCard id="print-section-nmtc" className={incMeta.hiddenCls('nmtc', naIncOpen)} style={{ order: incMeta.order('nmtc') }}
+                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-nmtc" className={incMeta.hiddenCls('nmtc', naIncOpen)} style={{ order: incMeta.order('nmtc') }}
                         state={incMeta.state('nmtc') === 0 ? "good" : incMeta.state('nmtc') === 1 ? "caution" : "na"}
                         name="New Markets Tax Credit (NMTC)" type="Financing" pill_label={incMeta.badge('nmtc')}
                         verdict={<>
@@ -7659,7 +8301,7 @@ export default function RunDetail() {
                           <div className="inc-v" style={{ marginTop: 12, background: 'var(--cautionSoft)', boxShadow: 'inset 3px 0 0 var(--caution)' }}>
                             <div className="vt">Maybe — Commercial Project in Residential Zone</div>
                             <div className="vs">
-                              This property is in an NMTC-qualified census tract, and your selected project type (<strong>{selectedProjectType}</strong>) is a commercial use that could qualify for NMTC.
+                              This property is in an NMTC-qualified census tract, and your selected project use (<strong>{selectedProjectType}</strong>) is a commercial use that could qualify for NMTC.
                               However, the property is currently zoned <strong>{facts.zoning}</strong> (Residential), so you would need to obtain a zoning change or special use permit before proceeding with a commercial project.
                               If rezoning is approved, this location would be eligible for NMTC incentives, provided the project meets the minimum investment threshold (typically $5M+) and creates jobs or community impact.
                             </div>
@@ -7687,7 +8329,7 @@ export default function RunDetail() {
                     {isLoadingMmrp ? (
                       <div id="print-section-mmrp" className={incMeta.hiddenCls('mmrp', naIncOpen)} style={{ order: incMeta.order('mmrp') }}><Skeleton className="h-16 w-full rounded-lg" /></div>
                     ) : mmrpData ? (
-                      <IncentiveCard id="print-section-mmrp" className={incMeta.hiddenCls('mmrp', naIncOpen)} style={{ order: incMeta.order('mmrp') }}
+                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-mmrp" className={incMeta.hiddenCls('mmrp', naIncOpen)} style={{ order: incMeta.order('mmrp') }}
                         state={incMeta.state('mmrp') === 0 ? "good" : incMeta.state('mmrp') === 1 ? "caution" : "na"}
                         name="Micro-Market Recovery Program (MMRP)" type="Grant" pill_label={incMeta.badge('mmrp')}
                         verdict={<span data-testid="text-mmrp-status">{mmrpData.inMmrpZone
@@ -7720,7 +8362,7 @@ export default function RunDetail() {
                     {isLoadingLocationIncentives ? (
                       <div id="print-section-enterprise-zone" className={incMeta.hiddenCls('enterprise-zone', naIncOpen)} style={{ order: incMeta.order('enterprise-zone') }}><Skeleton className="h-16 w-full rounded-lg" /></div>
                     ) : locationIncentivesData ? (
-                      <IncentiveCard id="print-section-enterprise-zone" className={incMeta.hiddenCls('enterprise-zone', naIncOpen)} style={{ order: incMeta.order('enterprise-zone') }}
+                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-enterprise-zone" className={incMeta.hiddenCls('enterprise-zone', naIncOpen)} style={{ order: incMeta.order('enterprise-zone') }}
                         state={incMeta.state('enterprise-zone') === 0 ? "good" : incMeta.state('enterprise-zone') === 1 ? "caution" : "na"}
                         name="Illinois Enterprise Zone" type="Property Tax" pill_label={incMeta.badge('enterprise-zone')}
                         verdict={<span data-testid="text-enterprise-zone-status">{locationIncentivesData.enterpriseZone.inZone
@@ -7752,7 +8394,7 @@ export default function RunDetail() {
 
                     {/* Neighborhood Opportunity Fund (NOF) */}
                     {facts?.communityArea ? (
-                      <IncentiveCard id="print-section-nof" className={incMeta.hiddenCls('nof', naIncOpen)} style={{ order: incMeta.order('nof') }}
+                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-nof" className={incMeta.hiddenCls('nof', naIncOpen)} style={{ order: incMeta.order('nof') }}
                         state={incMeta.state('nof') === 0 ? "good" : incMeta.state('nof') === 1 ? "caution" : "na"}
                         name="Neighborhood Opportunity Fund (NOF)" type="Grant" pill_label={incMeta.badge('nof')}
                         verdict={<span data-testid="text-nof-status">{nofEligible
@@ -7801,7 +8443,7 @@ export default function RunDetail() {
                     )}
 
                     {/* Invest South/West */}
-                    <IncentiveCard id="print-section-invest-sw" className={incMeta.hiddenCls('invest-sw', naIncOpen)} style={{ order: incMeta.order('invest-sw') }}
+                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-invest-sw" className={incMeta.hiddenCls('invest-sw', naIncOpen)} style={{ order: incMeta.order('invest-sw') }}
                       state={incMeta.state('invest-sw') === 0 ? "good" : incMeta.state('invest-sw') === 1 ? "caution" : "na"}
                       name="Invest South/West" type="Grant" pill_label={incMeta.badge('invest-sw')}
                       verdict={investSwEligible
@@ -7846,7 +8488,7 @@ export default function RunDetail() {
 
                     {/* SBA HUBZone */}
                     {isCommercialProjectType && (
-                    <IncentiveCard id="print-section-hubzone" className={incMeta.hiddenCls('hubzone', naIncOpen)} style={{ order: incMeta.order('hubzone') }}
+                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-hubzone" className={incMeta.hiddenCls('hubzone', naIncOpen)} style={{ order: incMeta.order('hubzone') }}
                       state={incMeta.state('hubzone') === 0 ? "good" : incMeta.state('hubzone') === 1 ? "caution" : "na"}
                       name="SBA HUBZone" type="Program" pill_label={incMeta.badge('hubzone')}
                       verdict={<span data-testid="text-hubzone-status">{isLoadingHubzone ? 'Checking HUBZone status…' : hubzoneData?.eligible ? 'This property is in an SBA HUBZone' : 'This property is not in an SBA HUBZone'}</span>}
@@ -7880,7 +8522,7 @@ export default function RunDetail() {
 
                     {/* HUD Qualified Census Tract (QCT) */}
                     {!isCommercialProjectType && (
-                    <IncentiveCard id="print-section-qct" className={incMeta.hiddenCls('qct', naIncOpen)} style={{ order: incMeta.order('qct') }}
+                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-qct" className={incMeta.hiddenCls('qct', naIncOpen)} style={{ order: incMeta.order('qct') }}
                       state={incMeta.state('qct') === 0 ? "good" : incMeta.state('qct') === 1 ? "caution" : "na"}
                       name="LIHTC Qualified Census Tract (QCT)" type="Tax Credit" pill_label={incMeta.badge('qct')}
                       verdict={<span data-testid="text-qct-status">{isLoadingQct ? 'Checking QCT status…' : qctData?.eligible ? 'This property is in a Qualified Census Tract' : 'This property is not in a Qualified Census Tract'}</span>}
@@ -7911,7 +8553,7 @@ export default function RunDetail() {
 
                     {/* CHA Opportunity Area */}
                     {!isCommercialProjectType && (
-                    <IncentiveCard id="print-section-cha-opportunity" className={incMeta.hiddenCls('cha-opportunity', naIncOpen)} style={{ order: incMeta.order('cha-opportunity') }}
+                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-cha-opportunity" className={incMeta.hiddenCls('cha-opportunity', naIncOpen)} style={{ order: incMeta.order('cha-opportunity') }}
                       state={incMeta.state('cha-opportunity') === 0 ? "good" : incMeta.state('cha-opportunity') === 1 ? "caution" : "na"}
                       name="CHA Opportunity Area" type="Program" pill_label={incMeta.badge('cha-opportunity')}
                       verdict={<span data-testid="text-cha-opportunity-status">{isLoadingChaOpportunity ? 'Checking CHA Opportunity Area status…' : chaOpportunityData?.isOpportunityArea ? 'This census tract is a CHA Opportunity Area' : 'This census tract is not a CHA Opportunity Area'}</span>}
@@ -7948,7 +8590,7 @@ export default function RunDetail() {
                       const zoningUp = facts?.zoning?.toUpperCase() ?? '';
                       const class6bEligible = zoningUp.startsWith('M') || zoningUp.startsWith('PMD');
                       return (
-                      <IncentiveCard id="print-section-class6b" className={incMeta.hiddenCls('class6b', naIncOpen)} style={{ order: incMeta.order('class6b') }}
+                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-class6b" className={incMeta.hiddenCls('class6b', naIncOpen)} style={{ order: incMeta.order('class6b') }}
                         state={incMeta.state('class6b') === 0 ? "good" : incMeta.state('class6b') === 1 ? "caution" : "na"}
                         name="Class 6(b) Industrial Tax Incentive" type="Property Tax" pill_label={incMeta.badge('class6b')}
                         verdict={<span data-testid="text-class6b-status">{class6bEligible
@@ -7993,7 +8635,7 @@ export default function RunDetail() {
                       if (inTif) qualifyingZones.push(`TIF: ${tifDistrictName}`);
                       if (inEnterpriseZone) qualifyingZones.push('Enterprise Zone');
                       return (
-                      <IncentiveCard id="print-section-class7" className={incMeta.hiddenCls('class7', naIncOpen)} style={{ order: incMeta.order('class7') }}
+                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-class7" className={incMeta.hiddenCls('class7', naIncOpen)} style={{ order: incMeta.order('class7') }}
                         state={incMeta.state('class7') === 0 ? "good" : incMeta.state('class7') === 1 ? "caution" : "na"}
                         name="Class 7(a)/(b) Commercial Tax Incentive" type="Property Tax" pill_label={incMeta.badge('class7')}
                         verdict={<span data-testid="text-class7-status">{class7Eligible
@@ -8120,14 +8762,14 @@ export default function RunDetail() {
                       ];
 
                       return (
-                      <IncentiveCard id="print-section-cdg" className={incMeta.hiddenCls('cdg', naIncOpen)} style={{ order: incMeta.order('cdg') }}
+                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-cdg" className={incMeta.hiddenCls('cdg', naIncOpen)} style={{ order: incMeta.order('cdg') }}
                         state={incMeta.state('cdg') === 0 ? "good" : incMeta.state('cdg') === 1 ? "caution" : "na"}
                         name="Community Development Grant (CDG)" type="Grant" pill_label={incMeta.badge('cdg')}
                         verdict={<span data-testid="text-cdg-status">{cdgEligible
                           ? medLargeOnly
-                            ? <>This property/project type may qualify for <em>CDG Medium and Large</em> grants</>
-                            : <>This property/project type may qualify for <em>all CDG grant tiers</em></>
-                          : 'This property/project type does not appear eligible for CDG grants'}</span>}
+                            ? <>This property/project use may qualify for <em>CDG Medium and Large</em> grants</>
+                            : <>This property/project use may qualify for <em>all CDG grant tiers</em></>
+                          : 'This property/project use does not appear eligible for CDG grants'}</span>}
                         verdict_sub={cdgEligible
                           ? 'Projects must be revenue-generating, involve new construction or rehabilitation, and not be completed at time of application. Funding is provided on a reimbursement basis.'
                           : 'CDG grants cover commercial, industrial, cultural, institutional, social service, and qualifying mixed-use projects. Purely residential projects are not eligible.'}
@@ -8160,7 +8802,7 @@ export default function RunDetail() {
                                   <div className="bg-background border border-border rounded p-3 flex items-start gap-2">
                                     <Info className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                                     <p className="text-xs text-muted-foreground">
-                                      <span className="font-semibold text-foreground">Project type classification: </span>
+                                      <span className="font-semibold text-foreground">Project use classification: </span>
                                       {isCdgSocialService
                                         ? 'Social service uses (day care, emergency shelter, community center, interim housing) are eligible for CDG Medium and Large only. CDG Small is limited to commercial and light industrial uses.'
                                         : isCdgCultural
@@ -8171,7 +8813,7 @@ export default function RunDetail() {
                                           ? (isLightIndustrialZoning || isCommercialZoning)
                                             ? 'Industrial use in commercial or M1/PMD zoning — all tiers including CDG Small are eligible.'
                                             : 'Industrial use in M2/M3 zoning — CDG Medium and Large only. CDG Small requires commercial or light industrial (M1/PMD) zoning.'
-                                          : 'Commercial or mixed-use project type — all tiers including CDG Small are eligible.'}
+                                          : 'Commercial or mixed-use project use — all tiers including CDG Small are eligible.'}
                                     </p>
                                   </div>
                                 )}
@@ -8214,10 +8856,11 @@ export default function RunDetail() {
                       naOpen={naIncOpen}
                       likelyOpen={likelyIncOpen}
                       confirmOpen={confirmIncOpen}
+                      variant={hybridInc ? "hybrid" : "current"}
                     />
 
                     {/* ADU (Accessory Dwelling Unit) Eligibility */}
-                    <IncentiveCard id="print-section-adu" className={incMeta.hiddenCls('adu', naIncOpen)} style={{ order: incMeta.order('adu') }}
+                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-adu" className={incMeta.hiddenCls('adu', naIncOpen)} style={{ order: incMeta.order('adu') }}
                       state={incMeta.state('adu') === 0 ? "good" : incMeta.state('adu') === 1 ? "caution" : "na"}
                       name="Accessory Dwelling Unit (ADU) Eligibility" type="Zoning" pill_label={incMeta.badge('adu')}
                       verdict={<span data-testid="text-adu-status">{facts?.aduZone === 'Zoning-Eligible'
@@ -8380,13 +9023,12 @@ export default function RunDetail() {
                           </div>
                     </IncentiveCard>
 
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
+                  </div>
           </motion.div>
+          </AccordionSection>
 
           {/* Property Details Section - Collapsible containing Parcel Info and Building History */}
+          <AccordionSection {...accProps("overview")}>
           <motion.div
             id="print-section-property-info"
             initial={{ opacity: 0 }}
@@ -8951,405 +9593,8 @@ export default function RunDetail() {
 
 
                     {/* Landmark Status Sub-section */}
-                    {/* Department of Buildings Information Sub-section */}
-                    <Collapsible open={isDobSectionOpen} onOpenChange={setIsDobSectionOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                          <h3 className="chead chead-icon">
-                            <ClipboardCheck className="w-4 h-4" />
-                            Department of Buildings Information
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            {!isLoadingPermits && !isLoadingViolations && (permitsData || violationsData) && (
-                              <span className="dob-count" data-testid="badge-dob-count">
-                                {(dobDerived?.allPermits.length ?? permitsData?.totalPermits ?? 0)} permits · {violationsData && violationsData.openViolations === 0
-                                  ? <b>0 open violations</b>
-                                  : <>{violationsData?.openViolations ?? '—'} open violations</>}
-                              </span>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isDobSectionOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                      <div className="seccard space-y-5">
-                        {/* Co-parcel note */}
-                        {coParcelAddress && (
-                          <div className="records-banner flex items-center gap-2">
-                            <Info className="w-3.5 h-3.5 shrink-0" />
-                            <span>Showing permits and violations for <span className="font-medium text-foreground">{run?.address?.split(',')[0].toUpperCase()}</span> (primary) and <span className="font-medium text-foreground">{coParcelAddress}</span> (co-parcel)</span>
-                          </div>
-                        )}
-
-                        {/* Takeaway — computed in code, not the AI engine */}
-                        {!isLoadingPermits && !isLoadingViolations && dobDerived && dobDerived.allPermits.length > 0 && (() => {
-                          const d = dobDerived;
-                          const fmt$ = (n: number) => '$' + Math.round(n).toLocaleString();
-                          const bigYr = d.bigWork ? new Date(d.bigWork.issueDate).getFullYear() : null;
-                          const bigIsPrior = d.bigWork?.era === 'prior';
-                          const openViol = violationsData?.openViolations ?? 0;
-                          let headline: string;
-                          if (d.bigWork && bigIsPrior) {
-                            headline = `The building's major permitted work (${fmt$(d.bigWork.estimatedCost)}, ${bigYr}) happened under prior ownership; ${d.currentPermits.length > 0 ? 'the current owner has done lighter work since' : 'no permits have been pulled since the sale'}${openViol === 0 ? ' and the record is clean today' : ''}.`;
-                          } else if (d.bigWork && d.bigWork.era === 'current') {
-                            headline = `The current owner invested ${fmt$(d.bigWork.estimatedCost)} in permitted work in ${bigYr} — the defining project on record.`;
-                          } else if (d.hasSaleDate) {
-                            headline = `${d.allPermits.length} permit${d.allPermits.length !== 1 ? 's' : ''} on record${d.permitYears ? `, ${d.permitYears.earliest}–${d.permitYears.latest}` : ''} — routine-scale work, nothing unusually large declared.`;
-                          } else {
-                            headline = `${d.allPermits.length} permit${d.allPermits.length !== 1 ? 's' : ''} on record${d.permitYears ? `, ${d.permitYears.earliest}–${d.permitYears.latest}` : ''}.`;
-                          }
-                          const jump = (target: string, label: string) => (
-                            <button type="button" className="crm-jump" onClick={(e) => { e.preventDefault(); document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
-                              {label}
-                              <svg viewBox="0 0 24 24" strokeWidth="2.5"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
-                            </button>
-                          );
-                          return (
-                            <div className="crm-take" data-testid="dob-takeaway">
-                              <div className="crm-takeh">
-                                <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>
-                                Takeaway
-                              </div>
-                              <div className="crm-taket">{headline}</div>
-                              <div className="crm-conn">
-                                {d.bigWork && (
-                                  <div className="crm-cn i">
-                                    <span className="dt" />
-                                    <span className="tx">
-                                      {bigIsPrior ? (
-                                        <>A <b>{fmt$(d.bigWork.estimatedCost)} project in {bigYr}</b> under prior ownership is the largest work on record. The prior owner did it and realized that value when they sold — treat the workmanship as something to confirm on your walk-through, not hidden equity the current owner created.</>
-                                      ) : (
-                                        <>The largest work on record — <b>{fmt$(d.bigWork.estimatedCost)} in {bigYr}</b> — is the seller's own investment in the building.</>
-                                      )}
-                                    </span>
-                                    {jump('dob-permits', 'Permits')}
-                                  </div>
-                                )}
-                                {d.notClosedCount > 0 && (
-                                  <div className="crm-cn c">
-                                    <span className="dt" />
-                                    <span className="tx"><b>{d.notClosedCount} permit{d.notClosedCount !== 1 ? 's' : ''} not closed out.</b> Work was permitted but no final close-out is recorded — confirm the work was finished and inspected.</span>{jump('dob-permits', 'Permits')}
-                                  </div>
-                                )}
-                                {violationsData && (
-                                  <div className={`crm-cn ${openViol === 0 ? 'g' : 'c'}`}>
-                                    <span className="dt" />
-                                    <span className="tx">
-                                      {openViol === 0
-                                        ? <><b>No open violations.</b> Nothing in the last 5 years{(violationsData as any).olderViolationsSummary ? '; older records are historical, from before the current-ownership window' : ' — clean record'}.</>
-                                        : <><b>{openViol} open violation{openViol !== 1 ? 's' : ''}.</b> Unresolved building-code violations are on record — review them before proceeding.</>}
-                                    </span>
-                                    {jump('dob-violations', 'Violations')}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })()}
-
-                        {/* ---- Permit History ---- */}
-                        <div id="dob-permits" className="dob-subwrap">
-                          <div className="dob-ssh">
-                            <svg className="hic" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
-                            <span className="t">Permit History</span>
-                            <span className="sub">City of Chicago DOB</span>
-                          </div>
-                          {isLoadingPermits ? (
-                            <div className="space-y-2">
-                              <Skeleton className="h-4 w-3/4" />
-                              <Skeleton className="h-4 w-2/3" />
-                              <Skeleton className="h-4 w-1/2" />
-                            </div>
-                          ) : permitsData?.parseError ? (
-                            <p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4" />Unable to parse address for permit lookup</p>
-                          ) : permitsData?.apiError ? (
-                            <p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4" />Could not fetch permit data</p>
-                          ) : dobDerived && dobDerived.allPermits.length > 0 ? (() => {
-                            const d = dobDerived;
-                            const fmt$ = (n: number) => '$' + Math.round(n).toLocaleString();
-                            const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                            const saleLabel = d.saleDateRaw ? new Date(d.saleDateRaw).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : null;
-                            const cleanType = (t: string) => (t || '').replace(/^PERMIT\s*-\s*/i, '').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-                            const permitCard = (permit: any, index: number) => (
-                              <div key={permit.id || index} className="dob-prow" data-testid={`permit-item-${index}`}>
-                                <div className="dob-ptop">
-                                  <div className="dob-pscope">{permit.workDescription || cleanType(permit.permitType)}</div>
-                                  <div className="dob-pdate">Issued<br />{fmtDate(permit.issueDate)}</div>
-                                </div>
-                                <div className="dob-ptags">
-                                  <span className={`dob-st ${permit.eff === 'complete' ? 'complete' : 'expired'}`}>
-                                    <span className="d" />{permit.eff === 'complete' ? 'Complete' : permit.eff === 'expired' ? 'Expired · not closed' : 'Open'}
-                                  </span>
-                                  {permit.era && (
-                                    <span className={`dob-era ${permit.era === 'current' ? 'cur' : 'prior'}`}><span className="d" />{permit.era === 'current' ? 'Current owner' : 'Prior owner'}</span>
-                                  )}
-                                  <span className="dob-ptype">{cleanType(permit.permitType)}</span>
-                                  {permit.estimatedCost != null && permit.estimatedCost > 0 && (
-                                    <span className="dob-pcost">{fmt$(permit.estimatedCost)} <span>declared</span></span>
-                                  )}
-                                </div>
-                                <div className="dob-pmeta">
-                                  <div className="dob-pm"><span className="k">Permit no.</span><span className="v">{permit.permitNumber || '—'}</span></div>
-                                  <div className="dob-pm"><span className="k">Owner of record</span><span className="v">{permit.ownerName || '—'}</span></div>
-                                  <div className="dob-pm"><span className="k">Architect</span><span className="v">{permit.architectName && permit.architectName.toUpperCase().trim() !== (permit.ownerName || '').toUpperCase().trim() ? permit.architectName : '— (not required)'}</span></div>
-                                  <div className="dob-pm"><span className="k">General contractor</span><span className="v">{(permit.contractors || []).find((c: any) => /GENERAL/i.test(c.type || ''))?.name || permit.generalContractorName || (permit.contractors || [])[0]?.name || '—'}</span></div>
-                                </div>
-                              </div>
-                            );
-                            let cardIdx = 0;
-                            return (
-                              <>
-                                <div className="dob-msnap">
-                                  <span className="big">{d.allPermits.length}</span>
-                                  <span>
-                                    <b>permit{d.allPermits.length !== 1 ? 's' : ''}{d.permitYears ? `, ${d.permitYears.earliest}–${d.permitYears.latest}` : ''}</b><br />
-                                    {d.totalCost > 0 ? <>{fmt$(d.totalCost)} declared value across all work</> : 'No declared values on record'}
-                                  </span>
-                                  {d.notClosedCount > 0 && (
-                                    <span className="dob-miniflag">
-                                      <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                      {d.notClosedCount} permit{d.notClosedCount !== 1 ? 's' : ''} not closed out
-                                    </span>
-                                  )}
-                                </div>
-                                {!d.hasSaleDate && (
-                                  <p className="dob-basis">
-                                    No recorded sale date was found for this property, so permits are shown as one list — the current-vs-prior-owner split couldn't be computed.
-                                  </p>
-                                )}
-                                {d.hasSaleDate ? (
-                                  <>
-                                    <div className="dob-eradiv">
-                                      <span className="lbl">Under current ownership</span>
-                                      <span className="meta">since {saleLabel} · {d.currentPermits.length} permit{d.currentPermits.length !== 1 ? 's' : ''}{d.currentCost > 0 ? ` · ${fmt$(d.currentCost)}` : ''}</span>
-                                      <span className="ln" />
-                                    </div>
-                                    {d.currentPermits.length > 0
-                                      ? d.currentPermits.map((p: any) => permitCard(p, cardIdx++))
-                                      : <p className="dob-noera">No permits pulled under current ownership.</p>}
-                                    {d.priorPermits.length > 0 && (
-                                      <>
-                                        <div className="dob-eradiv">
-                                          <span className="lbl">Under prior ownership</span>
-                                          <span className="meta">before {saleLabel} · {d.priorPermits.length} permit{d.priorPermits.length !== 1 ? 's' : ''}{d.priorCost > 0 ? ` · ${fmt$(d.priorCost)}` : ''}</span>
-                                          <span className="ln" />
-                                        </div>
-                                        {d.priorPermits.map((p: any) => permitCard(p, cardIdx++))}
-                                      </>
-                                    )}
-                                  </>
-                                ) : (
-                                  d.allPermits.map((p: any) => permitCard(p, cardIdx++))
-                                )}
-
-                                {/* Professionals — aggregated across the building */}
-                                {d.professionals.length > 0 && (
-                                  <div className="procard" data-testid="dob-professionals">
-                                    <div className="proh">
-                                      <svg viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                      Professionals who worked on this building<span className="sortnote">Most recent work first</span>
-                                    </div>
-                                    {d.professionals.map((pro, pi) => {
-                                      const enr = dobEnrichFor(pro.name);
-                                      return (
-                                        <div key={pro.key} className="pro2" data-testid={`dob-pro-${pi}`}>
-                                          <div className="pic">{proRoleIcon(pro.role)}</div>
-                                          <div className="pmain">
-                                            <div className="prole">{pro.role}</div>
-                                            <div className="pnm">{pro.name}</div>
-                                            <div className="pstat"><span className="lab">Here</span><b>{pro.permitIds.size} permit{pro.permitIds.size !== 1 ? 's' : ''}</b>{pro.value > 0 ? <> <span className="dim">·</span> {fmt$(pro.value)}</> : null} <span className="dim">·</span> latest {pro.latestYear}</div>
-                                            {enr?.matched && enr.citywide ? (
-                                              <div className="pcite">
-                                                <span className="cw">Citywide · 5 yr</span>
-                                                <b>{enr.citywide.permits.toLocaleString()} permits</b>
-                                                <span className="dim">
-                                                  {enr.citywide.lastActiveYear ? <>· last active {enr.citywide.lastActiveYear} </> : null}
-                                                  · {enr.citywide.mix}
-                                                </span>
-                                                <a className="vp" href={`/discovery?view=${pro.isDesign ? 'architect-rankings' : 'gc-rankings'}&highlight=${encodeURIComponent(pro.name)}`} target="_blank" rel="noopener noreferrer">View profile →</a>
-                                              </div>
-                                            ) : (
-                                              <div className="pcite nomatch">No confident citywide match — showing this property's record only.</div>
-                                            )}
-                                          </div>
-                                          {pro.era && (
-                                            <div className="pera"><span className={`era ${pro.era === 'current' ? 'cur' : 'prior'}`}><span className="d" />{pro.era === 'current' ? 'Current owner' : 'Prior owner'}</span></div>
-                                          )}
-                                        </div>
-                                      );
-                                    })}
-                                    <div className="profind">
-                                      Every professional on the building's permits is listed — a starting point, not a recommendation. Citywide figures are <b>permit activity, not a quality rating</b>; matches are made by license number, and where we can't match confidently only this property's record is shown. Verify licensing and references before relying on any firm.
-                                    </div>
-                                  </div>
-                                )}
-                              </>
-                            );
-                          })() : (
-                            <p className="text-sm text-muted-foreground">No building permits on record for this address.</p>
-                          )}
-                        </div>
-
-                        {/* ---- Building Violations ---- */}
-                        <div id="dob-violations" className="dob-subwrap">
-                          <div className="dob-ssh">
-                            <svg className="hic" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                            <span className="t">Building Violations</span>
-                            <span className="sub">City of Chicago DOB</span>
-                          </div>
-                          {isLoadingViolations ? (
-                            <div className="space-y-2">
-                              <Skeleton className="h-4 w-3/4" />
-                              <Skeleton className="h-4 w-2/3" />
-                            </div>
-                          ) : violationsData?.parseError ? (
-                            <p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4" />Unable to parse address for violation lookup</p>
-                          ) : violationsData?.apiError ? (
-                            <p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4" />Could not fetch violation data</p>
-                          ) : violationsData ? (() => {
-                            const v: any = violationsData;
-                            const openCount = v.openViolations || 0;
-                            const older: any[] = v.olderViolations || [];
-                            const olderSummary = v.olderViolationsSummary;
-                            const saleTime = dobDerived?.hasSaleDate && dobDerived.saleDateRaw ? new Date(dobDerived.saleDateRaw).getTime() : null;
-                            const isComplied = (viol: any) => /compl/i.test(viol.violationStatus || '');
-                            const staleOpenCount = older.filter(o => !isComplied(o)).length;
-                            return (
-                              <>
-                                <div className={`dob-vhero ${openCount > 0 ? 'bad' : ''}`} data-testid="dob-violations-hero">
-                                  <div className="ic">
-                                    {openCount === 0
-                                      ? <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                      : <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>}
-                                  </div>
-                                  <div>
-                                    <div className="big">{openCount} open violation{openCount !== 1 ? 's' : ''}</div>
-                                    <div className="sub">
-                                      {openCount === 0
-                                        ? <>No open building-code violations in the last 5 years{v.totalViolationsLast5Years === 0 && !olderSummary ? ' — clean record' : v.totalViolationsLast5Years === 0 ? ' — clean under the current window' : ''}.</>
-                                        : <>Unresolved building-code violations on record — review each below.</>}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Current open violations (last 5 years) — genuinely current problems, red */}
-                                {openCount > 0 && v.violations && v.violations.length > 0 && (
-                                  <div className="mb-4">
-                                    {v.violations.map((viol: any, vi: number) => (
-                                      <div key={viol.id || vi} className="dob-vitem" data-testid={`dob-open-violation-${vi}`}>
-                                        <span className="dob-vt openbad"><span className="d" />Open</span>
-                                        <div className="vtx">
-                                          <div className="vsc">{viol.violationDescription}</div>
-                                          <div className="vmeta">Issued {new Date(viol.violationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}{viol.violationCode ? ` · ${viol.violationCode}` : ''}</div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-
-                                {/* Historical (>5 yrs) — collapsed accordion */}
-                                {older.length > 0 && (
-                                  <div className="dob-hist">
-                                    <button
-                                      type="button"
-                                      className={`dob-histh ${showOlderViolationsList ? 'open' : ''}`}
-                                      onClick={() => setShowOlderViolationsList(!showOlderViolationsList)}
-                                      data-testid="button-toggle-older-violations"
-                                    >
-                                      <span className="ct">{older.length}</span>
-                                      <span className="tx">
-                                        <span className="tt block">Historical records · older than 5 years</span>
-                                        <span className="ds block">
-                                          {olderSummary && olderSummary.earliestYear !== olderSummary.latestYear
-                                            ? `${olderSummary.earliestYear}–${olderSummary.latestYear}`
-                                            : olderSummary?.earliestYear || ''}
-                                          {saleTime !== null && older.every(o => new Date(o.violationDate).getTime() < saleTime) ? ' — all under prior ownership, since resolved or gone stale' : ''}
-                                        </span>
-                                      </span>
-                                      <svg className="chev" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                                    </button>
-                                    <div className={showOlderViolationsList ? 'dob-histbody' : 'hidden print:block dob-histbody'}>
-                                      {older.map((viol: any, vi: number) => {
-                                        const complied = isComplied(viol);
-                                        const yr = new Date(viol.violationDate).getFullYear();
-                                        const era = saleTime !== null ? (new Date(viol.violationDate).getTime() >= saleTime ? 'current owner' : 'prior owner') : null;
-                                        return (
-                                          <div key={viol.id || vi} className="dob-vitem" data-testid={`dob-hist-violation-${vi}`}>
-                                            <span className={`dob-vt ${complied ? 'complied' : 'stale'}`}><span className="d" />{complied ? 'Complied' : `Open · ${yr}`}</span>
-                                            <div className="vtx">
-                                              <div className="vsc">{viol.violationDescription}</div>
-                                              <div className="vmeta">Issued {new Date(viol.violationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}{viol.statusDate ? ` · ${complied ? 'complied' : 'last status'} ${new Date(viol.statusDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}` : ''}{era ? ` · ${era}` : ''}</div>
-                                            </div>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {staleOpenCount > 0 && (
-                                  <div className="dob-caveat" data-testid="dob-violations-caveat">
-                                    <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                    <span><b>{staleOpenCount} historical record{staleOpenCount !== 1 ? 's' : ''} still show "Open," but {staleOpenCount !== 1 ? 'they are' : 'it is'} not a current problem.</b> {staleOpenCount !== 1 ? 'They' : 'It'} predate{staleOpenCount !== 1 ? '' : 's'} the current 5-year window and the city often never posts a final disposition on old cases. We treat records older than 5 years as historical, not active. If any matter to you, confirm current standing with the Department of Buildings.</span>
-                                  </div>
-                                )}
-                              </>
-                            );
-                          })() : (
-                            <p className="text-sm text-muted-foreground">Unable to load violation history</p>
-                          )}
-                        </div>
-                      </div>
-                      {/* Sidewalk Cafe Permits */}
-                      {isLoadingSidewalkCafe ? (
-                        <div className="mt-4 pt-4 border-t border-border/40">
-                          <Skeleton className="h-8 w-full" />
-                        </div>
-                      ) : sidewalkCafeData?.permits?.length > 0 ? (
-                        <div className="mt-4 pt-4 border-t border-border/40">
-                          <h4 className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651] flex items-center gap-2 mb-3">
-                            <Coffee className="w-4 h-4" />
-                            Sidewalk Cafe Permit{sidewalkCafeData.permits.length > 1 ? 's' : ''}
-                          </h4>
-                          <div className="space-y-2">
-                            {sidewalkCafeData.permits.map((permit: any, idx: number) => (
-                              <div key={permit.permitNumber || idx} className="border border-border p-3 text-sm space-y-1">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div>
-                                    <p className="font-medium">{permit.doingBusinessAs || permit.legalName}</p>
-                                    {permit.doingBusinessAs && permit.legalName && permit.doingBusinessAs !== permit.legalName && (
-                                      <p className="text-xs text-muted-foreground">{permit.legalName}</p>
-                                    )}
-                                  </div>
-                                  <Badge className={`text-xs shrink-0 ${permit.isActive ? '' : ''}`}>
-                                    {permit.isActive ? 'Active' : 'Expired'}
-                                  </Badge>
-                                </div>
-                                <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
-                                  {permit.issuedDate && (
-                                    <span>Issued: {new Date(permit.issuedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                  )}
-                                  {permit.expirationDate && (
-                                    <span>Expires: {new Date(permit.expirationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                  )}
-                                  {permit.permitNumber && (
-                                    <span>#{permit.permitNumber}</span>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : sidewalkCafeData && !sidewalkCafeData.found ? null : null}
-
-                      <p className="text-xs text-muted-foreground mt-4">
-                        Source: Chicago Data Portal (Building Permits & Building Violations)
-                      </p>
-                      </CollapsibleContent>
-                    </Collapsible>
-
                     {/* Zoning History Sub-section */}
-                    {run?.address && (
+                    {false && run?.address && (
                       <Collapsible open={isZoningHistoryOpen} onOpenChange={setIsZoningHistoryOpen}>
                         <CollapsibleTrigger asChild>
                           <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-zoning-history" id="subsection-zoning-history">
@@ -9370,6 +9615,18 @@ export default function RunDetail() {
                         <CollapsibleContent>
                           <div className="px-4 pt-2 pb-4">
                             <p className="text-xs text-muted-foreground mb-3">Ordinances, rezonings, and ZBA cases for this address</p>
+                            {!isLoadingZoningHistory && zoningHistoryCoverage && (
+                              <p className="mb-3 rounded-md border border-border/70 bg-muted/30 px-3 py-2 text-xs leading-relaxed text-muted-foreground" data-testid="zoning-history-coverage">
+                                <span className="font-medium text-foreground">Archive coverage:</span> {zoningHistoryCoverage}
+                              </p>
+                            )}
+                            {!isLoadingZoningHistory && zoningHistoryPlainLanguage && (
+                              <div className="mb-4 rounded-lg border border-[#dfe3f7] bg-[#eef0fb]/60 px-3 py-2.5" data-testid="zoning-history-summary">
+                                <p className="font-jbmono text-[10px] font-bold uppercase tracking-[0.05em] text-[#2b3a9e]">Plain-language read</p>
+                                <p className="mt-1 text-sm font-medium leading-snug text-foreground">{zoningHistoryPlainLanguage.headline}</p>
+                                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{zoningHistoryPlainLanguage.detail}</p>
+                              </div>
+                            )}
                             {isLoadingZoningHistory ? (
                               <div className="space-y-3">
                                 <Skeleton className="h-12 w-full" />
@@ -9419,6 +9676,9 @@ export default function RunDetail() {
                                         )}
                                         {item.ordinanceId && (
                                           <span className="text-xs font-jbmono text-muted-foreground">{item.ordinanceId}</span>
+                                        )}
+                                        {item.matchedAddress && (
+                                          <span className="text-xs text-muted-foreground">Matched: {item.matchedAddress}</span>
                                         )}
                                         <span className="text-xs text-muted-foreground">{item.source}</span>
                                       </div>
@@ -9549,7 +9809,7 @@ export default function RunDetail() {
                             {facts?.zoning && (
                               <div className="mt-4 pt-3 border-t">
                                 <p className="text-xs text-muted-foreground">
-                                  Current designation: <strong className="text-foreground">{facts.zoning}</strong>
+                                  Current designation: <strong className="text-foreground">{facts?.zoning}</strong>
                                   {zoningHistoryData?.ordinanceDate && (
                                     <> — in effect since{' '}
                                       <strong className="text-foreground">
@@ -10044,7 +10304,8 @@ export default function RunDetail() {
                               ? `A ${aptsNum}-unit${exterior ? ` ${exterior.toLowerCase()}` : ''} ${bldgNoun}${yearBuilt ? `, built ${yearBuilt}` : ''} — ${matching ? `configured as ${numWord(aptsNum).toLowerCase()} matching 1BR / 1BA apartments` : `${aptsNum} units${beds != null && baths != null ? ` with ${beds} beds / ${baths} baths — mixed unit sizes` : ''}`}.`
                               : `${exterior ? `A ${exterior.toLowerCase()} building` : 'A building'}${yearBuilt ? `, built ${yearBuilt}` : ''}${bldgSf ? ` — ${bldgSf.toLocaleString('en-US')} SF per the county record` : ''}.`;
                             // Listing-discrepancy caveat: only when an active listing exists AND unit counts conflict
-                            const listingUnits = listingData?.unitCount != null ? Number(listingData.unitCount) : null;
+                            const snapshotUnits = Number((listingSnapshot as any)?.unitCount);
+                            const listingUnits = Number.isFinite(snapshotUnits) && snapshotUnits > 0 ? snapshotUnits : null;
                             const listingIsActive = (listingSnapshot as any)?.status === 'active';
                             const listingConflicts = listingIsActive && listingUnits != null && listingUnits > 0 && aptsNum != null && listingUnits !== aptsNum;
                             const listingMix = (() => {
@@ -10086,7 +10347,7 @@ export default function RunDetail() {
                                 {listingConflicts && (
                                   <div className="prc-caveat" data-testid="parcel-listing-caveat">
                                     <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                    <span><b>The active listing differs — needs confirmation.</b> The current listing describes {listingMix}, not the county's {aptsNum} apartments. A live listing usually reflects the property as it stands today, so the listing is likely the more accurate picture — verify against the county record before relying on these figures.</span>
+                                    <span><b>The active listing differs — needs confirmation.</b> The current listing describes {listingMix}, not the county's {aptsNum} apartments. The listing and assessor describe different measures, so confirm the legal unit count before relying on either figure.</span>
                                   </div>
                                 )}
                               </div>
@@ -10744,1735 +11005,6 @@ export default function RunDetail() {
                       </CollapsibleContent>
                     </Collapsible>
 
-                    {/* Sale History Sub-section */}
-                    {pinLookupData && (() => {
-                      const recorderDeed = lienData?.deeds
-                        ?.filter(d => d.amount > 0)
-                        .sort((a, b) => new Date(b.recordedDate).getTime() - new Date(a.recordedDate).getTime())[0] || null;
-                      const mostRecentCcaoMs = pinLookupData.saleHistory?.length > 0
-                        ? new Date(pinLookupData.saleHistory[0].saleDate).getTime()
-                        : 0;
-                      const recorderDeedMs = recorderDeed ? new Date(recorderDeed.recordedDate).getTime() : 0;
-                      const isRecorderDuplicateCcao = (() => {
-                        if (!recorderDeed || !pinLookupData.saleHistory || pinLookupData.saleHistory.length === 0) return false;
-                        const ccaoSale = pinLookupData.saleHistory[0];
-                        if (recorderDeed.amount <= 0 || ccaoSale.salePrice <= 0) return false;
-                        const amountMatch = recorderDeed.amount === ccaoSale.salePrice;
-                        const daysDiff = Math.abs(recorderDeedMs - mostRecentCcaoMs) / (1000 * 60 * 60 * 24);
-                        return amountMatch && daysDiff <= 45;
-                      })();
-                      const showRecorderSale = !!recorderDeed && recorderDeedMs > mostRecentCcaoMs && !isRecorderDuplicateCcao;
-                      // Sanity-check for truncated/typo prices from public data (e.g. $1,185 when true price is $1,185,000)
-                      const isPriceSuspect = (() => {
-                        if (!recorderDeed || recorderDeed.amount <= 0) return false;
-                        // Absolute floor: no Chicago real estate transaction is under $10k
-                        if (recorderDeed.amount < 10000) return true;
-                        // "Value in thousands" typo: amount × 1000 is within 2% of a known CCAO sale price
-                        if (pinLookupData.saleHistory?.some(s => s.salePrice > 0 && Math.abs((recorderDeed.amount * 1000) - s.salePrice) / s.salePrice < 0.02)) return true;
-                        return false;
-                      })();
-                      // When price is suspect, find the best CCAO match: same seller (name-token fuzzy match),
-                      // same year (±1), and a larger price — always prefer the higher amount.
-                      const correctedSale = (() => {
-                        if (!isPriceSuspect || !recorderDeed || !pinLookupData.saleHistory?.length) return null;
-                        const nameTokens = (n: string) => n.toUpperCase().replace(/[^A-Z\s]/g, '').split(/\s+/).filter(t => t.length > 1);
-                        const namesMatch = (a: string, b: string) => {
-                          const ta = new Set(nameTokens(a));
-                          const tb = new Set(nameTokens(b));
-                          const shorter = ta.size <= tb.size ? ta : tb;
-                          const longer = ta.size <= tb.size ? tb : ta;
-                          const overlap = [...shorter].filter(t => longer.has(t)).length;
-                          return overlap >= shorter.size; // all tokens of shorter name appear in longer
-                        };
-                        const recYear = new Date(recorderDeed.recordedDate).getFullYear();
-                        const grantor = recorderDeed.grantor || lienData?.deedGrantor || '';
-                        return pinLookupData.saleHistory.find(s => {
-                          if (s.salePrice <= recorderDeed.amount) return false;
-                          const sYear = s.saleDate ? new Date(s.saleDate).getFullYear() : 0;
-                          if (Math.abs(sYear - recYear) > 1) return false;
-                          if (grantor && s.sellerName) return namesMatch(grantor, s.sellerName);
-                          return Math.abs(sYear - recYear) === 0; // same year fallback
-                        }) || null;
-                      })();
-                      const hasCcaoSales = pinLookupData.saleHistory && pinLookupData.saleHistory.length > 0;
-                      const coParcelDocNos = new Set(relatedParcels.flatMap(rp => (rp.saleHistory ?? []).map(s => s.docNo).filter((d): d is string => !!d)));
-
-                      // ---- Sale History derived view model (spec: every flag computed in code, not an LLM) ----
-                      const short$ = (v: number) => v >= 1e6 ? `$${parseFloat((v / 1e6).toFixed(2))}M` : `$${Math.round(v / 1000)}K`;
-                      const fmtFull$ = (v: number) => `$${v.toLocaleString('en-US')}`;
-                      const isTrustName = (n?: string | null) => !!n && /(\bTRUST\b|AS TRUSTEE|LAND TRUST|BANK\s*(&|AND)\s*TRUST)/i.test(n);
-                      const relatedEntities = (a?: string | null, b?: string | null) => {
-                        if (!a || !b) return false;
-                        const toks = (s: string) => (s.toUpperCase().match(/\d{3,}/g) || []);
-                        const tb = new Set(toks(b));
-                        return toks(a).some(t => tb.has(t));
-                      };
-                      const pinSearchUrl = pinLookupData?.pin ? `https://crs.cookcountyclerkil.gov/Search/ResultByPin?id1=${pinLookupData.pin.replace(/\D/g, '')}` : null;
-                      const saleVM: any[] = (pinLookupData.saleHistory || [])
-                        .filter((s: any) => s.salePrice > 0)
-                        .map((s: any) => {
-                          // Normalize YYYY / YYYY-MM / YYYY-MM-DD (noon local, so timezone can't shift the day).
-                          const raw = String(s.saleDate || '').substring(0, 10);
-                          const m = raw.match(/^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?/);
-                          const dt = m ? new Date(parseInt(m[1], 10), m[2] ? parseInt(m[2], 10) - 1 : 0, m[3] ? parseInt(m[3], 10) : 1, 12) : null;
-                          const validDt = dt && !isNaN(dt.getTime()) ? dt : null;
-                          // Approx = day missing entirely, or defaulted to the 1st (month/year precision only)
-                          const approx = !!validDt && (!m![3] || m![3] === '01');
-                          return {
-                            price: s.salePrice,
-                            ms: validDt ? validDt.getTime() : 0,
-                            year: validDt ? validDt.getFullYear() : (parseInt(s.year, 10) || 0),
-                            dateLabel: validDt ? (approx ? `${validDt.getFullYear()} · month approx.` : validDt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })) : 'Date unknown',
-                            monthYear: validDt ? validDt.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : String(s.year || ''),
-                            approx,
-                            grantor: s.sellerName || null,
-                            grantee: s.buyerName || null,
-                            deedType: s.deedType || 'Deed',
-                            docNo: s.docNo || null,
-                            docUrl: pinSearchUrl,
-                            isRecorder: false,
-                            sharedDeed: !!(s.docNo && coParcelDocNos.has(s.docNo)),
-                            priceNote: null as string | null,
-                          };
-                        })
-                        .sort((a: any, b: any) => b.ms - a.ms);
-                      const recorderIsDupOfAny = !!recorderDeed && (pinLookupData.saleHistory || []).some((s: any) => {
-                        if (recorderDeed.amount <= 0 || s.salePrice <= 0) return false;
-                        if (recorderDeed.documentNumber && s.docNo && String(recorderDeed.documentNumber).replace(/^0+/, '') === String(s.docNo).replace(/^0+/, '')) return true;
-                        const days = Math.abs(new Date(recorderDeed.recordedDate).getTime() - new Date(s.saleDate).getTime()) / 86400000;
-                        return recorderDeed.amount === s.salePrice && days <= 45;
-                      });
-                      const recorderIsNewest = !!recorderDeed && new Date(recorderDeed.recordedDate).getTime() > (saleVM[0]?.ms || 0);
-                      if (recorderDeed && recorderDeed.amount > 0 && recorderIsNewest && !recorderIsDupOfAny) {
-                        const rdt = new Date(recorderDeed.recordedDate);
-                        saleVM.unshift({
-                          price: correctedSale ? correctedSale.salePrice : recorderDeed.amount,
-                          ms: rdt.getTime(), year: rdt.getFullYear(),
-                          dateLabel: rdt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                          monthYear: rdt.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-                          approx: false,
-                          grantor: recorderDeed.grantor || lienData?.deedGrantor || null,
-                          grantee: recorderDeed.grantee || lienData?.deedGrantee || null,
-                          deedType: recorderDeed.documentType || 'Deed',
-                          docNo: recorderDeed.documentNumber || null,
-                          docUrl: recorderDeed.viewLink || pinSearchUrl,
-                          isRecorder: true,
-                          sharedDeed: relatedParcels.some(rp => rp.matchReason?.startsWith('Same deed')),
-                          priceNote: correctedSale ? `corrected — public record shows ${fmtFull$(recorderDeed.amount)}` : (isPriceSuspect ? 'amount likely incomplete — verify with the Recorder of Deeds' : null),
-                        });
-                      }
-                      // Non-arm's-length flags, first matching reason only (LOGIC 4). Amber, never red.
-                      const decoratedVM = saleVM.map((s: any, i: number) => {
-                        const trust = /TRUSTEE/i.test(s.deedType);
-                        let naflag: string | null = null;
-                        if (trust) naflag = "Trust conveyance — may not be an open-market sale";
-                        else if (isTrustName(s.grantee) || isTrustName(s.grantor)) naflag = 'Into a land trust — likely a title transfer, not a sale';
-                        else if (i > 0 && saleVM[i - 1].price > 0 && s.price > saleVM[i - 1].price) naflag = `Higher than the ${saleVM[i - 1].year} price — possible non-market transfer`;
-                        else if (relatedEntities(s.grantor, s.grantee)) naflag = 'Transfer between related entities';
-                        return { ...s, trust, naflag };
-                      });
-                      const recentSale = decoratedVM[0] || null;
-                      const earlierSales = decoratedVM.slice(1);
-                      const journey = [...decoratedVM].sort((a, b) => a.ms - b.ms);
-                      const anyApprox = decoratedVM.some(s => s.approx);
-                      const anyNaflag = decoratedVM.some(s => !!s.naflag);
-                      const anyTrusty = decoratedVM.some(s => s.trust || isTrustName(s.grantee) || isTrustName(s.grantor));
-                      const firstYear = journey[0]?.year || 0;
-                      const lastYear = journey[journey.length - 1]?.year || 0;
-                      // Value-add note (LOGIC 6): permitted work ≥ $50K between first and last sale
-                      const valueAdd = (() => {
-                        if (!dobDerived || journey.length < 2) return null;
-                        const startMs = journey[0].ms, endMs = journey[journey.length - 1].ms;
-                        const between = dobDerived.allPermits.filter((p: any) => {
-                          const t = new Date(p.issueDate).getTime();
-                          return t > startMs && t < endMs && (p.estimatedCost || 0) > 0; // strictly between sales — same-day work isn't attributable to the interval
-                        });
-                        const total = between.reduce((s: number, p: any) => s + (p.estimatedCost || 0), 0);
-                        if (total < 50000) return null;
-                        const tops = [...between].sort((a: any, b: any) => (b.estimatedCost || 0) - (a.estimatedCost || 0)).slice(0, 2);
-                        const jobWord = (p: any) => {
-                          const yr = new Date(p.issueDate).getFullYear();
-                          const d = String(p.workDescription || p.permitType || 'renovation work').toLowerCase()
-                            .replace(/^permit\s*-\s*/, '')
-                            .replace(/^(revision to|revised|rev\.?)\s*(permit)?\s*#?\d*[:\s-]*/, '')
-                            .replace(/^self-cert(ification)?[:\s-]*/, '');
-                          const shortD = d.length > 48 ? d.slice(0, 48).replace(/\s+\S*$/, '') + '…' : d;
-                          return `the ${yr} ${shortD}`;
-                        };
-                        return { total, summary: tops.map(jobWord).join(' plus ') };
-                      })();
-                      // Institutional / non-profit buyer (LOGIC 5) — "can change use/tax status", never a definite claim
-                      const instBuyer = recentSale?.grantee && /(PROGRAM|AUTHORITY|CITY OF|COUNTY OF|FOUNDATION|CHURCH|MINISTR|TEMPLE|SYNAGOGUE|MOSQUE|HEALTH|HOSPITAL|CLINIC|HOUSING|NOT[-\s]?FOR[-\s]?PROFIT|NON[-\s]?PROFIT|CHARIT|UNIVERSITY|COLLEGE|SCHOOL DISTRICT)/i.test(recentSale.grantee) ? recentSale.grantee : null;
-                      const numTimes = (n: number) => n === 1 ? 'once' : n === 2 ? 'twice' : `${['', '', '', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'][n] || n} times`;
-                      const jumpToPermits = () => { if (!isDobSectionOpen) setIsDobSectionOpen(true); setTimeout(() => document.getElementById('dob-permits')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 250); };
-                      const saleCard = (s: any, i: number, recent: boolean) => (
-                        <div key={`${s.docNo || s.ms}-${i}`} className={`slh-sale${recent ? ' recent' : ''}`} data-testid={recent ? 'sale-recent' : `sale-item-${i}`}>
-                          <div className="slh-srow">
-                            <div className="slh-sleft">
-                              {recent && (
-                                <span className="slh-schip"><span className="d" />Most recent · {s.isRecorder ? 'Recorder of Deeds' : 'Assessor (CCAO)'}</span>
-                              )}
-                              <span className="slh-sprice">{fmtFull$(s.price)}</span>
-                              <span className="slh-sdate">{s.dateLabel}</span>
-                              {s.priceNote && <span className="slh-sdate" style={{ color: 'var(--caution-text)' }}>{s.priceNote}</span>}
-                              {s.sharedDeed && <span className="slh-sdate">Total for all {relatedParcels.length + 1} parcels</span>}
-                            </div>
-                            <div className="slh-sparties">
-                              {(s.grantor || s.grantee) ? (
-                                <>
-                                  {s.grantor && <div className="row"><span className="lbl">From</span>{s.grantor}</div>}
-                                  {s.grantee && <div className="row"><span className="lbl">To</span>{s.grantee}</div>}
-                                </>
-                              ) : (
-                                <div className="row"><span className="lbl">Parties</span>Not recorded in this dataset</div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="slh-smeta">
-                            <span className={`slh-deed${s.trust ? ' trust' : ''}`}>{s.deedType}</span>
-                            {s.docNo && (
-                              <span className="slh-docn">Doc {s.docUrl
-                                ? <a href={s.docUrl} target="_blank" rel="noopener noreferrer">#{s.docNo} ↗</a>
-                                : <>#{s.docNo}</>}</span>
-                            )}
-                            {s.naflag && (
-                              <span className="slh-naflag"><svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>{s.naflag}</span>
-                            )}
-                          </div>
-                        </div>
-                      );
-
-                      // ---- Double lot · who owns what — relocated Companion Parcel content (renders ONLY when detectAssemblage passes:
-                      //      shared acquisition + adjacency, never owner-name match). Attaches beneath the co-parcel transaction row. ----
-                      const doubleLotPanel = assemblage ? (() => {
-                        const subj = assemblage.members.find(m => m.role === 'subject')!;
-                        const comp = assemblage.members.find(m => m.role === 'companion')!;
-                        const entLabel = (t: string) => t === 'llc' ? 'LLC' : t === 'trust' ? 'Trust' : 'Personal';
-                        const scopeLabel = assemblage.common_control === 'exact'
-                          ? 'Assemblage · common owner'
-                          : assemblage.common_control === 'likely'
-                            ? 'Assemblage · likely common control'
-                            : 'Assemblage · control unclear';
-                        return (
-                          <div id="asmb-double-lot" className="asmb-nest" data-testid="asmb-double-lot">
-                            <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
-                              <div className="asmb-nh">The double lot · who owns what</div>
-                              <span className="liens-pill" data-testid="badge-assemblage-scope">{scopeLabel}</span>
-                            </div>
-
-                            {/* Lot cards — companion neutral, subject highlighted. Debt = pointer only, never loan figures */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-                              {[comp, subj].map((m) => (
-                                <div key={m.pin} className={`asmb-lot ${m.role === 'subject' ? 'self' : ''}`} data-testid={`asmb-lot-${m.role}`}>
-                                  <div className="tag">{m.role === 'subject' ? 'This parcel' : 'Companion'}</div>
-                                  <div className="addr">{m.address}</div>
-                                  <div className="pin">PIN {m.pin}</div>
-                                  <div className="own">
-                                    {m.owner ? <>Held by <b>{m.owner}</b></> : <>Owner not resolved</>}
-                                    <br />
-                                    <span className={`ent ${m.owner_entity_type}`}>
-                                      {entLabel(m.owner_entity_type)}{m.role === 'subject'
-                                        ? (assemblage.debt_scope === 'single_pin' ? ' · own single-PIN financing — see Debt Snapshot' : ' · financing — see Debt Snapshot')
-                                        : (coParcelLienData
-                                            ? ((coParcelLienData.mortgages?.length ?? 0) > 0 ? ' · own financing on record' : ' · no mortgage found on its PIN')
-                                            : ' · financing not evaluated')}
-                                    </span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                            <div className="asmb-frontage">
-                              <span className="bar" />
-                              <span>
-                                {assemblage.combined_frontage_ft ? <>combined frontage <b>~{assemblage.combined_frontage_ft} ft</b> · </> : <>two adjacent lots · </>}
-                                acquired together{assemblage.acquired_together.year ? ` in ${assemblage.acquired_together.year}` : ''}
-                                {assemblage.zoning ? <> · <b>{assemblage.zoning}</b></> : null}
-                              </span>
-                              <span className="bar" />
-                            </div>
-
-                            {/* Common control + ownership history */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3 mt-3">
-                              <div className="asmb-panel" data-testid="asmb-common-control">
-                                <div className="l">Common control</div>
-                                <div className="cc">
-                                  <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                  <span>
-                                    {assemblage.common_control === 'exact' ? (
-                                      <>Both parcels are held under the <b>same named owner</b>{subj.owner ? <> — <b>{subj.owner}</b></> : null}.</>
-                                    ) : (
-                                      <>
-                                        Same buyer took both{assemblage.acquired_together.year ? ` in ${assemblage.acquired_together.year}` : ''}{assemblage.separated ? `; the ${assemblage.separated_year} split moved them into separate names` : ''}. <b>{assemblage.common_control === 'likely' ? 'Likely one beneficial owner' : 'Control unclear'}</b> — {assemblage.confidence_note.replace(/\s*—\s*confirm.*$/i, '').replace(/\.$/, '')}.
-                                        <span className="confirm">Confirm identity</span>
-                                      </>
-                                    )}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="asmb-panel" data-testid="asmb-history">
-                                <div className="l">Ownership history</div>
-                                <ul className="tl">
-                                  <li>
-                                    <span className="yr">{assemblage.acquired_together.year ?? '—'}</span>
-                                    <span><b>Acquired together</b> — one deed, both parcels{assemblage.acquired_together.price ? ` ($${assemblage.acquired_together.price.toLocaleString('en-US')})` : ''}</span>
-                                  </li>
-                                  {assemblage.separated && (
-                                    <li>
-                                      <span className="yr">{assemblage.separated_year}</span>
-                                      <span><b>Separated</b> — contemporaneous conveyances split the lots into {entLabel(subj.owner_entity_type).toLowerCase()} + {entLabel(comp.owner_entity_type).toLowerCase()}</span>
-                                    </li>
-                                  )}
-                                  <li>
-                                    <span className="yr">Now</span>
-                                    <span>Adjacent, {assemblage.common_control === 'exact' ? 'common owner' : assemblage.common_control === 'likely' ? 'likely common control' : 'common control unclear'}, <b>{assemblage.debt_scope === 'single_pin' ? 'separately financed' : assemblage.debt_scope === 'blanket' ? 'shared loan on record' : 'financing tracked per PIN'}</b></span>
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-
-                            {/* Optionality — flag only, no combined valuation */}
-                            <div className="asmb-opt" data-testid="asmb-optionality">
-                              <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                              <div className="bd">
-                                <div className="h">Assemblage optionality</div>
-                                {assemblage.common_control === 'exact' ? 'Under common ownership' : 'If commonly controlled'}, the two lots read as a <b>{assemblage.combined_frontage_ft ? `~${assemblage.combined_frontage_ft}-ft ` : 'combined '}development or resale parcel</b>, not two isolated lots — combinable frontage that can be built or sold as one.{assemblage.zoning ? <> In <b>{assemblage.zoning}</b>, a double lot materially changes the buildable envelope.</> : null} Worth weighing alongside each parcel's standalone value.
-                              </div>
-                            </div>
-
-                            <p className="text-[10.5px] leading-[1.5] text-muted-foreground mt-3 mb-0">
-                              The link is anchored on the <b className="text-foreground/70">shared {assemblage.acquired_together.year ?? ''} acquisition</b> (Doc #{assemblage.acquired_together.doc_number}, not a bare owner-name match){assemblage.separated ? <> and the contemporaneous {assemblage.separated_year} split</> : null}; {assemblage.common_control === 'exact' ? 'both parcels carry the same named owner.' : <>common control across the entity line is <b className="text-foreground/70">inferred, not asserted</b>.</>} Debt is tracked per PIN and never aggregated.
-                            </p>
-                          </div>
-                        );
-                      })() : null;
-
-                      return (
-                      <Collapsible id="section-sale-history" open={isSaleHistorySectionOpen} onOpenChange={setIsSaleHistorySectionOpen}>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                            <h3 className="chead chead-icon">
-                              <FileText className="w-4 h-4" />
-                              Sale History
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              <span className="slh-count" data-testid="badge-sale-count">
-                                {decoratedVM.length > 0
-                                  ? `${decoratedVM.length} recorded sale${decoratedVM.length !== 1 ? 's' : ''}${firstYear && lastYear ? ` · ${firstYear}\u2013${lastYear}` : ''}`
-                                  : 'No recorded sales'}
-                              </span>
-                              <span className="text-muted-foreground text-sm">{isSaleHistorySectionOpen ? '▼' : '▶'}</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="seccard space-y-2">
-                            {decoratedVM.length > 0 ? (
-                              <>
-                                {/* ---- Takeaway (computed, not LLM) ---- */}
-                                <div className="crm-take" data-testid="sale-takeaway">
-                                  <div className="crm-takeh">
-                                    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>
-                                    Takeaway
-                                  </div>
-                                  <div className="crm-taket">
-                                    {decoratedVM.length >= 2
-                                      ? <>The property has changed hands {numTimes(decoratedVM.length)} since {firstYear} and last sold in {recentSale.monthYear} for {short$(recentSale.price)}{recentSale.isRecorder ? ' — a brand-new record' : ''}.</>
-                                      : <>One recorded sale: {short$(recentSale.price)} in {recentSale.monthYear}{recentSale.isRecorder ? ' — a brand-new record' : ''}.</>}
-                                    {assemblage && (() => {
-                                      // Double-lot framing appended to the sales headline — deterministic, hedge from common_control (never asserted across an entity line)
-                                      const compShort = assemblage.members.find(m => m.role === 'companion')!.address.split(',')[0].trim();
-                                      const yr = assemblage.acquired_together.year;
-                                      const px = assemblage.acquired_together.price ? ` for $${assemblage.acquired_together.price.toLocaleString('en-US')}` : '';
-                                      const hedge = assemblage.common_control === 'exact' ? 'both still under the same owner'
-                                        : assemblage.common_control === 'likely' ? 'likely still one owner — confirm identity'
-                                        : 'current common control unclear — confirm';
-                                      return assemblage.separated
-                                        ? <> It was bought together with {compShort}{yr ? ` in ${yr}` : ''}{px}, then split into separate names in {assemblage.separated_year} — {hedge}.</>
-                                        : <> It was bought together with {compShort}{yr ? ` in ${yr}` : ''}{px} — {hedge}.</>;
-                                    })()}
-                                  </div>
-                                  <div className="crm-conn">
-                                    {recentSale.isRecorder && (
-                                      <div className="crm-cn c">
-                                        <span className="dt" />
-                                        <span className="tx"><b>The {recentSale.year} sale is freshly recorded.</b> It was pulled straight from the Cook County Recorder of Deeds and may not appear in the Assessor's data yet (typical 6–12 week lag).
-                                        </span>
-                                        <button type="button" className="crm-jump" onClick={() => document.getElementById('slh-recent')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}><svg viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Recent sale</button>
-                                      </div>
-                                    )}
-                                    {valueAdd && (
-                                      <div className="crm-cn i">
-                                        <span className="dt" />
-                                        <span className="tx"><b>The rise isn't just market appreciation.</b> Around {short$(valueAdd.total)} of permitted work — mainly {valueAdd.summary} — was invested between sales, so the climb from {short$(journey[0].price)} ({firstYear}) to {short$(journey[journey.length - 1].price)} ({lastYear}) blends the market, value-add improvements{anyNaflag ? ", and a few non-arm's-length transfers" : ''}. Sale prices alone can't separate them.
-                                        </span>
-                                        <button type="button" className="crm-jump" onClick={jumpToPermits}><svg viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Permit history</button>
-                                      </div>
-                                    )}
-                                    {instBuyer && (
-                                      <div className="crm-cn c">
-                                        <span className="dt" />
-                                        <span className="tx"><b>The {recentSale.year} buyer looks institutional / non-profit.</b> Institutional or non-profit ownership can change the property's use and its tax status going forward — confirm current exemptions in the Property Tax section.</span>
-                                      </div>
-                                    )}
-                                    {/* Assemblage rows folded into the same takeaway — deterministic, templated in shared/assemblage.ts (never LLM) */}
-                                    {assemblage && buildAssemblageTakeaway(assemblage).rows.map((r, ri) => (
-                                      <div key={`asmb-${ri}`} className={`crm-cn ${r.tone === 'good' ? 'g' : r.tone === 'caution' ? 'c' : 'n'}`} data-testid={`sale-takeaway-asmb-${ri}`}>
-                                        <span className="dt" />
-                                        <span className="tx">
-                                          <span dangerouslySetInnerHTML={{ __html: r.html }} />
-                                          {r.chip && <span className="lns-vchip">{r.chip}</span>}
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* ---- Price journey (oldest → newest) — twin-column chart, height ∝ price ---- */}
-                                {journey.length >= 2 && (() => {
-                                  const n = journey.length;
-                                  const maxPrice = Math.max(...journey.map(s => s.price));
-                                  const first = journey[0], last = journey[n - 1];
-                                  const delta = last.price - first.price;
-                                  const ratio = first.price > 0 ? last.price / first.price : null;
-                                  // Spec format: "+$1.0M · 3.0×" — one decimal on both parts, never annualized
-                                  const chg$ = (v: number) => v >= 1e6 ? `$${(v / 1e6).toFixed(1)}M` : `$${Math.round(v / 1000)}K`;
-                                  const badge = ratio != null && ratio !== 1
-                                    ? `${delta >= 0 ? '+' : '−'}${chg$(Math.abs(delta))} · ${ratio.toFixed(1)}×`
-                                    : null;
-                                  // Geometry mirrors the mockup: 620×250 viewBox, baseline y=195, max column 160px
-                                  const W = 620, BASE = 195, MAXH = 160;
-                                  const margin = n <= 2 ? 120 : 80;
-                                  const plotW = W - margin * 2;
-                                  const colW = n <= 2 ? 72 : Math.min(60, (plotW / n) * 0.55);
-                                  const cx = (i: number) => margin + plotW * ((i + 0.5) / n);
-                                  const colH = (p: number) => Math.max(10, (p / maxPrice) * MAXH);
-                                  const priceFs = n <= 2 ? 28 : n <= 4 ? 23 : 19;
-                                  // Label-collision policy: at 6+ columns only label first, newest,
-                                  // and the peak price — the rest stay unlabeled (heights carry them).
-                                  const maxIdx = journey.reduce((mi, s, i) => s.price > journey[mi].price ? i : mi, 0);
-                                  const showPrice = (i: number) => n <= 5 || i === 0 || i === n - 1 || i === maxIdx;
-                                  const chartDesc = `Sale prices by transaction: ${journey.map(s => `${short$(s.price)} in ${s.year}${s.approx ? ' (date approximate)' : ''}`).join(', ')}. Change from first to most recent: ${badge || 'none'}.`;
-                                  return (
-                                  <div className="slh-jwrap" data-testid="sale-journey">
-                                    <div className="slh-bhead">
-                                      <div className="slh-blabel">Price by transaction<span>chronological · not to scale</span></div>
-                                      {badge && (
-                                        <span className="slh-bbadge" data-testid="sale-change-badge">
-                                          <svg viewBox="0 0 24 24" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">{delta >= 0 ? <><path d="m4 17 6-6 4 4 6-6"/><path d="M16 7h4v4"/></> : <><path d="m4 7 6 6 4-4 6 6"/><path d="M16 17h4v-4"/></>}</svg>
-                                          {badge}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <svg className="slh-bplot" viewBox={`0 0 ${W} 250`} preserveAspectRatio="xMidYMid meet" role="img" aria-label={chartDesc}>
-                                      <line x1={margin - 10} y1={BASE} x2={W - margin + 10} y2={BASE} stroke="#e7e5df" strokeWidth="1" />
-                                      {journey.map((s, ji) => {
-                                        const recent = ji === n - 1;
-                                        const h = colH(s.price);
-                                        const x = cx(ji);
-                                        return (
-                                          <g key={ji}>
-                                            <rect x={x - colW / 2} y={BASE - h} width={colW} height={h} rx="5" fill={recent ? '#2b3a9e' : '#9aa1b0'} />
-                                            {showPrice(ji) && <text x={x} y={BASE - h - 11} textAnchor="middle" fontFamily="Instrument Serif,Georgia,serif" fontSize={recent ? priceFs + 4 : priceFs} fill={recent ? '#2b3a9e' : '#141414'}>{short$(s.price)}</text>}
-                                            <text x={x} y={218} textAnchor="middle" fontFamily="JetBrains Mono,monospace" fontSize={n <= 2 ? 12.5 : 12} fontWeight="700" fill={recent ? '#141414' : '#54544f'}>{s.year}{s.approx ? '*' : ''}</text>
-                                            {ji === 0 && <text x={x} y={236} textAnchor="middle" fontFamily="JetBrains Mono,monospace" fontSize={n <= 2 ? 9 : 8.5} fill="#8b8a84">{n <= 2 ? 'FIRST RECORDED' : 'FIRST'}</text>}
-                                            {recent && <text x={x} y={236} textAnchor="middle" fontFamily="JetBrains Mono,monospace" fontSize={n <= 2 ? 9 : 8.5} fill="#8b8a84">MOST RECENT</text>}
-                                          </g>
-                                        );
-                                      })}
-                                    </svg>
-                                    <div className="slh-bfine">
-                                      Recorded transactions — positioned by transaction order, height by price; spacing is not to time-scale.
-                                      {valueAdd ? ' Part of the change reflects permitted improvements, not price growth alone.' : ''}
-                                      {anyApprox ? ' * month/day approximate in the source record.' : ''}
-                                    </div>
-                                    {valueAdd && (
-                                      <div className="slh-jnote">
-                                        <svg viewBox="0 0 24 24" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/></svg>
-                                        <span><b>Not all of this is the market.</b> Between these sales, roughly {short$(valueAdd.total)} of permitted work was done — {valueAdd.summary} — so part of the climb is value added, not appreciation. <button type="button" className="lk" onClick={jumpToPermits}>See Permit History →</button></span>
-                                      </div>
-                                    )}
-                                  </div>
-                                  );
-                                })()}
-
-                                {/* ---- Most recent transfer ---- */}
-                                <div className="slh-divl" id="slh-recent"><span className="lbl">Most recent transfer</span><span className="ln" /></div>
-                                {saleCard(recentSale, 0, true)}
-                                {recentSale.isRecorder && (
-                                  <div className="slh-caveat" data-testid="sale-freshness-caveat">
-                                    <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                                    <span><b>Found directly in the Recorder of Deeds.</b> The Cook County Assessor's dataset updates monthly with a typical 6–12 week lag, so this {recentSale.monthYear} sale may not yet appear in Assessor-based figures elsewhere in this report. Verify the deed before relying on it.</span>
-                                  </div>
-                                )}
-
-                                {/* ---- Earlier transfers ---- */}
-                                {earlierSales.length > 0 && (
-                                  <>
-                                    <div className="slh-divl" style={{ marginTop: 16 }}><span className="lbl">Earlier transfers</span><span className="ln" /></div>
-                                    {earlierSales.map((s, i) => saleCard(s, i, false))}
-                                  </>
-                                )}
-
-                                {/* ---- Arm's-length / data-quality caveat ---- */}
-                                {(anyNaflag || anyApprox) && (
-                                  <div className="slh-caveat mt" data-testid="sale-armslength-caveat">
-                                    <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                    <span><b>Not every recorded transfer is an arm's-length sale.</b>{' '}
-                                      {anyTrusty ? "This chain of title includes trust-related conveyances — these are often nominal title moves, not open-market prices. " : anyNaflag ? 'One or more transfers show signals of a non-market transaction — treat those prices as directional. ' : ''}
-                                      {anyApprox ? 'Some older dates are recorded only to the month or year. ' : ''}
-                                      Treat the dollar figures as directional, and confirm any specific transaction against the deed.</span>
-                                  </div>
-                                )}
-                              </>
-                            ) : (
-                              <div className="p-4 rounded-lg bg-secondary border border-border">
-                                <p className="text-sm text-muted-foreground mb-2">
-                                  No sales recorded in Cook County Assessor's public database for this property.
-                                </p>
-                                <p className="text-xs text-muted-foreground mb-3">
-                                  Common reasons include: the property is held in a land trust, the transfer declaration (MyDec/PTAX-203)
-                                  hasn't been processed yet, the sale was very recent and not yet in the dataset, or the property
-                                  was transferred via inheritance, court order, or other non-arm's-length transaction.
-                                </p>
-                                <div className="flex flex-wrap gap-3 justify-center">
-                                  {pinLookupData?.pin && (
-                                    <a
-                                      href={`https://www.cookcountyassessoril.gov/pin/${pinLookupData.pin}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                                      data-testid="link-ccao-property"
-                                    >
-                                      <ExternalLink className="w-3 h-3" />
-                                      Check Assessor Property Page
-                                    </a>
-                                  )}
-                                  <a
-                                    href="https://ccrecorder.org/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                                    data-testid="link-recorder-deeds"
-                                  >
-                                    <ExternalLink className="w-3 h-3" />
-                                    Recorder of Deeds
-                                  </a>
-                                  <a
-                                    href="https://www.cookcountypropertyinfo.com/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                                    data-testid="link-property-info"
-                                  >
-                                    <ExternalLink className="w-3 h-3" />
-                                    Property Tax Portal
-                                  </a>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Co-Parcel block — spec: templated explainer + transfer cards */}
-                            {relatedParcels.map((rp, rpIdx) => {
-                              if (!rp.saleHistory || rp.saleHistory.length === 0) return null;
-                              const subjShort = (facts?.formattedAddress || run?.address || '').split(',')[0].trim() || 'the subject parcel';
-                              // Derive the shared-ownership link (entity / role / year) — deterministic, from deed fields
-                              let linkEntity: string | null = null;
-                              let linkRole: 'buyer' | 'other' = 'other';
-                              let linkYear: number | null = null;
-                              const shm = rp.matchReason?.match(/^Shared ownership — (.+?) \((buyer|seller)(?:,\s*(\d{4})?\s*)?\)/);
-                              if (shm) {
-                                linkEntity = shm[1];
-                                linkRole = shm[2] === 'buyer' ? 'buyer' : 'other';
-                                linkYear = shm[3] ? parseInt(shm[3], 10) : null;
-                              }
-                              // Deterministic newest-first ordering regardless of source order
-                              const saleMs = (s: typeof rp.saleHistory[number]) => {
-                                const t = s.saleDate ? new Date(s.saleDate).getTime() : NaN;
-                                if (!isNaN(t)) return t;
-                                const y = parseInt(s.year, 10);
-                                return isNaN(y) ? 0 : new Date(y, 0, 1).getTime();
-                              };
-                              const sortedSales = [...rp.saleHistory].sort((a, b) => saleMs(b) - saleMs(a));
-                              if (!shm) {
-                                if (rp.matchReason?.startsWith('Same deed')) {
-                                  const newest = sortedSales[0];
-                                  linkEntity = newest?.buyerName || rp.ownerName || null;
-                                  linkRole = 'buyer';
-                                  linkYear = newest?.saleDate ? new Date(newest.saleDate).getFullYear() : (parseInt(newest?.year, 10) || null);
-                                } else {
-                                  linkEntity = rp.ownerName || null;
-                                }
-                              }
-                              const middleClause = linkEntity
-                                ? (linkRole === 'buyer'
-                                    ? <>{linkEntity} acquired both this parcel and {subjShort}{linkYear ? ` in ${linkYear}` : ''}, so the neighbor's chain of title is shown here for a complete ownership picture.</>
-                                    : <>{linkEntity} is the common owner of both this parcel and {subjShort}, so the neighbor's chain of title is shown here for a complete ownership picture.</>)
-                                : <>This adjacent parcel is linked to {subjShort} by shared ownership records, so the neighbor's chain of title is shown here for a complete ownership picture.</>;
-                              return (
-                              <div key={rpIdx} className="cop" style={{ marginTop: 20 }} data-testid={`cop-block-${rpIdx}`}>
-                                <div className="cophd">
-                                  <span className="lab"><svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><path d="M8 12h8"/></svg>Co-parcel</span>
-                                  <span className="addr">{rp.formattedAddress}</span>
-                                  <span className="pin">PIN {rp.pin.replace(/(\d{2})(\d{2})(\d{3})(\d{3})(\d{4})/, '$1-$2-$3-$4-$5')}</span>
-                                  {assemblage && rpIdx === 0 && (
-                                    <button type="button" onClick={scrollToCompanionParcel} className="ml-auto text-[11.5px] font-semibold text-[#2b3a9e] hover:underline whitespace-nowrap" data-testid="link-cop-companion-parcel">
-                                      See who owns what ↓
-                                    </button>
-                                  )}
-                                </div>
-                                <div className="coexplain">
-                                  <b>Held under the same ownership as the subject.</b> {middleClause} <span className="note">Its recorded prices are this parcel's own — read them as the neighbor's, not the subject's value.</span>
-                                </div>
-                                {/* Recorder of Deeds — Recent Sale (propagated from primary when same-deed co-parcel) */}
-                                {(() => {
-                                  if (!showRecorderSale || !recorderDeed || !rp.matchReason?.startsWith('Same deed')) return null;
-                                  const rpMostRecentMs = sortedSales[0] ? saleMs(sortedSales[0]) : 0;
-                                  const recDeedMs = new Date(recorderDeed.recordedDate).getTime();
-                                  if (recDeedMs <= rpMostRecentMs) return null;
-                                  return (
-                                    <div className="p-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 mb-2">
-                                      <div className="flex items-start gap-2 mb-2">
-                                        <span className="text-xs font-semibold text-amber-800 dark:text-amber-400 uppercase tracking-wide">Recorder of Deeds — Recent Sale</span>
-                                      </div>
-                                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                        <div className="flex-1">
-                                          <div className="flex items-center gap-2 mb-1">
-                                            <span className="font-semibold text-foreground">${recorderDeed.amount.toLocaleString('en-US')}</span>
-                                            <span className="text-xs text-muted-foreground">
-                                              {new Date(recorderDeed.recordedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                                            </span>
-                                            <span className="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 px-1.5 py-0.5 rounded font-medium">
-                                              Total for all {relatedParcels.length + 1} parcels
-                                            </span>
-                                          </div>
-                                          <div className="text-xs text-muted-foreground">
-                                            <span className="mr-2">{recorderDeed.documentType}</span>
-                                            {recorderDeed.viewLink ? (
-                                              <a href={recorderDeed.viewLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-0.5">
-                                                Doc #{recorderDeed.documentNumber} <ExternalLink className="w-3 h-3" />
-                                              </a>
-                                            ) : (
-                                              <span>Doc #{recorderDeed.documentNumber}</span>
-                                            )}
-                                          </div>
-                                        </div>
-                                        <div className="text-xs sm:text-right flex-shrink-0 sm:max-w-[280px]">
-                                          {(recorderDeed.grantor || lienData?.deedGrantor) && <div className="break-words"><span className="text-muted-foreground">From:</span> <span className="font-medium">{recorderDeed.grantor || lienData?.deedGrantor}</span></div>}
-                                          {(recorderDeed.grantee || lienData?.deedGrantee) && <div className="break-words"><span className="text-muted-foreground">To:</span> <span className="font-medium">{recorderDeed.grantee || lienData?.deedGrantee}</span></div>}
-                                        </div>
-                                      </div>
-                                      <p className="text-xs text-amber-700 dark:text-amber-400 mt-2 leading-relaxed">
-                                        Found via the primary parcel's Recorder of Deeds search — this deed covers all parcels in the assemblage. CCAO records typically lag 6–12 weeks behind recorded transactions.
-                                      </p>
-                                    </div>
-                                  );
-                                })()}
-                                {sortedSales.map((sale, sIdx) => {
-                                  const isMultiParcelSale = sale.docNo && primaryDocNos.includes(sale.docNo) && relatedParcels.length > 0;
-                                  // Same non-arm's-length flags as the subject's transfers (first matching reason only, same order)
-                                  const newer = sortedSales[sIdx - 1]; // previous in newest-first list = the more recent transfer
-                                  const newerYear = newer ? (newer.saleDate ? new Date(newer.saleDate).getFullYear() : parseInt(newer.year, 10) || null) : null;
-                                  const xTrust = /TRUSTEE/i.test(sale.deedType || '');
-                                  let xNaflag: string | null = null;
-                                  if (xTrust) xNaflag = "Trust conveyance — may not be an open-market sale";
-                                  else if (isTrustName(sale.buyerName) || isTrustName(sale.sellerName)) xNaflag = 'Into a land trust — likely a title transfer, not a sale';
-                                  else if (newer && newer.salePrice > 0 && sale.salePrice > newer.salePrice) xNaflag = `Higher than the ${newerYear ?? 'later'} price — possible non-market transfer`;
-                                  else if (relatedEntities(sale.sellerName, sale.buyerName)) xNaflag = 'Transfer between related entities';
-                                  return (
-                                  <div key={sIdx} className="xfer" data-testid={`sale-coparcel-${rpIdx}-${sIdx}`}>
-                                    <div className="lft">
-                                      <div className="price">{sale.salePrice > 0 ? `$${sale.salePrice.toLocaleString('en-US')}` : 'Price not recorded'}</div>
-                                      <div className="date">
-                                        {sale.saleDate ? new Date(sale.saleDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Date unknown'}
-                                        {isMultiParcelSale && sale.salePrice > 0 ? ` · Total for all ${relatedParcels.length + 1} parcels` : ''}
-                                      </div>
-                                      {(sale.deedType || sale.docNo) && (
-                                        <div className="deed">
-                                          {sale.deedType && <span className="tg">{sale.deedType}</span>}
-                                          {sale.docNo && <span className="doc">Doc #{sale.docNo}</span>}
-                                        </div>
-                                      )}
-                                      {xNaflag && (
-                                        <div className="naflag"><svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>{xNaflag}</div>
-                                      )}
-                                    </div>
-                                    <div className="rgt">
-                                      {(sale.sellerName || sale.buyerName) ? (
-                                        <>
-                                          {sale.sellerName && <div className="rw"><span>From</span><b>{sale.sellerName}</b></div>}
-                                          {sale.buyerName && <div className="rw"><span>To</span><b>{sale.buyerName}</b></div>}
-                                        </>
-                                      ) : (
-                                        <div className="rw"><span>Parties</span><b>Not recorded in this dataset</b></div>
-                                      )}
-                                    </div>
-                                  </div>
-                                  );
-                                })}
-                              </div>
-                              );
-                            })}
-                            {/* Double lot · who owns what — placed below the co-parcel sale history (renders whenever assemblage resolves) */}
-                            {assemblage && doubleLotPanel}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                      );
-                    })()}
-
-                    {/* Owner Intelligence — hidden until owner address/contact lookup is automated.
-                        Re-enable by restoring: <OwnerIntelligenceCard pin={submittedPin} deedOwnerName={...} mailingOwnerName={...} /> */}
-
-                    {/* Liens Sub-section */}
-                    {submittedPin && (
-                      <Collapsible id="section-liens" open={isLiensSectionOpen} onOpenChange={setIsLiensSectionOpen}>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-liens-section">
-                            <h3 className="chead chead-icon">
-                              <Scale className="w-4 h-4" />
-                              Liens
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              <div className="flex flex-wrap gap-1.5 items-center">
-                                {!isLiensSectionOpen && isLoadingLiens && (
-                                  <Badge variant="secondary" className="text-xs">Loading…</Badge>
-                                )}
-                                {lienData && !isLoadingLiens && (
-                                  <>
-                                    {!isLiensSectionOpen && lienData.isStale && (
-                                      <span className="text-xs text-muted-foreground animate-pulse">Searching…</span>
-                                    )}
-                                    {(() => {
-                                      // red only for ACTIVE distress — resolved filings are history, not a current issue
-                                      if (lienDistress.hasForeclosureActive) return <span className="lns-badge bad" data-testid="badge-title-status"><span className="d" />Foreclosure on record</span>;
-                                      if (lienData.activeLienCount > 0) return <span className="lns-badge warn" data-testid="badge-title-status"><span className="d" />{lienData.activeLienCount} lien{lienData.activeLienCount !== 1 ? 's' : ''} on file</span>;
-                                      if (lienDistress.lis.activeCount > 0) return <span className="lns-badge bad" data-testid="badge-title-status"><span className="d" />Lis pendens</span>;
-                                      return <span className="lns-badge" data-testid="badge-title-status"><span className="d" />Clear title</span>;
-                                    })()}
-                                    {!isLiensSectionOpen && lienData.mortgages.length > 0 && (
-                                      <Badge className="text-xs">
-                                        {lienData.mortgages.length} Mortgage{lienData.mortgages.length !== 1 ? 's' : ''}
-                                      </Badge>
-                                    )}
-                                  </>
-                                )}
-                              </div>
-                              <span className="text-muted-foreground text-sm">{isLiensSectionOpen ? '▼' : '▶'}</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="seccard">
-                            {/* Assemblage cross-ref chip — the ONLY assemblage content here; debt stays PIN-scoped */}
-                            {assemblage && (
-                              <button type="button" onClick={scrollToCompanionParcel} className="asmb-xref" data-testid="xref-companion-parcel">
-                                <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><path d="M8 12h8"/></svg>
-                                <span className="tx"><b>Part of a historically combined double lot</b> with {assemblage.members.find(m => m.role === 'companion')?.address}. The debt shown here is for <b>this PIN only</b>; the companion parcel is separately owned and its financing is not aggregated here.</span>
-                                <span className="go">See Sale & Ownership History ↓</span>
-                              </button>
-                            )}
-                            {/* Primary label — shown only when co-parcel is detected */}
-                            {coParcelAddress && lienData && (
-                              <div className="flex items-center gap-2 mb-3 mt-1">
-                                <span className="liens-pill">Primary</span>
-                                <span className="text-xs" style={{color:'#565651'}}>{run?.address?.split(',')[0].toUpperCase()}</span>
-                              </div>
-                            )}
-                            {isLoadingLiens && (
-                              <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-                                <RefreshCw className="w-4 h-4 animate-spin" />
-                                Searching Cook County Property Records…
-                              </div>
-                            )}
-                            {lienData && (
-                              <div className="space-y-4">
-                                {/* Foreclosure alert */}
-                                {lienData.hasForeclosure && (() => {
-                                  const foreDoc = (lienData.documents || []).find((d: any) => d.category === 'foreclosure' && !d.isReleased) || (lienData.documents || []).find((d: any) => d.category === 'foreclosure');
-                                  return (
-                                    <div className="liens-alert" data-testid="banner-foreclosure-alert">
-                                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{color:'#b3311f'}} />
-                                      <div>
-                                        <p className="liens-alert-h">Active foreclosure on record</p>
-                                        <p className="liens-alert-b">
-                                          A <b>{foreDoc?.documentType || 'Lis Pendens foreclosure'}</b>{foreDoc?.recordedDate ? <> was recorded <b>{foreDoc.recordedDate}</b>.</> : <> is on record.</>} Title is clouded until it resolves, and financing is unlikely until then. Treat this as the property's defining risk.
-                                        </p>
-                                      </div>
-                                    </div>
-                                  );
-                                })()}
-                                {/* Takeaway + Debt Snapshot */}
-                                {(() => {
-                                  // ===== Stage 3: resolved snapshot — card AND takeaway from the SAME snap =====
-                                  if (debtSnapRec?.snap && (debtSnapRec.snap.active.length > 0 || debtSnapRec.snap.cleared_by_sale.length > 0 || debtSnapRec.snap.foreclosure_active)) {
-                                    const snap = debtSnapRec.snap;
-                                    const model = buildDebtCardModel(snap);
-                                    const ta = debtSnapRec.takeaway;
-                                    const toneClass: Record<string, string> = { good: 'g', caution: 'c', insight: 'n', bad: 'b' };
-                                    return (
-                                      <>
-                                        {ta && (
-                                          <div className="crm-take" data-testid="liens-takeaway">
-                                            <div className="crm-takeh">
-                                              <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>
-                                              The Takeaway
-                                            </div>
-                                            <div className="crm-taket">{ta.title}</div>
-                                            <div className="crm-conn">
-                                              {ta.rows.map((r, i) => (
-                                                <div key={i} className={`crm-cn ${toneClass[r.tone] ?? 'n'}`}>
-                                                  <span className="dt" />
-                                                  <span>
-                                                    {/* server-sanitized: <b>-only html */}
-                                                    <span dangerouslySetInnerHTML={{ __html: r.html }} />
-                                                    {r.chip && <span className="lns-vchip">{r.chip}</span>}
-                                                  </span>
-                                                </div>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        )}
-                                        <div className="lns-card" data-testid="card-debt-snapshot">
-                                          <div className="lns-sh">
-                                            <svg className="hic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-                                            <span className="t">Debt Snapshot</span>
-                                            {model.headerBadge && (
-                                              <span className={`lns-badge${model.headerBadge.tone === 'caution' ? ' warn' : model.headerBadge.tone === 'bad' ? ' bad' : ''}`} style={{ marginLeft: 'auto' }} data-testid="debt-badge"><span className="d" />{model.headerBadge.text}</span>
-                                            )}
-                                          </div>
-                                          {model.stackSummary && (
-                                            <div className="lns-stacksum" data-testid="debt-stack-summary">
-                                              <span className="pill">{model.stackSummary.pill}</span>
-                                              <span className="tx">{model.stackSummary.text}</span>
-                                            </div>
-                                          )}
-                                          {model.tiles.length > 0 && (
-                                            <>
-                                              <div className="lns-g4">
-                                                {model.tiles.slice(0, 4).map((t, i) => (
-                                                  <div key={i} className={`lns-dt2${t.variant === 'pos' ? ' pos' : ''}${t.variant === 'warn' ? ' cwarn' : ''}`} data-testid={`debt-tile-${t.label.toLowerCase().replace(/\s+/g, '-')}`}>
-                                                    <p className="l">{t.label}</p>
-                                                    <p className={`v${t.variant === 'warn' ? ' vcau' : ''}${t.variant === 'ok' ? ' ok' : ''}${t.variant === 'bad' ? ' warn' : ''}`}>{t.value}</p>
-                                                    {(t.sub || t.subWas) && <p className="s">{t.subWas && <span className="was">{t.subWas}</span>}{t.subWas && t.sub ? ' · ' : ''}{t.sub}</p>}
-                                                  </div>
-                                                ))}
-                                              </div>
-                                              <div className="lns-g4">
-                                                {model.tiles.slice(4, 8).map((t, i) => (
-                                                  <div key={i} className={`lns-dt2${t.variant === 'pos' ? ' pos' : ''}${t.variant === 'warn' ? ' cwarn' : ''}`} data-testid={`debt-tile-${t.label.toLowerCase().replace(/\s+/g, '-')}`}>
-                                                    <p className="l">{t.label}</p>
-                                                    <p className={`v${t.variant === 'warn' ? ' vcau' : ''}${t.variant === 'ok' ? ' ok' : ''}${t.variant === 'bad' ? ' warn' : ''}`}>
-                                                      {t.variant === 'ok' && <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>}
-                                                      {t.value}
-                                                    </p>
-                                                    {(t.sub || t.subWas) && <p className="s">{t.subWas && <span className="was">{t.subWas}</span>}{t.subWas && t.sub ? ' · ' : ''}{t.sub}</p>}
-                                                  </div>
-                                                ))}
-                                              </div>
-                                            </>
-                                          )}
-                                          {model.modification && (
-                                            <div className="lns-mod" data-testid="debt-modification">
-                                              <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
-                                              <span>
-                                                <b>Modification on record</b> (<span className="doc">{model.modification.docNumber}</span>{model.modification.year ? `, ${model.modification.year}` : ''}):
-                                                {model.modification.amount && <> clarified the loan at <b>{model.modification.amount}</b>,</>}
-                                                {model.modification.rate && <> cut the rate to <b>{model.modification.rate}</b>,</>}
-                                                {model.modification.maturity && <> and extended maturity to <b>{model.modification.maturity}</b>.</>}
-                                                {' '}Effective terms shown above reflect the modification, not the original terms.
-                                              </span>
-                                            </div>
-                                          )}
-                                          {model.refiSuspect && (
-                                            <div className="lns-refinote" data-testid="debt-refi-suspect">
-                                              <svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                              <span><b>No release recorded — confirm payoff.</b> {model.refiSuspect}</span>
-                                            </div>
-                                          )}
-                                          {model.stack.map((lien, li) => (
-                                            <div key={li} className="lns-lien" data-testid={`debt-stack-lien-${li}`}>
-                                              <div className="lns-lienh">
-                                                <span className={`posb${lien.junior ? ' jr' : ''}`}>{lien.posLabel}</span>
-                                                <span className="lname">{lien.lender}</span>
-                                                {lien.junior && <span className="jrtag">Junior lien</span>}
-                                                <span className="lrec">{lien.recLine}</span>
-                                              </div>
-                                              <div className="lns-g4">
-                                                <div className="lns-dt2"><p className="l">Lender</p><p className="v">{lien.lender}</p></div>
-                                                <div className="lns-dt2"><p className="l">Amount</p><p className="v">{lien.amount}</p><p className="s">recorded loan</p></div>
-                                                <div className="lns-dt2"><p className="l">Maturity</p><p className="v">{lien.maturity}</p><p className="s">{lien.maturitySub}</p></div>
-                                                <div className="lns-dt2"><p className="l">Recorded</p><p className="v">{lien.recorded}</p><p className="s">{lien.recordedSub}</p></div>
-                                              </div>
-                                              {lien.note && (
-                                                <div className="lns-jrnote" data-testid={`debt-junior-note-${li}`}>
-                                                  <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-                                                  <span>{lien.note}</span>
-                                                </div>
-                                              )}
-                                            </div>
-                                          ))}
-                                          {model.crossCollateral && (
-                                            <div className="lns-xcol" data-testid="debt-cross-collateral">
-                                              <div className="ic">
-                                                <svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
-                                              </div>
-                                              <div className="bd">
-                                                <div className="h">{model.crossCollateral.heading}</div>
-                                                <div className="p">{model.crossCollateral.body}</div>
-                                                <div className="pins">
-                                                  {model.crossCollateral.pins.map((p, i) => (
-                                                    <span key={i} className={`pin${p.self ? ' self' : ''}`} data-testid={`debt-xcol-pin-${i}`}>{p.label}{p.self ? ' · this parcel' : ''}</span>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          )}
-                                          {model.poolLtv && (
-                                            <div className="lns-ltv" data-testid="debt-pool-ltv">
-                                              <div className="lns-ltvcell dead">
-                                                <div className="l">Per-parcel LTV</div>
-                                                <div className="n">{model.poolLtv.perParcelPct != null ? `${model.poolLtv.perParcelPct}%` : '—'}</div>
-                                                <div className="x">not meaningful — loan isn't secured by this parcel alone</div>
-                                              </div>
-                                              <div className={`lns-ltvcell${model.poolLtv.pooledPct != null ? ' live' : ''}`}>
-                                                <div className="l">Pooled LTV ({model.poolLtv.poolSize} parcels)</div>
-                                                <div className="n">{model.poolLtv.pooledPct != null ? `~${model.poolLtv.pooledPct}%` : '—'}</div>
-                                                <div className="x">{model.poolLtv.pooledSub ?? model.poolLtv.note ?? 'combined leverage not computed'}</div>
-                                              </div>
-                                            </div>
-                                          )}
-                                          {model.ownerNote && (
-                                            <div className="lns-note2" data-testid="debt-owner-note">
-                                              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                              <span>
-                                                <b>Owner entity: {model.ownerNote.owner}.</b> The PIN + owner-name search also surfaced <b>{model.ownerNote.other}</b> — a likely related entity, but not an exact match. Confirm debtor identity before treating owner-name lien hits as this owner's.
-                                                <span className="tag">Confirm</span>
-                                              </span>
-                                            </div>
-                                          )}
-                                          {model.anchorBlock && (
-                                            <div className="lns-anchor" data-testid="debt-anchor">
-                                              <div className="ic">
-                                                <svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
-                                              </div>
-                                              <div className="bd">
-                                                <div className="h">{model.anchorBlock.title}</div>
-                                                {model.anchorBlock.body}
-                                              </div>
-                                            </div>
-                                          )}
-                                          {model.resolvedDistress && (
-                                            <div className="lns-res" data-testid="debt-resolved-distress">
-                                              <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                              <span>{model.resolvedDistress}</span>
-                                              <span className="cl">Resolved</span>
-                                            </div>
-                                          )}
-                                          {model.cleared && (
-                                            <div className="lns-cleared" data-testid="debt-cleared-block">
-                                              <div className="lns-clearedh">
-                                                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                                                {model.cleared.title}
-                                                <span className="n">{model.cleared.rows.length} prior-owner loan{model.cleared.rows.length !== 1 ? 's' : ''}</span>
-                                              </div>
-                                              <div className="lns-clearedsub">{model.cleared.sub}</div>
-                                              {model.cleared.rows.map((row, i) => (
-                                                <div key={i} className="lns-crow" data-testid={`debt-cleared-row-${i}`}>
-                                                  <span className="doc">{row.doc}</span>
-                                                  <span className="who">{row.who}</span>
-                                                  <span className="amt">{row.amt}</span>
-                                                  <span className="st">{row.status}</span>
-                                                </div>
-                                              ))}
-                                            </div>
-                                          )}
-                                          {model.lifecycle && (
-                                            <div className="lns-life" style={{ marginBottom: 14 }} data-testid="debt-lifecycle">
-                                              <div className="lns-lifeh">Loan lifecycle · refinancing runway</div>
-                                              <div className="lns-runway">
-                                                <span className={`fill${model.lifecycle.atOrPast ? ' cau' : ''}`} style={{ width: `${model.lifecycle.pct}%` }} />
-                                                <span className={`now${model.lifecycle.atOrPast ? ' cau' : ''}`} style={{ left: `${Math.min(99, model.lifecycle.pct)}%` }} />
-                                                <span className={`nowlab${model.lifecycle.atOrPast ? ' cau' : ''}`} style={{ left: `${Math.min(93, Math.max(6, model.lifecycle.pct))}%` }}>{model.lifecycle.nowLabel}</span>
-                                              </div>
-                                              <div className="lns-lifeends"><span>Recorded <b>{model.lifecycle.recordedLabel}</b></span><span>{model.lifecycle.maturityLabel}</span></div>
-                                              <div className="lns-lifesum">{model.lifecycle.atOrPast ? <>{model.lifecycle.summary.replace('Refinancing risk elevated: due now. ', '')}{' '}Refinancing risk <span className="wd" style={{ color: 'var(--caution-text)' }}>Elevated: due now</span>.</> : model.lifecycle.summary}</div>
-                                            </div>
-                                          )}
-                                          <div className="lns-dcaveat" data-testid="debt-caveat">
-                                            <svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                            <span><b>Verify before relying on this.</b> {model.caveat}</span>
-                                          </div>
-                                        </div>
-                                      </>
-                                    );
-                                  }
-                                  // ===== Legacy fallback (index-only view) while the resolved snapshot builds =====
-                                  function parseLienDate(s: string): Date | null {
-                                    if (!s) return null;
-                                    const parts = s.split('/').map(Number);
-                                    if (parts.length !== 3 || parts.some(isNaN)) return null;
-                                    const [mo, day, yr] = parts;
-                                    return new Date(yr, mo - 1, day);
-                                  }
-                                  const activeMortgages = (lienData.mortgages || []).filter((m: any) => !m.isReleased && !m.isProbablyCleared);
-                                  // Sort oldest-first so index 0 = 1st loan, index 1 = 2nd loan, etc.
-                                  const sortedLoans = [...activeMortgages].sort((a: any, b: any) => {
-                                    const da = parseLienDate(a.recordedDate);
-                                    const db2 = parseLienDate(b.recordedDate);
-                                    if (!da && !db2) return 0; if (!da) return 1; if (!db2) return -1;
-                                    return da.getTime() - db2.getTime();
-                                  });
-                                  const pc = compPropertyClass || facts?.propertyClass || '';
-                                  const zoningCode = facts?.zoning || '';
-                                  const zoningIsResidential = zoningInfo?.category === 'residential' || /^R[A-Z0-9]/i.test(zoningCode);
-                                  // LLC ownership + non-residential zoning ⇒ commercial financing:
-                                  // typically a 5-year balloon even when amortized over ~25 years.
-                                  const ownerNameForLoan = lienData?.ownerName || lienData?.deedGrantee || propertyTaxData?.mailingOwnerName || '';
-                                  const isLLCOwner = /\b(L\.?\s?L\.?\s?C\.?|SERIES\s+LLC|LIMITED\s+LIABILITY)\b/i.test(ownerNameForLoan);
-                                  const llcCommercial = isLLCOwner && !!zoningCode && !zoningIsResidential;
-                                  const isResidential = !llcCommercial && (pc.startsWith('2') || pc.startsWith('3') || zoningIsResidential);
-                                  const balloonYears = isResidential ? 30 : 5;
-                                  const maturityLabel = isResidential
-                                    ? '30yr est. (residential)'
-                                    : llcCommercial
-                                      ? '5-yr balloon est. (LLC + commercial zoning · ~25-yr amortization)'
-                                      : '5-yr balloon est. (commercial · ~25-yr amortization)';
-                                  const modDocs = (lienData.documents || []).filter((d: any) =>
-                                    ['MOD','EXTENSION','AMEND','MODIFICATION'].some(k => d.documentType?.toUpperCase().includes(k))
-                                  );
-                                  const mechLiens = (lienData.liens || []).filter((l: any) =>
-                                    !l.isReleased && !l.isProbablyCleared && (l.category === 'mechanic' || ['MECHANIC','CONTRACTOR'].some(k => l.documentType?.toUpperCase().includes(k)))
-                                  );
-                                  const multiLoan = sortedLoans.length > 1;
-                                  const loanPositions = ['1st','2nd','3rd','4th'];
-                                  const orderReliable = sortedLoans.every((l: any) => parseLienDate(l.recordedDate));
-                                  // Per-loan maturity
-                                  const loanCalcs = sortedLoans.map((loan: any) => {
-                                    const recDate = parseLienDate(loan.recordedDate);
-                                    const estMaturity = recDate ? new Date(recDate.getFullYear() + balloonYears, recDate.getMonth(), recDate.getDate()) : null;
-                                    const actualMaturityDate: Date | null = loan.maturityDate ? parseLienDate(loan.maturityDate) : null;
-                                    return { maturityDate: actualMaturityDate || estMaturity, isEst: !actualMaturityDate };
-                                  });
-                                  const earliestIdx = loanCalcs.reduce((best: number, c: any, i: number) => {
-                                    if (!c.maturityDate) return best;
-                                    if (best < 0 || !loanCalcs[best].maturityDate || c.maturityDate.getTime() < (loanCalcs[best].maturityDate as Date).getTime()) return i;
-                                    return best;
-                                  }, -1);
-                                  const earliestMaturityMs = earliestIdx >= 0 ? (loanCalcs[earliestIdx].maturityDate as Date).getTime() : null;
-                                  const earliestIsEst = earliestIdx >= 0 ? loanCalcs[earliestIdx].isEst : true;
-                                  const nowMs = Date.now();
-                                  const overallMonthsLeft = earliestMaturityMs !== null ? Math.round((earliestMaturityMs - nowMs) / (1000 * 60 * 60 * 24 * 30.44)) : null;
-                                  const riskLevelFinal = overallMonthsLeft === null ? null : overallMonthsLeft < 0 ? 'past-due' : overallMonthsLeft < 12 ? 'high' : overallMonthsLeft < 24 ? 'moderate' : 'low';
-                                  const riskWord = riskLevelFinal === 'low' ? 'Low' : riskLevelFinal === 'moderate' ? 'Moderate' : riskLevelFinal === 'high' ? 'High' : riskLevelFinal === 'past-due' ? 'Past maturity' : null;
-                                  const yrsRemaining = overallMonthsLeft !== null ? Math.round(overallMonthsLeft / 12) : null;
-                                  // Takeaway derivations — everything computed from the record, never hardcoded
-                                  const docsAll = lienData.documents || [];
-                                  // ACTIVE lis pendens only — filings cleared by a later genuine sale (or refi/release) are historical
-                                  const lisPendensCount = lienDistress.lis.activeCount;
-                                  // combine lis + foreclosure resolved history for messaging
-                                  const lpResolved = {
-                                    activeCount: lienDistress.lis.activeCount + lienDistress.fc.activeCount,
-                                    resolvedCount: lienDistress.lis.resolvedCount + lienDistress.fc.resolvedCount,
-                                    resolvedBy: lienDistress.lis.resolvedBy === 'sale' || lienDistress.fc.resolvedBy === 'sale' ? 'sale' as const : (lienDistress.lis.resolvedBy ?? lienDistress.fc.resolvedBy),
-                                    resolvedSaleYear: lienDistress.lis.resolvedSaleYear ?? lienDistress.fc.resolvedSaleYear,
-                                    oldestResolvedYear: [lienDistress.lis.oldestResolvedYear, lienDistress.fc.oldestResolvedYear].filter((y): y is number => y !== null).sort()[0] ?? null,
-                                  };
-                                  const fcActive = lienDistress.hasForeclosureActive;
-                                  const activeDebt = sortedLoans.reduce((s: number, m: any) => s + (m.amount > 0 ? m.amount : 0), 0);
-                                  const estValue = pinLookupData?.commercialData?.marketValue || null;
-                                  const ltv = estValue && activeDebt > 0 ? activeDebt / estValue : null;
-                                  const releasedMtgCount = (lienData.mortgages || []).length - sortedLoans.length;
-                                  const noDistress = !fcActive && lienData.activeLienCount === 0 && mechLiens.length === 0 && lisPendensCount === 0;
-                                  const ownerLabel = lienData.ownerName || derivedOwnerName || '';
-                                  const ownerSearched = !!lienData.ownerLienScrapedAt && !lienData.ownerLienIsStale;
-                                  const ownerLienCount = lienData.ownerLiens?.length ?? 0;
-                                  const lev = ltv === null ? null : ltv < 0.35 ? 'lightly leveraged' : ltv < 0.7 ? 'moderately leveraged' : 'heavily leveraged';
-                                  const fmtPct = ltv !== null ? `${Math.round(ltv * 100)}%` : null;
-                                  // resolved-distress copy: "the only distress on record, a {year} lis pendens, was cleared by the {year} sale"
-                                  const resolvedNote = lpResolved.resolvedCount > 0 && lpResolved.resolvedBy === 'sale'
-                                    ? (lpResolved.resolvedCount === 1
-                                        ? `the only distress in the file, a ${lpResolved.oldestResolvedYear ?? ''} filing, was cleared by the ${lpResolved.resolvedSaleYear} sale`
-                                        : `all ${lpResolved.resolvedCount} prior distress filings were cleared by the ${lpResolved.resolvedSaleYear} sale`)
-                                    : lpResolved.resolvedCount > 0
-                                      ? `prior distress filings are resolved — historical, not current`
-                                      : null;
-                                  let headline: string;
-                                  if (fcActive) headline = 'Active foreclosure on record — title is clouded until it resolves.';
-                                  else if (lienData.activeLienCount > 0) headline = `${lienData.activeLienCount} active lien${lienData.activeLienCount !== 1 ? 's' : ''} on file — factor payoff into any offer.`;
-                                  else if (lisPendensCount > 0) headline = 'Lis pendens on record — pending litigation clouds the title until it resolves.';
-                                  else if (!sortedLoans.length) headline = resolvedNote
-                                    ? `Clean title today — no debt on record, and ${resolvedNote}.`
-                                    : 'Clean title with no active recorded debt — no open mortgages, liens, or distress signals on file.';
-                                  else headline = `Clean title${lev ? `, ${lev}` : ''} — ${multiLoan ? `${sortedLoans.length} active mortgages` : 'one mortgage'} and no distress signals on record.`;
-                                  const soleLoan = sortedLoans.length === 1 ? sortedLoans[0] : null;
-                                  const soleLoanYear = soleLoan ? parseLienDate(soleLoan.recordedDate)?.getFullYear() : null;
-                                  const takeaway = (
-                                    <div className="crm-take" data-testid="liens-takeaway">
-                                      <div className="crm-takeh">
-                                        <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>
-                                        Takeaway
-                                      </div>
-                                      <div className="crm-taket">{headline}</div>
-                                      <div className="crm-conn">
-                                        {activeDebt > 0 && (
-                                          <div className={`crm-cn ${ltv !== null ? (ltv < 0.35 ? 'g' : ltv < 0.7 ? 'n' : 'c') : 'n'}`}>
-                                            <span className="dt" />
-                                            <span>
-                                              <b>{ltv !== null ? (ltv < 0.35 ? 'Low leverage.' : ltv < 0.7 ? 'Moderate leverage.' : 'High leverage.') : 'Active debt on record.'}</b>{' '}
-                                              {soleLoan
-                                                ? <>A single active mortgage of <b>${activeDebt.toLocaleString()}</b>{soleLoan.grantee ? ` (${soleLoan.grantee}${soleLoanYear ? `, ${soleLoanYear}` : ''})` : ''}{fmtPct ? <> — roughly <b>{fmtPct}</b> of the property's estimated value</> : ''}.</>
-                                                : <>Total active secured debt of <b>${activeDebt.toLocaleString()}</b> across {sortedLoans.length} mortgages{fmtPct ? <> — roughly <b>{fmtPct}</b> of the property's estimated value</> : ''}.</>}
-                                              {riskWord && <> Refinancing risk <b>{riskWord.toLowerCase()}</b>{yrsRemaining !== null && yrsRemaining >= 0 ? <>, ~{yrsRemaining} years of runway</> : null}.</>}
-                                            </span>
-                                          </div>
-                                        )}
-                                        <div className={`crm-cn ${noDistress ? 'g' : 'b'}`}>
-                                          <span className="dt" />
-                                          {noDistress ? (
-                                            lpResolved.resolvedCount > 0 && lpResolved.resolvedBy === 'sale' ? (
-                                              <span><b>No active distress.</b> {lpResolved.resolvedCount === 1 ? <>The lone distress filing{lpResolved.oldestResolvedYear ? ` (${lpResolved.oldestResolvedYear})` : ''} predates</> : <>All {lpResolved.resolvedCount} prior distress filings predate</>} the <b>{lpResolved.resolvedSaleYear} sale</b> — a real sale clears prior litigation from title. {lpResolved.resolvedCount === 1 ? 'It appears' : 'They appear'} in the property's history, <b>not as a current issue</b>.</span>
-                                            ) : lpResolved.resolvedCount > 0 ? (
-                                              <span><b>No active distress.</b> Prior filings are resolved — they appear in the property's history, not as current issues. Zero active liens, no foreclosure, no mechanics liens.</span>
-                                            ) : (
-                                              <span><b>No distress.</b> Zero active liens, no foreclosure, no mechanics liens, and no lis pendens on record.</span>
-                                            )
-                                          ) : (
-                                            <span><b>Distress signals on record.</b> {[
-                                              fcActive ? 'an active foreclosure' : null,
-                                              lienData.activeLienCount > 0 ? `${lienData.activeLienCount} active lien${lienData.activeLienCount !== 1 ? 's' : ''}` : null,
-                                              mechLiens.length > 0 ? `${mechLiens.length} mechanics lien${mechLiens.length !== 1 ? 's' : ''}` : null,
-                                              lisPendensCount > 0 && !fcActive ? 'a lis pendens filing' : null,
-                                            ].filter(Boolean).join(', ').replace(/, ([^,]*)$/, ' and $1')} — build resolution into your title review.</span>
-                                          )}
-                                        </div>
-                                        {ownerLabel && ownerSearched && (
-                                          <div className={`crm-cn ${ownerLienCount === 0 ? 'g' : 'c'}`}>
-                                            <span className="dt" />
-                                            {ownerLienCount === 0 ? (
-                                              <span><b>Owner is clean.</b> No personal liens found against <b>{ownerLabel}</b>{lienData.ownerLienScrapedAt ? ` (last searched ${new Date(lienData.ownerLienScrapedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })})` : ''}.</span>
-                                            ) : (
-                                              <span><b>{ownerLienCount} personal lien record{ownerLienCount !== 1 ? 's' : ''} against the owner.</b> Personal liens follow the owner, not this property — useful negotiation context.</span>
-                                            )}
-                                          </div>
-                                        )}
-                                        {docsAll.length > 0 && (
-                                          <div className="crm-cn n">
-                                            <span className="dt" />
-                                            <span>{docsAll.length} recorded document{docsAll.length !== 1 ? 's' : ''} over the property's history — {(lienData.mortgages || []).length} mortgage{(lienData.mortgages || []).length !== 1 ? 's' : ''}{releasedMtgCount > 0 ? ' (older ones released)' : ''}{modDocs.length > 0 ? ` and ${modDocs.length} loan modification${modDocs.length !== 1 ? 's' : ''}` : ''}.</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                  if (!sortedLoans.length) return takeaway;
-                                  // Loan-lifecycle runway (earliest loan → earliest maturity)
-                                  const firstLoan = sortedLoans[0];
-                                  const firstRecDate = firstLoan ? parseLienDate(firstLoan.recordedDate) : null;
-                                  const tlStart = firstRecDate?.getTime() ?? null;
-                                  const tlPct = tlStart !== null && earliestMaturityMs !== null && earliestMaturityMs > tlStart
-                                    ? Math.min(100, Math.max(0, ((nowMs - tlStart) / (earliestMaturityMs - tlStart)) * 100))
-                                    : null;
-                                  const yrsElapsed = tlStart !== null ? Math.round((nowMs - tlStart) / (1000 * 60 * 60 * 24 * 365.25)) : null;
-                                  const recLabel = firstRecDate ? firstRecDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : null;
-                                  const matYearLabel = earliestMaturityMs !== null ? new Date(earliestMaturityMs).getFullYear() : null;
-                                  return (
-                                    <>
-                                      {takeaway}
-                                      <div className="lns-card" data-testid="card-debt-snapshot">
-                                        <div className="lns-sh">
-                                          <svg className="hic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-                                          <span className="t">Debt Snapshot{multiLoan ? ` · ${sortedLoans.length} Active Loans` : ''}</span>
-                                        </div>
-                                        {sortedLoans.map((loan: any, idx: number) => {
-                                          const position = !orderReliable
-                                            ? 'Undetermined'
-                                            : sortedLoans.length === 1
-                                              ? '1st · sole active'
-                                              : `${loanPositions[idx] ?? `${idx + 1}th`} of ${sortedLoans.length}`;
-                                          return (
-                                            <div key={idx} className="lns-g4">
-                                              <div className="lns-dt2">
-                                                <p className="l">Lender{multiLoan ? ` · ${loanPositions[idx] ?? `${idx + 1}th`} loan` : ''}</p>
-                                                <p className="v">{loan.grantee || '—'}</p>
-                                              </div>
-                                              <div className="lns-dt2">
-                                                <p className="l">Original Amount</p>
-                                                <p className="v">{loan.amount > 0 ? `$${loan.amount.toLocaleString()}` : '—'}</p>
-                                                <p className="s">recorded — not current balance</p>
-                                              </div>
-                                              <div className="lns-dt2 pos">
-                                                <p className="l">Lien Position</p>
-                                                <p className="v">{position}</p>
-                                                <p className="s">derived from record order</p>
-                                              </div>
-                                              <div className="lns-dt2">
-                                                <p className="l">Recorded</p>
-                                                <p className="v">{loan.recordedDate || '—'}</p>
-                                              </div>
-                                            </div>
-                                          );
-                                        })}
-                                        <div className="lns-g4">
-                                          <div className="lns-dt2">
-                                            <p className="l">Maturity{multiLoan ? ' · Earliest' : ''}</p>
-                                            <p className="v" style={riskLevelFinal === 'past-due' || riskLevelFinal === 'high' ? {color:'var(--bad)'} : undefined}>{matYearLabel ? (earliestIsEst ? `~${matYearLabel}` : `${matYearLabel}`) : '—'}</p>
-                                            <p className="s">{earliestIsEst ? maturityLabel : 'actual · Cook County Recorder'}</p>
-                                          </div>
-                                          <div className="lns-dt2">
-                                            <p className="l">Foreclosure</p>
-                                            {lienData.hasForeclosure ? (
-                                              <p className="v warn">Active filing</p>
-                                            ) : (
-                                              <p className="v ok"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>{lienData.foreclosures?.length > 0 ? `${lienData.foreclosures.length} resolved` : 'None on record'}</p>
-                                            )}
-                                          </div>
-                                          <div className="lns-dt2">
-                                            <p className="l">Mechanics Liens</p>
-                                            {mechLiens.length > 0 ? (
-                                              <p className="v warn">{mechLiens.length} active</p>
-                                            ) : (
-                                              <p className="v ok"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>None on record</p>
-                                            )}
-                                          </div>
-                                          <div className="lns-dt2">
-                                            <p className="l">Refinancing Risk</p>
-                                            <p className={`v ${riskLevelFinal === 'low' ? 'ok' : riskLevelFinal === 'past-due' || riskLevelFinal === 'high' ? 'warn' : ''}`}>{riskWord ?? '—'}</p>
-                                            {yrsRemaining !== null && yrsRemaining >= 0 && <p className="s">{yrsRemaining} yrs remaining</p>}
-                                          </div>
-                                        </div>
-                                        <div className="lns-dcaveat" data-testid="liens-debt-caveat">
-                                          <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                          <span><b>Recorded amounts are original loan amounts, not current balances.</b> The Recorder shows what was borrowed at closing — actual payoff figures require a title search or lender payoff letter. Maturity{earliestIsEst ? ' is estimated from the recording date and a standard term' : ' comes from the recorded instrument'}; lien position is inferred from recording order, not a title commitment.</span>
-                                        </div>
-                                        {tlPct !== null && (
-                                          <div className="lns-life" data-testid="liens-runway">
-                                            <p className="lns-lifeh">Loan lifecycle · refinancing runway</p>
-                                            <div className="lns-runway">
-                                              <div className="fill" style={{ width: `${tlPct}%` }} />
-                                              <div className="now" style={{ left: `${tlPct}%` }} />
-                                              <span className="nowlab" style={{ left: `${tlPct}%` }}>Now</span>
-                                            </div>
-                                            <div className="lns-lifeends">
-                                              <span>Recorded <b>{recLabel}</b></span>
-                                              <span>{earliestIsEst ? 'Est. maturity' : 'Maturity'} <b>{earliestIsEst ? '~' : ''}{matYearLabel}</b></span>
-                                            </div>
-                                            <p className="lns-lifesum">
-                                              {yrsElapsed !== null && <>~<b>{yrsElapsed} yrs</b> elapsed</>}
-                                              {yrsRemaining !== null && yrsRemaining >= 0 && <> · <b>{yrsRemaining} yrs remaining</b> on a {balloonYears}-yr {balloonYears === 5 ? 'balloon (~25-yr amortization)' : 'term'}</>}
-                                              {riskWord && <> · refinancing risk <span className={riskLevelFinal === 'low' ? 'gd' : riskLevelFinal === 'moderate' ? '' : 'wd'}>{riskWord}</span></>}
-                                              {modDocs.length > 0 && <> · {modDocs.length} modification{modDocs.length !== 1 ? 's' : ''} recorded</>}
-                                            </p>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </>
-                                  );
-                                })()}
-
-                                {/* Property Records card */}
-                                <div className="lns-card" data-testid="card-property-records">
-                                  <div className="lns-sh">
-                                    <svg className="hic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                                    <span className="t">Property Records</span>
-                                    <div className="ctrls">
-                                      {lienData.isStale && (
-                                        <span className="text-xs text-muted-foreground animate-pulse">Searching…</span>
-                                      )}
-                                      {lienData.overallStatus === 'has_foreclosure' && (
-                                        <span className="lns-badge bad" data-testid="badge-lien-foreclosure"><span className="d" />Foreclosure</span>
-                                      )}
-                                      {lienData.overallStatus === 'has_liens' && (
-                                        <span className="lns-badge warn" data-testid="badge-lien-status"><span className="d" />{lienData.activeLienCount} Active Lien{lienData.activeLienCount !== 1 ? 's' : ''}</span>
-                                      )}
-                                      {lienData.overallStatus === 'clear' && (
-                                        <span className="lns-badge" data-testid="badge-lien-clear"><span className="d" />Clear</span>
-                                      )}
-                                      <button
-                                        type="button"
-                                        onClick={() => submittedPin && refreshLienSearch.mutate({ pin: submittedPin, ownerName: derivedOwnerName })}
-                                        disabled={refreshLienSearch.isPending}
-                                        className="lns-ctrl no-print"
-                                        data-testid="button-refresh-liens"
-                                      >
-                                        <RefreshCw className={`w-3 h-3 ${refreshLienSearch.isPending ? 'animate-spin' : ''}`} />
-                                        Refresh
-                                      </button>
-                                    </div>
-                                  </div>
-
-                                  {/* KPI tiles */}
-                                  {lienData.documents.length > 0 && (
-                                    <div className="lns-kpis">
-                                      <div className="lns-kpi">
-                                        <p className="l">Total Docs</p>
-                                        <p className="n">{lienData.documents.length}</p>
-                                      </div>
-                                      <div className="lns-kpi">
-                                        <p className="l">Mortgages</p>
-                                        <p className="n">{lienData.mortgages.length}</p>
-                                      </div>
-                                      <div className={`lns-kpi ${lienData.activeLienCount > 0 ? 'bad' : 'ok'}`}>
-                                        <p className="l">Active Liens</p>
-                                        <p className="n">{lienData.activeLienCount}</p>
-                                      </div>
-                                      {(() => {
-                                        // headline number = ACTIVE distress; resolved shows as a muted sub-label, never a red alarm
-                                        const { activeCount, resolvedCount, resolvedBy, resolvedSaleYear } = lienDistress.lis;
-                                        return (
-                                          <div className={`lns-kpi ${activeCount > 0 ? 'bad' : 'ok'}`} data-testid="kpi-lis-pendens">
-                                            <p className="l">Lis Pendens{activeCount === 0 && resolvedCount > 0 ? ' · Active' : ''}</p>
-                                            <p className="n">{activeCount}</p>
-                                            {activeCount === 0 && resolvedCount > 0 && (
-                                              <p className="text-[10px] text-muted-foreground mt-0.5">
-                                                <b>{resolvedCount} historical</b>{resolvedBy === 'sale' && resolvedSaleYear ? ` — resolved by ${resolvedSaleYear} sale` : resolvedBy === 'financing' ? ' — resolved (financing after filing implies clean title — verify)' : ' — resolved'}
-                                              </p>
-                                            )}
-                                          </div>
-                                        );
-                                      })()}
-                                    </div>
-                                  )}
-
-                                  {/* Document table — last 10 only */}
-                                  {lienData.documents.length > 0 ? (
-                                    <div className="overflow-x-auto">
-                                      <table className="lns-dtable" data-testid="table-lien-documents">
-                                        <thead>
-                                          <tr>
-                                            <td>Document</td>
-                                            <td>Type</td>
-                                            <td>Recorded</td>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          {lienData.documents.slice(0, 10).map((doc, i) => (
-                                            <tr key={i} className={doc.isReleased ? 'released' : doc.isProbablyCleared ? 'opacity-60' : ''} data-testid={`row-lien-doc-${i}`}>
-                                              <td className="doc pr-3">
-                                                {doc.viewLink ? (
-                                                  <a
-                                                    href={doc.viewLink}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="hover:opacity-70 transition-opacity"
-                                                    data-testid={`link-doc-${doc.documentNumber}`}
-                                                  >
-                                                    {doc.documentNumber || '—'}
-                                                  </a>
-                                                ) : (
-                                                  <span>{doc.documentNumber || '—'}</span>
-                                                )}
-                                              </td>
-                                              <td className="pr-3">
-                                                <div className="flex items-center gap-1 flex-wrap">
-                                                  <span className={`badge2 ${doc.category === 'foreclosure' && !doc.isReleased ? 'fore' : ''}`}>
-                                                    {doc.documentType || doc.category}
-                                                  </span>
-                                                  {doc.isWaterDept && !doc.isReleased && !doc.isProbablyCleared && (
-                                                    <span className="badge2" data-testid={`badge-water-dept-${i}`}>💧 Water Dept</span>
-                                                  )}
-                                                  {doc.isProbablyCleared && !doc.isReleased && (
-                                                    <span className="badge2" data-testid={`badge-probably-cleared-${i}`}>Likely Cleared (2+ yrs)</span>
-                                                  )}
-                                                  {doc.isReleased && (
-                                                    <span className="rel" data-testid={`badge-released-${i}`}>✓ Released</span>
-                                                  )}
-                                                  {doc.category === 'litigation' && doc.isReleased && (
-                                                    <span className="badge2" data-testid={`badge-lis-pendens-resolved-${i}`}>Likely Resolved</span>
-                                                  )}
-                                                  {doc.grantor && (doc.category === 'lien') && !doc.isReleased && (
-                                                    <span className="text-xs text-muted-foreground truncate max-w-[120px]" title={doc.grantor}>{doc.grantor}</span>
-                                                  )}
-                                                </div>
-                                              </td>
-                                              <td className="rec">{doc.recordedDate || '—'}</td>
-                                            </tr>
-                                          ))}
-                                        </tbody>
-                                      </table>
-                                      {lienData.documents.length > 10 && (
-                                        <a
-                                          href={lienData.recorderUrl}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="lns-allrec hover:opacity-80"
-                                          data-testid="link-recorder-all-docs"
-                                        >
-                                          View all {lienData.documents.length} documents on Cook County Recorder ↗
-                                        </a>
-                                      )}
-                                    </div>
-                                  ) : !lienData.isStale ? (
-                                    <div className="p-4 rounded-lg bg-secondary border border-border">
-                                      <p className="text-sm text-foreground font-medium">
-                                        ✓ No recorded documents found for this PIN
-                                      </p>
-                                      <p className="text-xs text-muted-foreground mt-1">
-                                        No mortgages, liens, or other encumbrances found in Cook County Property Records.
-                                      </p>
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
-                                      <RefreshCw className="w-4 h-4 animate-spin" />
-                                      Searching public records…
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Owner Liens Section */}
-                                <div className="lns-card" data-testid="card-owner-liens">
-                                  <div className="lns-sh flex-wrap">
-                                    <svg className="hic" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/></svg>
-                                    <span className="t">
-                                      Owner Liens{(lienData.ownerName || derivedOwnerName) ? ` · ${lienData.ownerName || derivedOwnerName}` : ''}
-                                    </span>
-                                    {isEditingOwnerName ? (
-                                      <div className="flex items-center gap-1 flex-1 min-w-0">
-                                        <input
-                                          type="text"
-                                          value={ownerNameInput}
-                                          onChange={e => setOwnerNameInput(e.target.value.toUpperCase())}
-                                          onKeyDown={e => {
-                                            if (e.key === 'Enter' && ownerNameInput.trim().length >= 2 && submittedPin) {
-                                              ownerLienSearch.mutate({ pin: submittedPin, ownerName: ownerNameInput.trim() });
-                                              setIsEditingOwnerName(false);
-                                            }
-                                            if (e.key === 'Escape') setIsEditingOwnerName(false);
-                                          }}
-                                          placeholder="LAST,FIRST or COMPANY NAME"
-                                          className="flex-1 min-w-0 text-xs font-jbmono border border-border rounded px-2 py-0.5 bg-background focus:outline-none focus:ring-1 focus:ring-primary"
-                                          autoFocus
-                                          data-testid="input-owner-name-override"
-                                        />
-                                        <button
-                                          onClick={() => {
-                                            if (ownerNameInput.trim().length >= 2 && submittedPin) {
-                                              ownerLienSearch.mutate({ pin: submittedPin, ownerName: ownerNameInput.trim() });
-                                            }
-                                            setIsEditingOwnerName(false);
-                                          }}
-                                          disabled={ownerLienSearch.isPending || ownerNameInput.trim().length < 2}
-                                          className="text-xs px-2 py-0.5 rounded bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 shrink-0"
-                                          data-testid="button-owner-name-search"
-                                        >
-                                          {ownerLienSearch.isPending ? '…' : 'Search'}
-                                        </button>
-                                        <button
-                                          onClick={() => setIsEditingOwnerName(false)}
-                                          className="text-xs text-muted-foreground hover:text-foreground shrink-0"
-                                          data-testid="button-owner-name-cancel"
-                                        >
-                                          ✕
-                                        </button>
-                                      </div>
-                                    ) : (
-                                      <div className="flex items-center gap-1 min-w-0 ml-auto">
-                                        {lienData.ownerName && (
-                                          <span className="text-xs text-muted-foreground truncate max-w-[160px]" title={lienData.ownerName}>
-                                            Searching: {lienData.ownerName}
-                                          </span>
-                                        )}
-                                        {lienData.ownerLienIsStale && lienData.ownerName && (
-                                          <span className="text-xs text-muted-foreground animate-pulse">Searching…</span>
-                                        )}
-                                        <button
-                                          onClick={() => {
-                                            setOwnerNameInput(lienData.ownerName || derivedOwnerName || '');
-                                            setIsEditingOwnerName(true);
-                                          }}
-                                          title="Search by a different owner name"
-                                          className="text-xs text-muted-foreground hover:text-foreground p-0.5 rounded hover:bg-muted shrink-0"
-                                          data-testid="button-edit-owner-name"
-                                        >
-                                          ✎
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
-                                  {!lienData.ownerName && !derivedOwnerName ? (
-                                    <p className="text-xs text-muted-foreground italic">
-                                      No owner name available — sale history needed to search owner liens.
-                                    </p>
-                                  ) : lienData.ownerLiens && lienData.ownerLiens.length > 0 ? (
-                                    <div className="space-y-1.5">
-                                      <div className="liens-callout mb-2">
-                                        <p className="liens-callout-h">
-                                          {lienData.ownerLiens.length} personal lien record{lienData.ownerLiens.length !== 1 ? 's' : ''} found against owner
-                                        </p>
-                                        <p className="liens-callout-b">
-                                          Personal liens follow the owner, not this property — useful for negotiation context
-                                        </p>
-                                      </div>
-                                      <table className="w-full text-xs" data-testid="table-owner-liens">
-                                        <thead>
-                                          <tr className="border-b text-left" style={{borderColor:'var(--sb-line)'}}>
-                                            <th className="pb-1.5 pr-3 liens-th">Doc #</th>
-                                            <th className="pb-1.5 pr-3 liens-th">Type</th>
-                                            <th className="pb-1.5 liens-th text-right">Recorded</th>
-                                          </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-border">
-                                          {lienData.ownerLiens.slice(0, 10).map((doc, i) => (
-                                            <tr key={i} className="hover:bg-muted" data-testid={`row-owner-lien-${i}`}>
-                                              <td className="py-1.5 pr-3 font-jbmono">
-                                                {(doc.viewLink || doc.documentNumber) ? (
-                                                  <a
-                                                    href={doc.viewLink || `https://crs.cookcountyclerkil.gov/Search/ResultByDocNum?id1=${doc.documentNumber}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="liens-docn hover:opacity-70 transition-opacity"
-                                                    data-testid={`link-owner-doc-${doc.documentNumber}`}
-                                                  >
-                                                    {doc.documentNumber || '—'}
-                                                  </a>
-                                                ) : '—'}
-                                              </td>
-                                              <td className="py-1.5 pr-3">
-                                                <Badge
-                                                  variant="outline"
-                                                  className="records-neutral text-xs"
-                                                >
-                                                  {doc.documentType || doc.category}
-                                                </Badge>
-                                              </td>
-                                              <td className="py-1.5 text-right tabular-nums" style={{color:'#8b8a84'}}>{doc.recordedDate || '—'}</td>
-                                            </tr>
-                                          ))}
-                                        </tbody>
-                                      </table>
-                                    </div>
-                                  ) : lienData.ownerLienScrapedAt && !lienData.ownerLienIsStale ? (
-                                    <div className="lns-clean" data-testid="banner-owner-clean">
-                                      <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3 -3"/></svg>
-                                      <span className="x">No personal liens found against {lienData.ownerName || derivedOwnerName} — owner record is clean</span>
-                                    </div>
-                                  ) : (
-                                    <p className="text-xs text-muted-foreground italic">
-                                      {derivedOwnerName ? `Checking liens against ${derivedOwnerName}…` : 'Searching…'}
-                                    </p>
-                                  )}
-                                  {/* Recorder links */}
-                                  <div className="lns-olinks mt-4">
-                                    <a
-                                      href={lienData.recorderUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      data-testid="link-recorder-search"
-                                    >
-                                      <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
-                                      View all property documents on Cook County Recorder
-                                    </a>
-                                    {(lienData.ownerName || derivedOwnerName) && (
-                                      <a
-                                        href={`https://crs.cookcountyclerkil.gov/Search/Result?id1=${encodeURIComponent(lienData.ownerName || derivedOwnerName || '')}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        data-testid="link-recorder-owner-search"
-                                      >
-                                        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
-                                        View owner name search results on Recorder
-                                        <span className="chip">{lienData.ownerName || derivedOwnerName}</span>
-                                      </a>
-                                    )}
-                                  </div>
-                                  {lienData.scrapedAt && (
-                                    <p className="lns-olast">
-                                      Last searched {new Date(lienData.scrapedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Co-parcel liens block */}
-                            {coParcelAddress && (
-                              <div className="border-t border-border pt-4 space-y-4">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs font-medium font-body bg-secondary text-foreground/70 border [border-color:hsl(var(--tag-line))] rounded-full px-2.5 py-0.5">Co-Parcel</span>
-                                  <span className="text-xs text-muted-foreground">{coParcelAddress}</span>
-                                  {coParcelPin && (
-                                    <span className="text-xs font-jbmono text-muted-foreground/60">PIN {coParcelPin.replace(/(\d{2})(\d{3})(\d{3})(\d{3})(\d{4})/, '$1-$2-$3-$4-$5')}</span>
-                                  )}
-                                </div>
-                                {isLoadingCoParcelLiens && (
-                                  <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
-                                    <RefreshCw className="w-4 h-4 animate-spin" />
-                                    Searching Cook County Property Records…
-                                  </div>
-                                )}
-                                {coParcelLienData && (
-                                  <div className="space-y-4">
-                                    {/* Co-parcel property records header */}
-                                    <div className="flex items-center justify-between flex-wrap gap-2">
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651]">Property Records</span>
-                                      </div>
-                                      <div className="flex items-center gap-2 flex-wrap">
-                                        {coParcelLienData.overallStatus === 'has_foreclosure' && (
-                                          <Badge className="bg-red-600 text-white border-red-600 font-bold">🚨 Foreclosure</Badge>
-                                        )}
-                                        {coParcelLienData.overallStatus === 'has_liens' && (
-                                          <Badge className="bg-red-600 text-white border-red-600">⚠ {coParcelLienData.activeLienCount} Active Lien{coParcelLienData.activeLienCount !== 1 ? 's' : ''}</Badge>
-                                        )}
-                                        {coParcelLienData.overallStatus === 'clear' && (
-                                          <Badge className="bg-green-600 text-white border-green-600">✓ Clear</Badge>
-                                        )}
-                                      </div>
-                                    </div>
-
-                                    {/* Co-parcel summary tiles */}
-                                    {coParcelLienData.documents.length > 0 && (
-                                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                        <div className="liens-kt">
-                                          <p className="liens-kt-l">Total Docs</p>
-                                          <p className="liens-kt-n">{coParcelLienData.documents.length}</p>
-                                        </div>
-                                        <div className="liens-kt">
-                                          <p className="liens-kt-l">Mortgages</p>
-                                          <p className="liens-kt-n">{coParcelLienData.mortgages.length}</p>
-                                        </div>
-                                        <div className={`liens-kt ${coParcelLienData.activeLienCount > 0 ? 'bad' : 'good'}`}>
-                                          <p className="liens-kt-l">Active Liens</p>
-                                          <p className="liens-kt-n">{coParcelLienData.activeLienCount}</p>
-                                        </div>
-                                        {(() => {
-                                          const lp = coParcelLienData.foreclosures.length + (coParcelLienData.activeListPendensCount ?? coParcelLienData.litigation?.length ?? 0);
-                                          return (
-                                            <div className={`liens-kt ${lp > 0 ? 'bad' : 'good'}`}>
-                                              <p className="liens-kt-l">Lis Pendens</p>
-                                              <p className="liens-kt-n">{lp}</p>
-                                            </div>
-                                          );
-                                        })()}
-                                      </div>
-                                    )}
-
-                                    {/* Co-parcel document table */}
-                                    {coParcelLienData.documents.length > 0 ? (
-                                      <div className="overflow-x-auto">
-                                        <table className="w-full text-sm">
-                                          <thead>
-                                            <tr className="border-b text-left" style={{borderColor:'var(--sb-line)'}}>
-                                              <th className="pb-2 pr-3 liens-th">Doc #</th>
-                                              <th className="pb-2 pr-3 liens-th">Type</th>
-                                              <th className="pb-2 liens-th text-right">Recorded</th>
-                                            </tr>
-                                          </thead>
-                                          <tbody className="divide-y divide-border">
-                                            {coParcelLienData.documents.slice(0, 10).map((doc, i) => (
-                                              <tr key={i} className={`hover:bg-muted ${doc.isReleased ? 'opacity-50' : doc.isProbablyCleared ? 'opacity-60' : ''}`}>
-                                                <td className="py-2 pr-3 font-jbmono text-xs">
-                                                  {doc.viewLink ? (
-                                                    <a href={doc.viewLink} target="_blank" rel="noopener noreferrer" className={`liens-docn hover:opacity-70 transition-opacity ${doc.isReleased ? 'liens-docn-rel' : ''}`}>
-                                                      {doc.documentNumber || '—'}
-                                                    </a>
-                                                  ) : (
-                                                    <span className={`font-jbmono text-xs ${doc.isReleased ? 'liens-docn-rel' : ''}`}>{doc.documentNumber || '—'}</span>
-                                                  )}
-                                                </td>
-                                                <td className="py-2 pr-3">
-                                                  <div className="flex items-center gap-1 flex-wrap">
-                                                    <Badge variant="outline" className={doc.category === 'foreclosure' && !doc.isReleased ? 'liens-fore text-xs' : 'records-neutral text-xs'}>
-                                                      {doc.documentType || doc.category}
-                                                    </Badge>
-                                                    {doc.isReleased && <span className="liens-relflag">✓ Released</span>}
-                                                  </div>
-                                                </td>
-                                                <td className="py-2 text-xs text-right tabular-nums" style={{color:'#8b8a84'}}>{doc.recordedDate || '—'}</td>
-                                              </tr>
-                                            ))}
-                                          </tbody>
-                                        </table>
-                                        {coParcelLienData.documents.length > 10 && (
-                                          <div className="mt-2 text-center">
-                                            <a href={coParcelLienData.recorderUrl} target="_blank" rel="noopener noreferrer" className="liens-viewall hover:opacity-80">
-                                              View all {coParcelLienData.documents.length} documents on Cook County Recorder ↗
-                                            </a>
-                                          </div>
-                                        )}
-                                      </div>
-                                    ) : !coParcelLienData.isStale ? (
-                                      <div className="p-4 rounded-lg bg-secondary border border-border">
-                                        <p className="text-sm text-foreground font-medium">✓ No recorded documents found for this PIN</p>
-                                      </div>
-                                    ) : null}
-
-                                    {/* Co-parcel owner liens */}
-                                    <div className="mt-2 pt-3 border-t border-border">
-                                      <div className="flex items-center justify-between mb-2 gap-2">
-                                        <span className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651]">Owner Liens</span>
-                                        {coParcelResolvedOwner && (
-                                          <span className="text-xs text-muted-foreground truncate max-w-[200px]">Searching: {coParcelResolvedOwner}</span>
-                                        )}
-                                      </div>
-                                      {!coParcelResolvedOwner ? (
-                                        <p className="text-xs text-muted-foreground italic">No owner name available.</p>
-                                      ) : coParcelLienData.ownerLiens && coParcelLienData.ownerLiens.length > 0 ? (
-                                        <div className="space-y-1.5">
-                                          <div className="liens-callout mb-2">
-                                            <p className="liens-callout-h">
-                                              {coParcelLienData.ownerLiens.length} personal lien record{coParcelLienData.ownerLiens.length !== 1 ? 's' : ''} found against owner
-                                            </p>
-                                          </div>
-                                          <table className="w-full text-xs">
-                                            <thead>
-                                              <tr className="border-b text-left" style={{borderColor:'var(--sb-line)'}}>
-                                                <th className="pb-1.5 pr-3 liens-th">Doc #</th>
-                                                <th className="pb-1.5 pr-3 liens-th">Type</th>
-                                                <th className="pb-1.5 liens-th text-right">Recorded</th>
-                                              </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-border">
-                                              {coParcelLienData.ownerLiens.slice(0, 10).map((doc, i) => (
-                                                <tr key={i} className="hover:bg-muted">
-                                                  <td className="py-1.5 pr-3 font-jbmono">
-                                                    {(doc.viewLink || doc.documentNumber) ? (
-                                                      <a href={doc.viewLink || `https://crs.cookcountyclerkil.gov/Search/ResultByDocNum?id1=${doc.documentNumber}`} target="_blank" rel="noopener noreferrer" className="liens-docn hover:opacity-70 transition-opacity">{doc.documentNumber || '—'}</a>
-                                                    ) : '—'}
-                                                  </td>
-                                                  <td className="py-1.5 pr-3">
-                                                    <Badge variant="outline" className="records-neutral text-xs">{doc.documentType || doc.category}</Badge>
-                                                  </td>
-                                                  <td className="py-1.5 text-right tabular-nums" style={{color:'#8b8a84'}}>{doc.recordedDate || '—'}</td>
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                          </table>
-                                        </div>
-                                      ) : coParcelLienData.ownerLienScrapedAt && !coParcelLienData.ownerLienIsStale ? (
-                                        <div className="flex items-center gap-2 text-xs text-foreground">
-                                          <span>✓ No personal liens found against {coParcelResolvedOwner}</span>
-                                        </div>
-                                      ) : (
-                                        <p className="text-xs text-muted-foreground italic">
-                                          {coParcelResolvedOwner ? `Checking liens against ${coParcelResolvedOwner}…` : 'Searching…'}
-                                        </p>
-                                      )}
-                                    </div>
-
-                                    {/* Co-parcel external links */}
-                                    <div className="flex flex-col gap-1">
-                                      <a href={coParcelLienData.recorderUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                                        <ExternalLink className="h-3 w-3" />
-                                        View all property documents on Recorder
-                                      </a>
-                                      {coParcelResolvedOwner && (
-                                        <a href={`https://crs.cookcountyclerkil.gov/Search/Result?id1=${encodeURIComponent(coParcelResolvedOwner)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                                          <ExternalLink className="h-3 w-3" />
-                                          View owner name search on Recorder
-                                          <span className="ml-1 font-jbmono text-xs bg-muted px-1 rounded">{coParcelResolvedOwner}</span>
-                                        </a>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    )}
-
-
                     {/* Listing Details Sub-section */}
                     {listingData && (
                       <div className="border border-border rounded-none p-4 mt-2">
@@ -12539,7 +11071,7 @@ export default function RunDetail() {
                     )}
 
                     {/* Property Tax Information Sub-section */}
-                    {(pinLookupData?.assessedValues && pinLookupData.assessedValues.length > 0 || (propertyTaxData && (propertyTaxData.totalAnnualTaxAmount !== null || (propertyTaxData.taxYears && propertyTaxData.taxYears.length > 0)))) && (
+                    {((pinLookupData?.assessedValues && pinLookupData.assessedValues.length > 0) || propertyTaxData) && (
                       <Collapsible id="section-property-tax-info" open={isPropertyTaxInfoSectionOpen} onOpenChange={setIsPropertyTaxInfoSectionOpen}>
                         <CollapsibleTrigger asChild>
                           <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
@@ -12729,7 +11261,11 @@ export default function RunDetail() {
                               </div>
                             )}
                             {/* Tax Bill sub-section (from Treasurer scraper) */}
-                            {propertyTaxData && (propertyTaxData.totalAnnualTaxAmount !== null || (propertyTaxData.taxYears && propertyTaxData.taxYears.length > 0)) && (() => {
+                            {propertyTaxData && (
+                              propertyTaxData.totalAnnualTaxAmount !== null
+                              || (propertyTaxData.taxYears && propertyTaxData.taxYears.length > 0)
+                              || propertyTaxData.paymentStatus === 'unknown'
+                            ) && (() => {
                               const tyArr = propertyTaxData.taxYears ?? [];
                               const ty0 = tyArr[0];
                               const fmtAmt = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -12776,6 +11312,11 @@ export default function RunDetail() {
                                     )}
                                   </div>
                                 )}
+                                  {propertyTaxData.paymentStatus === 'unknown' && tyArr.length === 0 && propertyTaxData.totalAnnualTaxAmount === null && (
+                                    <p className="tax-note mb-3" data-testid="text-tax-status-unavailable">
+                                      The Cook County Treasurer did not return a bill or payment status for this parcel. Verify directly with the County before relying on this record.
+                                    </p>
+                                  )}
                                 {tyArr.length > 0 && (
                                   <div className="space-y-1.5">
                                     {tyArr.slice(0, 3).map((ty, idx) => {
@@ -13487,8 +12028,10 @@ export default function RunDetail() {
               </Card>
             </Collapsible>
           </motion.div>
+          </AccordionSection>
 
           {/* Development Potential Section */}
+          <AccordionSection {...accProps("potential")}>
           {(() => {
             const buildingSqFt = run?.manualBuildingSqFt || propertyTaxData?.buildingSquareFeet || pinLookupData?.commercialData?.bldgSf || coParcelLookupData?.commercialData?.bldgSf || 0;
             const primaryLandSqFt = run?.manualLandSqFt || propertyTaxData?.landSquareFeet || pinLookupData?.commercialData?.landSf || 0;
@@ -15045,38 +13588,17 @@ export default function RunDetail() {
               </motion.div>
             );
           })()}
+          </AccordionSection>
 
           {/* Property Proximity Details Section - Contains Crime Statistics and Proximity Info */}
+          <AccordionSection {...accProps("proximity")}>
           <motion.div
             id="print-section-proximity-details"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.187 }}
           >
-            <Collapsible open={isProximityDetailsOpen} onOpenChange={setIsProximityDetailsOpen}>
-              <Card className="border border-border">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="pb-2 cursor-pointer hover-elevate rounded-t-lg">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="chead flex items-center gap-2">
-                        Property Proximity Details
-                      </CardTitle>
-                      <span className="text-muted-foreground text-sm">{isProximityDetailsOpen ? '▼' : '▶'}</span>
-                    </div>
-                    {!isProximityDetailsOpen && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        <Badge className="text-xs">New Construction</Badge>
-                        <Badge className="text-xs">New Business Licenses</Badge>
-                        <Badge className="text-xs">Crime Statistics</Badge>
-                        <Badge className="text-xs">Nearby Landmarks</Badge>
-                        <Badge className="text-xs">Environmental Factors</Badge>
-                        <Badge className="text-xs">Entertainment & Culture</Badge>
-                      </div>
-                    )}
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent className="space-y-6">
+                  <div className="space-y-6">
 
                     {/* ── Parcel Proximity Takeaway ── */}
                     {(() => {
@@ -15176,7 +13698,7 @@ export default function RunDetail() {
                     })()}
 
                     {/* New Construction Activity Sub-section */}
-                    <Collapsible id="section-new-construction" open={isNewConstructionSectionOpen} onOpenChange={setIsNewConstructionSectionOpen}>
+                    {false && <Collapsible id="section-new-construction" open={isNewConstructionSectionOpen} onOpenChange={setIsNewConstructionSectionOpen}>
                       <CollapsibleTrigger asChild>
                         <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
                           <h3 className="chead chead-icon">
@@ -15544,10 +14066,10 @@ export default function RunDetail() {
                           )}
                         </div>
                       </CollapsibleContent>
-                    </Collapsible>
+                    </Collapsible>}
 
                     {/* Recent Business Licenses */}
-                    <Collapsible id="section-new-business-licenses" open={isRecentLicensesSectionOpen} onOpenChange={setIsRecentLicensesSectionOpen}>
+                    {false && <Collapsible id="section-new-business-licenses" open={isRecentLicensesSectionOpen} onOpenChange={setIsRecentLicensesSectionOpen}>
                       <CollapsibleTrigger asChild>
                         <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
                           <h3 className="chead chead-icon">
@@ -15713,187 +14235,7 @@ export default function RunDetail() {
                           )}
                         </div>
                       </CollapsibleContent>
-                    </Collapsible>
-
-                    {/* Crime Statistics */}
-                    <Collapsible id="section-crime" open={isCrimeSectionOpen} onOpenChange={setIsCrimeSectionOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                          <h3 className="chead chead-icon">
-                            <AlertTriangle className="w-4 h-4" />
-                            Area Crime Statistics
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            {!isLoadingCrime && crimeTractData?.violent && crimeTractData?.property ? (
-                              <div className="crm-badges">
-                                <span className={`crm-bdg ${crimeFavor(crimeTractData.violent.saferThanPercent)}`} data-testid="crime-status-badge-violent">
-                                  <span className="d" /> Violent · safer than {crimeTractData.violent.saferThanPercent}%
-                                </span>
-                                <span className={`crm-bdg ${crimeFavor(crimeTractData.property.saferThanPercent)}`} data-testid="crime-status-badge-property">
-                                  <span className="d" /> Property · safer than {crimeTractData.property.saferThanPercent}%
-                                </span>
-                                {crimeTractData.trend?.yoyPercent != null && (
-                                  <span className={`crm-bdg ${crimeTractData.trend.yoyPercent <= 0 ? 'good' : 'bad'}`} data-testid="crime-status-badge-trend">
-                                    <span className="d" /> Trend {crimeTractData.trend.yoyPercent <= 0 ? '↓' : '↑'} {Math.abs(crimeTractData.trend.yoyPercent)}% YoY
-                                  </span>
-                                )}
-                              </div>
-                            ) : !isLoadingCrime && crimeTractData?.tier && crimeTractData?.saferThanPercent != null ? (
-                              <span className="viz-status" data-testid="crime-status-badge">
-                                <AlertTriangle className="w-3 h-3" /> {crimeTractData.tier} · safer than {crimeTractData.saferThanPercent}% of areas
-                              </span>
-                            ) : null}
-                            {!isCrimeSectionOpen && !isLoadingCrime && crimeData?.nearby && crimeData?.quarterMile && (
-                              <div className="flex flex-wrap gap-1.5">
-                                <Badge variant="outline" className="text-xs border-border text-muted-foreground">
-                                  250ft: {crimeData.nearby.totalCrimes.toLocaleString()}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs border-border text-muted-foreground">
-                                  &frac14; mi: {crimeData.quarterMile.totalCrimes.toLocaleString()}
-                                </Badge>
-                              </div>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isCrimeSectionOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                      <div className="seccard">
-                      {isLoadingCrime ? (
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-3/4" />
-                          <Skeleton className="h-4 w-1/2" />
-                        </div>
-                      ) : crimeData && crimeData.nearby && crimeData.quarterMile ? (
-                        <div className="space-y-4">
-                          {/* THE TAKEAWAY — cached AI summary (never generated on render) */}
-                          {crimeTakeaway?.headline && (
-                            <div className="crm-take" data-testid="crime-takeaway">
-                              <div className="crm-takeh">
-                                <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>
-                                Takeaway
-                              </div>
-                              <div className="crm-taket">{crimeTakeaway.headline}</div>
-                              <div className="crm-conn">
-                                {/* Crime sensitivity: unfavorable facts render as amber caution, never red */}
-                                {crimeTakeaway.bullets.map((b, i) => (
-                                  <div key={i} className={`crm-cn ${b.tone === 'good' ? 'g' : b.tone === 'bad' ? 'c' : 'n'}`}>
-                                    <span className="dt" /><span className="txt">{b.text.split('**').map((part, j) => j % 2 === 1 ? <b key={j}>{part}</b> : part)}</span>
-                                    {renderJump(crimeMetricAnchor(b.metric))}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* ZONE 1 — around the address (rolling 12 months) */}
-                          <div id="crime-breakdown" className="crm-zone">
-                            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                            <span className="zt">Around this address</span><span className="sc">· trailing 12 months</span>
-                          </div>
-                          {(() => {
-                            const CLIENT_VIOLENT = new Set(['HOMICIDE', 'CRIMINAL SEXUAL ASSAULT', 'CRIM SEXUAL ASSAULT', 'ROBBERY', 'ASSAULT', 'BATTERY', 'KIDNAPPING', 'HUMAN TRAFFICKING', 'SEX OFFENSE']);
-                            const selected = crimeRadius === 'nearby' ? crimeData.nearby : crimeData.quarterMile;
-                            const radiusLabel = crimeRadius === 'nearby' ? '250 ft' : '¼ mile';
-                            const ranked = Object.entries(selected.crimesByType).sort(([, a], [, b]) => Number(b) - Number(a));
-                            const max = Number(ranked[0]?.[1] || 1);
-                            const isViol = (t: string) => CLIENT_VIOLENT.has(t.toUpperCase());
-                            const violCount = ranked.filter(([t]) => isViol(t)).reduce((s, [, c]) => s + Number(c), 0);
-                            const violNames = ranked.filter(([t]) => isViol(t)).map(([t]) => t.toLowerCase()).join(', ');
-                            return <div>
-                              <div className="crm-toggle2">
-                                <button type="button" data-testid="crime-radius-250ft" className={`crm-tg${crimeRadius === 'nearby' ? ' on' : ''}`} onClick={() => setCrimeRadius('nearby')} aria-pressed={crimeRadius === 'nearby'}>
-                                  <div><div className="tl">Within 250 ft — my block</div><div className="ts">{crimeRadius === 'nearby' ? 'Showing breakdown below' : 'Click to see breakdown'}</div></div>
-                                  <div className="tn">{crimeData.nearby.totalCrimes.toLocaleString()}</div>
-                                </button>
-                                <button type="button" data-testid="crime-radius-quarter" className={`crm-tg${crimeRadius === 'quarterMile' ? ' on' : ''}`} onClick={() => setCrimeRadius('quarterMile')} aria-pressed={crimeRadius === 'quarterMile'}>
-                                  <div><div className="tl">Within ¼ mile</div><div className="ts">{crimeRadius === 'quarterMile' ? 'Showing breakdown below' : 'Click to see breakdown'}</div></div>
-                                  <div className="tn">{crimeData.quarterMile.totalCrimes.toLocaleString()}</div>
-                                </button>
-                              </div>
-                              {ranked.length === 0 ? (
-                                <p className="text-sm text-muted-foreground">No incidents within {radiusLabel} in the last 12 months.</p>
-                              ) : <>
-                                <div className="crm-bkhead">
-                                  <span className="l">Breakdown by type · {radiusLabel}</span>
-                                  <span className="crm-key2"><span className="crm-k2"><span className="d prop" />Property / other</span><span className="crm-k2"><span className="d viol" />Violent</span></span>
-                                </div>
-                                {ranked.map(([type, count]) => <div className="crm-bkrow" key={type} title={`${type}: ${count}`}>
-                                  <span className="bl">{type.charAt(0) + type.slice(1).toLowerCase()}</span>
-                                  <span className="bt"><i className={isViol(type) ? 'viol' : 'prop'} style={{ width: `${(Number(count) / max) * 100}%` }} /></span>
-                                  <span className="bv">{count}</span>
-                                </div>)}
-                                <div className="crm-bkmore">Violent types{violNames ? ` (${violNames})` : ''} make up <b>{violCount} of {selected.totalCrimes.toLocaleString()}</b> incidents — about {Math.round((violCount / Math.max(1, selected.totalCrimes)) * 100)}%.</div>
-                              </>}
-                            </div>;
-                          })()}
-
-                          {crimeTractData?.violent && crimeTractData?.property && (
-                            <div id="crime-area-ranking" data-testid="crime-area-ranking">
-                              <div className="crm-bkdiv" />
-                              {/* ZONE 2 — community area (last full calendar year, per capita) */}
-                              <div className="crm-zone">
-                                <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>
-                                <span className="zt">{facts?.communityArea ? `${facts.communityArea} community area` : 'Community area'}</span>
-                                <span className="sc">· last full calendar year{crimeTractData.perCapita ? ', per capita' : ''}</span>
-                              </div>
-                              <div className="crm-rlbl">{crimeTractData.perCapita ? 'Ranked per 1,000 residents vs. all Chicago community areas' : 'Ranked vs. all Chicago community areas'}</div>
-                              <div className="crm-ranks">
-                                <div className={`crm-rank ${crimeFavor(crimeTractData.violent.saferThanPercent)}`}>
-                                  <div><div className="cat">Violent crime</div>{crimeTractData.violent.ratePer1000 != null && <div className="rate">{crimeTractData.violent.ratePer1000} per 1,000 residents</div>}<div className="lab"><span className="d" />{crimeTractData.violent.tier}</div></div>
-                                  <div className="big">{crimeTractData.violent.saferThanPercent}%<small>safer than</small></div>
-                                </div>
-                                <div className={`crm-rank ${crimeFavor(crimeTractData.property.saferThanPercent)}`}>
-                                  <div><div className="cat">Property &amp; other crime</div>{crimeTractData.property.ratePer1000 != null && <div className="rate">{crimeTractData.property.ratePer1000} per 1,000 residents</div>}<div className="lab"><span className="d" />{crimeTractData.property.tier}</div></div>
-                                  <div className="big">{crimeTractData.property.saferThanPercent}%<small>safer than</small></div>
-                                </div>
-                              </div>
-                              {crimeTractData.trend && crimeTractData.trend.years.length >= 2 && (() => {
-                                const years = crimeTractData.trend!.years;
-                                const yoy = crimeTractData.trend!.yoyPercent;
-                                const threeYr = crimeTractData.trend!.threeYearPercent;
-                                const maxCount = Math.max(...years.map(y => y.count), 1);
-                                const falling = yoy != null && yoy <= 0;
-                                return <div className="crm-trend">
-                                  <div className="crm-trendtop">
-                                    <span className="l">All incidents · full calendar years</span>
-                                    {yoy != null && (
-                                      <span className={`chg ${falling ? 'down' : 'up'}`}>
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{falling ? <><path d="M22 17l-8.5-8.5-5 5L2 7"/><path d="M16 17h6v-6"/></> : <><path d="M22 7l-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></>}</svg>
-                                        {falling ? 'Down' : 'Up'} {Math.abs(yoy)}% YoY{threeYr != null && <> · {Math.abs(threeYr)}% since {years[0].year}</>}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="crm-bars">
-                                    {years.map((y, i) => (
-                                      <div key={y.year} className={`crm-tb${i === years.length - 1 ? ` cur ${falling ? 'down' : 'up'}` : ''}`}>
-                                        <span className="val">{y.count.toLocaleString()}</span>
-                                        <span className="bar" style={{ height: `${Math.max(8, Math.round((y.count / maxCount) * 100))}%` }} />
-                                        <span className="yr">{y.year}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>;
-                              })()}
-                            </div>
-                          )}
-                          <p className="crm-src">
-                            Source: Chicago Data Portal — crimes reported to CPD{crimeTractData?.perCapita ? ' · rates per 2023 ACS population · rankings use the last full calendar year' : ''}
-                          </p>
-                        </div>
-                      ) : (crimeData?.nearby?.apiError || crimeData?.quarterMile?.apiError) ? (
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <AlertTriangle className="w-4 h-4" />
-                          Could not fetch crime data
-                        </p>
-                      ) : !geocode.data?.lat ? (
-                        <p className="text-sm text-muted-foreground">Geocoding required for crime statistics</p>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">Unable to load crime statistics</p>
-                      )}
-                      </div>
-                      </CollapsibleContent>
-                    </Collapsible>
+                    </Collapsible>}
 
                     {/* Proximity Information */}
                     <Collapsible open={isProximitySectionOpen} onOpenChange={setIsProximitySectionOpen}>
@@ -15961,14 +14303,7 @@ export default function RunDetail() {
                                 data-testid="fact-schools-nearby"
                                 onClick={() => {
                                   setSectionOpen('schools', true);
-                                  const tryScroll = (attempts: number) => {
-                                    setTimeout(() => {
-                                      const el = document.getElementById('section-schools');
-                                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                      else if (attempts > 0) tryScroll(attempts - 1);
-                                    }, 120);
-                                  };
-                                  tryScroll(3);
+                                  revealAnchor('section-schools');
                                 }}
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') (e.currentTarget as HTMLElement).click(); }}
                               >
@@ -16033,17 +14368,6 @@ export default function RunDetail() {
                                 </div>
                                 <p className="dir-fact-value">{proximityData.foreclosures.countInHalfMilePast5Years} in ½ mile</p>
                                 <p className="dir-fact-qualifier">Past 5 years · {proximityData.foreclosures.per1000Pins.toFixed(1)}/1000 PINs</p>
-                              </div>
-                            )}
-
-                            {proximityData.newConstruction && (
-                              <div className="dir-fact">
-                                <div className="dir-fact-top">
-                                  <span className="dir-fact-icon"><Building2 className="w-3 h-3" /></span>
-                                  <span className="dir-fact-label">New Construction</span>
-                                </div>
-                                <p className="dir-fact-value">{proximityData.newConstruction.countInHalfMilePast5Years} in ½ mile</p>
-                                <p className="dir-fact-qualifier">Past 5 years · Nearest {Math.round(proximityData.newConstruction.distanceFt).toLocaleString()} ft</p>
                               </div>
                             )}
 
@@ -16178,7 +14502,7 @@ export default function RunDetail() {
                             const highClosest = closestSchool(high);
                             const elemStrongCount = elem.filter((s: any) => ratingScore(s.overallRating) >= 4).length;
                             const schoolsStrong = elemRate?.label === 'Strong' && !!elemAssigned && ratingScore(elemAssigned.overallRating) >= 4;
-                            const jumpTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            const jumpTo = (id: string) => revealAnchor(id);
                             const jumpChip = (id: string, label: string) => (
                               <button type="button" className="jump" onClick={() => jumpTo(id)}>
                                 <svg viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>{label}
@@ -17173,58 +15497,508 @@ export default function RunDetail() {
                       </div>
                       </CollapsibleContent>
                     </Collapsible>
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
+                  </div>
           </motion.div>
+          </AccordionSection>
 
           {/* Transit Proximity Section */}
+
+          <AccordionSection {...accProps("permits")}>
+            <div id="print-section-permits" className="space-y-5">
+              {coParcelAddress && (
+                <div className="records-banner flex items-center gap-2">
+                  <Info className="w-3.5 h-3.5 shrink-0" />
+                  <span>Showing permits and violations for <span className="font-medium text-foreground">{run?.address?.split(',')[0].toUpperCase()}</span> (primary) and <span className="font-medium text-foreground">{coParcelAddress}</span> (co-parcel)</span>
+                </div>
+              )}
+
+              {/* ---- A. Permit History ---- */}
+              <div id="dob-permits">
+                <div className="kyp-subhead">
+                  <span className="lbl">Permit History</span>
+                  {dobDerived && dobDerived.allPermits.length > 0 && (
+                    <span className="ct" data-testid="badge-dob-count">{dobDerived.allPermits.length}{dobDerived.permitYears ? ` · ${dobDerived.permitYears.earliest}–${dobDerived.permitYears.latest}` : ''}</span>
+                  )}
+                  <span className="rule" />
+                </div>
+                {isLoadingPermits ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                ) : permitsData?.parseError ? (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4" />Unable to parse address for permit lookup</p>
+                ) : permitsData?.apiError ? (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4" />Could not fetch permit data</p>
+                ) : dobDerived && dobDerived.allPermits.length > 0 ? (() => {
+                  const d = dobDerived;
+                  const fmt$ = (n: number) => '$' + Math.round(n).toLocaleString();
+                  const fmtK = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M` : n >= 1000 ? `$${Math.round(n / 1000)}K` : `$${Math.round(n)}`;
+                  const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                  const saleLabel = d.saleDateRaw ? new Date(d.saleDateRaw).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : null;
+                  const cleanType = (t: string) => (t || '').replace(/^PERMIT\s*-\s*/i, '').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+                  // Display-only: sentence-case raw all-caps DOB scope text for legibility
+                  const sentenceCase = (s: string) => {
+                    const t = (s || '').trim();
+                    if (!t || t !== t.toUpperCase()) return t;
+                    return t.toLowerCase().replace(/(^\s*[a-z])|([.!?]\s+[a-z])/g, (c) => c.toUpperCase());
+                  };
+                  const permitCard = (permit: any, index: number) => {
+                    const gc = (permit.contractors || []).find((c: any) => /GENERAL/i.test(c.type || '')) || (permit.contractors || [])[0] || null;
+                    const gcLabel = gc?.type ? cleanType(gc.type) : 'General contractor';
+                    return (
+                      <div key={permit.id || index} className={`kyp-permit ${permit.eff === 'complete' ? 'good' : permit.eff === 'expired' ? 'att' : ''}`} data-testid={`permit-item-${index}`}>
+                        <div className="ph">
+                          <div className="pscope">{sentenceCase(permit.workDescription || '') || cleanType(permit.permitType)}</div>
+                          {permit.estimatedCost != null && permit.estimatedCost > 0 && <div className="pcost">{fmt$(permit.estimatedCost)}</div>}
+                        </div>
+                        <div className="ptags">
+                          <span className={`ptag ${permit.eff === 'complete' ? 'good' : 'att'}`}>{permit.eff === 'complete' ? 'Complete' : permit.eff === 'expired' ? 'Expired · not closed' : 'Open'}</span>
+                          {permit.era && <span className="ptag era">{permit.era === 'current' ? 'Current owner' : 'Prior owner'}</span>}
+                          <span className="ptag">{cleanType(permit.permitType)}</span>
+                          {permit.architectType === 'Self-Certified' && <span className="ptag">Self-certified</span>}
+                        </div>
+                        <div className="pmeta">
+                          <div><div className="pml">Permit no.</div><div className="pmv">{permit.permitNumber || '—'}{permit.issueDate ? ` · ${fmtDate(permit.issueDate)}` : ''}</div></div>
+                          <div><div className="pml">Owner of record</div><div className="pmv">{permit.ownerName || '—'}</div></div>
+                          <div><div className="pml">Architect</div>{permit.architectName && permit.architectName.toUpperCase().trim() !== (permit.ownerName || '').toUpperCase().trim() ? <div className="pmv">{permit.architectName}</div> : <div className="pmv dim">— (not required)</div>}</div>
+                          <div><div className="pml">{gcLabel}</div><div className="pmv">{gc?.name || '—'}</div></div>
+                        </div>
+                      </div>
+                    );
+                  };
+                  // Truncation: 3 current + 1 prior visible; the rest expand via the
+                  // more-link and always print (hidden print:block) so nothing is lost.
+                  const CUR_CAP = 3, PRIOR_CAP = 1;
+                  const renderEraList = (permits: any[], cap: number, startIdx: number) => {
+                    const visible = showAllPermits ? permits : permits.slice(0, cap);
+                    const hidden = showAllPermits ? [] : permits.slice(cap);
+                    return (
+                      <>
+                        {visible.map((p: any, i: number) => permitCard(p, startIdx + i))}
+                        {hidden.length > 0 && <div className="hidden print:block">{hidden.map((p: any, i: number) => permitCard(p, startIdx + visible.length + i))}</div>}
+                      </>
+                    );
+                  };
+                  const hiddenCount = d.hasSaleDate
+                    ? Math.max(0, d.currentPermits.length - CUR_CAP) + Math.max(0, d.priorPermits.length - PRIOR_CAP)
+                    : Math.max(0, d.allPermits.length - (CUR_CAP + PRIOR_CAP));
+                  return (
+                    <>
+                      <div className="kyp-blocks" style={d.notClosedCount > 0 ? undefined : { gridTemplateColumns: 'repeat(2,1fr)' }}>
+                        <div className="kyp-block ind">
+                          <div className="bv">{d.allPermits.length}</div>
+                          <div><div className="bl">Permits on record</div><div className="bd">{d.permitYears ? `${d.permitYears.earliest} – ${d.permitYears.latest} · ` : ''}15-yr window</div></div>
+                        </div>
+                        <div className="kyp-block dark">
+                          <div className="bv">{d.totalCost > 0 ? fmtK(d.totalCost) : '—'}</div>
+                          <div><div className="bl">Declared value</div><div className="bd">{d.totalCost > 0 ? 'across all permitted work' : 'no declared values on record'}</div></div>
+                        </div>
+                        {d.notClosedCount > 0 && (
+                          <div className="kyp-block orange">
+                            <div className="bv">{d.notClosedCount}</div>
+                            <div><div className="bl">Not closed out</div><div className="bd">no final inspection recorded</div></div>
+                          </div>
+                        )}
+                      </div>
+                      {!d.hasSaleDate && (
+                        <p className="dob-basis">
+                          No recorded sale date was found for this property, so permits are shown as one list — the current-vs-prior-owner split couldn't be computed.
+                        </p>
+                      )}
+                      {d.hasSaleDate ? (
+                        <>
+                          <div className="kyp-eradiv">
+                            <span className="lbl">Under current ownership</span>
+                            <span className="meta">since {saleLabel} · {d.currentPermits.length} permit{d.currentPermits.length !== 1 ? 's' : ''}{d.currentCost > 0 ? ` · ${fmt$(d.currentCost)}` : ''}</span>
+                            <span className="ln" />
+                          </div>
+                          {d.currentPermits.length > 0
+                            ? renderEraList(d.currentPermits, CUR_CAP, 0)
+                            : <p className="dob-noera">No permits pulled under current ownership.</p>}
+                          {d.priorPermits.length > 0 && (
+                            <>
+                              <div className="kyp-eradiv">
+                                <span className="lbl">Under prior ownership</span>
+                                <span className="meta">before {saleLabel} · {d.priorPermits.length} permit{d.priorPermits.length !== 1 ? 's' : ''}{d.priorCost > 0 ? ` · ${fmt$(d.priorCost)}` : ''}</span>
+                                <span className="ln" />
+                              </div>
+                              {renderEraList(d.priorPermits, PRIOR_CAP, d.currentPermits.length)}
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        renderEraList(d.allPermits, CUR_CAP + PRIOR_CAP, 0)
+                      )}
+                      {(hiddenCount > 0 || showAllPermits) && (
+                        <span className="kyp-morelink no-print" role="button" tabIndex={0} onClick={() => setShowAllPermits(!showAllPermits)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowAllPermits(!showAllPermits); } }} data-testid="button-toggle-all-permits">
+                          {showAllPermits ? 'Show fewer permits ↑' : `Show all ${d.allPermits.length} permits →`}
+                        </span>
+                      )}
+                    </>
+                  );
+                })() : (
+                  <p className="text-sm text-muted-foreground">No building permits on record for this address.</p>
+                )}
+              </div>
+
+              {/* ---- B. Professionals who worked on this building ---- */}
+              {dobDerived && dobDerived.professionals.length > 0 && (() => {
+                const fmt$ = (n: number) => '$' + Math.round(n).toLocaleString();
+                return (
+                  <div data-testid="dob-professionals">
+                    <div className="kyp-subhead">
+                      <span className="lbl">Professionals who worked on this building</span>
+                      <span className="ct">{dobDerived.professionals.length} · most recent first</span>
+                      <span className="rule" />
+                    </div>
+                    {dobDerived.professionals.map((pro, pi) => {
+                      const enr = dobEnrichFor(pro.name);
+                      const isExpediter = /EXPEDIT/i.test(pro.role);
+                      const rankingView = pro.isDesign ? 'architect-rankings' : isExpediter ? 'expeditor-rankings' : 'gc-rankings';
+                      return (
+                        <div key={pro.key} className={`kyp-procard ${pro.era === 'prior' ? 'prior' : ''}`} data-testid={`dob-pro-${pi}`}>
+                          <div className="ptop">
+                            <span className="prole">{pro.role}</span>
+                            <span className="pnm">{pro.name}</span>
+                            {pro.era && <span className="pera">{pro.era === 'current' ? 'Current owner' : 'Prior owner'}</span>}
+                          </div>
+                          <div className="phere">
+                            <b>Here:</b> <span className="n">{pro.permitIds.size}</span> permit{pro.permitIds.size !== 1 ? 's' : ''}
+                            {pro.value > 0 && <> — <span className="n">{fmt$(pro.value)}</span></>}
+                            {' '}· latest {pro.latestYear}
+                          </div>
+                          {enr?.matched && (enr.certs?.length || 0) > 0 && (
+                            <div className="kyp-pcerts">
+                              {enr.certs.map((c) => <span key={c} className="kyp-cert" data-testid={`cert-${c.toLowerCase()}`}>{c}</span>)}
+                            </div>
+                          )}
+                          <div className="pcity">
+                            {isLoadingDobEnrichment ? (
+                              <span>Checking citywide records…</span>
+                            ) : enr?.matched && enr.citywide ? (
+                              <>
+                                <span><b>Citywide · 5 yr</b> — {enr.citywide.permits.toLocaleString()} permits{enr.citywide.lastActiveYear ? ` · last active ${enr.citywide.lastActiveYear}` : ''} · {enr.citywide.mix}</span>
+                                <a className="pview" href={`/discovery?view=${rankingView}&highlight=${encodeURIComponent(pro.name)}`} target="_blank" rel="noopener noreferrer">View in rankings →</a>
+                              </>
+                            ) : (
+                              <span>No confident citywide match — showing this property's record only.</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div className="kyp-footnote">
+                      Every professional on the building's permits is listed — a starting point, not a recommendation. Citywide figures are <b>permit activity, not a quality rating</b>; matches are made by firm name, and where we can't match confidently only this property's record is shown. Verify licensing and references before relying on any firm.
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* ---- C. Building Violations ---- */}
+              <div id="dob-violations">
+                <div className="kyp-subhead">
+                  <span className="lbl">Building Violations</span>
+                  {violationsData && !violationsData.parseError && !violationsData.apiError && (
+                    <span className="ct">{violationsData.openViolations || 0} open · {((violationsData as any).olderViolations || []).length} historical</span>
+                  )}
+                  <span className="rule" />
+                </div>
+                {isLoadingViolations ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                ) : violationsData?.parseError ? (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4" />Unable to parse address for violation lookup</p>
+                ) : violationsData?.apiError ? (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4" />Could not fetch violation data</p>
+                ) : violationsData ? (() => {
+                  const v: any = violationsData;
+                  const openCount = v.openViolations || 0;
+                  const older: any[] = v.olderViolations || [];
+                  const olderSummary = v.olderViolationsSummary;
+                  const saleTime = dobDerived?.hasSaleDate && dobDerived.saleDateRaw ? new Date(dobDerived.saleDateRaw).getTime() : null;
+                  const isComplied = (viol: any) => /compl/i.test(viol.violationStatus || '');
+                  const staleOpenCount = older.filter(o => !isComplied(o)).length;
+                  const fmtVDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                  return (
+                    <>
+                      <div className="kyp-blocks" style={{ gridTemplateColumns: older.length > 0 ? 'repeat(2,1fr)' : '1fr' }} data-testid="dob-violations-hero">
+                        <div className={`kyp-block ${openCount === 0 ? 'grn' : 'bad'}`}>
+                          <div className="bv">{openCount}</div>
+                          <div>
+                            <div className="bl">Open violations</div>
+                            <div className="bd">{openCount === 0 ? `clean record, last 5 years${v.totalViolationsLast5Years === 0 && !olderSummary ? ' — clean record overall' : ''}` : 'unresolved building-code violations — review below'}</div>
+                          </div>
+                        </div>
+                        {older.length > 0 && (
+                          <div className="kyp-block slate">
+                            <div className="bv">{older.length}</div>
+                            <div>
+                              <div className="bl">Historical records</div>
+                              <div className="bd">{olderSummary && olderSummary.earliestYear !== olderSummary.latestYear ? `${olderSummary.earliestYear} – ${olderSummary.latestYear}` : olderSummary?.earliestYear || ''}{saleTime !== null && older.every(o => new Date(o.violationDate).getTime() < saleTime) ? ' · all prior owner' : ''}</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {openCount > 0 && v.violations && v.violations.length > 0 && (
+                        <div className="mb-2">
+                          {v.violations.map((viol: any, vi: number) => (
+                            <div key={viol.id || vi} className="kyp-viol" data-testid={`dob-open-violation-${vi}`}>
+                              <span className="vchip open">Open</span>
+                              <div className="vbody">
+                                <div className="vsc">{viol.violationDescription}</div>
+                                <div className="vmeta">Issued {fmtVDate(viol.violationDate)}{viol.violationCode ? ` · ${viol.violationCode}` : ''}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {older.length > 0 && (
+                        <>
+                          <span className="kyp-morelink no-print" role="button" tabIndex={0} onClick={() => setShowOlderViolationsList(!showOlderViolationsList)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowOlderViolationsList(!showOlderViolationsList); } }} data-testid="button-toggle-older-violations">
+                            {showOlderViolationsList ? 'Hide historical records ↑' : `Show ${older.length} historical record${older.length !== 1 ? 's' : ''} · older than 5 years →`}
+                          </span>
+                          <div className={showOlderViolationsList ? '' : 'hidden print:block'}>
+                            {older.map((viol: any, vi: number) => {
+                              const complied = isComplied(viol);
+                              const yr = new Date(viol.violationDate).getFullYear();
+                              const era = saleTime !== null ? (new Date(viol.violationDate).getTime() >= saleTime ? 'current owner' : 'prior owner') : null;
+                              return (
+                                <div key={viol.id || vi} className="kyp-viol" data-testid={`dob-hist-violation-${vi}`}>
+                                  <span className={`vchip ${complied ? 'complied' : 'stale'}`}>{complied ? 'Complied' : `Open · ${yr}`}</span>
+                                  <div className="vbody">
+                                    <div className="vsc">{viol.violationDescription}</div>
+                                    <div className="vmeta">Issued {fmtVDate(viol.violationDate)}{viol.statusDate ? ` · ${complied ? 'complied' : 'last status'} ${new Date(viol.statusDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}` : ''}{era ? ` · ${era}` : ''}</div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+
+                      {staleOpenCount > 0 && (
+                        <div className="kyp-caveat" data-testid="dob-violations-caveat">
+                          <b>{staleOpenCount} historical record{staleOpenCount !== 1 ? 's' : ''} still show "Open," but {staleOpenCount !== 1 ? 'they are' : 'it is'} not a current problem.</b> {staleOpenCount !== 1 ? 'They' : 'It'} predate{staleOpenCount !== 1 ? '' : 's'} the current 5-year window and the city often never posts a final disposition on old cases. We treat records older than 5 years as historical, not active. If any matter to you, confirm current standing with the Department of Buildings.
+                        </div>
+                      )}
+                    </>
+                  );
+                })() : (
+                  <p className="text-sm text-muted-foreground">Unable to load violation history</p>
+                )}
+              </div>
+
+              {/* ---- D. Sidewalk Cafe Permits (kept as-is) ---- */}
+              {isLoadingSidewalkCafe ? (
+                <div className="pt-4 border-t border-border/40">
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ) : sidewalkCafeData?.permits?.length > 0 ? (
+                <div className="pt-4 border-t border-border/40">
+                  <h4 className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651] flex items-center gap-2 mb-3">
+                    <Coffee className="w-4 h-4" />
+                    Sidewalk Cafe Permit{sidewalkCafeData.permits.length > 1 ? 's' : ''}
+                  </h4>
+                  <div className="space-y-2">
+                    {sidewalkCafeData.permits.map((permit: any, idx: number) => (
+                      <div key={permit.permitNumber || idx} className="border border-border p-3 text-sm space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-medium">{permit.doingBusinessAs || permit.legalName}</p>
+                            {permit.doingBusinessAs && permit.legalName && permit.doingBusinessAs !== permit.legalName && (
+                              <p className="text-xs text-muted-foreground">{permit.legalName}</p>
+                            )}
+                          </div>
+                          <Badge className="text-xs shrink-0">
+                            {permit.isActive ? 'Active' : 'Expired'}
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
+                          {permit.issuedDate && (
+                            <span>Issued: {new Date(permit.issuedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                          )}
+                          {permit.expirationDate && (
+                            <span>Expires: {new Date(permit.expirationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                          )}
+                          {permit.permitNumber && (
+                            <span>#{permit.permitNumber}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="kyp-src">Source: Chicago Data Portal (Building Permits &amp; Building Violations)</div>
+            </div>
+          </AccordionSection>
+
+          {/* 04 · Ownership & Title — one evidence-first surface for transfers, debt and claims. */}
+          <AccordionSection {...accProps("ownership")}>
+            <motion.div id="print-section-ownership" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }}>
+              <OwnershipTitleSection pinLookupData={pinLookupData} lienData={lienData} debtSnapRec={debtSnapRec} isDebtSnapshotFetched={debtSnapFetched} lienDistress={lienDistress} isLoadingLiens={isLoadingLiens} relatedParcels={relatedParcels} address={run?.address} saleDerivation={saleDerivation} />
+            </motion.div>
+          </AccordionSection>
+
+          <AccordionSection {...accProps("newBusinessLicenses")}>
+            <NewBusinessLicensesSection
+              data={nearbyLicensesData}
+              isLoading={isLoadingNearbyLicenses}
+              isError={isErrorNearbyLicenses}
+            />
+          </AccordionSection>
+
+          <AccordionSection {...accProps("newConstruction")}>
+            <NewConstructionSection
+              data={newConstructionData}
+              isLoading={isLoadingNewConstruction}
+              isError={isErrorNewConstruction}
+              subjectUnits={(propertyTaxData as any)?.units ?? pinLookupData?.characteristicsData?.units ?? null}
+            />
+          </AccordionSection>
+
+          <AccordionSection {...accProps("crime")}>
+            <div id="print-section-crime">
+                      <div>
+                      {isLoadingCrime ? (
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                        </div>
+                      ) : crimeData && crimeData.nearby && crimeData.quarterMile ? (
+                        <div className="kyp-sec">
+                          <div className="kyp-content">
+                            {(() => {
+                              const CLIENT_VIOLENT = new Set(['HOMICIDE', 'CRIMINAL SEXUAL ASSAULT', 'CRIM SEXUAL ASSAULT', 'ROBBERY', 'ASSAULT', 'BATTERY', 'KIDNAPPING', 'HUMAN TRAFFICKING', 'SEX OFFENSE']);
+                              const isViol = (t: string) => CLIENT_VIOLENT.has(t.toUpperCase());
+                              const selected = crimeRadius === 'nearby' ? crimeData.nearby : crimeData.quarterMile;
+                              const radiusLabel = crimeRadius === 'nearby' ? '250 ft' : 'quarter mile';
+                              const ranked = Object.entries(selected.crimesByType).sort(([, a], [, b]) => Number(b) - Number(a));
+                              const max = Number(ranked[0]?.[1] || 1);
+                              const violCount = ranked.filter(([t]) => isViol(t)).reduce((s, [, c]) => s + Number(c), 0);
+                              const violNames = ranked.filter(([t]) => isViol(t)).map(([t]) => t.toLowerCase()).join(', ');
+                              const qm = crimeData.quarterMile.totalCrimes, nb = crimeData.nearby.totalCrimes;
+                              const violPct = Math.round((violCount / Math.max(1, selected.totalCrimes)) * 100);
+                              const blk = crimeTractData?.violent ? tierBlock(crimeTier(crimeTractData.violent.saferThanPercent)) : 'slate';
+                              return (
+                                <div id="crime-breakdown">
+                                  <div className="kyp-subhead"><span className="lbl">Around this address</span><span className="ct">trailing 12 mo</span><span className="rule" /></div>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 6 }}>
+                                    <button type="button" className={`kyp-block count ${blk}`} data-testid="crime-radius-250ft" aria-pressed={crimeRadius === 'nearby'} onClick={() => setCrimeRadius('nearby')}
+                                         style={{ cursor: 'pointer', border: 'none', textAlign: 'left', font: 'inherit', boxShadow: crimeRadius === 'nearby' ? '0 0 0 2px var(--kyp-indigoL)' : 'none' }}>
+                                      <div className="bv">{nb.toLocaleString()}</div><div><div className="bl">Within 250 ft · my block</div><div className="bd">trailing 12 months</div></div>
+                                    </button>
+                                    <button type="button" className={`kyp-block count ${blk}`} data-testid="crime-radius-quarter" aria-pressed={crimeRadius === 'quarterMile'} onClick={() => setCrimeRadius('quarterMile')}
+                                         style={{ cursor: 'pointer', border: 'none', textAlign: 'left', font: 'inherit', boxShadow: crimeRadius === 'quarterMile' ? '0 0 0 2px var(--kyp-indigoL)' : 'none' }}>
+                                      <div className="bv">{qm.toLocaleString()}</div><div><div className="bl">Within quarter mile</div><div className="bd">trailing 12 months</div></div>
+                                    </button>
+                                  </div>
+                                  {ranked.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">No incidents within {radiusLabel} in the last 12 months.</p>
+                                  ) : (<>
+                                    <div className="kyp-charttitle">Breakdown by type · {radiusLabel}</div>
+                                    <div className="kyp-leg">
+                                      <span className="kyp-lg"><span className="ln" style={{ background: 'var(--kyp-indigoL)' }} />Property / petty</span>
+                                      <span className="kyp-lg"><span className="ln" style={{ background: 'var(--kyp-bad)' }} />Violent</span>
+                                    </div>
+                                    {ranked.map(([type, count]) => {
+                                      const cat = isViol(type) ? 'red' : 'ind';
+                                      return (
+                                        <div className="kyp-hbar" key={type} title={`${type}: ${count}`}>
+                                          <span className="hl"><span className={`tick ${cat}`} />{type.charAt(0) + type.slice(1).toLowerCase()}</span>
+                                          <span className="htrack"><i className={cat} style={{ width: `${(Number(count) / max) * 100}%` }}><b className="hbar-count">{count}</b></i></span>
+                                        </div>
+                                      );
+                                    })}
+                                    <div className="kyp-hsum">Violent types{violNames ? ` (${violNames})` : ''} make up <b>{violCount} of {selected.totalCrimes.toLocaleString()}</b> incidents — about <b>{violPct}%</b>.</div>
+                                  </>)}
+                                </div>
+                              );
+                            })()}
+
+                            {crimeTractData?.violent && crimeTractData?.property && (
+                              <div id="crime-area-ranking" data-testid="crime-area-ranking">
+                                <div className="kyp-subhead">
+                                  <span className="lbl">{facts?.communityArea ? `${facts.communityArea} community area` : 'Community area'}</span>
+                                  <span className="ct">per capita · last full year</span><span className="rule" />
+                                </div>
+                                {[
+                                  { key: 'violent', label: 'Violent crime · per 1,000 residents', d: crimeTractData.violent },
+                                  { key: 'property', label: 'Property & other crime · per 1,000 residents', d: crimeTractData.property },
+                                ].map(({ key, label, d }) => {
+                                  const t = crimeTier(d.saferThanPercent);
+                                  return (
+                                    <div className="kyp-cmp" key={key}>
+                                      <div className="kyp-cmptop"><span className="kyp-cmplab">{label}</span><span className={`kyp-pill ${t}`} data-testid={`crime-status-badge-${key}`}>{d.tier} · safer than {d.saferThanPercent}%</span></div>
+                                      <div className="kyp-track">
+                                        <div className="fill" style={{ width: `${d.saferThanPercent}%`, background: tierFill(t) }} />
+                                        <div className="tick" style={{ left: '50%' }}><span className="tlab">City median</span></div>
+                                      </div>
+                                      {d.ratePer1000 != null && <div className="kyp-cap"><b>{d.ratePer1000} {key === 'violent' ? 'violent' : 'property'} crimes per 1,000 residents</b> — safer than {d.saferThanPercent}% of all Chicago community areas.</div>}
+                                    </div>
+                                  );
+                                })}
+                                {crimeTractData.trend && crimeTractData.trend.years.length >= 2 && (() => {
+                                  const years = crimeTractData.trend!.years;
+                                  const yoy = crimeTractData.trend!.yoyPercent;
+                                  const threeYr = crimeTractData.trend!.threeYearPercent;
+                                  const maxCount = Math.max(...years.map(y => y.count), 1);
+                                  const falling = yoy != null && yoy <= 0;
+                                  return (
+                                    <div className={`kyp-ytrend${falling ? '' : ' att'}`}>
+                                      <div className="yttop">
+                                        <span className="kyp-charttitle" style={{ margin: 0 }}>All incidents · full calendar years</span>
+                                        {yoy != null && (
+                                          <span className={`kyp-pill ${falling ? 'good' : 'att'}`} data-testid="crime-status-badge-trend">
+                                            {falling ? '▼ Down' : '▲ Up'} {Math.abs(yoy)}% YoY{threeYr != null && ` · ${Math.abs(threeYr)}% since ${years[0].year}`}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="ytbars">
+                                        {years.map((y, i) => (
+                                          <div key={y.year} className={`kyp-ytcol${i === years.length - 1 ? ' cur' : ''}`}>
+                                            <span className="v">{y.count.toLocaleString()}</span>
+                                            <span className="bar" style={{ height: `${Math.max(8, Math.round((y.count / maxCount) * 100))}%` }} />
+                                            <span className="yr">{y.year}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            )}
+                            <div className="kyp-src">Source: Chicago Data Portal — crimes reported to CPD{crimeTractData?.perCapita ? ' · rates per 2023 ACS population · rankings use the last full calendar year' : ''}.</div>
+                          </div>
+                        </div>
+                      ) : (crimeData?.nearby?.apiError || crimeData?.quarterMile?.apiError) ? (
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <AlertTriangle className="w-4 h-4" />
+                          Could not fetch crime data
+                        </p>
+                      ) : !geocode.data?.lat ? (
+                        <p className="text-sm text-muted-foreground">Geocoding required for crime statistics</p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Unable to load crime statistics</p>
+                      )}
+                      </div>
+            </div>
+          </AccordionSection>
+
+          <AccordionSection {...accProps("transit")}>
           <motion.div
             id="print-section-transit"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.19 }}
           >
-            <Collapsible open={isTransitAccessOpen} onOpenChange={setIsTransitAccessOpen}>
-              <Card className="border border-border">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="pb-2 cursor-pointer hover-elevate rounded-t-lg">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="chead flex items-center gap-2">
-                        Transit Access & Ridership
-                      </CardTitle>
-                      <span className="text-muted-foreground text-sm">{isTransitAccessOpen ? '▼' : '▶'}</span>
-                    </div>
-                    {!isTransitAccessOpen && transitData && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {transitData.ctaRail.length > 0 && (
-                          <Badge className="text-xs">
-                            <Train className="w-3 h-3 mr-1" />
-                            {transitData.ctaRail.length} CTA Rail Station{transitData.ctaRail.length !== 1 ? 's' : ''}
-                          </Badge>
-                        )}
-                        {transitData.metra.length > 0 && (
-                          <Badge className="text-xs">
-                            <Train className="w-3 h-3 mr-1" />
-                            {transitData.metra.length} Metra Station{transitData.metra.length !== 1 ? 's' : ''}
-                          </Badge>
-                        )}
-                        {transitData.ctaBus.length > 0 && (
-                          <Badge className="text-xs">
-                            <Bus className="w-3 h-3 mr-1" />
-                            {transitData.ctaBus.length} Bus Route{transitData.ctaBus.length !== 1 ? 's' : ''}
-                          </Badge>
-                        )}
-                        {transitData.ctaRail.length === 0 && transitData.metra.length === 0 && transitData.ctaBus.length === 0 && (
-                          <Badge className="text-xs">No transit nearby</Badge>
-                        )}
-                      </div>
-                    )}
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent>
                 {isLoadingTransit ? (
                   <div className="space-y-3">
                     <Skeleton className="h-6 w-2/3" />
@@ -17232,7 +16006,7 @@ export default function RunDetail() {
                     <Skeleton className="h-4 w-3/4" />
                   </div>
                 ) : transitData ? (
-                  <div className="seccard space-y-4">
+                  <div className="space-y-4">
                     {/* ===== Transit at a Glance ===== */}
                     {(() => {
                       const nearestRail = transitData.ctaRail?.[0] ?? null;
@@ -17258,28 +16032,75 @@ export default function RunDetail() {
                       ) : null;
                       return (
                         <div id="transit-glance" data-testid="transit-glance">
-                          {transitTakeaway?.headline && (
-                            <div className="crm-take" data-testid="transit-ai-takeaway">
-                              <div className="crm-thead">
-                                <div className="crm-takeh">
-                                  <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>
-                                  Takeaway
-                                </div>
-                                <span className={`tz-bdg ${tierCls}`} data-testid="badge-transit-access-tier"><span className="d" />{accessTier} access</span>
-                              </div>
-                              <div className="crm-taket">{transitTakeaway.headline}</div>
-                              <div className="crm-conn">
-                                {transitTakeaway.bullets.map((b, i) => (
-                                  <div key={i} className={`crm-cn ${b.tone === 'good' ? 'g' : b.tone === 'bad' ? 'b' : 'n'}`}>
-                                    <span className="dt" />
-                                    <span className="txt">{b.text.split(/\*\*(.+?)\*\*/g).map((part, pi) => pi % 2 === 1 ? <b key={pi}>{part}</b> : part)}</span>
-                                    {renderJump(transitMetricAnchor(b.metric))}
+                          <div className="kyp-subhead fam-indigo" style={{marginTop:6}}><span className="lbl">Closest Mode of Transport</span><span className="rule"/></div>
+                          {hybridInc ? (
+                          <div className="kyp-modes">
+                            {/* Bus */}
+                            <div className="kyp-mtile" data-testid="glance-mode-bus">
+                              {busStops.length ? (
+                                <>
+                                  <div className="kyp-mtw"><span className="big">{wm(busStops[0].distance)}</span><span className="u">min walk</span></div>
+                                  <div className="kyp-mtbody">
+                                    <div className="kyp-mth">CTA Bus</div>
+                                    <div className="kyp-mtn">{String(busStops[0].routes?.[0] ?? '').match(/^X?\d+[A-Z]?/i)?.[0] ?? busStops[0].routes?.[0]}{dirChip(busStops[0].direction)}</div>
+                                    {busStops[1] && (
+                                      <div className="kyp-mts">
+                                        Also <b>{String(busStops[1].routes?.[0] ?? '').match(/^X?\d+[A-Z]?/i)?.[0] ?? busStops[1].routes?.[0]}</b>{dirChip(busStops[1].direction)} · {wm(busStops[1].distance)} min walk
+                                      </div>
+                                    )}
+                                    <div className="kyp-mts">
+                                      {coversBoth
+                                        ? <>Covers both <b>N–S &amp; E–W</b> travel</>
+                                        : <>{busStops.length} route{busStops.length !== 1 ? 's' : ''} within ½ mi</>}
+                                    </div>
                                   </div>
-                                ))}
-                              </div>
+                                </>
+                              ) : (
+                                <div className="kyp-mtbody"><div className="kyp-mth">CTA Bus</div><div className="kyp-mts">No routes within ½ mi</div></div>
+                              )}
                             </div>
-                          )}
-                          <div className="tz-glabel">Closest by mode</div>
+                            {/* CTA L */}
+                            <div className="kyp-mtile" data-testid="glance-mode-rail">
+                              {nearestRail ? (
+                                <>
+                                  <div className="kyp-mtw"><span className="big">{wm(nearestRail.distance)}</span><span className="u">min walk</span></div>
+                                  <div className="kyp-mtbody">
+                                    <div className="kyp-mth">CTA L</div>
+                                    <div className="kyp-mtn">{nearestRail.stopName.split(/[-/]/)[0].trim()}</div>
+                                    <div className="kyp-mtpills">
+                                      {nearestRail.routes.map((r, ri) => (
+                                        <span key={ri} className="kyp-linepill" style={{ background: getRouteHexColors([r])[0] }}>{r.replace(/ Line$/i, '')} Line</span>
+                                      ))}
+                                    </div>
+                                    <div className="kyp-mts">{Number(nearestRail.distance).toFixed(2)} mi · nearest of {transitData.ctaRail.length} station{transitData.ctaRail.length !== 1 ? 's' : ''} within 2 mi</div>
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="kyp-mtbody"><div className="kyp-mth">CTA L</div><div className="kyp-mts">No L stations within 2 mi</div></div>
+                              )}
+                            </div>
+                            {/* Metra */}
+                            <div className="kyp-mtile" data-testid="glance-mode-metra">
+                              {nearestMetra ? (
+                                <>
+                                  <div className="kyp-mtw"><span className="big">{wm(nearestMetra.distance)}</span><span className="u">min walk</span></div>
+                                  <div className="kyp-mtbody">
+                                    <div className="kyp-mth">Metra</div>
+                                    <div className="kyp-mtn">{nearestMetra.stopName}</div>
+                                    <div className="kyp-mtpills">
+                                      {nearestMetra.routes.map((r: string, ri: number) => (
+                                        <span key={ri} className="kyp-linepill" style={{ background: getMetraRouteHex(r) }}>{r}</span>
+                                      ))}
+                                    </div>
+                                    <div className="kyp-mts">{Number(nearestMetra.distance).toFixed(2)} mi · nearest of {transitData.metra.length} station{transitData.metra.length !== 1 ? 's' : ''} within 2 mi</div>
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="kyp-mtbody"><div className="kyp-mth">Metra</div><div className="kyp-mts">No Metra stations within 2 mi</div></div>
+                              )}
+                            </div>
+                          </div>
+                          ) : (
                           <div className="tz-modes">
                             {/* Bus */}
                             <div className="tz-mode" data-testid="glance-mode-bus">
@@ -17358,42 +16179,28 @@ export default function RunDetail() {
                               )}
                             </div>
                           </div>
+                          )}
                         </div>
                       );
                     })()}
                     {/* CTA Rail */}
                     {transitData.ctaRail.length > 0 && (
-                      <Collapsible open={isCtaRailSectionOpen} onOpenChange={setIsCtaRailSectionOpen}>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                            <h3 className="chead chead-icon">
-                              <Train className="w-4 h-4" />
-                              CTA Rail Stations (2 mi)
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              {!isCtaRailSectionOpen && (
-                                <div className="flex flex-wrap gap-1.5">
-                                  {(() => {
-                                    const allLines = Array.from(new Set(transitData.ctaRail.flatMap(s => s.routes || [])));
-                                    return allLines.map((line, li) => {
-                                      const lName = line.replace(/ Line$/i, '');
-                                      const lc = ctaLineColorMap[lName] || defaultLineColor;
-                                      return <Badge key={li} variant="outline" className={`text-xs ${lc.bg} ${lc.text} ${lc.border} ${lc.darkBg} ${lc.darkText} ${lc.darkBorder}`}>{line}</Badge>;
-                                    });
-                                  })()}
-                                  <Badge variant="outline" className="text-xs">
-                                    {transitData.ctaRail.length} Station{transitData.ctaRail.length !== 1 ? 's' : ''}
-                                  </Badge>
-                                </div>
-                              )}
-                              <span className="text-muted-foreground text-sm">{isCtaRailSectionOpen ? '▼' : '▶'}</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="inc-detail px-4 mt-2">
+                      <div>
+                        <div className="kyp-subhead fam-indigo"><span className="lbl">CTA Rail Stations</span><span className="ct">2 mi</span><span className="rule"/></div>
+                          <div className="mt-2">
                             <div className="space-y-1">
                               {transitData.ctaRail.map((stop, idx) => (
+                                hybridInc ? (
+                                <div key={idx} className="kyp-row" data-testid={`rail-station-row-${idx}`}>
+                                  <span className="kyp-rbar" style={{ background: getRouteHexColors([stop.routes[0]])[0] }} />
+                                  <span className="kyp-rn">{stop.stopName}{" "}
+                                    {stop.routes.map((r, ri) => (
+                                      <span key={ri} className="kyp-linepill" style={{ background: getRouteHexColors([r])[0] }}>{r}</span>
+                                    ))}
+                                  </span>
+                                  <span className="kyp-rd">{stop.distance} mi</span>
+                                </div>
+                                ) : (
                                 <div key={idx} className="transit-station-row" data-testid={`rail-station-row-${idx}`}>
                                   <span className="transit-name">{stop.stopName}</span>
                                   {stop.routes.map((r, ri) => (
@@ -17401,49 +16208,18 @@ export default function RunDetail() {
                                   ))}
                                   <span className="transit-distance">{stop.distance} mi</span>
                                 </div>
+                                )
                               ))}
                             </div>
                           </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                      </div>
                     )}
 
                     {/* CTA L Ridership Data */}
                     {transitData.ctaRail.length > 0 && (
-                      <Collapsible id="transit-ridership" open={isCtaRidershipOpen} onOpenChange={setIsCtaRidershipOpen}>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                            <h3 className="chead chead-icon">
-                              <BarChart3 className="w-4 h-4" />
-                              CTA L Ridership
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              {!isCtaRidershipOpen && !isLoadingRidership && ctaRidershipData?.stations?.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5">
-                                  {ctaRidershipData.stations.slice(0, 2).map((station: any, si: number) => {
-                                    const slc = getStationLineColor(station.stationId);
-                                    return (
-                                    <div key={si} className="flex items-center gap-1">
-                                      <Badge variant="outline" className={`text-xs ${slc.bg} ${slc.text} ${slc.border} ${slc.darkBg} ${slc.darkText} ${slc.darkBorder}`}>
-                                        {station.stationName}
-                                        {station.latest ? ` ${station.latest.weekday.toLocaleString()}/day` : ''}
-                                      </Badge>
-                                      {station.trendPct !== null && (
-                                        <Badge className="text-xs border-0" style={station.trendPct >= 0 ? { background: '#edf6ef', color: '#2f7d3f' } : { background: '#fbecea', color: '#b3311f' }}>
-                                          {station.trendPct >= 0 ? '↗ +' : '↘ '}{station.trendPct}%
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                              <span className="text-muted-foreground text-sm">{isCtaRidershipOpen ? '▼' : '▶'}</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="inc-detail px-4 mt-2">
+                      <div id="transit-ridership">
+                        <div className="kyp-subhead fam-indigo"><span className="lbl">CTA L Ridership</span><span className="rule"/></div>
+                          <div className="mt-2">
                             {isLoadingRidership ? (
                               <div className="space-y-3">
                                 <Skeleton className="h-6 w-2/3" />
@@ -17457,6 +16233,22 @@ export default function RunDetail() {
                                     || (Array.isArray(station.routes) && station.routes.length ? station.routes : []);
                                   return (
                                   <div key={sIdx} className="space-y-3">
+                                    {hybridInc ? (
+                                    <div className="kyp-rhead">
+                                      <span className="kyp-rname" data-testid={`badge-ridership-station-${sIdx}`}>{station.stationName}</span>
+                                      {stationRoutes.map((r: string, ri: number) => (
+                                        <span key={ri} className="kyp-linepill" style={{ background: getRouteHexColors([r])[0], ...(r.replace(/ Line$/i, '') === 'Yellow' ? { color: 'var(--ink)' } : {}) }}>{r}</span>
+                                      ))}
+                                      {station.weekdayRank > 0 && (
+                                        <span className="kyp-rank" data-testid={`badge-ridership-rank-${sIdx}`}>#{station.weekdayRank} / {station.totalStationsRanked}</span>
+                                      )}
+                                      {station.trendPct !== null && (
+                                        <span className={`kyp-trend ${station.trendPct >= 0 ? 'up' : 'down'}`} data-testid={`badge-ridership-trend-${sIdx}`}>
+                                          {station.trendPct >= 0 ? '▲' : '▼'} {Math.abs(station.trendPct)}% · 3-yr
+                                        </span>
+                                      )}
+                                    </div>
+                                    ) : (
                                     <div className="tz-rhead">
                                       <span className="transit-rname" data-testid={`badge-ridership-station-${sIdx}`}>
                                         {station.stationName}
@@ -17476,14 +16268,31 @@ export default function RunDetail() {
                                         </span>
                                       )}
                                     </div>
+                                    )}
 
-                                    {station.latest && (
+                                    {station.latest && (hybridInc ? (() => {
+                                      const wd = station.latest.weekday, sa = station.latest.saturday, su = station.latest.sunday;
+                                      const h = (n: number) => `${Math.max(6, Math.round((n / Math.max(wd, 1)) * 100))}%`;
+                                      return (
+                                        <div className="kyp-daybox">
+                                          <div className="kyp-daytop">
+                                            <div data-testid={`card-ridership-weekday-${sIdx}`}><div className="kyp-dbig">{wd.toLocaleString()}</div><div className="kyp-dbl">Avg weekday · entries/day</div></div>
+                                            <div className="kyp-dtri">
+                                              <div className="kyp-dcell" data-testid={`card-ridership-saturday-${sIdx}`}><div className="dv">{sa.toLocaleString()}</div><div className="dl">Sat</div></div>
+                                              <div className="kyp-dcell" data-testid={`card-ridership-sunday-${sIdx}`}><div className="dv">{su.toLocaleString()}</div><div className="dl">Sun/Hol</div></div>
+                                            </div>
+                                          </div>
+                                          <div className="kyp-daybars"><i style={{ height: "100%" }} /><i className="sat" style={{ height: h(sa) }} /><i className="sun" style={{ height: h(su) }} /></div>
+                                          <div className="kyp-dlab"><span>Weekday</span><span>Sat</span><span>Sun/Hol</span></div>
+                                        </div>
+                                      );
+                                    })() : (
                                       <div className="tz-kpis">
                                         <div className="tz-kpi" data-testid={`card-ridership-weekday-${sIdx}`}><div><div className="l">Avg Weekday</div><div className="s">entries/day</div></div><div className="n">{station.latest.weekday.toLocaleString()}</div></div>
                                         <div className="tz-kpi" data-testid={`card-ridership-saturday-${sIdx}`}><div><div className="l">Avg Saturday</div><div className="s">entries/day</div></div><div className="n">{station.latest.saturday.toLocaleString()}</div></div>
                                         <div className="tz-kpi" data-testid={`card-ridership-sunday-${sIdx}`}><div><div className="l">Avg Sun/Hol</div><div className="s">entries/day</div></div><div className="n">{station.latest.sunday.toLocaleString()}</div></div>
                                       </div>
-                                    )}
+                                    ))}
 
                                     {ctaRidershipData.systemStats && station.latest && (() => {
                                       // Single linear scale drives marker, ticks AND labels — never hardcode axis values.
@@ -17495,6 +16304,25 @@ export default function RunDetail() {
                                       const pctile = station.weekdayRank > 0 && station.totalStationsRanked > 0
                                         ? Math.round(((station.totalStationsRanked - station.weekdayRank) / station.totalStationsRanked) * 100) : null;
                                       const tier = pctile == null ? null : pctile > 70 ? 'Strong' : pctile >= 30 ? 'Moderate' : 'Limited';
+                                      if (hybridInc) return (
+                                        <div className="kyp-cmp" data-testid={`cmp-ridership-${sIdx}`}>
+                                          <div className="kyp-cmptop">
+                                            <span className="kyp-cmplab">vs. all {station.totalStationsRanked || ''} L stations · weekday avg</span>
+                                            {tier && (
+                                              <span className={`kyp-pill ${tier === 'Strong' ? 'good' : 'ctx'}`}>{tier} activity</span>
+                                            )}
+                                          </div>
+                                          <div className="kyp-track">
+                                            <div className="fill" style={{ width: pos(v) }} />
+                                            <div className="tick" style={{ left: pos(med) }}><span className="tlab">Median</span></div>
+                                            <div className="tick" style={{ left: pos(avg) }}><span className="tlab">Sys avg</span></div>
+                                          </div>
+                                          <div className="kyp-cap">
+                                            <b>This station {v.toLocaleString()}</b> · Median {med.toLocaleString()} · System avg {avg.toLocaleString()}
+                                            {pctile != null && <> — busier than {pctile}% of stations.</>}
+                                          </div>
+                                        </div>
+                                      );
                                       return (
                                         <div className="tz-cmp" data-testid={`cmp-ridership-${sIdx}`}>
                                           <div className="tz-cmptop">
@@ -17538,7 +16366,11 @@ export default function RunDetail() {
                                   const stationColors = allStations.map((s: any) => getStationLineColor(s.stationId).hex);
                                   return (
                                     <div className="space-y-2 pt-2">
-                                      <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Weekday Ridership Trend (36 Months)</p>
+                                      {hybridInc ? (
+                                        <div className="kyp-charttitle">Weekday trend · 36 months</div>
+                                      ) : (
+                                        <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Weekday Ridership Trend (36 Months)</p>
+                                      )}
                                       <div className="h-52 w-full" data-testid="chart-l-ridership-trend">
                                         <ResponsiveContainer width="100%" height="100%">
                                           <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -17564,12 +16396,18 @@ export default function RunDetail() {
                                   );
                                 })()}
 
+                                {hybridInc ? (
+                                  <div className="kyp-src">
+                                    Source: CTA L Station Entries, City of Chicago Data Portal. Data as of {ctaRidershipData.systemStats?.latestMonth}. Trend based on 36-month comparison.
+                                  </div>
+                                ) : (
                                 <div className="text-xs text-muted-foreground pt-2 border-t flex items-start gap-1">
                                   <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
                                   <span>
                                     Source: CTA L Station Entries, City of Chicago Data Portal. Data as of {ctaRidershipData.systemStats?.latestMonth}. Trend based on 36-month comparison.
                                   </span>
                                 </div>
+                                )}
                               </div>
                             ) : (
                               <p className="text-sm text-muted-foreground">
@@ -17577,40 +16415,27 @@ export default function RunDetail() {
                               </p>
                             )}
                           </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                      </div>
                     )}
 
                     {/* Metra */}
                     {transitData.metra.length > 0 && (
-                      <Collapsible open={isMetraSectionOpen} onOpenChange={setIsMetraSectionOpen}>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                            <h3 className="chead chead-icon">
-                              <Train className="w-4 h-4" />
-                              Metra Stations (2 mi)
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              {!isMetraSectionOpen && (
-                                <div className="flex flex-wrap gap-1.5">
-                                  <Badge variant="outline" className="text-xs">
-                                    {transitData.metra.length} Station{transitData.metra.length !== 1 ? 's' : ''}
-                                  </Badge>
-                                  {transitData.metra[0] && (
-                                    <Badge variant="outline" className="text-xs" style={{ borderColor: `${getMetraPrimaryColor(transitData.metra[0].routes)}40`, color: getMetraPrimaryColor(transitData.metra[0].routes), backgroundColor: `${getMetraPrimaryColor(transitData.metra[0].routes)}10` }}>
-                                      Nearest: {transitData.metra[0].stopName} ({transitData.metra[0].distance} mi)
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
-                              <span className="text-muted-foreground text-sm">{isMetraSectionOpen ? '▼' : '▶'}</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="inc-detail px-4 mt-2">
+                      <div>
+                        <div className="kyp-subhead fam-indigo"><span className="lbl">Metra Stations & Ridership</span><span className="ct">2 mi</span><span className="rule"/></div>
+                          <div className="mt-2">
                             <div className="space-y-1">
                               {transitData.metra.map((stop, idx) => (
+                                hybridInc ? (
+                                <div key={idx} className="kyp-row">
+                                  <span className="kyp-rbar" style={{ background: getMetraRouteHex(stop.routes[0]) }} />
+                                  <span className="kyp-rn">{stop.stopName}{" "}
+                                    {stop.routes.map((r: string, ri: number) => (
+                                      <span key={ri} className="kyp-linepill" style={{ background: getMetraRouteHex(r) }}>{r}</span>
+                                    ))}
+                                  </span>
+                                  <span className="kyp-rd">{stop.distance} mi</span>
+                                </div>
+                                ) : (
                                 <div key={idx} className="transit-station-row">
                                   <span className="transit-name">{stop.stopName}</span>
                                   {stop.routes.map((r: string, ri: number) => (
@@ -17618,43 +16443,16 @@ export default function RunDetail() {
                                   ))}
                                   <span className="transit-distance">{stop.distance} mi</span>
                                 </div>
+                                )
                               ))}
                             </div>
                           </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                      </div>
                     )}
 
                     {/* Metra Ridership */}
                     {nearestMetraStopName && (metraRidershipData || isLoadingMetraRidership || metraLineData) && (
-                      <Collapsible open={isMetraRidershipOpen} onOpenChange={setIsMetraRidershipOpen}>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-metra-ridership-subsection">
-                            <h3 className="chead chead-icon">
-                              <Train className="w-4 h-4" />
-                              Metra Ridership
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              {!isMetraRidershipOpen && metraRidershipData && (
-                                <div className="flex flex-wrap gap-1.5">
-                                  <Badge variant="outline" className="text-xs">
-                                    {metraRidershipData.stationName} · {metraRidershipData.boards2018.toLocaleString()}/day
-                                  </Badge>
-                                  {metraRidershipData.boards2016 != null && metraRidershipData.boards2016 > 0 && (() => {
-                                    const pct = Math.round(((metraRidershipData.boards2018 - metraRidershipData.boards2016) / metraRidershipData.boards2016) * 1000) / 10;
-                                    return (
-                                      <Badge className="text-xs border-0" style={pct >= 0 ? { background: '#edf6ef', color: '#2f7d3f' } : { background: '#fbecea', color: '#b3311f' }}>
-                                        {pct >= 0 ? '+' : ''}{pct}%
-                                      </Badge>
-                                    );
-                                  })()}
-                                </div>
-                              )}
-                              <span className="text-muted-foreground text-sm">{isMetraRidershipOpen ? '\u25bc' : '\u25b6'}</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
+                      <div data-testid="trigger-metra-ridership-subsection">
                           <div className="px-4 mt-2 space-y-5">
                             {metraLineData && (() => {
                               const stations = (transitData?.metra ?? []).slice(0, 2);
@@ -17707,6 +16505,26 @@ export default function RunDetail() {
                                       const stationLines = (s.routes || []).filter((r: string) => lineByName.has(r));
                                       if (stationLines.length === 0) return null;
                                       const sZone = zoneFor(s);
+                                      if (hybridInc) return (
+                                        <div key={si} className="kyp-mcard" data-testid={`metra-line-station-${si}`}>
+                                          <div className="kyp-mctop">
+                                            <span className="kyp-rname" style={{ fontSize: 15 }}>{s.stopName}</span>
+                                            <span className="kyp-rd">{s.distance} mi</span>
+                                            {sZone && <span className="kyp-zb">Zone {sZone}</span>}
+                                          </div>
+                                          {stationLines.map((r: string, ri: number) => {
+                                            const ld = lineByName.get(r)!;
+                                            return (
+                                              <div key={ri} className="kyp-mline" data-testid={`metra-line-row-${si}-${ri}`}>
+                                                <span><span className="kyp-linepill" style={{ background: getMetraRouteHex(r) }}>{r}</span>{" "}<b>{ld.latest.rides.toLocaleString()}</b> riders/mo</span>
+                                                {ld.yoyPct != null && (
+                                                  <span className={`kyp-trend ${ld.yoyPct >= 0 ? 'up' : 'down'}`}>{ld.yoyPct >= 0 ? '▲' : '▼'} {Math.abs(ld.yoyPct)}% YoY</span>
+                                                )}
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      );
                                       return (
                                         <div key={si} className="rounded-lg border p-3 space-y-2" style={{ borderColor: '#eae8e2', background: si === 0 ? 'var(--sb-paper, #faf9f6)' : 'transparent' }} data-testid={`metra-line-station-${si}`}>
                                           <div className="flex items-center gap-2 flex-wrap">
@@ -17738,7 +16556,11 @@ export default function RunDetail() {
                                   </div>
 
                                   <div className="space-y-2 pt-1">
-                                    <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Monthly Line Ridership (24 Months, through {latestLabel})</p>
+                                    {hybridInc ? (
+                                      <div className="kyp-charttitle">Monthly line ridership · 24 months, through {latestLabel}</div>
+                                    ) : (
+                                      <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Monthly Line Ridership (24 Months, through {latestLabel})</p>
+                                    )}
                                     <div className="h-52 w-full" data-testid="chart-metra-line-ridership">
                                       <ResponsiveContainer width="100%" height="100%">
                                         <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -17759,10 +16581,18 @@ export default function RunDetail() {
                                     </div>
                                   </div>
 
-                                  {zoneFlowNote && (
+                                  {zoneFlowNote && (hybridInc ? (
+                                    <div className="kyp-zone" data-testid="text-metra-zone-flows">{zoneFlowNote}</div>
+                                  ) : (
                                     <p className="text-xs" style={{ color: '#565651' }} data-testid="text-metra-zone-flows">{zoneFlowNote}</p>
-                                  )}
+                                  ))}
 
+                                  {hybridInc ? (
+                                    <div className="kyp-src">
+                                      Source: RTAMS Metra Monthly Ridership by Line / by Fare Zone, updated through {latestLabel}. Metra reports ridership at the line level only — figures are total monthly rides for each line, not boardings at an individual station. Dataset at{' '}
+                                      <a href={metraLineData.meta.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">rtams.org</a>.
+                                    </div>
+                                  ) : (
                                   <div className="text-xs text-muted-foreground pt-2 border-t flex items-start gap-1">
                                     <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
                                     <span>
@@ -17770,6 +16600,7 @@ export default function RunDetail() {
                                       <a href={metraLineData.meta.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline text-[#2b3a9e]">rtams.org</a>.
                                     </span>
                                   </div>
+                                  )}
                                 </div>
                               );
                             })()}
@@ -17780,6 +16611,35 @@ export default function RunDetail() {
                               </div>
                             ) : metraRidershipData ? (
                               <div className="space-y-4">
+                                {hybridInc ? (
+                                  <>
+                                    {metraLineData && (
+                                      <div className="kyp-title" style={{ fontSize: 14 }}>Station-level detail <span style={{ fontWeight: 400, color: 'var(--kyp-ink2)' }}>· {metraRidershipData.surveyYear} survey — last station-level count Metra conducted</span></div>
+                                    )}
+                                    <div className="kyp-rhead">
+                                      <span className="kyp-rname" style={{ fontSize: 15 }} data-testid="badge-metra-ridership-station">{metraRidershipData.stationName}</span>
+                                      {metraRidershipData.rank > 0 && (
+                                        <span className="kyp-rank" data-testid="badge-metra-ridership-rank">#{metraRidershipData.rank} / {metraRidershipData.totalStations}</span>
+                                      )}
+                                      {metraRidershipData.boards2016 != null && metraRidershipData.boards2016 > 0 && (() => {
+                                        const pct = Math.round(((metraRidershipData.boards2018 - metraRidershipData.boards2016) / metraRidershipData.boards2016) * 1000) / 10;
+                                        return (
+                                          <span className={`kyp-trend ${pct >= 0 ? 'up' : 'down'}`} data-testid="badge-metra-ridership-trend">
+                                            {pct >= 0 ? '▲' : '▼'} {Math.abs(pct)}% since 2016
+                                          </span>
+                                        );
+                                      })()}
+                                    </div>
+                                    <div className="kyp-blocks">
+                                      <div className="kyp-block ind" data-testid="card-metra-ridership-boardings"><div className="bv">{metraRidershipData.boards2018.toLocaleString()}</div><div><div className="bl">Daily boardings</div><div className="bd">avg weekday · {metraRidershipData.surveyYear}</div></div></div>
+                                      <div className="kyp-block dark" data-testid="card-metra-ridership-rank"><div className="bv">#{metraRidershipData.rank}</div><div><div className="bl">Station rank</div><div className="bd">of {metraRidershipData.totalStations} stations</div></div></div>
+                                      {metraRidershipData.boards2006 != null && metraRidershipData.boards2006 > 0 && (
+                                        <div className="kyp-block grn" data-testid="card-metra-ridership-2006"><div className="bv">{metraRidershipData.boards2006.toLocaleString()}</div><div><div className="bl">2006 baseline</div><div className="bd">boardings/day</div></div></div>
+                                      )}
+                                    </div>
+                                  </>
+                                ) : (
+                                <>
                                 {metraLineData && (
                                   <p className="text-xs pt-1" style={{ color: '#565651', fontWeight: 600 }}>Station-Level Detail (2018 survey — last station-level count Metra conducted)</p>
                                 )}
@@ -17810,6 +16670,8 @@ export default function RunDetail() {
                                     <StatTile label="2006 BASELINE" qualifier="boardings/day in 2006" value={metraRidershipData.boards2006.toLocaleString()} data-testid="card-metra-ridership-2006" />
                                   )}
                                 </div>
+                                </>
+                                )}
 
                                 {(() => {
                                   const points = ([
@@ -17821,7 +16683,11 @@ export default function RunDetail() {
                                   if (points.length < 2) return null;
                                   return (
                                     <div className="space-y-2 pt-2">
-                                      <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Survey-Year Boardings Trend</p>
+                                      {hybridInc ? (
+                                        <div className="kyp-charttitle">Survey-year boardings trend</div>
+                                      ) : (
+                                        <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Survey-Year Boardings Trend</p>
+                                      )}
                                       <div className="h-40 w-full" data-testid="chart-metra-ridership-trend">
                                         <ResponsiveContainer width="100%" height="100%">
                                           <LineChart data={points} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -17841,6 +16707,12 @@ export default function RunDetail() {
                                   );
                                 })()}
 
+                                {hybridInc ? (
+                                  <div className="kyp-src">
+                                    Source: RTAMS Metra Boarding &amp; Alighting Survey ({metraRidershipData.surveyYear}) · station-level boardings for {metraRidershipData.stationName}. Latest systemwide reports at{' '}
+                                    <a href="https://metra.com/ridership-and-on-time-performance" target="_blank" rel="noopener noreferrer" className="underline">metra.com</a>.
+                                  </div>
+                                ) : (
                                 <div className="text-xs text-muted-foreground pt-2 border-t flex items-start gap-1">
                                   <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
                                   <span>
@@ -17848,90 +16720,46 @@ export default function RunDetail() {
                                     <a href="https://metra.com/ridership-and-on-time-performance" target="_blank" rel="noopener noreferrer" className="underline text-[#2b3a9e]">metra.com</a>.
                                   </span>
                                 </div>
+                                )}
                               </div>
                             ) : !metraLineData ? (
                               <p className="text-sm text-muted-foreground">No ridership data available for {nearestMetraStopName}.</p>
                             ) : null}
                           </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                      </div>
                     )}
 
 
                     {/* CTA Bus */}
                     {transitData.ctaBus.length > 0 && (
-                      <Collapsible open={isCtaBusSectionOpen} onOpenChange={setIsCtaBusSectionOpen}>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                            <h3 className="chead chead-icon">
-                              <Bus className="w-4 h-4" />
-                              CTA Bus Routes (0.5 mi)
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              {!isCtaBusSectionOpen && (
-                                <div className="flex flex-wrap gap-1.5">
-                                  <Badge variant="outline" className="text-xs">
-                                    {transitData.ctaBus.length} Route{transitData.ctaBus.length !== 1 ? 's' : ''}
-                                  </Badge>
-                                  {transitData.ctaBus[0] && (
-                                    <Badge variant="outline" className="text-xs">
-                                      Nearest: {transitData.ctaBus[0].routes[0] || transitData.ctaBus[0].stopName} at {transitData.ctaBus[0].stopName} ({transitData.ctaBus[0].distance} mi)
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
-                              <span className="text-muted-foreground text-sm">{isCtaBusSectionOpen ? '▼' : '▶'}</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
+                      <div>
+                        <div className="kyp-subhead fam-indigo"><span className="lbl">CTA Bus Routes</span><span className="ct">0.5 mi</span><span className="rule"/></div>
                           <div className="px-4 mt-2">
                             <div className="space-y-1">
                               {transitData.ctaBus.map((stop, idx) => (
+                                hybridInc ? (
+                                <div key={idx} className="kyp-row">
+                                  <span className="kyp-rbar" style={{ background: "var(--kyp-indigo)" }} />
+                                  <span className="kyp-rn">{stop.routes[0] || stop.stopName} <span style={{ fontWeight: 400, color: "var(--kyp-ink2)" }}>at {stop.stopName}</span></span>
+                                  <span className="kyp-rd">{stop.distance} mi</span>
+                                </div>
+                                ) : (
                                 <div key={idx} className="transit-station-row">
                                   <span className="transit-name">{stop.routes[0] || stop.stopName}</span>
                                   <span className="text-sm text-muted-foreground">at {stop.stopName}</span>
                                   <span className="transit-distance">{stop.distance} mi</span>
                                 </div>
+                                )
                               ))}
                             </div>
                           </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                      </div>
                     )}
 
                     {/* CTA Bus Ridership Data */}
                     {transitData.ctaBus.length > 0 && (
-                      <Collapsible open={isCtaBusRidershipOpen} onOpenChange={setIsCtaBusRidershipOpen}>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                            <h3 className="chead chead-icon">
-                              <BarChart3 className="w-4 h-4" />
-                              CTA Bus Ridership
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              {!isCtaBusRidershipOpen && !isLoadingBusRidership && ctaBusRidershipData?.routes?.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5">
-                                  {ctaBusRidershipData.routes.slice(0, 2).map((route: any, ri: number) => (
-                                    <div key={ri} className="flex items-center gap-1">
-                                      <Badge variant="outline" className="text-xs">
-                                        #{route.route} {route.routeName}
-                                        {route.latest ? ` ${Math.round(route.latest.weekday).toLocaleString()}/day` : ''}
-                                      </Badge>
-                                      {route.trendPct !== null && (
-                                        <Badge className="text-xs border-0" style={route.trendPct >= 0 ? { background: '#edf6ef', color: '#2f7d3f' } : { background: '#fbecea', color: '#b3311f' }}>
-                                          {route.trendPct >= 0 ? '+' : ''}{route.trendPct}%
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              <span className="text-muted-foreground text-sm">{isCtaBusRidershipOpen ? '▼' : '▶'}</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
+                      <div>
+                        <div className="kyp-subhead fam-indigo"><span className="lbl">CTA Bus Ridership</span><span className="rule"/></div>
                           <div className="px-4 mt-2">
                             {isLoadingBusRidership ? (
                               <div className="space-y-3">
@@ -17943,6 +16771,19 @@ export default function RunDetail() {
                               <div className="space-y-4">
                                 {ctaBusRidershipData.routes.map((route: any, rIdx: number) => (
                                   <div key={rIdx} className="space-y-3">
+                                    {hybridInc ? (
+                                    <div className="kyp-rhead">
+                                      <span className="kyp-rname" data-testid={`badge-bus-ridership-route-${rIdx}`}>#{route.route} {route.routeName}</span>
+                                      {route.weekdayRank > 0 && (
+                                        <span className="kyp-rank" data-testid={`badge-bus-ridership-rank-${rIdx}`}>#{route.weekdayRank} / {route.totalRoutesRanked}</span>
+                                      )}
+                                      {route.trendPct !== null && (
+                                        <span className={`kyp-trend ${route.trendPct >= 0 ? 'up' : 'down'}`} data-testid={`badge-bus-ridership-trend-${rIdx}`}>
+                                          {route.trendPct >= 0 ? '▲' : '▼'} {Math.abs(route.trendPct)}% · 3-yr
+                                        </span>
+                                      )}
+                                    </div>
+                                    ) : (
                                     <div className="tz-rhead">
                                       <span className="tz-route" data-testid={`badge-bus-ridership-route-${rIdx}`}>
                                         {route.route} {route.routeName}
@@ -17959,14 +16800,31 @@ export default function RunDetail() {
                                         </span>
                                       )}
                                     </div>
+                                    )}
 
-                                    {route.latest && (
+                                    {route.latest && (hybridInc ? (() => {
+                                      const wd = Math.round(route.latest.weekday), sa = Math.round(route.latest.saturday), su = Math.round(route.latest.sunday);
+                                      const h = (n: number) => `${Math.max(6, Math.round((n / Math.max(wd, 1)) * 100))}%`;
+                                      return (
+                                        <div className="kyp-daybox">
+                                          <div className="kyp-daytop">
+                                            <div data-testid={`card-bus-ridership-weekday-${rIdx}`}><div className="kyp-dbig">{wd.toLocaleString()}</div><div className="kyp-dbl">Avg weekday · riders/day</div></div>
+                                            <div className="kyp-dtri">
+                                              <div className="kyp-dcell" data-testid={`card-bus-ridership-saturday-${rIdx}`}><div className="dv">{sa.toLocaleString()}</div><div className="dl">Sat</div></div>
+                                              <div className="kyp-dcell" data-testid={`card-bus-ridership-sunday-${rIdx}`}><div className="dv">{su.toLocaleString()}</div><div className="dl">Sun/Hol</div></div>
+                                            </div>
+                                          </div>
+                                          <div className="kyp-daybars"><i style={{ height: "100%" }} /><i className="sat" style={{ height: h(sa) }} /><i className="sun" style={{ height: h(su) }} /></div>
+                                          <div className="kyp-dlab"><span>Weekday</span><span>Sat</span><span>Sun/Hol</span></div>
+                                        </div>
+                                      );
+                                    })() : (
                                       <div className="tz-kpis">
                                         <div className="tz-kpi" data-testid={`card-bus-ridership-weekday-${rIdx}`}><div><div className="l">Avg Weekday</div><div className="s">riders/day</div></div><div className="n">{Math.round(route.latest.weekday).toLocaleString()}</div></div>
                                         <div className="tz-kpi" data-testid={`card-bus-ridership-saturday-${rIdx}`}><div><div className="l">Avg Saturday</div><div className="s">riders/day</div></div><div className="n">{Math.round(route.latest.saturday).toLocaleString()}</div></div>
                                         <div className="tz-kpi" data-testid={`card-bus-ridership-sunday-${rIdx}`}><div><div className="l">Avg Sun/Hol</div><div className="s">riders/day</div></div><div className="n">{Math.round(route.latest.sunday).toLocaleString()}</div></div>
                                       </div>
-                                    )}
+                                    ))}
 
                                     {ctaBusRidershipData.systemStats && route.latest && (() => {
                                       // Single linear scale drives marker, ticks AND labels.
@@ -17978,6 +16836,25 @@ export default function RunDetail() {
                                       const pctile = route.weekdayRank > 0 && route.totalRoutesRanked > 0
                                         ? Math.round(((route.totalRoutesRanked - route.weekdayRank) / route.totalRoutesRanked) * 100) : null;
                                       const tier = pctile == null ? null : pctile > 70 ? 'Strong' : pctile >= 30 ? 'Moderate' : 'Limited';
+                                      if (hybridInc) return (
+                                        <div className="kyp-cmp" data-testid={`cmp-bus-ridership-${rIdx}`}>
+                                          <div className="kyp-cmptop">
+                                            <span className="kyp-cmplab">vs. all {route.totalRoutesRanked || ''} bus routes · weekday avg</span>
+                                            {tier && (
+                                              <span className={`kyp-pill ${tier === 'Strong' ? 'good' : 'ctx'}`}>{tier} activity</span>
+                                            )}
+                                          </div>
+                                          <div className="kyp-track">
+                                            <div className="fill" style={{ width: pos(v) }} />
+                                            <div className="tick" style={{ left: pos(med) }}><span className="tlab">Median</span></div>
+                                            <div className="tick" style={{ left: pos(avg) }}><span className="tlab">Sys avg</span></div>
+                                          </div>
+                                          <div className="kyp-cap">
+                                            <b>This route {v.toLocaleString()}</b> · Median {med.toLocaleString()} · System avg {avg.toLocaleString()}
+                                            {pctile != null && <> — busier than {pctile}% of routes.</>}
+                                          </div>
+                                        </div>
+                                      );
                                       return (
                                         <div className="tz-cmp" data-testid={`cmp-bus-ridership-${rIdx}`}>
                                           <div className="tz-cmptop">
@@ -18021,7 +16898,11 @@ export default function RunDetail() {
                                   const lineColors = ['#2b3a9e', '#93a0da'];
                                   return (
                                     <div className="space-y-2 pt-2">
-                                      <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Weekday Ridership Trend (36 Months)</p>
+                                      {hybridInc ? (
+                                        <div className="kyp-charttitle">Weekday trend · 36 months</div>
+                                      ) : (
+                                        <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Weekday Ridership Trend (36 Months)</p>
+                                      )}
                                       <div className="h-52 w-full" data-testid="chart-bus-ridership-trend">
                                         <ResponsiveContainer width="100%" height="100%">
                                           <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -18048,12 +16929,18 @@ export default function RunDetail() {
                                   );
                                 })()}
 
+                                {hybridInc ? (
+                                  <div className="kyp-src">
+                                    Source: CTA Bus Ridership, City of Chicago Data Portal. Data as of {ctaBusRidershipData.systemStats?.latestMonth}. Ridership is total route-wide boardings, not specific to any individual bus stop. Trend based on 36-month comparison.
+                                  </div>
+                                ) : (
                                 <div className="text-xs text-muted-foreground pt-2 border-t flex items-start gap-1">
                                   <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
                                   <span>
                                     Source: CTA Bus Ridership, City of Chicago Data Portal. Data as of {ctaBusRidershipData.systemStats?.latestMonth}. Ridership is total route-wide boardings, not specific to any individual bus stop. Trend based on 36-month comparison.
                                   </span>
                                 </div>
+                                )}
                               </div>
                             ) : (
                               <p className="text-sm text-muted-foreground">
@@ -18061,42 +16948,13 @@ export default function RunDetail() {
                               </p>
                             )}
                           </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                      </div>
                     )}
 
                     {/* Street Traffic Count */}
                     {(isLoadingTraffic || trafficData) && (
-                      <Collapsible>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                            <h3 className="chead chead-icon">
-                              <Car className="w-4 h-4" />
-                              Street Traffic Volume
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              {!isLoadingTraffic && trafficData && (
-                                <div className="flex flex-wrap gap-1.5">
-                                  <Badge variant="outline" className="text-xs">
-                                    {trafficData.latestCount.toLocaleString()} vehicles/day
-                                  </Badge>
-                                  {trafficData.cityRank > 0 && (
-                                    <Badge variant={trafficData.percentile >= 75 ? 'default' : 'secondary'} className="text-xs">
-                                      Top {100 - trafficData.percentile + 1}% citywide
-                                    </Badge>
-                                  )}
-                                  <Badge className="text-xs flex items-center gap-1">
-                                    {trafficData.trend === 'increasing' ? <TrendingUp className="w-3 h-3" /> : trafficData.trend === 'decreasing' ? <TrendingDown className="w-3 h-3" /> : null}
-                                    {trafficData.trend === 'increasing' ? 'Increasing' : trafficData.trend === 'decreasing' ? 'Decreasing' : 'Stable'}
-                                    {trafficData.yearlyAverages?.[0]?.year ? ` · since ${trafficData.yearlyAverages[0].year}` : ''}
-                                  </Badge>
-                                </div>
-                              )}
-                              <span className="text-muted-foreground text-sm">▶</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
+                      <div>
+                        <div className="kyp-subhead fam-indigo"><span className="lbl">Street Traffic Volume</span><span className="rule"/></div>
                           <div className="px-4 mt-2 pb-4">
                             {isLoadingTraffic ? (
                               <div className="space-y-3">
@@ -18107,21 +16965,44 @@ export default function RunDetail() {
                             ) : trafficData ? (
                               <div className="space-y-4">
                                 {/* Segment info */}
+                                {hybridInc ? (
+                                <div>
+                                  <div className="kyp-title" style={{ fontSize: 15 }}>{trafficData.roadName} ({trafficData.direction}) — {trafficData.fromSegment} to {trafficData.toSegment}</div>
+                                  <div style={{ fontFamily: "var(--kyp-sans)", fontSize: 12, color: "var(--kyp-ink2)", marginTop: -8 }}>Nearest monitored segment · {trafficData.distanceFt < 5280 ? `${trafficData.distanceFt.toLocaleString()} ft away` : `${(trafficData.distanceFt / 5280).toFixed(2)} mi away`}</div>
+                                </div>
+                                ) : (
                                 <div>
                                   <p className="text-sm font-medium">{trafficData.roadName} ({trafficData.direction}) — {trafficData.fromSegment} to {trafficData.toSegment}</p>
                                   <p className="text-xs text-muted-foreground mt-0.5">Nearest monitored segment · {trafficData.distanceFt < 5280 ? `${trafficData.distanceFt.toLocaleString()} ft away` : `${(trafficData.distanceFt / 5280).toFixed(2)} mi away`}</p>
                                 </div>
+                                )}
 
                                 {/* Key stats */}
+                                {hybridInc ? (
+                                <div className="kyp-blocks">
+                                  <div className="kyp-block ind" data-testid="card-traffic-daily"><div className="bv">{trafficData.latestCount.toLocaleString()}</div><div><div className="bl">Daily vehicles</div><div className="bd">vehicles/day</div></div></div>
+                                  <div className="kyp-block dark" data-testid="card-traffic-rank"><div className="bv">#{trafficData.cityRank > 0 ? trafficData.cityRank.toLocaleString() : '—'}</div><div><div className="bl">City rank</div><div className="bd">of {trafficData.cityTotal.toLocaleString()} segments</div></div></div>
+                                  <div className="kyp-block grn" data-testid="card-traffic-percentile"><div className="bv">{trafficData.percentile > 0 ? <>{trafficData.percentile}<span style={{ fontSize: 18 }}>th</span></> : '—'}</div><div><div className="bl">Percentile</div><div className="bd">busier than {trafficData.percentile}%</div></div></div>
+                                </div>
+                                ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                   <StatTile label="DAILY VEHICLES" qualifier="vehicles/day" value={trafficData.latestCount.toLocaleString()} data-testid="card-traffic-daily" />
                                   <StatTile label="CITY RANK" qualifier={`of ${trafficData.cityTotal.toLocaleString()} segments`} value={`#${trafficData.cityRank > 0 ? trafficData.cityRank.toLocaleString() : '—'}`} data-testid="card-traffic-rank" />
                                   <StatTile label="PERCENTILE" qualifier={`busier than ${trafficData.percentile}% of city`} value={trafficData.percentile > 0 ? `${trafficData.percentile}th` : '—'} data-testid="card-traffic-percentile" />
                                 </div>
+                                )}
 
                                 {/* City comparison bar — neutral positional scale: traffic volume
                                     isn't inherently good or bad (depends on the use case). */}
                                 {trafficData.cityRank > 0 && (
+                                  hybridInc ? (
+                                  <div className="kyp-cmp" data-testid="cmp-traffic">
+                                    <div className="kyp-cmptop"><span className="kyp-cmplab">vs. all monitored segments citywide</span></div>
+                                    <div className="kyp-track"><div className="fill" style={{ width: `${Math.min(100, trafficData.percentile)}%`, background: "var(--kyp-orange)" }} />
+                                      <div className="tick" style={{ left: `${Math.min(100, trafficData.percentile)}%` }}><span className="tlab">This segment</span></div></div>
+                                    <div className="kyp-cap">Busier isn't better or worse — high-visibility retail wants traffic; quiet residential doesn't.</div>
+                                  </div>
+                                  ) : (
                                   <div className="tz-cmp" data-testid="cmp-traffic">
                                     <div className="tz-cmptop">
                                       <span className="l">vs. all monitored street segments citywide</span>
@@ -18132,12 +17013,17 @@ export default function RunDetail() {
                                     <div className="tz-labs"><span>Quieter streets</span><b>This segment: {trafficData.percentile}th percentile</b><span>Busier streets</span></div>
                                     <div className="tz-cap">Busier isn't better or worse — high-visibility retail wants traffic; quiet residential doesn't.</div>
                                   </div>
+                                  )
                                 )}
 
                                 {/* Yearly trend chart */}
                                 {trafficData.yearlyAverages.length >= 2 && (
                                   <div className="space-y-2 pt-2">
+                                    {hybridInc ? (
+                                    <div className="kyp-charttitle">Annual average daily traffic</div>
+                                    ) : (
                                     <p className="text-xs font-medium text-muted-foreground">Annual Average Daily Traffic Trend</p>
+                                    )}
                                     <div className="h-44 w-full" data-testid="chart-traffic-trend">
                                       <ResponsiveContainer width="100%" height="100%">
                                         <LineChart data={trafficData.yearlyAverages} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -18149,7 +17035,7 @@ export default function RunDetail() {
                                             labelFormatter={(label) => `Year: ${label}`}
                                             contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }}
                                           />
-                                          <Line type="monotone" dataKey="avgCount" stroke="#3f51c5" strokeWidth={2} dot={{ r: 3, fill: '#3f51c5' }} activeDot={{ r: 5 }} />
+                                          <Line type="monotone" dataKey="avgCount" stroke={hybridInc ? "#e07a2e" : "#3f51c5"} strokeWidth={2} dot={{ r: 3, fill: hybridInc ? "#e07a2e" : "#3f51c5" }} activeDot={{ r: 5 }} />
                                         </LineChart>
                                       </ResponsiveContainer>
                                     </div>
@@ -18163,8 +17049,7 @@ export default function RunDetail() {
                               </div>
                             ) : null}
                           </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                      </div>
                     )}
                     {transitData.ctaRail.length === 0 && transitData.metra.length === 0 && transitData.ctaBus.length === 0 && (
                       <p className="text-sm text-muted-foreground">
@@ -18172,25 +17057,19 @@ export default function RunDetail() {
                       </p>
                     )}
 
-                    <div className="pt-2 border-t">
-                      <p className="text-xs text-muted-foreground">
-                        Source: CTA and Metra GTFS feeds
-                      </p>
-                    </div>
+                    <div className="kyp-src">Source: CTA and Metra GTFS feeds</div>
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">
                     Transit data is loading. Please check back in a moment.
                   </p>
                 )}
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
           </motion.div>
+          </AccordionSection>
 
           {/* Pre-Title Check - Can I Finance This Property? */}
           {run?.address && (
+          <AccordionSection {...accProps("debt")}>
             <motion.div
               id="print-section-pre-title-check"
               initial={{ opacity: 0 }}
@@ -18203,19 +17082,18 @@ export default function RunDetail() {
                 openViolationsCount={violationsData?.openViolations || 0}
                 lienData={lienData}
                 propertyTaxData={propertyTaxData}
+                city={facts?.city}
                 isOpen={sectionStates.preTitleCheck}
                 onIsOpenChange={(v) => setSectionOpen('preTitleCheck', v)}
                 onScrollToSection={(section) => {
-                  setIsPropertyDetailsOpen(true);
                   if (section === 'propertyTax') {
+                    setIsPropertyDetailsOpen(true);
                     setIsPropertyTaxInfoSectionOpen(true);
-                    setTimeout(() => document.getElementById('section-property-tax-info')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
-                  } else if (section === 'liens') {
-                    setIsLiensSectionOpen(true);
-                    setTimeout(() => document.getElementById('section-liens')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
-                  } else if (section === 'saleHistory') {
-                    setIsSaleHistorySectionOpen(true);
-                    setTimeout(() => document.getElementById('section-sale-history')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+                    revealAnchor('section-property-tax-info');
+                  } else if (section === 'ownership') {
+                    setAccHidden((m) => ({ ...m, ownership: false }));
+                    setAccOpen((m) => ({ ...m, ownership: true }));
+                    revealAnchor('section-ownership');
                   }
                 }}
               >
@@ -18538,10 +17416,157 @@ export default function RunDetail() {
                 )}
               </PreTitleCheck>
             </motion.div>
+          </AccordionSection>
           )}
 
-          {/* Site-Specific Coverage — address-level news, only shown when articles exist */}
-          {(() => {
+          {/* Site-Specific Coverage — address-level news, only shown when articles exist.
+              The wrapper div is a stable scroll anchor for the scan view even when no articles render. */}
+          <AccordionSection {...accProps("news")}>
+          <div id="section-address-news">
+          {/* Hybrid: ONE merged News section (site-specific + neighborhood). Legacy blocks below are hidden under the flag. */}
+          {hybridInc && (() => {
+            const bothLoaded = !isLoadingAddressNews && (!coParcelAddress || !isLoadingCoParcelAddressNews);
+            const primaryArticles = (addressNewsData?.articles || []).map((a: any) => ({ ...a, _addressLabel: run?.address?.split(',')[0] }));
+            const coArticles = coParcelAddress ? (coParcelAddressNewsData?.articles || []).map((a: any) => ({ ...a, _addressLabel: coParcelAddress.split(',')[0] })) : [];
+            const seenUrls = new Set<string>();
+            const merged = [...primaryArticles, ...coArticles]
+              .filter(a => { if (!a.url || seenUrls.has(a.url)) return false; seenUrls.add(a.url); return true; })
+              .sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime());
+            const showLabels = coParcelAddress && coArticles.length > 0;
+            const genSite = newsTakeaway?.section && newsTakeaway.meta?.length ? newsTakeaway : null;
+            const parcelArts = genSite ? genSite.meta.filter(m => m.tier === 'parcel') : [];
+            const adjArts = genSite ? genSite.meta.filter(m => m.tier === 'adjacent') : [];
+            const genById = genSite ? new Map(genSite.articles.map(a => [a.id, a])) : new Map();
+            const hasSite = !!genSite || (bothLoaded && merged.length > 0);
+            const nn = nnTakeaway?.takeaway ? nnTakeaway : null;
+            const hasNeighborhood = !!facts?.communityArea;
+            if (!hasSite && !hasNeighborhood) return null;
+            const siteCount = genSite ? parcelArts.length + adjArts.length : merged.length;
+            const siteSources = genSite?.sources_line || "Block Club Chicago, Crain's Chicago Business, The Real Deal, Chicago YIMBY, Chicago Tribune, Chicago Sun-Times";
+            const nnSources = nn?.sources_line ? `${nn.sources_line}. Podcasts: Crain's Daily Gist, Reset (WBEZ), Eater's The Digest, Good Beer Hunting` : hasNeighborhood ? "Block Club Chicago, Eater Chicago, The Infatuation, WhatNow Chicago, Timeout Chicago, Chicago Reader, Chicago YIMBY, Crain's Chicago Business, The Real Deal, Dwell, Dezeen. Podcasts: Crain's Chicago Daily Gist, Reset (WBEZ), Eater's The Digest, Good Beer Hunting" : '';
+            return (
+              <motion.div id="print-section-news" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+                  <div className="pt-0">
+                        <div className="kyp-sec">
+                          <div className="kyp-content">
+                            {/* ── Subsection 1: Site-Specific Coverage — always rendered; an explicit "none" is a real finding ── */}
+                                <div className="kyp-subhead fam-slate"><span className="lbl">Site-Specific Coverage</span><span className="ct">{hasSite ? siteCount : 0}</span><span className="rule" /></div>
+                                {!hasSite ? (
+                                  <div className="kyp-empty" data-testid="news-site-empty">No news coverage names this property.</div>
+                                ) : genSite ? (
+                                  <div data-testid="news-coverage-generated">
+                                    <div className="kyp-arch">
+                                      {[...parcelArts, ...adjArts].map((m, i) => (
+                                        <NewsSiteCard key={m.id} m={m} g={genById.get(m.id)} idx={i} lead={i === 0} />
+                                      ))}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="kyp-arch">
+                                    {merged.map((article: any, idx: number) => (
+                                      <div className="kyp-archrow" key={article.url || idx} data-testid={`address-news-article-${idx}`}>
+                                        <LogoTile url={article.url} source={article.source} date={article.published ? new Date(article.published).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : undefined} />
+                                        <div className="kyp-archbody">
+                                          <div className="kyp-archkick">
+                                            {article.published && <span className="kyp-archdate" data-testid={`text-address-news-date-${idx}`}>{new Date(article.published).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>}
+                                            {showLabels && <span className="kyp-archtag adj">{article._addressLabel}</span>}
+                                          </div>
+                                          {safeUrl(article.url) ? <a className="kyp-archtitle" href={safeUrl(article.url)} target="_blank" rel="noopener noreferrer" data-testid={`link-address-news-${idx}`}>{article.title}</a> : <span className="kyp-archtitle" data-testid={`link-address-news-${idx}`}>{article.title}</span>}
+                                          {article.summary && <div className="kyp-archsum">{article.summary}</div>}
+                                          <div className="kyp-archfoot">
+                                            {safeUrl(article.url) && <a className="kyp-archread" href={safeUrl(article.url)} target="_blank" rel="noopener noreferrer"><span data-testid={`text-address-news-source-${idx}`}>Read at {article.source}</span> ↗</a>}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                            {/* ── Subsection 2: Neighborhood News ── */}
+                            {hasNeighborhood && (
+                              <>
+                                <div className="kyp-subhead fam-slate" id="print-section-neighborhood-news" style={{ marginTop: 34 }}><span className="lbl">Neighborhood News</span><span className="ct">{facts?.communityArea} · 120 days</span><span className="rule" /></div>
+                                {isLoadingNeighborhoodNews ? (
+                                  <div className="space-y-2">
+                                    <Skeleton className="h-4 w-3/4" />
+                                    <Skeleton className="h-4 w-2/3" />
+                                    <Skeleton className="h-4 w-1/2" />
+                                  </div>
+                                ) : nn ? (
+                                  <div data-testid="neighborhood-news-generated">
+                                    {nn.kpis && (
+                                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 18 }}>
+                                        <div className={`kyp-block count ${nn.kpis.momentumScore >= 75 ? 'grn' : nn.kpis.momentumScore >= 50 ? 'orange' : 'red'}`}>
+                                          <div className="bv" data-testid="text-news-score">{nn.kpis.momentumScore}</div>
+                                          <div><div className="bl">Momentum · <span data-testid="text-news-label">{nn.kpis.momentumLabel}</span></div><div className="bd">vs. Chicago community areas</div></div>
+                                        </div>
+                                        <div className="kyp-block count slate">
+                                          <div className="bv" data-testid="text-news-articles">{nn.kpis.articleCount}</div>
+                                          <div><div className="bl">Articles found</div><div className="bd">last 120 days</div></div>
+                                        </div>
+                                      </div>
+                                    )}
+                                    <div className="kyp-cath"><Utensils className="w-3.5 h-3.5" />Entertainment &amp; Culture</div>
+                                    {nn.culture.length === 0 && <p className="text-sm text-muted-foreground italic">No recent entertainment or culture coverage found.</p>}
+                                    <div className="kyp-arch">{nn.culture.map((a, i) => <NewsArchCard key={a.url || i} a={a} testid={`nn-culture-${i}`} />)}</div>
+
+                                    <div className="kyp-cath"><Building2 className="w-3.5 h-3.5" />Real Estate &amp; Development</div>
+                                    {nn.dev.length === 0 && <p className="text-sm text-muted-foreground italic">No recent development coverage found.</p>}
+                                    <div className="kyp-arch">{nn.dev.map((p, i) => <NewsDevCard key={p.url || i} p={p} testid={`nn-dev-${i}`} />)}</div>
+                                  </div>
+                                ) : neighborhoodNewsData ? (
+                                  <div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 18 }}>
+                                      <div className={`kyp-block count ${neighborhoodNewsData.momentum_score >= 75 ? 'grn' : neighborhoodNewsData.momentum_score >= 50 ? 'orange' : 'red'}`}>
+                                        <div className="bv" data-testid="text-news-score">{neighborhoodNewsData.momentum_score}</div>
+                                        <div><div className="bl">Momentum · <span data-testid="text-news-label">{neighborhoodNewsData.momentum_label}</span></div><div className="bd">vs. Chicago community areas</div></div>
+                                      </div>
+                                      <div className="kyp-block count slate">
+                                        <div className="bv" data-testid="text-news-articles">{neighborhoodNewsData.article_count}</div>
+                                        <div><div className="bl">Articles found</div><div className="bd">last 120 days</div></div>
+                                      </div>
+                                    </div>
+                                    {(() => {
+                                      const CULTURE_SOURCES = ['eater', 'infatuation', 'what now', 'timeout', 'chicago reader'];
+                                      const isCulture = (src: string) => CULTURE_SOURCES.some(s => src.toLowerCase().includes(s));
+                                      const cultureArticles = (neighborhoodNewsData.articles || []).filter((a: any) => isCulture(a.source || ''));
+                                      const realEstateArticles = (neighborhoodNewsData.articles || []).filter((a: any) => !isCulture(a.source || ''));
+                                      const toArch = (a: any) => ({ url: a.url, source: a.source, title: a.title, date: a.published ? String(a.published).slice(0, 10) : '' });
+                                      return (
+                                        <>
+                                          <div className="kyp-cath"><Utensils className="w-3.5 h-3.5" />Entertainment &amp; Culture</div>
+                                          {cultureArticles.length === 0 && <p className="text-sm text-muted-foreground italic">No recent entertainment or culture coverage found for {facts.communityArea}.</p>}
+                                          <div className="kyp-arch">{cultureArticles.map((a: any, i: number) => <NewsArchCard key={a.url || i} a={toArch(a)} testid={`row-culture-article-${i}`} />)}</div>
+                                          <div className="kyp-cath"><Building2 className="w-3.5 h-3.5" />Real Estate &amp; Development</div>
+                                          {realEstateArticles.length === 0 && <p className="text-sm text-muted-foreground italic">No recent real estate or development coverage found for {facts.communityArea}.</p>}
+                                          <div className="kyp-arch">{realEstateArticles.map((a: any, i: number) => <NewsArchCard key={a.url || i} a={toArch(a)} testid={`row-realestate-article-${i}`} />)}</div>
+                                          {(neighborhoodNewsData.podcasts || []).length > 0 && (
+                                            <>
+                                              <div className="kyp-cath"><Mic className="w-3.5 h-3.5" />Podcast Coverage</div>
+                                              <div className="kyp-arch">{(neighborhoodNewsData.podcasts || []).map((ep: any, i: number) => <NewsArchCard key={ep.url || i} a={toArch(ep)} testid={`row-podcast-neighborhood-${i}`} />)}</div>
+                                            </>
+                                          )}
+                                        </>
+                                      );
+                                    })()}
+                                  </div>
+                                ) : (
+                                  <p className="text-sm text-muted-foreground">News data not available for this area.</p>
+                                )}
+                              </>
+                            )}
+
+                            <div className="kyp-src">
+                              {hasSite && <>Site coverage summarized from original reporting; every headline links to its source. Summaries are paraphrased, not reproduced — verify current status at the linked article. Corridor-level signals appear in the separate Corridor Intelligence section. Sources: {siteSources}. </>}
+                              {hasNeighborhood && <>Neighborhood development items are matched to permit records by address and de-duplicated across sections — coverage often surfaces projects before they appear in permit filings, so a story may run ahead of the record. Sources: {nnSources}.</>}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+              </motion.div>
+            );
+          })()}
+          {!hybridInc && (() => {
             const bothLoaded = !isLoadingAddressNews && (!coParcelAddress || !isLoadingCoParcelAddressNews);
             const primaryArticles = (addressNewsData?.articles || []).map((a: any) => ({ ...a, _addressLabel: run?.address?.split(',')[0] }));
             const coArticles = coParcelAddress ? (coParcelAddressNewsData?.articles || []).map((a: any) => ({ ...a, _addressLabel: coParcelAddress.split(',')[0] })) : [];
@@ -18558,25 +17583,7 @@ export default function RunDetail() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
               >
-                <Collapsible open={isAddressNewsOpen} onOpenChange={setIsAddressNewsOpen}>
-                  <Card className="border border-border overflow-visible">
-                    <CollapsibleTrigger asChild>
-                      <CardHeader className="cursor-pointer hover-elevate pb-3">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="chead flex items-center gap-2">
-                            News &amp; Media Coverage
-                          </CardTitle>
-                          <span className="text-muted-foreground text-sm">{isAddressNewsOpen ? '▼' : '▶'}</span>
-                        </div>
-                        {!isAddressNewsOpen && (
-                          <Badge variant="outline" className="text-xs mt-2 w-fit" data-testid="badge-address-news-count">
-                            {merged.length} {merged.length === 1 ? 'Article' : 'Articles'} Found
-                          </Badge>
-                        )}
-                      </CardHeader>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <CardContent className="pt-0">
+                  <div className="pt-0">
                         {newsTakeaway?.section && newsTakeaway.meta?.length ? (() => {
                           // Generated layout — Standard Takeaway (meta) + tiered article cards
                           // with report-data-first Current status verification.
@@ -18714,16 +17721,16 @@ export default function RunDetail() {
                           ))}
                         </div>
                         )}
-                      </CardContent>
-                    </CollapsibleContent>
-                  </Card>
-                </Collapsible>
+                      </div>
               </motion.div>
             );
           })()}
+          </div>
+          </AccordionSection>
 
           {/* Corridor News - shown when property is within 0.5 miles of a major corridor */}
           {corridorNewsData?.is_near_corridor && (
+          <AccordionSection {...accProps("corridor")}>
             <motion.div
               id="print-section-corridor-news"
               initial={{ opacity: 0 }}
@@ -18902,8 +17909,8 @@ export default function RunDetail() {
                               for (const cp of corridorStreetPatterns) {
                                 if (cp.pattern.test(addr)) {
                                   if (!corridorLicenseMap[cp.corridorKey]) corridorLicenseMap[cp.corridorKey] = [];
-                                  const dedupKey = `${(license.businessName || '').toUpperCase()}|||${addr}`;
-                                  const existing = corridorLicenseMap[cp.corridorKey].find(b => `${b.name.toUpperCase()}|||${b.address.toUpperCase()}` === dedupKey);
+                                  const dedupKey = licenseEstablishmentKey(license);
+                                  const existing = corridorLicenseMap[cp.corridorKey].find(b => licenseEstablishmentKey({ businessName: b.name, address: b.address }) === dedupKey);
                                   if (existing) {
                                     if (!existing.licenses.includes(license.licenseType)) existing.licenses.push(license.licenseType);
                                     if (!existing.categories.includes(license.licenseCategory)) existing.categories.push(license.licenseCategory);
@@ -19018,7 +18025,7 @@ export default function RunDetail() {
                           }
                           for (const key of Object.keys(corridorLicenseMap)) {
                             for (const l of (corridorLicenseMap[key] || [])) {
-                              const lk = `${l.name}|||${l.address}`;
+                              const lk = licenseEstablishmentKey({ businessName: l.name, address: l.address });
                               if (!_seenL.has(lk)) { _seenL.add(lk); _totalLicenses++; }
                             }
                           }
@@ -19105,13 +18112,27 @@ export default function RunDetail() {
                                 use: proposed ? _titleCase(proposed) : '',
                               };
                             }),
+                            dpdApplications: (corridorNewsData.dpdApplications || [])
+                              .filter((application: any) => application.corridorKeys?.includes(c.corridorKey))
+                              .map((application: any) => ({
+                                address: application.address,
+                                applicationType: application.applicationType,
+                                applicant: application.applicant,
+                                status: application.status,
+                                hearingDate: application.hearingDate,
+                                proposal: application.proposal,
+                                applicationUrl: application.applicationUrl,
+                                hearingUrl: application.hearingUrl,
+                                distanceMi: application.distanceMi ?? null,
+                              })),
                           };
                         });
 
                         return (
                           <CorridorIntelligenceView
-                            kpis={{ permits: _totalPermits, permitUnits: _permitUnits, licenses: _totalLicenses, articles: _totalArticles, zoningAppeals: _totalZba }}
+                            kpis={{ permits: _totalPermits, permitUnits: _permitUnits, licenses: _totalLicenses, articles: _totalArticles, zoningAppeals: _totalZba, dpdApplications: corridorNewsData.dpdApplications?.length || 0 }}
                             corridors={corridorCards}
+                            licensesLoading={isLoadingNearbyLicenses}
                           />
                         );
                       })()}
@@ -19218,10 +18239,11 @@ export default function RunDetail() {
                 </Card>
               </Collapsible>
             </motion.div>
+          </AccordionSection>
           )}
 
-          {/* Neighborhood News - Collapsible Section */}
-          {facts?.communityArea && (
+          {/* Neighborhood News - Collapsible Section (hybrid: merged into the News section above) */}
+          {!hybridInc && facts?.communityArea && (
             <motion.div
               id="print-section-neighborhood-news"
               initial={{ opacity: 0 }}
@@ -19283,7 +18305,7 @@ export default function RunDetail() {
                         const t = nnTakeaway;
                         const fmtD = (d: string) => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
                         const statusCls = (stage: string) => stage === 'permitted' || stage === 'under_construction' || stage === 'complete' ? 'perm' : stage === 'approved' ? 'appr' : 'prop';
-                        const goCorridor = (e: React.MouseEvent) => { e.preventDefault(); document.getElementById('print-section-corridor-news')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+                        const goCorridor = (e: React.MouseEvent) => { e.preventDefault(); revealAnchor('print-section-corridor-news'); };
                         const CULTURE_SHOW = 4, DEV_SHOW = 5;
                         return (
                           <div className="nnwrap" data-testid="neighborhood-news-generated">
@@ -19535,6 +18557,7 @@ export default function RunDetail() {
 
           {/* Upcoming Developments Section */}
           {!!(facts?.neighborhood || facts?.communityArea) && (
+          <AccordionSection {...accProps("development")}>
             <motion.div
               id="print-section-upcoming-developments"
               initial={{ opacity: 0 }}
@@ -19574,6 +18597,16 @@ export default function RunDetail() {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <CardContent className="pt-0 space-y-3">
+                      <div className="flex items-center justify-between gap-3 rounded-md bg-muted/40 px-3 py-2 text-xs">
+                        <span className="text-muted-foreground">DPD application search radius</span>
+                        <Select value={String(upcomingRadiusMi)} onValueChange={(value) => setUpcomingRadiusMi(value === '1' ? 1 : 0.5)}>
+                          <SelectTrigger className="h-7 w-[108px] text-xs" data-testid="select-dpd-radius"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="0.5">½ mile</SelectItem>
+                            <SelectItem value="1">1 mile</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
                       {/* ── Upcoming Developments Summary ── */}
                       {!isLoadingUpcomingDevs && (() => {
@@ -19748,6 +18781,34 @@ export default function RunDetail() {
                               <span>No neighborhood-specific results found — showing recent Chicago-wide new construction activity.</span>
                             </div>
                           )}
+                          {(upcomingDevsData?.dpdApplications?.length || 0) > 0 && (
+                            <div className="space-y-2" data-testid="upcoming-dpd-applications">
+                              <div className="flex items-center gap-2 border-t border-border/40 pt-3">
+                                <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                                <h4 className="chead">DPD Application Signals</h4>
+                                <Badge variant="secondary" className="text-xs">{upcomingDevsData.dpdApplications.length}</Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground">Recent Chicago Plan Commission hearing-page records within {upcomingRadiusMi === 1 ? '1 mile' : '½ mile'}. Applications are not approvals, permits, or proof of construction.</p>
+                              {upcomingDevsData.dpdApplications.map((application: any) => (
+                                <div key={application.id} className="rounded-lg border border-border/40 p-3 space-y-1.5">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div>
+                                      <a href={application.applicationUrl || application.hearingUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-primary hover:underline">{application.address}</a>
+                                      <p className="text-xs text-muted-foreground mt-0.5">{application.applicationType} · {application.distanceMi.toFixed(2)} mi</p>
+                                    </div>
+                                    <Badge variant="outline" className="text-xs">{application.status}</Badge>
+                                  </div>
+                                  {application.applicant && <p className="text-xs text-muted-foreground">Applicant: {application.applicant}</p>}
+                                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{application.proposal}</p>
+                                  <div className="flex flex-wrap gap-3 text-xs">
+                                    {application.hearingDate && <span className="text-muted-foreground">Hearing page: {new Date(`${application.hearingDate}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
+                                    <a className="text-primary hover:underline" href={application.hearingUrl} target="_blank" rel="noopener noreferrer">Official hearing page</a>
+                                  </div>
+                                </div>
+                              ))}
+                              <p className="text-xs text-muted-foreground">{upcomingDevsData?.dpdCoverage?.note}</p>
+                            </div>
+                          )}
                           {/* Stage 2 — Rich details from Block Club */}
                           {upcomingDevsData?.developments?.filter((d: any) => d.stage === 2).length > 0 && (
                             <Collapsible open={isDevNewsSubOpen} onOpenChange={setIsDevNewsSubOpen}>
@@ -19834,7 +18895,7 @@ export default function RunDetail() {
                           )}
 
                           {/* Stage 1 — Chicago Data Portal new construction permits */}
-                          {upcomingDevsData?.developments?.filter((d: any) => d.stage === 1).length > 0 && (
+                          {false && upcomingDevsData?.developments?.filter((d: any) => d.stage === 1).length > 0 && (
                             <Collapsible open={isNewConstructionSubOpen} onOpenChange={setIsNewConstructionSubOpen}>
                               <CollapsibleTrigger asChild>
                                 <div className="flex items-center justify-between cursor-pointer hover-elevate p-2 -mx-2 border-t border-border/40" data-testid="trigger-new-construction-sub">
@@ -20046,10 +19107,12 @@ export default function RunDetail() {
                 </Card>
               </Collapsible>
             </motion.div>
+          </AccordionSection>
           )}
 
           {/* Neighborhood People Profile - Collapsible Section */}
           {((languageData || languageZipData) || facts?.communityArea) && (
+          <AccordionSection {...accProps("people")}>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -20907,8 +19970,10 @@ export default function RunDetail() {
                 </Card>
               </Collapsible>
             </motion.div>
+          </AccordionSection>
           )}
 
+          <AccordionSection {...accProps("valuation")}>
           {/* Quick Cashflow Calculator for Day Care projects */}
           {isDaycare && (
             <motion.div
@@ -21218,12 +20283,16 @@ export default function RunDetail() {
                         : null;
 
                       // Listing unit count is highest priority (active-listing snapshot first, then scraped listing data)
-                      const snapUnitCount = (listingSnapshot as any)?.unitCount != null ? Number((listingSnapshot as any).unitCount) : null;
+                      const rawSnapUnitCount = (listingSnapshot as any)?.unitCount != null ? Number((listingSnapshot as any).unitCount) : null;
+                      const snapUnitCount = rawSnapUnitCount != null && Number.isFinite(rawSnapUnitCount) && rawSnapUnitCount > 0 ? rawSnapUnitCount : null;
                       const snapRentRoll: Array<{ unit: string | null; beds: number | null; baths: number | null; monthlyRent: number | null }> =
                         Array.isArray((listingSnapshot as any)?.rentRoll) ? (listingSnapshot as any).rentRoll : [];
                       const listingUnitCount = snapUnitCount
                         ?? (snapRentRoll.length > 1 ? snapRentRoll.length : null)
-                        ?? (listingData?.unitCount != null ? Number(listingData.unitCount) : null);
+                        ?? (() => {
+                          const parsed = listingData?.unitCount != null ? Number(listingData.unitCount) : null;
+                          return parsed != null && Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+                        })();
 
                       // Infer unit count: listing > parcel char_apts > class code > commercial > null
                       const inferredUnitCount: number | null =
@@ -21512,7 +20581,7 @@ export default function RunDetail() {
                               </div>
                               <p className="text-[10.5px] text-muted-foreground mt-2" data-testid="text-noi-defaults-note">
                                 {funnelProjectType
-                                  ? <>From your project type: <b className="text-[#54544f]">{funnelProjectType}</b> → Investor</>
+                                  ? <>From your project use: <b className="text-[#54544f]">{funnelProjectType}</b> → Investor</>
                                   : <>Investor · buy-to-lease</>}
                                 {noiTier == null && <> · {effectiveTier === 'advanced' ? 'Advanced view (you filled the deal inputs)' : 'Simple view (deal inputs skipped)'}</>}
                                 {' '}· change the view above in one click. Simple and Advanced are views of the same full-expense model — the NOI is identical.
@@ -22364,6 +21433,31 @@ export default function RunDetail() {
               </Card>
             </Collapsible>
           </motion.div>
+          </AccordionSection>
+          </div>{/* /kyp-acc */}
+
+          {/* Step 5 — Generate Insight Report moved to the bottom */}
+          {isReportUnlocked && run?.id && (
+            <div className="kyp-gen" id="insight-report-section" data-testid="gen-insight">
+                  <InsightReportSection
+                    runId={run.id}
+                    canAccess={isReportUnlocked}
+                    currentProjectType={selectedProjectType || (run as any)?.lastProjectType || null}
+                    projectTypeComplete={!!(selectedProjectType || (run as any)?.lastProjectType)}
+                    contextComplete={!!((run as any)?.lastFreeformDescription || (run as any)?.lastRole || (run as any)?.lastTransactionType)}
+                    valuationComplete={!!(valuationPurchasePrice || sbaBusinessPrice || sbaRealEstatePrice || (run?.reportContext as any)?.valuation?.purchasePrice)}
+                    onCompleteProjectType={() => {
+                      setCypModalOpen(true);
+                    }}
+                    onCompleteContext={() => setShowFunnelEdit(true)}
+                    onCompleteValuation={() => {
+                      setIsValuationCalculatorOpen(true);
+                      revealAnchor('valuation-calculator-section');
+                    }}
+                    registerTrigger={(fn) => { insightTriggerRef.current = fn; }}
+                  />
+            </div>
+          )}
 
           </div>
           </div>

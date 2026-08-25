@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;--hair:#e5e2da;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--green:#2f7d3f;--red:#d13b26;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1180px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+
+  /* stronger section header — eyebrow, square accent, divider */
+  .chead{display:flex;align-items:center;gap:9px;padding-bottom:13px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+  .chead .sq{width:10px;height:10px;border-radius:2px;background:var(--indigo);flex:none}
+  .chead .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+
+  /* alderperson */
+  .kick{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .name{font-family:var(--disp);font-size:27px;line-height:1.05;color:var(--ink);margin-bottom:16px}
+  .contact{display:flex;flex-direction:column;gap:11px;margin-bottom:16px}
+  .cx{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--ink2);line-height:1.35}
+  .cx .ic{flex:none;width:17px;color:var(--indigo);margin-top:1px}
+  .cx a{color:var(--indigo);text-decoration:none}
+  .cx .addr{font-style:normal}
+  .cx .addr b{display:block;color:var(--ink);font-weight:500}
+  .help{font-size:12.5px;color:var(--muted);line-height:1.45;border-top:1px solid var(--line);padding-top:13px}
+
+  /* zoning */
+  .sub{font-family:var(--sans);font-size:16px;font-weight:600;color:var(--ink);margin-bottom:3px}
+  .desc{font-size:13.5px;color:var(--ink2);margin-bottom:14px}
+  .flags{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .flag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:5px 11px;color:var(--ink2)}
+  .flag .y{color:var(--green)} .flag .n{color:var(--muted)}
+  .flag.off{color:var(--muted);opacity:.75}
+  .specs{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin-bottom:18px}
+  .spec .l{font-size:12.5px;color:var(--ink2)}
+  .spec .v{font-size:15px;font-weight:600;color:var(--ink)}
+  .uselbl{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .uses{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+  .use{font-size:12px;background:var(--indigoSoft);color:var(--indigo);border-radius:6px;padding:5px 10px;font-weight:500}
+  .note{font-size:12px;color:var(--muted);line-height:1.45;border-top:1px solid var(--line);padding-top:13px}
+  .note a{color:var(--indigo)}
+  .mono-pin{font-family:var(--mono);font-size:11.5px;background:#f1efe9;padding:1px 5px;border-radius:4px;color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="row">
+
+  <!-- WARD & ALDERPERSON -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">Ward &amp; Alderperson</span></div>
+    <div class="kick">Ward 35</div>
+    <div class="name">Anthony J. Quezada</div>
+    <div class="contact">
+      <div class="cx"><span class="ic">✆</span><a href="tel:7738873772">(773) 887-3772</a></div>
+      <div class="cx"><span class="ic">✉</span><a href="mailto:ward35@cityofchicago.org">ward35@cityofchicago.org</a></div>
+      <div class="cx"><span class="ic">◎</span><span class="addr"><b>2934 North Milwaukee Avenue, Unit C</b>Chicago, IL 60618</span></div>
+    </div>
+    <div class="help">Contact your alderperson for zoning changes, special-use permits, or development-related matters.</div>
+  </div>
+
+  <!-- ZONING DETAILS -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">Zoning Details · B2-2</span></div>
+    <div class="sub">Neighborhood Mixed-Use</div>
+    <div class="desc">Mixed commercial and residential along main streets.</div>
+    <div class="flags">
+      <span class="flag"><span class="y">●</span> Residential <span class="y">✓</span></span>
+      <span class="flag"><span class="y">●</span> Commercial <span class="y">✓</span></span>
+      <span class="flag off"><span class="n">●</span> Industrial <span class="n">✕</span></span>
+    </div>
+    <div class="specs">
+      <div class="spec"><div class="l">Max FAR</div><div class="v">2.2</div></div>
+      <div class="spec"><div class="l">Max Height</div><div class="v">50 ft (4 stories)</div></div>
+      <div class="spec"><div class="l">Parking</div><div class="v">1 space / unit (residential)</div></div>
+      <div class="spec"><div class="l">MLA</div><div class="v">1,000 sq ft / unit</div></div>
+    </div>
+    <div class="uselbl">Allowed uses — as of right</div>
+    <div class="uses">
+      <span class="use">Retail</span><span class="use">Restaurants</span><span class="use">Bars</span>
+      <span class="use">Entertainment</span><span class="use">Offices</span>
+      <span class="use">Residential above ground floor</span><span class="use">Hotels</span>
+    </div>
+    <div class="note">Data may not reflect recent rezonings. <a href="#">Verify on the official map</a> — search by PIN <span class="mono-pin">13-26-218-094-0000</span>.</div>
+  </div>
+
+</div>
+</body>
+</html>

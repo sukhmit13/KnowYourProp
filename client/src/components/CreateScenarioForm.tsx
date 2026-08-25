@@ -96,7 +96,7 @@ export function CreateScenarioForm({ runId }: CreateScenarioFormProps) {
                   name="projectType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Project Type</FormLabel>
+                      <FormLabel>Project Use</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>

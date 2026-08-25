@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--takeBorder:#dde1f6;--takeDivider:#e3e5f4;
+    --good:#2f7d3f;--goodSoft:#e9f4ec;--bad:#d13b26;--caution:#f0a41c;--cautionText:#96600a;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+    --take-label:11px;--take-title:21px;--take-body:13px;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:var(--sans);color:var(--ink);padding:34px 40px}
+  .wrap{max-width:1140px;margin:0 auto}
+
+  /* section header — filled indigo square */
+  .secthead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:6px}
+  .secthead .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .secsub{font-size:12.5px;color:var(--muted);margin-bottom:18px;padding-left:21px}
+
+  /* ===== STANDARD TAKEAWAY ===== */
+  .take{background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:12px;padding:18px 20px 19px;margin-bottom:22px}
+  .take-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .take-label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:var(--take-label);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo)}
+  .take-label svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+  .take-title{font-family:var(--disp);font-size:var(--take-title);line-height:1.28;color:var(--ink);margin-bottom:14px}
+  .take-row{display:flex;align-items:flex-start;gap:11px;padding:10px 0}
+  .take-row + .take-row{border-top:1px solid var(--takeDivider)}
+  .take-row .dot{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .take-row.good .dot{background:var(--good)}
+  .take-row.caution .dot{background:var(--caution)}
+  .take-row.insight .dot{background:var(--indigo)}
+  .take-row .body{flex:1;font-size:var(--take-body);line-height:1.5;color:var(--ink2)}
+  .take-row .body b{color:var(--ink);font-weight:600}
+  .take-chip{flex:none;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid var(--takeBorder);border-radius:8px;padding:6px 11px;white-space:nowrap}
+  .take-chip svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+
+  /* KPI tiles */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px}
+  .kpi{border:1px solid var(--line);border-radius:12px;padding:18px 16px;text-align:center;background:var(--paper)}
+  .kpi .n{font-family:var(--disp);font-size:34px;color:var(--ink);line-height:1}
+  .kpi .l{font-size:12px;font-weight:600;color:var(--ink);margin-top:8px}
+  .kpi .s{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:.02em}
+
+  /* subsection header — outline icon + summary chip */
+  .ssh{display:flex;align-items:center;gap:9px;margin:6px 0 4px}
+  .ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+  .ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+  .ssh .tag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:6px;padding:3px 7px}
+  .ssh .chip{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 10px}
+  .ssnote{font-size:12px;color:var(--muted);line-height:1.5;margin:0 0 14px 26px}
+
+  /* loan rows */
+  .loans{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+  .loan{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:11px;padding:13px 16px}
+  .loan .main{flex:1;min-width:0}
+  .loan .nm{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.3}
+  .loan .meta{font-size:12px;color:var(--ink2);margin-top:2px}
+  .loan .via{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:3px}
+  .loan .right{text-align:right;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+  .loan .amt{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--ink)}
+  .loan .aux{display:flex;align-items:center;gap:8px}
+  .loan .jobs{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--indigo);background:var(--indigoSoft);border-radius:6px;padding:2px 7px}
+  .loan .date{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  .morelink{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--indigo);text-transform:uppercase;letter-spacing:.04em;margin:2px 0 20px 2px;display:inline-block}
+
+  /* lender bars */
+  .lh{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin:4px 0 12px}
+  .lbars{display:flex;flex-direction:column;gap:12px;margin-bottom:30px}
+  .lb .lbtop{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+  .lb .nm{font-size:13px;font-weight:600;color:var(--ink)}
+  .lb .val{font-family:var(--mono);font-size:11.5px;color:var(--ink2)}
+  .lb .val b{color:var(--ink);font-weight:700}
+  .lb .track{height:8px;background:var(--paper);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+  .lb .track i{display:block;height:100%;background:var(--indigo);border-radius:5px 0 0 5px}
+
+  .src{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.03em;padding-top:14px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="secthead"><span class="sq"></span>Commercial Lending Activity</div>
+  <div class="secsub">SBA-guaranteed business & commercial-real-estate loans in ZIP 60618 · FY2020–present</div>
+
+  <!-- STANDARD TAKEAWAY -->
+  <div class="take">
+    <div class="take-head"><span class="take-label"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Takeaway</span></div>
+    <div class="take-title">The commercially relevant lending picture — and SBA 504 is the owner-occupier financing path for a parcel like this one.</div>
+
+    <div class="take-row insight"><span class="dot"></span><span class="body"><b>This is the commercial counterpart to the residential mortgage data.</b> SBA <b>504</b> loans fund owner-occupied commercial real estate — the exact profile of this B2-2 parcel. <b>72 loans ($41.2M)</b> closed across ZIP 60618 since FY2020, financing owner-occupants like a dance academy, a barbell gym, and a photo studio. For a buyer planning to occupy, 504 is a real, actively-used path here.</span><a class="take-chip" href="#sba504">504 loans <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+
+    <div class="take-row insight"><span class="dot"></span><span class="body"><b>A busy small-business corridor.</b> On the <b>7(a)</b> side, <b>139 loans ($76.7M)</b> funded working capital and expansion — cleaners, roofers, accountants, a $2.7M / 9-job accounting firm — steady credit flow that signals an economically active area supporting local commercial demand.</span><a class="take-chip" href="#sba7a">7(a) loans <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+
+    <div class="take-row insight"><span class="dot"></span><span class="body"><b>Concrete lenders you can approach.</b> 504 is concentrated in two CDCs — Small Business Growth Corp and SomerCor, together ~96% of local 504 loans; 7(a) is led by Huntington National Bank (43 loans). Real names to start a financing conversation, not an abstract "market."</span><a class="take-chip" href="#lenders">Lenders <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+
+    <div class="take-row caution"><span class="dot"></span><span class="body"><b>Read the 504 rows as ZIP-level, not address-linked.</b> The SBA FOIA 504 dataset discloses the borrower, industry, amount and CDC — but <b>not the financed property address</b> — so 504 activity is neighborhood context, not proof any specific building traded. (7(a) records do carry a borrower street address.)</span></div>
+  </div>
+
+  <!-- KPI tiles -->
+  <div class="kpis">
+    <div class="kpi"><div class="n">139</div><div class="l">7(a) Loans</div><div class="s">$76.7M total</div></div>
+    <div class="kpi"><div class="n">72</div><div class="l">504 · CRE</div><div class="s">$41.2M total</div></div>
+    <div class="kpi"><div class="n">$118.0M</div><div class="l">Total Deployed</div><div class="s">ZIP 60618</div></div>
+    <div class="kpi"><div class="n">9</div><div class="l">Active Lenders</div><div class="s">in this ZIP</div></div>
+  </div>
+
+  <!-- SBA 504 SUBSECTION -->
+  <div id="sba504" class="ssh">
+    <svg class="hic" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 11h.01M15 11h.01"/></svg>
+    <span class="t">SBA 504 — Commercial Real Estate</span><span class="tag">CRE Financing</span>
+    <span class="chip">72 loans · $41.2M</span>
+  </div>
+  <div class="ssnote">Funds owner-occupied commercial real estate. The SBA FOIA 504 dataset discloses borrower entity, industry, loan amount, and CDC lender — <b>not</b> the financed property address.</div>
+
+  <div class="loans">
+    <div class="loan"><div class="main"><div class="nm">Definition Dance Academy, LLC</div><div class="meta">Elementary & Secondary Schools</div><div class="via">via Small Business Growth Corporation</div></div><div class="right"><div class="amt">$1.6M</div><div class="date">May 2026</div></div></div>
+    <div class="loan"><div class="main"><div class="nm">Stegcorp, LLC</div><div class="meta">Motion Picture & Video Production</div><div class="via">via SomerCor 504, Inc.</div></div><div class="right"><div class="amt">$820K</div><div class="date">Mar 2024</div></div></div>
+    <div class="loan"><div class="main"><div class="nm">Maes Studio, Inc.</div><div class="meta">Commercial Photography</div><div class="via">via SomerCor 504, Inc.</div></div><div class="right"><div class="amt">$690K</div><div class="date">2025</div></div></div>
+    <div class="loan"><div class="main"><div class="nm">Rockwell Barbell, Inc.</div><div class="meta">Other Personal Care Services</div><div class="via">via Small Business Growth Corporation</div></div><div class="right"><div class="amt">$517K</div><div class="date">Jan 2026</div></div></div>
+  </div>
+  <span class="morelink">+ 68 more 504 loans →</span>
+
+  <div class="lh">Top 504 lenders (CDCs)</div>
+  <div class="lbars">
+    <div class="lb"><div class="lbtop"><span class="nm">Small Business Growth Corporation</span><span class="val"><b>36</b> loans · $23.2M</span></div><div class="track"><i style="width:100%"></i></div></div>
+    <div class="lb"><div class="lbtop"><span class="nm">SomerCor 504, Inc.</span><span class="val"><b>33</b> loans · $17.3M</span></div><div class="track"><i style="width:92%"></i></div></div>
+    <div class="lb"><div class="lbtop"><span class="nm">Illinois Business Financial Services</span><span class="val"><b>2</b> loans · $464K</span></div><div class="track"><i style="width:6%"></i></div></div>
+    <div class="lb"><div class="lbtop"><span class="nm">Wessex 504 Corporation</span><span class="val"><b>1</b> loan · $350K</span></div><div class="track"><i style="width:3%"></i></div></div>
+  </div>
+
+  <!-- SBA 7(a) SUBSECTION -->
+  <div id="sba7a" class="ssh">
+    <svg class="hic" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21V8h16v13"/><path d="M9 21v-5h6v5"/><path d="M8 4h8l1 4H7z"/></svg>
+    <span class="t">SBA 7(a) — Small Business</span><span class="tag">Business Financing</span>
+    <span class="chip">139 loans · $76.7M</span>
+  </div>
+  <div class="ssnote">Supports working capital, equipment, and expansion for small businesses. 7(a) records carry a borrower street address and jobs supported.</div>
+
+  <div class="loans">
+    <div class="loan"><div class="main"><div class="nm">Clarke Professional Accounting, LLC</div><div class="meta">2124 W Belmont Ave, Chicago</div><div class="via">via Monterey County Bank</div></div><div class="right"><div class="amt">$2.7M</div><div class="aux"><span class="jobs">9 jobs</span><span class="date">Dec 2025</span></div></div></div>
+    <div class="loan"><div class="main"><div class="nm">Motrose Cleaners, Inc.</div><div class="meta">2004 W Montrose Ave, Chicago</div><div class="via">via The Huntington National Bank</div></div><div class="right"><div class="amt">$312K</div><div class="aux"><span class="jobs">5 jobs</span><span class="date">Dec 2025</span></div></div></div>
+    <div class="loan"><div class="main"><div class="nm">WIEJAK Inc.</div><div class="meta">3056 N Oakley Ave, Chicago</div><div class="via">via First Financial Bank</div></div><div class="right"><div class="amt">$248K</div><div class="aux"><span class="jobs">3 jobs</span><span class="date">May 2026</span></div></div></div>
+    <div class="loan"><div class="main"><div class="nm">10/10 Research LLC</div><div class="meta">4220 N Bernard St, Chicago</div><div class="via">via The Huntington National Bank</div></div><div class="right"><div class="amt">$150K</div><div class="aux"><span class="jobs">3 jobs</span><span class="date">Feb 2026</span></div></div></div>
+  </div>
+  <span class="morelink">+ 135 more 7(a) loans →</span>
+
+  <div id="lenders" class="lh">Top 7(a) lenders</div>
+  <div class="lbars">
+    <div class="lb"><div class="lbtop"><span class="nm">The Huntington National Bank</span><span class="val"><b>43</b> loans · $9.4M</span></div><div class="track"><i style="width:100%"></i></div></div>
+    <div class="lb"><div class="lbtop"><span class="nm">Byline Bank</span><span class="val"><b>9</b> loans · $7.2M</span></div><div class="track"><i style="width:21%"></i></div></div>
+    <div class="lb"><div class="lbtop"><span class="nm">U.S. Bank, N.A.</span><span class="val"><b>8</b> loans · $3.1M</span></div><div class="track"><i style="width:19%"></i></div></div>
+    <div class="lb"><div class="lbtop"><span class="nm">JPMorgan Chase Bank, N.A.</span><span class="val"><b>8</b> loans · $2.2M</span></div><div class="track"><i style="width:19%"></i></div></div>
+    <div class="lb"><div class="lbtop"><span class="nm">BayFirst National Bank</span><span class="val"><b>8</b> loans · $980K</span></div><div class="track"><i style="width:19%"></i></div></div>
+  </div>
+
+  <div class="src">Source: SBA FOIA 7(a) & 504 loan data · FY2020–present · ZIP 60618</div>
+
+</div>
+</body>
+</html>

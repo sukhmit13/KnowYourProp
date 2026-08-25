@@ -1,0 +1,99 @@
+# Replit Prompt — Report Assistant chat panel
+
+Paste everything below into Replit. It has TWO parts: **Part A is front-end** (restyle the panel). **Part B is a behavior contract** for the assistant's logic — provenance is only trustworthy if the backend actually enforces it, so Part B is not optional styling, it's how answers must be produced.
+
+---
+
+# PART A — Front-end (markup + CSS)
+
+Restyle the **Report Assistant** chat panel to match the site's design language. This part is CSS + markup only — do not change how messages are sent/received here. Values shown are placeholders.
+
+## Design tokens (reuse existing if present)
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --navy:#232d6e;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+
+## Panel shell + header (replace the black header)
+```css
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(20,20,40,.12);display:flex;flex-direction:column}
+.hd{background:var(--navy);padding:15px 17px;display:flex;align-items:center;gap:11px}
+.hd .ic{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex:none}
+.hd .ic svg{width:17px;height:17px;stroke:#fff}   /* chat-bubble icon */
+.hd .ttl{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff}
+.hd .addr{font-size:11px;color:#aab0d8;margin-top:2px}
+.hd .x{margin-left:auto;color:#aab0d8;font-size:18px;cursor:pointer}
+.body{flex:1;overflow:auto;padding:16px 17px}
+```
+
+## Intro + a one-time provenance key
+```css
+.intro{font-size:12px;color:var(--ink2);line-height:1.5;margin-bottom:12px}
+.key{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.kchip{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 9px}
+.kchip .kd{width:8px;height:8px;border-radius:2px;flex:none}
+.kchip .kd.rp{background:var(--indigo)}      /* from report */
+.kchip .kd.out{background:#9aa1b0}            /* outside source */
+```
+Intro copy: "Ask anything about this property. I answer from **this report and its data first** — and clearly mark anything I bring in from outside, with a source." Key chips: "From this report" (indigo) and "Outside source · cited" (grey).
+
+## User message bubble
+```css
+.umsg{display:flex;justify-content:flex-end;margin-bottom:16px}
+.umsg .bub{background:var(--indigo);color:#fff;font-size:12.5px;line-height:1.45;border-radius:13px 13px 4px 13px;padding:10px 14px;max-width:82%}
+```
+
+## Assistant answer — split into provenance blocks (the core pattern)
+An assistant answer is composed of one or more **blocks**, each tagged by where its content came from. Report-sourced content gets an indigo left border + "From this report" tag; outside content gets a grey left border + "Outside source" tag + a citation link.
+```css
+.aname{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.aname .d{width:6px;height:6px;border-radius:50%;background:var(--indigo)}
+.ablock{border-left:2px solid;padding-left:13px;margin-bottom:15px}
+.ablock.report{border-color:var(--indigo)}
+.ablock.outside{border-color:#c3c8d2}
+.prov{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:3px 8px;margin-bottom:8px}
+.prov svg{width:11px;height:11px}
+.prov.report{background:var(--indigoSoft);color:var(--indigo)} .prov.report svg{stroke:var(--indigo)}     /* document icon */
+.prov.outside{background:var(--paper);border:1px solid var(--line);color:var(--ink2)} .prov.outside svg{stroke:var(--ink2)}  /* globe icon */
+.atxt{font-size:12.5px;color:var(--ink);line-height:1.55} .atxt b{font-weight:600}
+.cite{font-size:10.5px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:6px}
+.cite svg{width:11px;height:11px;stroke:var(--muted);flex:none}
+.cite a{color:var(--indigo);text-decoration:none;font-weight:500}
+.cite .rf{font-weight:600;color:var(--ink2)}
+```
+- **Report block** citation names the report field/section it came from (e.g. "TIF field · this report"), with a check-badge icon. No external URL — it's from the report.
+- **Outside block** citation is a real link to the external source (e.g. "City of Chicago — TIF Program") with an external-link icon.
+
+## Suggested follow-ups + input
+```css
+.sug{display:flex;flex-direction:column;gap:8px}
+.schip{text-align:left;font-size:12px;font-weight:500;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 13px;cursor:pointer;display:flex;align-items:center;gap:9px}
+.schip svg{width:13px;height:13px;stroke:var(--indigo);flex:none}   /* search icon */
+.foot{border-top:1px solid var(--line);padding:13px 15px 12px;background:var(--card)}
+.inputrow{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:12px;padding:6px 6px 6px 14px;background:var(--paper)}
+.inputrow input{flex:1;border:0;background:transparent;font-size:12.5px;color:var(--ink);outline:none}
+.send{width:34px;height:34px;border-radius:9px;background:var(--indigo);border:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.send svg{width:16px;height:16px;stroke:#fff}   /* paper-plane */
+.disc{font-size:10px;color:var(--muted);text-align:center;margin-top:9px;line-height:1.4}
+```
+Footer disclaimer: "Answers use this report and its data first. Outside info is cited — verify independently." (Nothing black; every accent is indigo/navy/neutral.)
+
+---
+
+# PART B — Assistant behavior contract (NOT optional styling)
+
+The provenance UI in Part A is only trustworthy if the assistant's logic actually enforces these rules. The block color must reflect the *true* origin of each sentence — decorating outside info with a "From this report" tag would be worse than no tags at all.
+
+1. **Report/backend first.** For every question, the assistant must first attempt to answer from this property's report data and the site's backend for this property. Only when the report/backend genuinely cannot answer may it use outside/general knowledge. This is a retrieval-order rule, not a label.
+
+2. **Segment by true source.** Structure each answer as blocks. Any statement grounded in this property's report/backend data → a `report` block, cited to the specific field/section it came from. Any statement from general knowledge or an external source → an `outside` block. If a single answer mixes both (like the TIF example: the property-specific fact is from the report, the explanation of what TIF *means* is general), split it into a report block AND an outside block. Never label outside content as "from this report."
+
+3. **Citations are mandatory for outside blocks, and must be real.** Every `outside` block must carry a verifiable citation with a working URL to the actual source — not a plausible-sounding source name with no link. If the assistant cannot produce a real citation for a claim, it should not present that claim as sourced; say it's general knowledge or decline.
+
+4. **Never fabricate a report field.** A `report` block may only cite a field/section that actually exists in this report. If the report doesn't contain the answer, do not invent a report citation — move the content to an outside block or state that the report doesn't cover it.
+
+5. **Scope honesty.** Keep the existing "I only have access to the data shown in this report" framing. When the report lacks something, say so plainly rather than guessing and tagging it as report data.
+
+## Acceptance check
+Ask "Is this property in a TIF district, and what does that mean?" → the answer should show a **report block** ("not in a TIF district," cited to the report's TIF field) followed by an **outside block** (what TIF means, cited to a real City of Chicago URL). Ask something the report fully answers (e.g. "What's the max FAR here?") → a single report block, no outside block, no external citation.

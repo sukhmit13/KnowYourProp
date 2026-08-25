@@ -1,0 +1,117 @@
+Please update `reportLogic.ts` only.
+
+I do NOT want a full rewrite of the file.
+I want targeted edits to the existing master prompt so the tax logic behaves correctly in two different places:
+
+1. the TOP STAT STRIP / top cards
+2. the LOWER INSIGHT CARDS / analytical takeaways
+
+These are not the same thing and must be handled differently.
+
+==================================================
+GOAL
+==================================================
+
+The top Property Taxes stat tile should show the most recent clearly full-year tax amount.
+
+The lower tax-related insight cards may discuss whether taxes are likely rising or falling based on assessed value changes and installment comparisons, but they must not present a partial 2025 installment as the full-year tax bill.
+
+Example:
+- If 2025 in the source is only the first installment, do NOT show that as the annual taxes in the top tile.
+- Use the last clearly full-year taxes, such as 2024, in the top tile.
+- But in the lower cards, if 2025 assessed value is higher than 2024 assessed value, and 2025 first installment is higher than 2024 first installment, then it is reasonable to say taxes are likely rising, as a supported implication rather than a confirmed final bill.
+
+==================================================
+WHAT TO CHANGE
+==================================================
+
+1. In `reportLogic.ts`, find the section:
+`TAXES / ASSESSMENT RULES`
+
+Replace that entire section with this exact text:
+
+==================================================
+TAXES / ASSESSMENT RULES
+==================================================
+
+Use tax data to show actual buyer impact.
+
+Pull:
+- the most recent full-year property tax amount clearly supported by the evidence
+- monthly equivalent burden where supported
+- trend where evidence supports it
+- assessed value / market value where supplied
+- appeal history and outcomes if supplied
+- whether a recent owner has or has not appealed
+
+Annual vs installment rules:
+- Prefer the most recent clearly full-year tax figure for the main annual tax burden.
+- If the most recent year (for example, 2025) only has a first installment, second installment, or other partial figure, do not treat that partial amount as the full-year tax.
+- Use the last confirmed full-year amount (for example, 2024) as the anchor for annual tax discussion, unless the application explicitly provides a verified annualized newer-year value.
+
+Directional / pressure rules:
+- Changes in assessed value and installment amounts may be used as directional signals about likely tax pressure, but not as confirmed annual tax numbers.
+- Pair installment comparisons with assessed-value changes when drawing conclusions. Do not rely on installment amounts alone.
+- If the newer year's assessed value is higher than the prior year's assessed value, and the comparable installment amount is also higher, you may state that taxes appear likely to rise or that tax pressure is increasing.
+- If the newer year's assessed value is lower than the prior year's assessed value, and the comparable installment amount is also lower, you may state that taxes appear likely to ease or that tax pressure may be declining.
+- These directional statements must be framed as supported implications, not confirmed final annual tax bills.
+- Use calibrated language such as "appears higher," "likely rising," "points to increasing tax pressure," "appears lower," or "may be easing" rather than stating a precise full-year tax amount that is not yet fully supported.
+
+Explain why the tax picture matters operationally, especially for carrying cost and appeal/underwriting strategy.
+
+Do not overstate incomplete-year records as full-year carrying cost.
+If full-year taxes for the newest year cannot be confirmed, say so clearly.
+
+2. In `reportLogic.ts`, find the section:
+`STAT STRIP RULES`
+
+Keep the existing section, but add these bullets under it in the most natural place:
+
+Stat strip tax rules:
+- The Property Taxes tile should use the most recent clearly full-year tax figure as its primary value.
+- Do not present a single installment from a newer year as the full annual tax bill unless the application explicitly provides a verified annualized value.
+- If the newest tax year in the evidence is only partial or installment-based, use the last clearly full-year amount as the main tile value.
+- A newer partial installment may be discussed in lower insight cards if analytically relevant, but the stat tile itself must not overstate an incomplete year as the full tax burden.
+
+3. In `reportLogic.ts`, find the section:
+`CONFIDENCE FRAMEWORK`
+
+Add this bullet in the area explaining supported implications or open diligence handling:
+
+- Tax trend statements based on assessed-value changes plus installment comparisons must be treated as supported implications, not confirmed facts about the final annual bill.
+
+==================================================
+IMPORTANT BEHAVIORAL INTENT
+==================================================
+
+The model must now handle taxes in two layers:
+
+TOP OF PAGE / STAT STRIP:
+- conservative
+- confirmed
+- full-year figure only
+
+LOWER INSIGHT CARDS:
+- analytical
+- directional
+- allowed to infer rising or falling pressure from assessed value + installment comparisons
+- but not allowed to convert a partial installment into a claimed full-year bill
+
+==================================================
+DO NOT CHANGE
+==================================================
+
+- Do not modify `reportDesign.ts`
+- Do not rewrite unrelated sections of `reportLogic.ts`
+- Do not remove any existing non-tax rules unless they conflict with the new instructions
+- Do not collapse the top-tile rule and lower-card rule into one vague paragraph
+
+==================================================
+AFTER YOU EDIT
+==================================================
+
+After updating the file:
+1. Show me the exact updated `TAXES / ASSESSMENT RULES` section
+2. Show me the exact added bullets under `STAT STRIP RULES`
+3. Show me the exact line added to `CONFIDENCE FRAMEWORK`
+4. Confirm no other unrelated logic was changed

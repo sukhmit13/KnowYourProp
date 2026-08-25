@@ -1,0 +1,80 @@
+# Task for Replit Agent — Build "Stage 1" of the Debt Snapshot: recorder-document ingest + extraction
+
+## Goal
+For each recorded document in a parcel's property-records list, turn the document into a structured JSON object by: fetching the file → using its PDF text layer if present (free) → falling back to Mistral OCR only for scans → extracting fields with Claude. This fills the currently-blank Lender / Original Amount and produces the data the debt engine needs. **Build ONLY this Stage 1 now** (do not build the reconciliation/lien-stack logic yet).
+
+## Adapt to this app
+The reference code below is JavaScript. **Port it to whatever this backend already uses** (if Python, use `mistralai`, `anthropic`, `pypdf`). Match the app's existing conventions and file structure.
+
+## Prereqs
+- Secrets already set: `MISTRAL_API_KEY`, `ANTHROPIC_API_KEY`.
+- Install: `@mistralai/mistralai`, `@anthropic-ai/sdk`, `pdf-parse` (or Python equivalents).
+- Wire the input to the **existing property-records document list** (the same list the UI already shows — each row has a document number, type, recorded date, and a link to the recorder file). Do NOT invent a new data source.
+
+## Reference code (port as needed)
+```js
+import { Mistral } from "@mistralai/mistralai";
+import Anthropic from "@anthropic-ai/sdk";
+import pdfParse from "pdf-parse";
+
+const mistral   = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const EXTRACT_MODEL = "claude-haiku-4-5"; // use this app's Haiku model id
+
+async function getDocText(docUrl) {
+  const bytes = Buffer.from(await (await fetch(docUrl)).arrayBuffer());
+  const isPdf = docUrl.toLowerCase().includes(".pdf") || bytes.slice(0,4).toString() === "%PDF";
+  if (isPdf) {
+    try { const { text } = await pdfParse(bytes);
+      if (text && text.trim().length > 100) return { text, source: "text-layer" }; } catch {}
+  }
+  const b64 = bytes.toString("base64");
+  const resp = await mistral.ocr.process({
+    model: "mistral-ocr-latest",
+    document: isPdf
+      ? { type: "document_url", documentUrl: `data:application/pdf;base64,${b64}` }
+      : { type: "image_url",    imageUrl:    `data:image/png;base64,${b64}` },
+  });
+  return { text: resp.pages.map(p => p.markdown).join("\n\n"), source: "ocr" };
+}
+
+const EXTRACTION_PROMPT = `You read ONE recorded real-estate instrument and output a JSON object. Ground EVERY field in the document text; if a field is not stated, use null — never guess an amount, party, maturity, or date. Copy identifiers (doc numbers, PINs, amounts, dates, names) verbatim. CAPTURE EVERY REFERENCED DOC NUMBER (a release names the mortgage it satisfies; an assignment/modification names the mortgage it acts on). For a judgment/tax lien, extract debtor_name.
+Output ONLY this JSON:
+{ "doc_number": string, "doc_type": "mortgage|release|satisfaction|assignment|modification|subordination|deed|lis_pendens|foreclosure|notice_default|judgment_lien|tax_lien|mechanics_lien|ucc|other",
+  "recording_date": "YYYY-MM-DD|null", "pins": [string],
+  "parties": { "borrower": string|null, "lender": string|null, "assignor": string|null, "assignee": string|null },
+  "amount": number|null, "maturity_date": "YYYY-MM-DD|null", "references_docs": [string], "debtor_name": string|null,
+  "is_partial": boolean, "is_blanket": boolean, "extraction_confidence": "high|medium|low" }
+Rules: extraction_confidence = low if OCR text is garbled/sparse. is_blanket = true if the instrument names multiple PINs/properties. Never invent a reference number.`;
+
+async function extractDoc({ docNumber, indexTypeHint, indexDateHint, text, ocrSource }) {
+  const msg = await anthropic.messages.create({
+    model: EXTRACT_MODEL, max_tokens: 1024, system: EXTRACTION_PROMPT,
+    messages: [{ role: "user", content:
+      `DOC_NUMBER: ${docNumber}\nINDEX_TYPE_HINT: ${indexTypeHint ?? ""}\nINDEX_DATE_HINT: ${indexDateHint ?? ""}\nTEXT_SOURCE: ${ocrSource}\n\nDOCUMENT TEXT:\n${text}` }],
+  });
+  const raw = msg.content[0].text.trim().replace(/^```json\s*|\s*```$/g, "");
+  const obj = JSON.parse(raw); obj.text_source = ocrSource; return obj;
+}
+
+export async function ingestDoc(indexRow) {
+  const cached = await cacheGet(indexRow.docNumber);   // recorder docs are immutable — cache forever
+  if (cached) return cached;
+  const { text, source } = await getDocText(indexRow.url);
+  const doc = await extractDoc({ docNumber: indexRow.docNumber, indexTypeHint: indexRow.type, indexDateHint: indexRow.recorded, text, ocrSource: source });
+  await cacheSet(indexRow.docNumber, doc);
+  return doc;
+}
+```
+
+## Requirements
+1. **Cache by document number** (persistent — a recorded instrument never changes; OCR/extract each one once, reuse across reports). Use this app's existing DB/KV; create a small `recorder_doc_cache` table/collection keyed on doc number if none exists.
+2. **Text-layer first, OCR only on scans** (the `> 100 chars` check). Don't OCR documents that already have selectable text.
+3. **Only ingest the doc types the debt engine uses:** mortgage, release, satisfaction, assignment, modification, subordination, deed, lis_pendens, foreclosure, notice_default, judgment_lien, tax_lien, mechanics_lien. Skip pure boilerplate.
+4. **Run with limited concurrency** (4–5 at a time), not one-at-a-time and not all at once.
+5. **Grounded extraction only** — the prompt must stay as-is (null when a field isn't in the text; capture references_docs). Do not let the model infer amounts/parties.
+6. Expose `ingestDoc(indexRow)` and a `ingestParcel(pin)` that runs the parcel's relevant index rows and returns the array of structured docs. Log the array for now (the reconciliation stage will consume it next).
+
+## Done when
+Running `ingestParcel` on a real parcel returns structured objects with **Lender and Amount populated** for the mortgage documents (the fields that are currently blank), each with its `references_docs`, cached by doc number so a re-run is instant.
+```

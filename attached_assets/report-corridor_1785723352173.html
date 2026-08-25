@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--track:#efeee9;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:34px}
+  .wrap{max-width:1000px;margin:0 auto}
+
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:11px;border-bottom:1px solid var(--line);margin-bottom:6px}
+  .sh .ic{color:var(--indigo);font-size:16px}
+  .sh .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .ca{margin-left:auto;color:var(--muted)}
+  .subtle{font-size:13px;color:var(--muted);margin:10px 0 16px}
+
+  /* summary KPI tiles */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+  .kpi{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+  .kpi .n{font-family:var(--disp);font-size:30px;line-height:1;color:var(--ink)}
+  .kpi .l{font-size:12px;font-weight:600;color:var(--ink2);margin-top:6px}
+  .kpi .s{font-size:10.5px;color:var(--muted);margin-top:5px}
+
+  /* corridor row */
+  .corr{border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:11px;background:var(--card)}
+  .crow{display:flex;align-items:center;gap:11px}
+  .crow .nav{color:var(--indigo);font-size:14px;flex:none}
+  .crow .nm{font-size:15px;font-weight:700;color:var(--ink)}
+  .tier{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;border-radius:6px;padding:3px 8px}
+  .tier.t1{background:var(--indigoSoft);color:var(--indigo)}
+  .tier.t2{background:#f1efe9;color:var(--ink2)}
+  .crow .dist{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .crow .right{margin-left:auto;display:flex;align-items:center;gap:7px;flex:none}
+  .cnt{font-size:11px;font-weight:600;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px 10px;display:inline-flex;align-items:center;gap:5px}
+  .cnt .ic{color:var(--indigo);font-size:11px}
+  .crow .chev{color:var(--muted);flex:none}
+  .cdesc{font-size:12.5px;color:var(--ink2);margin:7px 0 0 25px}
+
+  /* expanded */
+  .exp{margin:15px 0 2px 25px;border-top:1px solid var(--line);padding-top:15px;display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  .collbl{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);margin-bottom:12px}
+  .collbl .ic{color:var(--indigo);font-size:12px}
+  .ent{margin-bottom:14px}
+  .ent .er{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+  .ent .nm{font-size:13.5px;font-weight:700;color:var(--ink)}
+  .ent .dt{font-size:11px;color:var(--muted);font-family:var(--mono);flex:none}
+  .ent .ad{font-family:var(--mono);font-size:11px;color:var(--ink2);margin-top:2px}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .tg{font-size:10.5px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+  .kvs{font-size:12px;color:var(--ink2);line-height:1.65;margin-top:3px}
+  .kvs b{color:var(--ink);font-weight:600}
+  .cov{margin:16px 0 0 25px;border-top:1px solid var(--line);padding-top:13px}
+  .cov .cl{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);margin-bottom:9px}
+  .cov .ct{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .cov .cm{font-size:11.5px;color:var(--muted);margin-top:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sh"><span class="ic">▦</span><span class="t">Corridor Intelligence</span><span class="ca">▾</span></div>
+  <div class="subtle">Major commercial corridors within 0.5 miles of this property</div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n">9</div><div class="l">New construction permits</div><div class="s">4 corridors · 28 units · via City Permits</div></div>
+    <div class="kpi"><div class="n">18</div><div class="l">New business licenses</div><div class="s">Last 12 mo · via Chicago Licenses</div></div>
+    <div class="kpi"><div class="n">3</div><div class="l">News articles</div><div class="s">Last 90 days · Block Club / Curbed</div></div>
+    <div class="kpi"><div class="n">1</div><div class="l">Zoning appeal</div><div class="s">Recent ZBA · via Board of Appeals</div></div>
+  </div>
+
+  <!-- collapsed corridor -->
+  <div class="corr">
+    <div class="crow"><span class="nav">➤</span><span class="nm">Armitage Avenue</span><span class="tier t1">Tier 1 · Primary</span><span class="dist">0.18 mi away</span>
+      <span class="right"><span class="cnt"><span class="ic">▤</span>3 licenses</span><span class="cnt"><span class="ic">⌂</span>2 permits</span><span class="cnt"><span class="ic">▦</span>1 article</span><span class="chev">▴</span></span></div>
+    <div class="cdesc">Major east–west corridor through Humboldt Park, Logan Square, Bucktown, and Lincoln Park</div>
+  </div>
+
+  <!-- expanded corridor -->
+  <div class="corr">
+    <div class="crow"><span class="nav">➤</span><span class="nm">Damen Avenue</span><span class="tier t2">Tier 2 · Emerging</span><span class="dist">0.27 mi away</span>
+      <span class="right"><span class="cnt"><span class="ic">▤</span>7 licenses</span><span class="cnt"><span class="ic">⌂</span>5 permits</span><span class="cnt"><span class="ic">▦</span>1 article</span><span class="cnt"><span class="ic">§</span>1 appeal</span><span class="chev">▾</span></span></div>
+    <div class="cdesc">Wicker Park / Bucktown corridor</div>
+
+    <div class="exp">
+      <div>
+        <div class="collbl"><span class="ic">▤</span>New Business Licenses</div>
+        <div class="ent"><div class="er"><span class="nm">Cafe Gimme</span><span class="dt">Jul 2026</span></div><div class="ad">2115 N DAMEN AVE C-1</div><div class="tags"><span class="tg">Retail Food Establishment</span><span class="tg">Consumption on Premises</span></div></div>
+        <div class="ent"><div class="er"><span class="nm">Call Your Mother</span><span class="dt">May 2026</span></div><div class="ad">1615 N DAMEN AVE</div><div class="tags"><span class="tg">Retail Food Establishment</span></div></div>
+        <div class="ent"><div class="er"><span class="nm">Hot Pop's Pizzeria &amp; Rotisserie</span><span class="dt">Mar 2026</span></div><div class="ad">2010 N DAMEN AVE 1ST E</div><div class="tags"><span class="tg">Retail Food Establishment</span></div></div>
+        <div class="ent"><div class="er"><span class="nm">Soloway Coffee</span><span class="dt">Feb 2026</span></div><div class="ad">1708 N DAMEN AVE</div><div class="tags"><span class="tg">Retail Food Establishment</span></div></div>
+      </div>
+      <div>
+        <div class="collbl"><span class="ic">⌂</span>New Construction</div>
+        <div class="ent"><div class="er"><span class="nm">2847 N Damen Ave</span><span class="dt">Apr 2025</span></div><div class="kvs"><b>Multi-Family</b> · Parking · 0.95 mi<br>3 story · 3 units · <b>$1.2M</b><br>Architect: Hanna, John C · Contractor: Tuckpointing Masonry</div></div>
+        <div class="ent"><div class="er"><span class="nm">2129 N Damen Ave</span><span class="dt">Aug 2024</span></div><div class="kvs"><b>Multi-Family</b> · Retail · 0.14 mi<br>4 story · 6 units, 2 parking · <b>$3.1M</b><br>Architect: Hanna, John C · Contractor: BM UK Enterprise</div></div>
+        <div class="ent"><div class="er"><span class="nm">1628 N Damen Ave</span><span class="dt">Jun 2024</span></div><div class="kvs"><b>Multi-Family</b> · Retail · 0.62 mi<br>4 story · 6 units · <b>$1.4M</b><br>Architect: Liptak, Helen M · Contractor: Mavrek, Inc</div></div>
+      </div>
+    </div>
+
+    <div class="cov">
+      <div class="cl">Recent Coverage</div>
+      <div class="ct">Foodsmart On Armitage Avenue Closed For Remodeling</div>
+      <div class="cm">Block Club Chicago · Jul 15, 2026</div>
+    </div>
+  </div>
+
+  <!-- another collapsed -->
+  <div class="corr">
+    <div class="crow"><span class="nav">➤</span><span class="nm">Western Avenue</span><span class="tier t1">Tier 1 · Primary</span><span class="dist">0.37 mi away</span>
+      <span class="right"><span class="cnt"><span class="ic">▤</span>2 licenses</span><span class="cnt"><span class="ic">⌂</span>1 permit</span><span class="cnt"><span class="ic">▦</span>1 article</span><span class="chev">▴</span></span></div>
+    <div class="cdesc">Major north–south corridor spanning the city through multiple neighborhoods</div>
+  </div>
+</div>
+</body>
+</html>

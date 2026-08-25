@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--c1:#3f51c5;--track:#efeee9;
+    --up:#2f7d3f;--down:#d13b26;
+    --t1:#9aa4e2;--t2:#6b78d6;--t3:#4657c0;--t4:#2c3a86;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .col{max-width:940px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .chead{display:flex;align-items:center;gap:9px;padding-bottom:13px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+  .chead .sq{width:10px;height:10px;border-radius:2px;background:var(--indigo);flex:none}
+  .chead .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+  .barlbl{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);margin:2px 0 12px}
+
+  /* FMR tiles */
+  .fmr{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+  .rt{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 13px;text-align:center}
+  .rt .l{font-family:var(--mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .rt .n{font-family:var(--disp);font-size:26px;line-height:1;margin:6px 0 2px;color:var(--ink)}
+  .rt .u{font-size:10.5px;color:var(--muted)}
+
+  /* range/comparison bar (indigo) */
+  .rangebox{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:15px 17px}
+  .rangebox .lab{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:12px}
+  .rtrack{position:relative;height:12px;background:var(--track);border-radius:6px;margin:22px 0 8px}
+  .rfill{position:absolute;left:0;top:0;bottom:0;background:var(--c1);border-radius:6px}
+  .rmark{position:absolute;top:-5px;width:3px;height:22px;background:var(--indigo);border-radius:2px}
+  .rcap{position:absolute;top:-22px;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--indigo);white-space:nowrap}
+  .rends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+  .rends b{color:var(--ink2);font-weight:600}
+
+  /* tier ladder */
+  .tier{display:grid;grid-template-columns:88px 1fr 120px;align-items:center;gap:12px;margin-bottom:10px}
+  .tier .nm{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--ink)}
+  .tier .sw{width:10px;height:10px;border-radius:2px}
+  .ttrack{position:relative;height:15px;background:var(--track);border-radius:5px}
+  .tbar{position:absolute;top:0;bottom:0;border-radius:5px}
+  .tier .rng{font-size:12px;color:var(--ink2);text-align:right;font-variant-numeric:tabular-nums}
+  .axis{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px;padding-left:100px}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);text-align:right;padding:0 0 10px;border-bottom:1px solid var(--line)}
+  thead th:first-child{text-align:left}
+  tbody td{padding:11px 0;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+  tbody td:first-child{text-align:left}
+  .rmName{font-weight:600;color:var(--ink)}
+  .rmSub{font-size:11.5px;color:var(--muted)}
+  .price b{font-weight:700}.price span{color:var(--muted);font-size:11.5px}
+  .occ{display:flex;align-items:center;gap:9px;justify-content:flex-end}
+  .occ .bar{width:64px;height:8px;background:var(--track);border-radius:3px;overflow:hidden}
+  .occ .bar span{display:block;height:100%;background:var(--c1);border-radius:3px}
+  .occ .v{font-weight:700;min-width:34px}
+  .src{font-size:11.5px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="col">
+
+  <!-- FMR -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">Fair Market Rent · HUD FY2026</span></div>
+    <div class="fmr">
+      <div class="rt"><div class="l">Efficiency</div><div class="n">$1,530</div><div class="u">/month</div></div>
+      <div class="rt"><div class="l">1 Bedroom</div><div class="n">$1,630</div><div class="u">/month</div></div>
+      <div class="rt"><div class="l">2 Bedroom</div><div class="n">$1,840</div><div class="u">/month</div></div>
+      <div class="rt"><div class="l">3 Bedroom</div><div class="n">$2,370</div><div class="u">/month</div></div>
+      <div class="rt"><div class="l">4 Bedroom</div><div class="n">$2,740</div><div class="u">/month</div></div>
+    </div>
+    <div class="rangebox">
+      <div class="lab">This ZIP vs Chicago · 2-bedroom</div>
+      <div class="rtrack">
+        <div class="rfill" style="width:40%"></div>
+        <div class="rmark" style="left:40%"><span class="rcap" style="left:0">This ZIP $1,840</span></div>
+      </div>
+      <div class="rends"><span>Min <b>$1,290</b></span><span>City median <b>$1,840</b></span><span>Max <b>$2,670</b></span></div>
+    </div>
+  </div>
+
+  <!-- QUALITY TIER LADDER -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">2-Bedroom Quality Tiers · vs HUD FMR</span></div>
+    <div class="tier"><div class="nm"><span class="sw" style="background:var(--t1)"></span>Dated</div><div class="ttrack"><div class="tbar" style="left:4%;width:14%;background:var(--t1)"></div></div><div class="rng">$1,288–$1,564</div></div>
+    <div class="tier"><div class="nm"><span class="sw" style="background:var(--t2)"></span>Average</div><div class="ttrack"><div class="tbar" style="left:18%;width:28%;background:var(--t2)"></div></div><div class="rng">$1,564–$2,116</div></div>
+    <div class="tier"><div class="nm"><span class="sw" style="background:var(--t3)"></span>Nice</div><div class="ttrack"><div class="tbar" style="left:46%;width:32%;background:var(--t3)"></div></div><div class="rng">$2,116–$2,760</div></div>
+    <div class="tier"><div class="nm"><span class="sw" style="background:var(--t4)"></span>Luxury</div><div class="ttrack"><div class="tbar" style="left:78%;width:20%;background:var(--t4)"></div></div><div class="rng">$2,760+</div></div>
+    <div class="axis"><span>$1,200</span><span>$2,000</span><span>$2,800+</span></div>
+    <div class="src">Ranges relative to the HUD FMR 2-bedroom baseline. Darker = higher tier.</div>
+  </div>
+
+  <!-- AIRBNB TABLE + occupancy bars -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">Short-Term Rental Market · Airbnb</span></div>
+    <div class="barlbl">Entire home / apt · by bedroom</div>
+    <table>
+      <thead><tr><th>Room type</th><th>Avg price</th><th>Booked nights</th><th>Occupancy</th></tr></thead>
+      <tbody>
+        <tr><td><span class="rmName">Studio</span> <span class="rmSub">38 · 5.9%</span></td><td class="price"><b>$89</b>/nt <span>$53 med</span></td><td>50 <span class="rmSub">days/yr</span></td><td><div class="occ"><div class="bar"><span style="width:14%"></span></div><span class="v">14%</span></div></td></tr>
+        <tr><td><span class="rmName">1 Bedroom</span> <span class="rmSub">103 · 15.9%</span></td><td class="price"><b>$162</b>/nt <span>$143 med</span></td><td>133 <span class="rmSub">days/yr</span></td><td><div class="occ"><div class="bar"><span style="width:36%"></span></div><span class="v">36%</span></div></td></tr>
+        <tr><td><span class="rmName">2 Bedrooms</span> <span class="rmSub">189 · 29.2%</span></td><td class="price"><b>$188</b>/nt <span>$159 med</span></td><td>157 <span class="rmSub">days/yr</span></td><td><div class="occ"><div class="bar"><span style="width:43%"></span></div><span class="v">43%</span></div></td></tr>
+        <tr><td><span class="rmName">3 Bedrooms</span> <span class="rmSub">103 · 15.9%</span></td><td class="price"><b>$313</b>/nt <span>$265 med</span></td><td>110 <span class="rmSub">days/yr</span></td><td><div class="occ"><div class="bar"><span style="width:30%"></span></div><span class="v">30%</span></div></td></tr>
+        <tr><td><span class="rmName">4+ Bedrooms</span> <span class="rmSub">57 · 8.8%</span></td><td class="price"><b>$690</b>/nt <span>$467 med</span></td><td>128 <span class="rmSub">days/yr</span></td><td><div class="occ"><div class="bar"><span style="width:35%"></span></div><span class="v">35%</span></div></td></tr>
+      </tbody>
+    </table>
+    <div class="src">Source: Inside Airbnb · West Town · Occupancy estimated from availability. Prices are average listed, not per booked night.</div>
+  </div>
+
+</div>
+</body>
+</html>

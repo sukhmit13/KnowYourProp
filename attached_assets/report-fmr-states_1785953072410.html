@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;--indigo:#2b3a9e;
+    --good:#2f7d3f;--goodSoft:#e9f4ec;--bad:#d13b26;--badText:#b3311f;--badSoft:#fbece9;--neu:#8b8a84;--neuSoft:#f0efeb;
+    --goodZone:#2f7d3f;--badZone:#d13b26;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:34px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .state{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--indigo);margin:0 0 8px}
+  .barcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px 18px;margin-bottom:22px}
+  .bhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .bhead .bt{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+  .verdict{font-size:11.5px;font-weight:700;border-radius:999px;padding:5px 12px;display:inline-flex;align-items:center;gap:5px}
+  .verdict.good{background:var(--goodSoft);color:var(--good)}
+  .verdict.bad{background:var(--badSoft);color:var(--badText)}
+  .verdict.neu{background:var(--neuSoft);color:var(--ink2)}
+
+  .barwrap{position:relative;padding-top:42px;padding-bottom:30px}
+  .track{position:relative;height:12px;border-radius:6px;overflow:hidden;display:flex}
+  .zone{height:100%}
+  .zone.red{background:linear-gradient(90deg,#d13b26,#e5897a)} .zone.green{background:linear-gradient(90deg,#57a06e,#2f7d3f)}
+  .med{position:absolute;top:39px;height:18px;width:2px;background:#0a0a0a;transform:translateX(-50%)}
+  .zip{position:absolute;top:22px;height:32px;width:3px;border-radius:2px;transform:translateX(-50%)}
+  .zipdot{position:absolute;width:12px;height:12px;border-radius:50%;border:3px solid;background:#fff;top:41px;transform:translateX(-50%);box-shadow:0 0 0 2px #fff}
+  .zip.good{background:#1f5e2c} .zip.bad{background:#9e2417} .zip.neu{background:var(--neu)}
+  .zipdot.good{border-color:var(--good)} .zipdot.bad{border-color:var(--bad)} .zipdot.neu{border-color:var(--neu)}
+  .lab{position:absolute;font-size:11px;transform:translateX(-50%);white-space:nowrap}
+  .lab.ziptop{top:2px;font-weight:700}
+  .lab.ziptop.good{color:var(--good)} .lab.ziptop.bad{color:var(--badText)} .lab.ziptop.neu{color:var(--ink)}
+  .lab.ziptop b{font-family:var(--disp);font-size:15px;font-weight:400}
+  .lab.medlab{bottom:0;color:var(--ink2);font-weight:600;text-align:center}
+  .lab.medlab small{display:block;color:var(--muted);font-weight:400;font-size:9.5px}
+  .lab.endmin{bottom:0;left:0!important;transform:none;color:var(--muted)}
+  .lab.endmax{bottom:0;right:0;left:auto!important;transform:none;color:var(--muted)}
+  .lab b.v{color:var(--ink);font-weight:600}
+  .read{font-size:12px;color:var(--ink2);line-height:1.5;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+  .read b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ABOVE -->
+  <div class="state">Above median → green (this property)</div>
+  <div class="barcard">
+    <div class="bhead"><span class="bt">This ZIP vs Chicago · 2-Bedroom</span><span class="verdict good">▲ +21% above city median</span></div>
+    <div class="barwrap">
+      <div class="track"><span class="zone red" style="width:39.9%"></span><span class="zone green" style="width:60.1%"></span></div>
+      <div class="med" style="left:39.9%"></div>
+      <div class="zip good" style="left:67.4%"></div><div class="zipdot good" style="left:67.4%"></div>
+      <div class="lab ziptop good" style="left:67.4%">This ZIP <b>$2,220</b></div>
+      <div class="lab medlab" style="left:39.9%">City median <b class="v">$1,840</b><small>average</small></div>
+      <div class="lab endmin">Min <b class="v">$1,290</b></div><div class="lab endmax">Max <b class="v">$2,670</b></div>
+    </div>
+    <div class="read">This ZIP's 2-bedroom FMR sits <b>21% above the Chicago median</b> — a higher conservative rent baseline, favorable for underwriting downside.</div>
+  </div>
+
+  <!-- AT -->
+  <div class="state">At the median → neutral (average)</div>
+  <div class="barcard">
+    <div class="bhead"><span class="bt">This ZIP vs Chicago · 2-Bedroom</span><span class="verdict neu">● At city median · average</span></div>
+    <div class="barwrap">
+      <div class="track"><span class="zone red" style="width:39.9%"></span><span class="zone green" style="width:60.1%"></span></div>
+      <div class="med" style="left:39.9%"></div>
+      <div class="zip neu" style="left:42.8%"></div><div class="zipdot neu" style="left:42.8%"></div>
+      <div class="lab ziptop neu" style="left:42.8%">This ZIP <b>$1,880</b></div>
+      <div class="lab medlab" style="left:39.9%;transform:translateX(-70%)">City median <b class="v">$1,840</b><small>average</small></div>
+      <div class="lab endmin">Min <b class="v">$1,290</b></div><div class="lab endmax">Max <b class="v">$2,670</b></div>
+    </div>
+    <div class="read">This ZIP's 2-bedroom FMR is <b>right at the Chicago median</b> — a typical rent baseline for the city.</div>
+  </div>
+
+  <!-- BELOW -->
+  <div class="state">Below median → red</div>
+  <div class="barcard">
+    <div class="bhead"><span class="bt">This ZIP vs Chicago · 2-Bedroom</span><span class="verdict bad">▼ −18% below city median</span></div>
+    <div class="barwrap">
+      <div class="track"><span class="zone red" style="width:39.9%"></span><span class="zone green" style="width:60.1%"></span></div>
+      <div class="med" style="left:39.9%"></div>
+      <div class="zip bad" style="left:15.2%"></div><div class="zipdot bad" style="left:15.2%"></div>
+      <div class="lab ziptop bad" style="left:15.2%">This ZIP <b>$1,500</b></div>
+      <div class="lab medlab" style="left:39.9%">City median <b class="v">$1,840</b><small>average</small></div>
+      <div class="lab endmin">Min <b class="v">$1,290</b></div><div class="lab endmax">Max <b class="v">$2,670</b></div>
+    </div>
+    <div class="read">This ZIP's 2-bedroom FMR is <b>18% below the Chicago median</b> — a lower rent baseline; income assumptions should stay conservative.</div>
+  </div>
+
+</div>
+</body>
+</html>

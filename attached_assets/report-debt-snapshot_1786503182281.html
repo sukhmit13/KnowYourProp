@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;--cautionSoft:#fdf8f0;--bad:#c0392b;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04);margin-bottom:20px}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 9px;background:var(--card);border:1px solid #e6cfa0;color:var(--cautionText)}
+  .sh .badge .d{width:7px;height:7px;border-radius:50%;background:var(--caution)}
+
+  /* takeaway */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.55;color:var(--ink2);margin-bottom:9px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+  .cn.g .dt{background:var(--good)}.cn.c .dt{background:var(--caution)}.cn.n .dt{background:#9aa1b0}
+  .cn b{color:var(--ink);font-weight:600}
+  .cn .chip{margin-left:6px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:5px;vertical-align:1px}
+  .cn .chip.c{color:var(--cautionText);background:var(--cautionSoft);border:1px solid #e6cfa0}
+  .cn .chip.g{color:var(--good);background:var(--goodSoft);border:1px solid #cfe6d6}
+
+  /* debt tiles */
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+  .dt2{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+  .dt2 .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .dt2 .v{font-size:15px;font-weight:600;color:var(--ink);line-height:1.2;display:flex;align-items:center;gap:6px}
+  .dt2 .v.ok{color:var(--good)}
+  .dt2 .v.warn{color:var(--cautionText)}
+  .dt2 .v svg{width:13px;height:13px;fill:none;flex:none}
+  .dt2 .v.ok svg{stroke:var(--good)}
+  .dt2 .s{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .dt2 .s .was{color:var(--cautionText);font-weight:600}
+  .dt2.pos{background:var(--indigoSoft);border-color:#dfe3f7}
+  .dt2.pos .l{color:var(--indigo)}
+  .dt2.warn{background:var(--cautionSoft);border-color:#e6cfa0}
+  .dt2.warn .l{color:var(--cautionText)}
+
+  /* modification strip */
+  .mod{display:flex;gap:10px;align-items:flex-start;font-size:11.5px;color:var(--ink2);line-height:1.5;margin:8px 0 14px;padding:11px 14px;background:var(--indigoSoft);border:1px solid #dfe3f7;border-radius:10px}
+  .mod svg{width:14px;height:14px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;margin-top:1px}
+  .mod b{color:var(--ink);font-weight:600}
+  .mod .doc{font-family:var(--mono);font-size:10.5px;color:var(--indigo)}
+
+  /* cleared-by-sale history */
+  .cleared{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .clearedh{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px}
+  .clearedh svg{width:14px;height:14px;stroke:var(--good);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .clearedh .n{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+  .clearedsub{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:11px}
+  .crow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:12px}
+  .crow .doc{font-family:var(--mono);font-size:11px;color:var(--ink2);min-width:92px}
+  .crow .who{color:var(--ink);font-weight:500;flex:1}
+  .crow .amt{font-family:var(--mono);font-size:11px;color:var(--ink2)}
+  .crow .st{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--good);background:var(--goodSoft);border:1px solid #cfe6d6;border-radius:5px;padding:3px 8px}
+
+  /* lifecycle */
+  .life{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:14px}
+  .lifeh{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:30px}
+  .runway{position:relative;height:8px;border-radius:999px;background:#e6e4dd;margin-bottom:8px}
+  .runway .fill{position:absolute;left:0;top:0;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--indigo),var(--caution))}
+  .runway .now{position:absolute;top:-4px;width:3px;height:16px;background:var(--cautionText);border-radius:2px}
+  .runway .nowlab{position:absolute;top:-24px;transform:translateX(-50%);font-size:10px;font-weight:700;color:var(--cautionText);white-space:nowrap}
+  .lifeends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-bottom:12px}
+  .lifeends b{color:var(--ink2)}
+  .lifesum{font-size:12px;color:var(--ink2);line-height:1.5;padding-top:12px;border-top:1px solid var(--line)}
+  .lifesum b{color:var(--ink);font-weight:600}.lifesum .cau{color:var(--cautionText);font-weight:700}
+
+  .dcaveat{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--ink2);line-height:1.5;padding:11px 14px;background:var(--card);border:1px solid #e6cfa0;border-left:3px solid var(--caution);border-radius:10px}
+  .dcaveat svg{width:14px;height:14px;stroke:var(--cautionText);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;margin-top:1px}
+  .dcaveat b{color:var(--cautionText);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- SECTION: takeaway -->
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Debt &amp; Title</span><span class="badge"><span class="d"></span>1 active · at maturity</span></div>
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>The Takeaway</div>
+      <div class="taket">One mortgage in first position with clean priority — but it just reached maturity, so the live question is payoff or extension.</div>
+      <div class="cn c"><span class="dt"></span><span><b>At maturity now.</b> The lone active loan — <b>$399,000</b> with <b>Albany Bank &amp; Trust</b> — hit its modified maturity of <b>7/5/2026</b>. A 2021 modification cut the rate <b>4% → 3.75%</b> and extended the term; no payoff or further extension is recorded yet.<span class="chip c">Verify</span></span></div>
+      <div class="cn g"><span class="dt"></span><span><b>First position, clean priority.</b> Albany is the <b>sole active lien</b>. Two older loans (1999 Banco Popular, 2005 Greenpoint) were <b>extinguished by the 2014 court-ordered receiver's sale</b> — kept in history, not burdening current title.</span></div>
+      <div class="cn g"><span class="dt"></span><span><b>No active distress.</b> The pre-2014 foreclosure filings resolved with that sale — <b>zero</b> active foreclosure, lis pendens, or mechanics liens on record.</span></div>
+      <div class="cn n"><span class="dt"></span><span>Owner <b>HAPPY ARTS LLC</b> took title <b>4/24/2014</b> via a receiver's sale ($411,000). 41 recorded documents span the property's history.</span></div>
+    </div>
+  </div>
+
+  <!-- SECTION: Debt Snapshot -->
+  <div class="cardbox">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span class="t">Debt Snapshot</span></div>
+
+    <div class="g4">
+      <div class="dt2"><div class="l">Lender</div><div class="v">Albany Bank &amp; Trust</div><div class="s">N.A.</div></div>
+      <div class="dt2"><div class="l">Loan Amount</div><div class="v">$399,000</div><div class="s">recorded loan · <span class="was">not the $798K index figure</span></div></div>
+      <div class="dt2 pos"><div class="l">Lien Position</div><div class="v">1st · sole active</div><div class="s">record order, after 2014 sale</div></div>
+      <div class="dt2 warn"><div class="l">Maturity</div><div class="v warn">7/5/2026</div><div class="s">at maturity now</div></div>
+    </div>
+    <div class="g4">
+      <div class="dt2"><div class="l">Interest Rate</div><div class="v">3.75%</div><div class="s"><span class="was">was 4%</span> · modified 2021</div></div>
+      <div class="dt2"><div class="l">Recorded</div><div class="v">6/28/2016</div><div class="s">mortgage 1618022008</div></div>
+      <div class="dt2"><div class="l">Acquired</div><div class="v">4/24/2014</div><div class="s">receiver's (judicial) sale</div></div>
+      <div class="dt2"><div class="l">Foreclosure</div><div class="v ok"><svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>None active</div><div class="s">pre-2014 filings resolved</div></div>
+    </div>
+
+    <div class="mod"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span><b>Modification on record</b> (<span class="doc">2121004479</span>, 2021): clarified the loan at <b>$399,000</b>, cut the rate to <b>3.75%</b>, and extended maturity to <b>7/5/2026</b>. Effective terms shown above reflect the modification, not the original 2016 terms.</span></div>
+
+    <div class="cleared">
+      <div class="clearedh"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Cleared by the 2014 receiver's sale<span class="n">2 prior-owner loans</span></div>
+      <div class="clearedsub">Recorded but never released. A judicial sale extinguishes the prior owner's liens by court order — shown for history, not counted against current title.</div>
+      <div class="crow"><span class="doc">Mtg · 1999</span><span class="who">Banco Popular — L. Carrera</span><span class="amt">—</span><span class="st">Extinguished</span></div>
+      <div class="crow"><span class="doc">Mtg · 2005</span><span class="who">Greenpoint Mortgage — M. Aguilar</span><span class="amt">—</span><span class="st">Extinguished</span></div>
+    </div>
+
+    <div class="life">
+      <div class="lifeh">Loan lifecycle · refinancing runway</div>
+      <div class="runway"><span class="fill" style="width:100%"></span><span class="now" style="left:99%"></span><span class="nowlab" style="left:99%">Now · at maturity</span></div>
+      <div class="lifeends"><span>Recorded <b>Jun 2016</b></span><span>Modified maturity <b>Jul 2026</b></span></div>
+      <div class="lifesum">The original loan ballooned in <b>2021</b>; a 2021 modification extended it to <b>2026</b> — now reached. Refinancing risk <span class="cau">Elevated: due now</span>. Confirm payoff or a further extension; no release is recorded.</div>
+    </div>
+
+    <div class="dcaveat"><svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span><b>Verify before relying on this.</b> Amounts are the <b>recorded loan</b>, not the current balance. Position is inferred from recording order of unreleased liens after the 2014 sale. "Cleared by sale" reflects a judicial sale's extinguishment of prior-owner liens — no recorded release exists for them, so confirm at title. Maturity reflects the 2021 modification.</span></div>
+  </div>
+
+</div>
+</body>
+</html>

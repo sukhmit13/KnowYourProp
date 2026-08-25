@@ -13,6 +13,7 @@ import {
   Store,
   Factory,
   AlertTriangle,
+  Search,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
@@ -27,6 +28,7 @@ import {
   LINE,
   MUTED,
 } from '@/components/ContractorRankingShared';
+import { Input } from '@/components/ui/input';
 
 interface GCEntry {
   name: string;
@@ -40,6 +42,8 @@ interface GCEntry {
   mixedUseCommercialCount: number;
   industrialCount: number;
   lastPermitDate: string | null;
+  searchMatchCount?: number;
+  searchMatches?: string[];
 }
 
 interface GCResponse {
@@ -58,9 +62,11 @@ type SortKey =
   | 'single_family'
   | 'multi_family'
   | 'mixed_use'
-  | 'industrial';
+  | 'industrial'
+  | 'search_match';
 
 const SORT_OPTIONS: { key: SortKey; label: string; icon: any; shortLabel: string }[] = [
+  { key: 'search_match', label: 'Best Match', shortLabel: 'Best Match', icon: Search },
   { key: 'total_projects', label: 'Total Projects', shortLabel: 'Total', icon: Hammer },
   { key: 'total_value', label: 'Total Value', shortLabel: 'Value', icon: DollarSign },
   { key: 'new_construction', label: 'New Construction', shortLabel: 'New Const.', icon: HardHat },
@@ -73,6 +79,7 @@ const SORT_OPTIONS: { key: SortKey; label: string; icon: any; shortLabel: string
 
 function getSortValue(entry: GCEntry, sortBy: SortKey): number {
   switch (sortBy) {
+    case 'search_match': return entry.searchMatchCount ?? entry.totalProjects;
     case 'total_value': return entry.totalValue;
     case 'new_construction': return entry.newConstructionCount;
     case 'renovation': return entry.renovationCount;
@@ -86,6 +93,9 @@ function getSortValue(entry: GCEntry, sortBy: SortKey): number {
 
 function formatSortValue(entry: GCEntry, sortBy: SortKey): string {
   if (sortBy === 'total_value') return formatValue(entry.totalValue);
+  if (sortBy === 'search_match' && entry.searchMatchCount != null) {
+    return `${entry.searchMatchCount.toLocaleString()} match${entry.searchMatchCount === 1 ? '' : 'es'}`;
+  }
   return getSortValue(entry, sortBy).toLocaleString();
 }
 
@@ -125,7 +135,10 @@ function GCRow({ entry, rank, sortBy, highlighted }: { entry: GCEntry; rank: num
           {entry.isOwnerGC && <CertChip label="Owner-GC" />}
         </>
       }
-      subLine={lastDateStr ? `Last permit: ${lastDateStr}` : undefined}
+      subLine={[
+        entry.searchMatches?.length ? `Matched work: ${entry.searchMatches.join(' · ')}` : null,
+        lastDateStr ? `Last permit: ${lastDateStr}` : null,
+      ].filter(Boolean).join(' · ') || undefined}
       pill={
         <CountPill icon={Icon} testId={`badge-gc-primary-${rank}`}>
           {formatSortValue(entry, sortBy)}
@@ -170,6 +183,7 @@ function GCRow({ entry, rank, sortBy, highlighted }: { entry: GCEntry; rank: num
 
 export function GeneralContractorRankingsView() {
   const [sortBy, setSortBy] = useState<SortKey>('total_projects');
+  const [search, setSearch] = useState('');
   // Deep-link highlight: /discovery?view=gc-rankings&highlight=<firm name>
   const highlightNorm = (() => {
     try {
@@ -179,15 +193,26 @@ export function GeneralContractorRankingsView() {
   })();
 
   const { data, isLoading, error } = useQuery<GCResponse>({
-    queryKey: ['/api/discovery/general-contractors', sortBy],
+    queryKey: ['/api/discovery/general-contractors', sortBy, search],
     queryFn: async () => {
-      const res = await fetch(`/api/discovery/general-contractors?sortBy=${sortBy}&limit=100`, { credentials: 'include' });
+      const params = new URLSearchParams({ sortBy, limit: '100' });
+      if (search.trim()) params.set('search', search.trim());
+      const res = await fetch(`/api/discovery/general-contractors?${params.toString()}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch general contractor rankings');
       return res.json();
     },
     staleTime: 1000 * 60 * 60 * 6,
     refetchOnWindowFocus: false,
   });
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setSortBy(currentSort => {
+      if (value.trim() && currentSort === 'total_projects') return 'search_match';
+      if (!value.trim() && currentSort === 'search_match') return 'total_projects';
+      return currentSort;
+    });
+  };
 
   return (
     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
@@ -196,8 +221,26 @@ export function GeneralContractorRankingsView() {
           <SectionHeader
             icon={Hammer}
             title="Top Chicago General Contractors"
-            subtitle="Ranked by permit activity — last 5 years (2020–present). Source: Chicago Building Permits."
+            subtitle={search.trim()
+              ? `Matches for “${search.trim()},” ranked by matching permit work. Last 5 years (2020–present).`
+              : 'Ranked by permit activity — last 5 years (2020–present). Source: Chicago Building Permits.'}
           />
+          <div>
+            <label htmlFor="gc-search" className="font-jbmono text-[9.5px] font-bold uppercase tracking-[0.05em]" style={{ color: MUTED }}>
+              Search contractor or project work
+            </label>
+            <div className="relative mt-1.5">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: MUTED }} />
+              <Input
+                id="gc-search"
+                value={search}
+                onChange={(event) => handleSearchChange(event.target.value)}
+                placeholder="Try bathroom, tile, kitchen, or a contractor name"
+                className="pl-9"
+                data-testid="input-gc-search"
+              />
+            </div>
+          </div>
           <div className="flex flex-wrap gap-1.5">
             {SORT_OPTIONS.map(opt => (
               <FilterPill

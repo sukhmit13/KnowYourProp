@@ -1,0 +1,408 @@
+{
+  "community_area": 22,
+  "name": "Logan Square",
+  
+  "population_5_plus": 68000,
+  
+  "languages": {
+    "english_only": {
+      "count": 38000,
+      "pct": 55.9
+    },
+    "spanish": {
+      "count": 22000,
+      "pct": 32.4,
+      "english_proficiency": {
+        "very_well": 12000,
+        "well": 5000,
+        "not_well": 3500,
+        "not_at_all": 1500
+      }
+    },
+    "polish": {
+      "count": 4500,
+      "pct": 6.6,
+      "english_proficiency": {
+        "very_well": 2500,
+        "well": 1200,
+        "not_well": 600,
+        "not_at_all": 200
+      }
+    },
+    "other_languages": {
+      "count": 3500,
+      "pct": 5.1
+    }
+  },
+  
+  "summary": {
+    "speak_english_only": 38000,
+    "speak_other_language": 30000,
+    "pct_non_english_speakers": 44.1,
+    
+    "limited_english_proficiency": {
+      "count": 5800,
+      "pct": 8.5
+    }
+  },
+  
+  "top_languages": [
+    {"language": "English", "pct": 55.9},
+    {"language": "Spanish", "pct": 32.4},
+    {"language": "Polish", "pct": 6.6},
+    {"language": "Other", "pct": 5.1}
+  ]
+}
+```
+
+---
+
+## Replit Instructions
+```
+ADD LANGUAGE AND NON-ENGLISH SPEAKER DATA TO PROPERTY PAGES
+
+Show languages spoken at home and English proficiency for multilingual 
+services, translation needs, ESL programs, or cultural business analysis.
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 1: FIND LANGUAGE DATA
+═══════════════════════════════════════════════════════════════════════════
+
+Search Chicago Data Portal for:
+https://data.cityofchicago.org/browse?q=language
+
+OR check existing demographic datasets - language data may already be included.
+
+Look for:
+- Language spoken at home
+- English proficiency
+- By community area
+
+Key fields to look for:
+- speak_english_only
+- speak_spanish
+- speak_other_language
+- limited_english_proficiency
+- languages_spoken
+
+IF NOT FOUND on Chicago Data Portal:
+
+Use Census Bureau API directly:
+https://api.census.gov/data/2022/acs/acs5
+
+Key tables:
+- S1601: Language spoken at home
+- B16001: Language spoken at home by ability to speak English
+
+Download by census tract for Cook County, aggregate to community areas.
+
+Save to: /server/data/demographics/languages.json
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 2: DATA STRUCTURE
+═══════════════════════════════════════════════════════════════════════════
+
+Organize language data by community area:
+
+{
+  "7": {
+    "community_area": 7,
+    "name": "Lincoln Park",
+    "population_5_plus": 65000,
+    
+    "english_only_pct": 75.2,
+    "non_english_pct": 24.8,
+    
+    "top_languages": [
+      {"language": "English only", "count": 48880, "pct": 75.2},
+      {"language": "Spanish", "count": 6500, "pct": 10.0},
+      {"language": "Chinese", "count": 3250, "pct": 5.0},
+      {"language": "Polish", "count": 2600, "pct": 4.0},
+      {"language": "Other", "count": 3770, "pct": 5.8}
+    ],
+    
+    "limited_english_proficiency": {
+      "count": 3900,
+      "pct": 6.0
+    }
+  },
+  
+  "22": {
+    "community_area": 22,
+    "name": "Logan Square",
+    "population_5_plus": 68000,
+    
+    "english_only_pct": 55.9,
+    "non_english_pct": 44.1,
+    
+    "top_languages": [
+      {"language": "English only", "count": 38000, "pct": 55.9},
+      {"language": "Spanish", "count": 22000, "pct": 32.4},
+      {"language": "Polish", "count": 4500, "pct": 6.6},
+      {"language": "Other", "count": 3500, "pct": 5.1}
+    ],
+    
+    "limited_english_proficiency": {
+      "count": 5800,
+      "pct": 8.5
+    }
+  }
+  
+  // ... all 77 community areas
+}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 3: ADD TO PROPERTY PAGE DISPLAY
+═══════════════════════════════════════════════════════════════════════════
+
+Show language data in demographics section.
+
+const languageData = require('./data/demographics/languages.json');
+
+function getLanguageData(communityArea) {
+  return languageData[communityArea] || null;
+}
+
+// On property page:
+const ca = propertyData.community_area;
+const languages = getLanguageData(ca);
+
+DISPLAY FORMAT (General):
+────────────────────────
+
+Languages Spoken:
+─────────────────
+
+Primary Languages at Home:
+{FOR EACH language in top_languages}
+  • {language}: {pct}% ({count} speakers)
+{END FOR}
+
+Language Diversity:
+- English only: {english_only_pct}%
+- Speak other language at home: {non_english_pct}%
+
+Limited English Proficiency (LEP):
+- {lep_count} residents ({lep_pct}%)
+- Definition: Speak English "not well" or "not at all"
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 4: PROJECT-SPECIFIC INSIGHTS
+═══════════════════════════════════════════════════════════════════════════
+
+For multilingual services, add market analysis:
+
+IF project_type === "healthcare" OR "social_services" OR "government":
+
+  Multilingual Service Needs:
+  ────────────────────────────
+  
+  {IF non_english_pct > 30}
+    🌍 HIGH MULTILINGUAL NEED
+    • {non_english_pct}% speak other language at home
+    • Bilingual staff essential
+    • Translation services critical
+  
+  {ELSE IF non_english_pct > 15}
+    🌍 MODERATE MULTILINGUAL NEED
+    • Some non-English speakers
+    • Bilingual capability helpful
+  
+  {ELSE}
+    🌍 LOW MULTILINGUAL NEED
+    • Mostly English-speaking area
+  {END IF}
+  
+  Required Language Capabilities:
+  {FOR EACH language WHERE pct > 5}
+    • {language}: {pct}% of population
+  {END FOR}
+  
+  {IF lep_pct > 10}
+    ⚠️ Note: {lep_pct}% have limited English proficiency
+    Professional translation services recommended
+  {END IF}
+
+IF project_type === "restaurant" OR "retail":
+
+  Cultural Market Analysis:
+  ─────────────────────────
+  
+  Top Languages/Cultures:
+  {FOR EACH language WHERE pct > 10}
+    • {language} speakers: {pct}% ({count})
+  {END FOR}
+  
+  {IF spanish_pct > 20}
+    🌮 Spanish-speaking market
+    • {spanish_count} Spanish speakers
+    • Consider bilingual signage/menu
+    • Hispanic/Latino cultural preferences
+  
+  {IF chinese_pct > 10}
+    🥢 Chinese-speaking market
+    • {chinese_count} Chinese speakers
+    • Consider Chinese language materials
+    • Asian cultural preferences
+  
+  {IF polish_pct > 10}
+    🇵🇱 Polish-speaking market
+    • {polish_count} Polish speakers
+    • Consider Polish language materials
+    • Eastern European cultural preferences
+  {END IF}
+
+IF project_type === "daycare" OR "school":
+
+  Language Support Needs:
+  ───────────────────────
+  
+  Non-English Speaking Families:
+  • {non_english_pct}% speak other language at home
+  
+  {IF non_english_pct > 30}
+    ✅ Bilingual staff highly recommended
+    • Significant multilingual population
+    • Parent communication in multiple languages
+    • ESL support for children may be needed
+  {END IF}
+  
+  Top Languages for Parent Communication:
+  {FOR EACH language WHERE pct > 5 AND language != "English only"}
+    • {language}: {pct}%
+  {END FOR}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 5: VISUAL REPRESENTATION
+═══════════════════════════════════════════════════════════════════════════
+
+Show language diversity visually:
+
+Language Breakdown (bar chart or list):
+
+English only        ████████████████████ 55.9%
+Spanish            ████████████ 32.4%
+Polish             ██ 6.6%
+Other              █ 5.1%
+
+OR simple text list:
+
+Languages Spoken at Home:
+1. English only: 55.9%
+2. Spanish: 32.4%
+3. Polish: 6.6%
+4. Other: 5.1%
+
+Multilingual Area: 🌍🌍🌍 High Diversity
+(44.1% speak language other than English at home)
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 6: COMPARISON TO CHICAGO AVERAGE
+═══════════════════════════════════════════════════════════════════════════
+
+Calculate comparison to citywide average:
+
+Chicago citywide: ~35% speak language other than English at home
+
+{IF non_english_pct > city_avg}
+  This area is MORE linguistically diverse than Chicago average
+  ({non_english_pct}% vs. {city_avg}%)
+  
+  → Higher need for multilingual services
+{ELSE}
+  This area is LESS linguistically diverse than Chicago average
+  ({non_english_pct}% vs. {city_avg}%)
+  
+  → Primarily English-speaking
+{END IF}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 7: COMBINE WITH OTHER RELEVANT DATA
+═══════════════════════════════════════════════════════════════════════════
+
+For comprehensive cultural analysis, also consider:
+
+Race/Ethnicity (you may already have):
+- Hispanic/Latino: XX%
+- Asian: XX%
+- White: XX%
+- Black: XX%
+
+Foreign-Born Population:
+- % foreign-born: XX%
+- Top countries of origin
+
+This helps understand cultural context beyond just language.
+
+═══════════════════════════════════════════════════════════════════════════
+DATA NOTES
+═══════════════════════════════════════════════════════════════════════════
+
+SOURCE: U.S. Census Bureau, American Community Survey (ACS)
+- Table S1601: Language spoken at home
+- Table B16001: Language by ability to speak English
+- Population 5 years and over (language questions only for 5+)
+- 5-year estimates (most stable)
+
+DEFINITIONS:
+- "English only": Speaks only English at home
+- "Limited English Proficiency (LEP)": Speaks English "not well" or "not at all"
+- "Other language": Any language other than English spoken at home
+
+IMPORTANT NOTES:
+- Data is for languages spoken AT HOME, not necessarily primary language
+- Someone who speaks Spanish at home may still speak English fluently
+- LEP is more critical metric for service needs than just "speaks other language"
+
+CHICAGO CONTEXT:
+- Chicago is highly multilingual
+- Top languages after English: Spanish, Polish, Chinese, Arabic
+- Varies greatly by neighborhood
+- Some areas 60%+ non-English speakers
+
+UPDATE FREQUENCY:
+- Download new ACS data annually when released
+- Language patterns change slowly (unlike housing prices)
+
+═══════════════════════════════════════════════════════════════════════════
+```
+
+---
+
+## Example Output
+```
+Languages Spoken - Logan Square
+────────────────────────────────
+
+Primary Languages at Home:
+- English only: 55.9% (38,000)
+- Spanish: 32.4% (22,000)
+- Polish: 6.6% (4,500)
+- Other: 5.1% (3,500)
+
+Language Diversity: 🌍🌍🌍 High Diversity
+- 44.1% speak language other than English at home
+- Above Chicago average (35%)
+
+Limited English Proficiency (LEP):
+- 5,800 residents (8.5%)
+- These residents speak English "not well" or "not at all"
+
+────────────────────────────────────────────────
+
+Market Analysis for Healthcare Facility:
+
+🌍 HIGH MULTILINGUAL NEED
+
+Required Language Capabilities:
+- Spanish: 32.4% of population
+- Polish: 6.6% of population
+
+Recommendations:
+✓ Bilingual staff (Spanish) essential
+✓ Polish language materials helpful
+✓ Professional translation services for LEP patients
+✓ Consider Spanish-language signage
+
+LEP Population: 8.5%
+→ Professional medical translation critical for this segment

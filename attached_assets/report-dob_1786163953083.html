@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--bad:#d13b26;
+    --caution:#f0a41c;--cautionText:#96600a;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .cardbox[id]{scroll-margin-top:90px}
+
+  /* top-level header */
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+  .sh .count b{color:var(--good)}
+
+  /* takeaway */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px 17px;margin-bottom:18px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+  .taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:13px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:9px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .cn.g .dt{background:var(--good)}
+  .cn.c .dt{background:var(--caution)}
+  .cn.i .dt{background:var(--indigo)}
+  .cn b{color:var(--ink);font-weight:600}
+  .cn .tx{flex:1}
+  .jump{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:9.5px;font-weight:600;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid #dde1f6;border-radius:6px;padding:2px 7px;margin-left:7px;white-space:nowrap;vertical-align:middle}
+  .jump svg{width:10px;height:10px;stroke:var(--indigo);fill:none}
+
+  /* subsection header */
+  .subwrap{margin-top:20px}
+  .ssh{display:flex;align-items:center;gap:9px;margin-bottom:15px}
+  .ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+  .ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+  .ssh .sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto}
+
+  /* mini snapshot line */
+  .msnap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 15px;margin-bottom:8px}
+  .msnap .big{font-family:var(--disp);font-size:23px;color:var(--ink);line-height:1}
+  .msnap b{color:var(--ink);font-weight:600}
+  .miniflag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--cautionText);background:#fdf3df;border:1px solid #f0d79a;border-radius:7px;padding:4px 9px;margin-left:auto}
+  .miniflag svg{width:12px;height:12px;stroke:var(--cautionText);fill:none}
+  .basis{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:16px;padding-left:2px}
+  .basis b{color:var(--ink2);font-weight:600}
+
+  /* owner-era divider */
+  .eradiv{display:flex;align-items:center;gap:11px;margin:16px 0 11px}
+  .eradiv .lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+  .eradiv .meta{font-family:var(--mono);font-size:9.5px;color:var(--muted);white-space:nowrap}
+  .eradiv .ln{flex:1;height:1px;background:var(--line)}
+
+  /* permit cards */
+  .prow{border:1px solid var(--line);border-radius:12px;padding:15px 16px;margin-bottom:10px;background:var(--card)}
+  .ptop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:11px}
+  .pscope{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.35;max-width:560px}
+  .pdate{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;text-align:right;padding-top:1px}
+  .ptags{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:13px}
+  .st{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 11px 4px 9px}
+  .st .d{width:7px;height:7px;border-radius:50%;flex:none}
+  .st.complete{color:var(--good);background:var(--goodSoft)}.st.complete .d{background:var(--good)}
+  .st.expired{color:var(--cautionText);background:#fdf3df;border:1px solid #f0d79a}.st.expired .d{background:var(--caution)}
+  .ptype{font-size:11px;font-weight:500;color:var(--indigo);background:var(--indigoSoft);border-radius:7px;padding:4px 11px}
+  .pcost{font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--ink);margin-left:auto}
+  .pcost span{color:var(--muted);font-weight:400}
+  /* permit meta grid */
+  .pmeta{display:grid;grid-template-columns:1fr 1fr;gap:9px 22px;border-top:1px dashed var(--line);padding-top:12px}
+  .pm{display:flex;flex-direction:column;gap:2px}
+  .pm .k{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .pm .v{font-size:12.5px;color:var(--ink);font-weight:500}
+
+  /* era chip (categorical, neutral) */
+  .era{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;border-radius:7px;padding:3px 8px}
+  .era .d{width:6px;height:6px;border-radius:50%;flex:none}
+  .era.cur{color:var(--indigo);background:var(--indigoSoft)}.era.cur .d{background:var(--indigo)}
+  .era.prior{color:var(--ink2);background:var(--paper);border:1px solid var(--line)}.era.prior .d{background:#9aa1b0}
+
+  /* professionals — aggregated across building */
+  .procard{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:6px}
+  .proh{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:6px}
+  .proh svg{width:13px;height:13px;stroke:var(--ink2);fill:none}
+  .prow2{padding:12px 0;border-top:1px solid var(--line)}
+  .prow2:first-of-type{border-top:none}
+  .p2top{display:flex;align-items:center;gap:9px}
+  .p2role{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:3px 8px;flex:none}
+  .p2role.arch{color:var(--indigo);background:var(--indigoSoft)}
+  .p2role.gc{color:var(--ink2);background:#eeece6}
+  .p2name{font-size:14px;font-weight:600;color:var(--ink);flex:1}
+  .p2sub{margin-top:5px;font-size:11.5px;color:var(--ink2);line-height:1.45}
+  .p2sub .stat{font-family:var(--mono);font-size:10.5px;color:var(--ink);font-weight:600}
+  .p2sub .stat b{color:var(--muted);font-weight:400}
+  .p2label{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-right:7px}
+  .p2cite{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-family:var(--mono);font-size:10.5px;color:var(--ink2)}
+  .p2cite .cw{color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-size:8.5px;font-weight:700}
+  .p2cite b{color:var(--ink);font-weight:600}
+  .p2cite .vp{margin-left:auto;color:var(--indigo);text-decoration:none;font-weight:600;white-space:nowrap}
+  .p2cite .nomatch{color:var(--muted)}
+  /* MBE/WBE certification chip — neutral factual attribute, outline style */
+  .cert{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px 7px;flex:none}
+  .cert svg{width:10px;height:10px;stroke:var(--ink2);fill:none}
+  .profind{font-size:11px;color:var(--muted);margin-top:13px;padding-top:12px;border-top:1px dashed var(--line);line-height:1.5}
+  .profind a{color:var(--indigo);text-decoration:none;font-weight:500}
+
+  /* violations hero */
+  .vhero{display:flex;align-items:center;gap:14px;background:var(--goodSoft);border:1px solid #cfe6d3;border-radius:12px;padding:16px 18px;margin-bottom:16px}
+  .vhero .ic{width:38px;height:38px;border-radius:9px;background:#fff;border:1px solid #cfe6d3;display:flex;align-items:center;justify-content:center;flex:none}
+  .vhero .ic svg{width:20px;height:20px;stroke:var(--good);fill:none}
+  .vhero .big{font-family:var(--disp);font-size:24px;color:var(--good);line-height:1.05}
+  .vhero .sub{font-size:12px;color:var(--ink2);margin-top:2px}
+
+  /* historical (>5yr) */
+  .hist{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .histh{display:flex;align-items:center;gap:11px;padding:14px 16px;background:var(--paper);cursor:pointer}
+  .histh .ct{font-family:var(--disp);font-size:21px;color:var(--ink);line-height:1;flex:none}
+  .histh .tx{flex:1}
+  .histh .tt{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:2px}
+  .histh .ds{font-size:11px;color:var(--muted)}
+  .histh .chev{width:15px;height:15px;stroke:var(--muted);fill:none;flex:none}
+  .histbody{padding:4px 16px 8px}
+  .vitem{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+  .vitem .vtx{flex:1}
+  .vitem .vsc{font-size:12.5px;color:var(--ink);font-weight:500;line-height:1.4;margin-bottom:3px}
+  .vitem .vmeta{font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .vt{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;border-radius:999px;padding:3px 9px 3px 7px;white-space:nowrap;margin-top:1px}
+  .vt .d{width:6px;height:6px;border-radius:50%;flex:none}
+  .vt.complied{color:var(--good);background:var(--goodSoft)}.vt.complied .d{background:var(--good)}
+  .vt.stale{color:var(--ink2);background:var(--paper);border:1px solid var(--line)}.vt.stale .d{background:#9aa1b0}
+
+  .caveat{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--ink2);line-height:1.5;margin-top:16px;padding:11px 14px;background:var(--card);border:1px solid #ecd49a;border-left:3px solid #e0a92e;border-radius:10px}
+  .caveat svg{width:14px;height:14px;stroke:var(--cautionText);fill:none;flex:none;margin-top:1px}
+  .caveat b{color:var(--cautionText);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Department of Buildings Information</span>
+      <span class="count">4 permits · <b>0 open violations</b></span></div>
+
+    <!-- TAKEAWAY -->
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>What the building record shows</div>
+      <div class="taket">The building was gut-rehabbed in 2012 under prior ownership; the current owner has done light work since and kept a clean record.</div>
+      <div class="cn i"><span class="dt"></span><span class="tx"><b>A $577K gut rehab in 2012</b> rebuilt the entire building — its defining work. But the prior owner did it and realized that value when they sold in 2015: it's already baked into today's price, not hidden equity the current owner created. Confirm the workmanship on your walk-through.<a class="jump" href="#permits"><svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Permits</a></span></div>
+      <div class="cn c"><span class="dt"></span><span class="tx"><b>One permit left open.</b> The current owner's 2017 electrical permit was never closed out — confirm the deck wiring was finished and inspected.<a class="jump" href="#permits"><svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Permits</a></span></div>
+      <div class="cn g"><span class="dt"></span><span class="tx"><b>No open violations.</b> Nothing in the last 5 years; an older 2013 cluster was fully resolved under the prior owner.<a class="jump" href="#violations"><svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Violations</a></span></div>
+    </div>
+
+    <!-- ============ PERMIT HISTORY ============ -->
+    <div class="subwrap" id="permits">
+      <div class="ssh">
+        <svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h.01"/><path d="M9 13h.01"/><path d="M9 17h.01"/><path d="M15 9h.01"/><path d="M15 13h.01"/><path d="M15 17h.01"/></svg>
+        <span class="t">Permit History</span>
+        <span class="sub">City of Chicago DOB</span>
+      </div>
+
+      <div class="msnap">
+        <span class="big">4</span>
+        <div><b>permits, 2012–2017</b><br><span style="font-size:11.5px;color:var(--muted)">$666,600 declared value across all work</span></div>
+        <span class="miniflag"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>1 permit not closed out</span>
+      </div>
+      <div class="basis">Permits are split by ownership using the <b>last recorded sale (Jun 2015)</b>: work permitted after that date is the current owner's; earlier work was done by prior owners.</div>
+
+      <!-- CURRENT OWNER -->
+      <div class="eradiv"><span class="lbl">Under current ownership</span><span class="meta">since Jun 2015 · 2 permits · $57,600</span><span class="ln"></span></div>
+
+      <div class="prow">
+        <div class="ptop">
+          <div class="pscope">Electrical — new service and rooftop-deck wiring for the entire building</div>
+          <div class="pdate">Issued<br>Mar 14, 2017</div>
+        </div>
+        <div class="ptags">
+          <span class="st expired"><span class="d"></span>Expired · not closed</span>
+          <span class="era cur"><span class="d"></span>Current owner</span>
+          <span class="ptype">Electrical Permit</span>
+          <span class="pcost">$9,600 <span>declared</span></span>
+        </div>
+        <div class="pmeta">
+          <div class="pm"><span class="k">Permit no.</span><span class="v">100742-2017-ELEC</span></div>
+          <div class="pm"><span class="k">Owner of record</span><span class="v">2540 W North LLC</span></div>
+          <div class="pm"><span class="k">Architect</span><span class="v">Martinez, Luis A.</span></div>
+          <div class="pm"><span class="k">General contractor</span><span class="v">A Kats Construction Inc.</span></div>
+        </div>
+      </div>
+
+      <div class="prow">
+        <div class="ptop">
+          <div class="pscope">Rear porch reconstruction — replace open wood porch and stairs, three stories</div>
+          <div class="pdate">Issued<br>May 2, 2016</div>
+        </div>
+        <div class="ptags">
+          <span class="st complete"><span class="d"></span>Complete</span>
+          <span class="era cur"><span class="d"></span>Current owner</span>
+          <span class="ptype">Building Permit</span>
+          <span class="pcost">$48,000 <span>declared</span></span>
+        </div>
+        <div class="pmeta">
+          <div class="pm"><span class="k">Permit no.</span><span class="v">100518-2016-BLDG</span></div>
+          <div class="pm"><span class="k">Owner of record</span><span class="v">2540 W North LLC</span></div>
+          <div class="pm"><span class="k">Architect</span><span class="v">Martinez, Luis A.</span></div>
+          <div class="pm"><span class="k">General contractor</span><span class="v">A Kats Construction Inc.</span></div>
+        </div>
+      </div>
+
+      <!-- PRIOR OWNER -->
+      <div class="eradiv"><span class="lbl">Under prior ownership</span><span class="meta">before Jun 2015 · 2 permits · $609,000</span><span class="ln"></span></div>
+
+      <div class="prow">
+        <div class="ptop">
+          <div class="pscope">Full gut rehabilitation — entire building, new mechanicals, plumbing and electrical throughout</div>
+          <div class="pdate">Issued<br>Apr 9, 2012</div>
+        </div>
+        <div class="ptags">
+          <span class="st complete"><span class="d"></span>Complete</span>
+          <span class="era prior"><span class="d"></span>Prior owner</span>
+          <span class="ptype">Building Permit</span>
+          <span class="pcost">$577,000 <span>declared</span></span>
+        </div>
+        <div class="pmeta">
+          <div class="pm"><span class="k">Permit no.</span><span class="v">100231-2012-BLDG</span></div>
+          <div class="pm"><span class="k">Owner of record</span><span class="v">North Ave Holdings LLC</span></div>
+          <div class="pm"><span class="k">Architect</span><span class="v">Kowalski Design Group</span></div>
+          <div class="pm"><span class="k">General contractor</span><span class="v">Prime Builders LLC</span></div>
+        </div>
+      </div>
+
+      <div class="prow">
+        <div class="ptop">
+          <div class="pscope">Masonry & facade repair — tuckpointing and lintel replacement, north and east elevations</div>
+          <div class="pdate">Issued<br>Aug 21, 2014</div>
+        </div>
+        <div class="ptags">
+          <span class="st complete"><span class="d"></span>Complete</span>
+          <span class="era prior"><span class="d"></span>Prior owner</span>
+          <span class="ptype">Building Permit</span>
+          <span class="pcost">$32,000 <span>declared</span></span>
+        </div>
+        <div class="pmeta">
+          <div class="pm"><span class="k">Permit no.</span><span class="v">100394-2014-BLDG</span></div>
+          <div class="pm"><span class="k">Owner of record</span><span class="v">North Ave Holdings LLC</span></div>
+          <div class="pm"><span class="k">Architect</span><span class="v">— (not required)</span></div>
+          <div class="pm"><span class="k">General contractor</span><span class="v">Windy City Masonry Co.</span></div>
+        </div>
+      </div>
+
+      <!-- professionals — aggregated across the building -->
+      <div class="procard">
+        <div class="proh"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Professionals who worked on this building</div>
+
+        <div class="prow2">
+          <div class="p2top"><span class="p2role arch">Architect</span><span class="p2name">Martinez, Luis A.</span><span class="era cur"><span class="d"></span>Current owner</span></div>
+          <div class="p2sub"><span class="p2label">Here</span><span class="stat">2 permits · $57.6K · latest 2017</span> &nbsp;—&nbsp; porch reconstruction + deck/electrical.</div>
+          <div class="p2cite"><span class="cw">Citywide · 5 yr</span> <b>63 permits</b> · last active 2026 · mostly renovations <a class="vp" href="#">View profile →</a></div>
+        </div>
+        <div class="prow2">
+          <div class="p2top"><span class="p2role gc">Gen. contractor</span><span class="p2name">A Kats Construction Inc.</span><span class="cert"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 7.8 8 9 4.6-1.2 8-4 8-9V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg>MBE</span><span class="era cur"><span class="d"></span>Current owner</span></div>
+          <div class="p2sub"><span class="p2label">Here</span><span class="stat">2 permits · $57.6K · latest 2017</span> &nbsp;—&nbsp; porch (complete) and electrical (permit left open).</div>
+          <div class="p2cite"><span class="cw">Citywide · 5 yr</span> <b>128 permits</b> · last active 2025 · mostly residential <a class="vp" href="#">View profile →</a></div>
+        </div>
+        <div class="prow2">
+          <div class="p2top"><span class="p2role gc">Gen. contractor</span><span class="p2name">Windy City Masonry Co.</span><span class="era prior"><span class="d"></span>Prior owner</span></div>
+          <div class="p2sub"><span class="p2label">Here</span><span class="stat">1 permit · $32K · 2014</span> &nbsp;—&nbsp; tuckpointing and facade repair.</div>
+          <div class="p2cite"><span class="cw">Citywide · 5 yr</span> <b>210 permits</b> · last active 2026 · masonry / facade specialist <a class="vp" href="#">View profile →</a></div>
+        </div>
+        <div class="prow2">
+          <div class="p2top"><span class="p2role arch">Architect</span><span class="p2name">Kowalski Design Group</span><span class="cert"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 7.8 8 9 4.6-1.2 8-4 8-9V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg>WBE</span><span class="era prior"><span class="d"></span>Prior owner</span></div>
+          <div class="p2sub"><span class="p2label">Here</span><span class="stat">1 permit · $577K · 2012</span> &nbsp;—&nbsp; designed the gut rehab of the entire building.</div>
+          <div class="p2cite"><span class="cw">Citywide · 5 yr</span> <b>310 permits</b> · last active 2026 · mostly multi-family <a class="vp" href="#">View profile →</a></div>
+        </div>
+        <div class="prow2">
+          <div class="p2top"><span class="p2role gc">Gen. contractor</span><span class="p2name">Prime Builders LLC</span><span class="cert"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 7.8 8 9 4.6-1.2 8-4 8-9V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg>MBE</span><span class="era prior"><span class="d"></span>Prior owner</span></div>
+          <div class="p2sub"><span class="p2label">Here</span><span class="stat">1 permit · $577K · 2012</span> &nbsp;—&nbsp; led the gut rehab of the entire building.</div>
+          <div class="p2cite"><span class="cw">Citywide · 5 yr</span> <b>540 permits · $480M</b> · last active 2026 · mostly multi-family <a class="vp" href="#">View profile →</a></div>
+        </div>
+
+        <div class="profind">Every professional on the building's permits is listed — a starting point, not a recommendation. Citywide figures are <b>permit activity, not a quality rating</b>; high volume doesn't guarantee good work, and self-certified permits get less city review. <b>MBE/WBE</b> shows the city's Minority/Woman-Owned certification where a firm matches the certified directory — a blank means no confident match, not "not certified." Firms are matched to city records by license number. Verify licensing, certification, and references before relying on any firm.</div>
+      </div>
+    </div>
+
+    <!-- ============ BUILDING VIOLATIONS ============ -->
+    <div class="subwrap" id="violations">
+      <div class="ssh">
+        <svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        <span class="t">Building Violations</span>
+        <span class="sub">City of Chicago DOB</span>
+      </div>
+
+      <div class="vhero">
+        <div class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <div>
+          <div class="big">0 open violations</div>
+          <div class="sub">No building-code violations in the last 5 years — clean under the current owner.</div>
+        </div>
+      </div>
+
+      <div class="hist">
+        <div class="histh">
+          <span class="ct">12</span>
+          <div class="tx">
+            <div class="tt">Historical records · older than 5 years</div>
+            <div class="ds">A 2013 cluster of code enforcement — all under prior ownership, since resolved</div>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="histbody">
+          <div class="vitem">
+            <span class="vt complied"><span class="d"></span>Complied</span>
+            <div class="vtx"><div class="vsc">Failed to maintain rear porch / exterior stairs</div><div class="vmeta">Issued 3/11/2013 · complied 2013 · prior owner</div></div>
+          </div>
+          <div class="vitem">
+            <span class="vt complied"><span class="d"></span>Complied</span>
+            <div class="vtx"><div class="vsc">Repair or replace defective smoke detectors</div><div class="vmeta">Issued 3/11/2013 · complied 2013 · prior owner</div></div>
+          </div>
+          <div class="vitem">
+            <span class="vt stale"><span class="d"></span>Open · 2013</span>
+            <div class="vtx"><div class="vsc">Failure to file annual inspection certificate</div><div class="vmeta">Issued 3/11/2013 · no disposition recorded · prior owner</div></div>
+          </div>
+          <div class="vitem">
+            <span class="vt complied"><span class="d"></span>Complied</span>
+            <div class="vtx"><div class="vsc">Post owner / manager identification sign</div><div class="vmeta">Issued 3/11/2013 · complied 2013 · prior owner</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="caveat"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span><b>A couple of 2013 records still show "Open," but none are current problems.</b> They predate the current owner (who bought in 2015) and the city often just never posts a final disposition. We treat records older than 5 years as historical, not active. If any matter to you, confirm current standing with the Department of Buildings.</span></div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

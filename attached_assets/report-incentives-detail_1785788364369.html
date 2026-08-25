@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;
+    --good:#2f7d3f;--goodSoft:#edf6ef;--amber:#c98400;--amberBd:#e6a70a;--amberSoft:#fdf6cf;--na:#8b8a84;--naSoft:#f2f1ec;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:34px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .tlbl{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 2px}
+
+  .inc{border:1px solid var(--line);border-radius:10px;margin-bottom:16px;background:var(--card);overflow:hidden}
+  .incrow{display:flex;align-items:center;gap:11px;padding:12px 15px}
+  .incrow .mk{flex:none;width:15px;text-align:center;font-size:12px;font-weight:700}
+  .inc.gr .mk{color:var(--good)} .inc.am .mk{color:var(--amber)}
+  .incrow .nm{font-size:13.5px;font-weight:700;color:var(--ink)}
+  .incrow .badge{font-size:10px;font-weight:700;border-radius:999px;padding:3px 10px;flex:none;white-space:nowrap}
+  .badge.gr{background:var(--goodSoft);color:var(--good)} .badge.am{background:var(--amberSoft);color:var(--amber)}
+  .incrow .right{margin-left:auto;display:flex;align-items:center;gap:11px;flex:none}
+  .incrow .chev{color:var(--muted);font-size:12px}
+
+  /* ── unified expanded detail ── */
+  .det{padding:14px 16px 16px;border-top:1px solid var(--line)}
+  .tt{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+  .tt .pill{background:var(--indigoSoft);color:var(--indigo);border-radius:5px;padding:2px 7px;margin-left:6px;letter-spacing:.02em}
+
+  /* status banner */
+  .banner{display:flex;gap:10px;border-radius:10px;padding:12px 14px;margin-bottom:14px}
+  .banner.gr{background:var(--goodSoft)} .banner.am{background:var(--amberSoft)}
+  .banner .bic{flex:none;font-size:15px;margin-top:1px}
+  .banner.gr .bic{color:var(--good)} .banner.am .bic{color:var(--amber)}
+  .banner .bt{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+  .banner .bt em{font-style:normal;color:var(--good);font-weight:700}
+  .banner.am .bt em{color:var(--amber)}
+  .banner .bd{font-size:11.5px;color:var(--ink2);line-height:1.45}
+
+  /* stat tiles */
+  .stiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+  .st{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:12px 13px;text-align:center}
+  .st .n{font-family:var(--disp);font-size:24px;line-height:1;color:var(--ink)}
+  .st .l{font-size:10.5px;color:var(--ink2);margin-top:6px}
+  .st .b{display:inline-block;font-size:9px;font-weight:700;color:var(--good);background:var(--goodSoft);border-radius:5px;padding:2px 7px;margin-top:6px}
+
+  /* info tiles (text, e.g. year schedule) */
+  .itiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+  .itiles.two{grid-template-columns:1fr 1fr}
+  .it{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+  .it .l{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px}
+  .it .d{font-size:11px;color:var(--ink2);line-height:1.4}
+  .tif{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--indigo);background:var(--indigoSoft);border-radius:6px;padding:4px 10px;margin-bottom:12px}
+
+  /* two-col who/eligibility */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .col{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:12px 14px}
+  .col .cl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .col ul{margin:0;padding-left:15px}
+  .col li{font-size:11.5px;color:var(--ink2);line-height:1.45;margin-bottom:5px}
+
+  .desc{font-size:12.5px;color:var(--ink2);line-height:1.5;margin-bottom:11px}
+  .meta{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);margin-bottom:6px}
+  .meta .ic{color:var(--indigo)}
+  .note{font-size:11px;color:var(--muted);font-style:italic;margin-bottom:11px}
+  .links{display:flex;gap:16px;border-top:1px solid var(--line);padding-top:11px}
+  .links a{font-size:11.5px;color:var(--indigo);font-weight:600}
+  .links .src{font-size:10.5px;color:var(--muted);margin-left:auto;font-weight:400}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tlbl">Financing &amp; Investor Credits</div>
+
+  <!-- NMTC — eligible, data-rich -->
+  <div class="inc gr">
+    <div class="incrow"><span class="mk">✓</span><span class="nm">New Markets Tax Credit (NMTC)</span><span class="right"><span class="badge gr">Deep Distress</span><span class="chev">▴</span></span></div>
+    <div class="det">
+      <div class="banner gr"><span class="bic">◉</span><div><div class="bt">Located in an NMTC Qualified Census Tract — <em>Deep Distress</em></div><div class="bd">This tract shows deep economic distress — projects here are strongly competitive for NMTC allocation.</div></div></div>
+
+      <div class="stiles">
+        <div class="st"><div class="n">17.9%</div><div class="l">Poverty rate</div></div>
+        <div class="st"><div class="n">44%</div><div class="l">of Area Median Income</div><span class="b">Qualifies</span></div>
+        <div class="st"><div class="n">3.4%</div><div class="l">Unemployment rate</div></div>
+        <div class="st"><div class="n" style="font-size:16px;font-family:var(--mono);font-weight:700">17031030603</div><div class="l">Census Tract FIPS</div></div>
+        <div class="st"><div class="n">2,355</div><div class="l">Poverty population</div></div>
+        <div class="st"><div class="n" style="font-size:19px">Metro</div><div class="l">Metro designation</div></div>
+      </div>
+
+      <div class="cols">
+        <div class="col"><div class="cl">Who Can Apply</div><ul><li>Community Development Entities (CDEs)</li><li>Real estate developers and businesses</li><li>Non-profits serving low-income areas</li></ul></div>
+        <div class="col"><div class="cl">Eligibility Requirements</div><ul><li>Project in a qualifying low-income tract</li><li>Minimum investment typically $5M+</li><li>Must create jobs or services in community</li><li>Must work with a certified CDE</li></ul></div>
+      </div>
+
+      <div class="note">Note: NMTC provides a 39% tax credit over 7 years on qualified equity investments. Requires application — not automatic.</div>
+      <div class="links"><a>↗ NMTC Program Details</a><a>↗ Verify on CIMS Map</a><span class="src">Source: CDFI Fund CIMS</span></div>
+    </div>
+  </div>
+
+  <div class="tlbl">Property Tax</div>
+
+  <!-- Class 7 — needs confirmation, schedule tiles -->
+  <div class="inc am">
+    <div class="incrow"><span class="mk">!</span><span class="nm">Class 7(a)/(b) Commercial Tax Incentive</span><span class="right"><span class="badge am">In Qualifying Zone</span><span class="chev">▴</span></span></div>
+    <div class="det">
+      <div class="banner am"><span class="bic">◉</span><div><div class="bt">In a qualifying zone for Class 7 <em>(TIF: Bryn Mawr / Broadway)</em></div><div class="bd">Class 7 requires a commercial project in a Redevelopment Area (TIF), Federal Enterprise Zone, or Empowerment Zone.</div></div></div>
+
+      <div class="desc">Cook County's Class 7 program offers a 12-year real-estate tax reduction for qualifying commercial projects:</div>
+      <div class="stiles">
+        <div class="st"><div class="n" style="font-size:19px">10%</div><div class="l">Years 1–10 · vs 25% standard</div></div>
+        <div class="st"><div class="n" style="font-size:19px">15%</div><div class="l">Year 11</div></div>
+        <div class="st"><div class="n" style="font-size:19px">20%</div><div class="l">Year 12 · then standard rate</div></div>
+      </div>
+      <div class="itiles two">
+        <div class="it"><div class="l">Class 7(a) — projects under $2M</div><div class="d">For smaller commercial rehabilitation or new construction in qualifying areas.</div></div>
+        <div class="it"><div class="l">Class 7(b) — projects over $2M</div><div class="d">For larger commercial developments; requires additional review and City Council approval.</div></div>
+      </div>
+      <span class="tif">◎ TIF: Bryn Mawr / Broadway</span>
+
+      <div class="cols">
+        <div class="col"><div class="cl">Who Can Apply</div><ul><li>Commercial property owners and developers</li><li>Businesses investing in commercial buildings in qualifying zones</li><li>Mixed-use developers with ground-floor commercial</li></ul></div>
+        <div class="col"><div class="cl">Eligibility Requirements</div><ul><li>Property in a TIF, Enterprise Zone, or Empowerment Zone</li><li>Commercial use (office, retail, or mixed-use)</li><li>7(a): under $2M · 7(b): over $2M (City Council approval)</li></ul></div>
+      </div>
+
+      <div class="note">Note: Class 7 incentives require a City of Chicago resolution. Apply through Chicago DPD before construction begins.</div>
+      <div class="links"><a>↗ Cook County Class 7 Program</a><a>↗ Apply via DPD</a><span class="src">Source: Cook County Assessor / Chicago DPD</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+Front-end / styling only — do NOT change routing, auth, data, or business logic.
+
+Redesign the Property Tax / Assessment / Appeals / Exemptions sections to match the attached report-tax.html, using the existing design tokens and the indigo-icon header rule.
+
+Property Tax Bill. Lead with the amount in Instrument Serif ("$28,577.27 · Tax Year 2025 · 1st installment only") and a status pill on the right — "✓ Taxes current" green (
+#edf6ef/
+#2f7d3f) or "⚠ Delinquent" red (
+#fbecea/
+#d13b26). Below, a per-year row list: year (+ "1st Inst." chip), the amount right-aligned in tabular figures with the YoY / installment breakdown in muted gray, and a status badge — Paid = soft green; a balance due = solid red "$X Due" (
+#d13b26/white). "↗ Full details at Cook County Treasurer" indigo link. Repeat the same block for the co-parcel, carrying its own status (this one is Delinquent).
+2025 Assessed Value. Three fact tiles (Assessed Total with "assessed at 10%" qualifier, Est. Market Value, Land/Building breakdown). Then the Assessment Value Trend line chart recolored to the chart palette: Total assessed = indigo 
+#3f51c5, Land = teal 
+#0e8fa6 (dashed), Building = amber 
+#e0a615. 2px lines, hairline gridlines, mono axis labels, legend, hover tooltip. Remove the old blue/green/orange.
+Appeal History. One card per tax year: the year, an outcome badge — Decrease = green, Increase = red, No Change = neutral — and the reason. Show Assessor Value vs Board of Review Value side by side; when the appeal reduced the value, show the reduction (e.g. "−$29,316") in green. Appellant/attorney line beneath a divider.
+Exemption Eligibility. A two-column grid of exemption cards: name, EAV reduction amount (indigo), eligibility criteria (muted), and a status chip ("Not on file" neutral gray; "On file" green if present). Keep the honest note that none-on-file is expected for a non-owner-occupied commercial parcel.
+
+Status colors are legitimate here (taxes current vs delinquent; a successful appeal reduction is favorable). Match spacing, radii, and borders to the mockup.

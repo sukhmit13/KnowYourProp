@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KnowYourProp — Homepage Mockup (Corbusier grid)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ffffff; --paper-2:#fafaf8;
+    --ink:#141414; --ink-2:#565651; --muted:#8b8a84;
+    --line:#eae8e2; --line-2:#ddd9d0;
+    --grid:rgba(20,20,20,.05);
+    --blue:#2b3a9e; --blue-hi:#3446bd; --blue-lt:#8f9bd6; --blue-deep:#1e2a6e; --blue-soft:#ecedf9;
+    --red:#d13b26; --yellow:#f3b31f; --green:#2f7d3f;
+    --good:#2f7d3f; --good-bg:#eef5ef; --good-line:#cfe3d3;
+    --risk:#d13b26; --risk-bg:#fbecea; --risk-line:#f1cec8;
+    --caution:#c98a12; --caution-bg:#fbf2da; --caution-line:#eeddac;
+    --radius:14px; --radius-sm:11px;
+    --shadow-s:0 1px 2px rgba(20,20,20,.05);
+    --shadow-m:0 6px 20px rgba(20,20,20,.09), 0 1px 3px rgba(20,20,20,.05);
+    --shadow-l:0 20px 46px rgba(20,20,20,.14), 0 6px 16px rgba(20,20,20,.08);
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --display:"Instrument Serif",Georgia,"Times New Roman",serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 26px}
+  a{color:inherit;text-decoration:none}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* faint grid backdrop (Ramp/Twenty) */
+  .grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:72px 72px;
+    -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 70%,transparent 100%);
+            mask-image:linear-gradient(180deg,#000 0%,#000 70%,transparent 100%)}
+  .page{position:relative;z-index:1}
+
+  /* color-grid brand mark (Corbusier façade) */
+  .mkgrid{width:22px;height:22px;flex:none;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px}
+  .mkgrid i{border-radius:2px}
+  .mkgrid i:nth-child(1){background:var(--blue)} .mkgrid i:nth-child(2){background:var(--red)}
+  .mkgrid i:nth-child(3){background:var(--yellow)} .mkgrid i:nth-child(4){background:var(--green)}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);display:inline-flex;align-items:center;gap:9px}
+  .eyebrow .sq{width:9px;height:9px;border-radius:2px;background:var(--blue)}
+  .eyebrow .pill{border:1px solid var(--line-2);border-radius:6px;padding:2px 7px;color:var(--ink);background:var(--paper)}
+
+  /* buttons */
+  .btn{font-family:var(--sans);font-weight:600;font-size:14px;border:none;cursor:pointer;border-radius:10px;padding:11px 18px;transition:transform .14s ease, box-shadow .14s ease, background .14s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-blue{background:var(--blue);color:#fff;box-shadow:var(--shadow-s)}
+  .btn-blue:hover{background:var(--blue-hi)}
+  .btn-dark{background:var(--ink);color:#fff}
+  .btn-ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line-2)}
+  .btn-ghost:hover{border-color:var(--ink)}
+  .btn-lg{padding:14px 24px;font-size:15px}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.82);backdrop-filter:saturate(1.3) blur(12px);border-bottom:1px solid var(--line)}
+  nav .row{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:16px;letter-spacing:-.02em}
+  .navlinks{display:flex;gap:8px}
+  .navlinks a{font-size:14px;font-weight:500;color:var(--ink-2);padding:7px 12px;border-radius:8px}
+  .navlinks a:hover{color:var(--ink);background:rgba(20,20,20,.045)}
+  .navright{display:flex;align-items:center;gap:12px}
+  .navright .txt{font-size:14px;font-weight:600;color:var(--ink-2)}
+  @media(max-width:900px){.navlinks{display:none}.navright .txt{display:none}}
+
+  /* HERO (scroll-pinned) */
+  .hero-wrap{position:relative;min-height:100vh}
+  .hero-stage{position:relative;min-height:100vh;overflow:hidden;display:flex;align-items:center;padding:92px 0 40px}
+  .facade{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .facade .siteplan{position:absolute;left:50%;top:53%;transform:translate(-50%,-50%);width:min(74vw,880px);height:auto;opacity:.11;color:var(--blue)}
+  @media(max-width:900px){.facade{display:none}}
+
+  .hero-inner{position:relative;z-index:3;width:100%;text-align:center}
+  .hero-inner .eyebrow{margin-bottom:22px}
+  h1{font-family:var(--display);font-weight:400;font-size:clamp(44px,7vw,88px);line-height:.98;letter-spacing:-.01em;margin:0 auto;max-width:15ch;color:var(--ink)}
+  h1 .ln{display:block}
+  h1 .cbuy{color:var(--blue);font-style:italic} h1 .csell{color:var(--red);font-style:italic} h1 .clease{color:var(--green);font-style:italic}
+  .hero-lower{margin-top:2px}
+  .sub{font-size:clamp(16px,1.7vw,19px);color:var(--ink-2);max-width:54ch;margin:16px auto 0}
+  .searchbar{max-width:600px;margin:24px auto 0;display:flex;gap:8px;background:var(--paper);border:1px solid var(--line-2);border-radius:14px;padding:8px;box-shadow:var(--shadow-m)}
+  .searchbar .ic{display:flex;align-items:center;padding-left:12px;color:var(--muted)}
+  .searchbar input{flex:1;border:none;outline:none;font-family:var(--sans);font-size:15px;background:transparent;color:var(--ink)}
+  .searchbar input::placeholder{color:var(--muted)}
+  .microtrust{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:14px;letter-spacing:.02em}
+  .microtrust b{color:var(--ink-2)}
+
+  /* floating cards */
+  .float{position:absolute;z-index:2;background:var(--paper);border:1px solid var(--line-2);border-radius:var(--radius-sm);box-shadow:var(--shadow-l);padding:15px 16px;width:232px;
+    will-change:transform,opacity}
+  .float .lbl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .float .big{font-family:var(--display);font-weight:800;font-size:27px;color:var(--ink);margin-top:4px;line-height:1;letter-spacing:-.02em}
+  .float .delta{font-size:11px;font-weight:600;margin-top:5px}
+  .up{color:var(--good)} .down{color:var(--risk)}
+  .ins{display:flex;gap:8px;align-items:flex-start}
+  .ins .mk{width:13px;height:13px;border-radius:3px;flex:none;margin-top:2px}
+  .ins .tt{font-size:12px;font-weight:600;line-height:1.25;color:var(--ink)}
+  .ins .sm{font-size:10.5px;color:var(--ink-2);font-weight:400;margin-top:2px}
+  .c-red .mk{background:var(--risk)} .c-green .mk{background:var(--good)} .c-amber .mk{background:var(--yellow)}
+  .spark{display:flex;align-items:flex-end;gap:3px;height:30px;margin-top:9px}
+  .spark i{flex:1;border-radius:2px 2px 0 0;background:var(--blue);opacity:.9}
+  .donut{width:44px;height:44px;border-radius:50%;margin-top:6px;background:conic-gradient(var(--blue) 0 72%, #e9e7df 72% 100%);position:relative}
+  .donut::after{content:"";position:absolute;inset:7px;background:var(--paper);border-radius:50%}
+  .row-mini{display:flex;align-items:center;gap:10px}
+
+  .f1{top:14vh;left:2.5%;width:216px}
+  .f2{top:45vh;left:4.5%;width:238px}
+  .f3{top:12vh;right:2.5%;width:274px}
+  .f4{top:46vh;right:4.5%;width:224px}
+  .f5{top:70vh;left:3.5%;width:266px}
+  .f6{top:69vh;right:3.5%;width:226px}
+  @media(max-width:1240px){.f5,.f6{display:none}}
+  @media(max-width:900px){.float{display:none}}
+
+  .scrollcue{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:3;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);opacity:.72;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .scrollcue .dot{width:22px;height:34px;border:1.5px solid var(--line-2);border-radius:12px;position:relative}
+  .scrollcue .dot::after{content:"";position:absolute;left:50%;top:7px;transform:translateX(-50%);width:3px;height:6px;border-radius:2px;background:var(--blue);animation:cue 1.5s ease-in-out infinite}
+  @keyframes cue{0%,100%{opacity:.3;top:7px}50%{opacity:1;top:14px}}
+
+  /* reveal */
+  .js .reveal{opacity:0;transform:translateY(30px);transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
+  .js .reveal.in{opacity:1;transform:none}
+
+  section{padding:82px 0;position:relative}
+  .sec-head{text-align:center;max-width:700px;margin:0 auto 40px}
+  .sec-head .eyebrow{margin-bottom:12px}
+  .sec-head h2{font-family:var(--display);font-weight:400;font-size:clamp(32px,4.6vw,54px);letter-spacing:-.005em;line-height:1.04;margin:0 0 10px;color:var(--ink)}
+  .sec-head h2 em{font-style:italic}
+  .sec-head h2 em{font-style:italic;color:var(--blue)}
+  .sec-head p{font-size:17px;color:var(--ink-2);margin:0}
+
+  /* sources */
+  .sources{max-width:980px;margin:0 auto;text-align:center}
+  .sources .cap{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+  .chip{font-size:12.5px;font-weight:500;color:var(--ink-2);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+
+  /* report — Ramp-style bordered frame */
+  .frame{border:1px solid var(--line-2);border-radius:20px;background:var(--paper-2);padding:12px;box-shadow:var(--shadow-m)}
+  .frame-cap{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:4px 6px 12px}
+  .frame-cap .live{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(47,125,63,.16)}
+  .report{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .rhead{background:var(--blue-deep);color:#fff;display:grid;grid-template-columns:1.55fr 1fr}
+  .rhead .l{padding:26px 28px}
+  .rhead .r{padding:26px 28px;border-left:1px solid rgba(255,255,255,.2)}
+  .rhead .ey{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9ec7e6}
+  .rhead h3{font-family:var(--display);font-weight:400;font-size:36px;line-height:.98;margin:10px 0 12px;letter-spacing:-.01em}
+  .rhead .meta{font-size:12.5px;color:#c2d6e6;line-height:1.5}
+  .rhead .take-l{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow)}
+  .rhead .take-h{font-family:var(--display);font-weight:700;font-size:20px;margin:6px 0 8px;line-height:1.1;letter-spacing:-.02em}
+  .rhead .take-p{font-size:12.5px;color:#cddbe8;line-height:1.55}
+  @media(max-width:760px){.rhead{grid-template-columns:1fr}.rhead .r{border-left:0;border-top:1px solid rgba(255,255,255,.2)}}
+  .statrow{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--line);background:var(--paper)}
+  .statrow .s{padding:15px 16px;border-right:1px solid var(--line)}
+  .statrow .s:last-child{border-right:0}
+  .statrow .k{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .statrow .v{font-family:var(--display);font-weight:800;font-size:22px;color:var(--ink);margin-top:6px;line-height:1;letter-spacing:-.02em}
+  .statrow .v.red{color:var(--risk)} .statrow .v.gold{color:var(--caution)}
+  .statrow .n{font-size:10.5px;color:var(--ink-2);margin-top:5px}
+  @media(max-width:760px){.statrow{grid-template-columns:repeat(2,1fr)}.statrow .s:nth-child(2n){border-right:0}}
+  .rbanner{background:var(--paper-2);color:var(--ink-2);padding:12px 20px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+  .rbanner span{font-family:var(--sans);font-weight:400;text-transform:none;letter-spacing:0;font-size:12px;color:var(--muted)}
+  .rcards{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px}
+  @media(max-width:680px){.rcards{grid-template-columns:1fr}}
+  .rcard{border-radius:12px;padding:14px 15px;border:1px solid;border-left-width:4px}
+  .rcard.red{background:var(--risk-bg);border-color:var(--risk-line);border-left-color:var(--risk)}
+  .rcard.green{background:var(--good-bg);border-color:var(--good-line);border-left-color:var(--good)}
+  .rcard.amber{background:var(--caution-bg);border-color:var(--caution-line);border-left-color:var(--caution)}
+  .rcard .h{display:flex;gap:8px;align-items:flex-start;font-weight:700;font-size:14px;color:var(--ink);line-height:1.28}
+  .rcard .mk{width:14px;height:14px;border-radius:3px;flex:none;margin-top:3px}
+  .rcard.red .mk{background:var(--risk)} .rcard.green .mk{background:var(--good)} .rcard.amber .mk{background:var(--caution)}
+  .rcard p{font-size:12.5px;color:var(--ink-2);margin:8px 0 0;line-height:1.5}
+  .report-cta{text-align:center;margin-top:28px}
+
+  /* value block — Corbusier façade panel */
+  .know{background:var(--blue-deep);color:#fff;border-radius:20px;padding:60px 40px;text-align:center;overflow:hidden;position:relative}
+  .know .sq{position:absolute;z-index:0;border-radius:3px}
+  .know .s1{width:150px;height:150px;top:-40px;right:-30px;background:var(--yellow)}
+  .know .s2{width:96px;height:96px;bottom:-30px;left:-24px;background:var(--red)}
+  .know .s3{width:60px;height:60px;top:30px;left:40px;background:var(--green);opacity:.9}
+  .know h2{position:relative;z-index:1;font-family:var(--display);font-weight:400;font-size:clamp(32px,4.4vw,54px);line-height:1.06;margin:0;letter-spacing:-.005em}
+  .know h2 em{font-style:italic}
+  .know h2 em{font-style:italic;color:var(--yellow)}
+  .know p{position:relative;z-index:1;color:rgba(255,255,255,.85);font-size:16.5px;max-width:56ch;margin:18px auto 0}
+
+  /* features */
+  .fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:860px){.fgrid{grid-template-columns:1fr}}
+  .fcard{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px 22px;transition:border-color .15s, transform .15s}
+  .fcard:hover{border-color:var(--line-2);transform:translateY(-2px)}
+  .fcard .ic{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:14px;color:#fff}
+  .fcard.a .ic{background:var(--blue)} .fcard.b .ic{background:var(--red)} .fcard.c .ic{background:var(--yellow);color:#241a02}
+  .fcard h4{font-family:var(--display);font-weight:700;font-size:19px;margin:0 0 10px;color:var(--ink);letter-spacing:-.02em}
+  .fcard ul{margin:0;padding:0;list-style:none}
+  .fcard li{font-size:13.3px;color:var(--ink-2);padding:5px 0 5px 18px;position:relative}
+  .fcard li::before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:2px}
+  .fcard.a li::before{background:var(--blue)} .fcard.b li::before{background:var(--red)} .fcard.c li::before{background:var(--yellow)}
+  .fcard li b{color:var(--ink);font-weight:600}
+
+  /* comparison table */
+  .compare{border:1px solid var(--line-2);border-radius:18px;overflow:hidden;background:var(--paper);box-shadow:var(--shadow-m)}
+  .compare .scroll{overflow-x:auto}
+  table.cmp{width:100%;border-collapse:collapse;min-width:840px}
+  .cmp th,.cmp td{padding:13px 12px;text-align:center;border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:middle}
+  .cmp th:last-child,.cmp td:last-child{border-right:0}
+  .cmp th:first-child,.cmp td:first-child{text-align:left;width:32%;padding-left:20px}
+  .cmp thead th{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);background:var(--paper-2);line-height:1.3;padding-top:18px;padding-bottom:18px}
+  .cmp thead th.us{background:var(--blue-deep);color:#fff}
+  .cmp .rowlbl{font-family:var(--sans);font-size:13.3px;color:var(--ink);font-weight:500;line-height:1.32}
+  .cmp .rowlbl span{color:var(--muted);font-weight:400}
+  .cmp td.us{background:var(--blue)}
+  .cmp tbody tr:nth-child(even) td:not(.us){background:#faf9f6}
+  .cmp .ic-yes{color:var(--ink);display:inline-block;vertical-align:middle}
+  .cmp td.us .ic-yes{color:#fff}
+  .cmp .partial{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .cmp .no{color:#d4d1c8;font-size:15px;font-weight:700}
+  .compare .foot{padding:13px 20px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--paper-2);border-top:1px solid var(--line)}
+  .compare .foot b{color:var(--ink-2)}
+
+  /* pricing */
+  .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:860px;margin:0 auto}
+  @media(max-width:720px){.pgrid{grid-template-columns:1fr}}
+  .price{border-radius:var(--radius);padding:28px;border:1px solid var(--line);background:var(--paper)}
+  .price.hot{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue);position:relative}
+  .price .tier{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .price .amt{font-family:var(--display);font-weight:400;font-size:58px;line-height:1;margin:10px 0 4px;color:var(--ink);letter-spacing:-.01em}
+  .price .amt small{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--muted)}
+  .price .desc{font-size:13.5px;color:var(--ink-2);margin:8px 0 18px}
+  .price .btn{width:100%;padding:12px;font-size:14px}
+  .price ul{margin:18px 0 0;padding:0;list-style:none}
+  .price li{font-size:13.3px;padding:6px 0 6px 22px;position:relative;color:var(--ink-2)}
+  .price li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:700}
+  .badge{position:absolute;top:18px;right:18px;background:var(--red);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:6px}
+
+  /* closer + footer */
+  .closer{background:var(--ink);color:#fff;border-radius:20px;padding:44px 38px;display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;position:relative;overflow:hidden}
+  .closer .sq{position:absolute;width:80px;height:80px;border-radius:3px}
+  .closer .q1{background:var(--blue);top:-20px;right:120px}
+  .closer .q2{background:var(--yellow);bottom:-30px;right:40px;width:120px;height:120px;opacity:.9}
+  .closer h3{position:relative;z-index:1;font-family:var(--display);font-weight:400;font-size:34px;margin:0;letter-spacing:-.01em}
+  .closer p{position:relative;z-index:1;margin:8px 0 0;color:#c7c7c1;font-size:15px}
+  .closer .btn{position:relative;z-index:1}
+  footer{padding:44px 0 64px;text-align:center;border-top:1px solid var(--line);margin-top:20px}
+  footer .fl{display:flex;gap:22px;justify-content:center;font-size:13.5px;color:var(--ink-2);margin-bottom:12px}
+  footer .fine{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+
+  .demo-flag{position:fixed;bottom:14px;left:14px;z-index:99;background:var(--paper);border:1px solid var(--line-2);color:var(--ink);font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;padding:7px 12px;border-radius:8px;box-shadow:var(--shadow-l)}
+  .demo-flag b{color:var(--blue)}
+  @media (prefers-reduced-motion: reduce){.scrollcue{display:none}.float{animation:none}}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="page">
+
+<div class="demo-flag"><b>MOCKUP</b> · design direction only · not a live page</div>
+
+<!-- NAV -->
+<nav>
+  <div class="wrap row">
+    <div class="brand"><span class="mkgrid"><i></i><i></i><i></i><i></i></span>KnowYourProp</div>
+    <div class="navlinks">
+      <a href="#report">How it works</a>
+      <a href="#features">What's included</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#">About</a>
+    </div>
+    <div class="navright">
+      <a class="txt" href="#report">See a sample</a>
+      <button class="btn btn-blue">Run a report</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-wrap">
+  <div class="hero-stage">
+    <div class="facade"><svg class="siteplan" viewBox="0 0 600 480" fill="none" stroke="currentColor" stroke-width="1.4">
+      <rect x="80" y="70" width="440" height="340"/>
+      <rect x="112" y="102" width="376" height="276" stroke-width="1" stroke-dasharray="5 6"/>
+      <rect x="184" y="150" width="232" height="150" fill="currentColor" fill-opacity="0.05"/>
+      <path d="M300 150 V300 M184 225 H416"/>
+      <path d="M80 44 H520 M80 39 V49 M520 39 V49 M300 39 V49"/>
+      <path d="M56 70 V410 M51 70 H61 M51 410 H61 M51 240 H61"/>
+      <path d="M80 70 l-16 -16 M520 70 l16 -16 M80 410 l-16 16 M520 410 l16 16" stroke-width="1"/>
+      <g transform="translate(548,104)"><circle cx="0" cy="0" r="21"/><path d="M0 -14 L7 9 L0 4 L-7 9 Z" fill="currentColor" fill-opacity="0.5"/></g>
+    </svg></div>
+
+    <div class="float f1" data-rot="-4" data-depth="0.30"><div class="lbl">Childcare demand · 60660</div><div class="big num">3.2</div><div class="delta down">Childcare desert — 476 slots, 1,502 kids</div></div>
+    <div class="float f2 c-green" data-rot="3.5" data-depth="0.20"><div class="ins"><span class="mk"></span><div><div class="tt">Retail-corridor incentives available</div><div class="sm">SBIF authorized · NMTC deep distress · Class 7 zone.</div></div></div></div>
+    <div class="float f3" data-rot="4" data-depth="0.42"><div class="lbl">Languages spoken · 60660</div><div class="big num">37.5%</div><div class="delta" style="color:var(--ink-2)">non-English at home · Spanish 16% · Chinese 4%</div></div>
+    <div class="float f4 c-red" data-rot="-3.5" data-depth="0.26"><div class="ins"><span class="mk"></span><div><div class="tt">Foreclosure action on record</div><div class="sm">1 active lis pendens — title needs review.</div></div></div></div>
+    <div class="float f5" data-rot="-5" data-depth="0.45"><div class="lbl">Local lending · avg first-lien rate</div><div class="big num">6.41%</div><div class="delta" style="color:var(--ink-2)">Top lender: Guaranteed Rate · 128 loans</div></div>
+    <div class="float f6" data-rot="4.5" data-depth="0.34"><div class="lbl">Tax appeal history</div><div class="big num">6</div><div class="delta up">assessment reductions won since 2010</div></div>
+
+    <div class="wrap hero-inner">
+      <div class="eyebrow"><span class="sq"></span>Cook County · <span class="pill num">1,412,336</span> parcels indexed</div>
+      <h1>
+        <span class="ln l1">Know before you <span class="cbuy">buy</span>,</span>
+        <span class="ln l2"><span class="csell">sell</span>,</span>
+        <span class="ln l3">or <span class="clease">lease</span>.</span>
+      </h1>
+      <div class="hero-lower">
+        <p class="sub">Every county record, permit, lien, and incentive on any Chicago property — synthesized into one clear, decision-ready brief.</p>
+        <div class="searchbar">
+          <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></span>
+          <input placeholder="Enter a Chicago address or paste a listing URL…">
+          <button class="btn btn-blue">Analyze</button>
+        </div>
+        <div class="microtrust"><b>15+ OFFICIAL SOURCES</b> · <b>20+ PAGES</b> · ONE BRIEF · SECONDS</div>
+      </div>
+    </div>
+
+    <div class="scrollcue"><span class="dot"></span>Scroll</div>
+  </div>
+</section>
+
+<!-- SOURCES -->
+<section style="padding-top:64px">
+  <div class="wrap sources reveal">
+    <div class="cap">Built from the records that matter</div>
+    <div class="chips">
+      <span class="chip">Cook County Assessor</span>
+      <span class="chip">Circuit Court of Cook County</span>
+      <span class="chip">Chicago Dept. of Buildings</span>
+      <span class="chip">Commission on Landmarks</span>
+      <span class="chip">Zoning &amp; Land Use</span>
+      <span class="chip">HUD Fair Market Rents</span>
+      <span class="chip">Federal lending data</span>
+      <span class="chip">+ 8 more</span>
+    </div>
+  </div>
+</section>
+
+<!-- REPORT -->
+<section id="report" style="padding-top:24px">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="sq"></span>See a real report</div>
+      <h2>This is what a search <em>returns</em></h2>
+      <p>Not a list of links — a synthesized brief that tells you what the public record actually means for your decision.</p>
+    </div>
+    <div class="frame reveal" style="--d:.08s">
+      <div class="frame-cap"><span class="live"></span>Live report · 2418 N. Milwaukee Ave</div>
+      <div class="report">
+        <div class="rhead">
+          <div class="l">
+            <div class="ey">Property Insight Report</div>
+            <h3>2418–2430<br>N. Milwaukee Ave</h3>
+            <div class="meta">Logan Square · Chicago, IL 60647<br>4-parcel assemblage · 28,905 SF · Built 1908</div>
+          </div>
+          <div class="r">
+            <div class="take-l">Our take</div>
+            <div class="take-h">Real potential — and real baggage.</div>
+            <div class="take-p">The location and zoning are genuinely strong. But the owner is in active foreclosure, and the building carries legal, physical, and tax constraints a listing won't mention. Go in with eyes open.</div>
+          </div>
+        </div>
+        <div class="statrow">
+          <div class="s"><div class="k">Last sold</div><div class="v num">$4.78M</div><div class="n">April 2025</div></div>
+          <div class="s"><div class="k">Prior sale</div><div class="v red num">$5.83M</div><div class="n">2018 — took a loss</div></div>
+          <div class="s"><div class="k">Zoning</div><div class="v">C1-3</div><div class="n">Neighborhood comm.</div></div>
+          <div class="s"><div class="k">Taxes</div><div class="v num">$125K</div><div class="n">/yr — fully paid</div></div>
+          <div class="s"><div class="k">Landmark</div><div class="v gold">Orange</div><div class="n">Exterior reviewed</div></div>
+        </div>
+        <div class="rbanner">What the public record says <span>Independent of what you plan to do with it</span></div>
+        <div class="rcards">
+          <div class="rcard red"><div class="h"><span class="mk"></span>The owner is in foreclosure — 8 months after buying.</div><p>J2 Hollander LLC paid $4.78M in April 2025; a foreclosure was filed by December and a mechanics lien in May. A seller in active distress — title is clouded until it resolves.</p></div>
+          <div class="rcard green"><div class="h"><span class="mk"></span>Retail on the ground floor, housing above — no special permits.</div><p>C1-3 zoning permits ground-floor retail with housing above as-of-right. No hearings, zoning board, or alderman approval. Your cleanest path.</p></div>
+          <div class="rcard amber"><div class="h"><span class="mk"></span>The tax bill is $125K a year — and probably going up.</div><p>The assessor values the property well below the last sale price; a reassessment on sale is likely. Filing a tax appeal on day one isn't optional.</p></div>
+          <div class="rcard green"><div class="h"><span class="mk"></span>Neighborhood demand is genuinely strong — this isn't hype.</div><p>Logan Square ranks among Chicago's top areas for real-estate activity. Two Blue Line stops within half a mile, ridership up 20%+ over three years.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="report-cta reveal"><button class="btn btn-ghost btn-lg">View the full 40-page sample report →</button></div>
+  </div>
+</section>
+
+<!-- VALUE -->
+<section style="padding-top:8px">
+  <div class="wrap">
+    <div class="know reveal">
+      <span class="sq s1"></span><span class="sq s2"></span><span class="sq s3"></span>
+      <h2>Critical property data exists.<br>It's just <em>scattered</em> — and hard to reach.</h2>
+      <p>County recorders, municipal permit databases, court filings, landmark surveys, federal lending data. We pull it together and translate it into plain language for the person making the decision.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="sq"></span>What's inside every brief</div>
+      <h2>Fifteen data sources, <em>one decision</em></h2>
+      <p>Commercial or residential — the report adapts to the property.</p>
+    </div>
+    <div class="fgrid">
+      <div class="fcard a reveal"><div class="ic">◱</div><h4>Zoning &amp; legal</h4><ul>
+        <li><b>Zoning compatibility</b> for your intended use</li>
+        <li><b>Lien &amp; title search</b> with owner names</li>
+        <li><b>Foreclosure &amp; tax</b> delinquency records</li>
+        <li><b>Building violations</b> &amp; code history</li></ul></div>
+      <div class="fcard b reveal" style="--d:.1s"><div class="ic">◈</div><h4>Market &amp; comps</h4><ul>
+        <li><b>Recent comparable sales</b> in your class</li>
+        <li><b>Price-per-sf</b> trends &amp; class match</li>
+        <li><b>Rental income</b> &amp; HUD fair-market rent</li>
+        <li><b>New construction</b> &amp; corridor activity</li></ul></div>
+      <div class="fcard c reveal" style="--d:.2s"><div class="ic">✦</div><h4>Upside &amp; incentives</h4><ul>
+        <li><b>Opportunity Zone</b> &amp; TIF eligibility</li>
+        <li><b>Historic &amp; LMI</b> tax credits</li>
+        <li><b>FAR analysis</b> — room left to build</li>
+        <li><b>AI executive summary</b> for decks &amp; OMs</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section id="compare">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="sq"></span>How we compare</div>
+      <h2>More than a <em>listing</em>.</h2>
+      <p>Listing sites tell you what's for sale. We tell you what you're actually buying — the zoning, the debt, the risk, and the upside.</p>
+    </div>
+    <div class="compare reveal" style="--d:.08s">
+      <div class="scroll">
+        <table class="cmp">
+          <thead>
+            <tr>
+              <th></th>
+              <th class="us">Know Your<br>Property</th>
+              <th>Zillow /<br>Redfin</th>
+              <th>LoopNet /<br>Crexi</th>
+              <th>Chicago<br>Cityscape</th>
+              <th>Ownerly</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rowlbl">Assessor-sourced building data <span>— sq ft, year built, class</span></td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">Current tax bill <span>— assessed value, exemptions &amp; PIN</span></td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="partial">Partial</span></td><td><span class="partial">Partial</span></td><td><span class="partial">Partial</span></td><td><span class="partial">Partial</span></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">Tax appeal history <span>— prior filings, outcomes &amp; attorneys</span></td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">Zoning code &amp; project compatibility check</td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="partial">Partial</span></td><td><span class="partial">Partial</span></td>
+              <td><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="no">✕</span></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">TIF, TOD, SBIF &amp; NMTC incentive eligibility</td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="no">✕</span></td><td><span class="no">✕</span></td>
+              <td><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="no">✕</span></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">Open liens, title flags &amp; building violations</td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="partial">Partial</span></td><td><span class="no">✕</span></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">Local mortgage market <span>— HMDA lenders, rates &amp; denial data</span></td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">Development potential <span>— FAR &amp; buildable square footage</span></td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="partial">Partial</span></td><td><span class="no">✕</span></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">Real-time residential rental comps &amp; active listings</td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="partial">Partial</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">Real-time commercial lease comps &amp; active listings</td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="no">✕</span></td><td><span class="partial">Partial</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">Comparable sales with price-per-sqft analysis</td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="partial">Partial</span></td><td><span class="partial">Partial</span></td><td><span class="no">✕</span></td><td><span class="partial">Partial</span></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">Professional referrals <span>— architects, lenders, attorneys</span></td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td>
+            </tr>
+            <tr>
+              <td class="rowlbl">AI executive summary <span>— pitch-deck &amp; OM ready</span></td>
+              <td class="us"><svg class="ic-yes" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.1"/></svg></td>
+              <td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="foot"><b>✓ Full</b> · Partial · ✕ not offered — based on publicly available features. KnowYourProp coverage shown for Chicago / Cook County.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="sq"></span>Pricing</div>
+      <h2>Priced for one deal <em>or a hundred</em></h2>
+      <p>No insider access or institutional budget required.</p>
+    </div>
+    <div class="pgrid">
+      <div class="price reveal">
+        <div class="tier">One-time</div>
+        <div class="amt num">$29 <small>/ report</small></div>
+        <div class="desc">One complete property intelligence report. No subscription required.</div>
+        <button class="btn btn-ghost">Search a property →</button>
+        <ul>
+          <li>Full zoning &amp; compatibility analysis</li>
+          <li>Legal, lien &amp; tax records</li>
+          <li>Market &amp; comparables intelligence</li>
+          <li>All location-based incentives</li>
+        </ul>
+      </div>
+      <div class="price hot reveal" style="--d:.1s">
+        <div class="badge">Best value</div>
+        <div class="tier">Monthly</div>
+        <div class="amt num">$99 <small>/ month</small></div>
+        <div class="desc">Unlimited reports, saved history, and multi-property comparison.</div>
+        <button class="btn btn-blue">Start subscription →</button>
+        <ul>
+          <li>Unlimited property reports</li>
+          <li>Saved search history — revisit any report</li>
+          <li>Side-by-side comparison of up to 3 properties</li>
+          <li>Priority data refresh</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSER -->
+<section style="padding-top:8px">
+  <div class="wrap">
+    <div class="closer reveal">
+      <span class="sq q1"></span><span class="sq q2"></span>
+      <div>
+        <h3>Ready to run your first report?</h3>
+        <p>Enter any Chicago address and see what the public record really says.</p>
+      </div>
+      <button class="btn btn-blue btn-lg">Analyze a property →</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fl"><a href="#">About us</a><a href="#">FAQ</a><a href="#">Sample report</a><a href="#">Contact</a></div>
+    <div class="fine">Chicago, IL · Cook County · Data updated regularly</div>
+  </div>
+</footer>
+
+</div><!-- /page -->
+
+<script>
+  (function(){
+    var root=document.documentElement; root.classList.add('js');
+    var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var reveals=document.querySelectorAll('.reveal');
+    if(reduce || !('IntersectionObserver' in window)){reveals.forEach(function(el){el.classList.add('in');});}
+    else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0.16,rootMargin:'0px 0px -8% 0px'});reveals.forEach(function(el){io.observe(el);});}
+    /* Hero headline + search stay static on load; the surrounding cards drift, shrink,
+       and fade as you scroll — handing off into the next section (steep-style morph). */
+    if(!reduce){
+      var cards=[].slice.call(document.querySelectorAll('.float'));
+      var hero=document.querySelector('.hero-stage');
+      var ticking=false;
+      var apply=function(){
+        var S=window.pageYOffset||document.documentElement.scrollTop||0;
+        var H=(hero?hero.offsetHeight:window.innerHeight)*0.9;
+        var p=Math.min(1,Math.max(0,S/H));
+        var sc=1-p*0.10, op=1-p*0.95;
+        for(var i=0;i<cards.length;i++){
+          var c=cards[i];
+          var rot=parseFloat(c.getAttribute('data-rot')||'0');
+          var depth=parseFloat(c.getAttribute('data-depth')||'0.3');
+          var ty=S*depth;
+          c.style.transform='translateY('+ty.toFixed(1)+'px) rotate('+rot+'deg) scale('+sc.toFixed(3)+')';
+          c.style.opacity=(op>0?op:0).toFixed(3);
+        }
+        ticking=false;
+      };
+      cards.forEach(function(c){
+        var rot=parseFloat(c.getAttribute('data-rot')||'0');
+        c.style.transform='rotate('+rot+'deg)';
+      });
+      window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(apply);ticking=true;}},{passive:true});
+      window.addEventListener('resize',apply,{passive:true});
+      apply();
+    }
+  })();
+</script>
+</body>
+</html>

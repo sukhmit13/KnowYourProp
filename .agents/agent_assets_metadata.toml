@@ -31,3 +31,87 @@ uri = "file://attached_assets/knowyourprop-report-sample.pdf"
 type = "pdf"
 title = "Full Property Report — sample (3014 W Irving Park Rd)"
 description = "Complete consultant-style PDF: snapshot with sale/assessment/appeal history, permits & violations, zoning with TOD/MMRP/NMTC, listing, market & valuation, financing & lending, crime, amenities, transit & demographics, incentives, and market discovery."
+
+[[outputs]]
+id = "1h86Sfm06rnUE7pkSGOqd"
+uri = "file://screenshots/step5-run495-top.jpg"
+type = "image"
+title = "New report page — top"
+description = "Setup zone, legend, and the first accordion sections on a run with a use and context already saved (2 of 3 steps done)."
+
+[[outputs]]
+id = "r0INm6o8o4OU2bY6A6--U"
+uri = "file://screenshots/step5-check-run496.jpg"
+type = "image"
+title = "Checklist re-check — opened run (top of page)"
+description = "Run with a use + context set: header, setup zone (2 of 3), legend, and first accordion sections, all expanded."
+
+[[outputs]]
+id = "Ez9JZEWwb68ZJGpdNE624"
+uri = "file://research/cadastral_ocr/output/annotated_map.jpg"
+type = "image"
+title = "Murrabba 39 — annotated cadastral map"
+description = "Full-resolution source map with 15 OCR candidate tile regions outlined and numbered. Candidate #1 is the only direct 39/ murrabba-notation match."
+
+[[outputs]]
+id = "a2eYsvuU7VY4wTgjPTRHr"
+uri = "file://research/cadastral_ocr/output/candidates.tsv"
+type = "unspecified"
+title = "Murrabba 39 — OCR candidate table"
+description = "15 candidates with OCR match text, confidence availability, tile position, source-image coordinates, and nearby OCR context."
+
+[[outputs]]
+id = "HlUZQxKkRxp74kFMSHsDL"
+uri = "file://research/cadastral_ocr/output/candidate_crops/candidate_ocr_report.md"
+type = "text"
+title = "All 15 candidate crops — full OCR report"
+description = "Unabridged OCR text and every detected numeric token for each independently enlarged crop, with original source coordinates."
+
+[[outputs]]
+id = "pqgedS9odPUV7iyf1_FyQ"
+uri = "file://research/cadastral_ocr/output/candidate_crops/candidate_crops.zip"
+type = "unspecified"
+title = "All 15 enlarged candidate crops"
+description = "Downloadable archive containing candidate_01.jpg through candidate_15.jpg, each full OCR text file, results.json, and the complete report."
+
+[[outputs]]
+id = "jM7MGdYele4m8tCPyIY56"
+uri = "file://research/cadastral_ocr/output/candidate_crops/candidate_01.jpg"
+type = "image"
+title = "Candidate 01 — enlarged source crop"
+description = "4× crop made directly from the original map with no annotation overlay. Independent OCR reads 29/6, not 39/."
+
+[[outputs]]
+id = "K8S1rMXRlNrh90pGIPaWj"
+uri = "file://research/cadastral_ocr/output/murrabba_37/annotated_map.jpg"
+type = "image"
+title = "Murrabba 37 — annotated candidate map"
+description = "Separate one-off detection map with 16 Murrabba 37 candidate regions outlined and numbered."
+
+[[outputs]]
+id = "JRuiJ9xo9dzyhY58c37wY"
+uri = "file://research/cadastral_ocr/output/murrabba_37/candidate_crops/candidate_ocr_report.md"
+type = "text"
+title = "Murrabba 37 — full OCR report"
+description = "Unabridged text and all detected number tokens from each of the 16 independently enlarged source crops."
+
+[[outputs]]
+id = "UcdT2KscDQmXQB6cw3XNm"
+uri = "file://research/cadastral_ocr/output/murrabba_37/candidate_crops/candidate_crops.zip"
+type = "unspecified"
+title = "Murrabba 37 — all enlarged candidate crops"
+description = "Archive with candidate_01.jpg through candidate_16.jpg, individual OCR text files, structured results, and the complete report."
+
+[[outputs]]
+id = "mfKmb5eDaYP_Tw3SM6vTs"
+uri = "file://research/cadastral_ocr/output/page_5309/high_contrast.jpg"
+type = "image"
+title = "Enhanced cadastral crop — 4× high contrast"
+description = "Source-preserving enlarged view for inspecting handwritten parcel labels; no inferred text or overlay was added."
+
+[[outputs]]
+id = "9qqLotIHY4jn1KkwrzizY"
+uri = "file://research/cadastral_ocr/output/page_5309/regional_transcription_report.md"
+type = "text"
+title = "Parcel-label transcription — review draft"
+description = "Region-by-region literal readings with confidence and explicit unresolved areas. Use this to confirm labels before any final plot-line overlay."

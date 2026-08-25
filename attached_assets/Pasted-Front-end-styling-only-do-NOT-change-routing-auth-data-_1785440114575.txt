@@ -1,0 +1,26 @@
+Front-end / styling only — do NOT change routing, auth, data, or business logic.
+
+Redesign the directory-style sections — Proximity Information, Schools, City-Owned Lots, and Entertainment & Culture (Michelin Restaurants, Registered Murals, Architectural Landmarks, Art Galleries) — to match the attached report-lists.html, using the existing design tokens and shared section-header component. These are directories, not charts; define the two reusable patterns below and apply each everywhere it fits.
+
+Pattern A — Fact-tile grid (Proximity Information, and the City-Owned Lots count row).
+A 3-column grid of tiles. Each tile: a small indigo-soft icon chip + a mono-caps label in dark ink (
+#565651), then the value in mixed-case Inter weight 600 (
+#141414) — NOT all-caps mono — then a muted qualifier line. Example: "Nearest Park / Smith Park / 0.17 mi · 893 ft". The biggest readability fix: stop rendering values in ALL-CAPS mono; use readable mixed case.
+
+Pattern B — Directory list row (Schools, Michelin, Murals, Landmarks, Galleries, and the individual City-Owned Lot rows).
+Each row: the item name in ink weight 600, followed inline by a key badge and optional chips, then a meta line beneath in secondary ink, and the distance in a small mono pill on the right. Rows separated by hairlines. Badge treatment by type:
+
+School rating ("Level 1+") → indigo-soft badge (
+#ecedf9 / 
+#2b3a9e).
+Michelin award ("Bib Gourmand", "Selected") → solid dark badge (
+#141414 / white).
+Status/type ("Boundary", "Open Enrollment", "Renewal", "Application Closed", "Built 1924", year) → neutral outline chip.
+Keep group sub-labels (Elementary / Middle / High, Within ¼ mile, etc.) as dark mono-caps labels.
+
+Collapsed summary chips (the Entertainment & Culture header row and any "10 found" collapsed section): render counts as indigo-soft chips ("9 Michelin", "2 Murals", "10 Landmarks"), consistent with the rest of the report.
+
+Label legibility: metric labels, group labels, and meta lines use dark ink (
+#565651), not the faint muted gray — reserve muted only for source lines and secondary qualifiers.
+
+Match spacing, radii, and borders to the mockup. Apply Pattern A and Pattern B consistently so every directory section shares the same tile and row.

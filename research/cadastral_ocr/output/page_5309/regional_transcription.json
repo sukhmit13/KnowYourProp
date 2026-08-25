@@ -1,0 +1,242 @@
+{
+  "regions": {
+    "upper_left": {
+      "readings": [
+        {
+          "text": "9",
+          "confidence": "high",
+          "position": "top right",
+          "notes": "clear single digit"
+        },
+        {
+          "text": "17",
+          "confidence": "medium",
+          "position": "center left parcel",
+          "notes": "two digits visible"
+        },
+        {
+          "text": "8",
+          "confidence": "high",
+          "position": "center left row, first position",
+          "notes": "clear digit"
+        },
+        {
+          "text": "8",
+          "confidence": "high",
+          "position": "center left row, third position",
+          "notes": "clear digit"
+        },
+        {
+          "text": "16",
+          "confidence": "high",
+          "position": "lower left",
+          "notes": "clear two digits"
+        }
+      ],
+      "unreadable": [
+        "top left corner - partial text with vertical orientation",
+        "center left row, middle position - degraded digit",
+        "center - marks obscured by yellow highlighting",
+        "lower center - multiple marks obscured by yellow highlighting"
+      ],
+      "note": "Heavy yellow highlighting obscures central and right portions"
+    },
+    "lower_left": {
+      "readings": [
+        {
+          "text": "16",
+          "confidence": "high",
+          "position": "top left",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "10",
+          "confidence": "high",
+          "position": "upper center parcel",
+          "notes": "clear two digits in yellow highlight"
+        },
+        {
+          "text": "9",
+          "confidence": "high",
+          "position": "center left margin",
+          "notes": "clear single digit"
+        },
+        {
+          "text": "75",
+          "confidence": "high",
+          "position": "center right, yellow highlighted parcel",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "15",
+          "confidence": "high",
+          "position": "lower left",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "16",
+          "confidence": "high",
+          "position": "lower right",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "15",
+          "confidence": "high",
+          "position": "bottom left",
+          "notes": "clear two digits"
+        }
+      ],
+      "unreadable": [
+        "upper right - marks obscured by yellow highlighting",
+        "center parcel below '10' - faint mark"
+      ],
+      "note": "Some parcels contain clear numbers while others are obscured"
+    },
+    "central_narrow_parcels": {
+      "readings": [
+        {
+          "text": "810",
+          "confidence": "medium",
+          "position": "top right",
+          "notes": "three digits, partially clear"
+        },
+        {
+          "text": "9",
+          "confidence": "high",
+          "position": "lower center",
+          "notes": "clear single digit"
+        },
+        {
+          "text": "75",
+          "confidence": "high",
+          "position": "bottom, yellow highlighted",
+          "notes": "clear two digits"
+        }
+      ],
+      "unreadable": [
+        "left side - multiple narrow parcels with marks obscured by yellow highlighting",
+        "center vertical strip - series of marks too degraded to read",
+        "upper left quadrant - marks obscured"
+      ],
+      "note": "Many narrow parcels with heavily obscured labels"
+    },
+    "upper_right": {
+      "readings": [
+        {
+          "text": "11",
+          "confidence": "high",
+          "position": "top center",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "26",
+          "confidence": "high",
+          "position": "upper right",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "12",
+          "confidence": "high",
+          "position": "center left parcel",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "14",
+          "confidence": "medium",
+          "position": "lower left, first line",
+          "notes": "two digits with some degradation"
+        },
+        {
+          "text": "13",
+          "confidence": "high",
+          "position": "lower center",
+          "notes": "clear two digits"
+        }
+      ],
+      "unreadable": [
+        "top left corner - partial marks",
+        "left margin - vertical text too degraded",
+        "center left vertical parcel - mark between '11' and '12'",
+        "lower left second line - marks below '14'"
+      ],
+      "note": "Some marginal text and between-parcel marks unclear"
+    },
+    "lower_right": {
+      "readings": [
+        {
+          "text": "3",
+          "confidence": "high",
+          "position": "top center",
+          "notes": "clear single digit"
+        },
+        {
+          "text": "9",
+          "confidence": "high",
+          "position": "top right",
+          "notes": "clear single digit"
+        },
+        {
+          "text": "19",
+          "confidence": "high",
+          "position": "upper left",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "13",
+          "confidence": "high",
+          "position": "center large parcel, first line",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "19",
+          "confidence": "high",
+          "position": "center large parcel, second line",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "14",
+          "confidence": "high",
+          "position": "lower center left, first line",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "8",
+          "confidence": "medium",
+          "position": "lower center left, second line (after 14)",
+          "notes": "single digit, partially degraded"
+        },
+        {
+          "text": "17",
+          "confidence": "high",
+          "position": "lower center, first line",
+          "notes": "clear two digits"
+        },
+        {
+          "text": "4",
+          "confidence": "high",
+          "position": "left margin, first position",
+          "notes": "clear single digit"
+        },
+        {
+          "text": "15",
+          "confidence": "medium",
+          "position": "left margin, second position",
+          "notes": "two digits, partially degraded"
+        },
+        {
+          "text": "2",
+          "confidence": "medium",
+          "position": "bottom left margin",
+          "notes": "single digit"
+        }
+      ],
+      "unreadable": [
+        "top left - marks obscured by yellow highlighting",
+        "left margin center - number between 15 and 4",
+        "bottom center - marks obscured or degraded",
+        "bottom right - marks near right margin unclear"
+      ],
+      "note": "Yellow highlighting obscures some upper portions"
+    }
+  }
+}

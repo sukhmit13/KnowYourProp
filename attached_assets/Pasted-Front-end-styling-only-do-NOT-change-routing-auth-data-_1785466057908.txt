@@ -1,0 +1,20 @@
+Front-end / styling only — do NOT change routing, auth, data, or business logic.
+
+Redesign the Liens section to match the attached report-liens.html, using the existing design tokens. This is the highest-stakes section, so lead with risk.
+
+Header: indigo scales icon marker (no square), "LIENS".
+Foreclosure alert (only when a foreclosure/lis pendens is on record): a prominent red banner at the top (
+#fbecea fill, 
+#f2c9c2 border, 
+#d13b26 heading) with a ⚠ icon: "Active foreclosure on record" + the lis pendens date and a plain-English consequence ("Title is clouded until it resolves; financing is unlikely until then."). If no foreclosure, omit the banner.
+Debt Snapshot: key facts as compact fact tiles (Lender, Loan Amount with "recorded [date]" qualifier, Mechanics Liens). Then a loan-lifecycle timeline: a light track with an indigo fill from loan-recorded to "Now", a "Now" marker, "Recorded [date]" and "Est. maturity [year]" at the ends, and a note line ("~7 yrs elapsed · 23 yrs remaining on a 30-yr term · refinancing risk Low · N modifications").
+Property Records: four KPI tiles — Total Docs and Mortgages neutral; Active Liens colored green when 0 (
+#edf6ef/
+#2f7d3f), Lis Pendens colored red when ≥1 (
+#fbecea/
+#d13b26). Then a document table: Doc # (indigo underlined link) · Type badge · Recorded date (right-aligned tabular). Type badges neutral, except LIS PENDENS FORECLOSURE = solid red (
+#d13b26/white). Released mortgages shown struck-through/muted with a green "✓ Released" flag. A centered "View all N documents on Cook County Recorder ↗" link.
+Owner Liens: an indigo-soft callout ("N personal lien records found against the owner" + "Personal liens follow the owner, not this property — useful as negotiation context"), then a table (Doc # · Type badge [Judgment, Mechanics Lien] · Recorded).
+Property Tax Information (if in this section): render as fact tiles/neutral chips (Assessed, Est. market, Tax, Appeals count).
+
+Status colors are legitimate here — foreclosure and lis pendens are genuine risks (red), zero active liens is genuinely reassuring (green). Match spacing, radii, borders to the mockup.

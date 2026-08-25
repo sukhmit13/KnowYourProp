@@ -1,0 +1,894 @@
+# REPLIT AI INSTRUCTIONS: Veraset-Style UI Redesign
+
+## OVERVIEW
+Transform the Chicago property intelligence platform to match Veraset.com's sophisticated, minimalist aesthetic while keeping ALL existing data sections and functionality intact.
+
+---
+
+## VERASET DESIGN SYSTEM ANALYSIS
+
+### COLORS
+```
+Black:        #000000 (primary background for hero sections)
+White:        #ffffff (text on black, card backgrounds)
+Beige:        #e5ddd5 (secondary background, sidebar, card backgrounds)
+Off-white:    #f5f5f5 (subtle backgrounds)
+Text dark:    #1a1a1a (body text on light backgrounds)
+Neon yellow:  #c4ff00 (primary CTA buttons)
+Light blue:   #7dd3fc (accents, diagrams)
+Orange:       #ff6b35 (highlights, secondary accents)
+```
+
+### TYPOGRAPHY
+- **Headlines**: Large, bold, monospace feel (48px desktop, 32px mobile)
+- **Body**: Clean sans-serif, 18px, line-height 1.8
+- **Spacing**: Very generous (1.8-2.0 line height)
+- **Style**: Some section labels in ALL CAPS
+
+### LAYOUT PRINCIPLES
+- **Massive white space** (80-120px section padding)
+- **Two-column layouts** (50/50 text and image/diagram splits)
+- **Sharp edges** (NO rounded corners - border-radius: 0)
+- **Flat design** (NO shadows, NO gradients)
+- **High contrast** (black text on white, white text on black)
+- **Minimalist** (every element has purpose)
+
+### COMPONENTS
+- **Buttons**: Neon yellow with black text, or black with white text, sharp corners
+- **Cards**: Beige or white backgrounds, NO shadows, sharp corners
+- **Icon boxes**: 80x80px beige squares with simple black icons
+- **Tables**: Clean, minimal borders, beige headers
+- **Sidebar**: Beige background, simple text links
+- **NO visual effects**: No drop shadows, no gradients, no rounded corners
+
+---
+
+## STEP-BY-STEP REPLIT AI INSTRUCTIONS
+
+### STEP 1: Create CSS File
+
+Create a new file: `/frontend/veraset-style.css`
+
+```css
+/* ===================================
+   VERASET-STYLE CSS
+   Minimalist, high-contrast, flat design
+   =================================== */
+
+/* CSS Variables - Veraset Color Scheme */
+:root {
+  /* Colors */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-beige: #e5ddd5;
+  --color-offwhite: #f5f5f5;
+  --color-text-dark: #1a1a1a;
+  --color-yellow: #c4ff00;
+  --color-blue: #7dd3fc;
+  --color-orange: #ff6b35;
+  
+  /* Typography */
+  --font-mono: 'Courier New', Courier, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  
+  /* Font Sizes */
+  --text-hero: 48px;
+  --text-h1: 32px;
+  --text-h2: 24px;
+  --text-body: 18px;
+  --text-small: 16px;
+  
+  /* Spacing - Veraset uses MASSIVE spacing */
+  --space-xs: 12px;
+  --space-sm: 24px;
+  --space-md: 48px;
+  --space-lg: 80px;
+  --space-xl: 120px;
+  
+  /* Effects - NONE! Flat design */
+  --border-radius: 0px; /* Sharp corners always */
+  --transition: all 200ms ease;
+}
+
+/* ===================================
+   BASE STYLES
+   =================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.8;
+  color: var(--color-text-dark);
+  background: var(--color-white);
+}
+
+/* Remove ALL shadows globally */
+*,
+*::before,
+*::after {
+  box-shadow: none !important;
+}
+
+/* ===================================
+   LAYOUT CONTAINERS
+   =================================== */
+
+.container,
+.max-width {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+/* Dark sections - Black background */
+.hero-section,
+.dark-section {
+  background: var(--color-black);
+  color: var(--color-white);
+  padding: var(--space-xl) var(--space-md);
+}
+
+/* Light sections */
+section,
+.section {
+  background: var(--color-white);
+  padding: var(--space-lg) var(--space-md);
+  margin-bottom: 0; /* No gaps between sections */
+}
+
+/* Beige sections */
+.beige-section {
+  background: var(--color-beige);
+  padding: var(--space-lg) var(--space-md);
+}
+
+/* ===================================
+   TYPOGRAPHY
+   =================================== */
+
+h1, .h1 {
+  font-size: var(--text-hero);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: var(--space-md);
+  font-family: var(--font-mono);
+  letter-spacing: -1px;
+}
+
+h2, .h2 {
+  font-size: var(--text-h1);
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: var(--space-sm);
+}
+
+h3, .h3 {
+  font-size: var(--text-h2);
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+p {
+  margin-bottom: var(--space-sm);
+}
+
+.text-large {
+  font-size: 20px;
+  line-height: 1.9;
+}
+
+/* ===================================
+   NAVIGATION
+   =================================== */
+
+nav,
+.navigation {
+  background: var(--color-white);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+nav a,
+.nav-link {
+  color: var(--color-text-dark);
+  text-decoration: none;
+  font-weight: 500;
+  padding: var(--space-xs);
+  transition: var(--transition);
+}
+
+nav a:hover {
+  color: var(--color-black);
+}
+
+/* ===================================
+   BUTTONS - Veraset Style
+   =================================== */
+
+button,
+.btn,
+a.btn {
+  display: inline-block;
+  padding: 16px 32px;
+  border: none;
+  border-radius: var(--border-radius); /* 0 - sharp corners */
+  font-weight: 600;
+  font-size: var(--text-body);
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  text-align: center;
+}
+
+/* Primary button - Neon yellow */
+.btn-primary {
+  background: var(--color-yellow);
+  color: var(--color-black);
+}
+
+.btn-primary:hover {
+  background: #b3e600;
+}
+
+/* Secondary button - Black */
+.btn-secondary {
+  background: var(--color-black);
+  color: var(--color-white);
+  border: 2px solid var(--color-black);
+}
+
+.btn-secondary:hover {
+  background: var(--color-text-dark);
+}
+
+/* Outline button */
+.btn-outline {
+  background: transparent;
+  color: var(--color-white);
+  border: 2px solid var(--color-white);
+}
+
+.btn-outline:hover {
+  background: var(--color-white);
+  color: var(--color-black);
+}
+
+/* ===================================
+   CARDS & BOXES
+   =================================== */
+
+.card,
+.property-card,
+.section-card {
+  background: var(--color-white);
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+  border-radius: var(--border-radius); /* Sharp corners */
+  border: 1px solid #e0e0e0;
+}
+
+/* Beige cards */
+.card-beige,
+.feature-box {
+  background: var(--color-beige);
+  padding: var(--space-md);
+  border-radius: var(--border-radius);
+}
+
+/* Icon boxes - Like Veraset */
+.icon-box {
+  background: var(--color-beige);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-sm);
+  border-radius: var(--border-radius);
+}
+
+.icon-box svg,
+.icon-box i {
+  font-size: 32px;
+  color: var(--color-black);
+}
+
+/* ===================================
+   TABLES - Clean Minimal Style
+   =================================== */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body);
+  margin-bottom: var(--space-md);
+}
+
+thead {
+  background: var(--color-beige);
+}
+
+th {
+  padding: var(--space-sm);
+  text-align: left;
+  font-weight: 600;
+  border: none;
+  color: var(--color-black);
+}
+
+td {
+  padding: var(--space-sm);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+tbody tr:hover {
+  background: var(--color-offwhite);
+}
+
+/* Zebra striping - subtle */
+tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* ===================================
+   BADGES & STATUS INDICATORS
+   =================================== */
+
+.badge,
+.status-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: var(--border-radius); /* Sharp corners */
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-success,
+.badge-eligible {
+  background: var(--color-beige);
+  color: var(--color-black);
+}
+
+.badge-warning,
+.badge-moderate {
+  background: var(--color-orange);
+  color: var(--color-white);
+}
+
+.badge-danger,
+.badge-critical {
+  background: var(--color-black);
+  color: var(--color-white);
+}
+
+.badge-info {
+  background: var(--color-blue);
+  color: var(--color-black);
+}
+
+/* ===================================
+   SIDEBAR NAVIGATION
+   =================================== */
+
+.sidebar {
+  background: var(--color-beige);
+  padding: var(--space-md);
+  position: sticky;
+  top: 20px;
+  border-radius: var(--border-radius);
+}
+
+.sidebar-title {
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.sidebar a,
+.sidebar-link {
+  display: block;
+  padding: var(--space-xs) 0;
+  color: var(--color-text-dark);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.sidebar a:hover {
+  color: var(--color-black);
+  font-weight: 600;
+}
+
+.sidebar a.active {
+  font-weight: 700;
+  color: var(--color-black);
+}
+
+/* ===================================
+   COLLAPSIBLE SECTIONS
+   =================================== */
+
+.collapsible-header {
+  cursor: pointer;
+  padding: var(--space-sm);
+  background: var(--color-offwhite);
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  margin-bottom: var(--space-xs);
+}
+
+.collapsible-header:hover {
+  background: #e8e8e8;
+}
+
+.collapsible-content {
+  padding: var(--space-sm);
+  border-left: 3px solid var(--color-beige);
+  margin-left: var(--space-sm);
+}
+
+/* ===================================
+   TWO-COLUMN LAYOUTS - Like Veraset
+   =================================== */
+
+.two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.column-text {
+  padding-right: var(--space-md);
+}
+
+.column-visual {
+  padding-left: var(--space-md);
+}
+
+/* ===================================
+   STAT CARDS
+   =================================== */
+
+.stat-card {
+  background: var(--color-white);
+  padding: var(--space-md);
+  text-align: center;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius);
+}
+
+.stat-number {
+  font-size: 48px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--color-black);
+  line-height: 1;
+  margin-bottom: var(--space-xs);
+}
+
+.stat-label {
+  font-size: var(--text-small);
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===================================
+   PROPERTY HEADER
+   =================================== */
+
+.property-header {
+  background: var(--color-black);
+  color: var(--color-white);
+  padding: var(--space-lg) var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.property-address {
+  font-size: var(--text-hero);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.property-meta {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-top: var(--space-sm);
+}
+
+.property-meta-item {
+  background: rgba(255,255,255,0.1);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius);
+}
+
+/* ===================================
+   FORMS & INPUTS
+   =================================== */
+
+input[type="text"],
+input[type="email"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  padding: var(--space-sm);
+  border: 2px solid #e0e0e0;
+  border-radius: var(--border-radius); /* Sharp corners */
+  font-size: var(--text-body);
+  font-family: var(--font-sans);
+  transition: var(--transition);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-black);
+}
+
+label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-weight: 600;
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===================================
+   MOBILE RESPONSIVE
+   =================================== */
+
+@media (max-width: 768px) {
+  :root {
+    --text-hero: 32px;
+    --text-h1: 24px;
+    --text-h2: 20px;
+    --space-xl: 60px;
+    --space-lg: 40px;
+    --space-md: 24px;
+  }
+  
+  .two-column {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  
+  .column-text,
+  .column-visual {
+    padding: 0;
+  }
+  
+  .sidebar {
+    position: relative;
+    top: 0;
+    margin-bottom: var(--space-md);
+  }
+  
+  .property-meta {
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  
+  table {
+    font-size: 14px;
+  }
+  
+  th, td {
+    padding: var(--space-xs);
+  }
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
+
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mb-xs { margin-bottom: var(--space-xs); }
+.mb-sm { margin-bottom: var(--space-sm); }
+.mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+
+.mt-xs { margin-top: var(--space-xs); }
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+
+.bg-black { background: var(--color-black); color: var(--color-white); }
+.bg-white { background: var(--color-white); color: var(--color-text-dark); }
+.bg-beige { background: var(--color-beige); color: var(--color-text-dark); }
+
+.uppercase { text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ===================================
+   PRINT STYLES
+   =================================== */
+
+@media print {
+  .sidebar,
+  nav,
+  .btn,
+  button {
+    display: none;
+  }
+  
+  body {
+    font-size: 12pt;
+    color: black;
+  }
+  
+  .property-header {
+    background: white;
+    color: black;
+    border: 2px solid black;
+  }
+}
+```
+
+---
+
+### STEP 2: Create Landing Page
+
+Create a new file: `/frontend/landing.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chicago Property Intelligence - $25 Reports</title>
+    <link rel="stylesheet" href="veraset-style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; font-size: 20px;">Chicago Property Intel</div>
+            <div style="display: flex; gap: 32px; align-items: center;">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="/report" class="btn btn-primary" style="padding: 12px 24px;">Get Report</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container" style="max-width: 900px; text-align: center;">
+            <h1>Chicago Property Intelligence for $25</h1>
+            <p class="text-large" style="margin-bottom: 48px; color: rgba(255,255,255,0.9);">
+                Comprehensive due diligence in seconds. Not $125/month.
+            </p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <a href="/report" class="btn btn-primary">Get Report Now →</a>
+                <a href="#sample" class="btn btn-outline">See Sample Report</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section style="background: var(--color-beige); padding: 24px; text-align: center;">
+        <div class="container">
+            <p style="margin: 0; font-weight: 600;">Trusted by 100+ Chicago real estate investors</p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features">
+        <div class="container" style="max-width: 1100px;">
+            <h2 style="text-align: center; margin-bottom: 80px;">Everything You Need to Invest Confidently</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 48px;">
+                <!-- Feature 1 -->
+                <div>
+                    <div class="icon-box">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3>Comprehensive Lien Search</h3>
+                    <p>75%+ coverage including owner liens. Find hidden title issues others miss.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div>
+                    <div class="icon-box">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <h3>Market Intelligence</h3>
+                    <p>Schools, comps, development, and lending data in one comprehensive report.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div>
+                    <div class="icon-box">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3>Instant Reports</h3>
+                    <p>Get comprehensive analysis in minutes. Download PDF immediately.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="beige-section">
+        <div class="container" style="max-width: 500px; margin: 0 auto;">
+            <div class="card" style="padding: 48px; text-align: center; background: white;">
+                <h2 style="margin-bottom: 12px;">One-Time Payment</h2>
+                <p style="color: #666; margin-bottom: 32px;">No subscription. No hidden fees.</p>
+                
+                <div style="margin-bottom: 32px;">
+                    <div style="font-size: 64px; font-weight: 700; font-family: var(--font-mono); line-height: 1;">$25</div>
+                    <div style="color: #666; margin-top: 8px;">per report</div>
+                </div>
+
+                <ul style="text-align: left; margin-bottom: 32px; list-style: none; padding: 0;">
+                    <li style="padding: 12px 0; border-bottom: 1px solid #e0e0e0;">✓ Comprehensive lien search</li>
+                    <li style="padding: 12px 0; border-bottom: 1px solid #e0e0e0;">✓ Comparable sales analysis</li>
+                    <li style="padding: 12px 0; border-bottom: 1px solid #e0e0e0;">✓ School rankings</li>
+                    <li style="padding: 12px 0; border-bottom: 1px solid #e0e0e0;">✓ Development tracking</li>
+                    <li style="padding: 12px 0; border-bottom: 1px solid #e0e0e0;">✓ SBA & HMDA lending data</li>
+                    <li style="padding: 12px 0;">✓ Instant PDF download</li>
+                </ul>
+
+                <a href="/report" class="btn btn-primary" style="width: 100%;">Get Your Report →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section>
+        <div class="container" style="max-width: 800px;">
+            <h2 style="text-align: center; margin-bottom: 48px;">vs Chicago Cityscape</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Us</th>
+                        <th>Cityscape</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Price</td>
+                        <td><strong>$25 one-time</strong></td>
+                        <td>$125/month</td>
+                    </tr>
+                    <tr>
+                        <td>Lien Search</td>
+                        <td><strong>75%+ coverage</strong></td>
+                        <td>Basic</td>
+                    </tr>
+                    <tr>
+                        <td>School Data</td>
+                        <td><strong>Included</strong></td>
+                        <td>Not included</td>
+                    </tr>
+                    <tr>
+                        <td>Owner Name Search</td>
+                        <td><strong>Included</strong></td>
+                        <td>Not included</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="dark-section" style="padding: 48px 24px;">
+        <div class="container" style="text-align: center;">
+            <p style="margin: 0; opacity: 0.7;">© 2026 Chicago Property Intel. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
+```
+
+---
+
+### STEP 3: Modify Existing Report Page
+
+In your existing report HTML file, add this at the top of the `<head>` section:
+
+```html
+<link rel="stylesheet" href="/frontend/veraset-style.css">
+```
+
+Then wrap your property address/header in this structure:
+
+```html
+<div class="property-header">
+    <div class="container">
+        <h1 class="property-address">2540 W. NORTH AVE., CHICAGO, IL 60647</h1>
+        <div class="property-meta">
+            <div class="property-meta-item">
+                <strong>Neighborhood:</strong> West Town - Wicker Park
+            </div>
+            <div class="property-meta-item">
+                <strong>Tract:</strong> 17031240600
+            </div>
+            <div class="property-meta-item">
+                <strong>Zoning:</strong> B3-1
+            </div>
+            <div class="property-meta-item">
+                <strong>OPP Zone:</strong> No
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+---
+
+### STEP 4: Test
+
+1. Upload `veraset-style.css` to `/frontend` folder in Replit
+2. Upload `landing.html` to `/frontend` folder  
+3. Add the `<link>` tag to your existing report page
+4. Preview the site
+5. Check mobile responsiveness (Chrome DevTools)
+
+---
+
+## INTEGRATION CHECKLIST
+
+- [ ] Create `/frontend/veraset-style.css`
+- [ ] Create `/frontend/landing.html`
+- [ ] Add `<link rel="stylesheet" href="/frontend/veraset-style.css">` to existing report page
+- [ ] Wrap property header in `.property-header` div
+- [ ] Test on desktop
+- [ ] Test on mobile
+- [ ] Verify all sections still work
+- [ ] Check collapsible sections still function
+
+---
+
+## KEY DIFFERENCES FROM CURRENT DESIGN
+
+**OLD (Current):**
+- Gradients and shadows
+- Rounded corners
+- Dense spacing
+- Colorful badges
+
+**NEW (Veraset Style):**
+- Flat, no shadows
+- Sharp corners (border-radius: 0)
+- Massive spacing (80-120px)
+- Black/white/beige only
+- Neon yellow CTAs
+- Minimalist, sophisticated
+
+---
+
+## ROLLBACK PLAN
+
+If something breaks:
+1. Remove the `<link>` tag from report page
+2. Delete `/frontend/veraset-style.css`
+3. Back to original instantly
+
+Your backend and data sections remain completely untouched.

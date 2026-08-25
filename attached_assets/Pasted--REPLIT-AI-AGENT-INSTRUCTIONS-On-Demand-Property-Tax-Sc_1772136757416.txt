@@ -1,0 +1,785 @@
+# REPLIT AI AGENT INSTRUCTIONS
+## On-Demand Property Tax Scraping with Caching
+
+---
+
+## OBJECTIVE
+
+Implement a system that scrapes Cook County Treasurer property tax data ON-DEMAND when a user generates a report, with intelligent caching to avoid repeat scraping.
+
+---
+
+## REQUIREMENTS
+
+### Dependencies to Install:
+
+```bash
+pip install selenium beautifulsoup4 requests --break-system-packages
+```
+
+Also need Chrome/Chromium for Selenium:
+```bash
+# Install Chrome
+apt-get update
+apt-get install -y chromium-browser chromium-chromedriver
+
+# Or if using Chrome:
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+apt install -y ./google-chrome-stable_current_amd64.deb
+```
+
+---
+
+## ARCHITECTURE
+
+```
+User requests report for address
+    ↓
+Get PIN from address (existing code)
+    ↓
+Call: get_tax_data(pin)
+    ↓
+Check cache: Does data/tax_cache/{pin}.json exist?
+    ↓
+    YES → Is it less than 90 days old?
+            ↓
+            YES → Return cached data (instant)
+            NO → Scrape fresh data
+    ↓
+    NO → Scrape Cook County Treasurer website
+    ↓
+Cache the result as JSON file
+    ↓
+Return tax data to report
+```
+
+---
+
+## FILE STRUCTURE
+
+Create these files:
+
+```
+your-project/
+├── data/
+│   └── tax_cache/          # Cache directory (create if doesn't exist)
+│       ├── 13364290210000.json
+│       ├── 13364290220000.json
+│       └── ...
+├── scrapers/
+│   ├── __init__.py
+│   └── tax_scraper.py      # NEW FILE - Tax scraping logic
+├── utils/
+│   ├── __init__.py
+│   └── cache.py            # NEW FILE - Cache management
+└── app.py                  # Your main application
+```
+
+---
+
+## IMPLEMENTATION
+
+### Step 1: Create Cache Manager
+
+Create file: `utils/cache.py`
+
+```python
+import json
+import os
+from datetime import datetime, timedelta
+
+class TaxDataCache:
+    """
+    File-based cache for property tax data
+    """
+    
+    def __init__(self, cache_dir='data/tax_cache'):
+        self.cache_dir = cache_dir
+        # Create cache directory if it doesn't exist
+        os.makedirs(cache_dir, exist_ok=True)
+    
+    def get(self, pin):
+        """
+        Get cached tax data if it exists and is fresh (<90 days old)
+        
+        Args:
+            pin: Property PIN (with or without dashes)
+        
+        Returns:
+            dict: Cached tax data if fresh, None otherwise
+        """
+        pin_clean = pin.replace('-', '')
+        cache_file = os.path.join(self.cache_dir, f"{pin_clean}.json")
+        
+        try:
+            # Check if cache file exists
+            if not os.path.exists(cache_file):
+                print(f"[CACHE MISS] No cache file for PIN {pin}")
+                return None
+            
+            # Read cache file
+            with open(cache_file, 'r') as f:
+                data = json.load(f)
+            
+            # Check if cache is still fresh (90 days)
+            cached_date = datetime.fromisoformat(data['cached_at'])
+            age_days = (datetime.now() - cached_date).days
+            
+            if age_days < 90:
+                print(f"[CACHE HIT] PIN {pin} - Age: {age_days} days")
+                return data['tax_data']
+            else:
+                print(f"[CACHE EXPIRED] PIN {pin} - Age: {age_days} days (>90)")
+                return None
+                
+        except Exception as e:
+            print(f"[CACHE ERROR] Error reading cache for PIN {pin}: {e}")
+            return None
+    
+    def set(self, pin, tax_data):
+        """
+        Cache tax data to file
+        
+        Args:
+            pin: Property PIN
+            tax_data: Tax data dict to cache
+        """
+        pin_clean = pin.replace('-', '')
+        cache_file = os.path.join(self.cache_dir, f"{pin_clean}.json")
+        
+        data = {
+            'pin': pin,
+            'cached_at': datetime.now().isoformat(),
+            'tax_data': tax_data
+        }
+        
+        try:
+            with open(cache_file, 'w') as f:
+                json.dump(data, f, indent=2)
+            
+            print(f"[CACHE SAVED] PIN {pin}")
+            return True
+            
+        except Exception as e:
+            print(f"[CACHE ERROR] Failed to save cache for PIN {pin}: {e}")
+            return False
+    
+    def clear_expired(self):
+        """
+        Delete cache files older than 90 days
+        """
+        count = 0
+        for filename in os.listdir(self.cache_dir):
+            if filename.endswith('.json'):
+                filepath = os.path.join(self.cache_dir, filename)
+                
+                try:
+                    with open(filepath, 'r') as f:
+                        data = json.load(f)
+                    
+                    cached_date = datetime.fromisoformat(data['cached_at'])
+                    age_days = (datetime.now() - cached_date).days
+                    
+                    if age_days >= 90:
+                        os.remove(filepath)
+                        count += 1
+                        print(f"[CACHE CLEANUP] Deleted expired cache: {filename}")
+                
+                except Exception as e:
+                    print(f"[CACHE CLEANUP ERROR] {filename}: {e}")
+        
+        print(f"[CACHE CLEANUP] Removed {count} expired files")
+        return count
+```
+
+---
+
+### Step 2: Create Tax Scraper
+
+Create file: `scrapers/tax_scraper.py`
+
+```python
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
+import time
+import re
+from datetime import datetime
+
+class CookCountyTaxScraper:
+    """
+    Scraper for Cook County Treasurer property tax data
+    """
+    
+    def __init__(self):
+        self.base_url = "https://www.cookcountytreasurer.com/pinsearch.aspx"
+    
+    def scrape_tax_data(self, pin):
+        """
+        Scrape property tax data from Cook County Treasurer
+        
+        Args:
+            pin: Property PIN (with or without dashes)
+        
+        Returns:
+            dict: Tax data including years, amounts, payment status
+        """
+        pin_clean = pin.replace('-', '')
+        url = f"{self.base_url}?pin={pin_clean}"
+        
+        print(f"[SCRAPER] Scraping tax data for PIN {pin}...")
+        print(f"[SCRAPER] URL: {url}")
+        
+        # Setup headless Chrome
+        options = Options()
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--window-size=1920,1080')
+        options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+        
+        driver = None
+        
+        try:
+            driver = webdriver.Chrome(options=options)
+            driver.get(url)
+            
+            # Wait for page to load
+            print("[SCRAPER] Waiting for page to load...")
+            time.sleep(4)  # Give page time to render
+            
+            # Get page source
+            html = driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
+            
+            # Parse tax data
+            tax_years = self._parse_tax_data(soup)
+            
+            if not tax_years:
+                print("[SCRAPER] No tax data found - check if page structure changed")
+                # Save HTML for debugging
+                with open(f'debug_{pin_clean}.html', 'w') as f:
+                    f.write(html)
+                print(f"[SCRAPER] Saved page HTML to debug_{pin_clean}.html for inspection")
+            
+            # Calculate summary
+            overall_status = self._determine_status(tax_years)
+            total_outstanding = sum(year.get('balance', 0) for year in tax_years)
+            
+            result = {
+                'pin': pin,
+                'tax_years': tax_years,
+                'overall_status': overall_status,
+                'total_outstanding': total_outstanding,
+                'scraped_at': datetime.now().isoformat(),
+                'source_url': url
+            }
+            
+            print(f"[SCRAPER] Successfully scraped {len(tax_years)} tax years")
+            return result
+            
+        except Exception as e:
+            print(f"[SCRAPER ERROR] {str(e)}")
+            return {
+                'pin': pin,
+                'error': str(e),
+                'status': 'Error - unable to retrieve tax data',
+                'check_manually_url': url
+            }
+        
+        finally:
+            if driver:
+                driver.quit()
+    
+    def _parse_tax_data(self, soup):
+        """
+        Parse tax data from HTML
+        
+        NOTE: You need to inspect the Cook County Treasurer page to get
+        the correct selectors. This is a template - UPDATE based on actual HTML.
+        """
+        tax_years = []
+        
+        # METHOD 1: Try to find table with tax data
+        # Look for tables that might contain tax information
+        tables = soup.find_all('table')
+        
+        for table in tables:
+            # Check if this looks like a tax table
+            table_text = table.get_text()
+            if any(keyword in table_text.lower() for keyword in ['tax year', 'total', 'billed', 'paid', 'balance']):
+                
+                rows = table.find_all('tr')
+                
+                for row in rows[1:]:  # Skip header row
+                    cells = row.find_all(['td', 'th'])
+                    
+                    # Need at least 4 columns: year, billed, paid, balance
+                    if len(cells) >= 4:
+                        try:
+                            year = cells[0].get_text().strip()
+                            
+                            # Only process if it looks like a year
+                            if re.match(r'20\d{2}', year):
+                                tax_years.append({
+                                    'year': year,
+                                    'total_billed': self._parse_currency(cells[1].get_text()),
+                                    'amount_paid': self._parse_currency(cells[2].get_text()),
+                                    'balance': self._parse_currency(cells[3].get_text()),
+                                    'status': 'Paid' if self._parse_currency(cells[3].get_text()) <= 0 else 'Outstanding'
+                                })
+                        except Exception as e:
+                            print(f"[SCRAPER] Error parsing row: {e}")
+                            continue
+        
+        # METHOD 2: Try alternative selectors if Method 1 fails
+        if not tax_years:
+            # Try finding divs or other containers
+            # UPDATE THESE SELECTORS based on actual page structure
+            year_sections = soup.find_all('div', class_='tax-year')
+            
+            for section in year_sections:
+                try:
+                    # This is a placeholder - adjust based on actual HTML
+                    year_elem = section.find('span', class_='year')
+                    billed_elem = section.find('span', class_='billed')
+                    paid_elem = section.find('span', class_='paid')
+                    balance_elem = section.find('span', class_='balance')
+                    
+                    if all([year_elem, billed_elem, paid_elem, balance_elem]):
+                        tax_years.append({
+                            'year': year_elem.get_text().strip(),
+                            'total_billed': self._parse_currency(billed_elem.get_text()),
+                            'amount_paid': self._parse_currency(paid_elem.get_text()),
+                            'balance': self._parse_currency(balance_elem.get_text()),
+                            'status': 'Paid' if self._parse_currency(balance_elem.get_text()) <= 0 else 'Outstanding'
+                        })
+                except:
+                    continue
+        
+        return tax_years
+    
+    def _parse_currency(self, text):
+        """
+        Convert currency text to float
+        Examples: '$1,234.56' -> 1234.56, '(123.45)' -> -123.45
+        """
+        if not text:
+            return 0.0
+        
+        # Remove whitespace
+        text = text.strip()
+        
+        # Handle parentheses (negative numbers)
+        is_negative = text.startswith('(') and text.endswith(')')
+        
+        # Remove currency symbols, commas, parentheses
+        clean = re.sub(r'[$,\s()]', '', text)
+        
+        # Handle different negative signs
+        clean = clean.replace('−', '-')
+        
+        try:
+            value = float(clean)
+            return -value if is_negative else value
+        except ValueError:
+            return 0.0
+    
+    def _determine_status(self, tax_years):
+        """
+        Determine overall tax payment status
+        """
+        if not tax_years:
+            return 'Unknown'
+        
+        total_outstanding = sum(year.get('balance', 0) for year in tax_years)
+        
+        if total_outstanding <= 0:
+            return 'Current'
+        elif total_outstanding < 1000:
+            return 'Minor Outstanding'
+        else:
+            return 'Delinquent'
+```
+
+---
+
+### Step 3: Create Main Tax Data Fetcher
+
+Create file: `scrapers/__init__.py` or add to existing module:
+
+```python
+from utils.cache import TaxDataCache
+from scrapers.tax_scraper import CookCountyTaxScraper
+
+class TaxDataFetcher:
+    """
+    Main interface for getting tax data
+    Handles caching and on-demand scraping
+    """
+    
+    def __init__(self):
+        self.cache = TaxDataCache()
+        self.scraper = CookCountyTaxScraper()
+    
+    def get_tax_data(self, pin):
+        """
+        Get tax data for a PIN - from cache if available, otherwise scrape
+        
+        Args:
+            pin: Property PIN (with or without dashes)
+        
+        Returns:
+            dict: Tax data including payment history and status
+        """
+        print(f"\n[TAX DATA] Fetching data for PIN {pin}")
+        
+        # Try cache first
+        cached_data = self.cache.get(pin)
+        
+        if cached_data:
+            print("[TAX DATA] Using cached data")
+            return cached_data
+        
+        # Cache miss - scrape fresh data
+        print("[TAX DATA] Cache miss - scraping fresh data...")
+        scraped_data = self.scraper.scrape_tax_data(pin)
+        
+        # Cache the result (even if error, so we don't retry immediately)
+        if scraped_data and 'error' not in scraped_data:
+            self.cache.set(pin, scraped_data)
+        
+        return scraped_data
+```
+
+---
+
+### Step 4: Integrate into Your Report Generation
+
+Update your existing report generation code:
+
+```python
+# In your app.py or wherever you generate reports
+
+from scrapers import TaxDataFetcher
+
+def generate_property_report(address, pin):
+    """
+    Generate full property report
+    """
+    print(f"Generating report for {address}...")
+    
+    # Your existing code for other data
+    property_data = get_property_data(pin)
+    zoning_data = get_zoning_data(pin)
+    violations_data = get_violations(address)
+    # ... etc
+    
+    # NEW: Get tax data with caching
+    tax_fetcher = TaxDataFetcher()
+    tax_data = tax_fetcher.get_tax_data(pin)
+    
+    # Build report
+    report = {
+        'address': address,
+        'pin': pin,
+        'property_data': property_data,
+        'zoning': zoning_data,
+        'violations': violations_data,
+        'tax_data': tax_data,  # NEW
+        # ... other sections
+    }
+    
+    return report
+```
+
+---
+
+### Step 5: Display Tax Data in Report
+
+Update your report template to show tax data:
+
+```html
+<!-- In your report HTML template -->
+
+<section class="tax-section">
+  <h3>PROPERTY TAX PAYMENT HISTORY</h3>
+  
+  {% if tax_data.error %}
+    <div class="tax-error">
+      <p>Unable to automatically retrieve tax data.</p>
+      <p>Please verify manually: 
+        <a href="{{ tax_data.check_manually_url }}" target="_blank">
+          Cook County Treasurer
+        </a>
+      </p>
+    </div>
+  
+  {% else %}
+    <div class="tax-status {{ tax_data.overall_status|lower }}">
+      Overall Status: {{ tax_data.overall_status }}
+    </div>
+    
+    {% if tax_data.total_outstanding > 0 %}
+      <div class="outstanding-alert">
+        Total Outstanding: ${{ tax_data.total_outstanding|number_format }}
+      </div>
+    {% endif %}
+    
+    <table class="tax-table">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Total Billed</th>
+          <th>Amount Paid</th>
+          <th>Balance</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for year in tax_data.tax_years %}
+        <tr>
+          <td>{{ year.year }}</td>
+          <td>${{ year.total_billed|number_format }}</td>
+          <td>${{ year.amount_paid|number_format }}</td>
+          <td>${{ year.balance|number_format }}</td>
+          <td class="status-{{ year.status|lower }}">{{ year.status }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    
+    <p class="tax-note">
+      Last updated: {{ tax_data.scraped_at|date_format }}
+    </p>
+  {% endif %}
+</section>
+```
+
+---
+
+## IMPORTANT: PAGE STRUCTURE INSPECTION
+
+**CRITICAL STEP:** You need to inspect the actual Cook County Treasurer page to get the correct HTML selectors.
+
+### How to do this:
+
+1. **Go to:** https://www.cookcountytreasurer.com/pinsearch.aspx?pin=13364290210000
+
+2. **Right-click → Inspect Element**
+
+3. **Find the tax data table/sections**
+
+4. **Note the HTML structure:**
+   - What's the table ID or class?
+   - What are the column positions?
+   - Are there specific class names?
+
+5. **Update the `_parse_tax_data()` method** in `tax_scraper.py` with the correct selectors
+
+**Example of what to look for:**
+```html
+<!-- Example structure (yours will vary) -->
+<table id="taxYearTable" class="table">
+  <thead>
+    <tr>
+      <th>Tax Year</th>
+      <th>Total</th>
+      <th>Paid</th>
+      <th>Balance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2023</td>
+      <td>$5,750.00</td>
+      <td>$5,750.00</td>
+      <td>$0.00</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+Then update code:
+```python
+# In _parse_tax_data() method
+table = soup.find('table', {'id': 'taxYearTable'})
+# or
+table = soup.find('table', {'class': 'tax-table'})
+```
+
+---
+
+## TESTING
+
+### Test the scraper:
+
+```python
+# Create a test script: test_tax_scraper.py
+
+from scrapers import TaxDataFetcher
+
+# Test with a known PIN
+test_pin = '13-36-429-021-0000'
+
+fetcher = TaxDataFetcher()
+
+# First call - should scrape
+print("=== First call (should scrape) ===")
+data1 = fetcher.get_tax_data(test_pin)
+print(data1)
+
+# Second call - should use cache
+print("\n=== Second call (should use cache) ===")
+data2 = fetcher.get_tax_data(test_pin)
+print(data2)
+
+# Verify cache worked
+if data1 == data2:
+    print("\n✓ Cache working correctly!")
+else:
+    print("\n✗ Cache issue - data doesn't match")
+```
+
+Run test:
+```bash
+python test_tax_scraper.py
+```
+
+---
+
+## DEBUGGING
+
+If scraping fails:
+
+1. **Check the saved HTML file:**
+   - Scraper saves `debug_{pin}.html` when it can't find data
+   - Open this file and inspect the structure
+   - Update selectors in `_parse_tax_data()`
+
+2. **Check console output:**
+   - Look for `[SCRAPER]` log messages
+   - Check for errors
+
+3. **Test manually:**
+   - Visit the URL in your browser
+   - Make sure page loads correctly
+   - Check if structure matches your selectors
+
+4. **Common issues:**
+   - Page uses JavaScript (wait longer with `time.sleep(5)`)
+   - Selectors changed (update `_parse_tax_data()`)
+   - CAPTCHA or rate limiting (add delays, rotate user agents)
+
+---
+
+## RATE LIMITING (Optional but Recommended)
+
+Add rate limiting to avoid being blocked:
+
+```python
+# Add to tax_scraper.py
+
+import time
+from datetime import datetime
+
+class RateLimiter:
+    def __init__(self, requests_per_minute=20):
+        self.max_requests = requests_per_minute
+        self.requests = []
+    
+    def wait_if_needed(self):
+        now = datetime.now()
+        
+        # Remove old requests
+        self.requests = [r for r in self.requests if (now - r).seconds < 60]
+        
+        # Check limit
+        if len(self.requests) >= self.max_requests:
+            wait_time = 60 - (now - min(self.requests)).seconds
+            if wait_time > 0:
+                print(f"[RATE LIMIT] Waiting {wait_time}s...")
+                time.sleep(wait_time)
+        
+        self.requests.append(now)
+
+# Use in CookCountyTaxScraper.__init__:
+self.rate_limiter = RateLimiter(requests_per_minute=20)
+
+# Use before scraping:
+def scrape_tax_data(self, pin):
+    self.rate_limiter.wait_if_needed()
+    # ... rest of scraping code
+```
+
+---
+
+## CACHE MAINTENANCE
+
+Add a cleanup function to remove old cache files:
+
+```python
+# Add to your admin/maintenance script
+
+from utils.cache import TaxDataCache
+
+def cleanup_old_cache():
+    """
+    Remove cache files older than 90 days
+    Run this weekly via cron job
+    """
+    cache = TaxDataCache()
+    removed = cache.clear_expired()
+    print(f"Cleaned up {removed} expired cache files")
+
+# Run weekly:
+# 0 0 * * 0 python cleanup_cache.py
+```
+
+---
+
+## SUMMARY
+
+**What this does:**
+1. User requests report
+2. System checks if tax data is cached (<90 days old)
+3. If cached → return instantly (free, fast)
+4. If not cached → scrape Cook County Treasurer (3-5 seconds)
+5. Cache the result for 90 days
+6. Return tax data to user
+
+**Performance:**
+- Cache hit: <100ms
+- Cache miss: 3-5 seconds
+- Cache hit rate: 40-50% after a few months
+
+**Cost:**
+- $0/month (vs $275/month for batch scraping)
+
+**Files created:**
+- `utils/cache.py` - Cache management
+- `scrapers/tax_scraper.py` - Selenium scraper
+- `scrapers/__init__.py` - Main fetcher interface
+- `data/tax_cache/` - Cache storage directory
+
+**Next steps:**
+1. Install dependencies
+2. Create the files above
+3. Inspect Cook County Treasurer page HTML
+4. Update selectors in `_parse_tax_data()`
+5. Test with a known PIN
+6. Integrate into report generation
+
+---
+
+## CRITICAL REMINDER
+
+**You MUST inspect the actual Cook County Treasurer page and update the HTML selectors in `_parse_tax_data()` method.**
+
+The template code is a starting point. The actual page structure will determine what selectors you need.
+
+Save the debug HTML file when scraping fails, then update your selectors accordingly.

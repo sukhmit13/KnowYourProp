@@ -1,0 +1,99 @@
+# Replit Prompt — Co-parcel block (Sale History) — build to spec
+
+Replace the co-parcel explainer + block in the **Sale History** section. Shows a linked adjacent parcel's chain of title with a plain-language explanation of why it's included. Implement CSS/HTML **verbatim**; check CRITICAL DETAILS.
+
+## 🔴 This is templated text, NOT an LLM takeaway
+The explanation is a **deterministic, code-built sentence** from deed fields — no model call, no tokens. It states a fact from the record (who owns both parcels), so build it in code from the template below. Do not route it through the takeaway generator.
+
+## Tokens / design system
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --takeBorder:#dde1f6; --cautionText:#96600a;
+--disp:"Instrument Serif"; --mono:"JetBrains Mono"; --sans:"Inter";
+```
+
+## Input (from deed / ownership records already in the report)
+```json
+{
+  "co_parcel": { "address": "2825 N Milwaukee Ave", "pin": "13-26-218-093-0000" },
+  "subject_address": "2821 N Milwaukee",
+  "link": { "entity": "DON DEAL 6 LLC", "role": "buyer", "year": 2020 },   // the shared-ownership link
+  "transfers": [
+    { "price": "$525,000", "date": "Feb 10, 2020", "deed_type": "Warranty Deed", "doc": "2004555300",
+      "from": "Caridad Arencibia", "to": "Don Deal 6 LLC" }
+    // …one per recorded transfer on the co-parcel, newest first
+  ]
+}
+```
+
+## CSS (verbatim)
+```css
+.cop{border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.cophd{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:11px}
+.cophd .lab{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:6px;padding:4px 8px}
+.cophd .lab svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+.cophd .addr{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink)}
+.cophd .pin{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.coexplain{font-size:13px;color:var(--ink2);line-height:1.55;margin-bottom:16px}
+.coexplain b{color:var(--ink);font-weight:600}
+.coexplain .note{color:var(--cautionText);font-weight:600}
+
+.xfer{border:1px solid var(--line);border-radius:12px;padding:15px 17px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.xfer + .xfer{margin-top:10px}
+.xfer .lft .price{font-family:var(--disp);font-size:30px;color:var(--ink);line-height:1}
+.xfer .lft .date{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px}
+.xfer .lft .deed{margin-top:12px;display:inline-flex;align-items:center;gap:9px}
+.xfer .lft .deed .tg{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+.xfer .lft .deed .doc{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.xfer .rgt{text-align:right;font-size:12.5px;line-height:1.9}
+.xfer .rgt .rw span{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-right:8px}
+.xfer .rgt .rw b{font-weight:600;color:var(--ink)}
+```
+
+## HTML (verbatim; bind fields)
+```html
+<div class="cop">
+  <div class="cophd">
+    <span class="lab"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><path d="M8 12h8"/></svg>Co-parcel</span>
+    <span class="addr">{co_parcel.address}</span>
+    <span class="pin">PIN {co_parcel.pin}</span>
+  </div>
+
+  <div class="coexplain"><b>Held under the same ownership as the subject.</b> {link.entity} acquired both this parcel and {subject_address} in {link.year}, so the neighbor's chain of title is shown here for a complete ownership picture. <span class="note">Its recorded prices are this parcel's own — read them as the neighbor's, not the subject's value.</span></div>
+
+  <!-- one .xfer per transfer, newest first -->
+  <div class="xfer">
+    <div class="lft">
+      <div class="price">{price}</div>
+      <div class="date">{date}</div>
+      <div class="deed"><span class="tg">{deed_type}</span><span class="doc">Doc #{doc}</span></div>
+    </div>
+    <div class="rgt">
+      <div class="rw"><span>From</span><b>{from}</b></div>
+      <div class="rw"><span>To</span><b>{to}</b></div>
+    </div>
+  </div>
+</div>
+```
+
+## COPY LOGIC (build the `.coexplain` sentence in code)
+Template (fill from `link` + `subject_address`):
+> **Held under the same ownership as the subject.** `{entity}` acquired both this parcel and `{subject_address}` in `{year}`, so the neighbor's chain of title is shown here for a complete ownership picture. *Its recorded prices are this parcel's own — read them as the neighbor's, not the subject's value.*
+
+Rules:
+1. **Name the link entity + year.** Pull `entity`/`year` from the shared-ownership record. If `year` is missing, drop "in {year}" (keep the sentence grammatical).
+2. **The bold lead + the amber caveat clause are fixed.** The middle clause is the only variable part. Never omit the caveat — it's what stops a reader from treating the neighbor's price as the subject's value.
+3. **If the link is by seller/other mechanism**, not a straight purchase, swap the verb: "is the common owner of both this parcel and {subject}" instead of "acquired both … in {year}". Default is the buyer case above.
+4. **Multiple co-parcels:** render one `.cop` block per linked parcel; the explanation is per-parcel with its own link entity.
+
+## LOGIC
+1. **One `.xfer` per recorded transfer**, newest first. Same card shape as the subject's transfers (serif price, mono date, deed tag + doc, From/To on the right).
+2. **Reuse existing transfer flags** if the co-parcel has them (e.g. a "Trust conveyance" / non-arm's-length caution) — apply the same treatment used on the subject's transfers.
+3. **No favorability color.** The block is neutral/context; the only accent is the amber caveat clause (`--cautionText`) and the indigo "Co-parcel" chip. No left rail, no red/green.
+
+## CRITICAL DETAILS
+1. **Templated, not LLM** — the explanation is code-built from deed fields; zero tokens.
+2. **Copy names the shared owner + year, always keeps the amber "neighbor's price, not the subject's value" caveat.**
+3. **"Co-parcel" chip** (indigo, link icon) marks it as related; **no blue/indigo left rail** — plain bordered card.
+4. **Transfer cards match the subject's** styling and inherit the same non-arm's-length flags.
+5. **Serif (`--disp`) ONLY** on the transfer `.price`. Everything else Inter/Mono.

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KnowYourProp — FAQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ffffff; --paper-2:#faf9f6; --ink:#141414; --ink-2:#565651; --muted:#8b8a84;
+    --line:#eae8e2; --line-2:#ddd4c6; --grid:rgba(20,20,20,.05);
+    --indigo:#2b3a9e; --indigo-deep:#1e2a6e; --indigo-soft:#ecedf9; --yellow:#f3b31f; --green:#2f7d3f; --red:#d13b26;
+    --sans:"Inter",-apple-system,sans-serif; --display:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",monospace;
+    --shadow-s:0 1px 2px rgba(20,20,20,.05); --shadow-m:0 6px 20px rgba(20,20,20,.08),0 1px 3px rgba(20,20,20,.05);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:66px 66px;-webkit-mask-image:linear-gradient(180deg,#000,transparent 55%);mask-image:linear-gradient(180deg,#000,transparent 55%)}
+  .page{position:relative;z-index:1}
+  .wrap{max-width:820px;margin:0 auto;padding:0 26px}
+  nav{border-bottom:1px solid var(--line);background:rgba(255,255,255,.85);backdrop-filter:blur(10px);position:sticky;top:0;z-index:40}
+  nav .row{max-width:1180px;margin:0 auto;padding:0 26px;height:64px;display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:20px}
+  .navlinks{display:flex;gap:22px;font-size:14px;color:var(--ink-2)}
+  @media(max-width:760px){.navlinks{display:none}}
+  .signin{font-size:13.5px;font-weight:600;border:1px solid var(--line-2);border-radius:9px;padding:8px 16px}
+  .eyebrow{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);display:inline-flex;align-items:center;gap:9px}
+  .eyebrow .sq{width:9px;height:9px;border-radius:2px;background:var(--indigo)}
+  .hero{padding:60px 0 30px}
+  .hero h1{font-family:var(--display);font-weight:400;font-size:clamp(38px,6vw,60px);line-height:1.02;letter-spacing:-.01em;margin:16px 0 16px}
+  .hero .lede{font-size:19px;color:var(--ink-2);max-width:56ch}
+  .rule{height:1px;background:var(--line);margin:34px 0 26px}
+  .lab{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .lab .sq{width:9px;height:9px;border-radius:2px;background:var(--indigo)}
+  /* accordion */
+  .qa{border:1px solid var(--line);border-radius:13px;background:var(--paper);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow-s)}
+  .qa summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:17px 20px;font-family:var(--display);font-size:20px;font-weight:400;color:var(--ink);line-height:1.15}
+  .qa summary::-webkit-details-marker{display:none}
+  .qa summary .pm{margin-left:auto;flex:none;width:22px;height:22px;position:relative;transition:transform .2s}
+  .qa summary .pm::before,.qa summary .pm::after{content:"";position:absolute;background:var(--indigo);border-radius:2px}
+  .qa summary .pm::before{top:10px;left:3px;right:3px;height:2px}
+  .qa summary .pm::after{left:10px;top:3px;bottom:3px;width:2px;transition:opacity .2s}
+  .qa[open] summary .pm::after{opacity:0}
+  .qa .ans{padding:0 20px 19px 20px;font-size:15px;color:var(--ink-2);line-height:1.6}
+  .qa .ans b{color:var(--ink);font-weight:600}
+  .qa .ans .hl{color:var(--indigo);font-weight:600}
+  .qa .ans .win{color:var(--green);font-weight:600}
+  .qa.trust{border-color:#cdd3f2}
+  .qa.trust summary .num,.qa .num{display:none}
+  /* closer */
+  .closer{background:var(--ink);color:#fff;border-radius:20px;padding:46px 40px;text-align:center;margin-top:8px}
+  .closer h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,4vw,40px);line-height:1.06;color:#fff;margin:0 0 10px}
+  .closer h2 em{font-style:italic;color:var(--yellow)}
+  .closer p{color:rgba(255,255,255,.72);font-size:16.5px;max-width:52ch;margin:0 auto 22px}
+  .closer p b{color:#fff;font-weight:600}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--indigo);color:#fff;font-weight:600;font-size:15px;border-radius:11px;padding:13px 26px;text-decoration:none}
+  .ask{font-size:13.5px;color:var(--muted);margin-top:16px}
+  .ask a{color:var(--ink-2);text-decoration:underline}
+  footer{padding:40px 0 64px;text-align:center}
+  .fine{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="page">
+
+<nav><div class="row">
+  <div class="brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+      <path d="M1.5 5 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0" stroke="#2b3a9e"/><path d="M1.5 10 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0" stroke="#f3b31f"/><path d="M1.5 15 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0" stroke="#2f7d3f"/><path d="M1.5 20 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0" stroke="#d13b26"/>
+    </svg>KnowYourProp
+  </div>
+  <div class="navlinks"><span>How It Works</span><span>About</span><span>FAQ</span></div>
+  <span class="signin">Sign In</span>
+</div></nav>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="eyebrow"><span class="sq"></span>Questions &amp; answers</span>
+    <h1>The honest FAQ.</h1>
+    <p class="lede">What a report can tell you, what it can't, and where our numbers come from. No overpromising — that's the whole point of the product.</p>
+  </div>
+
+  <!-- SECTION: BEFORE YOU OFFER -->
+  <div class="rule"></div>
+  <div class="lab"><span class="sq"></span>Before you make an offer</div>
+
+  <details class="qa" open>
+    <summary>Why get a report before I make an offer?<span class="pm"></span></summary>
+    <div class="ans">Once you're under contract, you've usually put down earnest money (often <b>1–3% of the price — $5,000 to $50,000+</b>) and you're paying an attorney (<b>$1,500–$3,000</b>) to review the deal on a tight clock. Anything you find at that point, you find with your money and your leverage already committed. A report puts the full picture in front of you first — so you can walk, renegotiate, or move ahead knowing exactly what you're buying.</div>
+  </details>
+
+  <details class="qa">
+    <summary>Can I actually use this to negotiate?<span class="pm"></span></summary>
+    <div class="ans">It's one of the most common ways people use it. If the record shows a lien, an open violation, or a use that needs a costly zoning approval, that's a documented reason to adjust your offer — for example, <span class="hl">"there's a recorded lien on this property, so I'm reflecting that in my number."</span> A documented fact is much harder to wave away than a hunch.</div>
+  </details>
+
+  <details class="qa">
+    <summary>What if I find something the seller didn't disclose?<span class="pm"></span></summary>
+    <div class="ans">That's the report doing its job. Found <em>before</em> you offer, an undisclosed lien or violation is just information — you can pass, price it in, or ask the seller to clear it as a condition of the deal. Found <em>after</em> you're under contract, the same issue becomes a fight on a deadline. <span class="win">Earlier is always cheaper.</span></div>
+  </details>
+
+  <!-- SECTION: WHAT'S IN A REPORT -->
+  <div class="rule"></div>
+  <div class="lab"><span class="sq"></span>What's in a report</div>
+
+  <details class="qa">
+    <summary>What does a report actually cover?<span class="pm"></span></summary>
+    <div class="ans">The public record on a Chicago property, pulled into one place: ownership and sale history, recorded liens and mortgages, building-code violations and permit history, property-tax status and trajectory, zoning and what it allows, location-based incentive zones, and neighborhood market and demographic data. Instead of a dozen county and city systems that don't talk to each other, <b>one plain-language brief.</b></div>
+  </details>
+
+  <details class="qa">
+    <summary>Does the report change based on what I want to do?<span class="pm"></span></summary>
+    <div class="ans">Yes — that's the point of the few questions we ask up front. Tell us you're opening a daycare and the report leans into the zoning, special-use, and childcare-demand picture; tell us you're a residential buyer and it focuses there. <b>Same address, a different report, built around your plan.</b> Prefer to skip the questions? You'll still get the full data report.</div>
+  </details>
+
+  <details class="qa">
+    <summary>How current is the data?<span class="pm"></span></summary>
+    <div class="ans">We pull from public sources daily, so most data is current within <b>24–48 hours</b>. A few sources lag by nature — recorded sales and permit filings can trail <b>30–90 days</b> depending on how quickly the county and city post them. When something is time-sensitive, the report flags it.</div>
+  </details>
+
+  <details class="qa">
+    <summary>What areas do you cover?<span class="pm"></span></summary>
+    <div class="ans">All of <b>Chicago and Cook County, Illinois</b> today. It's one of the most layered property markets in the country — dense zoning, TIF districts, landmark rules, dozens of overlapping incentive programs — which is exactly why we started here. More markets are on the way.</div>
+  </details>
+
+  <!-- SECTION: ACCURACY & LIMITS -->
+  <div class="rule"></div>
+  <div class="lab"><span class="sq"></span>Accuracy &amp; limits</div>
+
+  <details class="qa trust">
+    <summary>How accurate is the lien search?<span class="pm"></span></summary>
+    <div class="ans">We search both the property PIN and the owner's name against the Cook County Recorder, which gets us <b>75%+ coverage</b> — and we'd rather tell you that plainly than claim 100%. Some liens are recorded in other venues or are still pending recording when you look. Treat the report as your early-warning system, and <b>always confirm with a title company before closing.</b></div>
+  </details>
+
+  <details class="qa trust">
+    <summary>Is this a replacement for a title company?<span class="pm"></span></summary>
+    <div class="ans">No, and we won't pretend otherwise. We're <b>pre-purchase due diligence</b> — the picture you want before you commit money. You'll still need a title company at closing for title insurance and final lien clearance. Think of us as the step that comes before you ever get there.</div>
+  </details>
+
+  <details class="qa trust">
+    <summary>Can you tell me I'm "definitely eligible" for a tax incentive?<span class="pm"></span></summary>
+    <div class="ans">We tell you which incentive zones a property falls inside — Opportunity Zones, TOD areas, and the like — because that's a matter of public record. Whether you actually <em>qualify</em> depends on your project, your structure, and program rules, so final eligibility is a conversation for a tax advisor. <b>We'll show you where to look; we won't guess for you.</b></div>
+  </details>
+
+  <details class="qa trust">
+    <summary>What if the report has incorrect information?<span class="pm"></span></summary>
+    <div class="ans">Public records aren't perfect — a county system can carry a typo, a stale entry, or a lag before an update posts. We'd much rather you flag it than quietly lose trust in the whole report. If something looks wrong, email <b><a href="mailto:support@knowyourprop.com" style="color:var(--indigo);text-decoration:underline">support@knowyourprop.com</a></b> with the address and what you're seeing, and we'll check it against the source and correct it. For anything time-sensitive, the report also points you to the original source so you can verify before you act.</div>
+  </details>
+
+  <!-- SECTION: PRICING & ACCOUNT -->
+  <div class="rule"></div>
+  <div class="lab"><span class="sq"></span>Pricing &amp; account</div>
+
+  <details class="qa">
+    <summary>How much does a report cost?<span class="pm"></span></summary>
+    <div class="ans">A single property report is <b>$29</b>. If you're running properties regularly — agents, investors, developers — a <b>$99/month</b> subscription gives you unlimited reports, saved history, and multi-property comparison.</div>
+  </details>
+
+  <details class="qa">
+    <summary>Can I get a refund?<span class="pm"></span></summary>
+    <div class="ans">Yes. If the report doesn't give you what you needed, contact us within <b>7 days</b> for a full refund — no questions asked.</div>
+  </details>
+
+  <details class="qa">
+    <summary>Do you offer pricing for agents or developers?<span class="pm"></span></summary>
+    <div class="ans">Yes — the <b>$99/month</b> subscription is built for exactly that: unlimited reports, saved history, and side-by-side comparison across properties. If you're a larger team with heavier volume, reach out and we'll work something out.</div>
+  </details>
+
+  <div class="rule"></div>
+
+  <!-- CLOSER -->
+  <div class="closer">
+    <h2>Still deciding? <em>Run one property.</em></h2>
+    <p>The fastest way to see what the record holds is to look. At <b>$29</b>, it's the cheapest diligence you'll do on a six-figure decision.</p>
+    <a class="btn" href="#">Run your first analysis →</a>
+    <div class="ask">Question we didn't answer, or something look off in a report? <a href="mailto:support@knowyourprop.com">support@knowyourprop.com</a> — a real person reads it.</div>
+  </div>
+
+</div>
+
+<footer><div class="fine">Chicago, IL · Cook County · © 2025 Know Your Property</div></footer>
+
+</div>
+</body>
+</html>

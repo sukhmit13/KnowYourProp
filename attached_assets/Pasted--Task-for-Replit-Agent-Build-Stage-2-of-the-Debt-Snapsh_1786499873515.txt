@@ -1,0 +1,150 @@
+# Task for Replit Agent — Build "Stage 2" of the Debt Snapshot: reconcile → active lien stack
+
+## Goal
+Take the array Stage 1 (`ingestParcel`) produces and turn it into an **active lien stack**: match releases to the mortgages they satisfy, apply modifications so their **new amount / maturity / interest rate supersede** the original recorded terms, set holder on assignments, and assign lien **position by recording order**. Pure deterministic code — **no LLM in this stage.** Build ONLY Stage 2 now (state-resolution polish and the render/takeaway come in 2.5/3).
+
+## Adapt to this app
+Reference code is JavaScript. Port to whatever the backend uses; match existing conventions. It consumes the exact objects Stage 1 already returns (`doc_number`, `doc_type`, `parties`, `amount`, `maturity_date`, `interest_rate`, `modifies`, `references_docs`, `is_blanket`, …). Do NOT re-fetch or re-OCR — Stage 2 only reads Stage 1's output.
+
+## The core rules (why the code looks like it does)
+1. **Position = recording order + release status**, never loan-to-value. Oldest un-released mortgage is 1st.
+2. **A modification is NOT new debt** — it rewrites the *existing* mortgage's terms. Keep the original terms for display ("was 4% → now 3.75%") but the **effective** terms drive everything downstream. Latest modification wins if there are several.
+3. **A release must match a mortgage before it can satisfy it.** Prefer the referenced doc number. Falling back to a fuzzy match is allowed but **conservative and flagged** — a *false* "satisfied" hides a real lien, which is worse than leaving one active. Never satisfy on amount alone.
+4. **An assignment changes the holder, not the debt** — don't create a new lien from it.
+5. **Maturity uses the *effective* (modified) date against *today*** — so a loan whose modification pushed maturity to ~now reads "at maturity," not "current" and not years-past.
+
+## Reference code (port as needed) — `stage2.js`
+```js
+const RELEASE_MATCH_WINDOW_DAYS = 183; // ~6 months fallback window
+const MATURITY_NOW_WINDOW_DAYS  = 90;  // "at maturity" if within this of today
+
+const daysBetween = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
+
+function reconcile(docs) {
+  // ---- build mortgage records; effective terms start = original ----
+  const mortgages = docs.filter(d => d.doc_type === "mortgage").map(m => ({
+    doc_number: m.doc_number,
+    lender: m.parties?.lender ?? null,
+    borrower: m.parties?.borrower ?? null,
+    recording_date: m.recording_date, execution_date: m.execution_date ?? null,
+    pins: m.pins ?? [],
+    original_amount: m.amount ?? null,
+    original_maturity_date: m.maturity_date ?? null,
+    original_interest_rate: m.interest_rate ?? null,
+    index_consideration_amount: m.index_consideration_amount ?? null,
+    effective_amount: m.amount ?? null,
+    effective_maturity_date: m.maturity_date ?? null,
+    effective_interest_rate: m.interest_rate ?? null,
+    is_blanket: m.is_blanket || (m.pins?.length > 1),
+    extraction_confidence: m.extraction_confidence,
+    satisfied: false, satisfied_by: null, satisfy_match: null,
+    modified: false, modifications: [], assigned_to: null,
+    position: null, purchase_money: false,
+    references_docs: m.references_docs ?? [],
+  }));
+  const mById = new Map(mortgages.map(m => [m.doc_number, m]));
+
+  // ---- 1. RELEASES / SATISFACTIONS ----
+  for (const r of docs.filter(d => ["release","satisfaction"].includes(d.doc_type))) {
+    const refs = (r.references_docs ?? []).filter(id => mById.has(id));
+    if (refs.length) {
+      for (const id of refs) { const m = mById.get(id); m.satisfied = true; m.satisfied_by = r.doc_number; m.satisfy_match = "doc-ref"; }
+    } else {
+      // conservative fallback: same lender AND same amount, within the window. Flag it.
+      const cand = mortgages.find(m => !m.satisfied
+        && m.lender && r.parties?.lender && m.lender === r.parties.lender
+        && m.original_amount && r.amount && m.original_amount === r.amount
+        && m.recording_date && r.recording_date
+        && daysBetween(m.recording_date, r.recording_date) <= RELEASE_MATCH_WINDOW_DAYS + 3650);
+      if (cand) { cand.satisfied = true; cand.satisfied_by = r.doc_number; cand.satisfy_match = "inferred — verify"; }
+      else r._unmatched = true;
+    }
+  }
+
+  // ---- 2. MODIFICATIONS supersede terms (NOT new debt) ----
+  for (const mod of docs.filter(d => d.doc_type === "modification")) {
+    const targetId = mod.modifies?.references_doc ?? (mod.references_docs ?? []).find(id => mById.has(id));
+    const m = targetId ? mById.get(targetId) : null;
+    if (!m) { mod._unmatched = true; continue; }
+    const chg = mod.modifies ?? {};
+    m.modified = true;
+    m.modifications.push({ doc_number: mod.doc_number, recording_date: mod.recording_date,
+      new_amount: chg.new_amount ?? null, new_maturity_date: chg.new_maturity_date ?? null,
+      new_interest_rate: chg.new_interest_rate ?? null, summary: chg.summary ?? null });
+  }
+  // apply the LATEST modification's stated values as effective (several mods = newest wins)
+  for (const m of mortgages) {
+    if (!m.modifications.length) continue;
+    m.modifications.sort((a,b) => (a.recording_date||"").localeCompare(b.recording_date||""));
+    for (const mod of m.modifications) {          // walk oldest→newest so latest non-null wins
+      if (mod.new_amount        != null) m.effective_amount        = mod.new_amount;
+      if (mod.new_maturity_date != null) m.effective_maturity_date = mod.new_maturity_date;
+      if (mod.new_interest_rate != null) m.effective_interest_rate = mod.new_interest_rate;
+    }
+  }
+
+  // ---- 3. ASSIGNMENTS: holder changes, debt does not ----
+  for (const a of docs.filter(d => d.doc_type === "assignment")) {
+    const id = (a.references_docs ?? []).find(x => mById.has(x));
+    if (id) mById.get(id).assigned_to = a.parties?.assignee ?? a.parties?.lender ?? null;
+  }
+
+  // ---- 4. ACTIVE STACK + positions (recording order) ----
+  const active = mortgages.filter(m => !m.satisfied)
+    .sort((a,b) => (a.recording_date||"").localeCompare(b.recording_date||""));
+  active.forEach((m,i) => m.position = i + 1);
+  const deeds = docs.filter(d => d.doc_type === "deed");
+  for (const m of active) {                        // purchase-money: mortgage same day as a deed
+    if (deeds.some(d => d.recording_date && d.recording_date === m.recording_date)) m.purchase_money = true;
+  }
+
+  // ---- 5. EFFECTIVE MATURITY vs TODAY (modification supersedes) ----
+  const today = new Date().toISOString().slice(0,10);
+  for (const m of active) {
+    m.maturity_source = (m.modified && m.effective_maturity_date) ? "modification"
+                      : m.original_maturity_date ? "recorded" : "unknown";
+    if (!m.effective_maturity_date) { m.maturity_status = "unknown"; m.past_maturity = null; continue; }
+    const d = daysBetween(m.effective_maturity_date, today);      // >0 => today is after maturity
+    m.past_maturity = d > 0;
+    m.maturity_status = d > MATURITY_NOW_WINDOW_DAYS  ? "past_maturity"
+                      : d < -MATURITY_NOW_WINDOW_DAYS ? "current"
+                      : "at_maturity";                            // within ±90 days of today
+  }
+
+  return {
+    active,
+    satisfied: mortgages.filter(m => m.satisfied),
+    unmatched_releases: docs.filter(d => d._unmatched && ["release","satisfaction"].includes(d.doc_type)).map(d => d.doc_number),
+    unmatched_modifications: docs.filter(d => d._unmatched && d.doc_type === "modification").map(d => d.doc_number),
+    subordinations: docs.filter(d => d.doc_type === "subordination").map(d => d.doc_number),
+    counts: { mortgages: mortgages.length, active: active.length,
+              mods: docs.filter(d => d.doc_type === "modification").length },
+  };
+}
+// export reconcile so Stage 2.5/3 can consume it; log the result for now.
+```
+
+## Requirements
+1. **Consume Stage 1's array directly** — no re-fetch, no LLM. `reconcile(docs)` in, lien stack out.
+2. **Keep original AND effective terms** on each mortgage (display shows the change; downstream uses effective).
+3. **Latest modification wins** when several amend the same mortgage; non-null values only.
+4. **Fuzzy release matches are flagged `"inferred — verify"`, never silent** — and never on amount-only. Prefer doc-ref matches.
+5. **Positions are contiguous 1..n by recording date** over the *active* (un-satisfied) set only.
+6. **Maturity is computed off the effective (modified) date against today**, bucketed `current | at_maturity | past_maturity | unknown`.
+7. Expose `reconcile(docs)`; log the returned object for now (Stage 2.5 consumes it next).
+
+## 🔴 Ship these as tests (each maps to a real rule)
+```
+assert every mortgage with a doc-ref release is satisfied and absent from `active`
+assert a modification sets modified=true and its new values become the effective terms (latest wins)
+assert active positions are exactly 1..n in recording-date order, no gaps
+assert no mortgage is marked satisfied by amount alone (satisfy_match must be "doc-ref" or "inferred — verify")
+assert an assignment changes assigned_to and creates NO new lien
+// 3014 ground-truth regression:
+assert mortgage 1618022008 after reconcile: effective_interest_rate==3.75, effective_maturity_date=="2026-07-05",
+       original_interest_rate==4, modified==true, maturity_status=="at_maturity"   // NOT "current", NOT "past_maturity"
+```
+
+## Done when
+`reconcile(ingestParcel(pin))` on 3014 returns one **active** mortgage (`1618022008`) at **position 1**, lender Albany Bank and Trust Company, N.A., **effective amount $399,000, effective rate 3.75%, effective maturity 2026-07-05, `maturity_status: "at_maturity"`**, with the original 4% / 2021 terms preserved and the modification (`2121004479`) listed under `modifications`. Any release with no doc-ref match is surfaced in `unmatched_releases` rather than silently satisfying a lien.
+```

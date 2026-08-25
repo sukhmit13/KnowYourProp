@@ -604,10 +604,12 @@ async function refreshContractorRankings(): Promise<void> {
   console.log('[data-refresh] Contractor rankings rebuilt');
 }
 
-// ── ZBA attorney index (zba_cases table) ───────────────────────────────────
-// Rebuilt monthly by re-running the build script (scrapes 5 years of ZBA
-// resolution PDFs from chicago.gov). The script does an atomic swap with a
-// sanity floor, so a failed scrape never wipes the existing index.
+// ── ZBA resolution index (zba_cases table) ─────────────────────────────────
+// Rebuilt monthly from every dated resolution PDF currently linked by
+// chicago.gov. Attorney rankings still use a five-year query window, while
+// property zoning history can use the complete indexed timeline. The script
+// does an atomic swap with a sanity floor, so a failed scrape never wipes the
+// existing index.
 const ZBA_REFRESH_DAYS = 30;
 
 // Staleness lives in the DB (zba_index_runs), not a file

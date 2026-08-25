@@ -1,0 +1,274 @@
+# Replit Prompt — Department of Buildings Information — build to spec
+
+Rebuild the **Department of Buildings Information** section (two subsections: **Permit History** + **Building Violations**) to match this spec exactly. Front-end / CSS + markup, PLUS several derived rules (owner-era split, permit effective status, historical-vs-current violations, professional aggregation + citywide matching — see LOGIC). Bind values to real data; strings are placeholders. Implement CSS/HTML **verbatim** and check every CRITICAL DETAIL.
+
+Replit tends to get ~80% of a mockup — the missing 20% is usually: (a) bar/fill elements that need `display:block`, (b) derived logic done in an LLM instead of code, (c) favorability colors applied to the wrong thing. This section has none of the bar-fill issue, but the derived logic is the whole point — do it in code, not the takeaway engine.
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f; --goodSoft:#e9f4ec; --bad:#d13b26;
+--caution:#f0a41c; --cautionText:#96600a;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+
+## CSS (verbatim)
+```css
+.cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+.cardbox[id]{scroll-margin-top:90px}
+
+/* top-level header */
+.sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+.sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+.sh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+.sh .count b{color:var(--good)}
+
+/* takeaway */
+.take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px 17px;margin-bottom:18px}
+.takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+.takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+.taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:13px}
+.cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:9px}
+.cn:last-child{margin-bottom:0}
+.cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.cn.g .dt{background:var(--good)}
+.cn.c .dt{background:var(--caution)}
+.cn.i .dt{background:var(--indigo)}
+.cn b{color:var(--ink);font-weight:600}
+.cn .tx{flex:1}
+.jump{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:9.5px;font-weight:600;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid #dde1f6;border-radius:6px;padding:2px 7px;margin-left:7px;white-space:nowrap;vertical-align:middle}
+.jump svg{width:10px;height:10px;stroke:var(--indigo);fill:none}
+
+/* subsection header */
+.subwrap{margin-top:20px}
+.ssh{display:flex;align-items:center;gap:9px;margin-bottom:15px}
+.ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+.ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.ssh .sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto}
+
+/* mini snapshot line */
+.msnap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 15px;margin-bottom:8px}
+.msnap .big{font-family:var(--disp);font-size:23px;color:var(--ink);line-height:1}
+.msnap b{color:var(--ink);font-weight:600}
+.miniflag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--cautionText);background:#fdf3df;border:1px solid #f0d79a;border-radius:7px;padding:4px 9px;margin-left:auto}
+.miniflag svg{width:12px;height:12px;stroke:var(--cautionText);fill:none}
+.basis{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:16px;padding-left:2px}
+.basis b{color:var(--ink2);font-weight:600}
+
+/* owner-era divider */
+.eradiv{display:flex;align-items:center;gap:11px;margin:16px 0 11px}
+.eradiv .lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+.eradiv .meta{font-family:var(--mono);font-size:9.5px;color:var(--muted);white-space:nowrap}
+.eradiv .ln{flex:1;height:1px;background:var(--line)}
+
+/* permit cards */
+.prow{border:1px solid var(--line);border-radius:12px;padding:15px 16px;margin-bottom:10px;background:var(--card)}
+.ptop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:11px}
+.pscope{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.35;max-width:560px}
+.pdate{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;text-align:right;padding-top:1px}
+.ptags{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:13px}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 11px 4px 9px}
+.st .d{width:7px;height:7px;border-radius:50%;flex:none}
+.st.complete{color:var(--good);background:var(--goodSoft)}.st.complete .d{background:var(--good)}
+.st.expired{color:var(--cautionText);background:#fdf3df;border:1px solid #f0d79a}.st.expired .d{background:var(--caution)}
+.ptype{font-size:11px;font-weight:500;color:var(--indigo);background:var(--indigoSoft);border-radius:7px;padding:4px 11px}
+.pcost{font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--ink);margin-left:auto}
+.pcost span{color:var(--muted);font-weight:400}
+.pmeta{display:grid;grid-template-columns:1fr 1fr;gap:9px 22px;border-top:1px dashed var(--line);padding-top:12px}
+.pm{display:flex;flex-direction:column;gap:2px}
+.pm .k{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.pm .v{font-size:12.5px;color:var(--ink);font-weight:500}
+
+/* era chip (categorical, neutral — NOT favorability) */
+.era{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;border-radius:7px;padding:3px 8px}
+.era .d{width:6px;height:6px;border-radius:50%;flex:none}
+.era.cur{color:var(--indigo);background:var(--indigoSoft)}.era.cur .d{background:var(--indigo)}
+.era.prior{color:var(--ink2);background:var(--paper);border:1px solid var(--line)}.era.prior .d{background:#9aa1b0}
+
+/* professionals — aggregated across building */
+.procard{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:6px}
+.proh{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:6px}
+.proh svg{width:13px;height:13px;stroke:var(--ink2);fill:none}
+.prow2{padding:12px 0;border-top:1px solid var(--line)}
+.prow2:first-of-type{border-top:none}
+.p2top{display:flex;align-items:center;gap:9px}
+.p2role{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:3px 8px;flex:none}
+.p2role.arch{color:var(--indigo);background:var(--indigoSoft)}
+.p2role.gc{color:var(--ink2);background:#eeece6}
+.p2name{font-size:14px;font-weight:600;color:var(--ink);flex:1}
+.p2sub{margin-top:5px;font-size:11.5px;color:var(--ink2);line-height:1.45}
+.p2sub .stat{font-family:var(--mono);font-size:10.5px;color:var(--ink);font-weight:600}
+.p2sub .stat b{color:var(--muted);font-weight:400}
+.p2label{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-right:7px}
+.p2cite{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-family:var(--mono);font-size:10.5px;color:var(--ink2)}
+.p2cite .cw{color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-size:8.5px;font-weight:700}
+.p2cite b{color:var(--ink);font-weight:600}
+.p2cite .vp{margin-left:auto;color:var(--indigo);text-decoration:none;font-weight:600;white-space:nowrap}
+.p2cite .nomatch{color:var(--muted)}
+/* MBE/WBE certification chip — neutral factual attribute, OUTLINE style (not favorability) */
+.cert{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px 7px;flex:none}
+.cert svg{width:10px;height:10px;stroke:var(--ink2);fill:none}
+.profind{font-size:11px;color:var(--muted);margin-top:13px;padding-top:12px;border-top:1px dashed var(--line);line-height:1.5}
+.profind a{color:var(--indigo);text-decoration:none;font-weight:500}
+
+/* violations hero */
+.vhero{display:flex;align-items:center;gap:14px;background:var(--goodSoft);border:1px solid #cfe6d3;border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.vhero .ic{width:38px;height:38px;border-radius:9px;background:#fff;border:1px solid #cfe6d3;display:flex;align-items:center;justify-content:center;flex:none}
+.vhero .ic svg{width:20px;height:20px;stroke:var(--good);fill:none}
+.vhero .big{font-family:var(--disp);font-size:24px;color:var(--good);line-height:1.05}
+.vhero .sub{font-size:12px;color:var(--ink2);margin-top:2px}
+
+/* historical (>5yr) */
+.hist{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.histh{display:flex;align-items:center;gap:11px;padding:14px 16px;background:var(--paper);cursor:pointer}
+.histh .ct{font-family:var(--disp);font-size:21px;color:var(--ink);line-height:1;flex:none}
+.histh .tx{flex:1}
+.histh .tt{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.histh .ds{font-size:11px;color:var(--muted)}
+.histh .chev{width:15px;height:15px;stroke:var(--muted);fill:none;flex:none;transition:transform .2s}
+.histh.open .chev{transform:rotate(180deg)}
+.histbody{padding:4px 16px 8px}
+.vitem{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.vitem .vtx{flex:1}
+.vitem .vsc{font-size:12.5px;color:var(--ink);font-weight:500;line-height:1.4;margin-bottom:3px}
+.vitem .vmeta{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.vt{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;border-radius:999px;padding:3px 9px 3px 7px;white-space:nowrap;margin-top:1px}
+.vt .d{width:6px;height:6px;border-radius:50%;flex:none}
+.vt.complied{color:var(--good);background:var(--goodSoft)}.vt.complied .d{background:var(--good)}
+.vt.stale{color:var(--ink2);background:var(--paper);border:1px solid var(--line)}.vt.stale .d{background:#9aa1b0}
+
+.caveat{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--ink2);line-height:1.5;margin-top:16px;padding:11px 14px;background:var(--card);border:1px solid #ecd49a;border-left:3px solid #e0a92e;border-radius:10px}
+.caveat svg{width:14px;height:14px;stroke:var(--cautionText);fill:none;flex:none;margin-top:1px}
+.caveat b{color:var(--cautionText);font-weight:700}
+```
+
+## HTML (verbatim structure; bind placeholders, loop the repeated blocks)
+
+The full reference markup is the delivered `report-dob.html`. Structure = one `.cardbox` containing, in order: `.sh` header → `.take` takeaway → `#permits` subsection → `#violations` subsection. Key repeated blocks and their bindings:
+
+**Header count chip:** `{PERMIT_COUNT} permits · <b>{OPEN_VIOLATION_COUNT} open violations</b>` — the `<b>` (green) wraps the violations count only. Show "0 open violations" in green when clean.
+
+**Permit card** (loop per permit, inside its era group):
+```html
+<div class="prow">
+  <div class="ptop">
+    <div class="pscope">{PERMIT_SCOPE}</div>
+    <div class="pdate">Issued<br>{ISSUE_DATE}</div>
+  </div>
+  <div class="ptags">
+    <span class="st {STATUS_CLASS}"><span class="d"></span>{STATUS_LABEL}</span>
+    <span class="era {ERA_CLASS}"><span class="d"></span>{ERA_LABEL}</span>
+    <span class="ptype">{PERMIT_TYPE}</span>
+    <span class="pcost">{COST} <span>declared</span></span>
+  </div>
+  <div class="pmeta">
+    <div class="pm"><span class="k">Permit no.</span><span class="v">{PERMIT_NO}</span></div>
+    <div class="pm"><span class="k">Owner of record</span><span class="v">{OWNER}</span></div>
+    <div class="pm"><span class="k">Architect</span><span class="v">{ARCHITECT}</span></div>
+    <div class="pm"><span class="k">General contractor</span><span class="v">{GC}</span></div>
+  </div>
+</div>
+```
+
+**Era divider** (one before each non-empty era group):
+```html
+<div class="eradiv"><span class="lbl">{ERA_HEADING}</span><span class="meta">{ERA_BASIS} · {N} permits · {ERA_TOTAL}</span><span class="ln"></span></div>
+```
+
+**Professional row** (loop per unique firm; citywide block conditional — see LOGIC):
+```html
+<div class="prow2">
+  <div class="p2top"><span class="p2role {arch|gc}">{ROLE_LABEL}</span><span class="p2name">{FIRM}</span>{CERT_CHIPS}<span class="era {ERA_CLASS}"><span class="d"></span>{ERA_LABEL}</span></div>
+  <div class="p2sub"><span class="p2label">Here</span><span class="stat">{N} permit(s) · {VALUE} · {latest YEAR}</span> &nbsp;—&nbsp; {WHAT_THEY_DID_HERE}.</div>
+  <!-- citywide line ONLY when confidently matched -->
+  <div class="p2cite"><span class="cw">Citywide · 5 yr</span> <b>{CW_PERMITS} permits{ · $CW_VALUE }</b> · last active {CW_YEAR} · {CW_MIX} <a class="vp" href="{PROFILE_URL}">View profile →</a></div>
+  <!-- if NOT matched, replace the .p2cite line with: -->
+  <div class="p2cite"><span class="nomatch">No confident citywide match — showing this property's record only.</span></div>
+</div>
+```
+`{CERT_CHIPS}` = zero or more, only when the firm confidently matches the city certified-firm directory. One chip per certification held (a firm can be both MBE and WBE → two chips):
+```html
+<span class="cert"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 7.8 8 9 4.6-1.2 8-4 8-9V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg>{MBE|WBE|DBE}</span>
+```
+
+**Violation item** (loop inside `.histbody`):
+```html
+<div class="vitem">
+  <span class="vt {complied|stale}"><span class="d"></span>{VIO_STATUS}</span>
+  <div class="vtx"><div class="vsc">{VIO_DESC}</div><div class="vmeta">{VIO_META}</div></div>
+</div>
+```
+
+## LOGIC (derived — compute in the backend / code, NOT the takeaway engine)
+
+### 1. Owner-era split (the key derivation)
+- Input: `last_sale_date` (most recent recorded sale) and each record's date.
+- For each **permit**: `era = (permit.issue_date >= last_sale_date) ? "current" : "prior"`. Same rule for each **violation** (by issue date).
+- Era chip: current → `era cur`, label "Current owner"; prior → `era prior`, label "Prior owner". **This is categorical, not favorability — never color it green/red.**
+- Group permits under two dividers: **"Under current ownership"** (meta: `since {sale month/yr}`) then **"Under prior ownership"** (meta: `before {sale month/yr}`). Each divider's meta shows that group's permit count + summed declared value.
+- **Edge case — sale predates all permits:** the current-ownership group is empty. Render the current divider followed by a single muted line `No permits pulled under current ownership.` (don't render an empty group with no rows). Symmetric case (all permits current) → omit the prior group entirely.
+- **Edge case — no sale date on record:** skip the era split entirely (one ungrouped, newest-first list), drop all era chips, and change `.basis` to note the split couldn't be computed. Never guess an era without a sale date.
+
+### 2. Permit effective status
+- `complete` (green `st complete`, "Complete") when the permit is closed/finaled.
+- `expired` (amber `st expired`, "Expired · not closed") when the permit lapsed without a recorded final/close-out. **Amber caution, NOT red** — an open permit is a loose end to verify, not a serious defect.
+- Header mini-flag `{N} permit not closed out` appears only when ≥1 permit is `expired`; hide it otherwise.
+
+### 3. Permit scope wording
+- `{PERMIT_SCOPE}` may echo the permit's own description field **verbatim** (city record). But any text WE author (takeaway, professional summaries) must NOT assert a unit count — describe at the building level ("entire building"). Unit count is owned solely by the Parcel section.
+
+### 4. Professional data source & aggregation
+- **Source:** architect and contractor names come from the **city/county permit API**, per permit. This is authoritative for who worked on THIS property (the "Here" line binds directly from it). The citywide stats and MBE/WBE status are SEPARATE joins layered on top (see §5–§6).
+- **List EVERY professional on the building — no top-N, no truncation.** The purpose is to give the user a complete starting point, not a ranked shortlist. If a permit lists 6 firms, all 6 appear.
+- **Role-agnostic.** Support any professional role the permit data carries — architect, general contractor, and trades (electrical, plumbing, mason, etc.). Role-tag color = **design professional (architect/engineer) → `p2role arch` (indigo); any contractor/trade → `p2role gc` (warm grey)**; the specific role goes in the label text (`{ROLE_LABEL}`, e.g. "Electrical contractor", "Mason").
+- **Deduplicate by firm**, keyed on license number when the permit record includes it, else normalized name. One row per firm, aggregating: permit count on this property, summed declared value, most-recent year, short scope phrase.
+- **Sort: each firm's most-recent permit year, descending.** Tie-break design-professional-before-contractor.
+- Era chip on each firm = the era of their most-recent permit here.
+- Every firm's "Here" line ALWAYS renders (it's straight from the permit API); only the `.p2cite` citywide line and the `.cert` chips are conditional on a confident match.
+
+### 5. Match key (governs BOTH citywide stats and MBE/WBE)
+- **Preferred join = IL license number.** Use it whenever the permit record exposes it.
+- **If the permit API returns only a name string** (no license number), fall back to a **normalized-name match with a confidence threshold**. Below threshold = treat as NO match: suppress the citywide `.p2cite` stats (show the `.nomatch` line) AND omit the `.cert` chips. Never attribute another firm's stats or certification on a weak name match.
+- A firm can therefore appear with its property record only, no enrichment — that's the correct, safe outcome, not a bug.
+
+### 6. MBE/WBE certification
+- **Source:** the City of Chicago certified-firm directory (MBE = Minority Business Enterprise, WBE = Woman Business Enterprise; DBE if present). Join by the §5 match key.
+- Render a `.cert` chip per certification the firm holds (both → two chips), only on a **confident** match.
+- **Neutral factual attribute** — outline chip, `--ink2` text, no favorability color. It is NOT an endorsement and NOT a ranking input.
+- **Absence of a chip ≠ "not certified."** It may just mean no confident directory match. The footer states this; never render a "not certified" negative.
+
+### 7. Citywide track record (the enrichment — handle carefully)
+- Pull from the same dataset behind the Chicago Discovery leaderboard, but **match on IL license number** (not name). Only render the citywide `.p2cite` stats when the match is **confident**; otherwise render the `.nomatch` fallback line.
+- Citywide line is **factual activity only**: permit count (5 yr), optional total $ value, last-active year, dominant project type. **NEVER** import ranking language ("#1", "top", "best"), stars, or a quality score onto the property card. Volume ≠ quality.
+- Do **not** surface "self-certified" as a positive on the card; it's mentioned once, neutrally, in the footer only.
+- Apply to **both** current- and prior-owner firms (the prior-owner rehab team is the highest-value use of this context).
+- `{PROFILE_URL}` → the firm's Chicago Discovery profile page.
+- Stamp the citywide data with an "as of" date server-side; if the leaderboard dataset is stale beyond your refresh window, prefer the `.nomatch` fallback over showing outdated counts.
+- Footer `.profind` is fixed copy (volume≠quality + match-by-license + verify) — always show it when any citywide line renders.
+
+### 8. Violations: current vs. historical
+- **Current window = last 5 years** from today. Count `open` violations in that window → drives the green hero `{OPEN_VIOLATION_COUNT} open violations` and header chip.
+- Records **older than 5 years** go into the collapsible `.hist` block (default **collapsed**), header `{HISTORICAL_COUNT}` + one-line description.
+- Violation item status:
+  - `complied` (green) when resolved/complied.
+  - `stale` (neutral grey, label "Open · {year}") when the record shows open BUT is >5 years old / no disposition recorded. **Never red.** A stale unresolved record from a prior era is not a current problem.
+- The amber `.caveat` renders only when ≥1 historical record is `stale` (still shows "open"). If every historical record complied, drop the caveat.
+- **A genuinely current, serious open violation (recent, unresolved) is the one case that may use red** (`--bad`) — that scenario isn't in this property's data but the component should support it: a recent open violation is a real problem and should read as one.
+
+## CRITICAL DETAILS (check ALL)
+1. **Owner-era split is DERIVED from last-sale-date vs. record dates** — computed in code, applied to both permits and violations. Two labeled dividers, era chip on every permit + professional row. Handle all three edge cases (empty current group / empty prior group / no sale date).
+2. **Era chips are neutral/categorical** — indigo for current, grey for prior. NEVER green or red. Era is not good-or-bad.
+3. **Permit status colors:** Complete = green; Expired/not-closed = **amber caution, not red**. Header mini-flag only when ≥1 open permit.
+4. **List EVERY professional — no top-N/truncation.** Aggregated & deduped by firm (license-number key), **sorted most-recent-first**, tie-break design-professional-before-contractor. One row per firm, not one per permit. Role-agnostic: architect/engineer → indigo tag, any contractor/trade → grey tag, specific role in the label. Architect/GC names come from the **city/county permit API** (authoritative for on-property work).
+5. **One match key (IL license #) governs BOTH citywide stats AND MBE/WBE.** If the permit API gives only a name, use normalized-name matching with a confidence threshold; below threshold, suppress BOTH enrichments (no stats, no cert chips) — never mis-attribute on a weak match.
+6. **Citywide stats are activity, not a rating** — no "#1"/"top"/stars/scores on the property card; render only on confident match, else the `.nomatch` fallback. Self-cert stays out of the card body (footer only).
+7. **MBE/WBE is a neutral OUTLINE chip** (`.cert`, `--ink2`, no favorability color), rendered only on a confident directory match. A blank is NOT "not certified" — never render a negative. Footer states this.
+8. **"Here" vs "Citywide" are clearly labeled** — the `.p2label` "HERE" prefix on the property line, the `CITYWIDE · 5 YR` prefix on the enrichment line, separated by a dashed top border.
+9. **Violations "0 open" hero is green**, based on the **last-5-years** window only. Older records live in the **collapsed** `.hist` accordion.
+10. **Stale historical "Open" records are neutral grey, not red**, and trigger the amber `.caveat`. Red (`--bad`) is reserved for a genuinely recent, unresolved violation.
+11. **No unit-count claims in our own copy** — building-level language only; permit description fields may be echoed verbatim.
+12. **Header uses the filled indigo SQUARE** (top-level section); subsections use the **outline icons** (`.hic`, 17px): building icon for Permit History, alert-triangle for Building Violations.
+13. **Serif (`--disp`) only** on: takeaway headline, the big numbers (`.msnap .big`, `.histh .ct`, `.vhero .big`). Everything else Inter; all labels JetBrains Mono.
+14. **Takeaway is hardcoded/derived, not the LLM engine.** The "value realized in the prior sale" bullet fires ONLY when a substantial permit (declared value over your threshold) falls in the **prior-owner** era. If the big work is current-owner, flip the framing to "the seller's own investment," never "already priced in."
+15. Jump chips (`.jump`) link to `#permits` / `#violations`; both subsection `.cardbox`/`.subwrap` wrappers carry the `id` and `scroll-margin-top:90px`.

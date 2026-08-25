@@ -1,0 +1,72 @@
+# Replit Prompt — Schools at a Glance cards (updated)
+
+Restyle the **Schools at a Glance** summary cards to match the site design language (same pattern as the Transit at-a-glance cards). Front-end / CSS + markup, except two computed values noted below (the verdict tier and the takeaway) — do NOT change the schools data, distances, or ratings source. Placeholders shown; keep everything bound to real data.
+
+## Tokens (reuse existing if present)
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb;
+--good:#2f7d3f; --caution:#f0a41c; --cautionText:#96600a; --bad:#d13b26; --badText:#b3311f;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+
+## Cards — Elementary (K–8) and High School
+Two cards (NOT three — in Chicago most elementaries are K–8, so a separate "Middle" card just repeats the same K–8 school; render only levels that have their own data). Card header matches the Transit mode cards: **indigo-square icon + mono label**, with the verdict badge on the right.
+```css
+.glabel{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:13px}
+.glabel .sc{font-weight:500;color:var(--muted);letter-spacing:0;text-transform:none}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lvl{border:1px solid var(--line);border-radius:13px;padding:16px 18px;background:var(--card);box-shadow:0 1px 3px rgba(20,20,20,.04)}
+.lvltop{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.lvltop .ic{width:26px;height:26px;border-radius:7px;background:var(--indigoSoft);display:flex;align-items:center;justify-content:center;flex:none}
+.lvltop .ic svg{width:15px;height:15px;stroke:var(--indigo);fill:none}   /* graduation-cap icon */
+.lvltop .nm{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+.lvltop .badge{margin-left:auto}
+.metric{display:flex;align-items:baseline;gap:7px;margin-bottom:3px}
+.metric .big{font-family:var(--disp);font-size:30px;line-height:1;color:var(--ink)}
+.metric .u{font-size:12px;color:var(--ink2)}
+.closest{font-size:11.5px;color:var(--muted);margin-bottom:14px} .closest b{color:var(--ink2);font-weight:600}
+.assigned{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.assigned .al{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.assigned .an{font-size:13px;font-weight:600;color:var(--ink);line-height:1.25}
+.assigned .am{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--ink2);margin-top:6px}
+.assigned .am .rd{width:7px;height:7px;border-radius:50%;flex:none}
+.am .lvtxt{font-weight:600}
+```
+Labels: "Elementary · K–8" and "High School" (not just "High").
+
+## Verdict badge — favorability colored (shared component)
+```css
+.badge{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 9px;background:var(--card);border:1px solid;white-space:nowrap}
+.badge .d{width:7px;height:7px;border-radius:50%;flex:none}
+.badge.good{color:var(--good);border-color:#bcdcc4} .badge.good .d{background:var(--good)}
+.badge.mixed{color:var(--cautionText);border-color:#ecd49a} .badge.mixed .d{background:var(--caution)}
+.badge.limited{color:var(--badText);border-color:#eab5ac} .badge.limited .d{background:var(--bad)}
+```
+
+## CPS level → favorability color (fixes the red-for-Level-2 issue)
+The assigned school's level dot must map to the SAME favorability tiers used site-wide — NOT red for everything below Level 1. Red is reserved for genuinely bad. Map:
+- **Level 1+ / Level 1 → good** (green): `rd` green, `am` text green
+- **Level 2+ → neutral** (grey `#9aa1b0`)
+- **Level 2 → caution** (marigold `--caution`, text `--cautionText`)
+- **Level 3 → bad** (red `--bad`, text `--badText`)
+```css
+.rd.lv-good{background:var(--good)} .rd.lv-neu{background:#9aa1b0} .rd.lv-cau{background:var(--caution)} .rd.lv-bad{background:var(--bad)}
+.am.good .lvtxt{color:var(--good)} .am.neu .lvtxt{color:var(--ink2)} .am.cau .lvtxt{color:var(--cautionText)} .am.bad .lvtxt{color:var(--badText)}
+```
+Drive the class from the school's actual level. A Level 2 school is below-average, not failing — do not color it red.
+
+## ⚠️ The verdict tier is a computed rule — and it must weigh the ASSIGNED school
+"Strong / Mixed / Limited" is NOT hand-set. Compute it from the nearby schools' levels AND the assigned (boundary) school, and weigh the assigned school heavily — that's the school a family gets by default, so it's the most consequential fact.
+- Do not return **Strong** when the assigned school is Level 2 or below, even if good options exist via open enrollment — that contradicts itself. In the example, High School is **Mixed** because the boundary school (Roberto Clemente) is Level 2, despite a Level-1 option nearby.
+- Suggested: Strong = assigned school Level 1+/1 AND multiple strong nearby options; Mixed = decent options but assigned school is middling (Level 2+/2), or a split field; Limited = assigned Level 3 and few strong options. Pick your exact thresholds, but the assigned school must be able to pull the verdict down.
+
+## Takeaway (reuse the existing engine)
+If you add a Schools takeaway above these cards, use the same `generateTakeaway("schools", schoolsData)` engine (cached, render stored object, hide if null). The cards, badges, counts, and level dots here are all deterministic from data — only a prose takeaway goes through the model. Pass pre-computed favorability signals (each level's verdict tier, the assigned school's level, distances) so the model doesn't guess.
+
+## Consistency checklist
+- Card header = indigo-square icon + mono label + verdict badge (matches Transit at-a-glance).
+- Two cards max (Elementary K–8, High School); render only levels with their own data.
+- Level dots colored by favorability tier, never blanket red.
+- Verdict tier computed and weighs the assigned school; never "Strong" over a Level 2 boundary school.
+- Serif count number; paper "Assigned · Boundary" sub-box; nothing black, nothing beige.

@@ -15,6 +15,7 @@ import { X, MapPin, Building2, Layers, CheckCircle2, XCircle, AlertTriangle, Dol
 import { ProjectTypeCombobox } from "@/components/ProjectTypeCombobox";
 import { motion } from "framer-motion";
 import { formatAddress } from "@/lib/formatAddress";
+import { groupLicenseEstablishments, titleCaseBusiness } from "@shared/businessLicenses";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -98,22 +99,22 @@ const ALL_SECTIONS: SectionConfig[] = [
   { id: 'location', label: 'Location', isDefault: true, alwaysAvailable: true, group: 'Location & Zoning' },
   { id: 'zoning', label: 'Zoning / FAR / Height', isDefault: true, alwaysAvailable: true, group: 'Location & Zoning' },
   { id: 'zbaReps', label: 'Zoning Change History', isDefault: false, alwaysAvailable: true, group: 'Location & Zoning' },
-  { id: 'childcareAccess', label: 'Childcare Access', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Type Analysis' },
-  { id: 'childcareEnhanced', label: 'Childcare Demographics', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Type Analysis' },
-  { id: 'daycareRatios', label: 'Day Care Needs Estimator', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Type Analysis' },
-  { id: 'siteSpecificDaycare', label: 'Site Specific Day Care', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Type Analysis' },
-  { id: 'quickCashflow', label: 'Quick Cashflow', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Type Analysis' },
-  { id: 'nearbyDaycares', label: 'Nearby Day Cares', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Type Analysis' },
-  { id: 'groceryAccess', label: 'Grocery Access', isDefault: false, requiresProjectType: ['Grocery Store'], group: 'Project Type Analysis' },
-  { id: 'vehicleOwnership', label: 'Auto Dependency', isDefault: false, requiresProjectType: ['Auto Service', 'Gas Station', 'EV Charging Station'], group: 'Project Type Analysis' },
-  { id: 'seniorPopulation', label: 'Senior Population', isDefault: false, alwaysAvailable: true, group: 'Project Type Analysis' },
-  { id: 'gasStation', label: 'Nearby Filling Stations', isDefault: false, requiresProjectType: ['Gas Station'], group: 'Project Type Analysis' },
-  { id: 'evMarket', label: 'EV Registration Trends', isDefault: false, requiresProjectType: ['EV Charging Station'], group: 'Project Type Analysis' },
-  { id: 'hotels', label: 'Nearby Hotels', isDefault: false, requiresProjectType: ['Hotel'], group: 'Project Type Analysis' },
-  { id: 'restaurants', label: 'Nearby Restaurants', isDefault: false, requiresProjectType: ['Restaurant'], group: 'Project Type Analysis' },
-  { id: 'coffeeShops', label: 'Nearby Coffee Shops', isDefault: false, requiresProjectType: ['Coffee Shop / Cafe'], group: 'Project Type Analysis' },
-  { id: 'bars', label: 'Nearby Bars', isDefault: false, requiresProjectType: ['Bar / Tavern'], group: 'Project Type Analysis' },
-  { id: 'cannabisMarket', label: 'Cannabis Dispensary Market', isDefault: false, requiresProjectType: ['Cannabis Dispensary'], group: 'Project Type Analysis' },
+  { id: 'childcareAccess', label: 'Childcare Access', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Use Analysis' },
+  { id: 'childcareEnhanced', label: 'Childcare Demographics', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Use Analysis' },
+  { id: 'daycareRatios', label: 'Day Care Needs Estimator', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Use Analysis' },
+  { id: 'siteSpecificDaycare', label: 'Site Specific Day Care', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Use Analysis' },
+  { id: 'quickCashflow', label: 'Quick Cashflow', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Use Analysis' },
+  { id: 'nearbyDaycares', label: 'Nearby Day Cares', isDefault: false, requiresProjectType: ['Day Care Center', 'School (Private)'], group: 'Project Use Analysis' },
+  { id: 'groceryAccess', label: 'Grocery Access', isDefault: false, requiresProjectType: ['Grocery Store'], group: 'Project Use Analysis' },
+  { id: 'vehicleOwnership', label: 'Auto Dependency', isDefault: false, requiresProjectType: ['Auto Service', 'Gas Station', 'EV Charging Station'], group: 'Project Use Analysis' },
+  { id: 'seniorPopulation', label: 'Senior Population', isDefault: false, alwaysAvailable: true, group: 'Project Use Analysis' },
+  { id: 'gasStation', label: 'Nearby Filling Stations', isDefault: false, requiresProjectType: ['Gas Station'], group: 'Project Use Analysis' },
+  { id: 'evMarket', label: 'EV Registration Trends', isDefault: false, requiresProjectType: ['EV Charging Station'], group: 'Project Use Analysis' },
+  { id: 'hotels', label: 'Nearby Hotels', isDefault: false, requiresProjectType: ['Hotel'], group: 'Project Use Analysis' },
+  { id: 'restaurants', label: 'Nearby Restaurants', isDefault: false, requiresProjectType: ['Restaurant'], group: 'Project Use Analysis' },
+  { id: 'coffeeShops', label: 'Nearby Coffee Shops', isDefault: false, requiresProjectType: ['Coffee Shop / Cafe'], group: 'Project Use Analysis' },
+  { id: 'bars', label: 'Nearby Bars', isDefault: false, requiresProjectType: ['Bar / Tavern'], group: 'Project Use Analysis' },
+  { id: 'cannabisMarket', label: 'Cannabis Dispensary Market', isDefault: false, requiresProjectType: ['Cannabis Dispensary'], group: 'Project Use Analysis' },
   { id: 'incentives', label: 'Eligible Incentives', isDefault: true, alwaysAvailable: true, group: 'Location Based Incentives' },
   { id: 'todStatus', label: 'TOD Status', isDefault: false, alwaysAvailable: true, group: 'Location Based Incentives' },
   { id: 'sbifDetail', label: 'SBIF Eligibility', isDefault: false, alwaysAvailable: true, group: 'Location Based Incentives' },
@@ -250,7 +251,7 @@ function PropertyColumn({ runId, address, label, initialProjectType, onRemove, o
     return result.length > 0 ? result : undefined;
   })();
   const { data: ctaBusRidershipData, isLoading: isLoadingBusRidership } = useCtaBusRidership(nearbyBusRouteNumbers);
-  const { data: newConstructionData, isLoading: isLoadingNewConstruction } = useNewConstruction(facts?.communityArea || undefined, facts?.zipCode || undefined);
+  const { data: newConstructionData, isLoading: isLoadingNewConstruction } = useNewConstruction(facts?.lat, facts?.lon, facts?.communityArea || undefined);
 
   const isEvStation = selectedProjectType === 'EV Charging Station';
   const { data: evRegData, isLoading: isLoadingEvReg } = useEVRegistrations(isEvStation ? facts?.zipCode : undefined, isEvStation);
@@ -458,7 +459,7 @@ function PropertyColumn({ runId, address, label, initialProjectType, onRemove, o
       </div>
       
       <div className="p-4 border-b border-[#eae8e2]">
-        <label className="font-jbmono text-[10px] font-bold uppercase tracking-widest text-[#8b8a84] mb-2 block">Project Type</label>
+        <label className="font-jbmono text-[10px] font-bold uppercase tracking-widest text-[#8b8a84] mb-2 block">Project Use</label>
         <div className="flex items-center gap-1">
           {businessUsesData ? (
             <ProjectTypeCombobox
@@ -466,7 +467,7 @@ function PropertyColumn({ runId, address, label, initialProjectType, onRemove, o
               categories={businessUsesData.categories}
               value={selectedProjectType}
               onValueChange={handleProjectTypeChange}
-              placeholder="Select project type..."
+              placeholder="Select project use..."
             />
           ) : (
             <Skeleton className="h-9 w-full" />
@@ -552,7 +553,7 @@ function PropertyColumn({ runId, address, label, initialProjectType, onRemove, o
                   'bg-red-50 border-red-300'
                 }`}>
                   {!selectedProjectType ? (
-                    <span className="text-xs text-muted-foreground">Select project type</span>
+                    <span className="text-xs text-muted-foreground">Select project use</span>
                   ) : compatibility?.permission === 'permitted' ? (
                     <>
                       <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
@@ -1321,34 +1322,19 @@ function PropertyColumn({ runId, address, label, initialProjectType, onRemove, o
                   New Construction Activity
                 </h4>
                 {isLoadingNewConstruction ? <Skeleton className="h-10 w-full" /> : newConstructionData ? (() => {
-                  const ca = newConstructionData.communityArea;
-                  const zc = newConstructionData.zipCode;
+                  const stats = newConstructionData.subject;
                   return (
                     <div className="bg-white border border-[#eae8e2] rounded-lg p-2 text-xs space-y-2">
-                      {ca && (
+                      {stats && (
                         <div className="space-y-1">
-                          <div className="font-medium text-foreground">{newConstructionData.communityAreaName}</div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Total Permits:</span><span className="font-medium">{ca.totalPermits}</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Single Family:</span><span className="font-medium text-foreground">{ca.byCategory.singleFamily.count}</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Multifamily:</span><span className="font-medium text-foreground">{ca.byCategory.multifamily.count}</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Commercial:</span><span className="font-medium text-muted-foreground">{ca.byCategory.commercial.count}</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Trend:</span>
-                            <span className={`font-medium ${ca.trendDirection === 'increasing' ? 'text-foreground' : ca.trendDirection === 'decreasing' ? 'text-muted-foreground' : ''}`}>
-                              {ca.trendDirection === 'increasing' ? 'Increasing' : ca.trendDirection === 'decreasing' ? 'Decreasing' : 'Stable'}
-                            </span>
-                          </div>
+                          <div className="font-medium text-foreground">Within 1 mile</div>
+                          <div className="flex justify-between"><span className="text-muted-foreground">Total Permits:</span><span className="font-medium">{stats.totalPermits}</span></div>
+                          <div className="flex justify-between"><span className="text-muted-foreground">Single Family:</span><span className="font-medium text-foreground">{stats.byCategory.singleFamily}</span></div>
+                          <div className="flex justify-between"><span className="text-muted-foreground">Multifamily:</span><span className="font-medium text-foreground">{stats.byCategory.multifamily}</span></div>
+                          <div className="flex justify-between"><span className="text-muted-foreground">Commercial:</span><span className="font-medium text-muted-foreground">{stats.byCategory.commercial}</span></div>
                         </div>
                       )}
-                      {zc && (
-                        <div className="space-y-1 pt-1 border-t border-[#eae8e2]">
-                          <div className="font-medium text-foreground">ZIP {newConstructionData.zip}</div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Total Permits:</span><span className="font-medium">{zc.totalPermits}</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Single Family:</span><span className="font-medium text-foreground">{zc.byCategory.singleFamily.count}</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Multifamily:</span><span className="font-medium text-foreground">{zc.byCategory.multifamily.count}</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Commercial:</span><span className="font-medium text-muted-foreground">{zc.byCategory.commercial.count}</span></div>
-                        </div>
-                      )}
-                      {!ca && !zc && <span className="text-muted-foreground">No data available</span>}
+                      {!stats && <span className="text-muted-foreground">No data available</span>}
                     </div>
                   );
                 })() : (
@@ -1930,9 +1916,6 @@ function PropertyColumn({ runId, address, label, initialProjectType, onRemove, o
                       {pData.foreclosures && (
                         <div className="flex justify-between gap-1"><span className="text-muted-foreground">Foreclosures (0.5 mi, 5yr)</span><span className={`font-medium shrink-0 ${pData.foreclosures.countInHalfMilePast5Years > 20 ? 'text-muted-foreground' : pData.foreclosures.countInHalfMilePast5Years > 5 ? 'text-muted-foreground' : ''}`}>{pData.foreclosures.countInHalfMilePast5Years}</span></div>
                       )}
-                      {pData.newConstruction && (
-                        <div className="flex justify-between gap-1"><span className="text-muted-foreground">New Construction (0.5 mi, 5yr)</span><span className="font-medium shrink-0 text-foreground">{pData.newConstruction.countInHalfMilePast5Years}</span></div>
-                      )}
                       {pData.lakeMichigan && (
                         <div className="flex justify-between gap-1"><span className="text-muted-foreground">Lake Michigan</span><span className="font-medium shrink-0">{(pData.lakeMichigan.distanceFt / 5280).toFixed(2)} mi</span></div>
                       )}
@@ -2163,12 +2146,12 @@ function PropertyColumn({ runId, address, label, initialProjectType, onRemove, o
                 {isLoadingBusinessLicenses ? <Skeleton className="h-10 w-full" /> : nearbyBusinessLicensesData?.licenses?.length > 0 ? (
                   <div className="bg-white border border-[#eae8e2] rounded-lg p-2 text-xs space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Recent Licenses:</span>
-                      <span className="font-medium">{nearbyBusinessLicensesData.licenses.length}</span>
+                      <span className="text-muted-foreground">New Businesses:</span>
+                      <span className="font-medium">{nearbyBusinessLicensesData.totalCount}</span>
                     </div>
-                    {nearbyBusinessLicensesData.licenses.slice(0, 3).map((l: any, i: number) => (
+                    {groupLicenseEstablishments(nearbyBusinessLicensesData.licenses).slice(0, 3).map((l, i: number) => (
                       <div key={i} className="flex justify-between gap-1 text-muted-foreground">
-                        <span className="truncate">{l.doingBusinessAsName || l.legalName || 'Business'}</span>
+                        <span className="truncate">{titleCaseBusiness(l.name) || 'Business'}</span>
                         <span className="shrink-0">{l.distanceMiles?.toFixed(2)} mi</span>
                       </div>
                     ))}

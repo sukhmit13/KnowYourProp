@@ -1,0 +1,1226 @@
+{
+  "byWins": [
+    {
+      "rank": 1,
+      "name": "RICHARD SHAPIRO",
+      "firm": "RICHARD SHAPIRO, ATTORNEY",
+      "wins": 70294,
+      "totalReduction": 284031529,
+      "totalAppeals": 70294,
+      "winRate": 0,
+      "avgReduction": 4041
+    },
+    {
+      "rank": 2,
+      "name": "TIMOTHY C JACOBS",
+      "firm": "KOVITZ SHIFRIN NESBIT",
+      "wins": 54619,
+      "totalReduction": 57966937,
+      "totalAppeals": 54619,
+      "winRate": 0,
+      "avgReduction": 1061
+    },
+    {
+      "rank": 3,
+      "name": "MICHAEL J. ELLIOTT",
+      "firm": "ELLIOTT & ASSOCIATES",
+      "wins": 42565,
+      "totalReduction": 273919796,
+      "totalAppeals": 42565,
+      "winRate": 0,
+      "avgReduction": 6435
+    },
+    {
+      "rank": 4,
+      "name": "TIMOTHY E. MORAN",
+      "firm": "SCHMIDT SALZMAN & MORAN, LTD.",
+      "wins": 17379,
+      "totalReduction": 597438058,
+      "totalAppeals": 17379,
+      "winRate": 0,
+      "avgReduction": 34377
+    },
+    {
+      "rank": 5,
+      "name": "ANDREAS MAMALAKIS",
+      "firm": "ANDREAS MAMALAKIS",
+      "wins": 16449,
+      "totalReduction": 90783188,
+      "totalAppeals": 16449,
+      "winRate": 0,
+      "avgReduction": 5519
+    },
+    {
+      "rank": 6,
+      "name": "JAMES A. FIELD",
+      "firm": "FIELD & GOLDBERG, LLC",
+      "wins": 16085,
+      "totalReduction": 490911111,
+      "totalAppeals": 16085,
+      "winRate": 0,
+      "avgReduction": 30520
+    },
+    {
+      "rank": 7,
+      "name": "SCOTT SINAR",
+      "firm": "NOBLE LAW GROUP LTD.",
+      "wins": 15968,
+      "totalReduction": 62437008,
+      "totalAppeals": 15968,
+      "winRate": 0,
+      "avgReduction": 3910
+    },
+    {
+      "rank": 8,
+      "name": "SCOTT E LONGSTREET",
+      "firm": "PARK & LONGSTREET",
+      "wins": 13416,
+      "totalReduction": 72988230,
+      "totalAppeals": 13416,
+      "winRate": 0,
+      "avgReduction": 5440
+    },
+    {
+      "rank": 9,
+      "name": "GREGORY HILTON",
+      "firm": "PROPERTY TAX SOLUTIONS",
+      "wins": 13388,
+      "totalReduction": 48290626,
+      "totalAppeals": 13388,
+      "winRate": 0,
+      "avgReduction": 3607
+    },
+    {
+      "rank": 10,
+      "name": "THOMAS J THORSON",
+      "firm": "RAILA & ASSOCIATES PC",
+      "wins": 12627,
+      "totalReduction": 123139713,
+      "totalAppeals": 12627,
+      "winRate": 0,
+      "avgReduction": 9752
+    },
+    {
+      "rank": 11,
+      "name": "JAMES SARNOFF",
+      "firm": "SARNOFF & BACCASH",
+      "wins": 11541,
+      "totalReduction": 212398934,
+      "totalAppeals": 11541,
+      "winRate": 0,
+      "avgReduction": 18404
+    },
+    {
+      "rank": 12,
+      "name": "AMY FLOYD",
+      "firm": "AMY C FLOYD, ATTY AT LAW",
+      "wins": 10364,
+      "totalReduction": 29337295,
+      "totalAppeals": 10364,
+      "winRate": 0,
+      "avgReduction": 2831
+    },
+    {
+      "rank": 13,
+      "name": "EDWIN M WITTENSTEIN",
+      "firm": "WORSEK & VIHON LLP",
+      "wins": 9483,
+      "totalReduction": 129146282,
+      "totalAppeals": 9483,
+      "winRate": 0,
+      "avgReduction": 13619
+    },
+    {
+      "rank": 14,
+      "name": "CHRIS WALSH JR.",
+      "firm": "CHRISTOPHER G. WALSH JR.",
+      "wins": 9379,
+      "totalReduction": 40797309,
+      "totalAppeals": 9379,
+      "winRate": 0,
+      "avgReduction": 4350
+    },
+    {
+      "rank": 15,
+      "name": "CHRISTOPHER WOJCICKI",
+      "firm": "WOJCICKI LAW",
+      "wins": 9053,
+      "totalReduction": 30931718,
+      "totalAppeals": 9053,
+      "winRate": 0,
+      "avgReduction": 3417
+    }
+  ],
+  "byAvgReduction": [
+    {
+      "rank": 1,
+      "name": "ELIZABETH GRACIE",
+      "firm": "O'KEEFE, LYONS & HYNES LLC",
+      "wins": 938,
+      "totalReduction": 2019121642,
+      "totalAppeals": 938,
+      "winRate": 0,
+      "avgReduction": 2152582
+    },
+    {
+      "rank": 2,
+      "name": "RYAN J. GIBBS",
+      "firm": "GIBBS FIRM, LPA",
+      "wins": 139,
+      "totalReduction": 139462434,
+      "totalAppeals": 139,
+      "winRate": 0,
+      "avgReduction": 1003327
+    },
+    {
+      "rank": 3,
+      "name": "HAROLD J HICKS",
+      "firm": "MADIGAN & GETZENDANNER",
+      "wins": 2820,
+      "totalReduction": 1714095974,
+      "totalAppeals": 2820,
+      "winRate": 0,
+      "avgReduction": 607835
+    },
+    {
+      "rank": 4,
+      "name": "PAUL J REILLY",
+      "firm": "REILLY, SULLIVAN & DOOLEY, LLC",
+      "wins": 214,
+      "totalReduction": 113288539,
+      "totalAppeals": 214,
+      "winRate": 0,
+      "avgReduction": 529386
+    },
+    {
+      "rank": 5,
+      "name": "PATRICK J. MCNERNEY",
+      "firm": "MAYER BROWN, LLP",
+      "wins": 5454,
+      "totalReduction": 2418577361,
+      "totalAppeals": 5454,
+      "winRate": 0,
+      "avgReduction": 443450
+    },
+    {
+      "rank": 6,
+      "name": "DAVID S. MARTIN",
+      "firm": "NEAL GERBER & EISENBERG, LLP",
+      "wins": 584,
+      "totalReduction": 243281948,
+      "totalAppeals": 584,
+      "winRate": 0,
+      "avgReduction": 416579
+    },
+    {
+      "rank": 7,
+      "name": "JAMES E DOHERTY",
+      "firm": "THOMAS M TULLY & ASSOC.",
+      "wins": 3149,
+      "totalReduction": 1069890987,
+      "totalAppeals": 3149,
+      "winRate": 0,
+      "avgReduction": 339756
+    },
+    {
+      "rank": 8,
+      "name": "MICHAEL C. PRINZI",
+      "firm": "MADIGAN & GETZENDANNER",
+      "wins": 245,
+      "totalReduction": 78320398,
+      "totalAppeals": 245,
+      "winRate": 0,
+      "avgReduction": 319675
+    },
+    {
+      "rank": 9,
+      "name": "MICHAEL R. DAVIES",
+      "firm": "RYAN LAWYERS",
+      "wins": 2012,
+      "totalReduction": 641609664,
+      "totalAppeals": 2012,
+      "winRate": 0,
+      "avgReduction": 318891
+    },
+    {
+      "rank": 10,
+      "name": "ADAM ROGOZINSKY",
+      "firm": "WORSEK & VIHON LLP",
+      "wins": 738,
+      "totalReduction": 224235810,
+      "totalAppeals": 738,
+      "winRate": 0,
+      "avgReduction": 303843
+    },
+    {
+      "rank": 11,
+      "name": "CRAIG J DONNEWALD",
+      "firm": "FINKEL, MARTWICK & COLSON, PC",
+      "wins": 1165,
+      "totalReduction": 327384683,
+      "totalAppeals": 1165,
+      "winRate": 0,
+      "avgReduction": 281017
+    },
+    {
+      "rank": 12,
+      "name": "CHRISTOPHER M CAIRA",
+      "firm": "KBC LAW GROUP",
+      "wins": 915,
+      "totalReduction": 253928984,
+      "totalAppeals": 915,
+      "winRate": 0,
+      "avgReduction": 277518
+    },
+    {
+      "rank": 13,
+      "name": "NICHOLAS JORDAN",
+      "firm": "WORSEK & VIHON",
+      "wins": 2407,
+      "totalReduction": 646238973,
+      "totalAppeals": 2407,
+      "winRate": 0,
+      "avgReduction": 268483
+    },
+    {
+      "rank": 14,
+      "name": "DANIEL PAPPANO",
+      "firm": "ZWELLING LAW, PLLC",
+      "wins": 306,
+      "totalReduction": 79909736,
+      "totalAppeals": 306,
+      "winRate": 0,
+      "avgReduction": 261143
+    },
+    {
+      "rank": 15,
+      "name": "KEVIN B. HYNES",
+      "firm": "O'KEFFE LYONS & HYNES , LLC",
+      "wins": 1915,
+      "totalReduction": 498549524,
+      "totalAppeals": 1915,
+      "winRate": 0,
+      "avgReduction": 260339
+    }
+  ],
+  "residential": {
+    "byWins": [
+      {
+        "rank": 1,
+        "name": "RICHARD SHAPIRO",
+        "firm": "RICHARD SHAPIRO, ATTORNEY",
+        "wins": 69819,
+        "totalReduction": 270201469,
+        "totalAppeals": 69819,
+        "winRate": 0,
+        "avgReduction": 3870
+      },
+      {
+        "rank": 2,
+        "name": "TIMOTHY C JACOBS",
+        "firm": "KOVITZ SHIFRIN NESBIT",
+        "wins": 54385,
+        "totalReduction": 52439808,
+        "totalAppeals": 54385,
+        "winRate": 0,
+        "avgReduction": 964
+      },
+      {
+        "rank": 3,
+        "name": "MICHAEL J. ELLIOTT",
+        "firm": "ELLIOTT & ASSOCIATES",
+        "wins": 38545,
+        "totalReduction": 69347605,
+        "totalAppeals": 38545,
+        "winRate": 0,
+        "avgReduction": 1799
+      },
+      {
+        "rank": 4,
+        "name": "SCOTT SINAR",
+        "firm": "NOBLE LAW GROUP LTD.",
+        "wins": 15968,
+        "totalReduction": 62437008,
+        "totalAppeals": 15968,
+        "winRate": 0,
+        "avgReduction": 3910
+      },
+      {
+        "rank": 5,
+        "name": "ANDREAS MAMALAKIS",
+        "firm": "ANDREAS MAMALAKIS",
+        "wins": 15124,
+        "totalReduction": 47991357,
+        "totalAppeals": 15124,
+        "winRate": 0,
+        "avgReduction": 3173
+      },
+      {
+        "rank": 6,
+        "name": "JAMES A. FIELD",
+        "firm": "FIELD & GOLDBERG, LLC",
+        "wins": 14490,
+        "totalReduction": 32372342,
+        "totalAppeals": 14490,
+        "winRate": 0,
+        "avgReduction": 2234
+      },
+      {
+        "rank": 7,
+        "name": "GREGORY HILTON",
+        "firm": "PROPERTY TAX SOLUTIONS",
+        "wins": 13373,
+        "totalReduction": 47833179,
+        "totalAppeals": 13373,
+        "winRate": 0,
+        "avgReduction": 3577
+      },
+      {
+        "rank": 8,
+        "name": "SCOTT E LONGSTREET",
+        "firm": "PARK & LONGSTREET",
+        "wins": 12923,
+        "totalReduction": 58275749,
+        "totalAppeals": 12923,
+        "winRate": 0,
+        "avgReduction": 4509
+      },
+      {
+        "rank": 9,
+        "name": "TIMOTHY E. MORAN",
+        "firm": "SCHMIDT SALZMAN & MORAN, LTD.",
+        "wins": 10428,
+        "totalReduction": 59969731,
+        "totalAppeals": 10428,
+        "winRate": 0,
+        "avgReduction": 5751
+      },
+      {
+        "rank": 10,
+        "name": "AMY FLOYD",
+        "firm": "AMY C FLOYD, ATTY AT LAW",
+        "wins": 10364,
+        "totalReduction": 29337295,
+        "totalAppeals": 10364,
+        "winRate": 0,
+        "avgReduction": 2831
+      },
+      {
+        "rank": 11,
+        "name": "THOMAS J THORSON",
+        "firm": "RAILA & ASSOCIATES PC",
+        "wins": 10361,
+        "totalReduction": 51339003,
+        "totalAppeals": 10361,
+        "winRate": 0,
+        "avgReduction": 4955
+      },
+      {
+        "rank": 12,
+        "name": "JAMES SARNOFF",
+        "firm": "SARNOFF & BACCASH",
+        "wins": 9815,
+        "totalReduction": 36931277,
+        "totalAppeals": 9815,
+        "winRate": 0,
+        "avgReduction": 3763
+      },
+      {
+        "rank": 13,
+        "name": "CHRIS WALSH JR.",
+        "firm": "CHRISTOPHER G. WALSH JR.",
+        "wins": 9290,
+        "totalReduction": 38462541,
+        "totalAppeals": 9290,
+        "winRate": 0,
+        "avgReduction": 4140
+      },
+      {
+        "rank": 14,
+        "name": "CHRISTOPHER WOJCICKI",
+        "firm": "WOJCICKI LAW",
+        "wins": 9053,
+        "totalReduction": 30931718,
+        "totalAppeals": 9053,
+        "winRate": 0,
+        "avgReduction": 3417
+      },
+      {
+        "rank": 15,
+        "name": "EDWIN M WITTENSTEIN",
+        "firm": "WORSEK & VIHON LLP",
+        "wins": 8716,
+        "totalReduction": 15810146,
+        "totalAppeals": 8716,
+        "winRate": 0,
+        "avgReduction": 1814
+      }
+    ],
+    "byAvgReduction": [
+      {
+        "rank": 1,
+        "name": "DONALD HEMMESCH",
+        "firm": "SMITH, HEMMESCH, BURKE & KACZYNSKI",
+        "wins": 125,
+        "totalReduction": 3557156,
+        "totalAppeals": 125,
+        "winRate": 0,
+        "avgReduction": 28457
+      },
+      {
+        "rank": 2,
+        "name": "JAMES E DOHERTY",
+        "firm": "THOMAS M TULLY & ASSOC.",
+        "wins": 774,
+        "totalReduction": 18807457,
+        "totalAppeals": 774,
+        "winRate": 0,
+        "avgReduction": 24299
+      },
+      {
+        "rank": 3,
+        "name": "THOMAS J. MCNULTY",
+        "firm": "NEAL GERBER & EISENBERG, LLP",
+        "wins": 755,
+        "totalReduction": 17918897,
+        "totalAppeals": 755,
+        "winRate": 0,
+        "avgReduction": 23734
+      },
+      {
+        "rank": 4,
+        "name": "BENJAMIN BILTON",
+        "firm": "WORSEK & VIHON, LLP",
+        "wins": 1218,
+        "totalReduction": 19336722,
+        "totalAppeals": 1218,
+        "winRate": 0,
+        "avgReduction": 15876
+      },
+      {
+        "rank": 5,
+        "name": "KEITH BRIN",
+        "firm": "FINKEL, MARTWICK & COLSON, PC",
+        "wins": 124,
+        "totalReduction": 1747317,
+        "totalAppeals": 124,
+        "winRate": 0,
+        "avgReduction": 14091
+      },
+      {
+        "rank": 6,
+        "name": "PATRICK J. MCNERNEY",
+        "firm": "MAYER BROWN, LLP",
+        "wins": 511,
+        "totalReduction": 7125514,
+        "totalAppeals": 511,
+        "winRate": 0,
+        "avgReduction": 13944
+      },
+      {
+        "rank": 7,
+        "name": "CHRISTOPHER M CAIRA",
+        "firm": "KBC LAW GROUP",
+        "wins": 288,
+        "totalReduction": 3945343,
+        "totalAppeals": 288,
+        "winRate": 0,
+        "avgReduction": 13699
+      },
+      {
+        "rank": 8,
+        "name": "STEVEN B. PEARLMAN",
+        "firm": "STEVEN B. PEARLMAN & ASSOCIATES",
+        "wins": 2199,
+        "totalReduction": 28565551,
+        "totalAppeals": 2199,
+        "winRate": 0,
+        "avgReduction": 12990
+      },
+      {
+        "rank": 9,
+        "name": "WAYNE BORAWSKI",
+        "firm": "WAYNE BORAWSKI ATTORNEY AT LAW",
+        "wins": 186,
+        "totalReduction": 2369282,
+        "totalAppeals": 186,
+        "winRate": 0,
+        "avgReduction": 12738
+      },
+      {
+        "rank": 10,
+        "name": "LISA H FISHBEIN",
+        "firm": "LISA H FISHBEIN ATTORNEY AT LAW",
+        "wins": 113,
+        "totalReduction": 1423921,
+        "totalAppeals": 113,
+        "winRate": 0,
+        "avgReduction": 12601
+      },
+      {
+        "rank": 11,
+        "name": "JOHN PATRICK NYHAN",
+        "firm": "O'KEEFE LYONS & HYNES LLC",
+        "wins": 163,
+        "totalReduction": 2022607,
+        "totalAppeals": 163,
+        "winRate": 0,
+        "avgReduction": 12409
+      },
+      {
+        "rank": 12,
+        "name": "ALAN SKIDELSKY",
+        "firm": "SKIDELSKY & ASSOCIATES",
+        "wins": 264,
+        "totalReduction": 3141571,
+        "totalAppeals": 264,
+        "winRate": 0,
+        "avgReduction": 11900
+      },
+      {
+        "rank": 13,
+        "name": "WILLIAM J. SEITZ",
+        "firm": "LAW OFFICES OF WILLIAM J. SEITZ, LLC",
+        "wins": 615,
+        "totalReduction": 7075533,
+        "totalAppeals": 615,
+        "winRate": 0,
+        "avgReduction": 11505
+      },
+      {
+        "rank": 14,
+        "name": "GEORGE J. BEHRENS",
+        "firm": "BEHRENS & TRUONG LLC",
+        "wins": 300,
+        "totalReduction": 3425693,
+        "totalAppeals": 300,
+        "winRate": 0,
+        "avgReduction": 11419
+      },
+      {
+        "rank": 15,
+        "name": "MICHAEL E. CRANE",
+        "firm": "CRANE AND NORCROSS, LLC",
+        "wins": 2180,
+        "totalReduction": 24603703,
+        "totalAppeals": 2180,
+        "winRate": 0,
+        "avgReduction": 11286
+      }
+    ]
+  },
+  "multifamily": {
+    "byWins": [
+      {
+        "rank": 1,
+        "name": "JEFFREY A. HOLLAND",
+        "firm": "MADIGAN & GETZENDANNER",
+        "wins": 1651,
+        "totalReduction": 238678990,
+        "totalAppeals": 1651,
+        "winRate": 0,
+        "avgReduction": 144566
+      },
+      {
+        "rank": 2,
+        "name": "TIMOTHY E. MORAN",
+        "firm": "SCHMIDT SALZMAN & MORAN, LTD.",
+        "wins": 1484,
+        "totalReduction": 132055436,
+        "totalAppeals": 1484,
+        "winRate": 0,
+        "avgReduction": 88986
+      },
+      {
+        "rank": 3,
+        "name": "PATRICK J. MCNERNEY",
+        "firm": "MAYER BROWN, LLP",
+        "wins": 886,
+        "totalReduction": 128363534,
+        "totalAppeals": 886,
+        "winRate": 0,
+        "avgReduction": 144880
+      },
+      {
+        "rank": 4,
+        "name": "DANIEL G PIKARSKI",
+        "firm": "GORDON & PIKARSKI",
+        "wins": 857,
+        "totalReduction": 35562351,
+        "totalAppeals": 857,
+        "winRate": 0,
+        "avgReduction": 41496
+      },
+      {
+        "rank": 5,
+        "name": "JAMES P BOYLE",
+        "firm": "CRANE AND NORCROSS, LLC",
+        "wins": 670,
+        "totalReduction": 38842778,
+        "totalAppeals": 670,
+        "winRate": 0,
+        "avgReduction": 57974
+      },
+      {
+        "rank": 6,
+        "name": "JAMES SARNOFF",
+        "firm": "SARNOFF & BACCASH",
+        "wins": 651,
+        "totalReduction": 43856154,
+        "totalAppeals": 651,
+        "winRate": 0,
+        "avgReduction": 67367
+      },
+      {
+        "rank": 7,
+        "name": "JAMES A. FIELD",
+        "firm": "FIELD & GOLDBERG, LLC",
+        "wins": 582,
+        "totalReduction": 206433789,
+        "totalAppeals": 582,
+        "winRate": 0,
+        "avgReduction": 354697
+      },
+      {
+        "rank": 8,
+        "name": "ROBERT M SARNOFF",
+        "firm": "SARNOFF & BACCASH",
+        "wins": 574,
+        "totalReduction": 18233113,
+        "totalAppeals": 574,
+        "winRate": 0,
+        "avgReduction": 31765
+      },
+      {
+        "rank": 9,
+        "name": "JAMES E DOHERTY",
+        "firm": "THOMAS M TULLY & ASSOC.",
+        "wins": 571,
+        "totalReduction": 141637054,
+        "totalAppeals": 571,
+        "winRate": 0,
+        "avgReduction": 248051
+      },
+      {
+        "rank": 10,
+        "name": "HERBERT B ROSENBERG",
+        "firm": "RYAN LAW PLLC",
+        "wins": 565,
+        "totalReduction": 57070702,
+        "totalAppeals": 565,
+        "winRate": 0,
+        "avgReduction": 101010
+      },
+      {
+        "rank": 11,
+        "name": "HUAN CASSIOPPI TRAN",
+        "firm": "FLANAGAN | BILTON LLC",
+        "wins": 546,
+        "totalReduction": 69497404,
+        "totalAppeals": 546,
+        "winRate": 0,
+        "avgReduction": 127285
+      },
+      {
+        "rank": 12,
+        "name": "THOMAS J THORSON",
+        "firm": "RAILA & ASSOCIATES PC",
+        "wins": 482,
+        "totalReduction": 13755383,
+        "totalAppeals": 482,
+        "winRate": 0,
+        "avgReduction": 28538
+      },
+      {
+        "rank": 13,
+        "name": "ABBY L STRAUSS",
+        "firm": "SCHILLER STRAUSS & LAVIN PC",
+        "wins": 445,
+        "totalReduction": 29182694,
+        "totalAppeals": 445,
+        "winRate": 0,
+        "avgReduction": 65579
+      },
+      {
+        "rank": 14,
+        "name": "PATRICK J CULLERTON",
+        "firm": "THOMPSON COBURN LLP",
+        "wins": 439,
+        "totalReduction": 76376036,
+        "totalAppeals": 439,
+        "winRate": 0,
+        "avgReduction": 173977
+      },
+      {
+        "rank": 15,
+        "name": "STEVEN B. PEARLMAN",
+        "firm": "STEVEN B. PEARLMAN & ASSOCIATES",
+        "wins": 439,
+        "totalReduction": 74839911,
+        "totalAppeals": 439,
+        "winRate": 0,
+        "avgReduction": 170478
+      }
+    ],
+    "byAvgReduction": [
+      {
+        "rank": 1,
+        "name": "MARK VOLPE",
+        "firm": "REILLY & DOOLEY, LLC",
+        "wins": 238,
+        "totalReduction": 132755384,
+        "totalAppeals": 238,
+        "winRate": 0,
+        "avgReduction": 557796
+      },
+      {
+        "rank": 2,
+        "name": "BRIAN P. FORDE",
+        "firm": "O'KEEFE, LYONS & HYNES, LLC",
+        "wins": 347,
+        "totalReduction": 177043329,
+        "totalAppeals": 347,
+        "winRate": 0,
+        "avgReduction": 510211
+      },
+      {
+        "rank": 3,
+        "name": "JOHN P. FITZGERALD",
+        "firm": "FITZGERALD LAW GROUP",
+        "wins": 146,
+        "totalReduction": 53379397,
+        "totalAppeals": 146,
+        "winRate": 0,
+        "avgReduction": 365612
+      },
+      {
+        "rank": 4,
+        "name": "JAMES A. FIELD",
+        "firm": "FIELD & GOLDBERG, LLC",
+        "wins": 582,
+        "totalReduction": 206433789,
+        "totalAppeals": 582,
+        "winRate": 0,
+        "avgReduction": 354697
+      },
+      {
+        "rank": 5,
+        "name": "ELLY DRAKE",
+        "firm": "RYAN LAW",
+        "wins": 113,
+        "totalReduction": 38657156,
+        "totalAppeals": 113,
+        "winRate": 0,
+        "avgReduction": 342099
+      },
+      {
+        "rank": 6,
+        "name": "HAROLD J HICKS",
+        "firm": "MADIGAN & GETZENDANNER",
+        "wins": 373,
+        "totalReduction": 110994232,
+        "totalAppeals": 373,
+        "winRate": 0,
+        "avgReduction": 297572
+      },
+      {
+        "rank": 7,
+        "name": "JAMES DOOLEY",
+        "firm": "REILLY & DOOLEY, LLC",
+        "wins": 111,
+        "totalReduction": 32048990,
+        "totalAppeals": 111,
+        "winRate": 0,
+        "avgReduction": 288730
+      },
+      {
+        "rank": 8,
+        "name": "ROBERT MARSICO",
+        "firm": "CROWLEY & MARSICO, LLC",
+        "wins": 435,
+        "totalReduction": 111811355,
+        "totalAppeals": 435,
+        "winRate": 0,
+        "avgReduction": 257038
+      },
+      {
+        "rank": 9,
+        "name": "THOMAS SWEENEY",
+        "firm": "SIEGEL JENNINGS",
+        "wins": 187,
+        "totalReduction": 46598235,
+        "totalAppeals": 187,
+        "winRate": 0,
+        "avgReduction": 249188
+      },
+      {
+        "rank": 10,
+        "name": "JAMES E DOHERTY",
+        "firm": "THOMAS M TULLY & ASSOC.",
+        "wins": 571,
+        "totalReduction": 141637054,
+        "totalAppeals": 571,
+        "winRate": 0,
+        "avgReduction": 248051
+      },
+      {
+        "rank": 11,
+        "name": "THOMAS J BOYLE",
+        "firm": "CRANE AND NORCROSS, LLC",
+        "wins": 111,
+        "totalReduction": 26770022,
+        "totalAppeals": 111,
+        "winRate": 0,
+        "avgReduction": 241171
+      },
+      {
+        "rank": 12,
+        "name": "EDWARD T. MCELROY",
+        "firm": "EDWARD T. MCELROY & ASSOCIATES",
+        "wins": 150,
+        "totalReduction": 34191606,
+        "totalAppeals": 150,
+        "winRate": 0,
+        "avgReduction": 227944
+      },
+      {
+        "rank": 13,
+        "name": "MICHAEL R. DAVIES",
+        "firm": "RYAN LAWYERS",
+        "wins": 186,
+        "totalReduction": 40635708,
+        "totalAppeals": 186,
+        "winRate": 0,
+        "avgReduction": 218472
+      },
+      {
+        "rank": 14,
+        "name": "EUGENE P GRIFFIN",
+        "firm": "EUGENE L. GRIFFIN & ASSOCIATES, LTD",
+        "wins": 252,
+        "totalReduction": 48496525,
+        "totalAppeals": 252,
+        "winRate": 0,
+        "avgReduction": 192447
+      },
+      {
+        "rank": 15,
+        "name": "THOMAS J. MCNULTY",
+        "firm": "NEAL GERBER & EISENBERG, LLP",
+        "wins": 120,
+        "totalReduction": 22428559,
+        "totalAppeals": 120,
+        "winRate": 0,
+        "avgReduction": 186905
+      }
+    ]
+  },
+  "commercial": {
+    "byWins": [
+      {
+        "rank": 1,
+        "name": "TIMOTHY E. MORAN",
+        "firm": "SCHMIDT SALZMAN & MORAN, LTD.",
+        "wins": 5467,
+        "totalReduction": 405412891,
+        "totalAppeals": 5467,
+        "winRate": 0,
+        "avgReduction": 74156
+      },
+      {
+        "rank": 2,
+        "name": "PATRICK J. MCNERNEY",
+        "firm": "MAYER BROWN, LLP",
+        "wins": 4057,
+        "totalReduction": 2283088313,
+        "totalAppeals": 4057,
+        "winRate": 0,
+        "avgReduction": 562753
+      },
+      {
+        "rank": 3,
+        "name": "WILLIAM SANDRICK",
+        "firm": "SANDRICK LAW FIRM",
+        "wins": 4056,
+        "totalReduction": 145389153,
+        "totalAppeals": 4056,
+        "winRate": 0,
+        "avgReduction": 35845
+      },
+      {
+        "rank": 4,
+        "name": "BRIAN P LISTON",
+        "firm": "LISTON & TSANTILIS PC",
+        "wins": 3698,
+        "totalReduction": 903718679,
+        "totalAppeals": 3698,
+        "winRate": 0,
+        "avgReduction": 244380
+      },
+      {
+        "rank": 5,
+        "name": "MICHAEL J. ELLIOTT",
+        "firm": "ELLIOTT & ASSOCIATES",
+        "wins": 3681,
+        "totalReduction": 188892914,
+        "totalAppeals": 3681,
+        "winRate": 0,
+        "avgReduction": 51316
+      },
+      {
+        "rank": 6,
+        "name": "GEORGE N REVELIOTIS",
+        "firm": "REVELIOTIS LAW",
+        "wins": 3409,
+        "totalReduction": 116487210,
+        "totalAppeals": 3409,
+        "winRate": 0,
+        "avgReduction": 34170
+      },
+      {
+        "rank": 7,
+        "name": "STEVEN B. PEARLMAN",
+        "firm": "STEVEN B. PEARLMAN & ASSOCIATES",
+        "wins": 3402,
+        "totalReduction": 906013382,
+        "totalAppeals": 3402,
+        "winRate": 0,
+        "avgReduction": 266318
+      },
+      {
+        "rank": 8,
+        "name": "JAMES P BOYLE",
+        "firm": "CRANE AND NORCROSS, LLC",
+        "wins": 3025,
+        "totalReduction": 561234938,
+        "totalAppeals": 3025,
+        "winRate": 0,
+        "avgReduction": 185532
+      },
+      {
+        "rank": 9,
+        "name": "EUGENE P GRIFFIN",
+        "firm": "EUGENE L. GRIFFIN & ASSOCIATES, LTD",
+        "wins": 2588,
+        "totalReduction": 574543235,
+        "totalAppeals": 2588,
+        "winRate": 0,
+        "avgReduction": 222003
+      },
+      {
+        "rank": 10,
+        "name": "HUAN CASSIOPPI TRAN",
+        "firm": "FLANAGAN | BILTON LLC",
+        "wins": 2155,
+        "totalReduction": 447651622,
+        "totalAppeals": 2155,
+        "winRate": 0,
+        "avgReduction": 207727
+      },
+      {
+        "rank": 11,
+        "name": "MICHAEL E. CRANE",
+        "firm": "CRANE AND NORCROSS, LLC",
+        "wins": 2153,
+        "totalReduction": 421925100,
+        "totalAppeals": 2153,
+        "winRate": 0,
+        "avgReduction": 195971
+      },
+      {
+        "rank": 12,
+        "name": "PATRICK J CULLERTON",
+        "firm": "THOMPSON COBURN LLP",
+        "wins": 2135,
+        "totalReduction": 453319466,
+        "totalAppeals": 2135,
+        "winRate": 0,
+        "avgReduction": 212328
+      },
+      {
+        "rank": 13,
+        "name": "JOHN P. FITZGERALD",
+        "firm": "FITZGERALD LAW GROUP",
+        "wins": 2062,
+        "totalReduction": 226537174,
+        "totalAppeals": 2062,
+        "winRate": 0,
+        "avgReduction": 109863
+      },
+      {
+        "rank": 14,
+        "name": "JAMES E DOHERTY",
+        "firm": "THOMAS M TULLY & ASSOC.",
+        "wins": 1804,
+        "totalReduction": 909446476,
+        "totalAppeals": 1804,
+        "winRate": 0,
+        "avgReduction": 504128
+      },
+      {
+        "rank": 15,
+        "name": "THOMAS J THORSON",
+        "firm": "RAILA & ASSOCIATES PC",
+        "wins": 1784,
+        "totalReduction": 58045327,
+        "totalAppeals": 1784,
+        "winRate": 0,
+        "avgReduction": 32537
+      }
+    ],
+    "byAvgReduction": [
+      {
+        "rank": 1,
+        "name": "ELIZABETH GRACIE",
+        "firm": "O'KEEFE, LYONS & HYNES LLC",
+        "wins": 761,
+        "totalReduction": 1970247566,
+        "totalAppeals": 761,
+        "winRate": 0,
+        "avgReduction": 2589024
+      },
+      {
+        "rank": 2,
+        "name": "HAROLD J HICKS",
+        "firm": "MADIGAN & GETZENDANNER",
+        "wins": 1245,
+        "totalReduction": 1594633885,
+        "totalAppeals": 1245,
+        "winRate": 0,
+        "avgReduction": 1280830
+      },
+      {
+        "rank": 3,
+        "name": "RYAN J. GIBBS",
+        "firm": "GIBBS FIRM, LPA",
+        "wins": 139,
+        "totalReduction": 139462434,
+        "totalAppeals": 139,
+        "winRate": 0,
+        "avgReduction": 1003327
+      },
+      {
+        "rank": 4,
+        "name": "FRANCIS W O'MALLEY",
+        "firm": "WORSEK & VIHON LLP",
+        "wins": 426,
+        "totalReduction": 363757766,
+        "totalAppeals": 426,
+        "winRate": 0,
+        "avgReduction": 853891
+      },
+      {
+        "rank": 5,
+        "name": "NICHOLAS JORDAN",
+        "firm": "WORSEK & VIHON",
+        "wins": 804,
+        "totalReduction": 623024571,
+        "totalAppeals": 804,
+        "winRate": 0,
+        "avgReduction": 774906
+      },
+      {
+        "rank": 6,
+        "name": "MARK VOLPE",
+        "firm": "REILLY & DOOLEY, LLC",
+        "wins": 561,
+        "totalReduction": 382175542,
+        "totalAppeals": 561,
+        "winRate": 0,
+        "avgReduction": 681240
+      },
+      {
+        "rank": 7,
+        "name": "DAVID S. MARTIN",
+        "firm": "NEAL GERBER & EISENBERG, LLP",
+        "wins": 413,
+        "totalReduction": 242374515,
+        "totalAppeals": 413,
+        "winRate": 0,
+        "avgReduction": 586863
+      },
+      {
+        "rank": 8,
+        "name": "PATRICK J. MCNERNEY",
+        "firm": "MAYER BROWN, LLP",
+        "wins": 4057,
+        "totalReduction": 2283088313,
+        "totalAppeals": 4057,
+        "winRate": 0,
+        "avgReduction": 562753
+      },
+      {
+        "rank": 9,
+        "name": "RICHARD WORSEK",
+        "firm": "WORSEK & VIHON LLP",
+        "wins": 169,
+        "totalReduction": 92407963,
+        "totalAppeals": 169,
+        "winRate": 0,
+        "avgReduction": 546793
+      },
+      {
+        "rank": 10,
+        "name": "PAUL J REILLY",
+        "firm": "REILLY, SULLIVAN & DOOLEY, LLC",
+        "wins": 156,
+        "totalReduction": 80643765,
+        "totalAppeals": 156,
+        "winRate": 0,
+        "avgReduction": 516947
+      },
+      {
+        "rank": 11,
+        "name": "JAMES E DOHERTY",
+        "firm": "THOMAS M TULLY & ASSOC.",
+        "wins": 1804,
+        "totalReduction": 909446476,
+        "totalAppeals": 1804,
+        "winRate": 0,
+        "avgReduction": 504128
+      },
+      {
+        "rank": 12,
+        "name": "ADAM ROGOZINSKY",
+        "firm": "WORSEK & VIHON LLP",
+        "wins": 412,
+        "totalReduction": 205137435,
+        "totalAppeals": 412,
+        "winRate": 0,
+        "avgReduction": 497906
+      },
+      {
+        "rank": 13,
+        "name": "JEFFREY A. HOLLAND",
+        "firm": "MADIGAN & GETZENDANNER",
+        "wins": 1109,
+        "totalReduction": 519539291,
+        "totalAppeals": 1109,
+        "winRate": 0,
+        "avgReduction": 468475
+      },
+      {
+        "rank": 14,
+        "name": "CRAIG J DONNEWALD",
+        "firm": "FINKEL, MARTWICK & COLSON, PC",
+        "wins": 701,
+        "totalReduction": 301438304,
+        "totalAppeals": 701,
+        "winRate": 0,
+        "avgReduction": 430012
+      },
+      {
+        "rank": 15,
+        "name": "DANIEL PAPPANO",
+        "firm": "ZWELLING LAW, PLLC",
+        "wins": 187,
+        "totalReduction": 78916273,
+        "totalAppeals": 187,
+        "winRate": 0,
+        "avgReduction": 422012
+      }
+    ]
+  },
+  "yearsRange": "2019–2024",
+  "builtAt": "2026-02-28T03:37:59.222Z"
+}

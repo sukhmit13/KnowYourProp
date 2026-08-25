@@ -1,0 +1,69 @@
+# Stage 1 update — where the JSON is, + capture loan amount / rate / modification terms
+
+## 1. Where is the JSON right now?
+When you built Stage 1, the Agent was told to **"log the array for now"** — so the extracted objects aren't saved anywhere a screen reads yet. They're in **stdout**, not the UI or the DB. To see them:
+
+- Open the Replit **Console** (the run/logs pane, not the Shell), then trigger `ingestParcel(pin)` for the 3014 W Irving Park parcel — either from wherever you call it, or add a one-off route/button that calls it. The array of `{ doc_number, doc_type, lender, amount, ... }` prints there.
+- If you can't find the call site, search the codebase for `ingestParcel` or `console.log` near the Stage 1 code — that log line is your JSON.
+
+That's expected at this stage: Stage 1's job was just to prove the docs read correctly. It does **not** feed the Debt Snapshot card yet — that's Stage 2/2.5/3. So the live card still showing blank Lender/Amount is normal; check the **console array**, not the report page, to verify Stage 1.
+
+**Verify on 3014:** in that array, the mortgage doc `1618022008` should now come back with `lender: "Albany Bank and Trust Company, N.A."` and `amount: 399000` (the document's loan amount) — not blank, and not the $798,000 index consideration.
+
+## 2. Your two findings — now in the extraction
+You were right on both, and both are real accuracy bugs, not edge cases:
+
+**(a) Loan amount ≠ Consideration Amount.** The index "Consideration Amount" ($798,000) is a transfer-tax/valuation figure, not the debt. The mortgage doc `1618022008` states a **$399,000** loan in its body. Pulling the index number would overstate leverage by ~2×. The prompt now reads `amount` from the **document body** and parks any consideration figure in a separate `index_consideration_amount` so a mismatch is visible instead of silently wrong.
+
+**(b) The modification supersedes the original terms.** Doc `2121004479` (2021) clarifies the loan amount and adjusts maturity + interest rate. The prompt now captures a `modifies` object on modification docs, and the lender comes through on both docs.
+
+## 3. Schema additions (swap the EXTRACTION_PROMPT — nothing else changes)
+New fields: `execution_date`, `index_consideration_amount`, `interest_rate`, and a `modifies` object.
+
+```json
+{
+  "doc_number": string,
+  "doc_type": "mortgage|release|satisfaction|assignment|modification|subordination|deed|lis_pendens|foreclosure|notice_default|judgment_lien|tax_lien|mechanics_lien|ucc|other",
+  "recording_date": "YYYY-MM-DD|null",
+  "execution_date": "YYYY-MM-DD|null",
+  "pins": [string],
+  "parties": { "borrower": string|null, "lender": string|null, "assignor": string|null, "assignee": string|null },
+  "amount": number|null,                       // LOAN principal from the doc BODY — NOT the index consideration
+  "index_consideration_amount": number|null,   // consideration/transfer figure if the doc restates it (mismatch flag)
+  "interest_rate": number|null,                // annual %, e.g. 5.25
+  "maturity_date": "YYYY-MM-DD|null",
+  "modifies": {                                // null unless doc_type = modification/amendment
+    "references_doc": string|null,
+    "new_amount": number|null,
+    "new_maturity_date": "YYYY-MM-DD|null",
+    "new_interest_rate": number|null,
+    "summary": string|null
+  },
+  "references_docs": [string],
+  "debtor_name": string|null,
+  "is_partial": boolean,
+  "is_blanket": boolean,
+  "extraction_confidence": "high|medium|low"
+}
+```
+
+Paste-ready `EXTRACTION_PROMPT` is already updated in **replit-agent-stage1.md** and **stage1-ingest-extract.md** — copy that string into the Agent. Only the prompt string changes; `getDocText`, `extractDoc`, caching, and concurrency stay exactly as built.
+
+> ⚠️ If you already cached `1618022008` / `2121004479` from the old prompt, **bust the cache** for those two doc numbers (or clear `recorder_doc_cache`) so they re-extract with the new fields — otherwise you'll keep reading the old blank objects.
+
+## 4. Direct-fetch URL — confirmed
+The links you found are directly fetchable PDFs (no click-through page to scrape):
+```
+https://crs.cookcountyclerkil.gov/Document/DisplayPdf?dId=<encoded>&hId=<hash>
+```
+`getDocText` fetches this URL as-is → `%PDF` header → text-layer first, OCR fallback. So point each index row's `url` at the `DisplayPdf?dId=…&hId=…` form, not the search-results page.
+
+## Expected result on 3014 after the update
+```
+mortgage  1618022008  lender: Albany Bank and Trust Company, N.A.  amount: 399000
+                      index_consideration_amount: 798000  interest_rate: <from doc>  maturity_date: <from doc>
+modification 2121004479  references_docs: ["1618022008","1618022009"]
+                      modifies: { references_doc:"1618022008", new_amount:…, new_maturity_date:…, new_interest_rate:…, summary:"…" }
+                      lender: Albany Bank and Trust Company, N.A.
+```
+Once that array looks right, Stage 2 (`reconcile`) will apply the modification over the original mortgage — new amount/maturity/rate win — exactly the "modification supersedes" rule.

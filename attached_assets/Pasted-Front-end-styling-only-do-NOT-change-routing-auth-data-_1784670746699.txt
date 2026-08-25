@@ -1,0 +1,19 @@
+Front-end / styling only — do NOT change routing, auth, data, or business logic.
+
+Rebuild the /faq page to match the attached mockup knowyourprop-faq.html. Replace the page content entirely. Use the same design tokens as the rest of the site: Instrument Serif display, Inter body, JetBrains Mono labels, deep indigo 
+#2b3a9e, cream 
+#faf9f6, a faint fading grid background, the streams logo in the nav, and the dark closer card.
+
+Structure:
+
+Hero — eyebrow "Questions & answers", H1 "The honest FAQ.", and the one-line lede from the mockup.
+Four labeled groups of accordion questions, in this order:
+Before you make an offer — Why get a report before I make an offer? / Can I actually use this to negotiate? / What if I find something the seller didn't disclose?
+What's in a report — What does a report actually cover? / Does the report change based on what I want to do? / How current is the data? / What areas do you cover?
+Accuracy & limits — How accurate is the lien search? / Is this a replacement for a title company? / Can you tell me I'm "definitely eligible" for a tax incentive? / What if the report has incorrect information?
+Pricing & account — How much does a report cost? / Can I get a refund? / Do you offer pricing for agents or developers?
+Each question is an expandable accordion: serif question text with a +/− indigo toggle that flips open/closed. Use the exact question and answer copy from the mockup — do not change the specific figures (75%+ lien coverage, 24–48hr freshness, 30–90 day filing lag, $29 report, $99/mo subscription, 7-day refund).
+Contact/correction — the "What if the report has incorrect information?" answer and the closer's contact line both reference support@knowyourprop.com as a mailto: link.
+Dark closer — "Still deciding? Run one property." with the $29 line, a "Run your first analysis →" button, and the contact line: "Question we didn't answer, or something look off in a report? support@knowyourprop.com — a real person reads it."
+
+The "Run your first analysis →" button and the "$29" pricing answer should link to the real report/checkout flow — keep all existing routes intact. Match spacing, borders, radii, and colors to the mockup.

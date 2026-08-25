@@ -1,0 +1,452 @@
+{
+  "1": {
+    "name": "Daniel La Spata",
+    "phone": "(872) 206-2685",
+    "email": "Ward01@cityofchicago.org",
+    "wardOffice": "1958 North Milwaukee Avenue, Chicago, IL, 60647",
+    "website": "https://www.the1stward.com/",
+    "cityHallAddress": "121 North LaSalle Street, Room 300, Office 13",
+    "cityHallPhone": "(312) 744-3063 / 3074/6813"
+  },
+  "2": {
+    "name": "Brian Hopkins",
+    "phone": "(312) 744-6836 / 9867/6213",
+    "email": "office@aldermanhopkins.com",
+    "wardOffice": "121 North LaSalle Street, Room 300, Chicago, IL, 60602",
+    "website": "https://www.aldermanhopkins.com/",
+    "cityHallAddress": "",
+    "cityHallPhone": ""
+  },
+  "3": {
+    "name": "Pat Dowell",
+    "phone": "(773) 373-9273",
+    "email": "Ward03@cityofchicago.org",
+    "wardOffice": "5046 South State Street, Chicago, IL, 60609",
+    "website": "http://www.ward03chicago.com",
+    "cityHallAddress": "121 North LaSalle Street, Room 302",
+    "cityHallPhone": "(312) 744-8734 / 6712/3380"
+  },
+  "4": {
+    "name": "Lamont J. Robinson",
+    "phone": "(312)744-2690",
+    "email": "Ward04@cityofchicago.org",
+    "wardOffice": "928 East 43rd Street, Chicago, IL, 60653",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-2690/8438"
+  },
+  "5": {
+    "name": "Desmon C. Yancy",
+    "phone": "(312) 744-6832",
+    "email": "Ward05@cityofchicago.org",
+    "wardOffice": "2230 East 71st Street, Chicago, IL, 60649",
+    "website": "",
+    "cityHallAddress": "121 N. LaSalle Street Room 200",
+    "cityHallPhone": "(312) 744-6832/3195"
+  },
+  "6": {
+    "name": "William E. Hall",
+    "phone": "(773) 241-3100",
+    "email": "Ward06@cityofchicago.org",
+    "wardOffice": "8541 South State Street, Chicago, IL, 60619",
+    "website": "",
+    "cityHallAddress": "121 N. LaSalle St. Room 300",
+    "cityHallPhone": "(312) 744-6868"
+  },
+  "7": {
+    "name": "Gregory I. Mitchell",
+    "phone": "(773) 731-7777",
+    "email": "Ward07@cityofchicago.org",
+    "wardOffice": "2249 East 95th Street, Chicago, IL, 60617",
+    "website": "http://www.gregmitchell7thward.org/",
+    "cityHallAddress": "121 North LaSalle Street, Room 304",
+    "cityHallPhone": "(312) 744-6833 / 3127/4096"
+  },
+  "8": {
+    "name": "Michelle A. Harris",
+    "phone": "(773) 874-3300",
+    "email": "Ward08@cityofchicago.org",
+    "wardOffice": "8539 South Cottage Grove Avenue, Chicago, IL, 60619",
+    "website": "http://www.Aldermanmichelleharris.net",
+    "cityHallAddress": "121 Noth LaSalle Street, Room 200",
+    "cityHallPhone": "(312) 744-3075/6825"
+  },
+  "9": {
+    "name": "Anthony Beale",
+    "phone": "(773) 785-1100",
+    "email": "Ward09@cityofchicago.org",
+    "wardOffice": "34 East 112th Place, Chicago, IL, 60628",
+    "website": "http://www.Ward09.com",
+    "cityHallAddress": "121 North LaSalle Street, Room 200",
+    "cityHallPhone": "(312) 744-6838 / 3061"
+  },
+  "10": {
+    "name": "Peter Chico",
+    "phone": "(773) 768-8138",
+    "email": "Ward10@cityofchicago.org",
+    "wardOffice": "10500 South Ewing Avenue, Chicago, IL, 60617",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 200",
+    "cityHallPhone": "(312) 744-3078/5687"
+  },
+  "11": {
+    "name": "Nicole T. Lee",
+    "phone": "(773) 254-6677",
+    "email": "Ward11@cityofchicago.org",
+    "wardOffice": "3659 South Halsted Street, Chicago, IL, 60609",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-6663 / 6664"
+  },
+  "12": {
+    "name": "Julia M. Ramirez",
+    "phone": "(773) 475-6783",
+    "email": "Ward12@cityofchicago.org",
+    "wardOffice": "3868 South Archer Avenue, Chicago, IL, 60632",
+    "website": "",
+    "cityHallAddress": "121 North Lasalle, Room 200",
+    "cityHallPhone": "(312) 744-3068/4025"
+  },
+  "13": {
+    "name": "Marty Quinn",
+    "phone": "(773) 581-8000",
+    "email": "Ward13@cityofchicago.org",
+    "wardOffice": "6500 South Pulaski Road, Chicago, IL, 60629",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-3058/3076"
+  },
+  "14": {
+    "name": "Jeylu B. Gutierrez",
+    "phone": "773-236-0117",
+    "email": "Ward14@cityofchicago.org",
+    "wardOffice": "3124 West 59th Street, Chicago, IL, 60629",
+    "website": "",
+    "cityHallAddress": "121 North Lasalle, Room 300",
+    "cityHallPhone": "312-744-6580/6511"
+  },
+  "15": {
+    "name": "Raymond A. Lopez",
+    "phone": "(773) 823-1539",
+    "email": "Ward15@cityofchicago.org",
+    "wardOffice": "2650 West 51st Street, Chicago, IL, 60632",
+    "website": "http://www.the15thward.org",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-4321 / 4322"
+  },
+  "16": {
+    "name": "Stephanie D. Coleman",
+    "phone": "(773) 306-1981",
+    "email": "Ward16@cityofchicago.org",
+    "wardOffice": "1137 West 63rd Street, Unit C, Chicago, IL, 60621",
+    "website": "https://www.16thward.org",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-6850 / 6854"
+  },
+  "17": {
+    "name": "David H. Moore",
+    "phone": "(773) 783-3672",
+    "email": "Ward17@cityofchicago.org",
+    "wardOffice": "1344 West 79th Street, Chicago, IL, 60620",
+    "website": "http://www.David.Moore@cityofchicago.org",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-3435 / 3438"
+  },
+  "18": {
+    "name": "Derrick G. Curtis",
+    "phone": "(773) 284-5057",
+    "email": "Ward18@cityofchicago.org",
+    "wardOffice": "8359 South Pulaski Road, Chicago, IL, 60652",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-6856 / 3087"
+  },
+  "19": {
+    "name": "Matthew J. O'Shea",
+    "phone": "(773) 238-8766",
+    "email": "Ward19@cityofchicago.org",
+    "wardOffice": "10400 South Western Avenue, Chicago, IL, 60643",
+    "website": "http://the19thward.com/",
+    "cityHallAddress": "121 North LaSalle Street, Room 200",
+    "cityHallPhone": "(312) 744-3072 / 5682 /2679"
+  },
+  "20": {
+    "name": "Jeanette B. Taylor",
+    "phone": "(773) 966-5336",
+    "email": "Ward20@cityofchicago.org",
+    "wardOffice": "5401 South Wentworth Avenue, Suite 19E, Chicago, IL, 60621",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-6840/5688/7738"
+  },
+  "21": {
+    "name": "Ronnie L. Mosley",
+    "phone": "(773) 881-9300",
+    "email": "Ward21@cityofchicago.org",
+    "wardOffice": "10805 South Halsted Street, Chicago, IL, 60628",
+    "website": "",
+    "cityHallAddress": "121 North Lasalle, Room 200",
+    "cityHallPhone": "(312) 744-4810/4811"
+  },
+  "22": {
+    "name": "Michael D. Rodriguez",
+    "phone": "(773) 762-1771",
+    "email": "Ward22@cityofchicago.org",
+    "wardOffice": "2500 South St. Louis Avenue, Chicago, IL, 60623",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 300, Office 30",
+    "cityHallPhone": "(312) 744-9491/9492/3325"
+  },
+  "23": {
+    "name": "Silvana Tabares",
+    "phone": "(773) 582-4444",
+    "email": "Ward23@cityofchicago.org",
+    "wardOffice": "6247 South Archer Avenue, Chicago, IL, 60638",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 200, Office 14",
+    "cityHallPhone": "(312) 744-6828 / 5683"
+  },
+  "24": {
+    "name": "Monique L. Scott",
+    "phone": "(773) 533-2400",
+    "email": "ward24@cityofchicago.org",
+    "wardOffice": "1158 South Keeler Street, Chicago, IL, 60624",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-6839/6849"
+  },
+  "25": {
+    "name": "Byron Sigcho-Lopez",
+    "phone": "(773) 523-4100",
+    "email": "Ward25@cityofchicago.org",
+    "wardOffice": "2100 West Cermak Road, Chicago, IL, 60608",
+    "website": "https://www.25thward.org",
+    "cityHallAddress": "121 North LaSalle Street, Room 200, Office 11",
+    "cityHallPhone": "(312) 744-0209/1997/0584"
+  },
+  "26": {
+    "name": "Jessica L. Fuentes",
+    "phone": "(773) 395-0143",
+    "email": "Ward26@cityofchicago.org",
+    "wardOffice": "2511 West Division Street, Chicago, IL, 60602",
+    "website": "",
+    "cityHallAddress": "121 N. La Salle St. Room 200",
+    "cityHallPhone": "(312) 744-6853/4198"
+  },
+  "27": {
+    "name": "Walter R. Burnett",
+    "phone": "(312) 432-1995",
+    "email": "Ward27@cityofchicago.org",
+    "wardOffice": "4 North Western Avenue, Unit 1C, Chicago, IL, 60618",
+    "website": "http://aldermanburnett.com/",
+    "cityHallAddress": "121 North LaSalle Street, Room 300, Office 38",
+    "cityHallPhone": "(312) 744-6124/6125"
+  },
+  "28": {
+    "name": "Jason C. Ervin",
+    "phone": "(773) 533-0900",
+    "email": "Ward28@cityofchicago.org",
+    "wardOffice": "2622 West Jackson Boulevard, Suite 200A, Chicago, IL, 60612",
+    "website": "http://www.AldermanErvin.com/",
+    "cityHallAddress": "121 North LaSalle Street, Room 200, Office 18",
+    "cityHallPhone": "(312) 744-3066/3097/3166"
+  },
+  "29": {
+    "name": "Chris Taliaferro",
+    "phone": "(773) 237-6460",
+    "email": "Ward29@cityofchicago.org",
+    "wardOffice": "6272 West North Avenue, Chicago, IL, 60639",
+    "website": "http://www.aldtaliaferro.com",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-8805 / 5486"
+  },
+  "30": {
+    "name": "Ruth Cruz",
+    "phone": "(773) 628-7874",
+    "email": "Ward30@cityofchicago.org",
+    "wardOffice": "5418 W. Belmont Ave, Chicago, IL, 60641",
+    "website": "",
+    "cityHallAddress": "121 N. LaSalle St. Room 200",
+    "cityHallPhone": "(312) 744-3304/3305"
+  },
+  "31": {
+    "name": "Cardona, Jr., Felix",
+    "phone": "(773) 824-2000",
+    "email": "Ward31@cityofchicago.org",
+    "wardOffice": "4606 West Diversey Avenue, Chicago, IL, 60639",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 200, Office 19",
+    "cityHallPhone": "(312) 744-6102/6123"
+  },
+  "32": {
+    "name": "Scott Waguespack",
+    "phone": "(773) 248-1330",
+    "email": "Ward32@cityofchicago.org",
+    "wardOffice": "2657 North Clybourn Avenue, Chicago, IL, 60614",
+    "website": "http://www.ward32.org",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-6567/6574"
+  },
+  "33": {
+    "name": "Rossana Rodriguez Sanchez",
+    "phone": "(773) 840-7880",
+    "email": "Ward33@cityofchicago.org",
+    "wardOffice": "4747 North Sawyer Avenue, Chicago, IL, 60625",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-3373/3379/1367"
+  },
+  "34": {
+    "name": "William Conway",
+    "phone": "(312) 744-6820",
+    "email": "Ward34@cityofchicago.org",
+    "wardOffice": "121 North LaSalle Street, Room 300, Chicago, IL, 60602",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-6820/6829"
+  },
+  "35": {
+    "name": "Anthony J. Quezada",
+    "phone": "(773) 887-3772",
+    "email": "ward35@cityofchicago.org",
+    "wardOffice": "2934 North Milwaukee Avenue, Unit C, Chicago, IL, 60618",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-6835/3109/6845"
+  },
+  "36": {
+    "name": "Gilbert Villegas",
+    "phone": "(773) 745-4636",
+    "email": "Ward36@cityofchicago.org",
+    "wardOffice": "6560 West Fullerton Avenue, Unit C118, Suite A; 2246 West Chicago Avenue, Chicago, IL, 60707; 60622",
+    "website": "http://www.36thward.org",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-4324/4325/3701"
+  },
+  "37": {
+    "name": "Emma Mitts",
+    "phone": "(773) 379-0960",
+    "email": "Ward37@cityofchicago.org",
+    "wardOffice": "4924 West Chicago Avenue, Chicago, IL, 60651",
+    "website": "https://www.cityofchicago.org/city/en/about/wards/37.html",
+    "cityHallAddress": "121 North LaSalle Street, Room 300, Office 45",
+    "cityHallPhone": "(312) 744-8019/5686/1454"
+  },
+  "38": {
+    "name": "Nicholas Sposato",
+    "phone": "(773) 283-3838",
+    "email": "Ward38@cityofchicago.org",
+    "wardOffice": "3821 North Harlem Avenue, Chicago, IL, 60634",
+    "website": "http://aldermansposato.com/",
+    "cityHallAddress": "121 North LaSalle Street, Room 200, Office 2",
+    "cityHallPhone": "(312) 744-6857/7947/1836"
+  },
+  "39": {
+    "name": "Samantha Nugent",
+    "phone": "(773) 736-5594",
+    "email": "Ward39@cityofchicago.org",
+    "wardOffice": "4200 West Lawrence Avenue, Chicago, IL, 60630",
+    "website": "http://www.ward39@cityofchicago.org",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-7242/7243/3023"
+  },
+  "40": {
+    "name": "Vasquez, Jr., Andre",
+    "phone": "(773) 654-1867",
+    "email": "Ward40@cityofchicago.org",
+    "wardOffice": "5620 North Western Avenue, Chicago, IL, 60659",
+    "website": "http://www.40thward.org",
+    "cityHallAddress": "121 North LaSalle Street, Room 200",
+    "cityHallPhone": "(312) 744-6858/7248/3511"
+  },
+  "41": {
+    "name": "Anthony V. Napolitano",
+    "phone": "(773) 631-2241",
+    "email": "Ward41@cityofchicago.org",
+    "wardOffice": "7231 West Touhy Avenue, Chicago, IL, 60631",
+    "website": "http://www.chicago41.com",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-3942/3208"
+  },
+  "42": {
+    "name": "Brendan Reilly",
+    "phone": "(312) 642-4242",
+    "email": "Ward42@cityofchicago.org",
+    "wardOffice": "121 North LaSalle Street, Room 200, Office 6, Chicago, IL, 60602",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 200, Office 6",
+    "cityHallPhone": "(312) 642-4242"
+  },
+  "43": {
+    "name": "Timothy R. Knudsen",
+    "phone": "(773) 348-9500",
+    "email": "Ward43@cityofchicago.org",
+    "wardOffice": "2523 North Halsted Street, Chicago, IL, 60614",
+    "website": "https://ward43.org",
+    "cityHallAddress": "121 North LaSalle Street, Room 200",
+    "cityHallPhone": "(312) 744-3071/5685"
+  },
+  "44": {
+    "name": "Bennett R. Lawson",
+    "phone": "(773) 525-6034",
+    "email": "Ward44@cityofchicago.org",
+    "wardOffice": "3223 North Sheffield Avenue, Suite A, Chicago, IL, 60657",
+    "website": "",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-3073/3133"
+  },
+  "45": {
+    "name": "James M. Gardiner",
+    "phone": "(773) 853-0799",
+    "email": "Ward45@cityofchicago.org",
+    "wardOffice": "5460 N. Milwaukee Ave, Chicago, IL, 60630",
+    "website": "http://www.aldermangardiner.com",
+    "cityHallAddress": "121 North LaSalle Street, Room 200",
+    "cityHallPhone": "(312) 744-6841/5684"
+  },
+  "46": {
+    "name": "Angela Clay",
+    "phone": "(312) 744-6831",
+    "email": "Ward46@cityofchicago.org",
+    "wardOffice": "4544 North Broadway, Chicago, IL, 60640",
+    "website": "",
+    "cityHallAddress": "121 N. La Salle Room 200",
+    "cityHallPhone": "312-744-6831/5694"
+  },
+  "47": {
+    "name": "Matthew J. Martin",
+    "phone": "(773) 868-4747",
+    "email": "Ward47@cityofchicago.org",
+    "wardOffice": "4243 North Lincoln Avenue, Chicago, Illinois, 60618",
+    "website": "http://www.aldermanmartin.com",
+    "cityHallAddress": "121 North LaSalle Street, Room 200, Office 7",
+    "cityHallPhone": "(312) 744-4021/0446/3778"
+  },
+  "48": {
+    "name": "Leni Manaa-Hoppenworth",
+    "phone": "(773) 784-5277",
+    "email": "Ward48@cityofchicago.org",
+    "wardOffice": "1129  West Bryn Mawr Avenue, Chicago, IL, 60660",
+    "website": "https://www.the48thward.org/",
+    "cityHallAddress": "121 North Lasalle, Room 300",
+    "cityHallPhone": "(312) 744-6860/6834"
+  },
+  "49": {
+    "name": "Maria E. Hadden",
+    "phone": "(773) 338-5796",
+    "email": "Ward49@cityofchicago.org",
+    "wardOffice": "1447 West Morse Avenue, Chicago, IL, 60626",
+    "website": "http://www.49thward.org",
+    "cityHallAddress": "121 North LaSalle Street, Room 300",
+    "cityHallPhone": "(312) 744-3067/3080/1672"
+  },
+  "50": {
+    "name": "Debra L. Silverstein",
+    "phone": "(773) 262-1050",
+    "email": "Ward50@cityofchicago.org",
+    "wardOffice": "2949 West Devon Avenue, Chicago, IL, 60659",
+    "website": "http://50thwardchicago.com",
+    "cityHallAddress": "121 North LaSalle Street, Room 300, Office 24",
+    "cityHallPhone": "(312) 744-6855/5680/3180"
+  }
+}

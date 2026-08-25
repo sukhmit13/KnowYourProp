@@ -1,0 +1,41 @@
+Rebuild the Valuation Calculator to match the attached references: report-valuation-final.html (SBA / dual-price variant) and report-valuation-conv.html (Conventional / single-price variant). Front-end / styling + conditional field rendering only — do NOT change the calculation math, the loan-type definitions, auto-fill, routing, or auth. Same computations; this restyles the layout and drives which fields show based on the selected loan type's existing config.
+
+Overall layout — two stacked full-width blocks:
+
+Inputs card (top): white --card, rounded 14px, containing a 3-column grid of groups — Purchase, Financing, Operating Income. Mono-uppercase group labels with a bottom rule. Fields: small --ink2 label (required fields get an indigo *), then a --paper-filled input with --line border rounded 9px, $ prefix / % suffix in muted where relevant, value in Inter 600. Helper hints in small muted text.
+Deal at a Glance band (below): full-width dark 
+#232d6e panel, 4-column metric row, Instrument Serif values (~32px white), one-line verdict under a hairline.
+
+Loan-type adaptivity — render each group from the selected loan type's config, not a fixed template:
+
+Purchase group:
+
+If the loan type finances a combined business + real estate deal → show two price fields (Business Purchase Price, Real Estate Purchase Price).
+Otherwise → show one "Purchase Price" field.
+
+Financing group: Loan Type is always a full-width select. For the remaining terms, render each parameter by whether the loan type lets the user change it:
+
+Editable (loan type allows it, e.g. SBA/Custom) → a normal input (Down % / Term / Rate as an even trio).
+Fixed by the loan type (e.g. Conventional's 20% down, 30-yr) → do NOT render an editable input. Instead show a small "Set by loan type" label followed by read-only locked preset chips (muted 
+#f1f0ec fill, --line border, a small lock glyph, e.g. "🔒 20% down" "🔒 30-yr term"). Interest Rate stays editable with its source hint ("Freddie Mac PMMS · [date]").
+When the loan type changes, these chips/fields update automatically to the new type's parameters.
+
+Operating group:
+
+If the loan type / NOI basis uses a net NOI (taxes & insurance already deducted) → show only the NOI basis selector + NOI, with the hint "Net — taxes & insurance already deducted". Hide the Taxes and Insurance fields.
+If NOI is gross (e.g. the SBA business deal) → show NOI + Annual Property Taxes + Annual Insurance (taxes auto-filled from most recent year).
+
+Deal at a Glance — metric color rules (same on every loan type):
+
+DSCR: ≥ 1.25 → green "Debt well-covered"; 1.05–1.25 → amber "Thin coverage"; ~1.0 (0.95–1.05) → amber "Break-even / just under 1.0"; < 0.95 → red "Debt not covered".
+Monthly Cash Flow: positive → green "Positive"; ~0 → amber "Break-even"; clearly negative → red "Negative".
+Cap Rate and Cash-on-Cash: always neutral (muted sub-line) — no universal good/bad threshold.
+Color only the small sub-line marker (green 
+#7ee0a0 / amber 
+#f0c85a / red on the dark panel), never the big serif number. The bottom verdict dot + text summarizes the DSCR/cash-flow state.
+
+Empty state: if a required input (e.g. Purchase Price) is missing, the results band shows a clean on-system message ("Enter a purchase price to calculate investment metrics") instead of numbers — styled inside the same dark panel, not a separate grey box.
+
+Mobile: the three input groups stack to one column; the four metric tiles wrap to 2×2. Locked preset chips wrap normally.
+
+No black anywhere; keep it factual.

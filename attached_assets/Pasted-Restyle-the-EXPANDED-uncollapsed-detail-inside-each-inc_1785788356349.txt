@@ -1,0 +1,28 @@
+Restyle the EXPANDED (uncollapsed) detail inside each incentive card in the Location-Based Incentives section so every card uses one consistent detail template. The attached report-incentives-detail.html is the exact visual target. Front-end / styling only — do NOT change the incentive data, the eligibility results, which fields each program shows, routing, or auth. Keep the collapsed rows and the availability→type organization exactly as they are now; this only restyles what appears when a card is opened.
+
+Design tokens (use existing CSS variables): JetBrains Mono for labels + FIPS/identifiers; Inter for body; Instrument Serif for all tile numbers. State colors — three only: green --good:#2f7d3f / bg 
+#edf6ef, amber --amber:#c98400 / bg 
+#fdf6cf, grey --na:#8b8a84 / bg 
+#f2f1ec. Indigo 
+#2b3a9e for links, chips, and icons. Neutral surfaces: --paper:#faf9f6, --line:#e7e5df.
+
+Every expanded card renders these blocks in this fixed order (omit any block a program lacks — never reorder):
+
+Status banner — a soft-tinted rounded box in the card's state color (green/amber/grey), with a state-colored icon, a bold finding line, and a one-line explanation beneath. The key phrase in the finding line takes the state color inline (e.g. "…Qualified Census Tract — Deep Distress" with "Deep Distress" in green; "In a qualifying zone for Class 7 (TIF: Bryn Mawr/Broadway)" with the TIF in amber). This replaces the old uniform-grey callout — the banner color must match the card's eligibility state.
+Description (optional) — one short paragraph in --ink2 when the program needs a lead-in sentence.
+Stat tiles (optional, when the program has metrics) — a 3-up grid of tiles: --paper background, --line border, rounded 9px, centered, with the value in Instrument Serif over a small --ink2 label. Use this SAME tile for demographic metrics (NMTC: poverty %, AMI %, unemployment) AND for schedule/rate values (Class 7: 10% / 15% / 20%). Identifiers like the Census Tract FIPS render in JetBrains Mono instead of serif. A qualifying flag (e.g. "Qualifies") is a small green pill beneath the label — never a plain grey tag.
+Info tiles (optional, text-based) — a 2-up grid of --paper cards with a bold --ink label and a short --ink2 description, for sub-options (e.g. Class 7(a) vs 7(b)).
+Context chip (optional) — a small indigo-soft mono chip for a location/TIF tag.
+Who Can Apply / Eligibility Requirements — two --paper cards side by side, each with a mono-uppercase label over a bulleted list in --ink2. (Some programs use "Tax Incentives Available / Who Can Benefit" — same two-card treatment.)
+Note — the italic muted "requires application / approval — not automatic" and any program note.
+Links row — a top-bordered row with indigo program/apply links on the left and the source in muted text right-aligned. Optional timing/deadline line above it uses a small indigo calendar icon + muted italic text.
+
+Consistency rules to enforce across all cards:
+
+All tile numbers are Instrument Serif — never bold Inter.
+Status callouts are tinted to the card's actual state (green/amber/grey), not a single neutral grey for everything.
+One tile component for both metrics and rate/schedule values — do not build separate styles.
+All icons and links indigo; category/status flags use their state color; identifiers use mono.
+Grey (never red) for not-applicable states.
+
+No black anywhere. Do not add scores, rankings, or new eligibility conclusions — the detail only presents the data the program already has.

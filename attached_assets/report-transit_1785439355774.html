@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--c1:#3f51c5;--c2:#0e8fa6;--track:#efeee9;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+    /* official transit line identities — used ONLY as small labeled pills */
+    --green:#00a651;--blue:#00a1de;--pink:#e27ea6;--orange:#f9461c;--purple:#522398;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .col{max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .chead{display:flex;align-items:center;gap:9px;padding-bottom:13px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+  .chead .sq{width:10px;height:10px;border-radius:2px;background:var(--indigo);flex:none}
+  .chead .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+  .barlbl{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+
+  /* station rows — neutral bg, line pills, distance */
+  .st{display:flex;align-items:center;gap:12px;padding:11px 2px;border-top:1px solid var(--line)}
+  .st:first-of-type{border-top:0}
+  .st .nm{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .st .pills{display:flex;gap:5px;flex-wrap:wrap}
+  .pill{font-size:10px;font-weight:700;color:#fff;border-radius:5px;padding:2px 7px;white-space:nowrap}
+  .pill.green{background:var(--green)} .pill.blue{background:var(--blue)} .pill.pink{background:var(--pink)} .pill.orange{background:var(--orange)} .pill.purple{background:var(--purple)}
+  .st .dist{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--ink2);background:#f3f2ec;border-radius:5px;padding:2px 8px}
+
+  /* ridership block */
+  .rblock{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+  .rhead{display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap}
+  .rhead .name{font-size:14px;font-weight:700;color:var(--ink)}
+  .rhead .rank{font-family:var(--mono);font-size:11px;color:var(--ink2);background:#f3f2ec;border-radius:6px;padding:3px 8px}
+  .trend{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--indigo);background:var(--indigoSoft);border-radius:999px;padding:3px 9px}
+  .triple{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+  .tcell{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+  .tcell .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .tcell .n{font-family:var(--disp);font-size:26px;line-height:1;color:var(--ink);margin:5px 0 2px}
+  .tcell .u{font-size:11px;color:var(--muted)}
+
+  /* bullet comparison bar */
+  .bullet{margin-top:4px}
+  .bullet .lab{font-size:12px;color:var(--ink2);margin-bottom:7px}
+  .btrack{position:relative;height:12px;background:var(--track);border-radius:6px}
+  .bfill{position:absolute;left:0;top:0;bottom:0;background:var(--c1);border-radius:6px}
+  .btick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55}
+  .btick.dash{background:repeating-linear-gradient(var(--ink2),var(--ink2) 2px,transparent 2px,transparent 4px);opacity:.5}
+  .brow{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:7px}
+  .brow b{color:var(--ink);font-weight:600}
+
+  /* line chart */
+  .chart{margin-top:6px}
+  .chart svg{width:100%;height:auto;display:block}
+  .grid{stroke:var(--line);stroke-width:1}
+  .axis{font-family:var(--mono);font-size:9px;fill:var(--muted)}
+  .s1{stroke:var(--c1);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .s2{stroke:var(--c2);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .legend{display:flex;gap:18px;justify-content:center;margin-top:8px}
+  .lg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)}
+  .lg .d{width:14px;height:3px;border-radius:2px}.d1{background:var(--c1)}.d2{background:var(--c2)}
+
+  /* street traffic tiles */
+  .kpis3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+  .kpi{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .kpi .left{display:flex;flex-direction:column;gap:4px}
+  .kpi .cat{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .kpi .q{font-size:11.5px;color:var(--muted)}
+  .kpi .n{font-family:var(--disp);font-size:34px;line-height:.9;color:var(--ink)}
+  .src{font-size:11.5px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .seg-lbl{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px}
+  .seg-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+</style>
+</head>
+<body>
+<div class="col">
+
+  <!-- RAIL STATIONS -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">CTA Rail Stations · within 2 mi</span></div>
+    <div class="st"><span class="nm">Damen</span><span class="pills"><span class="pill green">Green</span></span><span class="dist">0.84 mi</span></div>
+    <div class="st"><span class="nm">California</span><span class="pills"><span class="pill green">Green</span></span><span class="dist">0.89 mi</span></div>
+    <div class="st"><span class="nm">Damen-O'Hare</span><span class="pills"><span class="pill blue">Blue</span></span><span class="dist">1.13 mi</span></div>
+    <div class="st"><span class="nm">Division</span><span class="pills"><span class="pill blue">Blue</span></span><span class="dist">1.18 mi</span></div>
+    <div class="st"><span class="nm">Ashland-Lake</span><span class="pills"><span class="pill green">Green</span><span class="pill pink">Pink</span></span><span class="dist">1.20 mi</span></div>
+  </div>
+
+  <!-- L RIDERSHIP -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">CTA L Ridership</span></div>
+    <div class="rblock">
+      <div class="rhead"><span class="name">Damen–Lake</span><span class="rank">#104 of 143 stations</span><span class="trend">↗ +32.6% (3 yr)</span></div>
+      <div class="triple">
+        <div class="tcell"><div class="l">Avg Weekday</div><div class="n">932.6</div><div class="u">entries/day</div></div>
+        <div class="tcell"><div class="l">Avg Saturday</div><div class="n">571.4</div><div class="u">entries/day</div></div>
+        <div class="tcell"><div class="l">Avg Sun/Hol</div><div class="n">435.7</div><div class="u">entries/day</div></div>
+      </div>
+      <div class="bullet">
+        <div class="lab">Weekday vs system</div>
+        <div class="btrack">
+          <div class="bfill" style="width:23%"></div>
+          <div class="btick dash" style="left:50%"></div>
+          <div class="btick" style="left:67%"></div>
+        </div>
+        <div class="brow"><span><b>This station 932.6</b></span><span>Median 2,013</span><span>System avg 2,693</span></div>
+      </div>
+    </div>
+
+    <div class="barlbl">Weekday ridership trend · 36 months</div>
+    <div class="chart">
+      <svg viewBox="0 0 700 190" preserveAspectRatio="none">
+        <line class="grid" x1="46" y1="20" x2="690" y2="20"/><line class="grid" x1="46" y1="60" x2="690" y2="60"/>
+        <line class="grid" x1="46" y1="100" x2="690" y2="100"/><line class="grid" x1="46" y1="140" x2="690" y2="140"/>
+        <text class="axis" x="8" y="24">1.4k</text><text class="axis" x="8" y="104">700</text><text class="axis" x="20" y="144">0</text>
+        <polyline class="s1" points="46,72 100,66 154,74 208,60 262,66 316,54 370,58 424,44 478,36 532,50 586,40 640,52 690,46"/>
+        <polyline class="s2" points="46,120 100,110 154,116 208,108 262,112 316,100 370,104 424,92 478,86 532,98 586,90 640,100 690,94"/>
+        <text class="axis" x="46" y="182">06/23</text><text class="axis" x="330" y="182">12/24</text><text class="axis" x="655" y="182">06/26</text>
+      </svg>
+      <div class="legend"><span class="lg"><span class="d d1"></span>Damen–Lake</span><span class="lg"><span class="d d2"></span>California–Lake</span></div>
+    </div>
+    <div class="src">Source: CTA L Station Entries, City of Chicago Data Portal. Trend based on 36-month comparison.</div>
+  </div>
+
+  <!-- STREET TRAFFIC -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">Street Traffic Volume</span><span style="margin-left:auto" class="trend">↗ Increasing</span></div>
+    <div class="seg-lbl">Western (NB) — W Ohio St to W Chicago Ave</div>
+    <div class="seg-sub">Nearest monitored segment · 376 ft away</div>
+    <div class="kpis3">
+      <div class="kpi"><div class="left"><span class="cat">Daily Vehicles</span><span class="q">vehicles/day</span></div><span class="n">12,644</span></div>
+      <div class="kpi"><div class="left"><span class="cat">City Rank</span><span class="q">of 2,162 segments</span></div><span class="n">#407</span></div>
+      <div class="kpi"><div class="left"><span class="cat">Percentile</span><span class="q">busier than 81%</span></div><span class="n">81st</span></div>
+    </div>
+    <div class="bullet">
+      <div class="lab">Citywide traffic comparison</div>
+      <div class="btrack"><div class="bfill" style="width:81%"></div><div class="btick" style="left:81%"></div></div>
+      <div class="brow"><span>Low traffic</span><span><b>This segment · 81st percentile</b></span><span>High traffic</span></div>
+    </div>
+    <div class="barlbl" style="margin-top:18px">Annual average daily traffic</div>
+    <div class="chart">
+      <svg viewBox="0 0 700 170" preserveAspectRatio="none">
+        <line class="grid" x1="46" y1="20" x2="690" y2="20"/><line class="grid" x1="46" y1="70" x2="690" y2="70"/><line class="grid" x1="46" y1="120" x2="690" y2="120"/>
+        <text class="axis" x="10" y="24">18k</text><text class="axis" x="10" y="74">9k</text><text class="axis" x="20" y="124">0</text>
+        <polyline class="s1" points="60,64 260,66 460,50 660,60"/>
+        <circle cx="60" cy="64" r="3.5" fill="#3f51c5"/><circle cx="260" cy="66" r="3.5" fill="#3f51c5"/><circle cx="460" cy="50" r="3.5" fill="#3f51c5"/><circle cx="660" cy="60" r="3.5" fill="#3f51c5"/>
+        <text class="axis" x="52" y="150">2022</text><text class="axis" x="252" y="150">2023</text><text class="axis" x="452" y="150">2025</text><text class="axis" x="650" y="150">2026</text>
+      </svg>
+    </div>
+    <div class="src">Source: Chicago Traffic Tracker, City of Chicago Data Portal. Ranking across 2,162 monitored segments.</div>
+  </div>
+
+</div>
+</body>
+</html>

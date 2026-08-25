@@ -1,0 +1,159 @@
+# KYP — Step 5c: Ward & Zoning context cards → hybrid
+
+Redesign the two context cards that sit under the map (above the "Shape your report" setup zone):
+**Ward & Alderperson** (`RunDetail.tsx:3733-3827`, `id="print-section-ward"`) and **Zoning Details**
+(`RunDetail.tsx:3830-3946`, `id="print-section-zoning-details"`).
+
+Today they render as always-open `<Card>`s with a `chead` title; in the current build they've picked
+up a thin collapsed line ("Leni Manaa-Hoppenworth · Ward 48 — view details") that hides all their
+real content behind a chevron. This step gives them a **real collapsed state that carries
+information**, and an expanded state in the bold hybrid language.
+
+**Match the attached mock exactly.** No data is added or removed — every existing field is kept.
+
+---
+
+## 0. CSS — append to `kyp-base.css` (namespaced)
+
+```css
+/* ===== context card (ward / zoning) ===== */
+.kyp-ctxc{background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:13px;overflow:hidden}
+.kyp-ctxc .top{display:flex;align-items:center;gap:13px;padding:14px 16px;cursor:pointer}
+.kyp-ctxc .crest{width:46px;height:46px;border-radius:11px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--kyp-indigo);color:#fff;line-height:1}
+.kyp-ctxc .crest .n{font-family:var(--kyp-disp);font-size:23px;line-height:.92}
+.kyp-ctxc .crest .u{font-family:var(--kyp-mono);font-size:6.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.86;margin-top:2px}
+.kyp-ctxc .crest.zone .n{font-size:16px}
+.kyp-ctxc .mid{flex:1;min-width:0}
+.kyp-ctxc .k{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--kyp-muted);margin-bottom:3px}
+.kyp-ctxc .nm{font-size:16px;font-weight:700;color:var(--kyp-ink);line-height:1.25}
+.kyp-ctxc .sub{font-size:12.5px;color:var(--kyp-ink2);margin-top:3px;line-height:1.35}
+.kyp-ctxc .sub b{color:var(--kyp-ink);font-weight:600}
+.kyp-ctxc .chev{flex:none;width:26px;height:26px;border-radius:7px;border:1px solid var(--kyp-line);display:flex;align-items:center;justify-content:center;color:var(--kyp-muted);font-size:11px}
+.kyp-ctxc .body{padding:0 18px 18px 75px;border-top:1px solid var(--kyp-line)}
+.kyp-ctxc .body.closed{display:none}
+
+/* stacked rows — ward contacts AND zoning allow-list share this shape */
+.kyp-cxrows{display:flex;flex-direction:column;gap:7px;padding-top:14px}
+.kyp-cxrow{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--kyp-ink2)}
+.kyp-cxrow .i{width:14px;height:14px;flex:none;color:var(--kyp-muted);font-size:11px;text-align:center}
+.kyp-cxrow a{color:var(--kyp-indigo);text-decoration:none;border-bottom:1px solid var(--kyp-indigoSoft)}
+.kyp-cxrow .mk{width:14px;flex:none;text-align:center;font-weight:700;color:var(--kyp-muted);font-size:12px}
+.kyp-cxrow.on{color:var(--kyp-ink)}
+.kyp-cxrow.on .mk{color:var(--kyp-green)}
+.kyp-cxrow .w{font-weight:600}
+.kyp-cxrow .note{color:var(--kyp-muted);font-weight:400;font-size:12px}
+
+/* filled stat blocks */
+.kyp-cxstats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.kyp-cxstat{display:flex;align-items:center;gap:13px;border-radius:11px;padding:13px 15px;color:#fff}
+.kyp-cxstat.ind{background:var(--kyp-indigoL)} .kyp-cxstat.dark{background:#16171b}
+.kyp-cxstat .n{font-family:var(--kyp-disp);font-size:32px;line-height:.9;flex:none}
+.kyp-cxstat .l{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.92}
+.kyp-cxstat .s{font-size:10.5px;opacity:.85;margin-top:3px;line-height:1.3}
+
+/* zoning metric blocks (4-up) */
+.kyp-cxtiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.kyp-cxtile{border-radius:11px;padding:13px 14px;color:#fff;background:var(--kyp-indigoL)}
+.kyp-cxtile.dark{background:#16171b} .kyp-cxtile.slate{background:var(--kyp-slate)}
+.kyp-cxtile .l{font-family:var(--kyp-mono);font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.92;margin-bottom:7px}
+.kyp-cxtile .n{font-family:var(--kyp-disp);font-size:27px;line-height:.95}
+.kyp-cxtile .s{font-size:10px;opacity:.85;margin-top:4px;line-height:1.3}
+
+/* use chips, bullets, cta, footer */
+.kyp-cxlbl{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-muted);margin:16px 0 8px}
+.kyp-cxuses{display:flex;gap:6px;flex-wrap:wrap}
+.kyp-cxuse{font-size:12px;font-weight:500;color:var(--kyp-indigo);background:var(--kyp-indigoSoft);border-radius:7px;padding:5px 10px}
+.kyp-cxwtm{margin-top:16px;padding-top:14px;border-top:1px dashed var(--kyp-line)}
+.kyp-cxwtmh{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-ink2);margin-bottom:9px}
+.kyp-cxb{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--kyp-ink2);line-height:1.5;margin-bottom:7px}
+.kyp-cxb .dot{width:5px;height:5px;border-radius:50%;background:var(--kyp-indigo);flex:none;margin-top:7px}
+.kyp-cxb b{color:var(--kyp-ink);font-weight:600}
+.kyp-cxcta{display:flex;align-items:center;gap:11px;margin-top:14px;padding:11px 13px;background:var(--kyp-indigoSoft);border-radius:10px;text-decoration:none}
+.kyp-cxcta .h{font-size:12.5px;font-weight:600;color:var(--kyp-ink);line-height:1.3}
+.kyp-cxcta .s{font-size:11px;color:var(--kyp-ink2);margin-top:2px}
+.kyp-cxcta .arr{color:var(--kyp-indigo);font-size:13px;flex:none;margin-left:auto}
+.kyp-cxfoot{font-size:11.5px;color:var(--kyp-muted);line-height:1.5;margin-top:14px;padding-top:12px;border-top:1px solid var(--kyp-line)}
+.kyp-cxfoot a{color:var(--kyp-indigo);text-decoration:none;border-bottom:1px solid var(--kyp-indigoSoft)}
+.kyp-cxfoot .pin{font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-ink2)}
+.kyp-cxlink{display:inline-flex;align-items:center;gap:5px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-indigo);text-decoration:none;margin-top:11px}
+```
+
+---
+
+## 1. WARD & ALDERPERSON card
+
+**Collapsed (default):** crest `{ward}` / "WARD" (indigo) · label "Alderperson" · `facts.alderman` ·
+sub-line `**{years} yrs** in office · {attendance} attendance` (omit either half if the field is null;
+if both are null, sub-line is the ward office neighborhood or nothing).
+
+**Expanded** — everything currently rendered, in this order:
+1. `.kyp-cxrows` — three contact rows, same links/testids as today: phone (`tel:`,
+   `link-alderman-phone`), email (`mailto:`, `link-alderman-email`), ward office (Google Maps,
+   `link-alderman-office`).
+2. `.kyp-cxstats` — two filled blocks: **ind** = `aldermanYearsInOffice` via existing `yearsTile()`
+   (`text-alderman-years`), **dark** = `aldermanAttendance` (`text-alderman-attendance`). Keep the
+   existing non-numeric fallback ("on City Council").
+3. `.kyp-cxcta` → Councilmatic (`aldermanCouncilmaticUrl` w/ existing fallback,
+   `link-alderman-councilmatic`). Copy: **"Legislation & donors"** / "Voting record & campaign
+   finance · via Councilmatic".
+4. `.kyp-cxwtm` "Why this matters" — all **four** existing bullets, copy unchanged.
+5. `.kyp-cxlink` → `aldermanUrl`, "View full Ward {ward} page ↗" (`link-alderman-page`).
+
+## 2. ZONING DETAILS card
+
+**Collapsed (default):** crest `{facts.zoning}` / "ZONING" — **indigo, same as ward** · label
+"Zoning district" · `zoningInfo.name` · sub-line = allowed categories + FAR, e.g.
+`Residential + commercial · **5.0 FAR**` (build from the three booleans + `maxFAR`).
+
+> **The crest is ALWAYS indigo.** A zoning code is a *designation*, not a verdict — it is not
+> good or bad on its own (that depends on the user's intended use, which is the Project Type
+> section's job). Never color it green/orange/red, and do not wire it to `effectiveCompatibility`.
+
+**Expanded** — everything currently rendered, in this order:
+1. **DELETE `zoningInfo.description`** (the "Community shopping districts accommodate…" paragraph).
+   It duplicates "What this zoning means" below. This is the only content removed in this step.
+2. `.kyp-cxrows` — the three allow-rows **stacked vertically** (not pills), mirroring the ward's
+   contact list so the filled blocks align across both cards:
+   `✓ Residential` / `✓ Commercial` / `✕ Industrial`, `.on` when allowed. Keep testids
+   `badge-residential`, `badge-commercial`, `badge-industrial`.
+   Where residential is allowed but not at ground level, append a muted `.note` — "— above ground
+   floor" (derive from the same `allowedUses` "above" sniff `zoningMeaningBullets()` already uses).
+3. `.kyp-cxtiles` — four filled blocks, values from the existing helpers:
+   **ind** Max FAR (`maxFAR`, "floor-area ratio") · **dark** Max Height (`heightTile()`) ·
+   **slate** Parking (`parkingTile()`) · **slate** Min Lot Area (`minLotAreaPerUnit`, "sq ft per unit").
+   When a value is absent render the word **"None"** + sub "not specified" — never a bare em-dash
+   (a dash in a filled block reads as missing data; "None" is a real answer).
+4. `.kyp-cxlbl` "Allowed uses — as of right" + `.kyp-cxuses` chips (`badge-use-{i}`).
+5. `.kyp-cxwtm` "What this zoning means" — the three existing `zoningMeaningBullets()`.
+6. `.kyp-cxfoot` — "Data may not reflect recent rezonings. [Verify on the official map] — search by
+   {PIN}" (PIN in `.pin`, same formatting + link as today).
+7. `.kyp-cxlink` → Chicago Zoning Code (`link-zoning-code`).
+
+---
+
+## 🔒 Guardrails
+- **Default state: COLLAPSED.** The collapsed line now carries real information, and these are
+  page context rather than sections to scan.
+- **Print must still work.** Keep `id="print-section-ward"` and `id="print-section-zoning-details"`.
+  Because these become real collapsibles, register them with the print force-open path
+  (`localCollapsiblesRef`, `RunDetail.tsx:768-783, 2795-2800`) or they will print collapsed.
+- Preserve every `data-testid` listed above and every link target.
+- Only ONE piece of content is deleted: the zoning `description` paragraph. Everything else stays.
+- Do **not** wire either card to `selectedProjectType` / `effectiveCompatibility`.
+
+## Companion
+`AddressPreview.tsx:645-846` renders a near-duplicate of both cards for the pre-purchase preview.
+Update it in parallel or it will drift. The shared helpers (`yearsTile`, `heightTile`, `parkingTile`,
+`zoningMeaningBullets`) already live in `client/src/lib/wardZoningDisplay.ts` — reuse them.
+
+## ✅ Done-when
+- [ ] Both cards collapsed by default, each showing crest + label + name + an informative sub-line
+      (no "— view details").
+- [ ] Both crests indigo; zoning crest never changes color with project type.
+- [ ] Ward expanded: 3 contact rows → 2 filled stat blocks → Councilmatic CTA → 4 "Why this matters"
+      bullets → full ward page link.
+- [ ] Zoning expanded: 3 stacked allow-rows → 4 filled metric blocks → use chips → 3 "What this
+      zoning means" bullets → PIN footer → zoning code link. No description paragraph.
+- [ ] Side by side, the filled blocks in the two cards sit at roughly the same vertical position.
+- [ ] Print/Save PDF still includes both cards fully expanded.
+- [ ] All testids and links intact; AddressPreview updated to match.

@@ -1,8 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ListingClaim } from "@shared/listingChecks";
 import { api, buildUrl, type RunInput, type ScenarioInput, type LookupInput } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
 import type { ZoningInfo, ChildcareAccessData, SbifEligibilityResult, NmtcEligibilityResult } from "@shared/schema";
 import type { ZoningPermission } from "@shared/businessUses";
+import type { NearbyLicensesResponse } from "@shared/businessLicenses";
 
 // ============================================
 // RUNS HOOKS
@@ -61,9 +63,11 @@ export function useCreateRun() {
 
   return useMutation({
     mutationFn: async (data: RunInput) => {
+      // Send the bearer token too: iframe contexts can block session cookies.
+      const token = localStorage.getItem('kyp_auth_token');
       const res = await fetch(api.runs.create.path, {
         method: api.runs.create.method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify(data),
         credentials: "include",
       });
@@ -176,7 +180,7 @@ export function useUpdateProjectType() {
         body: JSON.stringify({ projectType }),
         credentials: "include" 
       });
-      if (!res.ok) throw new Error('Failed to update project type');
+      if (!res.ok) throw new Error('Failed to update project use');
       return await res.json();
     },
     onSuccess: (data, variables) => {
@@ -1666,6 +1670,7 @@ export function useClearTaxCache() {
 // ============================================
 
 import type { LienResult } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
 
 export function useLienSearch(pin: string | null | undefined, ownerName?: string | null, city?: string | null) {
   const isValidPin = !!pin && (
@@ -1727,7 +1732,7 @@ export function useOwnerLienSearch() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ pin, ownerName }: { pin: string; ownerName: string }) => {
+    mutationFn: async ({ pin, ownerName }: { pin: string; ownerName: string; city?: string | null }) => {
       const res = await fetch('/api/lien-search/owner', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1740,10 +1745,10 @@ export function useOwnerLienSearch() {
       }
       return await res.json();
     },
-    onSuccess: (data, { pin }) => {
+    onSuccess: (data, { pin, ownerName, city }) => {
       // Invalidate all lien search queries for this PIN so UI refreshes
       queryClient.invalidateQueries({ queryKey: ['/api/lien-search', pin] });
-      queryClient.setQueryData(['/api/lien-search', pin, null], data);
+      queryClient.setQueryData(['/api/lien-search', pin, ownerName || null, city || null], data);
       toast({
         title: 'Owner lien search complete',
         description: `Found ${data.ownerLiens?.length ?? 0} personal lien record(s) for ${data.ownerName}.`,
@@ -1939,11 +1944,6 @@ export interface ProximityData {
     name: string;
     distanceFt: number;
     dailyTraffic: number;
-    dataYear: string;
-  } | null;
-  newConstruction: {
-    distanceFt: number;
-    nearestPin: string;
     dataYear: string;
   } | null;
   vacantLand: {
@@ -3013,16 +3013,16 @@ export interface CtaBusRidershipData {
   };
 }
 
-export function useNewConstruction(communityArea: string | undefined, zipCode: string | undefined) {
+export function useNewConstruction(lat: number | undefined, lon: number | undefined, communityArea?: string) {
   return useQuery<any>({
-    queryKey: ['/api/new-construction', communityArea, zipCode],
-    enabled: !!communityArea || !!zipCode,
+    queryKey: ['/api/new-construction', lat, lon, communityArea],
+    enabled: lat != null && lon != null,
     queryFn: async () => {
       const res = await fetch('/api/new-construction', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ communityArea, zipCode }),
+        body: JSON.stringify({ communityArea, lat, lng: lon }),
       });
       if (!res.ok) throw new Error('Failed to fetch new construction data');
       return await res.json();
@@ -3032,16 +3032,16 @@ export function useNewConstruction(communityArea: string | undefined, zipCode: s
   });
 }
 
-export function useNearbyNewConstruction(lat: number | undefined, lon: number | undefined) {
+export function useNearbyNewConstruction(lat: number | undefined, lon: number | undefined, communityArea?: string) {
   return useQuery<any>({
-    queryKey: ['/api/new-construction-nearby', lat, lon],
+    queryKey: ['/api/new-construction-nearby', lat, lon, communityArea],
     enabled: !!lat && !!lon,
     queryFn: async () => {
       const res = await fetch('/api/new-construction-nearby', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ lat, lng: lon }),
+        body: JSON.stringify({ lat, lng: lon, communityArea }),
       });
       if (!res.ok) throw new Error('Failed to fetch nearby new construction data');
       return await res.json();
@@ -3146,7 +3146,7 @@ export function useMetraLineRidership(enabled: boolean) {
 }
 
 export function useNearbyBusinessLicenses(lat: number | undefined, lon: number | undefined) {
-  return useQuery<any>({
+  return useQuery<NearbyLicensesResponse>({
     queryKey: ['/api/nearby-business-licenses', lat, lon],
     enabled: !!lat && !!lon,
     queryFn: async () => {
@@ -3543,9 +3543,10 @@ export function useUpcomingDevelopments(
   communityArea: string | undefined,
   lat?: number | null,
   lon?: number | null,
+  radiusMi: 0.5 | 1 = 0.5,
 ) {
   return useQuery<any>({
-    queryKey: ['/api/upcoming-developments', neighborhood, communityArea, lat, lon],
+    queryKey: ['/api/upcoming-developments', neighborhood, communityArea, lat, lon, radiusMi],
     enabled: !!(neighborhood || communityArea),
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -3553,6 +3554,7 @@ export function useUpcomingDevelopments(
       if (communityArea) params.set('communityArea', communityArea);
       if (lat != null) params.set('lat', String(lat));
       if (lon != null) params.set('lon', String(lon));
+      params.set('radiusMi', String(radiusMi));
       const res = await fetch(`/api/upcoming-developments?${params}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch upcoming developments');
       return await res.json();
@@ -3810,14 +3812,15 @@ export function useSidewalkCafe(address: string | undefined) {
   });
 }
 
-export function useZoningHistory(address: string | undefined, ward?: number | null) {
+export function useZoningHistory(address: string | undefined, ward?: number | null, altAddresses?: string[]) {
   return useQuery<any>({
-    queryKey: ['/api/zoning-history', address, ward],
+    queryKey: ['/api/zoning-history', address, ward, (altAddresses || []).join('|')],
     enabled: !!address,
     queryFn: async () => {
       const params = new URLSearchParams();
       if (address) params.set('address', address);
       if (ward != null) params.set('ward', String(ward));
+      for (const alt of altAddresses || []) params.append('alt', alt);
       const res = await fetch(`/api/zoning-history?${params}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch zoning history');
       return await res.json();
@@ -3912,14 +3915,38 @@ function listingSnapshotAuthHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+export interface ListingSnapshotData {
+  status: 'active' | 'pending' | 'off_market' | 'not_found';
+  statusLabel: string;
+  sourceName: string | null;
+  sourceUrl: string | null;
+  listPrice: number | null;
+  daysOnMarket: number | null;
+  listedDate: string | null;
+  soldDate: string | null;
+  soldPrice: number | null;
+  remarksSummary: string | null;
+  disclosures: string[];
+  keyFacts: string[];
+  claims: ListingClaim[];
+  whyHistorical: string | null;
+  unitCount: number | null;
+  rentRoll: Array<{ unit: string | null; beds: number | null; baths: number | null; monthlyRent: number | null }>;
+  grossAnnualIncome: number | null;
+  statedNoi: number | null;
+  checkedAt: string;
+}
+
 export function useListingSnapshot(runId: number | null | undefined) {
-  return useQuery<any>({
+  return useQuery<ListingSnapshotData | null>({
     queryKey: ['/api/runs', runId, 'listing-snapshot'],
     enabled: !!runId,
     queryFn: async () => {
       const res = await fetch(`/api/runs/${runId}/listing-snapshot`, { credentials: 'include', headers: listingSnapshotAuthHeaders() });
-      if (res.status === 401) return null; // not signed in — card just shows "not checked"
-      if (!res.ok) throw new Error('Failed to fetch listing snapshot');
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message || (res.status === 401 ? 'Sign in to view the listing check.' : 'Failed to fetch listing snapshot'));
+      }
       return res.json();
     },
     staleTime: Infinity, // only changes when the user explicitly refreshes
@@ -4275,9 +4302,12 @@ export function useGenerateNeighborhoodNewsTakeaway(runId: number | null | undef
 export interface DebtSnapshotRecord {
   pin: string;
   snap: {
+    schema_version?: number;
     current_owner: string | null; ownership_acquired: string | null; acquired_via: string;
-    active: any[]; cleared_by_sale: any[]; distress: any[]; foreclosure_active: boolean;
+    active: any[]; satisfied?: any[]; cleared_by_sale: any[]; distress: any[]; foreclosure_active: boolean;
     liens: any[]; flags: string[]; docs_total: number;
+    scopeChanges?: any[];
+    combined_recorded_debt?: number | null;
   };
   snapHash: string;
   takeaway: { title: string; rows: Array<{ tone: 'good' | 'caution' | 'insight' | 'bad'; html: string; chip: string | null }> } | null;

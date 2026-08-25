@@ -1,0 +1,24 @@
+Polish the "Historic Landmark Status" section to match our report design system, and make the rating tag color data-driven. Front-end / styling only — do NOT change the landmark data, the CHRS rating logic, routing, or auth. IMPORTANT: the orange color is correct and intentional — it's the official City of Chicago CHRS designation, not a brand color. Do NOT change it to indigo.
+
+Design tokens (use existing CSS variables; add any missing):
+
+JetBrains Mono for the section header + the "What This Means" label + PIN identifiers; Inter for body; --ink, --ink2, --muted, --line, --paper, --card as elsewhere
+--indigo:#2b3a9e (header icon + source link only)
+Rating colors: --orange:#d9660c, --red:#b23b2e, plus neutral --muted for unrated
+
+Section header: single indigo icon + "HISTORIC LANDMARK STATUS" in mono uppercase, bottom border --line. One icon only, no bullet beside it. (This is already close — just confirm the icon is indigo and the title is mono uppercase.)
+
+Do NOT add any colored stripe, accent bar, or left border to the cards. Cards use the standard flat treatment: --paper background, 1px --line border, rounded 12px — identical to every other card in the report. Strict parity, no accent.
+
+Rating tag — make the color driven by the CHRS rating value, not hardcoded:
+
+Pill shape, solid fill, white text (same as our other solid badges like "2 Parcels").
+If rating = Orange → --orange fill, label "Orange Tag".
+If rating = Red → --red fill, label "Red Tag".
+If unrated / no CHRS rating → neutral --muted fill, label "Unrated" (or hide the tag entirely if that's cleaner).
+The small color swatch on the "CHRS Rating:" line must use the same rating-driven color as the tag.
+Do not hardcode orange anywhere — a Red-rated property must render red, or it will display the wrong official designation.
+
+Body: the "Historic Resource" card keeps its key/value lines (Landmark address, Tagged parcels, CHRS Rating, Era) in --ink2 with bold --ink labels. Tagged-parcel PINs stay in JetBrains Mono (they're identifiers). The "WHAT THIS MEANS" card keeps its mono-uppercase label and bulleted list. Source line: "Historic Preservation Division" link in --indigo, source attribution in --muted.
+
+Keep it factual and unchanged in meaning — only styling and the rating-driven color logic change.

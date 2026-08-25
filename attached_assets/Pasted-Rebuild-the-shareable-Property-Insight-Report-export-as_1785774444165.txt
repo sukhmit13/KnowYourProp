@@ -1,0 +1,28 @@
+Rebuild the shareable "Property Insight Report" export as a single Letter page. The attached insight-report.html is the exact target — match its layout, type, and color. This is the print/PDF export view only; do NOT change the underlying report data, the analysis logic, routing, or auth. All content is the same data you already generate — this is layout and styling.
+
+Page & fonts: One US-Letter portrait page (816×1056px at 96dpi, or @page { size: letter; margin: 0 }). Everything fits on one page — no page 2. Fonts: Instrument Serif for the address, the "Our Take" headline, and the big metadata values; Inter for all body text; JetBrains Mono for labels, kickers, and band titles.
+
+Tokens: --navy:#232d6e (hero), --indigo:#2b3a9e / --band:#3a49bd (section bands + step numbers), --gold:#e0a615 (hero accents), --ink:#141414, --ink2:#54544f, --muted:#8b8a84, --line:#e7e5df. Status colors — traffic-light only, NO teal or any other hue: --red:#b23b2e / bg 
+#fbecea, --green:#2f7d3f / bg 
+#edf6ef, and yellow --amberBd:#e6a70a (border) / --amber:#c98400 (marker) / bg 
+#fdf6cf.
+
+Hero (stacked, not side-by-side): navy block with a gold bottom border. Order top to bottom: mono kicker "PROPERTY INSIGHT REPORT" → address in large Instrument Serif → one property line (neighborhood · city · zoning · size · year) → a thin full-width divider rule → mono gold "OUR TAKE" label → the Our Take headline in Instrument Serif → the Our Take paragraph. The Our Take must sit UNDER the address across full width — do not put it in a right-hand column beside the address.
+
+Metadata strip (5 cells, directly under the hero, no top border, shared borders between cells): LAST SOLD · ZONING · PROPERTY TAXES · TITLE STATUS · LANDMARK. Remove the old "Recorded Docs" cell entirely. Each cell is a small mono uppercase label above the value. No grey descriptor sub-lines — just label + value, except: LAST SOLD shows the price and sale date inline on one line ("$411,000" + a small muted "4/24/2014" beside it), and PROPERTY TAXES shows the amount and tax year inline ("$16,290" + small muted "2024"). Keep the date/year on the same line as the amount (no wrapping — use white-space:nowrap). TITLE STATUS "Flagged" renders in --red.
+
+Band headers: full-width --band indigo bars, mono uppercase title on the left, a muted note on the right. Two of them: "WHAT THE PUBLIC RECORD SAYS ABOUT THIS ASSET" and "BEFORE YOU MOVE FORWARD".
+
+Finding cards (2-column grid): each card has a 4px left border and a soft tinted background in its status color, and is laid out as a flex row: a fixed-width marker column, then a content column holding the bold title and the body paragraph. The body must align under the title text (both in the content column), NOT out under the marker.
+
+Traffic-light system, three states only: red = a risk to resolve, yellow = a caution/limitation, green = a genuine backstop. There is NO teal/blue "neutral" state — any finding that was teal becomes yellow.
+Markers are meaningful and mirror each other: red uses ×, green uses ✓, yellow uses !. Marker color matches the card's status color.
+The yellow must read as a clean yellow (gold border 
+#e6a70a on pale-lemon bg 
+#fdf6cf) — not a mustard/brown border on a beige fill.
+
+Before You Move Forward (3-column grid): each step is a bordered card with an indigo rounded number chip (1/2/3), a bold title, and a body paragraph.
+
+Sources footer: pinned to the bottom of the page, thin top rule, a mono "SOURCES" label, then the source list + the "informational only, not legal/tax/investment advice" disclaimer in small muted text.
+
+Fit-to-one-page: if content is close to overflowing, tighten padding and font sizes globally (the attached reference is already sized to land at exactly 1056px) rather than dropping to a second page. Verify the rendered/PDF output is exactly one page.

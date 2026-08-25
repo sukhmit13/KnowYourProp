@@ -1,0 +1,143 @@
+# Replit Prompt — Location-Based Incentives — standardize the whole section — build to spec
+
+Two levels of standardization: **(1)** the section adopts the carded standard (header → takeaway → bucket summary → grouped list), and **(2)** every incentive renders as ONE canonical card with a fixed set of optional slots — sparse and rich cards are visibly the same component. Implement CSS/HTML **verbatim**; check CRITICAL DETAILS.
+
+## 🔴 The core rule — one card, fixed slot order, slots hide when empty
+Every incentive card has this anatomy, ALWAYS in this order. A slot with no data is simply omitted — never restyled, never reordered:
+```
+1. Header      — status icon · name · type tag · status pill        (ALWAYS)
+2. Verdict box — tinted by status; bold statement + optional subline (ALWAYS)
+3. Key facts   — ONE stat-cell row: flat facts AND schedules/tiers   (optional)
+4. Two-column  — Who can apply / Eligibility (or Eligible uses)      (optional)
+5. Note        — deadline/cycle, or a caveat (calendar/clock/x icon) (optional)
+6. Footer      — program link(s) … source                           (ALWAYS)
+```
+The difference between a one-line "not applicable" card and the rich Class 7 card is only **how many optional slots are filled** — the header, verdict box, and footer are identical.
+
+## 🔴 Status = 3 states, one color system everywhere
+Every card, pill, icon, verdict tint, and bucket maps to exactly one of three states (this is the section's whole favorability axis — legitimate good/neutral/watch coloring):
+| State | Meaning | Pills that map to it | Color |
+|---|---|---|---|
+| `good` | you likely qualify | Potentially Eligible · In Area · Authorized · In Qualifying Zone (eligible) | green `--good`/`--goodSoft` |
+| `caution` | needs a manual/human check | Needs Confirmation · Manual Check · In Qualifying Zone (unconfirmed) | marigold `--cautionText`/`--cautionSoft` |
+| `na` | doesn't apply | Not Applicable · Not in Zone · Not Eligible | **muted red** `--bad`/`--badSoft` |
+
+Three-lane **traffic light**: green (yes) / amber (maybe) / red (no). The pill LABEL varies per program; the pill/icon/verdict COLOR is one of these three. Buckets (10/5/32) use the same three colors. **`na` red is deliberately MUTED (`#c0392b`), not alarm red** — "not applicable" is the normal majority outcome (most programs don't fit most parcels), so it must read as a calm "no," never as 32 errors. Clean soft fill (`#fbeceb`), and the group ships collapsed so the red never floods the view.
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --takeBorder:#dde1f6; --takeDivider:#e3e5f4;
+--good:#2f7d3f; --goodSoft:#e9f4ec; --goodLine:#cfe6d5;
+--caution:#f0a41c; --cautionText:#b26c07; --cautionSoft:#fdf8f0; --cautionLine:#f3e2c2;
+--bad:#c0392b; --badText:#b23c2f; --badSoft:#fbeceb; --badLine:#f0d0cb;   /* na = MUTED red (not alarm #d13b26); reds tint clean so the soft fill is fine */
+/* NOTE: caution soft is a near-white warm tint (NOT a beige block), text is clean amber #b26c07 (NOT brown). Pale marigold fills go muddy — keep the fill barely-there and carry the color in the left rail + icon + pill. */
+--disp:"Instrument Serif"; --mono:"JetBrains Mono"; --sans:"Inter"; --take-label:11px; --take-title:21px; --take-body:13px;
+```
+
+## Input (per incentive)
+```json
+{
+  "name": "Cook County Class 7c (CURE)",
+  "type": "Property Tax",                 // Property Tax | Grant | Financing | Tax Credit | Zoning | Program
+  "state": "good",                        // good | caution | na
+  "pill_label": "Potentially Eligible",
+  "verdict": "Potentially eligible — Class 7c provides a 5-year reduced assessment (16% of market value)…",
+  "verdict_sub": "Requires a Cook County Assessor application…",   // optional
+  "keyfacts": [ {"label":"Years 1–10","value":"10%","detail":"vs. standard 25%"}, … ],  // optional — ONE component for flat facts AND schedules/tiers
+  "columns": [ {"head":"Who can apply","items":["…"]}, {"head":"Eligible improvements","items":["…"]} ], // optional
+  "note": {"icon":"clock|calendar|x","text":"Requires application / approval — not automatic."},          // optional
+  "links": [ {"label":"Program info","href":"…"} ],
+  "source": "Cook County Assessor"
+}
+```
+
+## CSS (verbatim — section + canonical card)
+```css
+/* section: use the Standard Section Structure (carded) — header + takeaway + this content */
+.buckets{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0 6px}
+.bkt{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:var(--paper)}
+.bkt .bn{font-family:var(--disp);font-size:30px;line-height:1} .bkt .bl{font-size:12px;font-weight:600;color:var(--ink)}
+.bkt.good{background:var(--goodSoft);border-color:var(--goodLine)} .bkt.good .bn{color:var(--good)}
+.bkt.caution{background:var(--cautionSoft);border-color:var(--cautionLine)} .bkt.caution .bn{color:var(--cautionText)}
+.bkt.na{background:var(--badSoft);border-color:var(--badLine)} .bkt.na .bn{color:var(--badText)}
+.grouph{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:24px 0 12px}
+.grouph .gd{width:8px;height:8px;border-radius:50%} .grouph .ct{color:var(--muted)}
+.grouph.good .gd{background:var(--good)} .grouph.caution .gd{background:var(--caution)} .grouph.na .gd{background:var(--bad)}
+
+.inc{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--card)}
+.inc + .inc{margin-top:12px}
+.inchd{display:flex;align-items:center;gap:10px;margin-bottom:13px;flex-wrap:wrap}
+.inchd .sc{width:20px;height:20px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.inchd .sc svg{width:12px;height:12px;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.inchd .nm{font-size:14.5px;font-weight:700;color:var(--ink)}
+.inchd .tp{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:3px 7px}
+.inchd .pill{margin-left:auto;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:6px;padding:4px 9px;white-space:nowrap}
+.inc.good .sc{background:var(--goodSoft)} .inc.good .sc svg{stroke:var(--good)} .inc.good .pill{color:var(--good);background:var(--goodSoft);border:1px solid var(--goodLine)}
+.inc.caution .sc{background:var(--cautionSoft)} .inc.caution .sc svg{stroke:var(--cautionText)} .inc.caution .pill{color:var(--cautionText);background:var(--cautionSoft);border:1px solid var(--cautionLine)}
+.inc.na .sc{background:var(--badSoft)} .inc.na .sc svg{stroke:var(--bad)} .inc.na .pill{color:var(--badText);background:var(--badSoft);border:1px solid var(--badLine)}
+.inc-v{border-radius:9px;padding:13px 15px}
+/* colored LEFT RAIL carries the status crisply; the fill stays light so caution never reads as a beige block */
+.inc.good .inc-v{background:var(--goodSoft);box-shadow:inset 3px 0 0 var(--good)} .inc.caution .inc-v{background:var(--cautionSoft);box-shadow:inset 3px 0 0 var(--caution)} .inc.na .inc-v{background:var(--badSoft);box-shadow:inset 3px 0 0 var(--bad)}
+.inc-v .vt{font-size:13px;font-weight:600;color:var(--ink);line-height:1.5} .inc-v .vs{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:5px}
+/* ONE stat-cell component for BOTH flat facts and schedules/tiers — never two different components */
+.kf{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.kfc{border:1px solid var(--line);border-radius:9px;padding:11px 14px;min-width:112px}
+.kfc .kl{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.kfc .kv{font-family:var(--disp);font-size:22px;color:var(--ink);line-height:1}
+.kfc .kd{font-size:11px;color:var(--ink2);margin-top:6px;line-height:1.4;max-width:150px}
+.inc-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:14px}
+.inc-cols .ch{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
+.inc-cols ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+.inc-cols li{font-size:12px;color:var(--ink2);line-height:1.45;padding-left:13px;position:relative}
+.inc-cols li::before{content:"";position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:var(--indigo)}
+.inc-note{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:7px 11px;margin-top:12px}
+.inc-note svg{width:12px;height:12px;stroke:var(--ink2);fill:none;flex:none}
+.inc-ft{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:13px;padding-top:12px;border-top:1px solid var(--line)}
+.inclink{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none}
+.inclink svg{width:11px;height:11px;stroke:var(--indigo);fill:none} .incsrc{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+```
+
+## Status icons (by state)
+- `good` → check `<path d="M20 6 9 17l-5-5"/>`
+- `caution` → triangle-alert `<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>`
+- `na` → x `<path d="M18 6 6 18M6 6l12 12"/>`
+
+## Section takeaway (Standard component)
+3 bullets: (1) `good` — the ONE unlock that matters (e.g. the TIF location → Class 7 / SBIF / CDG), chip → `#relevant`; (2) `insight` — the counts (10 relevant / 5 confirm / 32 n/a) and why the 32 don't fit (residential/affordable programs vs a commercial parcel); (3) `caution` — "potentially eligible ≠ guaranteed; every program needs application + approval; confirm funding cycles." This is the honesty guardrail — see LOGIC 4.
+
+## Grouping — each status group is COLLAPSIBLE
+Render three groups in order: **Likely relevant** (good), **Needs confirmation** (caution), **Not applicable** (na); within each, order by type (Property Tax → Financing → Grants → Tax Credit → Zoning). **Each group is a collapsible section** — a clickable header (`.grouph` summary + chevron) that folds its cards. Use native `<details>` (no JS needed). Default open state: **Likely relevant OPEN, Needs confirmation OPEN, Not applicable COLLAPSED** (32 is long).
+```css
+details.grp > summary{list-style:none;cursor:pointer;user-select:none}
+details.grp > summary::-webkit-details-marker{display:none}
+details.grp > summary .chev{margin-left:auto;width:14px;height:14px;stroke:var(--ink2);fill:none;transition:transform .15s ease}
+details.grp[open] > summary .chev{transform:rotate(180deg)}
+details.grp > summary:hover .chev{stroke:var(--ink)}
+.grpbody{margin-bottom:6px}
+.disc{font-size:12px;color:var(--muted);line-height:1.55;margin-top:24px;padding-top:16px;border-top:1px solid var(--line)}
+```
+```html
+<details class="grp" open>                 <!-- omit `open` on the Not-applicable group -->
+  <summary class="grouph good"><span class="gd"></span>Likely relevant<span class="ct">· 10</span><svg class="chev" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+  <div class="grpbody"> …one .inc card per program… </div>
+</details>
+```
+- **Two levels of collapse** are fine and independent: the GROUP folds (this `<details>`), and each `.inc` card can also expand/collapse its own body (header-only ↔ full). The `na` group starts collapsed at the group level; when opened, its cards may themselves start card-collapsed (header + pill only).
+- Close the section with the **informational-only disclaimer** (`.disc`): "Informational only — not legal, tax, or financial advice. A geographic or zoning match means the parcel may be inside a program's footprint, which is necessary but usually not sufficient for eligibility. Confirm each program with the administering agency before taking action."
+
+## LOGIC
+1. **Fixed slot order, hide-when-empty** — never reorder or restyle a slot because a card is sparse. Header + verdict + footer always; slots 3–5 (key facts, two-column, note) only when data exists.
+2. **One 3-state color system** — `state` drives icon, pill, verdict tint, and bucket color. The pill label is free text; the color is not.
+3. **One number component, always** — flat facts (Term / 16%), year schedules (10/15/20 over years), and grant tiers (Small/Medium/Large) ALL render as the SAME `.kf` stat-cell row (mono label · serif value · optional detail). Never two different components for numbers — that's the exact drift that made Class 7c look different from Class 7(a)/(b). More/fewer cells, same cell.
+4. **"Eligible" is never a promise** — every `good`/`caution` card's verdict is phrased as *potentially* eligible / in a qualifying zone, and (where it applies) carries the "requires application — not automatic" note. Never state a program as granted.
+5. **`na` verdict states the missing condition** + the standard "the available location data does not establish eligibility" subline. No apology, no green.
+6. **Links + source always in the footer** — program link(s) left, source right. Consistent across all 47.
+
+## CRITICAL DETAILS
+1. **One canonical card, fixed slot order, slots hide when empty** — sparse vs rich differ only by filled slots.
+2. **Three states, one color system** — good/caution/na drive icon+pill+verdict+bucket; pill label varies, color doesn't.
+3. **One stat-cell component for ALL numbers** (facts, schedules, grant tiers) — no per-program bespoke layouts; sibling programs (Class 7c vs 7a/b) must render numbers identically.
+4. **Section = carded Standard Structure** (header → takeaway → buckets → **collapsible** grouped list → informational-only disclaimer); takeaway is the shared component. Each status group folds via `<details>` (Not applicable collapsed by default).
+5. **Eligibility is always conditional** ("potentially", "requires application"); `na` uses the standard subline; no program shown as guaranteed.
+6. **Serif (`--disp`) ONLY** on the takeaway headline, the bucket numbers, and the stat-cell value (`.kfc .kv`). Everything else Inter/Mono.

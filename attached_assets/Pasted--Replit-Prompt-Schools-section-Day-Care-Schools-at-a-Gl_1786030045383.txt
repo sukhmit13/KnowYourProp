@@ -1,0 +1,120 @@
+# Replit Prompt — Schools section (Day Care + Schools at a Glance + lists)
+
+Paste everything below into Replit.
+
+---
+
+Restyle the **Schools** section of the property report. This is primarily a **front-end / CSS + markup change**. Do NOT change routing, auth, or data fetching. Every value (ratios, counts, distances, school names, ratings, boundary flags) must stay bound to the real data already in the component — values shown here are placeholders. Two items (the day care classification and the per-level rating) are **derived states**: render whatever the data/rule produces, never hardcode the label.
+
+## Design tokens (reuse existing if present)
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb;
+--good:#2f7d3f;                 /* green — good */
+--caution:#f0a41c;              /* NEW marigold — caution/mid (replaces old #d9a520). fills/dots/bars only */
+--cautionText:#96600a;          /* dark marigold — use for caution TEXT (bright marigold fails contrast) */
+--bad:#d13b26; --badText:#b3311f;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+
+## Shared status badge (used by day care AND each school level)
+An outlined pill with a colored status dot + label — NOT a filled/beige background.
+```css
+.badge{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;border-radius:999px;padding:4px 12px 4px 10px;background:var(--card);border:1px solid;white-space:nowrap}
+.badge .bd{width:7px;height:7px;border-radius:50%;flex:none}
+.badge.good{color:var(--good);border-color:#bcdcc4}       .badge.good .bd{background:var(--good)}
+.badge.caution{color:var(--cautionText);border-color:#ecd49a} .badge.caution .bd{background:var(--caution)}
+.badge.bad{color:var(--badText);border-color:#eab5ac}     .badge.bad .bd{background:var(--bad)}
+```
+
+Shared section sub-label:
+```css
+.sub{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:12px}
+```
+
+---
+
+## PART 1 — DAY CARE (replace the diverging-bar + legend + 4 stat tiles)
+
+The old day care block is a heavy data-viz that clashes with the school lists. Replace it with a compact **status readout**: a status badge + the ratio, a four-step labeled track (categories labeled inline — NO separate legend), and a muted facts footnote.
+
+Keep the existing **By ZIP Code / By Neighborhood** toggle and the ZIP·Neighborhood·Ward context line; just restyle the toggle to a segmented control (active = indigo fill, white text).
+
+```css
+.toggle{display:inline-flex;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px;margin-bottom:12px}
+.toggle a{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:7px 16px;border-radius:8px;text-decoration:none;color:var(--ink2)}
+.toggle a.on{background:var(--indigo);color:#fff}
+.ctx{font-size:11.5px;color:var(--muted);margin-bottom:14px} .ctx b{color:var(--ink2);font-weight:600}
+
+.dc{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--card)}
+.dchead{display:flex;align-items:center;gap:12px;margin-bottom:15px}
+.dcnum{font-size:13px;color:var(--ink2)} .dcnum b{font-family:var(--disp);font-size:22px;color:var(--ink);vertical-align:-2px;margin-right:2px}
+.track{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.seg .bar{height:8px;border-radius:999px;background:#ecebe5}
+.seg .lb{font-size:11px;font-weight:600;color:var(--muted);margin-top:8px;text-align:center}
+.seg .rg{font-size:9.5px;color:#b3b2ac;margin-top:2px;text-align:center;font-family:var(--mono)}
+/* only the ACTIVE segment is colored; the rest stay grey */
+.seg.on.desert .bar{background:var(--bad)}       .seg.on.desert .lb{color:var(--badText)}
+.seg.on.underserved .bar{background:var(--caution)} .seg.on.underserved .lb{color:var(--cautionText)}
+.seg.on.adequate .bar{background:#4a9d5f}         .seg.on.adequate .lb{color:#3d8a4f}
+.seg.on.plentiful .bar{background:#1e7a3e}        .seg.on.plentiful .lb{color:#1e7a3e}
+.dcfacts{font-size:11.5px;color:var(--muted);margin-top:15px;padding-top:12px;border-top:1px solid var(--line);line-height:1.5} .dcfacts b{color:var(--ink2);font-weight:600}
+```
+
+- Track order left→right is **worst → best**: `Childcare desert (>3.0) · Underserved (1.5–3.0) · Adequate (1.0–1.5) · Plentiful (<1.0)`. (Ratio is children-under-5 per licensed slot, so lower = better; the ranges count down left to right, which is correct.)
+- The status badge class (`caution` here) AND the active track segment must both come from the SAME computed classification — a "Plentiful" area lights green in both, a "Childcare desert" lights red in both. Don't drive them separately.
+- Collapse the old four stat tiles into the single muted `.dcfacts` line (children under 5 · licensed slots · slot gap · source). No tiles, no separate legend.
+- **"Plentiful" is a new fourth category** — confirm its cutoff (default `<1.0`) matches your data's thresholds.
+
+---
+
+## PART 2 — SCHOOLS AT A GLANCE (new summary above the lists)
+
+A three-card row — **Elementary / Middle / High** — each leading with a rating, then count + closest, then the assigned boundary school. Put it after Day Care (with a divider) and before the detailed lists.
+
+```css
+.divide{height:1px;background:var(--line);margin:24px 0}
+.ov{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.lvl{border:1px solid var(--line);border-radius:12px;padding:15px 16px;background:var(--card)}
+.lvltop{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.lvltop .nm{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+.metric{display:flex;align-items:baseline;gap:7px;margin-bottom:3px}
+.metric .big{font-family:var(--disp);font-size:30px;line-height:1;color:var(--ink)}
+.metric .u{font-size:12px;color:var(--ink2)}
+.closest{font-size:11.5px;color:var(--muted);margin-bottom:13px} .closest b{color:var(--ink2);font-weight:600}
+.assigned{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+.assigned .al{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.assigned .an{font-size:13px;font-weight:600;color:var(--ink);line-height:1.25}
+.assigned .am{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2);margin-top:5px}
+.assigned .am .rd{width:7px;height:7px;border-radius:50%;flex:none;background:var(--good)}  /* dot color = that school's rating tier */
+```
+
+Each card: level name + rating badge (top row) → `<big count>` schools nearby → "Closest — {name} · {dist}" → an "Assigned · Boundary" sub-box with the zoned school, its rating, and distance. The assigned-school rating dot color follows that school's own rating tier (green/marigold/red), same mapping as the badges.
+
+### ⚠️ Two decisions to resolve before this ships (do not hardcode):
+1. **The per-level rating (Strong / Mixed / Limited) needs a defined rule**, not a hand-set label. Compute it from the nearby schools' CPS levels — e.g. *Strong* = majority Level 1+/1, *Mixed* = split, *Limited* = majority Level 2/3. Pick the exact thresholds and drive the badge class from that computed value. If a rule isn't defined yet, render the badge only when a rating exists; don't invent one.
+2. **Middle vs K–8 double-count.** In Chicago most elementary schools are K–8, so a separate "Middle" card often repeats the same K–8 school as Elementary. Prefer **Elementary (K–8)** and **High School** as two cards unless your data has genuinely distinct standalone middle schools. Only render a level card if that level has its own data.
+
+---
+
+## PART 3 — DETAILED LISTS (per level, below the summary)
+
+Keep the existing per-level lists but style each row consistently. Flag the assigned school inline with a "Your Boundary" indigo tag; rating tags use green-soft.
+```css
+.listlbl{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:22px 0 2px;display:flex;align-items:center;gap:9px}
+.listlbl .cnt{font-weight:500;color:var(--muted);letter-spacing:0;text-transform:none}
+.srow{display:flex;align-items:center;gap:12px;padding:12px 2px;border-top:1px solid var(--line)}
+.srow .nm{font-size:13.5px;font-weight:600;color:var(--ink)}
+.srow .gr{font-size:11.5px;color:var(--muted);margin-top:2px}
+.tag{font-size:10px;font-weight:600;border-radius:6px;padding:3px 8px;white-space:nowrap;margin-left:6px}
+.tag.lv{background:#e9f4ec;color:var(--good)}          /* CPS level */
+.tag.bd{background:var(--indigoSoft);color:var(--indigo)}  /* "Your Boundary" */
+.tag.en{background:var(--paper);border:1px solid var(--line);color:var(--ink2)}  /* enrollment type */
+.srow .mi{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+```
+
+## Consistency rules
+- One status system throughout: green (good/Strong), marigold `--caution` (mid/Underserved/Mixed), red (bad/Limited). Fills/dots/bars use `--caution`; any caution TEXT uses `--cautionText` (#96600a) for contrast.
+- No beige/yellow background fills anywhere — status color lives in the dot, bar, or border, not a wash.
+- Day care: no separate legend (labels sit on the track), no stat-tile row (collapsed to one footnote line).
+- Section order: Day Care → divider → Schools at a Glance → detailed lists.

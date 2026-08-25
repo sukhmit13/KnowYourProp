@@ -20,7 +20,7 @@ async function solveRecaptchaV3() {
   }
 
   process.stderr.write('[scraper] Submitting reCAPTCHA v3 to 2captcha...\n');
-  const submitUrl = `http://2captcha.com/in.php?key=${TWOCAPTCHA_API_KEY}&method=userrecaptcha&googlekey=${RECAPTCHA_SITE_KEY}&pageurl=${encodeURIComponent(searchUrl)}&version=v3&action=submit_v3&score=0.7&json=1`;
+  const submitUrl = `https://2captcha.com/in.php?key=${TWOCAPTCHA_API_KEY}&method=userrecaptcha&googlekey=${RECAPTCHA_SITE_KEY}&pageurl=${encodeURIComponent(searchUrl)}&version=v3&action=submit_v3&score=0.7&json=1`;
 
   let submitRes;
   try {
@@ -47,7 +47,7 @@ async function solveRecaptchaV3() {
   // Poll for result (every 5s, up to 120s)
   for (let i = 0; i < 24; i++) {
     await new Promise(r => setTimeout(r, 5000));
-    const resultUrl = `http://2captcha.com/res.php?key=${TWOCAPTCHA_API_KEY}&action=get&id=${captchaId}&json=1`;
+    const resultUrl = `https://2captcha.com/res.php?key=${TWOCAPTCHA_API_KEY}&action=get&id=${captchaId}&json=1`;
     let resultRes;
     try {
       resultRes = await fetch(resultUrl);

@@ -1,0 +1,22 @@
+Fix a ranking bug in the "Top Residential Lenders" section (Chicago Discovery). This is a data/logic fix — do NOT change any styling, the tab layout, the HMDA data source, or the definition of what each tab ranks by. Only make the displayed order match the displayed numbers.
+
+Symptom: On the "Most Closed Loans" tab, the list is not sorted by the closed-loan count it shows. Live example: the #1 lender displays 5,040 closed while the #6 lender displays 5,271 closed — a lender with more closed loans is ranked below one with fewer, on a list literally titled "Most Closed Loans." At least one mid-list row (Old National, 993) also outranks rows above it showing smaller counts.
+
+Step 1 — Diagnose, don't guess. Find the code that builds each lender tab (the query/aggregation and the sort). For the "Most Closed Loans" tab, identify two things separately:
+(a) the field used in the ORDER BY / .sort() that determines rank position, and
+(b) the field bound to the "N closed" number rendered in each row.
+Log or print both values per lender for the top ~8 rows so you can see them side by side.
+
+Step 2 — Determine which of these two root causes it is:
+
+Cause A — sort key ≠ displayed field: the ranking is sorted by a different metric than the count shown (e.g. sorted by application volume, a single-year subset, or a pre-filter count, while the UI prints a different closed-loan column).
+Cause B — displayed field ≠ sort field: the ranking is sorted correctly, but the number printed in the row pulls from the wrong column (e.g. total closed across a different year range than the one being ranked).
+Report which cause it is before changing code.
+
+Step 3 — Fix so they agree. The row's displayed "N closed" value and the value used to rank must be the same field, over the same time window. Sort strictly descending by that field. Do not fix this by re-sorting the final display array alone if the underlying issue is a field mismatch — align the field first, then sort.
+
+Step 4 — Check the other three tabs for the same pattern. Apply the identical check to "Most FHA Closed" (sort field vs the "FHA closed" number shown), "Most HELOC / Equity" (sort field vs the "subordinate" count shown), and "Lowest Avg Rate" (sort field vs the rate shown — note this one sorts ascending, lowest rate first). Fix any that mismatch.
+
+Step 5 — Verify. For every tab, print the ranked list and confirm the displayed metric is monotonic in the rank direction (descending for the count tabs, ascending for Lowest Avg Rate). Paste the verification output. No row may show a value that would place it out of order.
+
+Constraints: don't alter the qualifying thresholds (e.g. "min 50 loans"), the year ranges each tab covers, the tab titles, or any styling. This change is purely: make order consistent with the numbers shown.

@@ -18,7 +18,7 @@ interface Props {
   initialAnswers?: FunnelAnswers | null;
 }
 
-const ROLES = [
+export const ROLES = [
   { id: "broker_buy", label: "Real Estate Broker — Buy Side" },
   { id: "broker_sell", label: "Real Estate Broker — Sell Side" },
   { id: "owner_operator", label: "Owner / Operator" },
@@ -28,7 +28,7 @@ const ROLES = [
   { id: "lender", label: "Lender / Underwriter" },
 ];
 
-const REFERRAL_OPTIONS = [
+export const REFERRAL_OPTIONS = [
   { id: "residential_lender", label: "Residential Lender Recommendations" },
   { id: "commercial_lender", label: "Commercial / SBA Lender Recommendations" },
   { id: "tax_attorney", label: "Tax Attorney Recommendations" },
@@ -39,7 +39,7 @@ const REFERRAL_OPTIONS = [
   },
 ];
 
-const TRANSACTION_TYPES = [
+export const TRANSACTION_TYPES = [
   { id: "purchasing", label: "Purchasing the Building" },
   { id: "leasing_commercial", label: "Leasing Commercial Space\n(as Tenant)" },
   { id: "leasing_residential", label: "Leasing a Residential Apartment\n(as Tenant)" },

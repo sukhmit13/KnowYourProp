@@ -1,0 +1,37 @@
+Front-end / styling only — do NOT change routing, auth, or data. You may add a static metric-classification config for demographic coloring only.
+
+Redesign the Voting Trends and Demographic Trends sections to match the attached report-civic.html and report-demo2.html, using the existing design tokens and shared section-header component.
+
+1. Presidential Elections. For each year, a row with an inline two-party bar: a light track with a Democratic segment (
+#3f51c5) and a Republican segment (
+#c34a39), the Dem/Rep percentages labeled in their party colors beneath the bar, the margin as an indigo-soft "D +XX" badge, and turnout right-aligned in tabular figures. Blue/red are allowed here as party identity, always labeled.
+
+2. Mayoral Runoffs. Two cards, each listing the two candidates (name + party descriptor + %) with a two-segment split bar: winner in indigo (
+#2b3a9e), runner-up in neutral gray (
+#b9b7b0). Not red.
+
+3. Recent Referendums. A list where each measure shows name + year, a Yes-share bar with a dashed 50% threshold line, and a status badge — "Passed" in soft green (
+#edf6ef/
+#2f7d3f), "Failed" in neutral gray (
+#f2f0ea/
+#565651).
+
+4. Demographic Trends (Community Area, Census Tract, ZIP tables). Keep as clean comparison tables — do NOT chart. Metric left-aligned; the two period columns and Change right-aligned in tabular figures. Scope selectors (Community Area / Census Tract / ZIP) as neutral chips.
+
+Color the Change column by favorability, not by direction. Add a config classifying each metric's favorable direction:
+
+Favorable when UP: median household income, per capita income, median home value.
+Favorable when DOWN: % below poverty, % unemployed, % without HS diploma, % housing vacancy.
+Not rated (always neutral): median gross rent, population, median age, % owner-occupied, % renter-occupied, % commute via transit, and every race/ethnicity metric (% White, % Black/African American, % Hispanic/Latino, % Asian, % BIPOC, % children, % seniors).
+
+Rule: if a metric has a favorable direction and its change moves that way → green (
+#2f7d3f); moves the opposite way → red (
+#d13b26). If "not rated" → plain directional arrow (↑/↓) with the magnitude in neutral dark ink (
+#565651), never green/red. Any new/unlisted metric defaults to not rated.
+
+Add a three-item legend above each demographic table: green "Favorable trend", red "Unfavorable trend", gray "Contextual — not rated", plus the footnote noting that only metrics with an objective favorable direction are rated and identity metrics are context, not judgments.
+
+5. Label legibility throughout: column headers, metric names, and labels in dark ink (
+#565651); muted reserved for source lines only.
+
+Match spacing, radii, and borders to both mockups.

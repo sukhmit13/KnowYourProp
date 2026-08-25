@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--indigoBd:#d7dcf3;--good:#2f7d3f;--goodSoft:#edf6ef;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:40px}
+  .wrap{max-width:900px;margin:0 auto}
+  .mp{background:var(--indigoSoft);border:1px solid var(--indigoBd);border-radius:14px;padding:20px 22px}
+  .mphd{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+  .mphd .badge{display:inline-flex;align-items:center;gap:6px;background:var(--indigo);color:#fff;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:7px;padding:5px 10px}
+  .mphd .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+  .mphd .free{margin-left:auto;display:inline-flex;align-items:center;gap:5px;background:var(--goodSoft);color:var(--good);font-size:11px;font-weight:700;border-radius:999px;padding:4px 11px}
+  .mp p{font-size:13.5px;color:var(--ink2);line-height:1.55;margin-bottom:10px}
+  .mp p b{color:var(--ink);font-weight:600}
+  .mp .detail{font-size:12.5px;color:var(--ink2);line-height:1.5;margin-bottom:16px}
+
+  .parcels{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;background:var(--card);border:1px solid var(--indigoBd);border-radius:11px;padding:15px 17px}
+  .pc .lb{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  .pc .addr{font-size:14px;font-weight:600;color:var(--ink)}
+  .pc .pin{font-family:var(--mono);font-size:11.5px;color:var(--ink2);margin-top:3px}
+  .link{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--indigo)}
+  .link .ic{font-size:16px}
+  .link .lb{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="mp">
+    <div class="mphd"><span class="badge">⧉ 2 Parcels</span><span class="t">Multi-Parcel Property Detected</span><span class="free">✓ Included · no extra charge</span></div>
+    <p>We found an adjacent parcel linked to this property in Cook County records. Its sale history is already folded into the <b>Sale History</b> section below, so you're seeing the complete picture without running a second search.</p>
+    <div class="detail">Detected via a shared deed — the same recorded instrument covered both parcels in a prior transaction, confirming they were assembled or sold together.</div>
+    <div class="parcels">
+      <div class="pc"><div class="lb">You searched</div><div class="addr">522 N Claremont Ave</div><div class="pin">PIN 17-07-117-024-0000</div></div>
+      <div class="link"><span class="ic">⧉</span><span class="lb">Shared deed</span></div>
+      <div class="pc"><div class="lb">Co-parcel</div><div class="addr">520 N Claremont Ave</div><div class="pin">PIN 17-07-117-025-0000</div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,700 @@
+# REPLIT AI AGENT - LIEN SEARCH BACKEND IMPLEMENTATION
+
+---
+
+## TASK
+
+Build a lien and foreclosure search system that scrapes Cook County public records. Returns structured data for mortgages, liens, and foreclosures.
+
+---
+
+## CRITICAL REQUIREMENTS
+
+### 🔑 USE EXISTING 2CAPTCHA API KEY
+
+**The API key is ALREADY in Replit Secrets as `TWOCAPTCHA_API_KEY`**
+
+```python
+# ✅ ALWAYS use this
+import os
+api_key = os.getenv('TWOCAPTCHA_API_KEY')
+
+# ❌ NEVER do this
+# Don't create new account
+# Don't hardcode keys
+# Don't ask user for key
+```
+
+---
+
+### ⚡ ASYNC LOADING REQUIRED
+
+**Flow:**
+1. User requests report → Return immediately with fast data (5-10 sec)
+2. Start lien search in background thread
+3. Lien search completes in 30-60 seconds
+4. Frontend polls `/lien-status/<task_id>` for results
+
+**DO NOT block report generation waiting for liens.**
+
+---
+
+## FILE STRUCTURE
+
+Create these 3 files:
+
+```
+scrapers/
+├── __init__.py
+├── captcha_solver.py      # 2Captcha integration
+├── recorder_scraper.py    # Cook County Recorder scraper
+└── lien_search.py         # Coordinator with caching + async
+
+data/
+└── lien_cache/            # Auto-created cache directory
+```
+
+---
+
+## FILE 1: `scrapers/captcha_solver.py`
+
+**Purpose:** Solve reCAPTCHA using 2Captcha API
+
+**Requirements:**
+- Load API key from environment
+- Solve reCAPTCHA v2
+- Extract site key from page
+- Inject token into form
+
+**Implementation:**
+
+```python
+from twocaptcha import TwoCaptcha
+import os
+import re
+
+class CaptchaSolver:
+    def __init__(self):
+        self.api_key = os.getenv('TWOCAPTCHA_API_KEY')
+        if not self.api_key:
+            raise ValueError("TWOCAPTCHA_API_KEY not found")
+        self.solver = TwoCaptcha(self.api_key)
+    
+    def solve_recaptcha_v2(self, driver, url):
+        """
+        Solve reCAPTCHA v2
+        
+        Steps:
+        1. Extract site key from page source
+        2. Send to 2Captcha API
+        3. Wait for solution
+        4. Inject token into page
+        
+        Returns: True if solved, False otherwise
+        """
+        site_key = self._get_site_key(driver)
+        if not site_key:
+            return False
+        
+        result = self.solver.recaptcha(sitekey=site_key, url=url)
+        token = result['code']
+        
+        driver.execute_script(f'''
+            document.getElementById("g-recaptcha-response").innerHTML = "{token}";
+            var textarea = document.querySelector('textarea[name="g-recaptcha-response"]');
+            if (textarea) textarea.value = "{token}";
+        ''')
+        
+        return True
+    
+    def _get_site_key(self, driver):
+        """Extract reCAPTCHA site key from page"""
+        patterns = [
+            r'data-sitekey="([^"]+)"',
+            r'sitekey:\s*["\']([^"\']+)["\']',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, driver.page_source)
+            if match:
+                return match.group(1)
+        return None
+```
+
+---
+
+## FILE 2: `scrapers/recorder_scraper.py`
+
+**Purpose:** Scrape Cook County Recorder of Deeds
+
+**URL:** https://crs.cookcountyclerkil.gov/Search
+
+**What to find:**
+- Mortgages
+- Liens (tax, mechanic, judgment, water)
+- Releases/satisfactions
+- Deeds
+
+**Requirements:**
+- Use headless Chrome
+- Try multiple common selectors (sites vary)
+- Solve CAPTCHA before submitting
+- Parse results table
+- Categorize by document type
+- Save debug HTML on errors
+
+**Implementation:**
+
+```python
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from bs4 import BeautifulSoup
+import time
+import re
+
+class RecorderScraper:
+    def __init__(self, captcha_solver):
+        self.captcha_solver = captcha_solver
+        self.base_url = "https://crs.cookcountyclerkil.gov"
+    
+    def search_by_pin(self, pin):
+        """
+        Search for documents by PIN
+        
+        Returns:
+        {
+            'mortgages': [...],
+            'liens': [...],
+            'releases': [...],
+            'deeds': [...],
+            'other': [...]
+        }
+        """
+        options = Options()
+        options.add_argument('--headless=new')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        
+        driver = webdriver.Chrome(options=options)
+        
+        try:
+            # Load search page
+            driver.get(f"{self.base_url}/Search")
+            time.sleep(3)
+            
+            # Find PIN input (try common patterns)
+            pin_input = self._find_pin_input(driver)
+            pin_input.send_keys(pin.replace('-', ''))
+            
+            # Solve CAPTCHA if present
+            if self._has_captcha(driver):
+                self.captcha_solver.solve_recaptcha_v2(driver, driver.current_url)
+                time.sleep(2)
+            
+            # Click search
+            search_btn = self._find_search_button(driver)
+            search_btn.click()
+            time.sleep(5)
+            
+            # Parse results
+            documents = self._parse_documents(driver)
+            
+            # Categorize
+            return self._categorize_documents(documents)
+            
+        except Exception as e:
+            print(f"[RECORDER] Error: {e}")
+            # Save debug info
+            with open('debug_recorder_error.html', 'w') as f:
+                f.write(driver.page_source)
+            driver.save_screenshot('debug_recorder_error.png')
+            return None
+        finally:
+            driver.quit()
+    
+    def _find_pin_input(self, driver):
+        """Try common selectors for PIN input"""
+        selectors = [
+            (By.ID, 'pin'),
+            (By.ID, 'txtPIN'),
+            (By.ID, 'PinSearch'),
+            (By.NAME, 'pin'),
+            (By.CSS_SELECTOR, 'input[type="text"]'),  # Fallback
+        ]
+        
+        for by, value in selectors:
+            try:
+                return driver.find_element(by, value)
+            except:
+                continue
+        
+        raise Exception("Could not find PIN input")
+    
+    def _find_search_button(self, driver):
+        """Try common selectors for search button"""
+        selectors = [
+            (By.ID, 'btnSearch'),
+            (By.ID, 'searchButton'),
+            (By.CSS_SELECTOR, 'input[type="submit"]'),
+            (By.TAG_NAME, 'button'),  # Fallback
+        ]
+        
+        for by, value in selectors:
+            try:
+                return driver.find_element(by, value)
+            except:
+                continue
+        
+        raise Exception("Could not find search button")
+    
+    def _has_captcha(self, driver):
+        """Check if CAPTCHA is present"""
+        return bool(driver.find_elements(By.CSS_SELECTOR, '.g-recaptcha, iframe[src*="recaptcha"]'))
+    
+    def _parse_documents(self, driver):
+        """Parse document table from results page"""
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        
+        # Find table (try common patterns)
+        table = soup.find('table', {'id': 'resultsTable'}) or \
+                soup.find('table', {'class': 'results'}) or \
+                soup.find('table')
+        
+        if not table:
+            return []
+        
+        documents = []
+        for row in table.find_all('tr')[1:]:  # Skip header
+            cells = row.find_all('td')
+            if len(cells) >= 2:
+                documents.append({
+                    'document_number': cells[0].text.strip() if len(cells) > 0 else '',
+                    'document_type': cells[1].text.strip() if len(cells) > 1 else '',
+                    'recorded_date': cells[2].text.strip() if len(cells) > 2 else '',
+                    'grantor': cells[3].text.strip() if len(cells) > 3 else '',
+                    'grantee': cells[4].text.strip() if len(cells) > 4 else '',
+                    'amount': self._parse_currency(cells[5].text) if len(cells) > 5 else 0
+                })
+        
+        return documents
+    
+    def _categorize_documents(self, documents):
+        """Categorize documents by type"""
+        categorized = {
+            'mortgages': [],
+            'liens': [],
+            'releases': [],
+            'deeds': [],
+            'other': []
+        }
+        
+        for doc in documents:
+            doc_type = doc['document_type'].lower()
+            
+            if any(kw in doc_type for kw in ['mortgage', 'mtg', 'deed of trust']):
+                categorized['mortgages'].append(doc)
+            elif any(kw in doc_type for kw in ['lien', 'judgment', 'levy']):
+                categorized['liens'].append(doc)
+            elif any(kw in doc_type for kw in ['release', 'satisfaction', 'discharge']):
+                categorized['releases'].append(doc)
+            elif any(kw in doc_type for kw in ['deed', 'grant']):
+                categorized['deeds'].append(doc)
+            else:
+                categorized['other'].append(doc)
+        
+        return categorized
+    
+    def _parse_currency(self, text):
+        """Convert currency text to float"""
+        clean = re.sub(r'[$,\s]', '', str(text))
+        try:
+            return float(clean)
+        except:
+            return 0.0
+```
+
+---
+
+## FILE 3: `scrapers/lien_search.py`
+
+**Purpose:** Coordinate searches with caching and async support
+
+**Features:**
+- 30-day file cache
+- Async background search
+- Combine all sources
+- Generate warnings
+- Filter active liens
+
+**Implementation:**
+
+```python
+import json
+import os
+from datetime import datetime
+from threading import Thread
+import uuid
+
+from scrapers.captcha_solver import CaptchaSolver
+from scrapers.recorder_scraper import RecorderScraper
+
+
+class LienSearchCache:
+    """30-day file-based cache"""
+    
+    def __init__(self, cache_dir='data/lien_cache'):
+        self.cache_dir = cache_dir
+        os.makedirs(cache_dir, exist_ok=True)
+    
+    def get(self, pin):
+        """Get cached data if <30 days old"""
+        cache_file = os.path.join(self.cache_dir, f"{pin.replace('-', '')}.json")
+        
+        if not os.path.exists(cache_file):
+            return None
+        
+        with open(cache_file, 'r') as f:
+            data = json.load(f)
+        
+        cached_date = datetime.fromisoformat(data['searched_at'])
+        age_days = (datetime.now() - cached_date).days
+        
+        return data['results'] if age_days < 30 else None
+    
+    def set(self, pin, results):
+        """Cache results for 30 days"""
+        cache_file = os.path.join(self.cache_dir, f"{pin.replace('-', '')}.json")
+        
+        with open(cache_file, 'w') as f:
+            json.dump({
+                'pin': pin,
+                'searched_at': datetime.now().isoformat(),
+                'results': results
+            }, f, indent=2)
+
+
+class LienSearch:
+    """Main coordinator"""
+    
+    def __init__(self):
+        self.cache = LienSearchCache()
+        self.captcha_solver = CaptchaSolver()
+        self.recorder = RecorderScraper(self.captcha_solver)
+    
+    def search(self, pin, address):
+        """Synchronous search (blocks until done)"""
+        # Check cache
+        cached = self.cache.get(pin)
+        if cached:
+            return cached
+        
+        # Perform search
+        results = self._perform_search(pin, address)
+        
+        # Cache results
+        if results:
+            self.cache.set(pin, results)
+        
+        return results
+    
+    def search_async(self, pin, address, task_id, task_store):
+        """Async search for background thread"""
+        task_store[task_id] = {
+            'status': 'searching',
+            'started_at': datetime.now().isoformat(),
+            'progress': 'Searching public records...'
+        }
+        
+        try:
+            # Check cache first
+            cached = self.cache.get(pin)
+            if cached:
+                task_store[task_id] = {
+                    'status': 'complete',
+                    'completed_at': datetime.now().isoformat(),
+                    'data': cached
+                }
+                return
+            
+            # Perform search
+            results = self._perform_search(pin, address)
+            
+            # Cache
+            if results:
+                self.cache.set(pin, results)
+            
+            # Store result
+            task_store[task_id] = {
+                'status': 'complete',
+                'completed_at': datetime.now().isoformat(),
+                'data': results
+            }
+            
+        except Exception as e:
+            task_store[task_id] = {
+                'status': 'error',
+                'error': str(e),
+                'completed_at': datetime.now().isoformat()
+            }
+    
+    def _perform_search(self, pin, address):
+        """Perform actual search"""
+        # Search recorder
+        recorder_data = self.recorder.search_by_pin(pin)
+        
+        if not recorder_data:
+            return None
+        
+        # Extract data
+        mortgages = recorder_data.get('mortgages', [])
+        liens = recorder_data.get('liens', [])
+        releases = recorder_data.get('releases', [])
+        
+        # Filter active items (simplified - not released)
+        active_mortgages = mortgages
+        active_liens = liens
+        
+        # Calculate totals
+        total_lien_amount = sum(lien.get('amount', 0) for lien in active_liens)
+        
+        # Categorize liens
+        categorized_liens = {
+            'tax': [l for l in active_liens if 'tax' in l.get('document_type', '').lower()],
+            'water': [l for l in active_liens if 'water' in l.get('document_type', '').lower() or 'sewer' in l.get('document_type', '').lower()],
+            'judgment': [l for l in active_liens if 'judgment' in l.get('document_type', '').lower()],
+            'mechanic': [l for l in active_liens if 'mechanic' in l.get('document_type', '').lower()],
+            'hoa': [l for l in active_liens if 'hoa' in l.get('document_type', '').lower() or 'association' in l.get('document_type', '').lower()],
+            'other': [l for l in active_liens if not any(kw in l.get('document_type', '').lower() for kw in ['tax', 'water', 'sewer', 'judgment', 'mechanic', 'hoa'])]
+        }
+        
+        # Generate warnings
+        warnings = []
+        if active_liens:
+            warnings.append({
+                'level': 'HIGH',
+                'message': f'{len(active_liens)} active lien(s) totaling ${total_lien_amount:,.2f}',
+                'action': 'All liens must be cleared before closing'
+            })
+        
+        if len(active_mortgages) > 1:
+            warnings.append({
+                'level': 'MEDIUM',
+                'message': f'{len(active_mortgages)} active mortgage(s)',
+                'action': 'Multiple mortgages may indicate financial distress'
+            })
+        
+        # Build report
+        return {
+            'pin': pin,
+            'address': address,
+            'searched_at': datetime.now().isoformat(),
+            'overall_status': 'ISSUES FOUND' if active_liens else 'CLEAR',
+            'summary': {
+                'active_mortgages': len(active_mortgages),
+                'active_liens': len(active_liens),
+                'total_lien_amount': total_lien_amount,
+                'foreclosure_cases': 0
+            },
+            'mortgages': active_mortgages,
+            'liens': categorized_liens,
+            'foreclosures': [],
+            'warnings': warnings
+        }
+
+
+# Global task storage (use Redis in production)
+ASYNC_TASKS = {}
+
+
+def start_async_lien_search(pin, address):
+    """Start async search, return task ID immediately"""
+    task_id = str(uuid.uuid4())
+    
+    searcher = LienSearch()
+    thread = Thread(
+        target=searcher.search_async,
+        args=(pin, address, task_id, ASYNC_TASKS)
+    )
+    thread.daemon = True
+    thread.start()
+    
+    return task_id
+
+
+def get_async_task_status(task_id):
+    """Check status of async search"""
+    return ASYNC_TASKS.get(task_id)
+
+
+def search_liens_sync(pin, address):
+    """Synchronous search (blocks until done)"""
+    searcher = LienSearch()
+    return searcher.search(pin, address)
+```
+
+---
+
+## FLASK INTEGRATION
+
+**Add to your existing app.py:**
+
+```python
+from scrapers.lien_search import start_async_lien_search, get_async_task_status
+
+@app.route('/generate-report', methods=['POST'])
+def generate_report():
+    """
+    Generate report - return fast data immediately,
+    start lien search in background
+    """
+    data = request.json
+    pin = data['pin']
+    address = data['address']
+    
+    # Start async lien search (returns task ID immediately)
+    lien_task_id = start_async_lien_search(pin, address)
+    
+    # Get fast data (5-10 seconds total)
+    report = {
+        'address': address,
+        'pin': pin,
+        'generated_at': datetime.now().isoformat(),
+        
+        # Fast sections
+        'property_data': get_property_data(pin),
+        'tax_data': get_tax_data(pin),
+        'zoning_data': get_zoning_data(address),
+        'violations': get_violations(address),
+        
+        # Slow section - loads async
+        'lien_data': {
+            'status': 'loading',
+            'task_id': lien_task_id,
+            'message': 'Searching public records...'
+        }
+    }
+    
+    return jsonify(report)
+
+
+@app.route('/lien-status/<task_id>', methods=['GET'])
+def get_lien_status(task_id):
+    """Frontend polls this to get lien results"""
+    task_status = get_async_task_status(task_id)
+    
+    if not task_status:
+        return jsonify({'status': 'not_found'}), 404
+    
+    return jsonify(task_status)
+```
+
+---
+
+## OUTPUT FORMAT
+
+**Initial response (5-10 seconds):**
+```json
+{
+  "lien_data": {
+    "status": "loading",
+    "task_id": "abc-123-def-456",
+    "message": "Searching public records..."
+  }
+}
+```
+
+**After polling /lien-status/abc-123-def-456 (30-60 seconds later):**
+```json
+{
+  "status": "complete",
+  "data": {
+    "pin": "13-36-429-021-0000",
+    "address": "2540 W NORTH AVE",
+    "overall_status": "CLEAR",
+    "summary": {
+      "active_mortgages": 1,
+      "active_liens": 0,
+      "total_lien_amount": 0,
+      "foreclosure_cases": 0
+    },
+    "mortgages": [
+      {
+        "document_number": "2020-12345678",
+        "document_type": "MORTGAGE",
+        "recorded_date": "06/15/2020",
+        "grantee": "Wells Fargo Bank",
+        "amount": 450000
+      }
+    ],
+    "liens": {
+      "tax": [],
+      "water": [],
+      "judgment": [],
+      "mechanic": [],
+      "hoa": [],
+      "other": []
+    },
+    "foreclosures": [],
+    "warnings": []
+  }
+}
+```
+
+---
+
+## INSTALLATION
+
+**Dependencies:**
+```bash
+pip install selenium beautifulsoup4 2captcha-python --break-system-packages
+```
+
+**Verify API key:**
+```bash
+python3 -c "import os; print(os.getenv('TWOCAPTCHA_API_KEY'))"
+```
+
+---
+
+## TESTING
+
+**Quick test:**
+```python
+from scrapers.lien_search import search_liens_sync
+
+result = search_liens_sync(
+    pin='13-36-429-021-0000',
+    address='2540 W NORTH AVE'
+)
+
+print(result['overall_status'])
+print(result['summary'])
+```
+
+**Cost:** $0.003 per search (1 CAPTCHA)
+
+---
+
+## KEY POINTS
+
+1. ✅ Use existing `TWOCAPTCHA_API_KEY` from environment
+2. ✅ Return report in 5-10 seconds with async lien search
+3. ✅ Cache results for 30 days
+4. ✅ Handle errors gracefully with debug files
+5. ✅ Try multiple selectors (sites change)
+6. ✅ Save debug HTML on errors
+
+---
+
+## START HERE
+
+1. Create file structure
+2. Install dependencies
+3. Implement captcha_solver.py
+4. Implement recorder_scraper.py
+5. Implement lien_search.py
+6. Add Flask routes
+7. Test with sample PIN
+
+**Total time: 3-4 hours**

@@ -78,6 +78,10 @@ export interface ResolvedMortgage extends ReconciledMortgage {
   extraction_gap?: boolean;
   display_lender?: string;
   position_confidence?: "low";
+  /** newer.effective_amount > older.effective_amount * 1.05 on a refi pair (never asserts cash taken out) */
+  cashOutSuspect?: boolean;
+  /** newer recorded amount minus older recorded amount when both are known */
+  recordedDelta?: number;
 }
 
 export interface DistressDoc extends ExtractedRecorderDoc {
@@ -87,6 +91,17 @@ export interface DistressDoc extends ExtractedRecorderDoc {
 export interface LienDoc extends ExtractedRecorderDoc {
   enforceability?: string;
   debtor_flag?: string;
+}
+
+/** One entry per consecutive first-position pair where the PIN set changed */
+export interface ScopeChange {
+  /** the newer loan that narrowed or widened the parcel scope */
+  atDocNumber: string;
+  recordingDate: string;
+  /** PINs in the older loan that are absent from the newer loan */
+  droppedPins: string[];
+  /** PINs in the newer loan that were absent from the older loan */
+  addedPins: string[];
 }
 
 export interface ResolvedState {
@@ -100,11 +115,15 @@ export interface ResolvedState {
   active: ResolvedMortgage[];          // current-owner liens, re-positioned
   /** sum of active recorded amounts — null when any active amount is unextracted */
   combined_recorded_debt: number | null;
+  /** mortgages with an explicit matched release/satisfaction */
+  satisfied: ResolvedMortgage[];
   cleared_by_sale: ResolvedMortgage[];
   distress: DistressDoc[];
   foreclosure_active: boolean;
   liens: LienDoc[];
   flags: string[];
+  /** parcel scope changes detected across consecutive first-position loans */
+  scopeChanges: ScopeChange[];
 }
 
 /** Index rows for the owner's OTHER parcels (recorder INDEX only — never OCR
@@ -128,6 +147,7 @@ export function resolveState(
   // Pure-function contract: annotate copies, never the caller's reconcile
   // output or doc array (reused objects must not observe stale annotations).
   const stackActive: ResolvedMortgage[] = stack.active.map(m => ({ ...m, modifications: [...m.modifications] }));
+  const stackSatisfied: ResolvedMortgage[] = stack.satisfied.map(m => ({ ...m, modifications: [...m.modifications] }));
   docs = docs.map(d => ({ ...d }));
 
   // ---- (A) OWNERSHIP TIMELINE from deeds ----
@@ -245,6 +265,11 @@ export function resolveState(
         older.refi_suspect = true;
         older.note = "a later loan of similar-or-greater size is recorded with no release — may be a refinance; confirm payoff";
         refiOfSomething = true;
+        // 2C: cash-out classification — annotate the NEWER loan
+        if (newer.effective_amount > older.effective_amount * 1.05) {
+          newer.cashOutSuspect = true;
+          newer.recordedDelta = newer.effective_amount - older.effective_amount;
+        }
       }
     }
     if (!refiOfSomething) {
@@ -294,6 +319,13 @@ export function resolveState(
   // The collateral pool is defined by the LOAN, not the owner: encumbered set =
   // PINs in the doc body ∪ PINs the doc is indexed under (recorder INDEX only —
   // never the owner's whole portfolio, never OCR of sibling docs).
+  //
+  // 2A: Run over EVERY reconciled mortgage (active + cleared_by_sale), not just active.
+  // scopeChanges_ is populated inside the block below and exposed as scopeChanges after.
+  const scopeChanges_: ScopeChange[] = [];
+  //
+  // A released loan's PIN set is needed for the timeline's parcel coverage band and
+  // for detecting scope changes (2B). Nothing in this block depends on liveness.
   {
     // Canonicalize to the 14-digit Cook County parcel form: extractors copy
     // PINs verbatim, so "13-13-327-027" (10 digits, unit part omitted) must
@@ -317,7 +349,14 @@ export function resolveState(
       for (const r of (rows || []) as Array<{ docNumber: string }>) addPin(String(r.docNumber), pin);
 
     const thisPin = parcel?.pin ? normPin(parcel.pin) : null;
-    for (const m of active) {
+
+    // Every reconciled mortgage participates: current-owner active, explicitly
+    // satisfied/released, and unreleased prior-owner debt cleared by a sale.
+    const allMortgages: ResolvedMortgage[] = [...active, ...stackSatisfied, ...clearedBySale];
+    // Track the FULL pin pool per mortgage doc number for scope-change comparison (2B).
+    // blanket_pins only stores OTHER-than-subject pins; scope change needs the full set.
+    const fullPoolByDocNumber = new Map<string, Set<string>>();
+    for (const m of allMortgages) {
       const pool = new Set<string>([
         ...(m.pins || []).map(normPin),
         ...Array.from(docPins.get(m.doc_number) || []),
@@ -341,15 +380,80 @@ export function resolveState(
           : "blanket / cross-collateralized — spans multiple properties; per-parcel leverage not meaningful";
         // Pool LTV — the only meaningful leverage on a blanket loan. Any pool
         // pin we can't value ⇒ null with a note (never a partial denominator).
-        const vals = Array.from(pool).map(p => (p === thisPin ? (parcel?.value ?? valueOf?.(p)) : valueOf?.(p)));
-        const complete = vals.length > 0 && vals.every(v => typeof v === "number" && v > 0);
-        const poolValue = complete ? (vals as number[]).reduce((s, v) => s + v, 0) : null;
-        m.pool_value = poolValue;
-        m.pool_ltv = poolValue && m.effective_amount ? +(m.effective_amount / poolValue).toFixed(2) : null;
-        m.pool_ltv_note = poolValue ? null : "pool value incomplete — combined leverage not computed";
+        // Only compute for active loans; cleared loans no longer burden the current owner.
+        if (!m.resolved_by_sale) {
+          const vals = Array.from(pool).map(p => (p === thisPin ? (parcel?.value ?? valueOf?.(p)) : valueOf?.(p)));
+          const complete = vals.length > 0 && vals.every(v => typeof v === "number" && v > 0);
+          const poolValue = complete ? (vals as number[]).reduce((s, v) => s + v, 0) : null;
+          m.pool_value = poolValue;
+          m.pool_ltv = poolValue && m.effective_amount ? +(m.effective_amount / poolValue).toFixed(2) : null;
+          m.pool_ltv_note = poolValue ? null : "pool value incomplete — combined leverage not computed";
+        }
+      }
+      // Store full pool for 2B scope-change detection.
+      // Only track when the doc has explicit pins beyond the subject (pool.size > 1),
+      // or was derived from the doc body itself (m.pins had entries). This prevents
+      // loans with no PIN information from appearing to have a known empty set.
+      const hasExplicitPins = (m.pins || []).length > 0 || (docPins.get(m.doc_number)?.size ?? 0) > 0;
+      if (hasExplicitPins) fullPoolByDocNumber.set(m.doc_number, pool);
+    }
+
+    // ---- (2B) PARCEL SCOPE CHANGES — walk the first-position chain oldest → newest ----
+    // For consecutive first-position / refinance-chain loans where the PIN sets are
+    // both known and non-empty and differ, emit a scopeChange entry.
+    // Results are written into scopeChanges_ (declared before this block).
+    // Uses fullPoolByDocNumber (full pool including subject) rather than blanket_pins.
+    const chainCandidates = [...allMortgages]
+      .filter(m => fullPoolByDocNumber.has(m.doc_number)) // must have explicit PIN data
+      .sort((a, b) => (a.recording_date || "").localeCompare(b.recording_date || ""));
+
+    for (let i = 0; i < chainCandidates.length - 1; i++) {
+      const older = chainCandidates[i];
+      const newer = chainCandidates[i + 1];
+
+      // Only compare consecutive first-position / refinance-chain pairs.
+      // Explicitly released loans have no live position, so a similar-or-larger
+      // later amount is the conservative replacement signal for that history.
+      const amountSuggestsReplacement = older.effective_amount != null
+        && newer.effective_amount != null
+        && newer.effective_amount >= older.effective_amount * 0.9;
+      const olderIsChain = older.refi_suspect || older.satisfied || older.resolved_by_sale || older.position === 1;
+      const newerIsChain = newer.lien_kind !== "junior"
+        && (amountSuggestsReplacement || older.refi_suspect || older.satisfied || older.resolved_by_sale);
+      if (!olderIsChain || !newerIsChain) continue;
+
+      // Cash-out signal belongs to the newer replacement loan. It describes
+      // only the delta between recorded original principals, never proceeds.
+      if (amountSuggestsReplacement
+        && newer.effective_amount! > older.effective_amount! * 1.05) {
+        newer.cashOutSuspect = true;
+        newer.recordedDelta = newer.effective_amount! - older.effective_amount!;
+      }
+
+      // Require both sides have a known non-empty PIN set.
+      // An empty set is missing data, not a release — brief §2B says "never emit when either side empty/unknown".
+      const olderPool = fullPoolByDocNumber.get(older.doc_number)!;
+      const newerPool = fullPoolByDocNumber.get(newer.doc_number)!;
+      if (olderPool.size === 0 || newerPool.size === 0) continue; // missing data
+
+      // Compute dropped/added relative to the full pool (subject pin included).
+      // droppedPins = in older but not newer; addedPins = in newer but not older.
+      const droppedPins = Array.from(olderPool).filter(p => !newerPool.has(p));
+      const addedPins = Array.from(newerPool).filter(p => !olderPool.has(p));
+      if (droppedPins.length === 0 && addedPins.length === 0) continue; // PIN sets equal — no change
+
+      if (newer.recording_date) {
+        scopeChanges_.push({
+          atDocNumber: newer.doc_number,
+          recordingDate: newer.recording_date,
+          droppedPins,
+          addedPins,
+        });
       }
     }
   }
+
+  const scopeChanges: ScopeChange[] = scopeChanges_;
 
   // ---- (F) EXTRACTION gaps ----
   for (const m of active) {
@@ -376,6 +480,7 @@ export function resolveState(
     non_sale_transfers: nonSaleTransfers,
     active,
     combined_recorded_debt,
+    satisfied: stackSatisfied,
     cleared_by_sale: clearedBySale,
     distress,
     foreclosure_active,
@@ -386,5 +491,6 @@ export function resolveState(
       ...(clearedBySale.length ? ["pre_sale_liens_cleared"] : []),
       ...(active.some(m => m.extraction_gap) ? ["extraction_gap"] : []),
     ],
+    scopeChanges,
   };
 }

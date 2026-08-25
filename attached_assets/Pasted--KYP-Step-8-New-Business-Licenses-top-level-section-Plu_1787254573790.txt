@@ -1,0 +1,244 @@
+# KYP — Step 8: New Business Licenses → top-level section
+### Plus a shared-primitive upgrade that Crime inherits. Read §3 before starting.
+
+Promotes a nested subsection to top-level, adds a year-over-year comparison so the headline
+number can carry a verdict, and upgrades `.kyp-hbar` — which **also changes the Crime
+section**. Both must ship together.
+
+🔴 **Scope:** change only what this document specifies. Do not restyle, refactor, or "make
+consistent" any other section. The one exception is Crime, and only in the specific way §3
+describes.
+
+| What | Today | After |
+|---|---|---|
+| New Business Licenses | nested under Proximity Details, `RunDetail.tsx:15549–15716` | top-level section `09` |
+| Owner of the license data | this section **and** Corridor Intelligence, with two different dedup keys | this section only; Corridor reads its count |
+| `.kyp-hbar` | 9px track, count in a right-hand gutter | 26px track, count **inside** the mark |
+| License category chip | 2 treatments (outline in chart, tinted on cards) | **1** treatment everywhere |
+
+---
+
+## 1. Server — `server/businessLicenses.ts`
+
+### 1A. Pull 24 months, return both periods
+`fetchRecentLicenses()` hardcodes `cutoff.setMonth(cutoff.getMonth() - 12)` (`:85`). Change the
+window to **24 months** and split it:
+
+- **current** = licenses with `license_start_date` in the last 12 months
+- **prior** = licenses with `license_start_date` in months 13–24
+
+Extend `NearbyLicensesResponse`:
+
+```ts
+export interface NearbyLicensesResponse {
+  licenses: NearbyLicense[];        // current period only — unchanged shape
+  totalCount: number;               // current period licenses
+  radiusMiles: number;
+  periodMonths: number;
+  priorPeriodCount: number | null;  // NEW — distinct businesses in months 13–24
+  changePct: number | null;         // NEW — null when priorPeriodCount is 0 or unknown
+}
+```
+
+**Count businesses, not licenses, on both sides.** The comparison must use the same
+establishment grouping the UI uses, or "up 64%" will be measuring the wrong thing. Move
+`groupLicenseEstablishments` (currently `RunDetail.tsx:106–131`) and `normalizeLicenseAddr`
+(`:64–82`) into shared code and call the same function for both periods. Do not reimplement.
+
+`changePct = null` when `priorPeriodCount === 0` — a rise from zero is not a percentage.
+Render "first openings on record in 2 years" instead.
+
+**Cache note:** `cachedLicenses` is a module-level, city-wide cache with a 6h TTL (`:39–41`).
+Doubling the window doubles the payload of that one fetch, not per-property work. Keep the
+6h TTL. If the fetch time regresses noticeably, cache the two periods separately rather than
+shortening the window.
+
+### 1B. Fix the log line
+`:145` logs `…(last 6 months)` while the cutoff is 12. Make it print the real window.
+
+### 1C. Radius disagreement
+`routes.ts:9066` passes `1.0`; `reportPdf.ts:261` takes the function default `0.5`. Same
+property, two different numbers on screen vs in the PDF. **Pass `1.0` explicitly in both.**
+While you're there: `reportPdf.ts:612` reads `d.licenses.count ?? …` — `count` does not exist
+(it is `totalCount`), so the `??` always falls through; and the copy says "active business
+licenses" when these are **new issuances**. Fix both.
+
+---
+
+## 2. CSS — `kyp-base.css`
+
+### 2A. UPGRADE `.kyp-hbar` (shared — see §3)
+```css
+.kyp-hbar{display:flex;align-items:center;gap:14px;padding:5px 0;border-bottom:none}
+.kyp-hbar .hl{width:150px;font-size:13.5px;font-weight:600;color:var(--kyp-ink);display:flex;align-items:center;gap:8px}
+.kyp-hbar .hl.chips{width:250px;display:flex;gap:5px;flex-wrap:wrap}
+.kyp-hbar .htrack{position:relative;flex:1;height:26px;background:#eceae3;border-radius:6px}
+.kyp-hbar .htrack i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--kyp-slate);display:flex;align-items:center;justify-content:flex-end;padding-right:11px;color:#fff;font-family:var(--kyp-disp);font-size:20px;line-height:1}
+.kyp-hbar.ind .htrack i{background:var(--kyp-indigo)}
+.kyp-hbar.grn .htrack i{background:var(--kyp-green)}
+.kyp-hbar.att .htrack i{background:var(--kyp-orange)}
+.kyp-hbar.red .htrack i{background:var(--kyp-bad)}
+/* number sits just past the bar when the bar is too small to hold it */
+.kyp-hbar .htrack .hv{position:absolute;top:0;height:100%;display:none;align-items:center;font-family:var(--kyp-disp);font-size:20px;color:var(--kyp-ink);white-space:nowrap}
+.kyp-hbar.narrow .htrack .hv{display:flex}
+.kyp-hbar.narrow .htrack i{padding-right:0;font-size:0}
+.kyp-hbar.click{cursor:pointer;border-radius:7px;padding-left:8px;padding-right:8px;margin:0 -8px;transition:background .12s}
+.kyp-hbar.click:hover{background:var(--kyp-wash)}
+.kyp-hbar.active{background:var(--kyp-indigoSoft)}
+.kyp-barkey{font-family:var(--kyp-mono);font-size:9.5px;color:var(--kyp-muted);margin-top:11px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+```
+**Delete** the old `.kyp-hbar .hv{…width:34px;text-align:right}` gutter rule and the
+`.kyp-hbar .hl .tick` variants — the coloured tick is redundant once the bar itself is coloured.
+
+`narrow` is applied when the bar is **< 15%** of the max.
+
+### 2B. ONE chip
+```css
+.kyp-liccat{display:inline-flex;align-items:center;font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-ink);background:#fff;border:1.5px solid var(--kyp-slate);border-radius:5px;padding:3px 8px;white-space:nowrap}
+```
+**Delete** `.kyp-liccat.food`, `.liquor`, `.ent`, `.other`, `.neutral` and every
+context-conditional override. One designation, one look, everywhere.
+
+### 2C. Business cards
+```css
+.kyp-bizgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(256px,1fr));gap:12px}
+.kyp-bizcard{border:1px solid var(--kyp-line);border-left:5px solid var(--kyp-indigo);border-radius:12px;padding:14px 15px;background:var(--kyp-card);transition:box-shadow .12s ease}
+.kyp-bizcard:hover{box-shadow:0 4px 14px rgba(20,20,20,.06)}
+.kyp-bizcard .bt{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.kyp-bizcard .bnm{font-size:16px;font-weight:700;color:var(--kyp-ink);line-height:1.22}
+.kyp-bizcard .bdist{font-family:var(--kyp-disp);font-size:19px;color:var(--kyp-indigo);flex:none;white-space:nowrap}
+.kyp-bizcard .baddr{display:block;font-size:12px;color:var(--kyp-indigo);text-decoration:none;margin-top:4px}
+.kyp-bizcard .bchips{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.kyp-bizcard .bwhen{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted);margin-top:10px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.kyp-bizcard .bwhen .n2{background:var(--kyp-wash);border-radius:5px;padding:2px 6px;color:var(--kyp-ink2);font-weight:700}
+.kyp-blocks.hero{grid-template-columns:1.4fr 1fr 1fr}
+.kyp-blocks.hero .kyp-block:first-child .bv{font-size:46px}
+```
+🔴 No conditional rail colour, no conditional distance colour. Every card looks the same.
+
+### 2D. Delete
+`.bizbox` and everything under it (`index.css:2085–2125`), including the three dead
+`.bizbox .cn*` rules at `2092–2094` that target a class the markup never uses.
+
+---
+
+## 3. ⚠️ Crime inherits the `.kyp-hbar` upgrade
+
+Crime's "breakdown by type" chart uses `.kyp-hbar`. After §2A its bars get taller and its
+counts move inside the marks. **This is intended** — two horizontal bar charts must not look
+different. Verify Crime in the same pass:
+
+- [ ] Crime breakdown rows render with the count inside the bar.
+- [ ] Crime's `.ind` / `.att` / `.red` variants still map to the right categories.
+- [ ] Any Crime row under 15% of max gets `narrow` and reads correctly.
+- [ ] The removed `.hl .tick` swatch is not needed — the bar carries the colour.
+
+---
+
+## 4. Promote to a top-level section
+
+- Section id `newBusinessLicenses`, rendered at **09**.
+- Openable without Proximity Details. Register in `SectionStates`, `jumpTargets`, and
+  `PRINT_SECTIONS` — today it has **no print entry and no jump entry** of its own.
+- Row header: `09 · NEW BUSINESS LICENSES — <takeaway ≤70 chars> · <badge> · ⓘ · 👁 · ⌃`
+- Badge: `Formation up {n}%` (green) / `Formation down {n}%` (orange) / `{n} · past 12 mo`
+  (slate) when `changePct` is null.
+- Family accent bar and eyebrow dot: **green** (this section now carries a verdict).
+
+**Performance:** `groupLicenseEstablishments` currently runs **twice per render** — once in the
+collapsed header (`15561`) and once in the body (`15581`) — with no memo, inside a 22k-line
+component. Wrap it in a single `useMemo`.
+
+---
+
+## 5. Body layout
+
+1. **Three blocks** (`kyp-blocks hero`), colours per §6.
+2. **Mix chart** — `kyp-charttitle` + `.kyp-hbar.click.ind` rows + `.kyp-barkey`.
+3. **The openings** — `kyp-subhead` + `.kyp-bizgrid` of `.kyp-bizcard`, nearest first, cap 6.
+4. `kyp-morelink` → "Show all {n} businesses within 1 mile →"
+5. `kyp-footnote` — the businesses-not-licenses explanation.
+6. `kyp-src` — source line. **Fix the omission:** it currently says the data covers
+   "liquor/tavern, retail food, entertainment, late-hour and manufacturing" but `hotel` and
+   `gallery` are fetched, categorised and rendered too. List them.
+
+**Delete the standalone lead paragraph.** Its only non-duplicated idea belongs in the row-header
+takeaway.
+
+---
+
+## 6. 🔒 Colour — encodes the CLAIM, never the category
+
+| Block | Fill | Rule |
+|---|---|---|
+| **{n}** New businesses — up/down {p}% | `grn` when `changePct > 0` · `att` when `< 0` · `ind` when **null** | judged against the prior 12 months |
+| **{n}** Serve food — {p}% of openings | **`ind` always** | composition, not quality — no verdict is possible |
+| **{d} mi** Nearest opening | `grn` when `≤ 0.25` · `ind` above that | distance is judgeable on its own scale |
+
+- Sub-line on the food block must say **"no verdict — depends on your use"**. A food-led
+  corridor is amenity to a residential buyer and competition to a restaurant buyer.
+- **Chart bars are `ind`, always.** They report counts. A verdict colour never sits on a mark
+  that is only reporting a quantity.
+- Two green blocks is correct when two numbers are good. **Do not spread verdicts for visual
+  variety.**
+- No near-black block, no light-wash block, no `.dark`, no `.wash`. Every block saturated.
+
+---
+
+## 7. 🔒 Gated logic
+
+1. **Trend verdict** — render the `— up/down {p}%` suffix and the coloured block **only** when
+   `changePct != null`. When `priorPeriodCount === 0`, the block is `ind` and the sub-line reads
+   "first openings on record in 2 years".
+2. **Nearest-opening block** — render only when there is ≥1 opening. With zero, the section
+   shows the empty state and no blocks at all.
+3. **Narrow bars** — `narrow` when a bar is < 15% of the max.
+4. **Filter + show-more interaction (currently broken).** With `licenseFilter !== null` the
+   6-item cap is bypassed **and** both show-more/show-less buttons are suppressed (`15616`,
+   `15699`, `15702`), so a filtered result of 80 renders 80 rows with no control. Apply the cap
+   and the buttons **regardless of filter state**, and reset `showAllBiz` to `false` whenever
+   the filter changes.
+5. **Loading is not empty.** There is no `isError` branch (`15574–15713`); a 500 renders "No new
+   business licenses found within 1 mile." Add an explicit error state.
+6. **Mix rows** — no cap today, and up to 2⁶−1 = 63 combination labels are possible. Cap at 8
+   rows plus a `+{n} more combinations` line. **Never truncate silently.**
+
+---
+
+## 8. Bugs found while mapping — fix 1–3, log the rest
+
+1. **`Compare.tsx:2170` renders the literal word "Business" for every row.** It reads
+   `l.doingBusinessAsName || l.legalName || 'Business'`; neither field exists on `NearbyLicense`
+   (it is `businessName`). Masked by `useQuery<any>` at `use-runs.ts:3148`. **Type the hook.**
+2. **Corridor Intelligence asserts a false negative while loading.** `18760`, `18899` and the
+   KPI all read `nearbyLicensesData?.licenses?.length` with no `isLoading` guard, so
+   `CorridorIntelligenceView.tsx:132` prints *"No new business licenses recorded… a quiet
+   formation period"* during the fetch, then flips. Guard it.
+3. **Two dedup keys for the same records.** This section groups on
+   `NAME|normalizeLicenseAddr(address)` (`:109`); Corridor Intelligence groups on
+   `NAME|||RAW_UPPERCASE_ADDRESS` (`18905`). The same business at "1234 N Ave Ste 2" counts once
+   here and twice there. **Corridor must call the shared grouper** from §1A.
+4. `RunDetail.tsx:88` — `.replace(/(st|nd|rd|th)$/, m => m)` is a no-op. Dead code.
+5. `RunDetail.tsx:2371` — `isOnCorridor` is `(_name, d) => d === 0`, exact float equality on a
+   distance, first parameter ignored. Every `onCorridor` takeaway branch is unreachable.
+6. `RunDetail.tsx:122–124` — two unmapped categories both render as `Other`, producing the label
+   `"Other + Other"`.
+7. Parent proximity takeaway (`15098–15106`) counts only liquor/food/entertainment/manufacturing
+   — a corridor of new galleries reads as having no categories.
+8. `latitude`/`longitude` are on the wire and copied into `corridorLicenseMap` (`18917`) but
+   never read. There is no map. Either build one or stop shipping the fields.
+
+---
+
+## ✅ Done-when
+
+- [ ] Top-level section at 09, with its own print and jump entries.
+- [ ] Server returns `priorPeriodCount` + `changePct`, both counted as **businesses** via the
+      shared grouper; PDF and app agree on a 1.0 mi radius.
+- [ ] Blocks follow §6 exactly: green/orange/indigo by claim, never by category. No dark block,
+      no wash block.
+- [ ] `.kyp-hbar` upgraded once and used by both this section and Crime; **Crime re-verified.**
+- [ ] One `.kyp-liccat` treatment; all variants deleted; `.bizbox` deleted.
+- [ ] Filter no longer bypasses the cap; show-more works while filtered; error state exists.
+- [ ] Mix rows capped at 8 with an explicit `+{n} more` — nothing hidden silently.
+- [ ] Bugs 1–3 fixed; 4–8 fixed or logged with a reason.

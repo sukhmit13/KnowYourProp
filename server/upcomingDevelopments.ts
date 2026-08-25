@@ -7,8 +7,8 @@ const rssParser = new Parser({
 
 export interface UpcomingDevelopment {
   id: string;
-  source: 'permits' | 'blockclub';
-  stage: 1 | 2;
+  source: 'blockclub';
+  stage: 2;
   title: string;
   url: string;
   publishDate: string;
@@ -216,54 +216,6 @@ async function fetchBlockClubDevelopments(): Promise<UpcomingDevelopment[]> {
   return items;
 }
 
-// Chicago Data Portal: recent new construction permits — reliable, official source
-// Fetches city-wide so results can be cached once and filtered per-neighborhood downstream
-async function fetchChicagoPermits(): Promise<UpcomingDevelopment[]> {
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-  const dateStr = sixMonthsAgo.toISOString().split('T')[0];
-
-  const where = encodeURIComponent(`issue_date > '${dateStr}'`);
-  const url = `https://data.cityofchicago.org/resource/ydr8-5enu.json?permit_type=PERMIT+-+NEW+CONSTRUCTION&$where=${where}&$order=issue_date+DESC&$limit=500&$select=permit_,street_number,street_direction,street_name,suffix,community_area,ward,issue_date,work_description,contact_1_name,latitude,longitude`;
-
-  const resp = await fetch(url, {
-    headers: { Accept: 'application/json', 'User-Agent': 'ChicagoEligibilityScreener/1.0' },
-    signal: AbortSignal.timeout(15000),
-  });
-  if (!resp.ok) throw new Error(`Chicago permits API ${resp.status}`);
-  const permits: any[] = await resp.json();
-
-  return permits.map((p: any) => {
-    const streetAddr = [p.street_number, p.street_direction, p.street_name, p.suffix].filter(Boolean).join(' ').toUpperCase();
-    const caNum = p.community_area ? String(parseInt(p.community_area)) : '';
-    const neighborhoodName = Object.entries(COMMUNITY_AREA_NUMBERS).find(([, v]) => v === caNum)?.[0] || '';
-    const desc = (p.work_description || '').substring(0, 280);
-    const ward = p.ward ? parseInt(p.ward) : undefined;
-    const lat = p.latitude ? parseFloat(p.latitude) : undefined;
-    const lon = p.longitude ? parseFloat(p.longitude) : undefined;
-    return {
-      id: `permit-${p.permit_ || p.id}`,
-      source: 'permits' as const,
-      stage: 1 as const,
-      title: `New Construction Permit — ${streetAddr}`,
-      url: `https://data.cityofchicago.org/Buildings/Building-Permits/ydr8-5enu/about_data`,
-      publishDate: p.issue_date || '',
-      address: streetAddr,
-      units: parseUnits(desc),
-      stories: parseStories(desc),
-      developer: p.contact_1_name || undefined,
-      status: 'Permitted',
-      description: desc,
-      ordinanceId: p.permit_,
-      ward,
-      neighborhoods: neighborhoodName ? [neighborhoodName] : [],
-      lat,
-      lon,
-      useType: parseUseType(desc),
-    };
-  });
-}
-
 export async function getUpcomingDevelopments(): Promise<UpcomingDevelopment[]> {
   if (devCache && Date.now() - devCache.fetchedAt < CACHE_TTL) {
     return devCache.data;
@@ -277,14 +229,6 @@ export async function getUpcomingDevelopments(): Promise<UpcomingDevelopment[]> 
     console.log(`[UPCOMING DEV] BlockClub: ${bc.length}`);
   } catch (err) {
     console.error('[UPCOMING DEV] BlockClub error:', err);
-  }
-
-  try {
-    const permits = await fetchChicagoPermits();
-    all.push(...permits);
-    console.log(`[UPCOMING DEV] Chicago Permits: ${permits.length}`);
-  } catch (err) {
-    console.error('[UPCOMING DEV] Chicago Permits error:', err);
   }
 
   const seen = new Set<string>();

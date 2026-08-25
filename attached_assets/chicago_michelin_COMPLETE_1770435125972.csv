@@ -1,0 +1,106 @@
+name,address,city,state,zip,full_address,rating,cuisine,price,url
+Prime & Provisions,222 N. LaSalle St.,Chicago,IL,60601,"222 N. LaSalle St., Chicago, IL 60601",Selected Restaurant,Steakhouse,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/prime-provisions
+Chicago Cut,300 N. LaSalle St.,Chicago,IL,60654,"300 N. LaSalle St., Chicago, IL 60654",Selected Restaurant,Steakhouse,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/chicago-cut
+RPM Steak,66 W. Kinzie St.,Chicago,IL,60654,"66 W. Kinzie St., Chicago, IL 60654",Selected Restaurant,Steakhouse,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/rpm-steak
+Bavette’s Bar & Boeuf,218 W. Kinzie St.,Chicago,IL,60654,"218 W. Kinzie St., Chicago, IL 60654",Selected Restaurant,Steakhouse,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/bavette-s-bar-boeuf
+Gilt Bar,230 W. Kinzie St.,Chicago,IL,60654,"230 W. Kinzie St., Chicago, IL 60654",Bib Gourmand,Gastropub,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/gilt-bar
+Ciccio Mio,226 W. Kinzie St.,Chicago,IL,60654,"226 W. Kinzie St., Chicago, IL 60654",Bib Gourmand,Italian,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/ciccio-mio
+Frontera Grill,445 N. Clark St.,Chicago,IL,60654,"445 N. Clark St., Chicago, IL 60654",Bib Gourmand,Mexican,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/frontera-grill
+Topolobampo,445 N. Clark St.,Chicago,IL,60654,"445 N. Clark St., Chicago, IL 60654",Selected Restaurant,Mexican,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/topolobampo
+Sepia,123 N. Jefferson St.,Chicago,IL,60661,"123 N. Jefferson St., Chicago, IL 60661",Selected Restaurant,American,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/sepia
+Proxi,565 W. Randolph St.,Chicago,IL,60661,"565 W. Randolph St., Chicago, IL 60661",Bib Gourmand,International,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/proxi
+Alla Vita,564 W. Randolph St.,Chicago,IL,60661,"564 W. Randolph St., Chicago, IL 60661",Selected Restaurant,Italian,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/alla-vita
+avec,615 W. Randolph St.,Chicago,IL,60661,"615 W. Randolph St., Chicago, IL 60661",Selected Restaurant,Mediterranean Cuisine,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/avec
+Lou Mitchell's,565 W. Jackson Blvd.,Chicago,IL,60661,"565 W. Jackson Blvd., Chicago, IL 60661",Selected Restaurant,American,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/lou-mitchell-s
+Kumiko,630 W. Lake St.,Chicago,IL,60661,"630 W. Lake St., Chicago, IL 60661",Selected Restaurant,Japanese,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/kumiko
+Omakase Yume,651 W. Washington Blvd.,Chicago,IL,60661,"651 W. Washington Blvd., Chicago, IL 60661",Selected Restaurant,Japanese,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/omakase-yume
+Oriole,661 W. Walnut St.,Chicago,IL,60661,"661 W. Walnut St., Chicago, IL 60661",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/oriole
+Perilla,401 N. Milwaukee Ave.,Chicago,IL,60654,"401 N. Milwaukee Ave., Chicago, IL 60654",Bib Gourmand,Korean,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/perilla
+Mako,731 W. Lake St.,Chicago,IL,60661,"731 W. Lake St., Chicago, IL 60661",Selected Restaurant,Japanese,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/mako
+ROOP Chicago,736 W. Randolph St.,Chicago,IL,60661,"736 W. Randolph St., Chicago, IL 60661",Selected Restaurant,Indian,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/roop-chicago
+Sifr,660 N. Orleans St.,Chicago,IL,60654,"660 N. Orleans St., Chicago, IL 60654",Bib Gourmand,Middle Eastern,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/sifr
+Indienne,217 W. Huron St.,Chicago,IL,60654,"217 W. Huron St., Chicago, IL 60654",Selected Restaurant,Indian,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/indienne
+Girl & The Goat,809 W. Randolph St.,Chicago,IL,60607,"809 W. Randolph St., Chicago, IL 60607",Bib Gourmand,Contemporary,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/girl-the-goat
+Beity,813 W. Fulton St.,Chicago,IL,60607,"813 W. Fulton St., Chicago, IL 60607",Selected Restaurant,Lebanese,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/beity
+Momotaro,820 W. Lake St.,Chicago,IL,60607,"820 W. Lake St., Chicago, IL 60607",Selected Restaurant,Japanese,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/momotaro
+Taqueria Chingón,817 W. Fulton Market,Chicago,IL,60607,"817 W. Fulton Market, Chicago, IL 60607",Bib Gourmand,Mexican,$,https://guide.michelin.com/en/illinois/chicago/restaurant/taqueria-chingon
+Tzuco,720 N. State St.,Chicago,IL,60654,"720 N. State St., Chicago, IL 60654",Selected Restaurant,Mexican,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/tzuco
+Obélix,700 N. Sedgwick St.,Chicago,IL,60654,"700 N. Sedgwick St., Chicago, IL 60654",Selected Restaurant,French,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/obelix
+Rose Mary,932 W. Fulton Market,Chicago,IL,60607,"932 W. Fulton Market, Chicago, IL 60607",Selected Restaurant,Croatian,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/rose-mary
+Gaijin,950 W. Lake St.,Chicago,IL,60607,"950 W. Lake St., Chicago, IL 60607",Selected Restaurant,Japanese,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/gaijin-1190067
+Next,953 W. Fulton Market,Chicago,IL,60607,"953 W. Fulton Market, Chicago, IL 60607",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/next
+Swift & Sons,1000 W. Fulton Market,Chicago,IL,60607,"1000 W. Fulton Market, Chicago, IL 60607",Selected Restaurant,Steakhouse,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/swift-sons
+Monteverde,1020 W. Madison St.,Chicago,IL,60607,"1020 W. Madison St., Chicago, IL 60607",Selected Restaurant,Italian,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/monteverde
+Hugo’s Frog Bar & Fish House,1024 N. Rush St.,Chicago,IL,60611,"1024 N. Rush St., Chicago, IL 60611",Selected Restaurant,American,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/hugo-s-frog-bar-fish-house
+Maple & Ash,8 W. Maple St.,Chicago,IL,60610,"8 W. Maple St., Chicago, IL 60610",Selected Restaurant,Steakhouse,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/maple-ash
+Elina's,1202 W. Grand Ave.,Chicago,IL,60642,"1202 W. Grand Ave., Chicago, IL 60642",Selected Restaurant,Italian-American,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/elina-s
+Smyth,177 N. Ada St.,Chicago,IL,60607,"177 N. Ada St., Chicago, IL 60607",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/smyth
+Ever,1340 W. Fulton St.,Chicago,IL,60607,"1340 W. Fulton St., Chicago, IL 60607",Selected Restaurant,Creative,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/ever
+Elske,1350 W Randolph St,Chicago,IL,60607,"1350 W Randolph St, Chicago, IL 60607",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/elske
+Creepies,1360 W. Randolph St.,Chicago,IL,60607,"1360 W. Randolph St., Chicago, IL 60607",Selected Restaurant,French,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/creepies
+Chez Joël,1119 West Taylor,Chicago,IL,60607,"1119 West Taylor, Chicago, IL 60607",Selected Restaurant,French,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/chez-joel
+Coalfire,1321 W. Grand Ave.,Chicago,IL,60622,"1321 W. Grand Ave., Chicago, IL 60622",Selected Restaurant,Pizza,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/coalfire-pizza
+Astor Club: Chef's Table,24 E. Goethe St.,Chicago,IL,60610,"24 E. Goethe St., Chicago, IL 60610",Selected Restaurant,American Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/astor-club-chef-s-table
+Maxwells Trading,3957 N. Southport Ave.,Chicago,IL,60613,"3957 N. Southport Ave., Chicago, IL 60613",Selected Restaurant,Contemporary,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/maxwells-trading
+Oliver's,2715 W. North Ave.,Chicago,IL,60647,"2715 W. North Ave., Chicago, IL 60647",Selected Restaurant,Contemporary,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/oliver-s-1216274
+Azul Mariscos + Muelle,4660 N. Western Ave.,Chicago,IL,60625,"4660 N. Western Ave., Chicago, IL 60625",Selected Restaurant,Seafood,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/azul-mariscos-muelle
+Jeong,1460 W. Chicago Ave.,Chicago,IL,60647,"1460 W. Chicago Ave., Chicago, IL 60647",Selected Restaurant,Korean,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/jeong
+Provaré,1028 N. Western Ave.,Chicago,IL,60622,"1028 N. Western Ave., Chicago, IL 60622",Selected Restaurant,Fusion,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/provare
+HaiSous,1800 S. Carpenter St.,Chicago,IL,60608,"1800 S. Carpenter St., Chicago, IL 60608",Bib Gourmand,Vietnamese,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/haisous
+Yao Yao,2139 S. China Pl.,Chicago,IL,60616,"2139 S. China Pl., Chicago, IL 60616",Selected Restaurant,Chinese,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/yao-yao
+Pleasant House Pub,2119 S. Halsted St.,Chicago,IL,60608,"2119 S. Halsted St., Chicago, IL 60608",Bib Gourmand,Gastropub,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/pleasant-house-pub
+Alinea,1723 N. Halsted St.,Chicago,IL,60614,"1723 N. Halsted St., Chicago, IL 60614",Selected Restaurant,Creative,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/alinea
+Boka,1729 N. Halsted St.,Chicago,IL,60614,"1729 N. Halsted St., Chicago, IL 60614",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/boka
+Mott St.,1401 N. Ashland Ave.,Chicago,IL,60622,"1401 N. Ashland Ave., Chicago, IL 60622",Bib Gourmand,Fusion,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/mott-st
+The Coach House by Wazwan,105 N. State St.,Chicago,IL,60602,"105 N. State St., Chicago, IL 60602",Selected Restaurant,South East Asian,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/the-coach-house-by-wazwan
+Feld,2018 W. Chicago Ave.,Chicago,IL,60622,"2018 W. Chicago Ave., Chicago, IL 60622",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/feld
+Kasama,1001 N. Winchester Ave.,Chicago,IL,60622,"1001 N. Winchester Ave., Chicago, IL 60622",Selected Restaurant,Filipino,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/kasama
+Schwa,1466 N. Ashland Ave.,Chicago,IL,60622,"1466 N. Ashland Ave., Chicago, IL 60622",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/schwa
+Moody Tongue,2515 S. Wabash Ave.,Chicago,IL,60616,"2515 S. Wabash Ave., Chicago, IL 60616",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/moody-tongue
+The Perch,151 W. Ohio St.,Chicago,IL,60654,"151 W. Ohio St., Chicago, IL 60654",Selected Restaurant,American,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/the-perch
+Ina Mae,1415 N. Wood St.,Chicago,IL,60622,"1415 N. Wood St., Chicago, IL 60622",Selected Restaurant,Southern,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/ina-mae-tavern
+Esmé,2200 N. Clark St.,Chicago,IL,60614,"2200 N. Clark St., Chicago, IL 60614",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/esme
+Valhalla,1340 W. Randolph St.,Chicago,IL,60607,"1340 W. Randolph St., Chicago, IL 60607",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/valhalla
+John's Food and Wine,749 N. Franklin St.,Chicago,IL,60654,"749 N. Franklin St., Chicago, IL 60654",Selected Restaurant,American,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/john-s-food-and-wine
+S.K.Y.,1239 W. 18th St.,Chicago,IL,60608,"1239 W. 18th St., Chicago, IL 60608",Selected Restaurant,Contemporary,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/s-k-y
+Pizza Friendly Pizza,3212 W. Fullerton Ave.,Chicago,IL,60647,"3212 W. Fullerton Ave., Chicago, IL 60647",Selected Restaurant,Pizza,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/pizza-friendly-pizza
+Galit,2429 N. Lincoln Ave.,Chicago,IL,60614,"2429 N. Lincoln Ave., Chicago, IL 60614",Selected Restaurant,Middle Eastern,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/galit
+EL Ideas,2419 W. 14th St.,Chicago,IL,60608,"2419 W. 14th St., Chicago, IL 60608",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/el-ideas
+Ghin Khao,2505 N. Kedzie Ave.,Chicago,IL,60647,"2505 N. Kedzie Ave., Chicago, IL 60647",Bib Gourmand,Thai,$,https://guide.michelin.com/en/illinois/chicago/restaurant/ghin-khao
+Nadu,215 W. Huron St.,Chicago,IL,60654,"215 W. Huron St., Chicago, IL 60654",Bib Gourmand,Indian,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/nadu
+North Pond,2610 N. Cannon Dr.,Chicago,IL,60614,"2610 N. Cannon Dr., Chicago, IL 60614",Selected Restaurant,Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/north-pond
+Tama,2931 N. Clark St.,Chicago,IL,60657,"2931 N. Clark St., Chicago, IL 60657",Selected Restaurant,Mediterranean Cuisine,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/tama-1214019
+Mirra,2141 W. Division St.,Chicago,IL,60622,"2141 W. Division St., Chicago, IL 60622",Bib Gourmand,Fusion,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/mirra
+mfk.,432 W. Diversey Pkwy.,Chicago,IL,60614,"432 W. Diversey Pkwy., Chicago, IL 60614",Selected Restaurant,Spanish,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/mfk
+The Gundis,2000 W. 35th St.,Chicago,IL,60609,"2000 W. 35th St., Chicago, IL 60609",Selected Restaurant,Central Asian,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/the-gundis
+Chilam Balam,3023 N. Broadway,Chicago,IL,60657,"3023 N. Broadway, Chicago, IL 60657",Bib Gourmand,Mexican,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/chilam-balam
+Kyoten Next Door,2326 N. Lincoln Ave.,Chicago,IL,60614,"2326 N. Lincoln Ave., Chicago, IL 60614",Selected Restaurant,Sushi,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/kyoten-next-door
+Chef’s Special Cocktail Bar,2165 N. Western Ave.,Chicago,IL,60647,"2165 N. Western Ave., Chicago, IL 60647",Bib Gourmand,Chinese,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/chef%E2%80%99s-special-cocktail-bar
+"Table, Donkey and Stick",2728 W. Armitage Ave.,Chicago,IL,60647,"2728 W. Armitage Ave., Chicago, IL 60647",Bib Gourmand,Austrian,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/table-donkey-and-stick
+Osteria Langhe,2824 W. Armitage Ave.,Chicago,IL,60647,"2824 W. Armitage Ave., Chicago, IL 60647",Selected Restaurant,Italian,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/osteria-langhe
+Tied House,1027 W. Madison St.,Chicago,IL,60607,"1027 W. Madison St., Chicago, IL 60607",Selected Restaurant,Contemporary,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/tied-house
+Sochi,2235 N. Western Ave.,Chicago,IL,60647,"2235 N. Western Ave., Chicago, IL 60647",Bib Gourmand,Vietnamese,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/sochi
+Lardon,2800 W. Chicago Ave.,Chicago,IL,60622,"2800 W. Chicago Ave., Chicago, IL 60622",Bib Gourmand,Deli,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/lardon
+Union,2202 N. California Ave.,Chicago,IL,60647,"2202 N. California Ave., Chicago, IL 60647",Bib Gourmand,American,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/union-1200796
+GG's Chicken Shop,3448 N. Clark St.,Chicago,IL,60657,"3448 N. Clark St., Chicago, IL 60657",Selected Restaurant,American,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/gg-s-chicken-shop
+Itoko,1800 W. Division St.,Chicago,IL,60622,"1800 W. Division St., Chicago, IL 60622",Selected Restaurant,Japanese,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/itoko
+Daisies,2523 N. Milwaukee Ave.,Chicago,IL,60647,"2523 N. Milwaukee Ave., Chicago, IL 60647",Bib Gourmand,Italian,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/daisies
+Giant,3209 W. Armitage Ave.,Chicago,IL,60647,"3209 W. Armitage Ave., Chicago, IL 60647",Bib Gourmand,American,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/giant
+Mi Tocaya,2800 W. Logan Blvd.,Chicago,IL,60647,"2800 W. Logan Blvd., Chicago, IL 60647",Bib Gourmand,Mexican,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/mi-tocaya
+Andros Taverna,5204 N. Clark St.,Chicago,IL,60640,"5204 N. Clark St., Chicago, IL 60640",Selected Restaurant,Greek,$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/andros-taverna
+Lula Cafe,2537 N. Kedzie Blvd.,Chicago,IL,60647,"2537 N. Kedzie Blvd., Chicago, IL 60647",Bib Gourmand,American,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/lula-cafe
+Cellar Door Provisions,3025 W. Diversey Ave.,Chicago,IL,60647,"3025 W. Diversey Ave., Chicago, IL 60647",Bib Gourmand,Mediterranean Cuisine,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/cellar-door-provisions
+Superkhana International,3059 W. Diversey Ave.,Chicago,IL,60647,"3059 W. Diversey Ave., Chicago, IL 60647",Bib Gourmand,Indian,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/superkhana-international
+Longman & Eagle,2657 N. Kedzie Ave.,Chicago,IL,60647,"2657 N. Kedzie Ave., Chicago, IL 60647",Bib Gourmand,Gastropub,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/longman-eagle
+Anelya,2811 W. Diversey Ave.,Chicago,IL,60647,"2811 W. Diversey Ave., Chicago, IL 60647",Selected Restaurant,Eastern European,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/anelya
+Bayan Ko,1823 W. Chicago Ave.,Chicago,IL,60622,"1823 W. Chicago Ave., Chicago, IL 60622",Selected Restaurant,Filipino,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/bayan-ko
+Cariño,4659 N. Sheridan Rd.,Chicago,IL,60640,"4659 N. Sheridan Rd., Chicago, IL 60640",Selected Restaurant,Mexican,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/carino
+Munno Pizzeria & Bistro,2032 W. Chicago Ave.,Chicago,IL,60622,"2032 W. Chicago Ave., Chicago, IL 60622",Bib Gourmand,Pizza,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/munno-pizzeria-bistro
+Boonie's,833 W. Fulton Market,Chicago,IL,60607,"833 W. Fulton Market, Chicago, IL 60607",Bib Gourmand,Filipino,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/boonie-s
+Warlord,1800 S. Loomis St.,Chicago,IL,60608,"1800 S. Loomis St., Chicago, IL 60608",Selected Restaurant,American Contemporary,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/warlord
+Demera,4801 N. Broadway,Chicago,IL,60640,"4801 N. Broadway, Chicago, IL 60640",Selected Restaurant,Ethiopian,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/demera
+Virtue,1462 E. 53rd St.,Chicago,IL,60615,"1462 E. 53rd St., Chicago, IL 60615",Bib Gourmand,Southern,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/virtue
+Atelier,5655 W. Kinzie St.,Chicago,IL,60644,"5655 W. Kinzie St., Chicago, IL 60644",Selected Restaurant,American,$$$$,https://guide.michelin.com/en/illinois/chicago/restaurant/atelier-1207522
+Kie-Gol-Lanee,3401 N. Clark St.,Chicago,IL,60657,"3401 N. Clark St., Chicago, IL 60657",Bib Gourmand,Mexican,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/kie-gol-lanee
+Sol de Mexico,3018 N. Cicero Ave.,Chicago,IL,60641,"3018 N. Cicero Ave., Chicago, IL 60641",Bib Gourmand,Mexican,$$,https://guide.michelin.com/en/illinois/chicago/restaurant/sol-de-mexico
+Birrieria Zaragoza,4852 S. Pulaski Rd.,Chicago,IL,60632,"4852 S. Pulaski Rd., Chicago, IL 60632",Bib Gourmand,Mexican,$,https://guide.michelin.com/en/illinois/chicago/restaurant/birrieria-zaragoza

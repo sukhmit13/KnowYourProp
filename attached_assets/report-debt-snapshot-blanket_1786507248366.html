@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;--cautionSoft:#fdf8f0;--bad:#c0392b;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04);margin-bottom:20px}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 9px;background:var(--card);border:1px solid #e6cfa0;color:var(--cautionText)}
+  .sh .badge .d{width:7px;height:7px;border-radius:50%;background:var(--caution)}
+
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.55;color:var(--ink2);margin-bottom:9px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+  .cn.g .dt{background:var(--good)}.cn.c .dt{background:var(--caution)}.cn.n .dt{background:#9aa1b0}
+  .cn b{color:var(--ink);font-weight:600}
+  .cn .chip{margin-left:6px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:5px;vertical-align:1px}
+  .cn .chip.c{color:var(--cautionText);background:var(--cautionSoft);border:1px solid #e6cfa0}
+
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+  .dt2{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+  .dt2 .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .dt2 .v{font-size:15px;font-weight:600;color:var(--ink);line-height:1.2;display:flex;align-items:center;gap:6px}
+  .dt2 .v.ok{color:var(--good)}
+  .dt2 .v.warn{color:var(--cautionText)}
+  .dt2 .v.mut{color:var(--muted);font-weight:500}
+  .dt2 .v svg{width:13px;height:13px;fill:none;flex:none}
+  .dt2 .v.ok svg{stroke:var(--good)}
+  .dt2 .s{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .dt2 .s .was{color:var(--cautionText);font-weight:600}
+  .dt2.pos{background:var(--indigoSoft);border-color:#dfe3f7}
+  .dt2.pos .l{color:var(--indigo)}
+  .dt2.warn{background:var(--cautionSoft);border-color:#e6cfa0}
+  .dt2.warn .l{color:var(--cautionText)}
+
+  /* cross-collateral hero strip */
+  .xcol{display:flex;gap:12px;align-items:flex-start;background:var(--cautionSoft);border:1px solid #e6cfa0;border-left:3px solid var(--caution);border-radius:11px;padding:14px 16px;margin:8px 0 14px}
+  .xcol .ic{width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid #e6cfa0;display:flex;align-items:center;justify-content:center;flex:none}
+  .xcol .ic svg{width:17px;height:17px;stroke:var(--cautionText);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .xcol .bd{flex:1}
+  .xcol .h{font-size:13px;font-weight:700;color:var(--cautionText);margin-bottom:4px}
+  .xcol .p{font-size:12px;color:var(--ink2);line-height:1.5}
+  .xcol .p b{color:var(--ink);font-weight:600}
+  .xcol .pins{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+  .xcol .pin{font-family:var(--mono);font-size:10.5px;color:var(--cautionText);background:#fff;border:1px solid #e6cfa0;border-radius:6px;padding:4px 9px}
+  .xcol .pin.self{color:var(--ink2);background:var(--paper);border-color:var(--line)}
+
+  /* pool LTV panel */
+  .ltv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .ltvcell{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+  .ltvcell .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .ltvcell.dead .n{font-family:var(--disp);font-size:26px;line-height:1;color:var(--muted);text-decoration:line-through;text-decoration-thickness:2px}
+  .ltvcell.dead .x{font-size:10.5px;color:var(--muted);margin-top:6px}
+  .ltvcell.live{background:var(--cautionSoft);border-color:#e6cfa0}
+  .ltvcell.live .l{color:var(--cautionText)}
+  .ltvcell.live .n{font-family:var(--disp);font-size:26px;line-height:1;color:var(--cautionText)}
+  .ltvcell.live .x{font-size:10.5px;color:var(--ink2);margin-top:6px}
+  .ltvcell.live .x b{color:var(--cautionText);font-weight:700}
+
+  .note2{display:flex;gap:9px;align-items:flex-start;font-size:11.5px;color:var(--ink2);line-height:1.5;margin-bottom:14px;padding:11px 14px;background:var(--paper);border:1px solid var(--line);border-radius:10px}
+  .note2 svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;margin-top:1px}
+  .note2 b{color:var(--ink);font-weight:600}
+  .note2 .tag{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--cautionText);background:var(--cautionSoft);border:1px solid #e6cfa0;border-radius:5px;padding:2px 7px;margin-left:4px}
+
+  .dcaveat{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--ink2);line-height:1.5;padding:11px 14px;background:var(--card);border:1px solid #e6cfa0;border-left:3px solid var(--caution);border-radius:10px}
+  .dcaveat svg{width:14px;height:14px;stroke:var(--cautionText);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;margin-top:1px}
+  .dcaveat b{color:var(--cautionText);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- SECTION: takeaway -->
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Debt &amp; Title</span><span class="badge"><span class="d"></span>1 active · cross-collateralized</span></div>
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>The Takeaway</div>
+      <div class="taket">A single loan secured by this parcel and its neighbor — leverage only makes sense across the pair, where it runs high.</div>
+      <div class="cn c"><span class="dt"></span><span><b>Cross-collateralized.</b> The <b>$2,950,000</b> Belmont Bank &amp; Trust loan also encumbers <b>2825 W Cortland</b>. Per-parcel leverage (~190%) is an <b>artifact</b> — the loan is secured by both. Pooled across the two, it's <b>~95% LTV</b>, high for commercial. This parcel likely <b>can't be released on its own</b>.<span class="chip c">Verify</span></span></div>
+      <div class="cn g"><span class="dt"></span><span><b>First position, sole active lien.</b> No active foreclosure, lis pendens, or mechanics liens on record.</span></div>
+      <div class="cn c"><span class="dt"></span><span><b>Maturity likely passed.</b> No maturity stated and no modification recorded; a 5-yr commercial balloon from 2019 estimates to <b>~2024</b>. Confirm payoff or extension.<span class="chip c">Verify</span></span></div>
+      <div class="cn n"><span class="dt"></span><span>Owner <b>DON DEAL 6 LLC</b>, acquired 2019. Name search also surfaced <b>DON DEAL 5 LLC</b> — confirm debtor identity before relying on the owner-lien search.</span></div>
+    </div>
+  </div>
+
+  <!-- SECTION: Debt Snapshot -->
+  <div class="cardbox">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span class="t">Debt Snapshot</span></div>
+
+    <div class="g4">
+      <div class="dt2"><div class="l">Lender</div><div class="v">Belmont Bank &amp; Trust</div><div class="s">Co.</div></div>
+      <div class="dt2"><div class="l">Loan Amount</div><div class="v">$2,950,000</div><div class="s">blanket · recorded loan</div></div>
+      <div class="dt2 pos"><div class="l">Lien Position</div><div class="v">1st · sole active</div><div class="s">derived from record order</div></div>
+      <div class="dt2 warn"><div class="l">Maturity</div><div class="v warn">~2024</div><div class="s">est. · 5-yr balloon — verify</div></div>
+    </div>
+    <div class="g4">
+      <div class="dt2"><div class="l">Interest Rate</div><div class="v mut">—</div><div class="s">not stated in mortgage</div></div>
+      <div class="dt2"><div class="l">Recorded</div><div class="v">10/9/2019</div><div class="s">mortgage 1928319044</div></div>
+      <div class="dt2"><div class="l">Acquired</div><div class="v">10/2/2019</div><div class="s">arms-length sale</div></div>
+      <div class="dt2"><div class="l">Foreclosure</div><div class="v ok"><svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>None active</div></div>
+    </div>
+
+    <!-- cross-collateral hero -->
+    <div class="xcol">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg></div>
+      <div class="bd">
+        <div class="h">Cross-collateralized — this loan spans 2 parcels</div>
+        <div class="p">The mortgage is indexed under more than one PIN, so it's secured by a <b>pool</b> of properties, not this parcel alone. Per-parcel leverage isn't meaningful; the loan can only be judged against the combined collateral — and this parcel likely can't be released without satisfying the whole loan.</div>
+        <div class="pins"><span class="pin self">13-31-419-021 · this parcel (2821 W Cortland)</span><span class="pin">13-31-419-022 · 2825 W Cortland ↗</span></div>
+      </div>
+    </div>
+
+    <!-- pool LTV -->
+    <div class="ltv">
+      <div class="ltvcell dead"><div class="l">Per-parcel LTV</div><div class="n">190%</div><div class="x">not meaningful — loan isn't secured by this parcel alone</div></div>
+      <div class="ltvcell live"><div class="l">Pooled LTV (2 parcels)</div><div class="n">~95%</div><div class="x"><b>$2.95M</b> loan ÷ <b>$3.10M</b> combined value · <b>high for commercial</b> (norm ~65–75%) — verify</div></div>
+    </div>
+
+    <div class="note2"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span><b>Owner entity: DON DEAL 6 LLC.</b> The PIN + owner-name search also surfaced <b>DON DEAL 5 LLC</b> — a likely related entity, but not an exact match. Confirm debtor identity before treating owner-name lien hits as this owner's.<span class="tag">Confirm</span></span></div>
+
+    <div class="dcaveat"><svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span><b>Verify before relying on this.</b> Amounts are the <b>recorded loan</b>, not the current balance. Position is inferred from recording order. This is a <b>blanket loan</b> — the pooled LTV uses this report's value estimates for both parcels; confirm the full collateral list and any release terms at title. Maturity is estimated (no date stated, no modification on record).</span></div>
+  </div>
+
+</div>
+</body>
+</html>

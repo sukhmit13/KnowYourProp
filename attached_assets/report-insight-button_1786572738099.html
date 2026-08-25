@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--wash:#f4f2ec;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;--cautionSoft:#fdf8f0;--bad:#c0392b;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--wash);font-family:var(--sans);color:var(--ink);padding:26px}
+  .wrap{max-width:800px;margin:0 auto}
+  .cap{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8a897f;margin:14px 0 8px 2px}
+  .cap:first-child{margin-top:0}
+  .cap .n{color:var(--indigo)}
+  .anchor{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 18px;opacity:.55;margin-bottom:9px;display:flex;align-items:center;gap:9px}
+  .anchor .sq{width:9px;height:9px;border-radius:3px;background:var(--indigo)}
+  .anchor .t{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+
+  /* the button (resting state) */
+  .genbtn{display:flex;align-items:center;gap:13px;width:100%;background:var(--card);border:1.5px solid #bcc5ea;border-radius:13px;padding:17px 20px;box-shadow:0 2px 10px rgba(43,58,158,.07);cursor:pointer}
+  .genbtn .ic{width:34px;height:34px;border-radius:9px;background:var(--indigo);display:flex;align-items:center;justify-content:center;flex:none}
+  .genbtn .ic svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .genbtn .tx .h{font-size:14.5px;font-weight:700;color:var(--ink)}
+  .genbtn .tx .s{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .genbtn .go{margin-left:auto;font-size:12px;font-weight:600;color:var(--indigo);display:inline-flex;align-items:center;gap:6px}
+  .genbtn .go svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* modal */
+  .backdrop{background:rgba(20,20,30,.32);border-radius:14px;padding:34px;display:flex;justify-content:center}
+  .modal{background:var(--card);border:1px solid var(--line);border-radius:14px;width:460px;max-width:100%;box-shadow:0 18px 50px rgba(20,20,30,.28);overflow:hidden}
+  .mh{padding:18px 20px 4px;position:relative}
+  .mh .x{position:absolute;right:16px;top:16px;width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2}
+  .mh .k{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--indigo);margin-bottom:7px}
+  .mh .tt{font-family:var(--disp);font-size:21px;color:var(--ink);line-height:1.15}
+  .mh .sb{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:7px}
+  .mlist{padding:14px 20px}
+  .mrow{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .mrow:last-child{border-bottom:none}
+  .mrow .ic{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex:none;font-size:12px;font-weight:700}
+  .ic.todo{background:var(--indigoSoft);color:var(--indigo)} .ic.done{background:var(--goodSoft);color:var(--good)}
+  .mrow .lb{flex:1}
+  .mrow .lb .h{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .mrow .lb .s{font-size:10.5px;color:var(--muted);margin-top:1px}
+  .mrow .act{font-size:11.5px;font-weight:600;color:var(--indigo);display:inline-flex;align-items:center;gap:4px}
+  .mrow .act svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2}
+  .mrow .actdone{font-size:11px;font-weight:600;color:var(--good)}
+  .mfoot{display:flex;gap:10px;padding:15px 20px;border-top:1px solid var(--line);background:var(--paper)}
+  .mbtn{border-radius:9px;padding:10px 16px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
+  .mbtn.primary{background:var(--indigo);color:#fff;border:1px solid var(--indigo);margin-left:auto}
+  .mbtn.ghost{background:var(--card);color:var(--ink2);border:1px solid var(--line)}
+  .mbtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* section (B / C) */
+  .isec{background:var(--card);border:1.5px solid #bcc5ea;border-radius:13px;overflow:hidden;box-shadow:0 3px 14px rgba(43,58,158,.08)}
+  .isec .rail{height:4px;background:linear-gradient(90deg,var(--indigo),var(--caution))}
+  .ihead{display:flex;align-items:center;gap:10px;padding:14px 18px}
+  .ihead .sq{width:24px;height:24px;border-radius:6px;background:var(--indigoSoft);display:flex;align-items:center;justify-content:center;flex:none}
+  .ihead .sq svg{width:14px;height:14px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .ihead .tl{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+  .ihead .st{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:3px 9px;margin-left:9px}
+  .st.gen{color:var(--cautionText);background:var(--cautionSoft);border:1px solid #e6cfa0}
+  .st.ready{color:var(--good);background:var(--goodSoft);border:1px solid #cfe6d6}
+  .ihead .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .lnk{font-size:11px;font-weight:600;color:var(--indigo);display:inline-flex;align-items:center;gap:5px}
+  .lnk svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .chev{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .genwrap{padding:0 18px 16px}
+  .prog{height:8px;border-radius:999px;background:#e6e4dd;overflow:hidden;margin-bottom:8px}
+  .prog .f{height:100%;width:55%;border-radius:999px;background:linear-gradient(90deg,var(--indigo),var(--caution))}
+  .pm{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+  .pm b{color:var(--ink);font-weight:700}
+  .prio{font-size:11px;color:var(--ink2);margin-top:9px}
+  .prio .tag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid #dfe3f7;border-radius:5px;padding:2px 6px;margin-right:4px}
+
+  .ibody{padding:14px 18px 18px;border-top:1px solid var(--line)}
+  .op{border:1px solid var(--line);border-radius:11px;overflow:hidden}
+  .oph{background:var(--indigo);padding:14px 18px;color:#dfe3fb}
+  .oph .k{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#aab3e6;margin-bottom:6px}
+  .oph .tk{font-family:var(--disp);font-size:17px;color:#fff;line-height:1.2}
+  .oph .use{display:inline-block;margin-top:7px;font-size:10px;font-weight:600;color:#dfe3fb;background:rgba(255,255,255,.15);border-radius:6px;padding:3px 9px}
+  .opc{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:11px}
+  .fc{border:1px solid var(--line);border-left-width:3px;border-radius:8px;padding:9px 11px;font-size:10.5px}
+  .fc.g{border-left-color:var(--good);background:var(--goodSoft)} .fc.c{border-left-color:var(--caution);background:var(--cautionSoft)}
+  .fc .h{font-weight:700;color:var(--ink);margin-bottom:2px} .fc .p{color:var(--ink2);line-height:1.4}
+  .reuse{font-family:var(--mono);font-size:8.5px;color:var(--muted);text-align:center;padding:8px}
+
+  .note{background:#fff;border:1px solid var(--line);border-radius:11px;padding:14px 16px;font-size:12px;color:var(--ink2);line-height:1.6;margin-top:14px}
+  .note b{color:var(--ink)} .note .k{font-family:var(--mono);font-size:10.5px;color:var(--indigo)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="anchor"><span class="sq"></span><span class="t">Ward &amp; Alderperson · Zoning Details</span></div>
+
+  <!-- 1. resting button -->
+  <div class="cap">1 · <span class="n">Resting</span> — a section-width button in the slot</div>
+  <div class="genbtn">
+    <span class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></span>
+    <span class="tx"><div class="h">Generate Insight Report</div><div class="s">A one-page synthesis, tailored to your plan</div></span>
+    <span class="go">Generate<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+  </div>
+
+  <div class="anchor" style="margin-top:9px"><span class="sq"></span><span class="t">Check Your Project Type</span></div>
+
+  <!-- 2. modal -->
+  <div class="cap">2 · <span class="n">Click → pop-up</span> — complete inputs (links) or skip &amp; generate as-is</div>
+  <div class="backdrop">
+    <div class="modal">
+      <div class="mh">
+        <svg class="x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <div class="k">Property Insight Report</div>
+        <div class="tt">Sharpen your report</div>
+        <div class="sb">Complete these for a report tailored to your plan — the more you fill in, the more it prioritizes what matters to you. Or skip for a public-record read.</div>
+      </div>
+      <div class="mlist">
+        <div class="mrow"><span class="ic todo">1</span><span class="lb"><div class="h">Project Type / intended use</div><div class="s">Sets which sections get prioritized</div></span><span class="act">Complete<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div>
+        <div class="mrow"><span class="ic todo">2</span><span class="lb"><div class="h">Project Context</div><div class="s">Your goals &amp; constraints for this deal</div></span><span class="act">Complete<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div>
+        <div class="mrow"><span class="ic done">✓</span><span class="lb"><div class="h">Valuation Calculator</div><div class="s">Deal terms &amp; DSCR — already completed</div></span><span class="actdone">Done</span></div>
+      </div>
+      <div class="mfoot">
+        <span class="mbtn ghost">Skip &amp; generate as-is</span>
+        <span class="mbtn primary"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>Generate</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. State B -->
+  <div class="cap">3 · <span class="n">Generate → the button becomes the section</span> (State B · collapsed + progress)</div>
+  <div class="isec">
+    <div class="rail"></div>
+    <div class="ihead"><span class="sq"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><span class="tl">Property Insight Report</span><span class="st gen">Generating · Restaurant</span><span class="right"><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div>
+    <div class="genwrap">
+      <div class="prog"><div class="f"></div></div>
+      <div class="pm"><span><b>5 of 9</b> prioritized sections synthesized</span><span>~1–2 min · runs in background</span></div>
+      <div class="prio"><span class="tag">Prioritized for Restaurant</span>Zoning use-fit, Licensing, Incentives, Corridor, Transit — ahead of lower-relevance sections. Keep scrolling.</div>
+    </div>
+  </div>
+
+  <!-- 4. State C -->
+  <div class="cap">4 · <span class="n">Done → State C</span> — auto-opens, report embedded, Export in-section, still collapsible</div>
+  <div class="isec">
+    <div class="rail"></div>
+    <div class="ihead"><span class="sq"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><span class="tl">Property Insight Report</span><span class="st ready">Ready · Aug 12</span>
+      <span class="right"><span class="lnk"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>Export / Print PDF</span><span class="lnk"><svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.5 15a9 9 0 1 1-2.1-9.4L23 10"/></svg>Regenerate</span><svg class="chev" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg></span>
+    </div>
+    <div class="ibody">
+      <div class="op">
+        <div class="oph"><div class="k">Property Insight Report — tailored</div><div class="tk">A well-located restaurant site with clean use-fit — verify the tax read and DSCR headroom.</div><span class="use">▸ Tailored for: Restaurant / food service</span></div>
+        <div class="opc">
+          <div class="fc g"><div class="h">✓ Restaurant is by-right in B3-1.</div><div class="p">No zoning relief; liquor license is the next check.</div></div>
+          <div class="fc g"><div class="h">✓ Strong transit + corridor.</div><div class="p">5 CTA stations on Irving Park — supports food service.</div></div>
+          <div class="fc c"><div class="h">! DSCR at the 1.25× floor.</div><div class="p">From your deal terms — thin buffer, verify.</div></div>
+          <div class="fc c"><div class="h">! 2 open violations.</div><div class="p">Clear before build-out permits/financing.</div></div>
+        </div>
+        <div class="reuse">▲ this is the existing one-pager (Replit's design + prompt) — now rendered inside the section</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>The button is the section, before it exists.</b> Resting = a section-width <span class="k">Generate Insight Report</span> button in the slot above Project Type. Click → the <b>pop-up checklist</b> (Project Type, Project Context, Valuation — links each, or <b>Skip &amp; generate as-is</b>). On Generate the button <b>morphs into the section</b>: State B (collapsed + progress) → State C (report embedded), collapsible throughout.<br>
+    <b>Content is unchanged.</b> The one-pager keeps Replit's existing design + prompt — the only new work is the button, the checklist modal, and rendering that one-pager inside a collapsible section with an in-section Export.<br>
+    <b>Auto-skip still applies.</b> If all three inputs are already done, clicking the button skips the pop-up and goes straight to State B (tailored).
+  </div>
+
+</div>
+</body>
+</html>

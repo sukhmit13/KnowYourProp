@@ -1,0 +1,2672 @@
+{
+  "byZip": {
+    "60601": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "Randolph/Wells"
+        },
+        {
+          "name": "LaSalle Central"
+        }
+      ],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 25
+    },
+    "60602": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "Randolph/Wells"
+        },
+        {
+          "name": "LaSalle Central"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60603": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "LaSalle Central"
+        }
+      ],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60604": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "LaSalle Central"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60605": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "Roosevelt/Clark"
+        },
+        {
+          "name": "LaSalle Central"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 20
+    },
+    "60606": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "Canal/Congress"
+        },
+        {
+          "name": "Randolph/Wells"
+        },
+        {
+          "name": "LaSalle Central"
+        },
+        {
+          "name": "River West"
+        }
+      ],
+      "nmtcTotalTracts": 8,
+      "nmtcEligibleTracts": 2,
+      "nmtcCoveragePct": 25
+    },
+    "60607": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "Canal/Congress"
+        },
+        {
+          "name": "Roosevelt/Racine"
+        },
+        {
+          "name": "Western/Ogden"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        },
+        {
+          "name": "Roosevelt/Clark"
+        },
+        {
+          "name": "LaSalle Central"
+        },
+        {
+          "name": "Central West"
+        },
+        {
+          "name": "River West"
+        }
+      ],
+      "nmtcTotalTracts": 2,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 50
+    },
+    "60608": {
+      "sbifZones": [
+        {
+          "name": "35th/Halsted"
+        },
+        {
+          "name": "Roosevelt/Racine"
+        },
+        {
+          "name": "Western/Ogden"
+        },
+        {
+          "name": "Little Village East"
+        },
+        {
+          "name": "Sanitary Drainage and Ship Canal"
+        },
+        {
+          "name": "Midwest"
+        },
+        {
+          "name": "Archer/Western"
+        },
+        {
+          "name": "Pilsen"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 4,
+      "nmtcCoveragePct": 67
+    },
+    "60609": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "35th/Halsted"
+        },
+        {
+          "name": "35th/State"
+        },
+        {
+          "name": "Stockyards Southeast Quadrant Industrial"
+        },
+        {
+          "name": "Washington Park"
+        },
+        {
+          "name": "47th/Ashland"
+        },
+        {
+          "name": "47th/Halsted"
+        },
+        {
+          "name": "47th/State"
+        },
+        {
+          "name": "63rd/Ashland"
+        },
+        {
+          "name": "Englewood Neighborhood"
+        },
+        {
+          "name": "Archer/Western"
+        },
+        {
+          "name": "47th and King Drive"
+        },
+        {
+          "name": "Stevenson/Brighton"
+        },
+        {
+          "name": "Bronzeville"
+        }
+      ],
+      "nmtcTotalTracts": 8,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 63
+    },
+    "60610": {
+      "sbifZones": [
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        },
+        {
+          "name": "Near North"
+        },
+        {
+          "name": "River West"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 11
+    },
+    "60611": {
+      "sbifZones": [],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 4,
+      "nmtcCoveragePct": 100
+    },
+    "60612": {
+      "sbifZones": [
+        {
+          "name": "Western/Ogden"
+        },
+        {
+          "name": "Chicago/Central Park"
+        },
+        {
+          "name": "Midwest"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        },
+        {
+          "name": "Central West"
+        },
+        {
+          "name": "Homan-Arthington"
+        }
+      ],
+      "nmtcTotalTracts": 2,
+      "nmtcEligibleTracts": 2,
+      "nmtcCoveragePct": 100
+    },
+    "60613": {
+      "sbifZones": [
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        },
+        {
+          "name": "Montrose/Clarendon"
+        },
+        {
+          "name": "Wilson Yard"
+        }
+      ],
+      "nmtcTotalTracts": 2,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60614": {
+      "sbifZones": [
+        {
+          "name": "Diversey/Chicago River"
+        },
+        {
+          "name": "Cortland and Chicago River"
+        },
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60615": {
+      "sbifZones": [
+        {
+          "name": "51st and Lake Park"
+        },
+        {
+          "name": "Washington Park"
+        },
+        {
+          "name": "43rd Street/Cottage Grove Avenue"
+        },
+        {
+          "name": "47th/State"
+        },
+        {
+          "name": "53rd Street"
+        },
+        {
+          "name": "47th and King Drive"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 4,
+      "nmtcCoveragePct": 80
+    },
+    "60616": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "35th/Halsted"
+        },
+        {
+          "name": "24th/Michigan"
+        },
+        {
+          "name": "35th/State"
+        },
+        {
+          "name": "Michigan/Cermak"
+        },
+        {
+          "name": "Roosevelt/Clark"
+        },
+        {
+          "name": "26th & King Drive"
+        },
+        {
+          "name": "Archer/Western"
+        },
+        {
+          "name": "Pilsen"
+        },
+        {
+          "name": "Bronzeville"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 7,
+      "nmtcCoveragePct": 78
+    },
+    "60617": {
+      "sbifZones": [
+        {
+          "name": "North Pullman"
+        },
+        {
+          "name": "71st & Stony Island"
+        },
+        {
+          "name": "Lake Calumet Area Industrial"
+        },
+        {
+          "name": "South Chicago"
+        },
+        {
+          "name": "Avalon Park/South Shore"
+        },
+        {
+          "name": "Ewing Avenue"
+        },
+        {
+          "name": "Commercial Avenue"
+        },
+        {
+          "name": "116th/Avenue O"
+        },
+        {
+          "name": "Stony Island Avenue Commercial and Burnside Industrial Corridors"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60618": {
+      "sbifZones": [
+        {
+          "name": "Fullerton/Milwaukee"
+        },
+        {
+          "name": "Diversey/Chicago River"
+        },
+        {
+          "name": "Avondale"
+        },
+        {
+          "name": "Lawrence/Pulaski"
+        },
+        {
+          "name": "Kennedy/Kimball"
+        },
+        {
+          "name": "Pulaski Corridor"
+        },
+        {
+          "name": "Addison South"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 43
+    },
+    "60619": {
+      "sbifZones": [
+        {
+          "name": "71st & Stony Island"
+        },
+        {
+          "name": "73rd/University"
+        },
+        {
+          "name": "67th and Wentworth"
+        },
+        {
+          "name": "87th/Cottage Grove"
+        },
+        {
+          "name": "Stony Island Avenue Commercial and Burnside Industrial Corridors"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 100
+    },
+    "60620": {
+      "sbifZones": [
+        {
+          "name": "83rd/Stewart"
+        },
+        {
+          "name": "79th Street Corridor"
+        },
+        {
+          "name": "95th & Western"
+        },
+        {
+          "name": "79th/Vincennes"
+        },
+        {
+          "name": "Greater Southwest Industrial (East)"
+        },
+        {
+          "name": "79th Street/Southwest Highway"
+        },
+        {
+          "name": "67th and Wentworth"
+        }
+      ],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 25
+    },
+    "60621": {
+      "sbifZones": [
+        {
+          "name": "79th Street Corridor"
+        },
+        {
+          "name": "79th/Vincennes"
+        },
+        {
+          "name": "Washington Park"
+        },
+        {
+          "name": "47th/Halsted"
+        },
+        {
+          "name": "Englewood Mall Area"
+        },
+        {
+          "name": "47th/State"
+        },
+        {
+          "name": "67th and Wentworth"
+        },
+        {
+          "name": "Englewood Neighborhood"
+        }
+      ],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 75
+    },
+    "60622": {
+      "sbifZones": [
+        {
+          "name": "Division/Homan"
+        },
+        {
+          "name": "Humboldt Park Commercial"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 7,
+      "nmtcCoveragePct": 78
+    },
+    "60623": {
+      "sbifZones": [
+        {
+          "name": "Ogden/Pulaski"
+        },
+        {
+          "name": "Little Village Industrial Corridor"
+        },
+        {
+          "name": "Western/Ogden"
+        },
+        {
+          "name": "Little Village East"
+        },
+        {
+          "name": "Sanitary Drainage and Ship Canal"
+        },
+        {
+          "name": "Midwest"
+        },
+        {
+          "name": "Roosevelt/Cicero"
+        },
+        {
+          "name": "Stevenson/Brighton"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 9,
+      "nmtcCoveragePct": 100
+    },
+    "60624": {
+      "sbifZones": [
+        {
+          "name": "Ogden/Pulaski"
+        },
+        {
+          "name": "Madison/Austin Corridor"
+        },
+        {
+          "name": "Chicago/Central Park"
+        },
+        {
+          "name": "Midwest"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        },
+        {
+          "name": "Roosevelt/Cicero"
+        },
+        {
+          "name": "Homan-Arthington"
+        },
+        {
+          "name": "Northwest Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60625": {
+      "sbifZones": [
+        {
+          "name": "Lawrence/Kedzie"
+        },
+        {
+          "name": "Lincoln Avenue"
+        },
+        {
+          "name": "Lawrence/Pulaski"
+        },
+        {
+          "name": "Foster and California"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 2,
+      "nmtcCoveragePct": 67
+    },
+    "60626": {
+      "sbifZones": [
+        {
+          "name": "Pratt/Ridge Industrial Park Conservation Area"
+        },
+        {
+          "name": "Devon/Sheridan"
+        },
+        {
+          "name": "Touhy/Western"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 11
+    },
+    "60628": {
+      "sbifZones": [
+        {
+          "name": "107th/Halsted"
+        },
+        {
+          "name": "North Pullman"
+        },
+        {
+          "name": "Lake Calumet Area Industrial"
+        },
+        {
+          "name": "119th Street/I-57"
+        },
+        {
+          "name": "87th/Cottage Grove"
+        },
+        {
+          "name": "105th Street and Vincennes Avenue"
+        },
+        {
+          "name": "Roseland/Michigan Avenue"
+        },
+        {
+          "name": "119th and Halsted"
+        },
+        {
+          "name": "Stony Island Avenue Commercial and Burnside Industrial Corridors"
+        }
+      ],
+      "nmtcTotalTracts": 2,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60629": {
+      "sbifZones": [
+        {
+          "name": "67th/Cicero"
+        },
+        {
+          "name": "63rd/Pulaski"
+        },
+        {
+          "name": "Greater Southwest Industrial (East)"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 9,
+      "nmtcCoveragePct": 100
+    },
+    "60630": {
+      "sbifZones": [
+        {
+          "name": "Foster/Edens"
+        },
+        {
+          "name": "Lawrence/Pulaski"
+        },
+        {
+          "name": "Elston/Armstrong Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 100
+    },
+    "60631": {
+      "sbifZones": [],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60632": {
+      "sbifZones": [
+        {
+          "name": "Little Village Industrial Corridor"
+        },
+        {
+          "name": "63rd/Pulaski"
+        },
+        {
+          "name": "Sanitary Drainage and Ship Canal"
+        },
+        {
+          "name": "Cicero/Stevenson"
+        },
+        {
+          "name": "Archer/Western"
+        },
+        {
+          "name": "Stevenson/Brighton"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 4,
+      "nmtcCoveragePct": 80
+    },
+    "60633": {
+      "sbifZones": [
+        {
+          "name": "North Pullman"
+        },
+        {
+          "name": "Lake Calumet Area Industrial"
+        },
+        {
+          "name": "Ewing Avenue"
+        },
+        {
+          "name": "116th/Avenue O"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 100
+    },
+    "60634": {
+      "sbifZones": [
+        {
+          "name": "Diversey/Narragansett"
+        },
+        {
+          "name": "Belmont/Central"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 71
+    },
+    "60636": {
+      "sbifZones": [
+        {
+          "name": "79th Street Corridor"
+        },
+        {
+          "name": "Greater Southwest Industrial (East)"
+        },
+        {
+          "name": "67th and Wentworth"
+        },
+        {
+          "name": "63rd/Ashland"
+        },
+        {
+          "name": "Englewood Neighborhood"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 86
+    },
+    "60637": {
+      "sbifZones": [
+        {
+          "name": "Woodlawn"
+        },
+        {
+          "name": "71st & Stony Island"
+        },
+        {
+          "name": "Washington Park"
+        },
+        {
+          "name": "West Woodlawn"
+        },
+        {
+          "name": "47th/State"
+        },
+        {
+          "name": "73rd/University"
+        },
+        {
+          "name": "67th and Wentworth"
+        },
+        {
+          "name": "53rd Street"
+        },
+        {
+          "name": "87th/Cottage Grove"
+        },
+        {
+          "name": "Englewood Neighborhood"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 2,
+      "nmtcCoveragePct": 33
+    },
+    "60638": {
+      "sbifZones": [
+        {
+          "name": "67th/Cicero"
+        },
+        {
+          "name": "Cicero/Stevenson"
+        },
+        {
+          "name": "Stevenson/Brighton"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 100
+    },
+    "60639": {
+      "sbifZones": [
+        {
+          "name": "Austin Commercial"
+        },
+        {
+          "name": "Armitage/Pulaski"
+        },
+        {
+          "name": "Diversey/Narragansett"
+        },
+        {
+          "name": "Galewood/Armitage Industrial"
+        },
+        {
+          "name": "Pulaski Corridor"
+        },
+        {
+          "name": "Belmont/Central"
+        },
+        {
+          "name": "Northwest Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60640": {
+      "sbifZones": [
+        {
+          "name": "Lawrence/Broadway"
+        },
+        {
+          "name": "Hollywood/Sheridan"
+        },
+        {
+          "name": "Bryn Mawr/Broadway"
+        },
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        },
+        {
+          "name": "Clark/Montrose"
+        },
+        {
+          "name": "Montrose/Clarendon"
+        },
+        {
+          "name": "Wilson Yard"
+        }
+      ],
+      "nmtcTotalTracts": 2,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 50
+    },
+    "60641": {
+      "sbifZones": [
+        {
+          "name": "Fullerton/Milwaukee"
+        },
+        {
+          "name": "Avondale"
+        },
+        {
+          "name": "Lawrence/Pulaski"
+        },
+        {
+          "name": "Pulaski Corridor"
+        },
+        {
+          "name": "Belmont/Central"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 100
+    },
+    "60642": {
+      "sbifZones": [
+        {
+          "name": "Cortland and Chicago River"
+        },
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        },
+        {
+          "name": "Goose Island"
+        },
+        {
+          "name": "Near North"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        },
+        {
+          "name": "River West"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60643": {
+      "sbifZones": [
+        {
+          "name": "107th/Halsted"
+        },
+        {
+          "name": "95th & Western"
+        },
+        {
+          "name": "119th Street/I-57"
+        },
+        {
+          "name": "105th Street and Vincennes Avenue"
+        },
+        {
+          "name": "119th and Halsted"
+        },
+        {
+          "name": "Western Avenue/Rock Island"
+        }
+      ],
+      "nmtcTotalTracts": 2,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 50
+    },
+    "60644": {
+      "sbifZones": [
+        {
+          "name": "Austin Commercial"
+        },
+        {
+          "name": "Madison/Austin Corridor"
+        },
+        {
+          "name": "Harrison/Central"
+        },
+        {
+          "name": "Midwest"
+        },
+        {
+          "name": "Roosevelt/Cicero"
+        },
+        {
+          "name": "Northwest Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 33
+    },
+    "60645": {
+      "sbifZones": [
+        {
+          "name": "Touhy/Western"
+        },
+        {
+          "name": "Lincoln Avenue"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 4,
+      "nmtcCoveragePct": 80
+    },
+    "60646": {
+      "sbifZones": [
+        {
+          "name": "Foster/Edens"
+        },
+        {
+          "name": "Elston/Armstrong Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 8,
+      "nmtcEligibleTracts": 7,
+      "nmtcCoveragePct": 88
+    },
+    "60647": {
+      "sbifZones": [
+        {
+          "name": "Fullerton/Milwaukee"
+        },
+        {
+          "name": "Armitage/Pulaski"
+        },
+        {
+          "name": "Diversey/Chicago River"
+        },
+        {
+          "name": "Division/Homan"
+        },
+        {
+          "name": "Humboldt Park Commercial"
+        },
+        {
+          "name": "Pulaski Corridor"
+        },
+        {
+          "name": "Addison South"
+        }
+      ],
+      "nmtcTotalTracts": 8,
+      "nmtcEligibleTracts": 7,
+      "nmtcCoveragePct": 88
+    },
+    "60649": {
+      "sbifZones": [
+        {
+          "name": "Woodlawn"
+        },
+        {
+          "name": "71st & Stony Island"
+        },
+        {
+          "name": "Avalon Park/South Shore"
+        }
+      ],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60651": {
+      "sbifZones": [
+        {
+          "name": "Austin Commercial"
+        },
+        {
+          "name": "Division/Homan"
+        },
+        {
+          "name": "Humboldt Park Commercial"
+        },
+        {
+          "name": "Chicago/Central Park"
+        },
+        {
+          "name": "Pulaski Corridor"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        },
+        {
+          "name": "Northwest Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 2,
+      "nmtcEligibleTracts": 2,
+      "nmtcCoveragePct": 100
+    },
+    "60652": {
+      "sbifZones": [
+        {
+          "name": "67th/Cicero"
+        },
+        {
+          "name": "63rd/Pulaski"
+        },
+        {
+          "name": "Greater Southwest Industrial (East)"
+        },
+        {
+          "name": "79th and Cicero"
+        },
+        {
+          "name": "79th Street/Southwest Highway"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 17
+    },
+    "60653": {
+      "sbifZones": [
+        {
+          "name": "Lakefront"
+        },
+        {
+          "name": "43rd Street/Cottage Grove Avenue"
+        },
+        {
+          "name": "47th/State"
+        },
+        {
+          "name": "47th and King Drive"
+        },
+        {
+          "name": "Bronzeville"
+        },
+        {
+          "name": "Madden/Wells"
+        }
+      ],
+      "nmtcTotalTracts": 2,
+      "nmtcEligibleTracts": 2,
+      "nmtcCoveragePct": 100
+    },
+    "60654": {
+      "sbifZones": [
+        {
+          "name": "Near North"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        },
+        {
+          "name": "River West"
+        }
+      ],
+      "nmtcTotalTracts": 8,
+      "nmtcEligibleTracts": 8,
+      "nmtcCoveragePct": 100
+    },
+    "60655": {
+      "sbifZones": [
+        {
+          "name": "111th Street/Kedzie Avenue Business District"
+        },
+        {
+          "name": "Western Avenue/Rock Island"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 86
+    },
+    "60656": {
+      "sbifZones": [],
+      "nmtcTotalTracts": 8,
+      "nmtcEligibleTracts": 2,
+      "nmtcCoveragePct": 25
+    },
+    "60657": {
+      "sbifZones": [
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 17
+    },
+    "60659": {
+      "sbifZones": [
+        {
+          "name": "Lawrence/Kedzie"
+        },
+        {
+          "name": "Lincoln Avenue"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60660": {
+      "sbifZones": [
+        {
+          "name": "Hollywood/Sheridan"
+        },
+        {
+          "name": "Bryn Mawr/Broadway"
+        },
+        {
+          "name": "Devon/Sheridan"
+        },
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        },
+        {
+          "name": "Edgewater/Ashland"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 60
+    },
+    "60661": {
+      "sbifZones": [
+        {
+          "name": "Canal/Congress"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        },
+        {
+          "name": "LaSalle Central"
+        },
+        {
+          "name": "River West"
+        }
+      ],
+      "nmtcTotalTracts": 2,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 50
+    }
+  },
+  "byCommunityArea": {
+    "1": {
+      "sbifZones": [
+        {
+          "name": "Pratt/Ridge Industrial Park Conservation Area"
+        },
+        {
+          "name": "Devon/Sheridan"
+        },
+        {
+          "name": "Touhy/Western"
+        }
+      ],
+      "nmtcTotalTracts": 13,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 46
+    },
+    "2": {
+      "sbifZones": [
+        {
+          "name": "Touhy/Western"
+        },
+        {
+          "name": "Lincoln Avenue"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 100
+    },
+    "3": {
+      "sbifZones": [
+        {
+          "name": "Lawrence/Broadway"
+        },
+        {
+          "name": "Hollywood/Sheridan"
+        },
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        },
+        {
+          "name": "Clark/Montrose"
+        },
+        {
+          "name": "Montrose/Clarendon"
+        },
+        {
+          "name": "Wilson Yard"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 2,
+      "nmtcCoveragePct": 67
+    },
+    "4": {
+      "sbifZones": [
+        {
+          "name": "Lawrence/Kedzie"
+        },
+        {
+          "name": "Lincoln Avenue"
+        },
+        {
+          "name": "Foster and California"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "5": {
+      "sbifZones": [
+        {
+          "name": "Diversey/Chicago River"
+        },
+        {
+          "name": "Addison South"
+        }
+      ],
+      "nmtcTotalTracts": 8,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "6": {
+      "sbifZones": [
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 50
+    },
+    "7": {
+      "sbifZones": [
+        {
+          "name": "Diversey/Chicago River"
+        },
+        {
+          "name": "Cortland and Chicago River"
+        },
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        }
+      ],
+      "nmtcTotalTracts": 8,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 63
+    },
+    "8": {
+      "sbifZones": [
+        {
+          "name": "Cortland and Chicago River"
+        },
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        },
+        {
+          "name": "Goose Island"
+        },
+        {
+          "name": "Near North"
+        }
+      ],
+      "nmtcTotalTracts": 12,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 8
+    },
+    "9": {
+      "sbifZones": [],
+      "nmtcTotalTracts": 10,
+      "nmtcEligibleTracts": 8,
+      "nmtcCoveragePct": 80
+    },
+    "10": {
+      "sbifZones": [],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 100
+    },
+    "11": {
+      "sbifZones": [
+        {
+          "name": "Elston/Armstrong Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 14,
+      "nmtcEligibleTracts": 13,
+      "nmtcCoveragePct": 93
+    },
+    "12": {
+      "sbifZones": [
+        {
+          "name": "Foster/Edens"
+        },
+        {
+          "name": "Elston/Armstrong Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 11,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 9
+    },
+    "13": {
+      "sbifZones": [
+        {
+          "name": "Lawrence/Kedzie"
+        },
+        {
+          "name": "Lincoln Avenue"
+        },
+        {
+          "name": "Foster/Edens"
+        },
+        {
+          "name": "Lawrence/Pulaski"
+        }
+      ],
+      "nmtcTotalTracts": 12,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 25
+    },
+    "14": {
+      "sbifZones": [
+        {
+          "name": "Lawrence/Kedzie"
+        },
+        {
+          "name": "Foster/Edens"
+        },
+        {
+          "name": "Lawrence/Pulaski"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 33
+    },
+    "15": {
+      "sbifZones": [
+        {
+          "name": "Foster/Edens"
+        },
+        {
+          "name": "Belmont/Central"
+        }
+      ],
+      "nmtcTotalTracts": 14,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 36
+    },
+    "16": {
+      "sbifZones": [
+        {
+          "name": "Fullerton/Milwaukee"
+        },
+        {
+          "name": "Foster/Edens"
+        },
+        {
+          "name": "Avondale"
+        },
+        {
+          "name": "Lawrence/Pulaski"
+        },
+        {
+          "name": "Kennedy/Kimball"
+        },
+        {
+          "name": "Pulaski Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 14,
+      "nmtcEligibleTracts": 2,
+      "nmtcCoveragePct": 14
+    },
+    "17": {
+      "sbifZones": [
+        {
+          "name": "Belmont/Central"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 11
+    },
+    "18": {
+      "sbifZones": [
+        {
+          "name": "Diversey/Narragansett"
+        },
+        {
+          "name": "Galewood/Armitage Industrial"
+        }
+      ],
+      "nmtcTotalTracts": 12,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 42
+    },
+    "19": {
+      "sbifZones": [
+        {
+          "name": "Diversey/Narragansett"
+        },
+        {
+          "name": "Galewood/Armitage Industrial"
+        },
+        {
+          "name": "Belmont/Central"
+        },
+        {
+          "name": "Northwest Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "20": {
+      "sbifZones": [
+        {
+          "name": "Armitage/Pulaski"
+        },
+        {
+          "name": "Pulaski Corridor"
+        },
+        {
+          "name": "Northwest Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 8,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 38
+    },
+    "21": {
+      "sbifZones": [
+        {
+          "name": "Fullerton/Milwaukee"
+        },
+        {
+          "name": "Avondale"
+        },
+        {
+          "name": "Kennedy/Kimball"
+        },
+        {
+          "name": "Pulaski Corridor"
+        },
+        {
+          "name": "Addison South"
+        }
+      ],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 4,
+      "nmtcCoveragePct": 100
+    },
+    "22": {
+      "sbifZones": [
+        {
+          "name": "Fullerton/Milwaukee"
+        },
+        {
+          "name": "Cortland and Chicago River"
+        },
+        {
+          "name": "Pulaski Corridor"
+        },
+        {
+          "name": "Addison South"
+        }
+      ],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "23": {
+      "sbifZones": [
+        {
+          "name": "Division/Homan"
+        },
+        {
+          "name": "Humboldt Park Commercial"
+        },
+        {
+          "name": "Chicago/Central Park"
+        },
+        {
+          "name": "Pulaski Corridor"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        },
+        {
+          "name": "Northwest Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 13,
+      "nmtcEligibleTracts": 7,
+      "nmtcCoveragePct": 54
+    },
+    "24": {
+      "sbifZones": [
+        {
+          "name": "Cortland and Chicago River"
+        },
+        {
+          "name": "Division/Homan"
+        },
+        {
+          "name": "Humboldt Park Commercial"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        },
+        {
+          "name": "River West"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "25": {
+      "sbifZones": [
+        {
+          "name": "Austin Commercial"
+        },
+        {
+          "name": "Madison/Austin Corridor"
+        },
+        {
+          "name": "Galewood/Armitage Industrial"
+        },
+        {
+          "name": "Harrison/Central"
+        },
+        {
+          "name": "Midwest"
+        },
+        {
+          "name": "Roosevelt/Cicero"
+        },
+        {
+          "name": "Northwest Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "26": {
+      "sbifZones": [
+        {
+          "name": "Madison/Austin Corridor"
+        },
+        {
+          "name": "Chicago/Central Park"
+        },
+        {
+          "name": "Midwest"
+        },
+        {
+          "name": "Roosevelt/Cicero"
+        },
+        {
+          "name": "Homan-Arthington"
+        },
+        {
+          "name": "Northwest Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 100
+    },
+    "27": {
+      "sbifZones": [
+        {
+          "name": "Madison/Austin Corridor"
+        },
+        {
+          "name": "Western/Ogden"
+        },
+        {
+          "name": "Chicago/Central Park"
+        },
+        {
+          "name": "Midwest"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        },
+        {
+          "name": "Homan-Arthington"
+        },
+        {
+          "name": "Northwest Industrial Corridor"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 100
+    },
+    "28": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "Canal/Congress"
+        },
+        {
+          "name": "Roosevelt/Racine"
+        },
+        {
+          "name": "Western/Ogden"
+        },
+        {
+          "name": "Midwest"
+        },
+        {
+          "name": "Kinzie Industrial Conservation Area"
+        },
+        {
+          "name": "Roosevelt/Clark"
+        },
+        {
+          "name": "LaSalle Central"
+        },
+        {
+          "name": "Pilsen"
+        },
+        {
+          "name": "Central West"
+        },
+        {
+          "name": "River West"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 7,
+      "nmtcCoveragePct": 100
+    },
+    "29": {
+      "sbifZones": [
+        {
+          "name": "Ogden/Pulaski"
+        },
+        {
+          "name": "Western/Ogden"
+        },
+        {
+          "name": "Midwest"
+        },
+        {
+          "name": "Roosevelt/Cicero"
+        },
+        {
+          "name": "Homan-Arthington"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 71
+    },
+    "30": {
+      "sbifZones": [
+        {
+          "name": "Ogden/Pulaski"
+        },
+        {
+          "name": "Little Village Industrial Corridor"
+        },
+        {
+          "name": "Western/Ogden"
+        },
+        {
+          "name": "Little Village East"
+        },
+        {
+          "name": "Sanitary Drainage and Ship Canal"
+        },
+        {
+          "name": "Midwest"
+        },
+        {
+          "name": "Stevenson/Brighton"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 100
+    },
+    "31": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "Western/Ogden"
+        },
+        {
+          "name": "Pilsen"
+        }
+      ],
+      "nmtcTotalTracts": 10,
+      "nmtcEligibleTracts": 7,
+      "nmtcCoveragePct": 70
+    },
+    "32": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "Randolph/Wells"
+        },
+        {
+          "name": "Roosevelt/Clark"
+        },
+        {
+          "name": "LaSalle Central"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 33
+    },
+    "33": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "24th/Michigan"
+        },
+        {
+          "name": "Michigan/Cermak"
+        },
+        {
+          "name": "Roosevelt/Clark"
+        },
+        {
+          "name": "26th & King Drive"
+        },
+        {
+          "name": "Bronzeville"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "34": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "24th/Michigan"
+        },
+        {
+          "name": "35th/State"
+        },
+        {
+          "name": "Roosevelt/Clark"
+        },
+        {
+          "name": "Pilsen"
+        },
+        {
+          "name": "Bronzeville"
+        }
+      ],
+      "nmtcTotalTracts": 11,
+      "nmtcEligibleTracts": 9,
+      "nmtcCoveragePct": 82
+    },
+    "35": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "35th/State"
+        },
+        {
+          "name": "43rd Street/Cottage Grove Avenue"
+        },
+        {
+          "name": "26th & King Drive"
+        },
+        {
+          "name": "Bronzeville"
+        },
+        {
+          "name": "Madden/Wells"
+        }
+      ],
+      "nmtcTotalTracts": 10,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 30
+    },
+    "36": {
+      "sbifZones": [
+        {
+          "name": "Lakefront"
+        },
+        {
+          "name": "43rd Street/Cottage Grove Avenue"
+        },
+        {
+          "name": "Bronzeville"
+        },
+        {
+          "name": "Madden/Wells"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 7,
+      "nmtcCoveragePct": 100
+    },
+    "37": {
+      "sbifZones": [
+        {
+          "name": "Washington Park"
+        },
+        {
+          "name": "47th/Halsted"
+        },
+        {
+          "name": "47th/State"
+        },
+        {
+          "name": "Bronzeville"
+        }
+      ],
+      "nmtcTotalTracts": 8,
+      "nmtcEligibleTracts": 8,
+      "nmtcCoveragePct": 100
+    },
+    "38": {
+      "sbifZones": [
+        {
+          "name": "Washington Park"
+        },
+        {
+          "name": "47th/Halsted"
+        },
+        {
+          "name": "43rd Street/Cottage Grove Avenue"
+        },
+        {
+          "name": "47th/State"
+        },
+        {
+          "name": "47th and King Drive"
+        },
+        {
+          "name": "Bronzeville"
+        },
+        {
+          "name": "Madden/Wells"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 4,
+      "nmtcCoveragePct": 67
+    },
+    "39": {
+      "sbifZones": [
+        {
+          "name": "Washington Park"
+        },
+        {
+          "name": "43rd Street/Cottage Grove Avenue"
+        },
+        {
+          "name": "53rd Street"
+        }
+      ],
+      "nmtcTotalTracts": 10,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 50
+    },
+    "40": {
+      "sbifZones": [
+        {
+          "name": "Washington Park"
+        },
+        {
+          "name": "47th/Halsted"
+        },
+        {
+          "name": "West Woodlawn"
+        },
+        {
+          "name": "47th/State"
+        },
+        {
+          "name": "47th and King Drive"
+        }
+      ],
+      "nmtcTotalTracts": 11,
+      "nmtcEligibleTracts": 8,
+      "nmtcCoveragePct": 73
+    },
+    "41": {
+      "sbifZones": [
+        {
+          "name": "51st and Lake Park"
+        },
+        {
+          "name": "Washington Park"
+        },
+        {
+          "name": "West Woodlawn"
+        },
+        {
+          "name": "53rd Street"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 60
+    },
+    "42": {
+      "sbifZones": [
+        {
+          "name": "Woodlawn"
+        },
+        {
+          "name": "71st & Stony Island"
+        },
+        {
+          "name": "West Woodlawn"
+        },
+        {
+          "name": "67th and Wentworth"
+        },
+        {
+          "name": "87th/Cottage Grove"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 20
+    },
+    "43": {
+      "sbifZones": [
+        {
+          "name": "71st & Stony Island"
+        },
+        {
+          "name": "Avalon Park/South Shore"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 71
+    },
+    "44": {
+      "sbifZones": [
+        {
+          "name": "83rd/Stewart"
+        },
+        {
+          "name": "79th/Vincennes"
+        },
+        {
+          "name": "67th and Wentworth"
+        },
+        {
+          "name": "87th/Cottage Grove"
+        },
+        {
+          "name": "Stony Island Avenue Commercial and Burnside Industrial Corridors"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 33
+    },
+    "45": {
+      "sbifZones": [
+        {
+          "name": "71st & Stony Island"
+        },
+        {
+          "name": "Avalon Park/South Shore"
+        },
+        {
+          "name": "87th/Cottage Grove"
+        },
+        {
+          "name": "Commercial Avenue"
+        },
+        {
+          "name": "Stony Island Avenue Commercial and Burnside Industrial Corridors"
+        }
+      ],
+      "nmtcTotalTracts": 13,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 46
+    },
+    "46": {
+      "sbifZones": [
+        {
+          "name": "71st & Stony Island"
+        },
+        {
+          "name": "Lake Calumet Area Industrial"
+        },
+        {
+          "name": "South Chicago"
+        },
+        {
+          "name": "Avalon Park/South Shore"
+        },
+        {
+          "name": "Commercial Avenue"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 14
+    },
+    "47": {
+      "sbifZones": [
+        {
+          "name": "87th/Cottage Grove"
+        },
+        {
+          "name": "Stony Island Avenue Commercial and Burnside Industrial Corridors"
+        }
+      ],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "48": {
+      "sbifZones": [
+        {
+          "name": "Lake Calumet Area Industrial"
+        },
+        {
+          "name": "South Chicago"
+        },
+        {
+          "name": "Commercial Avenue"
+        },
+        {
+          "name": "Stony Island Avenue Commercial and Burnside Industrial Corridors"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 100
+    },
+    "49": {
+      "sbifZones": [
+        {
+          "name": "83rd/Stewart"
+        },
+        {
+          "name": "107th/Halsted"
+        },
+        {
+          "name": "North Pullman"
+        },
+        {
+          "name": "Lake Calumet Area Industrial"
+        },
+        {
+          "name": "87th/Cottage Grove"
+        },
+        {
+          "name": "105th Street and Vincennes Avenue"
+        },
+        {
+          "name": "Roseland/Michigan Avenue"
+        },
+        {
+          "name": "119th and Halsted"
+        },
+        {
+          "name": "Stony Island Avenue Commercial and Burnside Industrial Corridors"
+        }
+      ],
+      "nmtcTotalTracts": 9,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 11
+    },
+    "50": {
+      "sbifZones": [
+        {
+          "name": "North Pullman"
+        },
+        {
+          "name": "Lake Calumet Area Industrial"
+        },
+        {
+          "name": "Stony Island Avenue Commercial and Burnside Industrial Corridors"
+        }
+      ],
+      "nmtcTotalTracts": 11,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 9
+    },
+    "51": {
+      "sbifZones": [
+        {
+          "name": "North Pullman"
+        },
+        {
+          "name": "Lake Calumet Area Industrial"
+        },
+        {
+          "name": "South Chicago"
+        },
+        {
+          "name": "Commercial Avenue"
+        },
+        {
+          "name": "116th/Avenue O"
+        },
+        {
+          "name": "Stony Island Avenue Commercial and Burnside Industrial Corridors"
+        }
+      ],
+      "nmtcTotalTracts": 14,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 21
+    },
+    "52": {
+      "sbifZones": [
+        {
+          "name": "Lake Calumet Area Industrial"
+        },
+        {
+          "name": "Ewing Avenue"
+        },
+        {
+          "name": "116th/Avenue O"
+        }
+      ],
+      "nmtcTotalTracts": 5,
+      "nmtcEligibleTracts": 4,
+      "nmtcCoveragePct": 80
+    },
+    "53": {
+      "sbifZones": [
+        {
+          "name": "107th/Halsted"
+        },
+        {
+          "name": "119th Street/I-57"
+        },
+        {
+          "name": "Roseland/Michigan Avenue"
+        },
+        {
+          "name": "119th and Halsted"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "54": {
+      "sbifZones": [
+        {
+          "name": "Lake Calumet Area Industrial"
+        }
+      ],
+      "nmtcTotalTracts": 12,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 8
+    },
+    "55": {
+      "sbifZones": [
+        {
+          "name": "Lake Calumet Area Industrial"
+        },
+        {
+          "name": "Ewing Avenue"
+        },
+        {
+          "name": "116th/Avenue O"
+        }
+      ],
+      "nmtcTotalTracts": 11,
+      "nmtcEligibleTracts": 9,
+      "nmtcCoveragePct": 82
+    },
+    "56": {
+      "sbifZones": [
+        {
+          "name": "Cicero/Stevenson"
+        },
+        {
+          "name": "Stevenson/Brighton"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "57": {
+      "sbifZones": [
+        {
+          "name": "63rd/Pulaski"
+        },
+        {
+          "name": "Stevenson/Brighton"
+        }
+      ],
+      "nmtcTotalTracts": 6,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "58": {
+      "sbifZones": [
+        {
+          "name": "Sanitary Drainage and Ship Canal"
+        },
+        {
+          "name": "Archer/Western"
+        },
+        {
+          "name": "Stevenson/Brighton"
+        }
+      ],
+      "nmtcTotalTracts": 13,
+      "nmtcEligibleTracts": 13,
+      "nmtcCoveragePct": 100
+    },
+    "59": {
+      "sbifZones": [
+        {
+          "name": "35th/Halsted"
+        },
+        {
+          "name": "Archer/Western"
+        },
+        {
+          "name": "Pilsen"
+        },
+        {
+          "name": "Stevenson/Brighton"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "60": {
+      "sbifZones": [
+        {
+          "name": "Red Line Extension (RLE)"
+        },
+        {
+          "name": "35th/Halsted"
+        },
+        {
+          "name": "Archer/Western"
+        },
+        {
+          "name": "Pilsen"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 100
+    },
+    "61": {
+      "sbifZones": [
+        {
+          "name": "35th/Halsted"
+        },
+        {
+          "name": "Stockyards Southeast Quadrant Industrial"
+        },
+        {
+          "name": "47th/Ashland"
+        },
+        {
+          "name": "47th/Halsted"
+        },
+        {
+          "name": "63rd/Ashland"
+        },
+        {
+          "name": "Englewood Neighborhood"
+        },
+        {
+          "name": "Archer/Western"
+        },
+        {
+          "name": "Stevenson/Brighton"
+        }
+      ],
+      "nmtcTotalTracts": 13,
+      "nmtcEligibleTracts": 12,
+      "nmtcCoveragePct": 92
+    },
+    "62": {
+      "sbifZones": [
+        {
+          "name": "63rd/Pulaski"
+        }
+      ],
+      "nmtcTotalTracts": 13,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 46
+    },
+    "63": {
+      "sbifZones": [
+        {
+          "name": "Stevenson/Brighton"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 2,
+      "nmtcCoveragePct": 67
+    },
+    "64": {
+      "sbifZones": [
+        {
+          "name": "67th/Cicero"
+        },
+        {
+          "name": "63rd/Pulaski"
+        }
+      ],
+      "nmtcTotalTracts": 11,
+      "nmtcEligibleTracts": 11,
+      "nmtcCoveragePct": 100
+    },
+    "65": {
+      "sbifZones": [
+        {
+          "name": "67th/Cicero"
+        },
+        {
+          "name": "63rd/Pulaski"
+        }
+      ],
+      "nmtcTotalTracts": 10,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 30
+    },
+    "66": {
+      "sbifZones": [
+        {
+          "name": "Greater Southwest Industrial (East)"
+        }
+      ],
+      "nmtcTotalTracts": 11,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 45
+    },
+    "67": {
+      "sbifZones": [
+        {
+          "name": "79th Street Corridor"
+        },
+        {
+          "name": "Greater Southwest Industrial (East)"
+        },
+        {
+          "name": "67th and Wentworth"
+        },
+        {
+          "name": "63rd/Ashland"
+        },
+        {
+          "name": "Englewood Neighborhood"
+        }
+      ],
+      "nmtcTotalTracts": 11,
+      "nmtcEligibleTracts": 8,
+      "nmtcCoveragePct": 73
+    },
+    "68": {
+      "sbifZones": [
+        {
+          "name": "79th Street Corridor"
+        },
+        {
+          "name": "79th/Vincennes"
+        },
+        {
+          "name": "Washington Park"
+        },
+        {
+          "name": "47th/Halsted"
+        },
+        {
+          "name": "Englewood Mall Area"
+        },
+        {
+          "name": "67th and Wentworth"
+        },
+        {
+          "name": "Englewood Neighborhood"
+        }
+      ],
+      "nmtcTotalTracts": 13,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 46
+    },
+    "69": {
+      "sbifZones": [
+        {
+          "name": "Woodlawn"
+        },
+        {
+          "name": "79th/Vincennes"
+        },
+        {
+          "name": "71st & Stony Island"
+        },
+        {
+          "name": "Washington Park"
+        },
+        {
+          "name": "West Woodlawn"
+        },
+        {
+          "name": "73rd/University"
+        },
+        {
+          "name": "67th and Wentworth"
+        },
+        {
+          "name": "87th/Cottage Grove"
+        },
+        {
+          "name": "Englewood Neighborhood"
+        }
+      ],
+      "nmtcTotalTracts": 12,
+      "nmtcEligibleTracts": 6,
+      "nmtcCoveragePct": 50
+    },
+    "70": {
+      "sbifZones": [
+        {
+          "name": "Greater Southwest Industrial (East)"
+        },
+        {
+          "name": "79th and Cicero"
+        },
+        {
+          "name": "79th Street/Southwest Highway"
+        }
+      ],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 4,
+      "nmtcCoveragePct": 100
+    },
+    "71": {
+      "sbifZones": [
+        {
+          "name": "83rd/Stewart"
+        },
+        {
+          "name": "79th Street Corridor"
+        },
+        {
+          "name": "79th/Vincennes"
+        },
+        {
+          "name": "Greater Southwest Industrial (East)"
+        },
+        {
+          "name": "79th Street/Southwest Highway"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 7,
+      "nmtcCoveragePct": 100
+    },
+    "72": {
+      "sbifZones": [
+        {
+          "name": "95th & Western"
+        },
+        {
+          "name": "79th Street/Southwest Highway"
+        },
+        {
+          "name": "105th Street and Vincennes Avenue"
+        },
+        {
+          "name": "Western Avenue/Rock Island"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 1,
+      "nmtcCoveragePct": 33
+    },
+    "73": {
+      "sbifZones": [
+        {
+          "name": "107th/Halsted"
+        },
+        {
+          "name": "95th & Western"
+        },
+        {
+          "name": "105th Street and Vincennes Avenue"
+        }
+      ],
+      "nmtcTotalTracts": 3,
+      "nmtcEligibleTracts": 3,
+      "nmtcCoveragePct": 100
+    },
+    "74": {
+      "sbifZones": [
+        {
+          "name": "111th Street/Kedzie Avenue Business District"
+        },
+        {
+          "name": "Western Avenue/Rock Island"
+        }
+      ],
+      "nmtcTotalTracts": 7,
+      "nmtcEligibleTracts": 5,
+      "nmtcCoveragePct": 71
+    },
+    "75": {
+      "sbifZones": [
+        {
+          "name": "107th/Halsted"
+        },
+        {
+          "name": "119th Street/I-57"
+        },
+        {
+          "name": "105th Street and Vincennes Avenue"
+        },
+        {
+          "name": "119th and Halsted"
+        },
+        {
+          "name": "Western Avenue/Rock Island"
+        }
+      ],
+      "nmtcTotalTracts": 14,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    },
+    "76": {
+      "sbifZones": [],
+      "nmtcTotalTracts": 8,
+      "nmtcEligibleTracts": 4,
+      "nmtcCoveragePct": 50
+    },
+    "77": {
+      "sbifZones": [
+        {
+          "name": "Lawrence/Broadway"
+        },
+        {
+          "name": "Hollywood/Sheridan"
+        },
+        {
+          "name": "Bryn Mawr/Broadway"
+        },
+        {
+          "name": "Devon/Sheridan"
+        },
+        {
+          "name": "Red and Purple Modernization Phase One Project"
+        },
+        {
+          "name": "Edgewater/Ashland"
+        }
+      ],
+      "nmtcTotalTracts": 4,
+      "nmtcEligibleTracts": 0,
+      "nmtcCoveragePct": 0
+    }
+  },
+  "topZipsByChildcareNeed": [],
+  "topCommunityAreasByChildcareNeed": [
+    "MOUNT GREENWOOD",
+    "O'HARE",
+    "NORWOOD PARK",
+    "DOUGLAS",
+    "CLEARING",
+    "WEST ELSDON",
+    "GARFIELD RIDGE",
+    "WEST RIDGE",
+    "SOUTH LAWNDALE",
+    "JEFFERSON PARK"
+  ]
+}

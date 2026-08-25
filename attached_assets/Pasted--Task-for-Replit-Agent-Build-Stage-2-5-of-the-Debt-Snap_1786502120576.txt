@@ -1,0 +1,192 @@
+# Task for Replit Agent — Build "Stage 2.5" of the Debt Snapshot: resolveState (the fix layer)
+
+> **v2 — updated for judicial/receiver's deeds.** A court-ordered sale (receiver's, sheriff's, foreclosure, trustee's, deed-in-lieu) clears prior-owner liens **regardless of the recorded price** — because a judicial sale can record a nominal / credit-bid amount. Changes from v1: `isClearingTransfer = arms-length OR judicial`; judicial deeds bypass the consideration gate; distinct status labels; corrected 3014 tests (acquired **2014**, Albany is post-acquisition financing, not purchase-money).
+
+## Goal
+Take Stage 2's `reconcile()` output plus the raw doc array and resolve **STATE** — which liens actually burden the **current owner**, which distress is live vs. resolved, which liens are stale. Pure deterministic code, no LLM. **Headline fix:** a clearing transfer (arms-length sale OR judicial sale) resets the prior owner's unreleased liens, so the current owner's mortgage returns to its true position. On 3014 this takes Albany from position 3 to position 1 and turns "3 active mortgages" into "1 active mortgage."
+
+## Adapt to this app
+Reference code is JavaScript; port to the backend's conventions. `resolveState()` consumes Stage 2's returned object (`{active, satisfied, ...}`) and the doc array Stage 1 produced (deeds now carry `parties.assignor` = grantor, `parties.assignee` = grantee, `index_consideration_amount`). No re-fetch, no LLM.
+
+## Optional Stage 1 nicety (not required — detection below already works)
+If easy, add a `deed_subtype` to deed extraction (`warranty|quitclaim|receiver|sheriff|trustee|foreclosure|deed_in_lieu|other`). Stage 2.5 uses it if present and otherwise falls back to detecting a judicial sale from the grantor's role text ("receiver", "sheriff", "trustee", "commissioner", "referee") — which is how 3014's Eric Janssen (court-appointed receiver) is caught today.
+
+## The rules (why the code is shaped this way)
+1. **A clearing transfer resets the prior owner's owner-specific liens.** Two kinds qualify: (a) an **arms-length sale** — real consideration between unrelated parties; (b) a **judicial sale** — receiver's/sheriff's/foreclosure/trustee's deed, which clears by court order **even at a nominal price**. Cleared liens are *presumed resolved*, removed from the current-owner stack, kept in history with a title note — never a fake "satisfied."
+2. **Only owner-specific liens clear.** Prior owner's mortgages, HELOCs, judgments clear. **Tax liens run with the land and survive any sale** — never clear a tax lien by transfer.
+3. **Arms-length needs real money between unrelated parties; a judicial sale does NOT.** Unknown/nominal consideration on an *ordinary* deed ⇒ not proven ⇒ keep the lien and flag. A recognized *judicial* deed clears regardless of price.
+4. **Never clear a purchase-money mortgage** (recorded at/just after the acquiring deed).
+5. **Distress resolves if a clearing transfer (or current-owner financing) post-dates the filing.** A foreclosure that predates the judicial sale is history, not a live cloud.
+6. **Position is recomputed on current-owner liens only**, after clearing.
+7. *(caveat, lightweight)* A judicial sale extinguishes **junior** liens and satisfies the foreclosing lien; a lien **senior to and outside** the action can survive. Rare for prior-owner mortgages; when a cleared lien is senior-most and pre-dates the foreclosing lien, tag `verify_senior_survival` rather than asserting clean.
+
+## Reference code (port as needed) — `stage2_5.js`
+```js
+const NOMINAL_CONSIDERATION   = 1000;  // <= this => not arms-length (gift / quitclaim)
+const MECHANICS_ENFORCE_YEARS = 2;     // IL mechanics-lien window (verify)
+const JUDGMENT_LIEN_YEARS     = 7;     // IL judgment-lien life, revivable (verify)
+const BLANKET_VALUE_MULT      = 1.3;
+
+const daysBetween = (a,b) => Math.round((new Date(b) - new Date(a)) / 86400000);
+const ageYears    = (d, today) => daysBetween(d, today) / 365.25;
+const normEntity  = s => (s||"").toUpperCase().replace(/[.,]/g,"")
+  .replace(/\b(LLC|L L C|INC|CORP|CO|COMPANY|N A|NA|TRUST|LP|LLP)\b/g,"").replace(/\s+/g," ").trim();
+const sameEntity  = (a,b) => !!a && !!b && normEntity(a) === normEntity(b);
+
+// judicial / distressed deed: clears by COURT ORDER, regardless of the (often nominal/credit-bid) price
+const JUDICIAL_GRANTOR_RE = /\b(receiver|sheriff|trustee|commissioner|referee|master in chancery|special commissioner)\b/i;
+const isJudicialDeed = d =>
+  (d.deed_subtype && /receiver|sheriff|foreclosure|judicial|trustee|deed[-_ ]?in[-_ ]?lieu/i.test(d.deed_subtype)) ||
+  JUDICIAL_GRANTOR_RE.test(d.parties?.assignor || "");
+
+const isArmsLength = d => {
+  const consid = d.index_consideration_amount ?? null;
+  if (consid == null) return false;                              // unknown => NOT assumed arms-length
+  if (consid <= NOMINAL_CONSIDERATION) return false;             // gift / nominal quitclaim
+  if (sameEntity(d.parties?.assignor, d.parties?.assignee)) return false; // related parties
+  return true;
+};
+// a "clearing transfer" resets prior-owner liens: an arms-length sale OR a court-ordered judicial sale
+const isClearingTransfer = d => isArmsLength(d) || isJudicialDeed(d);
+
+function resolveState(stack, docs, parcel, coParcels, reportFacts) {
+  const today = new Date().toISOString().slice(0,10);
+
+  // ---- (A) OWNERSHIP TIMELINE from deeds ----
+  const deeds = docs.filter(d => d.doc_type === "deed" && d.recording_date)
+                    .sort((a,b) => a.recording_date.localeCompare(b.recording_date));
+  const acquisitionDeed    = deeds[deeds.length - 1] ?? null;              // newest deed
+  const currentOwner       = acquisitionDeed?.parties?.assignee ?? null;   // grantee of newest deed
+  const lastClearingXfer   = [...deeds].reverse().find(isClearingTransfer) ?? null;
+  const viaJudicial        = !!lastClearingXfer && isJudicialDeed(lastClearingXfer);
+
+  // ---- (B) CLEARING TRANSFER CLEARS PRIOR-OWNER LIENS (the position-3 fix) ----
+  const clearedBySale = [];
+  for (const m of stack.active) {
+    if (m.purchase_money) continue;                                        // never clear the acquisition loan
+    const priorToXfer = lastClearingXfer && m.recording_date
+                        && m.recording_date < lastClearingXfer.recording_date;
+    const notCurrentOwnerDebt = currentOwner && m.borrower && !sameEntity(m.borrower, currentOwner);
+    if (priorToXfer && (notCurrentOwnerDebt || m.borrower == null)) {
+      m.resolved_by_sale = true;
+      m.status = viaJudicial
+        ? `extinguished by court-ordered ${lastClearingXfer.deed_subtype || "receiver's/judicial"} sale recorded ${lastClearingXfer.recording_date}`
+        : `resolved by sale — presumed paid at ${lastClearingXfer.recording_date} closing (no release recorded)`;
+      m.title_note = viaJudicial
+        ? "wiped by judicial sale; junior liens extinguished by court order"
+        : "unreleased pre-sale mortgage; title insurer would have required payoff — minor title note";
+      clearedBySale.push(m);
+    }
+  }
+  const active = stack.active.filter(m => !m.resolved_by_sale)
+    .sort((a,b) => (a.recording_date||"").localeCompare(b.recording_date||""));
+  active.forEach((m,i) => m.position = i + 1);                             // RE-position on current-owner liens only
+
+  // ---- (C) DISTRESS: active vs resolved ----
+  const distress = docs.filter(d => ["lis_pendens","foreclosure","notice_default"].includes(d.doc_type));
+  for (const d of distress) {
+    d.state = "active";
+    if (lastClearingXfer && d.recording_date && d.recording_date < lastClearingXfer.recording_date)
+      d.state = "resolved";                                               // clearing transfer after the filing
+    if (docs.some(x => x.doc_type === "mortgage" && x.recording_date > d.recording_date
+        && sameEntity(x.parties?.borrower, currentOwner)))
+      d.state = "resolved";                                               // current owner financed after the filing
+    if (docs.some(x => (x.references_docs||[]).includes(d.doc_number)
+        && ["release","satisfaction","dismissal"].includes(x.doc_type)))
+      d.state = "resolved";                                               // explicit dismissal/release
+  }
+  const foreclosure_active = distress.some(d => d.state === "active"
+        && ["foreclosure","lis_pendens"].includes(d.doc_type));
+
+  // ---- (D) LIEN enforceability (stale / cleared) ----
+  const liens = docs.filter(d => ["mechanics_lien","judgment_lien","tax_lien"].includes(d.doc_type));
+  for (const L of liens) {
+    L.enforceability = "live";
+    if (L.doc_type !== "tax_lien" && lastClearingXfer && L.recording_date
+        && L.recording_date < lastClearingXfer.recording_date)
+      L.enforceability = "resolved by sale — verify";                     // tax liens run WITH the land — never here
+    if (L.doc_type === "mechanics_lien" && ageYears(L.recording_date, today) > MECHANICS_ENFORCE_YEARS)
+      L.enforceability = "likely expired — verify";
+    if (L.doc_type === "judgment_lien" && ageYears(L.recording_date, today) > JUDGMENT_LIEN_YEARS)
+      L.enforceability = "may be expired/satisfied — verify";
+  }
+
+  // ---- (E) BLANKET / cross-collateralized ----
+  for (const m of active) {
+    m.blanket = m.is_blanket || (m.pins?.length > 1);
+    if (!m.blanket && m.effective_amount && parcel?.value
+        && m.effective_amount > parcel.value * BLANKET_VALUE_MULT
+        && ownerHoldsOtherParcel(currentOwner, coParcels))
+      m.blanket = true;
+    if (m.blanket) { m.suppress_ltv = true;
+      m.note = "blanket / cross-collateralized — amount spans multiple properties; per-parcel leverage not meaningful"; }
+  }
+
+  // ---- (F) EXTRACTION gaps ----
+  for (const m of active) {
+    if (m.lender == null || m.effective_amount == null) {
+      m.extraction_gap = true;
+      m.display_lender = m.lender ?? "— not extracted (open document)";
+      m.position_confidence = "low";
+    }
+  }
+
+  // ---- (G) OWNER-ENTITY resolution for name-indexed liens ----
+  for (const L of liens) {
+    if (!L.debtor_name) continue;
+    if (!sameEntity(L.debtor_name, currentOwner))
+      L.debtor_flag = "possible — confirm debtor identity";               // e.g. DON DEAL 5 LLC vs 6 LLC
+  }
+
+  return {
+    current_owner: currentOwner,
+    ownership_acquired: lastClearingXfer?.recording_date ?? acquisitionDeed?.recording_date ?? null,
+    acquired_via: viaJudicial ? (lastClearingXfer.deed_subtype || "receiver's/judicial sale")
+                              : (lastClearingXfer ? "arms-length sale" : "unknown"),
+    active,                        // current-owner liens, re-positioned
+    cleared_by_sale: clearedBySale,
+    distress, foreclosure_active,
+    liens,
+    flags: [
+      ...(foreclosure_active ? ["foreclosure_active"] : []),
+      ...(active.some(m => m.blanket) ? ["blanket"] : []),
+      ...(clearedBySale.length ? ["pre_sale_liens_cleared"] : []),
+      ...(active.some(m => m.extraction_gap) ? ["extraction_gap"] : []),
+    ],
+  };
+}
+// helper ownerHoldsOtherParcel(owner, coParcels) already exists or stub to false for now.
+// export resolveState so Stage 3 (render + takeaway) consumes it next.
+```
+
+## Requirements
+1. **Consume Stage 2's output + the doc array.** No re-fetch, no LLM.
+2. **Two clearing paths:** arms-length (real money, unrelated parties, known amount) OR judicial (receiver/sheriff/foreclosure/trustee — clears at any price). Ordinary deed with unknown/nominal consideration ⇒ do NOT clear.
+3. **Tax liens never clear by transfer.** Owner-specific liens do.
+4. **Purchase-money loans are never cleared.**
+5. **Re-position on current-owner liens only** after clearing.
+6. **Cleared liens are retained** in `cleared_by_sale` with a title note — resolved, not deleted, not "satisfied."
+7. Expose `resolveState(...)`; log the result for now (Stage 3 renders it next).
+
+## 🔴 Ship these as tests (each maps to a real rule)
+```
+// 3014 ground-truth regression — the whole point of this stage (CORRECTED dates):
+assert current_owner is HAPPY ARTS LLC
+assert ownership_acquired == the 2014 receiver's-deed date  (NOT 2016 — 2016 is the Albany mortgage)
+assert acquired_via indicates a receiver's / judicial sale
+assert the 1999 Banco Popular and 2005 Greenpoint mortgages are in cleared_by_sale, NOT in active
+assert Albany 1618022008 is in active at position 1   // recorded 2016, AFTER the 2014 acquisition
+assert active.length == 1                             // "1 active mortgage", not 3
+assert Albany.effective_maturity_date=="2026-07-05" and maturity_status=="at_maturity"  // carried from Stage 2
+assert both pre-2014 foreclosure filings have state=="resolved"; foreclosure_active == false
+
+// guards that fail in the safe direction:
+assert a judicial deed clears prior liens even when its consideration is nominal/unknown
+assert an ORDINARY deed with unknown/nominal consideration does NOT clear any prior lien
+assert a tax lien is NEVER given enforceability "resolved by sale"
+assert a mortgage with purchase_money==true is never in cleared_by_sale
+```
+
+## Done when
+`resolveState(reconcile(ingestParcel(3014)))` returns **one** active mortgage — Albany at **position 1**, $399,000, 3.75%, maturity 7/5/2026, `maturity_status "at_maturity"` — with `ownership_acquired` = the **2014** receiver's-deed date, `acquired_via` a receiver's/judicial sale, the 1999 and 2005 loans under `cleared_by_sale` ("extinguished by court-ordered receiver's sale"), both pre-2014 foreclosures `resolved`, and `foreclosure_active: false`. The card can now honestly say "1 active mortgage, 1st position" instead of "3 active mortgages."
+```

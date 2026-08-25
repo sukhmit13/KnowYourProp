@@ -1,0 +1,36 @@
+Front-end / styling only — do NOT change routing, auth, data, or business logic.
+
+Redesign the market/rent sections — Development Potential, FAR Analysis, Fair Market Rent (HUD), Real-Time Rental Data, 2-Bedroom Quality Tier Guide, Short-Term Rental Market (Airbnb), and the Commercial Lease / Hourly Space blocks — to match the attached report-market.html and report-rtr.html, using the existing design tokens (Instrument Serif display, Inter body, JetBrains Mono labels, deep indigo 
+#2b3a9e, indigo-soft 
+#ecedf9, cream, hairline 
+#eae8e2) and the shared section-header + stat-tile components. Keep dense reference tables as tables; add visualization only where specified.
+
+1. Fair Market Rent (HUD). Five rent tiles (Efficiency → 4 Bedroom) with Instrument Serif numbers and mono labels. Replace the green "Chicago comparison" bar with an indigo range bar: a light track from min to max, an indigo fill and marker at "This ZIP" with its value labeled above the marker, and Min / City median / Max labeled beneath. No green anywhere in this bar.
+
+2. 2-Bedroom Quality Tier Guide. Convert the four text rows (Dated / Average / Nice / Luxury) into a range-bar ladder on a shared price axis: each tier is a bar positioned by its $ range, colored with a single-hue indigo ordinal ramp (Dated lightest 
+#9aa4e2, Average 
+#6b78d6, Nice 
+#4657c0, Luxury darkest 
+#2c3a86), with the tier name + color swatch on the left, the $ range on the right, and a shared $ axis beneath. Darker = higher tier.
+
+3. Short-Term Rental Market (Airbnb). Keep the full table with all detail, but style it consistently: mono uppercase column headers in dark ink, right-aligned tabular figures, room type + share in the first column, and add a small inline indigo occupancy bar next to each occupancy % so rows compare at a glance.
+
+4. Real-Time Rental Data. Style as a clean comparison table (do NOT chart it), matching report-rtr.html:
+
+Two scope tiles at top: "ZIP 60612 · 272 active listings" and "Within 0.75 mi · 77 active listings".
+A "Market overview" table comparing Median rent / Average rent / Median days on market across the two geographies.
+A "Median rent by bedroom" table: Room type · ZIP · 0.75 mi · vs FMR · Sq ft.
+Mono uppercase column headers in dark ink, right-aligned tabular figures, name left-aligned, and the "vs FMR" deltas colored by sign — green positive 
+#2f7d3f, red negative 
+#d13b26.
+
+5. FAR Analysis "What counts toward FAR". A rules list with a green check (
+#2f7d3f) for included items and a muted ✗ for excluded items — not red, since exclusion from FAR is not a negative.
+
+6. Development Potential and the empty market blocks (Commercial Lease "No listings found", Hourly Space "No venues found"): consistent typography and the standard section headers; render empty states as a neutral muted line, and any count as an indigo-soft chip.
+
+7. Label legibility (throughout). Metric labels, column headers, and group labels use dark ink (
+#565651) at weight 600–700 — not the faint muted gray 
+#8b8a84. Reserve muted only for source lines and secondary qualifiers.
+
+Match spacing, radii, and borders to the mockups. Apply the shared tile, table, and header styles consistently so this whole batch reads as one system.

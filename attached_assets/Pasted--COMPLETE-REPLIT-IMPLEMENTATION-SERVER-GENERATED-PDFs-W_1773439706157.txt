@@ -1,0 +1,911 @@
+# COMPLETE REPLIT IMPLEMENTATION: SERVER-GENERATED PDFs WITH SHAREABLE LINKS
+# User can export full report OR selected sections as PDF
+# Each PDF looks native, not like sections were cropped
+
+## ============================================
+## ARCHITECTURE OVERVIEW
+## ============================================
+
+"""
+USER EXPERIENCE:
+
+1. User views interactive web report
+2. User clicks "Generate PDF"
+3. Modal appears: "Select sections to include"
+4. User checks/unchecks sections
+5. User clicks "Generate PDF"
+6. Server generates professional PDF with ONLY selected sections
+7. User gets:
+   - Download link
+   - Shareable URL (expires in 7 days)
+   - Can email/text the link to others
+
+KEY POINT: PDF is GENERATED on server, not just printed from browser.
+This means we can make it look native, not like cropped sections.
+"""
+
+## ============================================
+## STEP 1: INSTALL DEPENDENCIES
+## ============================================
+
+"""
+In Replit Shell:
+pip install reportlab pypdf anthropic weasyprint
+"""
+
+# requirements.txt:
+"""
+reportlab==4.0.7
+pypdf==3.17.1
+anthropic==0.18.1
+weasyprint==60.2
+flask==3.0.0
+"""
+
+
+## ============================================
+## STEP 2: PDF GENERATOR (SERVER-SIDE)
+## ============================================
+
+"""
+This generates PDFs on the server, not in the browser.
+Each PDF looks native, purpose-built for the selected sections.
+"""
+
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+from datetime import datetime
+import os
+
+def generate_pdf_with_sections(data, selected_sections, output_path):
+    """
+    Generate PDF with ONLY selected sections
+    
+    Parameters:
+    - data: PropertyReportData object
+    - selected_sections: List of section IDs to include
+      Example: ['location-overview', 'zoning-details', 'crime-stats']
+    - output_path: Where to save the PDF
+    
+    Returns: path to generated PDF
+    """
+    
+    # Create PDF
+    doc = SimpleDocTemplate(
+        output_path,
+        pagesize=letter,
+        rightMargin=0.75*inch,
+        leftMargin=0.75*inch,
+        topMargin=0.75*inch,
+        bottomMargin=0.75*inch
+    )
+    
+    story = []
+    styles = getSampleStyleSheet()
+    
+    # Custom styles
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#1a1a1a'),
+        spaceAfter=20,
+        alignment=TA_LEFT
+    )
+    
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=16,
+        textColor=colors.HexColor('#2c3e50'),
+        spaceAfter=12,
+        spaceBefore=20,
+        borderPadding=5,
+        borderColor=colors.HexColor('#3498db'),
+        borderWidth=2,
+        leftIndent=0
+    )
+    
+    body_style = ParagraphStyle(
+        'CustomBody',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.HexColor('#2c3e50'),
+        spaceAfter=6,
+        leading=14
+    )
+    
+    # ===========================
+    # TITLE PAGE (ALWAYS INCLUDED)
+    # ===========================
+    
+    story.append(Paragraph("PROPERTY INTELLIGENCE REPORT", title_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    address_style = ParagraphStyle(
+        'Address',
+        parent=styles['Normal'],
+        fontSize=18,
+        textColor=colors.HexColor('#2c3e50'),
+        spaceAfter=10
+    )
+    story.append(Paragraph(data.address, address_style))
+    story.append(Paragraph(f"{data.neighborhood}, Chicago, IL", body_style))
+    story.append(Paragraph(f"PIN: {data.pin}", body_style))
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Report metadata
+    report_date = datetime.now().strftime('%B %d, %Y')
+    date_style = ParagraphStyle(
+        'Date',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.HexColor('#7f8c8d')
+    )
+    
+    # Show which sections are included
+    sections_included = len(selected_sections)
+    total_sections = count_total_sections()  # You'll need to define this
+    
+    story.append(Paragraph(f"Report Generated: {report_date}", date_style))
+    story.append(Paragraph(f"Sections Included: {sections_included} of {total_sections}", date_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Divider
+    from reportlab.platypus import HRFlowable
+    story.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor('#3498db')))
+    story.append(PageBreak())
+    
+    # ===========================
+    # DYNAMICALLY ADD SELECTED SECTIONS
+    # ===========================
+    
+    # Section mapping
+    section_generators = {
+        'location-overview': generate_location_overview_section,
+        'location-map': generate_location_map_section,
+        'project-type-zoning': generate_zoning_section,
+        'ward-alderperson': generate_ward_section,
+        'zoning-details': generate_zoning_details_section,
+        'zoning-history': generate_zoning_history_section,
+        'senior-population': generate_senior_population_section,
+        'location-incentives': generate_incentives_overview_section,
+        'tod': generate_tod_section,
+        'sbif': generate_sbif_section,
+        'nmtc': generate_nmtc_section,
+        'mmbp': generate_mmbp_section,
+        'liens': generate_liens_section,
+        'violations': generate_violations_section,
+        'crime-stats': generate_crime_section,
+        'comps': generate_comps_section,
+        'podcasts': generate_podcast_section
+    }
+    
+    # Add each selected section
+    for section_id in selected_sections:
+        if section_id in section_generators:
+            # Get the section content
+            section_content = section_generators[section_id](data, styles)
+            
+            # Add to story
+            story.extend(section_content)
+            
+            # Add page break after each major section (optional)
+            # story.append(PageBreak())
+    
+    # ===========================
+    # FOOTER (ALWAYS INCLUDED)
+    # ===========================
+    
+    story.append(Spacer(1, 0.5*inch))
+    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#bdc3c7')))
+    story.append(Spacer(1, 0.1*inch))
+    
+    footer_text = f"""
+    This report was generated on {report_date}. Data sources include Cook County Assessor, 
+    Cook County Clerk, Chicago Data Portal, and other public records. This report is for 
+    informational purposes only and should not be considered legal or financial advice.
+    """
+    story.append(Paragraph(footer_text, date_style))
+    
+    # Build PDF
+    doc.build(story)
+    
+    return output_path
+
+
+## ============================================
+## SECTION GENERATORS
+## ============================================
+
+"""
+Each section has its own generator function.
+This ensures each section looks native, not cropped.
+"""
+
+def generate_location_overview_section(data, styles):
+    """
+    Generate Location & Overview section
+    Returns list of flowables to add to PDF
+    """
+    content = []
+    
+    # Section header
+    content.append(Paragraph("📍 LOCATION & OVERVIEW", styles['Heading2']))
+    content.append(Spacer(1, 0.2*inch))
+    
+    # Key facts table
+    facts_data = [
+        ['Address:', data.address],
+        ['Neighborhood:', data.neighborhood],
+        ['ZIP Code:', data.zip_code],
+        ['PIN:', data.pin],
+        ['Property Type:', data.property_type]
+    ]
+    
+    t = Table(facts_data, colWidths=[2*inch, 4*inch])
+    t.setStyle(TableStyle([
+        ('FONT', (0, 0), (-1, -1), 'Helvetica', 10),
+        ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2c3e50')),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#ecf0f1')),
+        ('PADDING', (0, 0), (-1, -1), 8),
+    ]))
+    
+    content.append(t)
+    content.append(Spacer(1, 0.3*inch))
+    
+    return content
+
+
+def generate_location_map_section(data, styles):
+    """
+    Generate map section with static map image
+    """
+    content = []
+    
+    content.append(Paragraph("🗺️ LOCATION MAP", styles['Heading2']))
+    content.append(Spacer(1, 0.2*inch))
+    
+    # Generate static map image (using Mapbox Static API or similar)
+    map_image_path = generate_static_map_image(data.latitude, data.longitude)
+    
+    if os.path.exists(map_image_path):
+        img = Image(map_image_path, width=6*inch, height=4*inch)
+        content.append(img)
+    else:
+        content.append(Paragraph("Map unavailable", styles['Normal']))
+    
+    content.append(Spacer(1, 0.3*inch))
+    
+    return content
+
+
+def generate_zoning_section(data, styles):
+    """
+    Generate zoning section
+    """
+    content = []
+    
+    content.append(Paragraph("🏗️ ZONING & LAND USE", styles['Heading2']))
+    content.append(Spacer(1, 0.2*inch))
+    
+    # Zoning info
+    zoning_data = [
+        ['Zoning Classification:', data.zoning_classification],
+        ['Zoning District:', data.zoning_district],
+        ['Overlay Districts:', ', '.join(data.overlay_districts) if data.overlay_districts else 'None']
+    ]
+    
+    t = Table(zoning_data, colWidths=[2.5*inch, 3.5*inch])
+    t.setStyle(TableStyle([
+        ('FONT', (0, 0), (-1, -1), 'Helvetica', 10),
+        ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#ecf0f1')),
+        ('PADDING', (0, 0), (-1, -1), 8),
+    ]))
+    
+    content.append(t)
+    content.append(Spacer(1, 0.2*inch))
+    
+    # Permitted uses
+    content.append(Paragraph("<b>Permitted Uses:</b>", styles['Normal']))
+    content.append(Spacer(1, 0.1*inch))
+    
+    for use in data.permitted_uses[:10]:  # Show top 10
+        content.append(Paragraph(f"• {use}", styles['Normal']))
+    
+    if len(data.permitted_uses) > 10:
+        content.append(Paragraph(f"... and {len(data.permitted_uses) - 10} more", styles['Italic']))
+    
+    content.append(Spacer(1, 0.3*inch))
+    
+    return content
+
+
+def generate_liens_section(data, styles):
+    """
+    Generate liens section
+    """
+    content = []
+    
+    content.append(Paragraph("⚠️ LIENS & ENCUMBRANCES", styles['Heading2']))
+    content.append(Spacer(1, 0.2*inch))
+    
+    if not data.liens:
+        content.append(Paragraph("✓ No liens or encumbrances found on record.", styles['Normal']))
+    else:
+        # Create table
+        lien_data = [['Type', 'Amount', 'Date Filed', 'Status']]
+        
+        for lien in data.liens:
+            lien_data.append([
+                lien['type'],
+                f"${lien['amount']:,}",
+                lien['date'],
+                lien['status']
+            ])
+        
+        t = Table(lien_data, colWidths=[2*inch, 1.5*inch, 1.5*inch, 1.5*inch])
+        t.setStyle(TableStyle([
+            ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 10),
+            ('FONT', (0, 1), (-1, -1), 'Helvetica', 9),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e74c3c')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
+            ('PADDING', (0, 0), (-1, -1), 6),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8f9fa')])
+        ]))
+        
+        content.append(t)
+    
+    content.append(Spacer(1, 0.3*inch))
+    
+    return content
+
+
+def generate_crime_section(data, styles):
+    """
+    Generate crime statistics section
+    """
+    content = []
+    
+    content.append(Paragraph("🚔 CRIME STATISTICS", styles['Heading2']))
+    content.append(Spacer(1, 0.2*inch))
+    
+    # Summary stats
+    summary_text = f"""
+    Total incidents within 250 feet (past 12 months): <b>{data.crime_stats['total']}</b><br/>
+    Most common type: <b>{data.crime_stats['most_common_type']}</b><br/>
+    Trend: <b>{data.crime_stats['trend']}</b>
+    """
+    content.append(Paragraph(summary_text, styles['Normal']))
+    content.append(Spacer(1, 0.2*inch))
+    
+    # Breakdown table
+    crime_data = [['Crime Type', 'Count', '% of Total']]
+    
+    for crime_type, count in data.crime_stats['breakdown'].items():
+        percentage = (count / data.crime_stats['total'] * 100) if data.crime_stats['total'] > 0 else 0
+        crime_data.append([
+            crime_type,
+            str(count),
+            f"{percentage:.1f}%"
+        ])
+    
+    t = Table(crime_data, colWidths=[3*inch, 1.5*inch, 1.5*inch])
+    t.setStyle(TableStyle([
+        ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 10),
+        ('FONT', (0, 1), (-1, -1), 'Helvetica', 9),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498db')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
+        ('PADDING', (0, 0), (-1, -1), 6),
+    ]))
+    
+    content.append(t)
+    content.append(Spacer(1, 0.3*inch))
+    
+    return content
+
+
+# ... Define similar generators for all other sections ...
+
+
+## ============================================
+## STEP 3: FLASK ROUTES
+## ============================================
+
+from flask import Flask, request, jsonify, send_file, render_template_string
+import uuid
+from datetime import timedelta
+
+app = Flask(__name__)
+
+# Store for generated PDFs (in production, use S3 or similar)
+PDF_STORAGE = {}
+
+
+@app.route('/api/generate-pdf', methods=['POST'])
+def api_generate_pdf():
+    """
+    Generate PDF with selected sections
+    
+    Request body:
+    {
+        "pin": "13-25-326-010-0000",
+        "selected_sections": ["location-overview", "zoning-details", "crime-stats"],
+        "share": true  // If true, create shareable link
+    }
+    
+    Response:
+    {
+        "pdf_id": "abc123xyz",
+        "download_url": "/download-pdf/abc123xyz",
+        "share_url": "https://yoursite.com/shared-pdf/abc123xyz",
+        "expires_at": "2026-03-20T12:00:00Z"
+    }
+    """
+    
+    data = request.json
+    pin = data['pin']
+    selected_sections = data['selected_sections']
+    create_shareable = data.get('share', False)
+    
+    # Load property data
+    property_data = load_property_data(pin)
+    
+    # Generate unique PDF ID
+    pdf_id = str(uuid.uuid4())[:12]
+    
+    # Generate PDF
+    pdf_path = f'/tmp/pdfs/{pdf_id}.pdf'
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+    
+    generate_pdf_with_sections(
+        data=property_data,
+        selected_sections=selected_sections,
+        output_path=pdf_path
+    )
+    
+    # Calculate expiration
+    expires_at = datetime.now() + timedelta(days=7)
+    
+    # Store PDF metadata
+    PDF_STORAGE[pdf_id] = {
+        'path': pdf_path,
+        'pin': pin,
+        'sections': selected_sections,
+        'created_at': datetime.now(),
+        'expires_at': expires_at,
+        'shareable': create_shareable,
+        'download_count': 0
+    }
+    
+    response = {
+        'pdf_id': pdf_id,
+        'download_url': f'/download-pdf/{pdf_id}',
+        'expires_at': expires_at.isoformat()
+    }
+    
+    if create_shareable:
+        response['share_url'] = f'https://yoursite.com/shared-pdf/{pdf_id}'
+        response['share_message'] = f"Share this link (expires {expires_at.strftime('%B %d, %Y')}): https://yoursite.com/shared-pdf/{pdf_id}"
+    
+    return jsonify(response)
+
+
+@app.route('/download-pdf/<pdf_id>')
+def download_pdf(pdf_id):
+    """
+    Download a generated PDF
+    """
+    if pdf_id not in PDF_STORAGE:
+        return "PDF not found or expired", 404
+    
+    pdf_info = PDF_STORAGE[pdf_id]
+    
+    # Check expiration
+    if datetime.now() > pdf_info['expires_at']:
+        del PDF_STORAGE[pdf_id]
+        return "PDF has expired", 410
+    
+    # Increment download count
+    pdf_info['download_count'] += 1
+    
+    # Send file
+    return send_file(
+        pdf_info['path'],
+        as_attachment=True,
+        download_name=f'property_report_{pdf_info["pin"]}.pdf',
+        mimetype='application/pdf'
+    )
+
+
+@app.route('/shared-pdf/<pdf_id>')
+def shared_pdf_page(pdf_id):
+    """
+    Shareable PDF page
+    Shows preview and download button
+    """
+    if pdf_id not in PDF_STORAGE:
+        return "PDF not found or expired", 404
+    
+    pdf_info = PDF_STORAGE[pdf_id]
+    
+    if not pdf_info['shareable']:
+        return "This PDF is not shareable", 403
+    
+    if datetime.now() > pdf_info['expires_at']:
+        return "PDF has expired", 410
+    
+    # Render share page
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Shared Property Report</title>
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                max-width: 600px;
+                margin: 50px auto;
+                padding: 20px;
+                text-align: center;
+            }}
+            .card {{
+                background: white;
+                padding: 40px;
+                border-radius: 8px;
+                box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            }}
+            h1 {{
+                font-size: 28px;
+                margin-bottom: 10px;
+            }}
+            p {{
+                color: #666;
+                margin: 10px 0;
+            }}
+            .btn {{
+                display: inline-block;
+                background: #3498db;
+                color: white;
+                padding: 15px 30px;
+                border-radius: 6px;
+                text-decoration: none;
+                font-weight: 600;
+                margin-top: 20px;
+            }}
+            .btn:hover {{
+                background: #2980b9;
+            }}
+            .meta {{
+                font-size: 14px;
+                color: #999;
+                margin-top: 30px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>📄 Property Intelligence Report</h1>
+            <p>PIN: {pdf_info['pin']}</p>
+            <p>Generated: {pdf_info['created_at'].strftime('%B %d, %Y')}</p>
+            <p>Sections included: {len(pdf_info['sections'])}</p>
+            
+            <a href="/download-pdf/{pdf_id}" class="btn">
+                📥 Download PDF Report
+            </a>
+            
+            <div class="meta">
+                This link expires on {pdf_info['expires_at'].strftime('%B %d, %Y')}<br>
+                Downloads: {pdf_info['download_count']}
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return html
+
+
+## ============================================
+## STEP 4: FRONTEND JAVASCRIPT
+## ============================================
+
+"""
+Add this to your HTML to handle PDF generation
+"""
+
+FRONTEND_JS = """
+<script>
+async function generatePDF() {
+    // Get selected sections
+    const checkboxes = document.querySelectorAll('#printDialog input[type="checkbox"]:checked');
+    const selectedSections = Array.from(checkboxes).map(cb => cb.getAttribute('data-section'));
+    
+    if (selectedSections.length === 0) {
+        alert('Please select at least one section');
+        return;
+    }
+    
+    // Show loading state
+    const btn = document.getElementById('confirmPrint');
+    btn.textContent = '⏳ Generating PDF...';
+    btn.disabled = true;
+    
+    try {
+        // Call API to generate PDF
+        const response = await fetch('/api/generate-pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                pin: window.propertyData.pin,
+                selected_sections: selectedSections,
+                share: document.getElementById('createShareLink').checked
+            })
+        });
+        
+        const result = await response.json();
+        
+        // Close dialog
+        document.getElementById('printDialog').style.display = 'none';
+        
+        // Show success modal with download + share links
+        showPDFSuccess(result);
+        
+    } catch (error) {
+        alert('Error generating PDF: ' + error.message);
+    } finally {
+        btn.textContent = '🖨️ Generate PDF';
+        btn.disabled = false;
+    }
+}
+
+function showPDFSuccess(result) {
+    const modal = document.createElement('div');
+    modal.className = 'success-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <h2>✅ PDF Generated Successfully!</h2>
+            
+            <div class="action-buttons">
+                <a href="${result.download_url}" class="btn btn-primary" download>
+                    📥 Download PDF
+                </a>
+                
+                ${result.share_url ? `
+                    <button onclick="copyShareLink('${result.share_url}')" class="btn btn-secondary">
+                        🔗 Copy Share Link
+                    </button>
+                ` : ''}
+            </div>
+            
+            ${result.share_url ? `
+                <div class="share-info">
+                    <p>Share link:</p>
+                    <input type="text" value="${result.share_url}" readonly onclick="this.select()">
+                    <p class="expires">Expires: ${new Date(result.expires_at).toLocaleDateString()}</p>
+                </div>
+            ` : ''}
+            
+            <button onclick="closeSuccessModal()" class="btn-close">Close</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function copyShareLink(url) {
+    navigator.clipboard.writeText(url);
+    alert('Share link copied to clipboard!');
+}
+
+function closeSuccessModal() {
+    document.querySelector('.success-modal').remove();
+}
+</script>
+
+<style>
+.success-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    position: relative;
+    max-width: 500px;
+    margin: 100px auto;
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.share-info {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 6px;
+    margin: 20px 0;
+}
+
+.share-info input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin: 10px 0;
+    font-family: monospace;
+}
+
+.expires {
+    font-size: 12px;
+    color: #666;
+}
+
+.btn-close {
+    margin-top: 20px;
+    background: #95a5a6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+</style>
+"""
+
+
+## ============================================
+## STEP 5: UPDATE PRINT DIALOG
+## ============================================
+
+"""
+Update your print dialog to include share link option
+"""
+
+UPDATED_PRINT_DIALOG = """
+<div id="printDialog" class="print-dialog">
+    <div class="dialog-overlay"></div>
+    <div class="dialog-content">
+        <h2>Generate PDF Report</h2>
+        
+        <p>Select sections to include:</p>
+        
+        <div class="dialog-buttons-top">
+            <button onclick="selectAllSections()">Select All</button>
+            <button onclick="deselectAllSections()">Deselect All</button>
+        </div>
+        
+        <div class="checkbox-list">
+            <!-- Your existing checkboxes -->
+            ...
+        </div>
+        
+        <!-- NEW: Share link option -->
+        <div class="share-option">
+            <label>
+                <input type="checkbox" id="createShareLink" checked>
+                Create shareable link (expires in 7 days)
+            </label>
+        </div>
+        
+        <div class="dialog-buttons">
+            <button onclick="closeDialog()" class="btn-secondary">Cancel</button>
+            <button onclick="generatePDF()" id="confirmPrint" class="btn-primary">
+                📄 Generate PDF
+            </button>
+        </div>
+    </div>
+</div>
+"""
+
+
+## ============================================
+## INSTALLATION CHECKLIST
+## ============================================
+
+"""
+STEP-BY-STEP SETUP:
+
+1. INSTALL DEPENDENCIES
+   pip install reportlab pypdf weasyprint flask
+
+2. CREATE PDF GENERATOR
+   - Copy generate_pdf_with_sections() function
+   - Create all section generator functions
+   - Test with sample data
+
+3. ADD FLASK ROUTES
+   - /api/generate-pdf (POST)
+   - /download-pdf/<pdf_id> (GET)
+   - /shared-pdf/<pdf_id> (GET)
+
+4. UPDATE FRONTEND
+   - Add generatePDF() JavaScript function
+   - Update print dialog HTML
+   - Add success modal styles
+
+5. TEST
+   - Select sections
+   - Generate PDF
+   - Check PDF looks native (not cropped)
+   - Test share link
+   - Send share link to someone else
+   - Verify they can download
+
+RESULT:
+✅ Server-generated PDFs (not browser print)
+✅ Each PDF looks native for selected sections
+✅ Shareable links that expire
+✅ Professional appearance
+✅ No "cropped" look
+"""
+
+
+## ============================================
+## KEY DIFFERENCES FROM BROWSER PRINT
+## ============================================
+
+"""
+BROWSER PRINT (Old approach):
+- PDF is whatever browser renders
+- Sections look cropped/removed
+- Limited control over formatting
+- Can't create shareable links
+- Limited to what CSS can do
+
+SERVER-GENERATED PDF (New approach):
+- PDF is purpose-built for selected sections
+- Each section looks native
+- Full control over every element
+- Can create shareable links
+- Professional quality output
+- Can add dynamic content (charts as images, etc.)
+
+EXAMPLE:
+
+User selects: ["location-overview", "crime-stats"]
+
+BROWSER PRINT:
+[Full report with two sections visible, others hidden]
+→ Looks like stuff was deleted
+
+SERVER GENERATED:
+[Custom PDF with ONLY those two sections]
+→ Title page shows "2 sections included"
+→ Each section formatted perfectly
+→ Looks like a native 2-section report
+→ No hint that other sections exist
+"""

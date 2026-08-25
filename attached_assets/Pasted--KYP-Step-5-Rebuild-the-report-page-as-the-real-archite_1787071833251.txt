@@ -1,0 +1,230 @@
+# KYP — Step 5: Rebuild the report page as the real architecture (NO flags)
+
+This replaces the report page structure itself. **Remove `?scan` and `?hybrid` gating entirely** —
+the new layout *is* the page for everyone. The safety net is that the accordion is a pure wrapper:
+each section's existing JSX renders inside its row body unchanged, so nothing is hidden or lost —
+converted sections show their new design, unconverted sections show today's content inline, and we
+keep converting them one at a time on top of this structure.
+
+**Page order (top → bottom):**
+1. Address header (declutter — remove the Project Context + Insight Report buttons from here)
+2. Meta strip (Neighborhood · Tract · TIF · Zoning · Opp Zone) — as today
+3. Map — as today
+4. Alderman + Zoning context cards
+5. **Shape-your-report** setup zone (3 optional steps + tailoring meter)
+6. Instructional bar + legend + reset-order
+7. **The sections** — accordion, **default all-expanded**, each row collapses to one line
+8. **Generate Insight Report** — moved to the bottom
+
+Do this in the phases below. Each phase is safe on its own; after Phase 6 you can delete the flags.
+
+---
+
+## Phase 0 — CSS (append to `kyp-base.css`, namespaced)
+Add the page-chrome + accordion + setup primitives. (Charts/blocks/etc. already exist from Steps 1–4.)
+
+```css
+/* ---- page chrome ---- */
+.kyp-page{max-width:1120px;margin:0 auto;padding:30px 34px 90px}
+.kyp-meta5{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--kyp-line);border:1px solid var(--kyp-line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.kyp-m5{background:var(--kyp-card);padding:13px 15px}
+.kyp-m5 .l{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-muted);margin-bottom:5px}
+.kyp-m5 .v{font-size:14px;font-weight:600;color:var(--kyp-ink)}
+.kyp-ctx2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+.kyp-ctxc{background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:12px;padding:15px 17px;display:flex;align-items:center;gap:14px;cursor:pointer}
+.kyp-ctxc .ic{width:38px;height:38px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--kyp-indigoSoft);color:var(--kyp-indigo);font-family:var(--kyp-disp);font-size:20px}
+.kyp-ctxc .k{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-muted);margin-bottom:4px}
+.kyp-ctxc .nm{font-size:15px;font-weight:700;color:var(--kyp-ink)}
+.kyp-ctxc .sub{font-size:12px;color:var(--kyp-ink2);margin-top:2px}
+
+/* ---- setup zone (3 steps) ---- */
+.kyp-setup{background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:14px;margin-bottom:16px;overflow:hidden}
+.kyp-setup .top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 18px 13px;flex-wrap:wrap}
+.kyp-setup .top .h{font-family:var(--kyp-mono);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--kyp-ink)}
+.kyp-setup .top .h b{color:var(--kyp-ink2)}
+.kyp-meter{display:flex;align-items:center;gap:8px}
+.kyp-meter .dots{display:flex;gap:5px}
+.kyp-meter .dots i{width:9px;height:9px;border-radius:50%;background:var(--kyp-line);border:1.5px solid #d7d5cc}
+.kyp-meter .dots i.on{background:var(--kyp-green);border-color:var(--kyp-green)}
+.kyp-meter .t{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-ink2)}
+.kyp-step{display:flex;align-items:center;gap:14px;padding:15px 18px;border-top:1px solid var(--kyp-line)}
+.kyp-step .n{width:30px;height:30px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-family:var(--kyp-mono);font-size:12px;font-weight:700}
+.kyp-step .n.done{background:var(--kyp-green);color:#fff}
+.kyp-step .n.open{background:var(--kyp-card);border:1.5px solid var(--kyp-indigo);color:var(--kyp-indigo)}
+.kyp-step .mid{flex:1;min-width:0}
+.kyp-step .st{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-ink2);margin-bottom:4px}
+.kyp-step .ln{font-size:14px;color:var(--kyp-ink);line-height:1.4}
+.kyp-step .ln .em{color:var(--kyp-ink2)}
+.kyp-step .pay{font-size:12.5px;color:var(--kyp-ink2);margin-top:3px}
+.kyp-step .cta{flex:none;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:9px;padding:9px 14px;white-space:nowrap;cursor:pointer}
+.kyp-step .cta.pri{background:var(--kyp-indigo);color:#fff;border:1px solid var(--kyp-indigo)}
+.kyp-step .cta.ghost{background:var(--kyp-card);color:var(--kyp-ink2);border:1px solid var(--kyp-line)}
+.kyp-usechip{display:inline-flex;align-items:center;gap:6px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--kyp-green);background:#e9f4ec;border:1px solid #cfe6d5;border-radius:6px;padding:3px 8px;margin-left:2px}
+
+/* ---- instructional bar + legend ---- */
+.kyp-instr{display:flex;align-items:flex-start;gap:10px;background:var(--kyp-wash);border-radius:11px;padding:13px 16px;font-size:12.5px;color:var(--kyp-ink2);line-height:1.5;margin-bottom:16px}
+.kyp-instr b{color:var(--kyp-ink);font-weight:700}
+.kyp-rbtop{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.kyp-legend{display:flex;gap:14px}
+.kyp-legend .lg{display:inline-flex;align-items:center;gap:6px;font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-ink2)}
+.kyp-legend .lg .d{width:9px;height:9px;border-radius:2px}
+.kyp-legend .lg .d.g{background:var(--kyp-green)}.kyp-legend .lg .d.o{background:var(--kyp-orange)}.kyp-legend .lg .d.c{background:var(--kyp-slate)}
+.kyp-reset{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--kyp-ink2);background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:8px;padding:7px 11px}
+
+/* ---- accordion ---- */
+.kyp-acc{display:flex;flex-direction:column;gap:10px}
+.kyp-accrow{background:var(--kyp-card);border:1px solid var(--kyp-line);border-left:4px solid var(--kyp-slate);border-radius:13px;overflow:hidden}
+.kyp-accrow.g{border-left-color:var(--kyp-green)}.kyp-accrow.o{border-left-color:var(--kyp-orange)}.kyp-accrow.c{border-left-color:var(--kyp-slate)}
+.kyp-acchd{display:flex;align-items:center;gap:14px;padding:15px 18px;cursor:pointer}
+.kyp-acchd .drag{color:#c8c6bd;font-size:13px;flex:none;letter-spacing:-2px;cursor:grab}
+.kyp-acchd .num{font-family:var(--kyp-mono);font-size:12px;font-weight:700;color:var(--kyp-ink2);background:#eef0e9;border-radius:8px;width:34px;height:30px;display:flex;align-items:center;justify-content:center;flex:none}
+.kyp-accrow.g .num{background:#e7f2ea;color:var(--kyp-green)}.kyp-accrow.o .num{background:#fbeede;color:#c0651e}
+.kyp-acchd .mid{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline}
+.kyp-acchd .eb{font-family:var(--kyp-mono);font-size:13.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-slate);white-space:nowrap}
+.kyp-accrow.g .eb{color:var(--kyp-green)}.kyp-accrow.o .eb{color:var(--kyp-orange)}
+.kyp-acchd .tk{font-size:15px;font-weight:500;color:var(--kyp-ink);line-height:1.4}
+.kyp-acchd .tk::before{content:"—";color:var(--kyp-muted);margin:0 9px;font-weight:400}
+.kyp-acchd .tk em{font-family:var(--kyp-disp);font-style:italic;font-weight:400;font-size:1.1em;color:var(--kyp-green)}
+.kyp-acchd .tk em.o{color:var(--kyp-orange)}
+.kyp-acchd .stat{text-align:right;flex:none;line-height:1}
+.kyp-acchd .stat .n{font-family:var(--kyp-disp);font-size:23px;color:var(--kyp-ink);line-height:.9}
+.kyp-acchd .stat .u{font-family:var(--kyp-mono);font-size:7.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-muted);margin-top:4px}
+.kyp-acchd .badge{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;border-radius:7px;padding:5px 11px;white-space:nowrap;flex:none}
+.kyp-acchd .badge.g{background:var(--kyp-green)}.kyp-acchd .badge.o{background:var(--kyp-orange)}.kyp-acchd .badge.c{background:var(--kyp-slate)}
+.kyp-acchd .ico{width:27px;height:27px;border-radius:7px;border:1px solid var(--kyp-line);display:flex;align-items:center;justify-content:center;color:var(--kyp-muted);font-size:12px;flex:none;background:var(--kyp-card)}
+.kyp-accbody{padding:6px 26px 26px 66px;border-top:1px solid var(--kyp-line)}
+.kyp-accbody.closed{display:none}
+
+/* ---- bottom: generate insight report ---- */
+.kyp-gen{background:linear-gradient(180deg,var(--kyp-indigoSoft),var(--kyp-card));border:1px solid #dfe3f7;border-radius:16px;padding:26px 28px;margin-top:26px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.kyp-gen .h{font-family:var(--kyp-disp);font-size:26px;color:var(--kyp-ink);line-height:1.1}
+.kyp-gen .s{font-size:13.5px;color:var(--kyp-ink2);margin-top:6px;max-width:52ch;line-height:1.5}
+.kyp-gen .s b{color:var(--kyp-ink);font-weight:600}
+.kyp-gen .btn{font-family:var(--kyp-mono);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;background:var(--kyp-indigo);border-radius:11px;padding:15px 26px;white-space:nowrap;border:0;cursor:pointer}
+```
+
+---
+
+## Phase 1 — `<AccordionSection>` wrapper component (new file)
+`client/src/components/AccordionSection.tsx`. This is the row shell every section goes inside.
+
+```tsx
+import { useState } from "react";
+type Verdict = "good" | "watch" | "context";
+const VCLASS: Record<Verdict,string> = { good:"g", watch:"o", context:"c" };
+
+export function AccordionSection({
+  index, id, eyebrow, takeaway, stat, verdict, badge, info,
+  defaultOpen = true, onHide, children,
+}: {
+  index: number; id: string; eyebrow: string; takeaway: React.ReactNode;
+  stat?: { n: string; u: string }; verdict: Verdict; badge?: string; info?: string;
+  defaultOpen?: boolean; onHide?: () => void; children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const v = VCLASS[verdict];
+  return (
+    <div className={`kyp-accrow ${v}`} id={`section-${id}`} data-testid={`accsec-${id}`}>
+      <div className="kyp-acchd" onClick={() => setOpen(o => !o)}>
+        <span className="drag" title="Drag to re-rank" onClick={e => e.stopPropagation()}>⠿</span>
+        <span className="num">{String(index).padStart(2,"0")}</span>
+        <div className="mid">
+          <span className="eb">{eyebrow}</span>
+          <span className="tk">{takeaway}</span>
+        </div>
+        {stat && <span className="stat"><span className="n">{stat.n}</span><span className="u">{stat.u}</span></span>}
+        {badge && <span className={`badge ${v}`}>{badge}</span>}
+        <span className="ico" title={info} onClick={e => { e.stopPropagation(); /* show info tooltip */ }}>ⓘ</span>
+        {onHide && <span className="ico" title="Hide section" onClick={e => { e.stopPropagation(); onHide(); }}>👁</span>}
+        <span className="ico">{open ? "⌃" : "⌄"}</span>
+      </div>
+      <div className={`kyp-accbody${open ? "" : " closed"}`}>{children}</div>
+    </div>
+  );
+}
+```
+Notes: `defaultOpen = true` → **opens fully expanded**. `id` keeps the existing `section-*` / print
+anchors working. Drag/eye are stubbed handlers — wire to the existing reorder + show/hide state
+(the scan page already had this logic; lift it here). Info opens the same tooltip the scan page used.
+
+---
+
+## Phase 2 — Section metadata (one source)
+You already derive per-section takeaway/verdict/stat for the scan page (Step 3 `buildScanSections`).
+Keep that as the single source and feed it into the wrapper. Each entry needs:
+`{ id, order, eyebrow, takeaway, stat?, verdict, badge, info }`. Sections without a real takeaway
+fall back to their existing `summary` string (same fallback rule as Step 2). Default order = the
+fixed report order (Property Overview → … → News). Reorder/hide state persists as the scan page did.
+
+---
+
+## Phase 3 — Wrap every section
+In `RunDetail.tsx`, the report body becomes a single `.kyp-acc` list. For **each** existing section
+block, wrap its current JSX in `<AccordionSection {...meta}>{ …the section's existing content… }</AccordionSection>`.
+- **Converted sections** (Crime, News, Incentives, Transit, and any others done): put their `?hybrid`
+  branch here as the body, and **delete the `else` (old) branch + the flag check** — the new design
+  is now the only render.
+- **Unconverted sections**: put their **current** JSX in the body, untouched. They render inline,
+  fully, today's look — nothing hidden. We convert them section-by-section later, editing only that
+  one wrapper's children.
+- Keep every `data-testid`, `id`, and `print-section-*` anchor.
+
+---
+
+## Phase 4 — Setup zone (3 steps) — wire to existing components
+Render `.kyp-setup` above the accordion. Do **not** build new inputs — reuse what exists:
+
+- **Step One · Your intended use** → the existing `ProjectTypeCombobox` + `handleProjectTypeChange`.
+  Done-state when `selectedProjectType || run.lastProjectType`: show the use + the zoning verdict chip
+  (`effectiveCompatibility.permission === 'permitted'` → "Allowed by right"). Empty-state: the combobox
+  + payoff "See if your use is allowed here, and which incentives you qualify for."
+- **Step Two · Project Context** → the existing `FunnelModal` (`setShowFunnelEdit(true)`).
+  Done-state when `run.lastFreeformDescription || run.lastRole || run.lastTransactionType`: show a
+  one-line summary of their answers ("{role} · {transactionType} · saved") + "Edit context". Empty:
+  "Tell us your goals — 5 quick questions, skip anytime" + a "Start →" button.
+- **Step Three · Your numbers** → the existing valuation calculator (`setIsValuationCalculatorOpen`).
+  Done-state when `valuationComplete`: "{price} · {cap}% cap · edit". Empty: "Enter the deal →".
+- **Meter**: reuse the InsightReport checklist booleans (`projectTypeComplete`, `contextComplete`,
+  `valuationComplete`) → `n of 3 · tailored`, dots filled per complete step.
+
+Each step is optional and never blocks the report.
+
+---
+
+## Phase 5 — Header + bottom
+- **Header:** remove the "Project Context" and "Insight Report" buttons (they now live in the setup
+  zone and the bottom). Keep address, Share, Print, Collapse All.
+- **Bottom:** move `<InsightReportSection>` to the very end of the page inside `.kyp-gen` — the
+  "Generate your Insight Report" CTA. Its generate/tailored-vs-as-is logic is unchanged; only its
+  position moves.
+
+---
+
+## Phase 6 — Delete the flags
+Remove every `new URLSearchParams(location.search).has("hybrid")` / `has("scan")` check and the
+branches they guard. There is now one report page for everyone. Delete the standalone scan page /
+index and the old long-report layout that the scan linked to — the accordion replaces both.
+
+---
+
+## 🔒 Guardrails
+- **Nothing behind a flag, nothing hidden.** Every section's full content renders inline in its row
+  body — converted → new design, unconverted → current design. No data removed.
+- **Default expanded.** All rows open on load; collapse is user-initiated. Reorder + hide persist.
+- Preserve all `data-testid`s, `id`s, `print-section-*` anchors, and the Insight Report / funnel /
+  valuation logic. Only their **placement** changes.
+- Fixed default order for now (auto-reorder-by-use is a later upgrade).
+
+## ✅ Done-when
+- [ ] Opening a run shows: header (no context/insight buttons) → meta → map → alderman+zoning cards →
+      3-step setup zone with tailoring meter → instructional bar + legend → all 14 sections as an
+      accordion, **fully expanded**, each collapsing to a one-line "NN · TITLE — takeaway".
+- [ ] Converted sections render their new design; unconverted render current content — both inline,
+      neither behind a flag.
+- [ ] Generate Insight Report sits at the bottom; header is decluttered.
+- [ ] `?scan` / `?hybrid` do nothing (removed); there is exactly one report page.
+
+## After this
+The page is the architecture. We resume section-by-section: each conversion is now just editing one
+`<AccordionSection>`'s children — and later, Property Overview may split into subsections (breaking
+out Permits / Violations), but today's version is fine to ship.

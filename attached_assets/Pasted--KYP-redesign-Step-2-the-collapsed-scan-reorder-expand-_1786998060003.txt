@@ -1,0 +1,402 @@
+# KYP redesign — Step 2: the collapsed scan / reorder / expand report view
+
+Build the **scannable, reorderable, collapsible** report overview from the approved
+mockup — as real React, composing the `.kyp-*` classes. One paste: create the three
+files below exactly, then mount as described.
+
+## Prerequisite
+Step 1 must be in: **`client/src/kyp-base.css`** exists and is imported in `main.tsx`.
+Every class used here (`.kyp-scanrow`, `.kyp-numb`, `.kyp-pill`, `.kyp-info`, …) lives in
+that stylesheet. If it isn't installed, do Step 1 first.
+
+## 🔒 Guardrails (live site has testers)
+- **Mount behind a flag / on a dev route. Do NOT replace or delete the existing report.**
+  Render `<SectionScan>` only when e.g. `?scan=1` is in the URL, so testers aren't exposed
+  until you flip it on.
+- The **takeaway / verdict / hero / preview** values in `sectionRegistry.tsx` are
+  **placeholder example content** (copied from the approved mockup) so the UI renders and
+  is testable immediately. They are marked `// TODO(real-data)`. Wire them to real
+  per-property values **before** turning the flag on for everyone. The **static** fields
+  (title, info list, anchorId) are correct to keep.
+- `anchorId` values are best-guesses — verify each matches the real section element `id`
+  in `RunDetail.tsx` (search for `id="print-section-…"`); fix any that don't.
+- Native HTML5 drag-and-drop only — **add no new dependencies.**
+
+## Sections that don't have a takeaway yet
+Not every section will have a determined takeaway. That's handled — do **not** leave a row
+blank (a blank one-liner reads as broken). Each section always has a short `summary`
+("what this covers"); when a section has **no `takeaway`**, the row shows that muted
+`summary` and **no verdict pill** (row stays neutral slate), so we never imply a finding we
+don't have. As a takeaway is determined, add `takeaway` (+ optional `verdict`/`hero`) and
+the row upgrades automatically. `sectionRegistry.tsx` ships one such example — **Neighborhood
+& People** — with no takeaway/verdict, so you can see the fallback live.
+
+---
+
+## File 1 — `client/src/components/report/CollapsibleSection.tsx`
+
+```tsx
+import { type ReactNode, useRef } from "react";
+
+export type VerdictTone = "good" | "attention" | "context";
+
+const PILL_CLASS: Record<VerdictTone, string> = { good: "good", attention: "att", context: "ctx" };
+const ROW_CLASS:  Record<VerdictTone, string> = { good: "kyp-v-good", attention: "kyp-v-att", context: "kyp-v-ctx" };
+const SQ_VAR:     Record<VerdictTone, string> = { good: "--kyp-green", attention: "--kyp-orange", context: "--kyp-slate" };
+
+export interface PreviewRow { tone: VerdictTone; body: ReactNode; }
+
+export interface ScanSection {
+  id: string;                 // stable key (never changes)
+  anchorId?: string;          // element id of the full section to scroll to
+  title: string;              // section name (the kicker)
+  summary: string;            // ALWAYS present — "what this covers". Shown until a real takeaway exists.
+  takeaway?: ReactNode;       // the finding one-liner; may include <em>. OMIT until determined -> falls back to summary.
+  verdict?: { tone: VerdictTone; label: string }; // OMIT until determined -> no pill, row stays neutral (slate).
+  hero?: { value: string; label: string };
+  info: string[];             // "Contains" tooltip list
+  preview?: PreviewRow[];     // rows shown when expanded (optional)
+}
+
+function Chevron() {
+  return <svg className="kyp-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>;
+}
+function EyeIcon({ on }: { on: boolean }) {
+  return on
+    ? <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+    : <svg viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.1A9.5 9.5 0 0 1 12 5c6.5 0 10 7 10 7a15.8 15.8 0 0 1-3.1 3.9M6.6 6.6A15.9 15.9 0 0 0 2 12s3.5 7 10 7a9.5 9.5 0 0 0 3-.5" /></svg>;
+}
+
+function InfoTip({ items }: { items: string[] }) {
+  const tipRef = useRef<HTMLDivElement>(null);
+  const place = () => {
+    const tip = tipRef.current;
+    if (!tip || !tip.parentElement) return;
+    const btn = tip.parentElement.getBoundingClientRect();
+    const tw = 256, th = tip.offsetHeight;
+    const left = Math.min(Math.max(8, btn.right - tw), window.innerWidth - tw - 8);
+    let top = btn.bottom + 8;
+    if (top + th > window.innerHeight - 8) top = Math.max(8, btn.top - th - 8);
+    tip.style.left = `${left}px`;
+    tip.style.top = `${top}px`;
+  };
+  return (
+    <div
+      className="kyp-info"
+      onMouseEnter={() => { tipRef.current?.classList.add("show"); requestAnimationFrame(place); }}
+      onMouseLeave={() => tipRef.current?.classList.remove("show")}
+      onClick={(e) => e.stopPropagation()}
+    >
+      i
+      <div className="kyp-tip" ref={tipRef}>
+        <div className="tt">Contains</div>
+        <ul>{items.map((x, i) => <li key={i}>{x}</li>)}</ul>
+      </div>
+    </div>
+  );
+}
+
+export interface CollapsibleSectionProps {
+  section: ScanSection;
+  index: number;
+  open: boolean;
+  off: boolean;
+  onToggleOpen: () => void;
+  onToggleOff: () => void;
+  onOpenFull?: (anchorId?: string) => void;
+  over?: boolean;
+  dragging?: boolean;
+  dragHandlers?: React.HTMLAttributes<HTMLDivElement> & { draggable?: boolean };
+}
+
+export default function CollapsibleSection({
+  section, index, open, off, onToggleOpen, onToggleOff, onOpenFull, over, dragging, dragHandlers,
+}: CollapsibleSectionProps) {
+  const tone: VerdictTone = section.verdict?.tone ?? "context";   // no verdict -> neutral slate
+  const isFallback = section.takeaway == null;                    // show muted summary until a takeaway exists
+  const cls = ["kyp-scanrow", ROW_CLASS[tone], off && "off", open && "open", over && "over", dragging && "drag"]
+    .filter(Boolean).join(" ");
+  return (
+    <div className={cls} {...dragHandlers}>
+      <div className="accent" />
+      <div className="kyp-drag">⠿</div>
+      <div className="kyp-numb">{String(index + 1).padStart(2, "0")}</div>
+      <div className="kyp-scanmain" onClick={onToggleOpen}>
+        <div className="kyp-scankick">{section.title}</div>
+        <div className="kyp-scantake" style={isFallback ? { fontWeight: 500, color: "var(--kyp-ink2)" } : undefined}>
+          {section.takeaway ?? section.summary}
+        </div>
+        <div className="kyp-preview">
+          {(section.preview ?? []).map((r, i) => (
+            <div className="kyp-pvrow" key={i}>
+              <span className="sq" style={{ background: `var(${SQ_VAR[r.tone]})` }} />
+              <span>{r.body}</span>
+            </div>
+          ))}
+          <div className="kyp-jump" onClick={(e) => { e.stopPropagation(); onOpenFull?.(section.anchorId); }}>
+            Open full section →
+          </div>
+        </div>
+      </div>
+      <div className="kyp-scanright">
+        {section.hero && (
+          <div className="kyp-hero"><div className="hv">{section.hero.value}</div><div className="hl">{section.hero.label}</div></div>
+        )}
+        {section.verdict && <span className={`kyp-pill ${PILL_CLASS[section.verdict.tone]}`}>{section.verdict.label}</span>}
+        <InfoTip items={section.info} />
+        <div className="kyp-eye" title="Include / exclude" onClick={(e) => { e.stopPropagation(); onToggleOff(); }}>
+          <EyeIcon on={!off} />
+        </div>
+        <span onClick={(e) => { e.stopPropagation(); onToggleOpen(); }}><Chevron /></span>
+      </div>
+    </div>
+  );
+}
+```
+
+## File 2 — `client/src/components/report/SectionScan.tsx`
+
+```tsx
+import { useState } from "react";
+import CollapsibleSection, { type ScanSection } from "./CollapsibleSection";
+
+export interface SectionScanProps {
+  sections: ScanSection[];
+  /** localStorage key to persist the user's order + hidden set (e.g. `kyp-scan-${runId}`). */
+  storageKey?: string;
+  /** Default scrolls to the section's anchorId. Override to expand inline instead. */
+  onOpenFull?: (anchorId?: string) => void;
+}
+
+function readPersist(key?: string): { order?: string[]; hidden?: string[] } {
+  if (!key) return {};
+  try { return JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch { return {}; }
+}
+
+export default function SectionScan({ sections, storageKey, onOpenFull }: SectionScanProps) {
+  const persisted = readPersist(storageKey);
+  const [order, setOrder]   = useState<string[]>(persisted.order ?? sections.map((s) => s.id));
+  const [hidden, setHidden] = useState<Set<string>>(new Set(persisted.hidden ?? []));
+  const [open, setOpen]     = useState<Set<string>>(new Set());
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+
+  const byId = new Map(sections.map((s) => [s.id, s]));
+  const ordered = order.map((id) => byId.get(id)).filter(Boolean) as ScanSection[];
+
+  const persist = (o: string[], h: Set<string>) => {
+    if (storageKey) { try { localStorage.setItem(storageKey, JSON.stringify({ order: o, hidden: [...h] })); } catch { /* ignore */ } }
+  };
+  const move = (from: string, to: string) => {
+    if (from === to) return;
+    const o = [...order];
+    o.splice(o.indexOf(from), 1);
+    o.splice(o.indexOf(to), 0, from);
+    setOrder(o); persist(o, hidden);
+  };
+  const toggleOpen = (id: string) => setOpen((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const toggleOff  = (id: string) => setHidden((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); persist(order, n); return n; });
+  const reset = () => { const o = sections.map((s) => s.id); setOrder(o); setHidden(new Set()); setOpen(new Set()); persist(o, new Set()); };
+
+  const openFull = onOpenFull ?? ((anchorId?: string) => {
+    if (anchorId) document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  const chip = (color: string, label: string) => (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+      <i style={{ width: 11, height: 11, borderRadius: 3, background: `var(${color})`, display: "inline-block" }} />{label}
+    </span>
+  );
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap",
+                    fontFamily: "var(--kyp-mono)", fontSize: 10, fontWeight: 700, letterSpacing: ".04em",
+                    textTransform: "uppercase", color: "var(--kyp-ink2)", margin: "0 2px 16px" }}>
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          {chip("--kyp-green", "Good")}{chip("--kyp-orange", "Needs a look")}{chip("--kyp-slate", "Context")}
+        </div>
+        <button onClick={reset}
+          style={{ fontFamily: "var(--kyp-mono)", fontSize: 10.5, fontWeight: 700, letterSpacing: ".04em",
+                   textTransform: "uppercase", color: "var(--kyp-ink2)", background: "var(--kyp-card)",
+                   border: "1px solid var(--kyp-line)", borderRadius: 8, padding: "7px 12px", cursor: "pointer" }}>
+          ↺ Reset order
+        </button>
+      </div>
+
+      <div className="kyp-scan">
+        {ordered.map((s, i) => (
+          <CollapsibleSection
+            key={s.id}
+            section={s}
+            index={i}
+            open={open.has(s.id)}
+            off={hidden.has(s.id)}
+            onToggleOpen={() => toggleOpen(s.id)}
+            onToggleOff={() => toggleOff(s.id)}
+            onOpenFull={openFull}
+            over={overId === s.id}
+            dragging={dragId === s.id}
+            dragHandlers={{
+              draggable: true,
+              onDragStart: () => setDragId(s.id),
+              onDragEnd: () => { setDragId(null); setOverId(null); },
+              onDragOver: (e) => { e.preventDefault(); setOverId(s.id); },
+              onDragLeave: () => setOverId((o) => (o === s.id ? null : o)),
+              onDrop: (e) => { e.preventDefault(); if (dragId) move(dragId, s.id); setOverId(null); },
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+## File 3 — `client/src/components/report/sectionRegistry.tsx`
+
+Static metadata is correct to keep. Replace every `// TODO(real-data)` value with the
+real per-property takeaway / verdict / hero / preview before flipping the flag on.
+
+```tsx
+import { type ScanSection } from "./CollapsibleSection";
+
+// The default 14-section order. STATIC fields (title, info, anchorId) are real.
+// DYNAMIC fields (takeaway, verdict, hero, preview) are example placeholders — TODO(real-data).
+export const DEFAULT_SECTIONS: ScanSection[] = [
+  { id: "overview", anchorId: "print-section-overview", title: "Property Overview",
+    summary: "Address, PIN, zoning, building profile and lot — the basic facts.",
+    takeaway: <>2-flat + coach house on a 3,125 sf lot — <em>confirm the third unit</em>.</>,
+    verdict: { tone: "context", label: "Context" }, hero: { value: "3", label: "units" },
+    info: ["Location map", "Facts: PIN, zoning, Opportunity-Zone flag", "Building profile: units, sqft, beds/baths, year", "Parcel / assessor record", "Historic landmark status"],
+    preview: [{ tone: "context", body: "Assessor lists 2 units; a coach house suggests a likely 3rd — building profile pending confirmation." }] },
+
+  { id: "zoning", anchorId: "print-section-zoning", title: "Zoning & What You Can Build",
+    summary: "What the zoning lets you build, by-right or with approvals.",
+    takeaway: <>RS-3 allows the 2-unit + ADU <em>as-of-right</em> — no variance needed.</>,
+    verdict: { tone: "good", label: "By-right" },
+    info: ["Zoning district & meaning", "Allowed uses — as-of-right", "Your project-type verdict", "Development potential: FAR, height, parking", "Zoning & ZBA history"],
+    preview: [{ tone: "good", body: "Your project pencils under current zoning; no ZBA path required." }] },
+
+  { id: "valuation", anchorId: "print-section-valuation", title: "Valuation & Cashflow",
+    summary: "Cap rate, cash flow and debt coverage at your inputs.",
+    takeaway: <>Stabilizes to a <em>6.2% cap</em> at asking; coverage clears comfortably.</>,
+    verdict: { tone: "good", label: "Pencils" }, hero: { value: "6.2%", label: "cap" },
+    info: ["Deal inputs — price & financing", "Income → NOI statement", "Cap rate & cash flow", "DSCR coverage", "Market rents (RentCast)", "Short-term rental (Airbnb)"],
+    preview: [{ tone: "good", body: "NOI supports the ask at a 6.2% cap." }, { tone: "good", body: "DSCR 1.28 — clears a 1.20 lender floor." }] },
+
+  { id: "ownership", anchorId: "print-section-ownership", title: "Ownership & Sales History",
+    summary: "Sale history, entity, and any companion-parcel assemblage.",
+    takeaway: <>522 &amp; 520 bought together in 2013, <em>split to separate names in 2021</em>.</>,
+    verdict: { tone: "attention", label: "Confirm identity" },
+    info: ["Recorded sales timeline", "Double lot / companion parcel", "Current owner & entity"],
+    preview: [{ tone: "attention", body: "Possible assemblage — verify whether both lots remain under common control." }] },
+
+  { id: "debt", anchorId: "print-section-debt", title: "Debt, Liens & Title",
+    summary: "Mortgages, liens, property tax and clear-to-finance status.",
+    takeaway: <>One open mortgage, <em>no liens or judgments</em>; tax bill up 4% this year.</>,
+    verdict: { tone: "good", label: "Clear" }, hero: { value: "1.28", label: "DSCR" },
+    info: ["Debt snapshot — mortgages & positions", "Liens & encumbrances", "Property tax, exemptions & appeals", "Financing readiness (pre-title)"],
+    preview: [{ tone: "good", body: "Clean chain — clear to finance." }, { tone: "attention", body: "Tax bill up ~4% on a higher assessment — watch the next cycle." }] },
+
+  { id: "market", anchorId: "print-section-market", title: "The Local Market",
+    summary: "Comps, price trends and mortgage-lending activity nearby.",
+    takeaway: <>12 comparable sales in 6 months; upper-income borrowers, <em>68% funded</em>.</>,
+    verdict: { tone: "good", label: "Liquid" }, hero: { value: "12", label: "comps" },
+    info: ["Recently sold comps", "Area transaction trends", "HMDA — who’s borrowing", "HMDA — what’s getting funded", "Commercial lending (SBA)"],
+    preview: [{ tone: "good", body: "Active resale market at this price point." }, { tone: "good", body: "Lending mostly originates — a financeable submarket." }] },
+
+  { id: "transit", anchorId: "print-section-transit", title: "Transit Access",
+    summary: "Rail, Metra, bus and street traffic near the property.",
+    takeaway: <>Four rail stops within a mile; the #9 bus <em>ranks #4 citywide</em>.</>,
+    verdict: { tone: "good", label: "Strong" }, hero: { value: "4", label: "rail stops" },
+    info: ["CTA rail — nearest stations & ridership", "Metra — stations & ridership", "CTA bus — routes & ridership", "Street traffic volume (ADT)"],
+    preview: [{ tone: "good", body: "Rail-anchored, bus-rich — strong access." }] },
+
+  { id: "crime", anchorId: "print-section-crime", title: "Safety & Crime",
+    summary: "Area crime levels, percentile vs the city, and trend.",
+    takeaway: <>Violent crime <em>safer than 71% of tracts</em>; trend down 6% year-over-year.</>,
+    verdict: { tone: "good", label: "Lower crime" }, hero: { value: "71st", label: "pctile" },
+    info: ["Area crime statistics", "Tract percentile vs city", "Trend over time"],
+    preview: [{ tone: "good", body: "Below-median crime and falling." }] },
+
+  { id: "proximity", anchorId: "print-section-proximity", title: "Proximity & Amenities",
+    summary: "Parks, schools, hospitals, dining and other amenities.",
+    takeaway: <>Park, hospital, United Center and <em>two rated schools</em> within a mile.</>,
+    verdict: { tone: "good", label: "Well-located" },
+    info: ["Proximity grid: parks, hospital, stadium, lake", "Rated schools", "Grocery access", "Dining (Michelin + notable)", "Landmarks & culture", "Vacant / city-owned nearby"],
+    preview: [{ tone: "good", body: "Dense amenity cluster — strong for renters and owners alike." }] },
+
+  { id: "corridor", anchorId: "print-section-corridor", title: "Corridor Intelligence",
+    summary: "New businesses and news on the nearby commercial corridors.",
+    takeaway: <><em>9 new business licenses</em> on the Ashland corridor in the last year.</>,
+    verdict: { tone: "good", label: "Momentum" }, hero: { value: "9", label: "new biz" },
+    info: ["New business licenses on the corridor", "Corridor news coverage", "Neighborhood news"],
+    preview: [{ tone: "good", body: "The nearby commercial strip is adding tenants — a momentum signal." }] },
+
+  { id: "development", anchorId: "print-section-development", title: "Nearby Development & Construction",
+    summary: "New-construction permits and proposed projects nearby.",
+    takeaway: <><em>$40M in permits</em> within a half-mile; two proposed mid-rises.</>,
+    verdict: { tone: "good", label: "Active" }, hero: { value: "$40M", label: "permits" },
+    info: ["New-construction permits (radius-wide)", "Upcoming / proposed developments"],
+    preview: [{ tone: "good", body: "Real construction activity nearby — neighborhood is investing." }] },
+
+  // EXAMPLE of a section whose takeaway isn't determined yet: no `takeaway`, no `verdict`.
+  // The row shows the muted `summary`, no pill, and stays neutral (slate). This is the fallback.
+  { id: "people", anchorId: "print-section-people", title: "Neighborhood & People",
+    summary: "Demographics, income, tenure and workforce (context only).",
+    info: ["Demographic trends", "Languages spoken", "Vehicle ownership", "Senior population", "Jobs & workforce", "Voting & civic lean (context only)"] },
+
+  { id: "incentives", anchorId: "print-section-incentives", title: "Incentives",
+    summary: "Which incentive programs the parcel is eligible for.",
+    takeaway: <>Opportunity Zone + Class 6b + a <em>$150K facade grant</em> stack.</>,
+    verdict: { tone: "good", label: "5 Eligible" }, hero: { value: "$150K", label: "SBIF" },
+    info: ["Eligible / not-eligible program cards", "TIF, OZ, TOD, SBIF, NMTC", "Class 6b / 7, HUBZone, QCT", "Neighborhood Opportunity Fund, ADU…"],
+    preview: [{ tone: "good", body: "Real stackable money — 5 of 12 programs eligible." }] },
+
+  { id: "news", anchorId: "print-section-news", title: "News on This Property",
+    summary: "Any news coverage that names this specific property.",
+    takeaway: <><em>No adverse coverage</em> naming the parcel.</>,
+    verdict: { tone: "good", label: "Clean" },
+    info: ["Articles naming the subject parcel", "Current-status check vs the record"],
+    preview: [{ tone: "context", body: "No address-specific news flags." }] },
+];
+```
+
+---
+
+## Mount it (behind a flag, above the existing report)
+
+In `RunDetail.tsx`, render the scan at the top of the report **only when the flag is set**,
+leaving the existing sections rendered below (so "Open full section →" scrolls to them):
+
+```tsx
+import SectionScan from "@/components/report/SectionScan";
+import { DEFAULT_SECTIONS } from "@/components/report/sectionRegistry";
+
+// inside the report render, near the top:
+{new URLSearchParams(window.location.search).has("scan") && (
+  <div style={{ maxWidth: 920, margin: "0 auto 32px" }}>
+    <SectionScan sections={DEFAULT_SECTIONS} storageKey={`kyp-scan-${runId}`} />
+  </div>
+)}
+```
+
+Visit any report with `?scan=1` to see it. Everything below still renders as today.
+
+## ✅ Done-when checklist
+- [ ] Three files created verbatim under `client/src/components/report/`.
+- [ ] `?scan=1` shows the 14-row scan above the normal report; without the flag, the report
+      is unchanged.
+- [ ] Drag ⠿ reorders and renumbers; order persists on reload (localStorage).
+- [ ] Eye dims/undims a row; clicking a row (or chevron) expands the takeaway preview.
+- [ ] Hovering ⓘ shows the "Contains" tooltip, fully on-screen (flips up near the bottom).
+- [ ] "Open full section →" scrolls to the matching section (fix any `anchorId` that
+      doesn't resolve).
+- [ ] Color reads by verdict: one orange row (Ownership) stands out; two slate; rest green.
+- [ ] `git diff` is limited to the 3 new files + the small guarded block in `RunDetail.tsx`.
+
+## Next
+Once this feels right behind the flag, Step 3 wires the **real** takeaway/verdict/hero for
+each section (replacing the `TODO(real-data)` placeholders) and — when you're ready — makes
+the scan the default report view with sections expanding **inline** instead of jump-scrolling.

@@ -1,0 +1,81 @@
+# Replit Prompt — FAR Utilization bar — build to spec
+
+Replace the single-fill FAR Utilization bar with a **two-segment bar: built (indigo) + available headroom (green)**, and handle the **overbuilt (>100%)** case with an amber over-limit segment. Do **NOT** use a red→green position gradient (see the reasoning in LOGIC — it would falsely imply that being near the zoning limit is "bad"). Implement CSS/HTML **verbatim**; check the CRITICAL DETAILS.
+
+## Why this shape (the design rationale — keep it)
+FAR utilization is a **capacity** measure, not a quality score. Under-built = development upside; fully-built = maximized envelope (more income now). Neither end is universally good or bad, so favorability must NOT ride on bar position (a red→green gradient). Instead: color the built portion neutral-brand (indigo), color the **remaining headroom green** — the green length IS the buildable opportunity, matching the "Additional Buildable" tile. Amber appears ONLY when the building exceeds the zoning limit.
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --good:#2f7d3f; --goodSoft:#e9f4ec; --caution:#f0a41c; --cautionText:#96600a;
+--farHead:#5aa15f;   /* green headroom segment */
+--sans:"Inter"; --disp:"Instrument Serif"; --mono:"JetBrains Mono";
+```
+
+## CSS (verbatim)
+```css
+.utilhead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:11px}
+.utilhead .l{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.utilhead .pct{font-family:var(--disp);font-size:30px;color:var(--ink);line-height:1}
+
+.bar{display:flex;height:20px;border-radius:6px;overflow:hidden;background:#eceae3;gap:2px}
+.bar i{display:block;height:100%}
+.bar .built{background:var(--indigo);border-radius:6px 0 0 6px}
+.bar .head{background:var(--farHead);border-radius:0 6px 6px 0}   /* available headroom = green */
+.bar .over{background:var(--caution);border-radius:0 6px 6px 0}   /* overbuilt only */
+.bar i:only-child{border-radius:6px}
+
+.scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px}
+.scale .mid{color:var(--ink2)}
+.legend{display:flex;gap:18px;margin-top:12px}
+.legend .lg{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2)}
+.legend .lg .sw{width:11px;height:11px;border-radius:3px;flex:none}
+.legend .lg b{color:var(--ink);font-weight:600}
+```
+
+## HTML — normal / under-built or at-capacity (verbatim; bind widths)
+```html
+<div class="utilhead"><span class="l">FAR Utilization</span><span class="pct">{UTIL_PCT}%</span></div>
+<div class="bar">
+  <i class="built" style="width:{BUILT_PCT}%"></i>
+  <!-- headroom segment only when built < limit -->
+  <i class="head" style="width:{HEAD_PCT}%"></i>
+</div>
+<div class="scale"><span>0</span><span class="mid">Built · FAR {CURRENT_FAR}</span><span>Zoning limit · FAR {MAX_FAR}</span></div>
+<div class="legend">
+  <span class="lg"><span class="sw" style="background:var(--indigo)"></span>Built <b>FAR {CURRENT_FAR}</b></span>
+  <span class="lg"><span class="sw" style="background:var(--farHead)"></span>Available headroom <b>+{REMAIN_FAR} FAR · +{BUILDABLE} sq ft</b></span>
+</div>
+```
+
+## HTML — overbuilt (>100%): built exceeds the limit, over-portion amber
+```html
+<div class="bar">
+  <i class="built" style="width:{LIMIT_PCT_OF_TOTAL}%"></i>
+  <i class="over" style="width:{OVER_PCT_OF_TOTAL}%"></i>
+</div>
+<div class="scale"><span>0</span><span class="mid">Zoning limit · FAR {MAX_FAR}</span><span>Built · FAR {CURRENT_FAR}</span></div>
+<!-- amber caveat + green grandfathered-density note (two-sided), per the FAR overbuild pattern -->
+```
+
+## LOGIC (compute in code)
+1. **Scale = 0 → max(current_far, max_far).** Normal case the track ends at the zoning limit; overbuilt case the track ends at `current_far` (so the over-limit portion is visible past the limit line).
+2. **Under-built / at-capacity** (`current_far ≤ max_far`):
+   - `BUILT_PCT = current_far / max_far * 100`
+   - `HEAD_PCT = 100 − BUILT_PCT` (the green headroom). If `current_far == max_far`, `HEAD_PCT = 0` → no green segment (bar is all indigo, envelope maximized — that's fine, NOT a warning).
+   - `UTIL_PCT = BUILT_PCT`, `REMAIN_FAR = max_far − current_far`, `BUILDABLE = additional buildable sq ft`.
+3. **Overbuilt** (`current_far > max_far`):
+   - Track total = `current_far`. `LIMIT_PCT_OF_TOTAL = max_far / current_far * 100`; `OVER_PCT_OF_TOTAL = 100 − LIMIT_PCT_OF_TOTAL` (amber).
+   - Render the amber `.over` segment + an amber caveat ("exceeds zoning — legal non-conformity, can't be rebuilt this large") AND a green note on grandfathered density (two-sided, matching the existing FAR-overbuild treatment).
+4. **The verdict banner tier drives the section's favorability** (green "Under-Built — Development Potential Available" / neutral "At capacity" / amber "Overbuilt"). The bar visual follows from the tier; don't duplicate the verdict logic in the bar.
+
+## CRITICAL DETAILS (check ALL)
+1. **No red→green position gradient.** The bar is discrete segments: built (indigo) + headroom (green), or built + over-limit (amber) when overbuilt. Never a continuous good→bad gradient across the track.
+2. **Green = available headroom (the opportunity), sized `max_far − current_far`.** Its length is the buildable upside and must agree with the "Additional Buildable" tile.
+3. **At exactly 100% utilization → all indigo, no green, NO warning color.** A maxed-out envelope is neutral, not bad.
+4. **Amber appears ONLY when overbuilt (current > max).** It flags the over-limit portion, paired with a green grandfathered-density note (two-sided). This is the only warning color in the component.
+5. **Segment fills are `<i>` `display:block` with `width:%`** and a 2px gap between built and headroom (`.bar{gap:2px}`). Rounded outer corners only.
+6. **Serif (`--disp`) only** on the `{UTIL_PCT}%` figure (and any big tile numbers). Labels/scale/legend are Mono/Inter.
+7. Legend present (2 series: Built / Available headroom) so the two colors are never identity-by-color-alone.
+```

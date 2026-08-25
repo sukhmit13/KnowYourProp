@@ -1,0 +1,102 @@
+# Replit Prompt — Area Transaction Trends — build to spec
+
+Update the **Area Transaction Trends** section: add the standardized takeaway on top, fix the chart palette (remove teal), make the YoY change cards neutral (volume change is NOT good/bad), and **remove the broken ZIP-ranking stat entirely**. The takeaway uses the shared **Standard Takeaway component** (Part B of the takeaway-standard prompt) — same label/headline/body sizes and far-right centered chips as every other section. Implement CSS/HTML **verbatim**; check CRITICAL DETAILS.
+
+## Tokens
+```
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --takeBorder:#dde1f6; --takeDivider:#e3e5f4;
+--good:#2f7d3f; --caution:#f0a41c; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df; --card:#fff;
+--disp:"Instrument Serif"; --mono:"JetBrains Mono"; --sans:"Inter";
+--take-label:11px; --take-title:21px; --take-body:13px;
+/* VALIDATED teal-free 4-category palette (colorblind-checked: CVD ΔE 13.9 / normal 17.2) */
+--sf:#2b3a9e;    /* Single Family = indigo */
+--u24:#b1466f;   /* 2–4 Unit      = rose (replaces the removed teal) */
+--condo:#9a7fd0; /* Condo         = purple */
+--comm:#f0a41c;  /* Commercial    = marigold */
+```
+
+## 1) Takeaway — use the STANDARD component (Part B), do not restyle
+Copy the `.take` / `.take-head` / `.take-label` / `.take-title` / `.take-row` / `.take-chip` CSS from the takeaway-standard prompt verbatim. This section's content:
+- **Label:** "Takeaway" (lightbulb icon). No rating pill.
+- **Headline:** *"Sales activity has cooled sharply — but that's fewer transactions, not falling prices."* (the volume-vs-price framing is the point of the section).
+- **3 bullets** (no more — the old 4th "ignore the ZIP rank" bullet is DELETED along with the stat):
+  1. `.caution` — Volume down across the board: single-family −25.7%, 2–4 unit −31.2%, condo −13.2% YoY. Chip → `#chart`, label "Chart".
+  2. `.insight` — **Transaction count, not price.** Fewer sales = higher rates + owners holding, not declining values; slower/less-liquid market (harder for a seller, easier for a buyer). No chip.
+  3. `.insight` — Condo-heavy ZIP (condos ≈ half of ~1,366 2025 sales); commercial is a thin ~32-sales/yr market → sparse comps, and its "+3.2%" is one extra transaction, not a trend. No chip.
+
+## 2) Grouped bar chart (verbatim; bind heights)
+```css
+.chtitle{font-size:13.5px;color:var(--ink2);margin-bottom:14px}
+.chart{display:flex;gap:14px}
+.yax{display:flex;flex-direction:column;justify-content:space-between;height:230px;font-family:var(--mono);font-size:9.5px;color:var(--muted);text-align:right;padding-bottom:2px}
+.plot{flex:1}
+.plotarea{position:relative;display:flex;justify-content:space-around;align-items:flex-end;height:230px;border-bottom:1.5px solid var(--line)}
+.plotarea .grid{position:absolute;left:0;right:0;height:1px;background:#f0eee8}
+.grp{display:flex;gap:5px;align-items:flex-end;height:100%;z-index:1}
+.bar{width:16px;border-radius:3px 3px 0 0;display:block}
+.b-sf{background:var(--sf)} .b-u24{background:var(--u24)} .b-condo{background:var(--condo)} .b-comm{background:var(--comm)}
+.xlab{display:flex;justify-content:space-around;font-family:var(--mono);font-size:11px;color:var(--ink2);margin-top:7px;font-weight:600}
+.legend{display:flex;gap:18px;justify-content:center;margin-top:16px}
+.legend .lg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)}
+.legend .lg .sw{width:11px;height:11px;border-radius:3px;flex:none}
+```
+```html
+<div id="chart">
+  <div class="chtitle">Property sale transactions in {ZIP} by type · {FIRST}–{LAST}</div>
+  <div class="chart">
+    <div class="yax"><span>{Y4}</span><span>{Y3}</span><span>{Y2}</span><span>{Y1}</span><span>0</span></div>
+    <div class="plot">
+      <div class="plotarea">
+        <div class="grid" style="bottom:25%"></div><div class="grid" style="bottom:50%"></div><div class="grid" style="bottom:75%"></div><div class="grid" style="top:0"></div>
+        <!-- one .grp per year; bar height = value / axisMax * 100% -->
+        <div class="grp"><i class="bar b-sf" style="height:{%}"></i><i class="bar b-u24" style="height:{%}"></i><i class="bar b-condo" style="height:{%}"></i><i class="bar b-comm" style="height:{%}"></i></div>
+        <!-- … 4 groups … -->
+      </div>
+      <div class="xlab"><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div>
+    </div>
+  </div>
+  <div class="legend">
+    <span class="lg"><span class="sw" style="background:var(--sf)"></span>Single Family</span>
+    <span class="lg"><span class="sw" style="background:var(--u24)"></span>2–4 Unit</span>
+    <span class="lg"><span class="sw" style="background:var(--condo)"></span>Condo</span>
+    <span class="lg"><span class="sw" style="background:var(--comm)"></span>Commercial</span>
+  </div>
+</div>
+```
+- `axisMax` = the tallest bar across all years/types, rounded up to a nice number; y-axis labels evenly divide it (e.g. 1,400 / 1,050 / 700 / 350 / 0). Bar `height` = `value / axisMax * 100%`. Bars are `<i>` `display:block` (never inline spans).
+- Keep the hover tooltip (per the dataviz interaction default) showing all four type counts for the hovered year.
+
+## 3) YoY change cards — NEUTRAL directional (NOT red/green)
+```css
+.yoyhd{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin:28px 0 13px}
+.yoy{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.yc{border:1px solid var(--line);border-radius:12px;padding:15px 17px;background:var(--card)}
+.yc .h{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.yc .h .sw{width:11px;height:11px;border-radius:3px;flex:none}
+.yc .h .nm{font-size:13px;font-weight:600;color:var(--ink)}
+.yc .n{font-family:var(--disp);font-size:26px;color:var(--ink);line-height:1;margin-bottom:8px}
+.yc .chg{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink2)}
+.yc .chg svg{width:13px;height:13px;stroke:var(--ink2);fill:none}
+```
+- One card per type: color swatch + name, the 2025 count (serif), and the change as **an arrow + magnitude in neutral `--ink2`** — down-arrow for fewer, up-arrow for more. **Never red for a decline or green for an increase.** Transaction-volume change is not favorability (a drop is worse for sellers, better for buyers).
+- Phrase the change as count-language: "25.7% fewer", "13.2% fewer", and for a tiny-base move show the raw count: "1 more (≈flat)" rather than "+3.2%".
+
+## 4) REMOVE the ZIP ranking entirely (fail-closed)
+- Delete the "ZIP ranking by volume · #1 of 1 Chicago ZIP codes" stat. **Do not render it, do not render a disclaimer about it, do not spend a takeaway bullet on it.**
+- Rule: a ranking only renders when the ZIP is benchmarked against a real set (N > 1). If the comparison set has size 1 (only itself), omit the ranking completely. It returns — as a genuine stat ("#8 of 56 by volume") — only once the backend ranks against all Chicago ZIPs.
+- The total-sales figure (e.g. 1,366) is fine to keep where it's genuinely used (it appears inside takeaway bullet 3), just not as a "ranking."
+
+## LOGIC
+1. **Everything in this section is transaction COUNT (volume), not price.** The headline, the "count not price" bullet, the neutral card colors, and the footnote all reinforce this. Never imply prices are falling from volume data.
+2. **Tiny-base guard:** when a type's absolute count is small (e.g. commercial ≈ 30), express YoY as the raw delta ("1 more"), and in the takeaway call a small % "not a trend." Don't headline a big-looking % off a tiny base.
+3. **Palette is the validated set** (`--sf/--u24/--condo/--comm`) — no teal, ever. Legend required (4 series); swatch colors match bars exactly.
+4. **Ranking fail-closed** (see §4).
+
+## CRITICAL DETAILS
+1. **Takeaway = the shared Standard component** (11px label / 21px serif headline / 13px body / far-right centered `.take-chip`). Not a bespoke one.
+2. **Volume, not price** — headline says it, cards are neutral, footnote states it. No red/green on the change cards.
+3. **No teal.** 2–4 Unit is rose `#b1466f`; full 4-color set is the validated palette. Bars `<i> display:block`, heights = value/axisMax.
+4. **ZIP ranking removed entirely** — no stat, no disclaimer, no bullet. Renders only when N>1 real ZIPs.
+5. **Tiny-base commercial** shown as "1 more (≈flat)", not a percentage.
+6. **Serif (`--disp`) only** on the takeaway headline and the card counts (`.yc .n`). Everything else Inter/Mono.
+```

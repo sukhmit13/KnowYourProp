@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KnowYourProp — Report section visuals (reference)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ffffff; --paper-2:#fafaf8;
+    --ink:#141414; --ink-2:#565651; --muted:#8b8a84;
+    --line:#eae8e2; --line-2:#ddd9d0;
+    --blue:#2b3a9e; --blue-deep:#1e2a6e; --blue-soft:#ecedf9;
+    --good:#2f7d3f; --good-bg:#eef5ef; --good-line:#cfe3d3;
+    --risk:#d13b26; --risk-bg:#fbecea; --risk-line:#f1cec8;
+    --caution:#c98a12; --caution-bg:#fbf2da; --caution-line:#eeddac;
+    --radius:14px; --radius-sm:11px;
+    --shadow-s:0 1px 2px rgba(20,20,20,.05);
+    --shadow-m:0 6px 20px rgba(20,20,20,.09), 0 1px 3px rgba(20,20,20,.05);
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --display:"Instrument Serif",Georgia,"Times New Roman",serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper-2);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased;padding:34px 20px 70px}
+  .wrap{max-width:940px;margin:0 auto}
+  .num{font-variant-numeric:tabular-nums}
+  .pagehead{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:28px}
+  .pagehead b{color:var(--ink-2)}
+
+  /* section frame (matches the report's bordered cards) */
+  .card{background:var(--paper);border:1px solid var(--line-2);border-radius:var(--radius);box-shadow:var(--shadow-m);padding:24px 24px 22px;margin-bottom:26px}
+  .cap{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+  .cap .dot{width:8px;height:8px;border-radius:2px;background:var(--blue)}
+
+  /* ---------- 1 · CHILDCARE DEMAND METER ---------- */
+  .verdict{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .verdict .ic{width:30px;height:30px;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--risk-bg);color:var(--risk)}
+  .verdict h3{font-family:var(--display);font-weight:400;font-size:clamp(26px,4vw,34px);margin:0;letter-spacing:-.01em;line-height:1}
+  .verdict h3 .sub{display:block;font-family:var(--sans);font-size:13.5px;color:var(--ink-2);font-weight:500;margin-top:6px;letter-spacing:0}
+
+  .meterwrap{margin:26px 0 8px}
+  .meterscale{position:relative;height:34px}
+  .metertrack{display:flex;gap:2px;height:22px;border-radius:6px;overflow:hidden}
+  .seg{position:relative}
+  .seg.adequate{flex:1.5;background:var(--good-bg);border:1px solid var(--good-line)}
+  .seg.under{flex:1.5;background:var(--caution-bg);border:1px solid var(--caution-line)}
+  .seg.desert{flex:1;background:var(--risk-bg);border:1px solid var(--risk-line)}
+  .marker{position:absolute;top:-7px;bottom:-7px;left:80%;width:3px;background:var(--ink);border-radius:2px;box-shadow:0 0 0 3px var(--paper)}
+  .markerlbl{position:absolute;top:-30px;left:80%;transform:translateX(-50%);white-space:nowrap;font-family:var(--display);font-weight:800;font-size:18px;color:var(--ink);letter-spacing:-.02em}
+  .markerlbl small{font-family:var(--mono);font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;text-align:center;margin-top:1px}
+  .ticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:8px}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:16px}
+  .lg{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2)}
+  .lg .sw{width:11px;height:11px;border-radius:3px;flex:none}
+  .lg .sw.g{background:var(--good)} .lg .sw.a{background:var(--caution)} .lg .sw.r{background:var(--risk)}
+  .lg b{color:var(--ink);font-weight:600}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px;border-top:1px solid var(--line);padding-top:18px}
+  @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat .k{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .stat .v{font-family:var(--display);font-weight:800;font-size:26px;color:var(--ink);margin-top:5px;line-height:1;letter-spacing:-.02em}
+  .stat .n{font-size:11px;color:var(--ink-2);margin-top:4px}
+  .src{font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--muted);margin-top:16px}
+
+  /* ---------- 2 · INCENTIVE ELIGIBILITY SUMMARY ---------- */
+  .buckets{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+  @media(max-width:720px){.buckets{grid-template-columns:1fr}}
+  .bcol{display:flex;flex-direction:column;gap:10px}
+  .bhead{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+  .bhead .cnt{background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;color:var(--ink)}
+  .chip{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line);border-left-width:4px;border-radius:9px;padding:10px 12px;background:var(--paper)}
+  .chip .ci{width:15px;height:15px;flex:none;margin-top:1px}
+  .chip .nm{font-size:13px;font-weight:600;color:var(--ink);line-height:1.25}
+  .chip .ph{font-size:11.5px;color:var(--ink-2);margin-top:2px;line-height:1.35}
+  .chip.ok{border-color:var(--good-line);border-left-color:var(--good);background:var(--good-bg)}
+  .chip.ok .ci{color:var(--good)}
+  .chip.warn{border-color:var(--caution-line);border-left-color:var(--caution);background:var(--caution-bg)}
+  .chip.warn .ci{color:var(--caution)}
+  .chip.na{border-color:var(--line);border-left-color:var(--line-2);background:var(--paper)}
+  .chip.na .ci{color:var(--muted)} .chip.na .nm{color:var(--ink-2);font-weight:500}
+  .morelink{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted);padding:4px 2px}
+  .guard{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .guard b{color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="pagehead"><b>KnowYourProp</b> · report section visuals · reference build · 1126 W Bryn Mawr Ave (day care)</div>
+
+  <!-- 1 · CHILDCARE DEMAND METER -->
+  <section class="card">
+    <div class="cap"><span class="dot"></span>Childcare demand · project type: Day Care Center</div>
+
+    <div class="verdict">
+      <span class="ic" aria-hidden="true">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 8v5M12 16.5v.5"/><path d="M10.3 3.9 2.4 18a1.9 1.9 0 0 0 1.7 2.8h15.8a1.9 1.9 0 0 0 1.7-2.8L13.7 3.9a1.9 1.9 0 0 0-3.4 0Z"/></svg>
+      </span>
+      <h3>Childcare desert
+        <span class="sub">3.2 children under 5 per licensed slot — well above the 3.0 desert threshold.</span>
+      </h3>
+    </div>
+
+    <div class="meterwrap">
+      <div class="meterscale">
+        <div class="metertrack">
+          <div class="seg adequate"></div>
+          <div class="seg under"></div>
+          <div class="seg desert"></div>
+        </div>
+        <div class="markerlbl">3.2<small>this ZIP</small></div>
+        <div class="marker"></div>
+      </div>
+      <div class="ticks"><span>0</span><span>1.5</span><span>3.0</span><span>4.0+</span></div>
+      <div class="legend">
+        <span class="lg"><span class="sw g"></span><b>Adequate</b> &lt;1.5</span>
+        <span class="lg"><span class="sw a"></span><b>Underserved</b> 1.5–3.0</span>
+        <span class="lg"><span class="sw r"></span><b>Childcare desert</b> &gt;3.0</span>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="k">Children under 5</div><div class="v num">1,502</div><div class="n">ZIP 60660</div></div>
+      <div class="stat"><div class="k">Licensed slots</div><div class="v num">476</div><div class="n">441 center · 35 home</div></div>
+      <div class="stat"><div class="k">Children / slot</div><div class="v num">3.2</div><div class="n">desert &gt; 3.0</div></div>
+      <div class="stat"><div class="k">Daycares needed</div><div class="v num">~7</div><div class="n">~525-slot gap (1:1.5)</div></div>
+    </div>
+    <div class="src">Source: U.S. Census ACS 2023 · IL Network of Child Care R&amp;R 2024 · Edgewater, Ward 48</div>
+  </section>
+
+  <!-- 2 · INCENTIVE ELIGIBILITY SUMMARY -->
+  <section class="card">
+    <div class="cap"><span class="dot"></span>Incentive eligibility · matched to a Day Care Center use</div>
+
+    <div class="buckets">
+      <!-- LIKELY RELEVANT -->
+      <div class="bcol">
+        <div class="bhead"><span>Likely relevant</span><span class="cnt num">12</span></div>
+
+        <div class="chip ok"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><div><div class="nm">SBIF — Small Business Improvement Fund</div><div class="ph">In TIF Bryn Mawr/Broadway. Requires application — not automatic.</div></div></div>
+
+        <div class="chip ok"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><div><div class="nm">New Markets Tax Credit (NMTC)</div><div class="ph">Qualified tract — deep distress. Strongly competitive for allocation.</div></div></div>
+
+        <div class="chip ok"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><div><div class="nm">Cook County Class 7 (commercial)</div><div class="ph">Parcel is in a qualifying TIF zone. Confirm with Assessor.</div></div></div>
+
+        <div class="chip ok"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><div><div class="nm">Community Development Grant — Medium/Large</div><div class="ph">Day care is an eligible social-service use. Reimbursement basis.</div></div></div>
+
+        <div class="chip ok"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><div><div class="nm">IDHS Smart Start Illinois</div><div class="ph">Operating grant for licensed day care. FY26 active — annual cycle.</div></div></div>
+
+        <div class="chip ok"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><div><div class="nm">SSA #26 · IFA C-PACE · Class 7c / 8 / C · ADU</div><div class="ph">Each may apply — confirm the specific one with the agency.</div></div></div>
+
+        <div class="morelink">All require application / approval — geographic match ≠ guaranteed award.</div>
+      </div>
+
+      <!-- RIGHT COLUMN: NEEDS CONFIRMATION + NOT APPLICABLE -->
+      <div class="bcol">
+        <div class="bhead"><span>Needs confirmation</span><span class="cnt num">2</span></div>
+
+        <div class="chip warn"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg><div><div class="nm">J40 / CEJST</div><div class="ph">Federal tool discontinued — check the archived tract data.</div></div></div>
+
+        <div class="chip warn"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg><div><div class="nm">Illinois Solar for All</div><div class="ph">Contact Elevate Energy / IL DCEO to confirm eligibility.</div></div></div>
+
+        <div class="bhead" style="margin-top:8px"><span>Not applicable here</span><span class="cnt num">8</span></div>
+
+        <div class="chip na"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg><div><div class="nm">Opportunity Zone · TOD · MMRP · Enterprise Zone</div><div class="ph">Parcel is outside each program's boundary.</div></div></div>
+
+        <div class="chip na"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg><div><div class="nm">NOF · Invest South/West · SBA HUBZone</div><div class="ph">Edgewater is not in a designated receiving area.</div></div></div>
+
+        <div class="chip na"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg><div><div class="nm">Cook County Class 6b (industrial)</div><div class="ph">B3-5 zoning + day-care use don't qualify.</div></div></div>
+      </div>
+    </div>
+
+    <div class="guard"><b>Informational only</b> — not legal, tax, or financial advice. A geographic match means the parcel is inside a program's footprint, which is necessary but usually not sufficient. Confirm each program with the administering agency before acting.</div>
+  </section>
+</div>
+</body>
+</html>

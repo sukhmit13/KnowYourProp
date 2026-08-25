@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KnowYourProp — Use Cases section</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ffffff; --paper-2:#faf9f6; --ink:#141414; --ink-2:#565651; --muted:#8b8a84;
+    --line:#eae8e2; --line-2:#ddd4c6;
+    --indigo:#2b3a9e; --indigo-soft:#ecedf9; --red:#d13b26; --yellow:#e0a615; --green:#2f7d3f; --teal:#0e8fa6; --orange:#e07a2e;
+    --sans:"Inter",-apple-system,sans-serif; --display:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",monospace;
+    --shadow-s:0 1px 2px rgba(20,20,20,.05); --shadow-m:0 6px 20px rgba(20,20,20,.07),0 1px 3px rgba(20,20,20,.05);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper-2);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:70px 26px}
+  .eyebrow{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);display:inline-flex;align-items:center;gap:9px}
+  .eyebrow .sq{width:9px;height:9px;border-radius:2px;background:var(--indigo)}
+  .sec-head{text-align:center;max-width:720px;margin:0 auto 44px}
+  .sec-head h2{font-family:var(--display);font-weight:400;font-size:clamp(32px,4.6vw,50px);line-height:1.05;letter-spacing:-.01em;margin:14px 0 10px}
+  .sec-head h2 em{font-style:italic;color:var(--indigo)}
+  .sec-head p{font-size:17px;color:var(--ink-2);margin:0}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:620px){.grid{grid-template-columns:1fr}}
+  .uc{background:var(--paper);border:1px solid var(--line);border-radius:15px;padding:24px 22px;box-shadow:var(--shadow-s);transition:transform .15s,border-color .15s,box-shadow .15s}
+  .uc:hover{transform:translateY(-2px);border-color:var(--line-2);box-shadow:var(--shadow-m)}
+  .uc.hi{border-color:#c9d0ee;box-shadow:0 0 0 1px #c9d0ee, var(--shadow-m)}
+  .uc .ic{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;color:#fff;margin-bottom:15px}
+  .uc .who{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .uc h3{font-family:var(--display);font-weight:400;font-size:24px;line-height:1.06;letter-spacing:-.01em;margin:5px 0 9px;color:var(--ink)}
+  .uc .lede{font-size:13.5px;color:var(--ink-2);margin:0 0 14px;line-height:1.5}
+  .uc .lede b{color:var(--ink);font-weight:600}
+  .uc ul{margin:0;padding:0;list-style:none;border-top:1px solid var(--line);padding-top:12px}
+  .uc li{font-size:12.5px;color:var(--ink-2);padding:4px 0 4px 17px;position:relative;line-height:1.35}
+  .uc li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:2px}
+
+  .c-indigo .ic{background:var(--indigo)} .c-indigo li::before{background:var(--indigo)}
+  .c-green .ic{background:var(--green)} .c-green li::before{background:var(--green)}
+  .c-yellow .ic{background:var(--yellow)} .c-yellow li::before{background:var(--yellow)}
+  .c-red .ic{background:var(--red)} .c-red li::before{background:var(--red)}
+  .c-teal .ic{background:var(--teal)} .c-teal li::before{background:var(--teal)}
+  .c-orange .ic{background:var(--orange)} .c-orange li::before{background:var(--orange)}
+  .pin{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--indigo);background:var(--indigo-soft);border-radius:5px;padding:2px 7px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow"><span class="sq"></span>What can you do with it?</span>
+    <h2>One property. A <em>different answer</em> for every plan.</h2>
+    <p>The report adapts to what you'll actually do with the space — so you get the answer to your question, not a generic data dump.</p>
+  </div>
+
+  <div class="grid">
+
+    <div class="uc c-indigo">
+      <div class="ic">◱</div>
+      <div class="who">For operators &amp; tenants</div>
+      <h3>Can my business open here?</h3>
+      <p class="lede">Before you sign a lease, know if your use is <b>allowed by right</b>, whether the demand is there, and what money it unlocks.</p>
+      <ul>
+        <li>Zoning &amp; special-use check for <b>your</b> use</li>
+        <li>Use-specific demand — e.g. childcare deserts</li>
+        <li>Nearby competitors &amp; use-based grants</li>
+      </ul>
+    </div>
+
+    <div class="uc c-green">
+      <div class="ic">◈</div>
+      <div class="who">For investors</div>
+      <h3>Is this actually a good deal?</h3>
+      <p class="lede">Underwrite in minutes — and catch the risks a listing quietly leaves out.</p>
+      <ul>
+        <li>ROI &amp; cap rate you can adjust live</li>
+        <li>Rent comps vs. HUD fair-market rent</li>
+        <li>Liens, foreclosure &amp; incentive eligibility</li>
+      </ul>
+    </div>
+
+    <div class="uc c-yellow">
+      <div class="ic">▲</div>
+      <div class="who">For developers</div>
+      <h3>How much can I build?</h3>
+      <p class="lede">See the buildable upside on the lot before you make an offer.</p>
+      <ul>
+        <li>FAR analysis &amp; buildable square footage</li>
+        <li>Unit potential &amp; ADU eligibility</li>
+        <li>Corridor development activity nearby</li>
+      </ul>
+    </div>
+
+    <div class="uc c-red hi">
+      <span class="pin">The inspection complement</span>
+      <div class="ic">🔍</div>
+      <div class="who">For homebuyers</div>
+      <h3>What am I really buying?</h3>
+      <p class="lede">Your inspection checks the house. <b>We check the paperwork</b> — run us alongside it.</p>
+      <ul>
+        <li>Liens, foreclosure filings &amp; title flags</li>
+        <li>Code violations &amp; permit history</li>
+        <li>Tax delinquency &amp; the true tax trajectory</li>
+      </ul>
+    </div>
+
+    <div class="uc c-teal">
+      <div class="ic">✦</div>
+      <div class="who">For everyone</div>
+      <h3>Who do I even call?</h3>
+      <p class="lede">Not just what's wrong — the right local pros to fix it.</p>
+      <ul>
+        <li>Zoning &amp; tax attorneys with local wins</li>
+        <li>Architects &amp; lenders who work the area</li>
+        <li>Matched to your property &amp; its issues</li>
+      </ul>
+    </div>
+
+    <div class="uc c-orange">
+      <div class="ic">➤</div>
+      <div class="who">For scouts &amp; agents</div>
+      <h3>What's happening in this market?</h3>
+      <p class="lede">Discover the market, not just the property.</p>
+      <ul>
+        <li>Who's buying &amp; at what price</li>
+        <li>New construction &amp; heating-up corridors</li>
+        <li>Rental &amp; short-term-rental demand</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

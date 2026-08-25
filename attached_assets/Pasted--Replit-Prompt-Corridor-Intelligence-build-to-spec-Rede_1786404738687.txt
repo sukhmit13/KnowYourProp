@@ -1,0 +1,131 @@
+# Replit Prompt — Corridor Intelligence — build to spec
+
+Redesign the **Corridor Intelligence** section: a Standard Takeaway on top, four KPI tiles, then one card per nearby commercial corridor (**ordered closest-first**), each showing new business licenses, new construction, and — where present — recent corridor coverage and zoning activity. The takeaway uses the shared **Standard Takeaway component** (Part B). Implement CSS/HTML **verbatim**; check CRITICAL DETAILS.
+
+## 🔴 Governing rules
+1. **Report-data-first** (shared rule): `cross_reference_allowed: false` — this section is self-contained. Its takeaway uses ONLY this section's own corridor data. It may fire on its own data-ready with no cross-section wait.
+2. **Order corridors closest-first** — sort by distance ascending (`On corridor` / 0 mi first). See LOGIC.
+3. **No sentiment coloring on activity** — new licenses, permits, and construction are directional momentum → neutral. The ONE green bullet is the *location* takeaway (corridor frontage is a genuine property-specific strength). Zoning "Approved" is a neutral status tag, not green. No red anywhere.
+4. **Honesty on messy source data** — distances are per-item (the "within 0.5 mi" is to each corridor's nearest point; items can sit farther); raw permit "city class" labels are demoted to a muted tag, never the headline. See LOGIC.
+5. **Coverage here is corridor-level** — label it as such and point site-specific coverage to the News section (the two never double-count an article).
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --takeBorder:#dde1f6; --takeDivider:#e3e5f4;
+--good:#2f7d3f; --caution:#f0a41c;
+--disp:"Instrument Serif"; --mono:"JetBrains Mono"; --sans:"Inter";
+--take-label:11px; --take-title:21px; --take-body:13px;
+```
+
+## Input contract (this section's own data)
+```json
+{
+  "kpis": { "permits": 8, "permit_units": "43 units · 6 residential / 4 mixed-use / 33 commercial",
+            "licenses": 20, "articles": 1, "zoning_appeals": 1 },
+  "corridors": [
+    {
+      "name": "Milwaukee Avenue", "tier": 1, "tier_label": "Primary",
+      "distance_mi": 0.0, "on_corridor": true,          // on_corridor → sorts first, renders "On corridor"
+      "blurb": "Wicker Park / Logan Square main artery — the street the subject fronts.",
+      "counts": { "licenses": 9, "permits": 2, "articles": 1, "zoning": 0 },
+      "licenses": [ {"name":"Tropical Smoothie Cafe","address":"2620 N Milwaukee Ave","date":"Jun 2026","tags":["Retail Food"]} ],
+      "construction": [ {"address":"2481 N Milwaukee Ave","date":"Dec 2024","use":"Retail","stories":4,"units":9,"parking":9,"cost":"$4.8M","distance_mi":0.67,"architect":"Hanna, John C","gc":"BM UK Enterprise","city_class":"Multi-Family"} ],
+      "coverage": [ {"title":"…","source":"Block Club Chicago","date":"Jul 29, 2026","summary":"…","url":"https://…"} ],
+      "zoning": [ {"address":"2824 W Diversey Ave","kind":"Special Use","zone":"B3-1","case":"#94-26-S","date":"Mar 2026","status":"Approved","distance_mi":0.74,"use":"Tattoo & body-piercing facility"} ]
+    }
+  ]
+}
+```
+- A corridor with no `licenses`/`construction`/`coverage`/`zoning` renders **collapsed** (header + blurb + count chips only). One with data renders **expanded**.
+
+## 1) Header + Standard Takeaway
+No subtitle line. Section header = filled indigo square, then the takeaway.
+```css
+.secthead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:18px}
+.secthead .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+```
+Copy the `.take` / `.take-head` / `.take-label` / `.take-title` / `.take-row` / `.take-chip` CSS from the takeaway-standard prompt. Content — 4 bullets:
+1. **`.good`** — location strength: on a primary corridor + others within a half-mile (name them + distances). This is the one favorable, property-specific bullet.
+2. `.insight` — new-business formation (`licenses` count, 12-mo, dominant categories); may fold in the corridor coverage headline as corroboration.
+3. `.insight` — construction adding units (`permits` + `permit_units`), plus the zoning appeal count.
+4. `.caution` — "corridor momentum, not parcel specifics": per-corridor nearest-point distances, items can sit farther, raw permit labels; and **site-specific coverage lives in the News section.**
+
+## 2) KPI tiles (verbatim)
+```css
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--paper)}
+.kpi .n{font-family:var(--disp);font-size:32px;color:var(--ink);line-height:1}
+.kpi .l{font-size:12px;font-weight:600;color:var(--ink);margin-top:7px}
+.kpi .s{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:5px;line-height:1.5;letter-spacing:.01em}
+```
+Tiles: permits (`{permits}` / `{permit_units}` · via City Building Permits) · licenses (`{licenses}` / Last 12 mo · via Chicago Business Licenses) · articles (`{articles}` / Last 90 days · local news) · zoning (`{zoning_appeals}` / via Zoning Board of Appeals). **Serif only on `.kpi .n`.**
+
+## 3) Corridor card (verbatim)
+```css
+.corr{border:1px solid var(--line);border-radius:13px;padding:16px 18px;margin-bottom:12px}
+.corrhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.nav{width:15px;height:15px;stroke:var(--indigo);fill:none;flex:none}
+.corrhead .nm{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--ink)}
+.tierchip{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:6px;padding:3px 7px}
+.corrdist{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.corrchips{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.cchip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 9px}
+.corrsub{font-size:12.5px;color:var(--ink2);margin:10px 0 15px}
+.corrgrid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.colh{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:6px}
+.colh svg{width:12px;height:12px;stroke:var(--indigo);fill:none}
+.item{padding:9px 0;border-top:1px solid var(--line)}
+.item .r1{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.item .nm2{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.3}
+.item .dt{font-family:var(--mono);font-size:10px;color:var(--muted);flex:none}
+.item .addr{font-family:var(--mono);font-size:10.5px;color:var(--ink2);margin-top:3px}
+.item .meta2{font-size:11px;color:var(--ink2);margin-top:3px}
+.item .meta2 b{color:var(--ink);font-weight:600}
+.item .tags{margin-top:6px;display:flex;gap:5px;flex-wrap:wrap}
+.tag{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:2px 6px}
+.rawtag{color:var(--muted)}
+.corrextra{margin-top:15px;padding-top:14px;border-top:1px solid var(--line)}
+.cexlabel{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:9px}
+.cexlabel svg{width:12px;height:12px;stroke:var(--indigo);fill:none}
+.covtitle{font-size:13px;font-weight:600;color:var(--ink);line-height:1.35}
+.covtitle a{color:var(--ink);text-decoration:none;border-bottom:1.5px solid var(--takeBorder)}
+.covmeta{font-family:var(--mono);font-size:10px;color:var(--muted);margin:3px 0 6px}
+.covsum{font-size:12px;color:var(--ink2);line-height:1.5}
+.zrow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.zaddr{font-size:12.5px;font-weight:600;color:var(--ink)}
+.zmeta{font-family:var(--mono);font-size:10px;color:var(--ink2)}
+.zstatus{font-family:var(--mono);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:2px 7px}
+.zuse{font-size:12px;color:var(--ink2);margin-top:4px}
+.corr.collapsed{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--paper)}
+.corr.collapsed .corrsub{margin:0;flex-basis:100%;order:3}
+```
+- Header: `.nav` paper-plane icon + `.nm` name + `.tierchip` (`Tier {tier} · {tier_label}`) + `.corrdist` (`On corridor` if `on_corridor`, else `{distance_mi} mi`; the closest non-zero may read `{d} mi — closest corridor`) + right-aligned `.corrchips` (one `.cchip` per non-zero count: `{n} licenses` / `{n} permits` / `{n} article` / `{n} zoning appeal`).
+- Expanded body: two-column `.corrgrid` — **New business licenses** (left) and **New construction** (right). License `.item`: name + date, address, category `.tag`(s). Construction `.item`: address + date, then `.meta2` = clean line `{use} · {stories}-story · {units} units, {parking} parking · <b>{cost}</b> · {distance_mi} mi`, then `.addr` = `Arch. {architect} · GC {gc}`, then a muted `.tag.rawtag` `City class: {city_class}` (only if `city_class` present).
+- `.corrextra` blocks (when present): **Recent corridor coverage** (title→url, source·date, summary + muted "corridor-level, not the subject parcel") and **Zoning activity** (`.zrow`: address + `.zmeta` kind·zone·case·date + `.zstatus` + distance; `.zuse` describes it + "not the subject parcel").
+- Collapsed card (no detail data): `.corr.collapsed` — nav + name + tierchip + dist + chips + blurb only.
+
+## 4) Footer (verbatim, single line — do NOT duplicate)
+```css
+.foot{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.02em;line-height:1.6;padding-top:15px;margin-top:8px;border-top:1px solid var(--line)}
+.foot b{color:var(--ink2);font-weight:700}
+```
+`Showing primary commercial corridors within ~0.5 mi of the property (nearest point). Tier 1 = primary commercial corridor · Tier 2 = secondary / emerging. Individual licenses, permits and appeals can sit farther along a corridor (distance shown per item). Permit "city class" labels are raw Building-Permit classifications. Sources: City Building Permits · Chicago Business Licenses · Zoning Board of Appeals · Block Club / Curbed / local news.`
+
+## LOGIC
+1. **Sort corridors closest-first (ascending distance).** Key = `on_corridor ? 0 : distance_mi`, ascending. So `On corridor` renders first, then 0.01, 0.29, 0.47, … Tie-break by name. The tier (1/2) does NOT change order — it's a label, not a sort key.
+2. **Expanded vs collapsed** by whether a corridor has any detail data (licenses/construction/coverage/zoning). Chips reflect non-zero counts only.
+3. **Distances are per-item.** Show each item's own `distance_mi`; keep the section's "~0.5 mi" as a nearest-point filter in the footer. Don't imply every item is within 0.5 mi.
+4. **Raw permit labels demoted.** Lead construction rows with the clean `use · stories · units · cost` line; render `city_class` only as a muted `City class:` tag. Never headline a contradictory raw label.
+5. **Coverage = corridor-level**, labeled and cross-pointed to the News section; never re-count a site-specific article here.
+6. **No favorability color except the location `.good` bullet.** Activity is neutral; zoning status is a neutral tag.
+
+## CRITICAL DETAILS
+1. **Takeaway = shared Standard component**; 4 bullets, exactly one `.good` (location), the rest insight + one caution.
+2. **Corridors sorted closest-first** (`on_corridor` = 0). Tier is a label, not a sort.
+3. **Per-item distances**, nearest-point filter noted; raw permit `city class` demoted to a muted tag.
+4. **Corridor-level coverage** labeled + pointed to News; no double-counting.
+5. **Single footer line** (the live version prints it twice — collapse to one).
+6. **No sentiment color** beyond the location bullet; zoning "Approved" is neutral. No red.
+7. **Serif (`--disp`) ONLY** on the takeaway headline and `.kpi .n`. Everything else Inter/Mono.
+8. **`cross_reference_allowed: false`** — self-contained; fires on its own data.

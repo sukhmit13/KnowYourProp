@@ -1,0 +1,107 @@
+# Replit Prompt — Active Listing section
+
+Paste everything below into Replit.
+
+---
+
+Restyle the **Active Listing** section of the property report. This is a **front-end / CSS + markup change only** — do NOT change routing, auth, data fetching, or the underlying listing data. Keep every value (price, dates, MLS #, square footage, disclosures, claims) bound to the real listing data already in the component. Values shown below are placeholders from the current record.
+
+## What's wrong with the current version (the goals of this redesign)
+1. **Neutral facts are styled as warnings.** The current "Disclosed in Listing" box uses a yellow/amber background with ⚠️ warning triangles on things like "Residential units are rented" — which is a neutral (often positive) fact, not a risk. Stop editorializing neutral facts as alarms.
+2. **The "unverified" caution color is used in two places, diluting it.** Consolidate the amber/caution signal into ONE banner at the top. Everything below it should be neutral.
+3. **Facts are duplicated** (list price and the theater/apartments appear in both prose and bullets). Each fact should appear once.
+4. **The "compare with official records" line is passive.** Make it an actionable call-to-action.
+
+## Design tokens (reuse existing if present)
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f;
+--amberSoft:#fdf4dd; --amberText:#8f6a08; --amberLine:#ecd9a0;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+
+## Structure, top to bottom
+
+### 1. Header row
+Indigo square + mono uppercase "ACTIVE LISTING". Pushed to the right: a green status indicator (dot + "Active") and a muted mono "as of {date}".
+```css
+.sh{display:flex;align-items:center;gap:9px;padding:18px 24px 14px;border-bottom:1px solid var(--line)}
+.sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo)}
+.sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+.sh .status{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--good)}
+.sh .status .d{width:8px;height:8px;border-radius:50%;background:var(--good)}
+.sh .asof{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:12px}
+```
+
+### 2. Unverified banner — the single most important element
+This is the product's core message: everything in this section is the seller's claim, not city records. Use a clean **white background with a thin amber LEFT border** and an amber icon chip — NOT a full amber/yellow background fill.
+```css
+.unv{display:flex;gap:12px;align-items:flex-start;background:#fff;border-bottom:1px solid var(--line);border-left:3px solid #e0a92e;padding:13px 24px 13px 21px}
+.unv .ic{width:30px;height:30px;border-radius:8px;background:var(--amberSoft);border:1px solid var(--amberLine);display:flex;align-items:center;justify-content:center;flex:none}
+.unv .ic svg{width:16px;height:16px;stroke:var(--amberText)}   /* eye-off icon */
+.unv .h{font-size:12.5px;font-weight:700;color:var(--amberText)}
+.unv .s{font-size:11.5px;color:var(--ink2);line-height:1.45;margin-top:2px}
+.unv .s b{font-weight:600;color:var(--ink)}
+```
+Text: **"Listing claim — not verified"** then "What the public listing says — **Zillow, Redfin, LoopNet, brokerage sites.** This is the seller's side, not city records. Cross-check anything that matters below."
+
+### 3. Source line
+A single muted line: `Source: [View original listing on {brokerage} ↗] · MLS {number} · Listed {date}`. The link is indigo with an external-link icon.
+
+### 4. Key facts as stat tiles (4-up)
+Replace the loose LIST PRICE / LISTED text with a row of stat tiles. Number in the display serif. Put "per listing" in the sub-label on the measured claims to quietly reinforce these are unverified.
+```css
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 4px}
+.tile{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.tile .l{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.tile .n{font-family:var(--disp);font-size:28px;line-height:1;color:var(--ink)}   /* Instrument Serif, normal weight */
+.tile .s{font-size:10px;color:var(--muted);margin-top:6px}
+```
+Tiles: **List Price** ($1,099,000 · "asking") · **Floor Area** (5,183 · "sq ft · per listing") · **Lot Size** (5,850 · "sq ft · per listing") · **Config** (3 units · "theater + 2 apts"). If Config isn't a clean data point, drop to 3 tiles rather than inventing one.
+
+### 5. "What the Listing Says" — one prose paragraph
+A short human summary. Mono uppercase label, then a single paragraph (`--ink2`, key phrases bolded to `--ink`). This is the ONLY place the narrative prose lives.
+
+### 6. "Listing Highlights" — grouped bullets, de-duplicated
+Two columns: **The Building** and **The Location**, each with a mono sub-label and indigo-dot bullets. Do NOT repeat the list price or anything already shown in the tiles here.
+```css
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px 26px}
+.hgl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.li{display:flex;gap:9px;margin-bottom:9px;font-size:12.5px;line-height:1.45;color:var(--ink2)}
+.li .dot{width:5px;height:5px;border-radius:50%;background:var(--indigo);flex:none;margin-top:6px}
+.li b{color:var(--ink);font-weight:600}
+```
+
+### 7. "Disclosed by Seller" — NEUTRAL, not a warning
+Material facts the seller disclosed (tenant lease, rented units). Use a **neutral grey paper box with an indigo info "i" icon** — NOT amber, NOT warning triangles. These are facts to note, not risks.
+```css
+.disc{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+.disc .dh{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.disc .dh svg{width:15px;height:15px;stroke:var(--indigo)}   /* info circle */
+.disc .dh .t{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+.drow{display:flex;gap:9px;font-size:12.5px;line-height:1.45;color:var(--ink2);margin-bottom:8px}
+.drow .dd{width:5px;height:5px;border-radius:50%;background:var(--muted);flex:none;margin-top:6px}   /* grey dot, not a triangle */
+.drow b{color:var(--ink);font-weight:600}
+```
+Items: "**Commercial tenant lease in place through December** — the property is tenant-occupied." and "**Residential units are income-producing** (currently rented)."
+
+### 8. Cross-check call-to-action
+Turn the passive "compare with official records" line into an indigo action panel pointing to the verification sections.
+```css
+.cc{display:flex;align-items:center;gap:12px;background:var(--indigoSoft);border:1px solid #dfe3f7;border-radius:11px;padding:13px 16px;text-decoration:none;margin-top:14px}
+.cc .ic{width:30px;height:30px;border-radius:8px;background:var(--indigo);display:flex;align-items:center;justify-content:center;flex:none}
+.cc .ic svg{width:15px;height:15px;stroke:#fff}   /* check-circle */
+.cc .h{display:block;font-size:12.5px;font-weight:600;color:var(--indigo)}
+.cc .s{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.cc .arr{margin-left:auto;color:var(--indigo);font-size:15px}   /* ↓ */
+```
+Heading "Cross-check these claims against official records", sub "Permit & Building History · Pre-Title Check — below". Link/scroll to those sections.
+
+### 9. Footer
+A thin top border, then a muted "Re-check listing" (with a refresh icon; keep its existing re-fetch behavior) on the left, and an italic "Listed by {brokerage} (per {source})" pushed to the right.
+
+## Consistency rules
+- **Only one amber accent** in the whole section — the top unverified banner. Nothing else is amber/yellow.
+- Every other accent is indigo, green (status only), or neutral grey.
+- Stat-tile numbers use Instrument Serif (`--disp`) at ~28px, normal weight — not bold sans.
+- Each fact appears once: tiles for the metrics, prose for the narrative, grouped bullets for the highlights. No repeats across them.

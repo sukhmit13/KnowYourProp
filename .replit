@@ -61,6 +61,8 @@ waitForPort = 5000
 [userenv.shared]
 RENTCAST_API_KEY = "83b88a99ee6644dbb973fc56611677c4"
 GOOGLE_PLACES_API_KEY = "AIzaSyA4diAvlpHY7V4XRw9Yx9yzwpyo3T2hy38"
+WEST_TOWN_TAX_SCAN_BATCH_LIMIT = "100"
+WEST_TOWN_TAX_SCAN_ENABLED = "true"
 
 [userenv.development]
 APIFY_API_TOKEN = "apify_api_kgNfTbi7lezbjqHU8EJfZZs9QfQssR45Qu4p"

@@ -1,0 +1,64 @@
+# Replit build prompt — Incentives eligibility checker (paste this to the agent)
+
+Build an incentives eligibility checker for Chicago / Cook County property. I've uploaded two files:
+`incentives-config.json` (the source of truth — loop over it, do NOT hard-code programs or endpoints) and
+`KnowYourProp-incentives-catalog.xlsx` (human reference only).
+
+## The one rule that matters most
+**No false positives.** A geographic match means the parcel is INSIDE a program's footprint — that is
+*necessary but usually NOT sufficient*. Never output a bare `eligible: true` for a geographic program.
+Always return the program's `resultPhrasing` string and one of the allowed statuses below. If you are
+unsure or the data isn't loaded, return a "confirm / pending" status — never guess.
+
+## Data model
+Load `incentives-config.json` at startup. Each program has a `method` and an `implement` bucket. Handle by `method`:
+
+- **`chicago_polygon`** (`implement: "now"`, verified): fetch `geojsonEndpoint` ONCE, cache the GeoJSON in
+  memory (do not re-fetch per request). Use point-in-polygon (Turf.js `booleanPointInPolygon`, or Shapely in
+  Python) against the geocoded lat/lng. Return `in_area` (+ the `resultPhrasing.inArea`, substituting any
+  `{name}`/`{number}`/`{zone}` from the matched feature's properties) or `not_in_area`.
+- **`federal_tract` / `federal_zcta`** (`implement: "needs_data"`): these check the parcel's **2020 census
+  tract** (or ZCTA) against a program tract list. **Do NOT implement the check until the tract list is loaded.**
+  For now return status `data_pending` with `resultPhrasing.pending`. (Stub the loader with a TODO; I'll supply
+  the tract lists next.)
+- **`use_based` / `conditional`**: these depend on the user's PROJECT TYPE, not location. Only evaluate if the
+  request includes `projectType` and it intersects the program's `requiresProjectType`. If it matches, return
+  `potentially_eligible` with `resultPhrasing.potentiallyEligible`. Otherwise return `not_applicable`. **Never
+  `eligible: true`.** For `cook_class_l` also require the `landmark` polygon check to have hit.
+- **`derived` / `manual`** (`implement: "stub"`): no reliable boundary. Return status `manual_check` with
+  `resultPhrasing.manual`. **Do not invent an endpoint or approximate the boundary.**
+
+Programs whose `key` starts with `_` are helper layers (zoning, community area) — use them to enrich results
+(e.g., resolve base zoning, resolve community area for INVEST S/W), but don't list them as incentives.
+
+## Geocoding
+Use the `geocoder` block in the config (US Census Geocoder). One call returns lat/lng + the 11-digit 2020
+census tract GEOID; cache by normalized address. If geocoding fails, return an error — never fall back to a
+guess. Cook County FIPS = 17031; flag addresses outside it as "out of coverage."
+
+## API
+`POST /api/incentives  { address: string, projectType?: "industrial"|"commercial"|"multifamily"|"rehab"|"residential" }`
+→ returns, per program:
+```
+{ key, name, category, status, statement, automatic, actionRequired }
+```
+where `status` ∈ `in_area | not_in_area | potentially_eligible | not_applicable | manual_check | data_pending`,
+`statement` = the resolved `resultPhrasing`, and `actionRequired` = true whenever the benefit needs an
+application/approval (i.e., `automatic === false`).
+
+## UI
+Group the response into three buckets: **Likely relevant** (`in_area` + `potentially_eligible`), **Needs
+confirmation** (`manual_check` + `data_pending`), and **Not applicable** (collapsed by default). On every
+"likely relevant" card, show the `statement` and, when `actionRequired`, a muted "Requires application /
+approval — not automatic" line. Never show the word "Eligible" as a standalone yes.
+
+## Build order
+1. Geocoder + the 6 `chicago_polygon` incentive layers + 3 helper layers (all verified, `implement: "now"`). Ship this first.
+2. The `use_based` project-type gating (Cook County classes, AHSAP, LIHTC, historic).
+3. Leave `federal_tract` as `data_pending` and `derived`/`manual` as `manual_check` until the datasets are sourced.
+
+## Non-negotiables
+- Cache each GeoJSON layer once; never fetch per request.
+- Never fabricate a dataset ID, endpoint, or boundary. If it's not in the config with `implement:"now"`, it is NOT eligible-checkable yet.
+- Every geographic hit is phrased "in the area — may qualify, requires application," never a bare yes.
+- Add a visible disclaimer: "Informational only — not legal, tax, or financial advice. Confirm each program with the administering agency."

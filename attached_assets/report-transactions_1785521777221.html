@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--track:#efeee9;
+    --c1:#3f51c5;--c2:#0e8fa6;--c3:#7c4dcf;--c4:#e0a615;   /* SF / 2-4 / Condo / Commercial */
+    --good:#2f7d3f;--bad:#d13b26;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .col{max-width:900px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .mainhead{display:flex;align-items:center;gap:9px;padding-bottom:13px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+  .mainhead .ic{color:var(--indigo);font-size:16px;flex:none;width:18px;text-align:center}
+  .mainhead .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+  .cap{font-size:13px;color:var(--ink2);margin-bottom:10px}
+  #chart{width:100%;height:auto;display:block}
+  .grid{stroke:var(--line);stroke-width:1}
+  .axis{font-family:var(--mono);font-size:9px;fill:var(--muted)}
+  .legend{display:flex;gap:18px;justify-content:center;margin:10px 0 4px;flex-wrap:wrap}
+  .lg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)}
+  .lg .d{width:11px;height:11px;border-radius:2px}
+
+  .yoylbl{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:20px 0 12px}
+  .yoy{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+  .yt{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+  .yt .top{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+  .yt .dot{width:9px;height:9px;border-radius:2px;flex:none}
+  .yt .cat{font-size:12px;font-weight:600;color:var(--ink2)}
+  .yt .n{font-family:var(--disp);font-size:26px;line-height:1;color:var(--ink)}
+  .yt .chg{font-size:12px;font-weight:700;margin-top:5px}
+  .yt .chg.up{color:var(--good)} .yt .chg.down{color:var(--bad)}
+  .rank{display:flex;align-items:center;justify-content:space-between;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 16px}
+  .rank .l{font-size:12px;color:var(--ink2)} .rank .l b{color:var(--ink);font-weight:600}
+  .rank .r{text-align:right} .rank .r .lab{font-size:11px;color:var(--muted)} .rank .r .v{font-family:var(--disp);font-size:22px;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="col">
+  <div class="card">
+    <div class="mainhead"><span class="ic">▦</span><span class="t">Area Transaction Trends</span></div>
+    <div class="cap">Property sale transactions in ZIP 60612 by type · 2022–2025</div>
+    <svg id="chart" viewBox="0 0 720 250"></svg>
+    <div class="legend">
+      <span class="lg"><span class="d" style="background:var(--c1)"></span>Single Family</span>
+      <span class="lg"><span class="d" style="background:var(--c2)"></span>2–4 Unit</span>
+      <span class="lg"><span class="d" style="background:var(--c3)"></span>Condo</span>
+      <span class="lg"><span class="d" style="background:var(--c4)"></span>Commercial</span>
+    </div>
+
+    <div class="yoylbl">Year-over-year change · 2024 → 2025</div>
+    <div class="yoy">
+      <div class="yt"><div class="top"><span class="dot" style="background:var(--c1)"></span><span class="cat">Single Family</span></div><div class="n">77</div><div class="chg down">↓ −23.0%</div></div>
+      <div class="yt"><div class="top"><span class="dot" style="background:var(--c2)"></span><span class="cat">2–4 Unit</span></div><div class="n">340</div><div class="chg down">↓ −24.9%</div></div>
+      <div class="yt"><div class="top"><span class="dot" style="background:var(--c3)"></span><span class="cat">Condo</span></div><div class="n">1,478</div><div class="chg down">↓ −21.8%</div></div>
+      <div class="yt"><div class="top"><span class="dot" style="background:var(--c4)"></span><span class="cat">Commercial</span></div><div class="n">66</div><div class="chg up">↑ +94.1%</div></div>
+    </div>
+    <div class="rank"><span class="l">ZIP ranking by volume (2025) · <b>#1 of 1 Chicago ZIP codes</b></span><span class="r"><div class="lab">Total sales</div><div class="v">1,961</div></span></div>
+  </div>
+</div>
+<script>
+  const years=['2022','2023','2024','2025'];
+  const data={  // SF, 2-4, Condo, Commercial
+    '2022':[150,600,3000,120],'2023':[100,400,1900,80],'2024':[90,440,1960,40],'2025':[77,340,1478,66]
+  };
+  const cols=['--c1','--c2','--c3','--c4'].map(v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim());
+  const NS='http://www.w3.org/2000/svg', svg=document.getElementById('chart');
+  const X0=50,X1=706,Y0=14,Y1=210,MAX=3000;
+  const py=v=>Y1-(Y1-Y0)*v/MAX;
+  [0,1000,2000,3000].forEach(v=>{const y=py(v);const l=document.createElementNS(NS,'line');l.setAttribute('x1',X0);l.setAttribute('x2',X1);l.setAttribute('y1',y);l.setAttribute('y2',y);l.setAttribute('class','grid');svg.appendChild(l);const t=document.createElementNS(NS,'text');t.setAttribute('x',8);t.setAttribute('y',y+3);t.setAttribute('class','axis');t.textContent=v>=1000?(v/1000)+'k':v;svg.appendChild(t);});
+  const gw=(X1-X0)/years.length, bw=Math.min(16,(gw*0.62)/4), gap=3;
+  years.forEach((yr,gi)=>{
+    const gx=X0+gi*gw+gw*0.19;
+    data[yr].forEach((v,bi)=>{
+      const x=gx+bi*(bw+gap), y=py(v), h=Y1-y;
+      const r=document.createElementNS(NS,'rect');r.setAttribute('x',x);r.setAttribute('y',y);r.setAttribute('width',bw);r.setAttribute('height',h);r.setAttribute('rx',2.5);r.setAttribute('fill',cols[bi]);svg.appendChild(r);
+    });
+    const t=document.createElementNS(NS,'text');t.setAttribute('x',gx+(bw+gap)*2-gap);t.setAttribute('y',Y1+18);t.setAttribute('class','axis');t.setAttribute('text-anchor','middle');t.textContent=yr;svg.appendChild(t);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+Restyle the "Top Chicago Architects" section to match our report design system. This is front-end / styling only — do NOT change routing, auth, the permit data query, or how architects are ranked. Ranking stays by permit activity exactly as it is now.
+
+Design tokens (use our existing CSS variables; add any that are missing):
+
+Fonts: headers/labels use JetBrains Mono uppercase, body uses Inter, big numbers use Instrument Serif
+--indigo:#2b3a9e, --indigoSoft:#ecedf9
+Chart mix colors in this fixed order: --c1:#3f51c5 (Single Family), --c2:#f4610a (Multi-Family), --c3:#7c4dcf (Commercial), --c4:#e0a615 (Industrial)
+--paper:#faf9f6, --card:#fff, --ink:#141414, --ink2:#565651, --muted:#8b8a84, --line:#eae8e2
+
+Header: Single indigo pencil/architect icon + "TOP CHICAGO ARCHITECTS" in mono uppercase. One icon only — no bullet or square alongside it. Subtitle underneath in muted gray: "Ranked by permit activity. Source: Chicago Building Permits."
+
+Filter pills: Pill-shaped, 1px --line border, white background, --ink2 text. The ACTIVE pill must be solid --indigo background with white text — never black. (The Self-Cert pill is currently black; make it indigo.)
+
+Each architect card:
+
+Rank in mono indigo (#1, #2…), name bold, a small "Self-Cert" credential chip in --indigoSoft background / indigo text, and "Last permit [date]" in muted gray.
+Right side: project count as a large Instrument Serif number with "projects" in small muted text, then an expand/collapse control ("Less" / "More") in indigo.
+Expanded cards show four compact stat tiles (--paper background, --line border, rounded 9px): Reported Value, New Construction, Renovation, Self-Certified — each with a small mono uppercase label and an Instrument Serif number.
+Project-type mix bar: a horizontal stacked bar using --c1→--c2→--c3→--c4 in that exact order (do not reorder — orange and amber must never sit adjacent). Above it, a mono uppercase "PROJECT-TYPE MIX" label on the left and a plain-language takeaway on the right in indigo (e.g. "Mostly multi-family"). Below it, a legend with a colored square + label + bold count for each type.
+A "↗ Verify IL License" link in indigo, right-aligned.
+Collapsed cards show only the rank, name, credential chip, last-permit date, count, and a "More" expander.
+
+Do not add any quality scores, ratings, stars, or "best architect" language. This stays a factual activity ranking.

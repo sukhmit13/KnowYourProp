@@ -1,0 +1,87 @@
+# Maturity rules — consolidated (supersedes replit-agent-maturity-junior-rule.md)
+
+The complete maturity estimator for Stage 3 (`corroborate` / `termFor`). One file, whole ruleset. **A recorded maturity always wins; everything below is only the fallback estimate.**
+
+## 🔴🔴 GOVERNING RULE — the recorded document wins, always
+If the recorded instrument (or a later modification) **states a maturity date, that IS the maturity.** Every term/balloon/line rule below is a fallback used *only* when the document is silent. An estimate must never override, contradict, or sit next to a date the document actually spells out. When in doubt, the paper governs.
+
+## 🔴 Read-first precedence
+1. `maturity_date` stated in the mortgage → use it. (`maturity_source = "recorded"`)
+2. A later modification's `new_maturity_date` → supersedes. (`"modification"`)
+3. **Estimate** (only when 1 and 2 are absent) — the rules below. (`"estimated"`)
+
+## 🔴 Don't estimate over a maturity you simply failed to read
+An estimate is valid only when the document **genuinely doesn't state** a maturity — not when extraction merely missed one. Distinguish the two:
+- `maturity_date == null` **and** `extraction_confidence` is high → the document is silent; estimate is appropriate.
+- `maturity_date == null` **and** `extraction_confidence` is low/medium (garbled OCR, sparse text, a term loan that would normally state a date) → treat as an **extraction gap**, not a silent document: label **"maturity not captured — may be stated in the document; verify,"** and mark the estimate low-confidence rather than presenting it as the answer.
+Never let a missed read masquerade as "the document has no maturity."
+
+## Tunable constants
+```
+RESIDENTIAL_TERM_YRS        = 30   // residential 1st mortgage, self-amortizing
+JUNIOR_RESIDENTIAL_TERM_YRS = 10   // residential 2nd/junior (home-equity / 2nd mortgage)
+COMMERCIAL_BALLOON_YRS      = 7    // commercial TERM mortgage — balloon at term, amortized ~20–25yr
+                                   //   (central CRE estimate; set to 5 for a conservative floor)
+// SBA schedule handled separately: 7(a) ≤25yr RE / ≤10yr WC; 504 = 10/20/25
+```
+
+## `termFor(m, parcel)` — estimate branch
+```js
+function termFor(m, parcel) {
+  // A) LINES OF CREDIT have no fixed amortizing payoff — never assign a term. Flag & verify.
+  if (isCreditLine(m)) {                        // HELOC, business LOC, open-end / revolving / "maximum indebtedness"
+    return { term: null, revolving: true,
+      note: parcel.residentialZoning
+        ? "home-equity line — draw/repay term, verify"
+        : "business/commercial line of credit — revolving, renews; no fixed maturity, verify" };
+  }
+  // B) SBA schedule wins among term estimates
+  if (isSBALender(m.lender)) return { term: sbaTerm(m), basis: "SBA schedule" };
+
+  const residential = isResidentialZoning(parcel.zoning);
+  const junior      = m.position >= 2 || m.lien_kind === "junior";
+
+  // C) residential
+  if (residential && junior) return { term: JUNIOR_RESIDENTIAL_TERM_YRS, basis: "2nd-lien 10-yr (residential)" };
+  if (residential)           return { term: RESIDENTIAL_TERM_YRS,        basis: "30-yr (residential)" };
+
+  // D) commercial TERM mortgage → balloon
+  return { term: COMMERCIAL_BALLOON_YRS, basis: `${COMMERCIAL_BALLOON_YRS}-yr balloon (commercial term)` };
+}
+```
+
+## `isCreditLine(m)` — detect revolving/open-end (needs a small Stage 1 flag)
+A recorded line of credit reads as a mortgage but is revolving. Add `is_credit_line: boolean` to Stage 1 extraction — set true when the document says **"line of credit," "revolving," "open-end," "maximum indebtedness/principal," "HELOC," or "equity line."** `isCreditLine(m)` = `m.is_credit_line === true`. (One-line addendum to the extraction prompt.)
+
+## 🔴 Estimated maturity never asserts "past due"
+When `maturity_source === "estimated"`, the date is a guess — do NOT headline a hard past-maturity.
+```js
+if (m.maturity_source === "estimated") {
+  // soft status only
+  m.maturity_status = (estDate < today) ? "estimated_balloon_may_have_passed" : m.maturity_status;
+  m.maturity_note   = "estimated term — confirm actual maturity";
+  m.position_confidence_for_maturity = "low";
+}
+// existing guard still applies: a modification recorded after the estimated balloon => past_maturity = false
+```
+Display label: **"est. · {basis}"** on the maturity tile (e.g. "est. · 7-yr balloon (commercial term)"), and for a line: **"revolving — no fixed maturity, verify"** with no date.
+
+## Guards / edge cases
+- **Commercial line ≠ commercial term.** A business LOC secured by CRE is revolving (branch A), NOT a 7-yr balloon. Only a commercial *term* mortgage gets the balloon.
+- **Residential vs commercial** keys off the report's zoning class (reuse it), not a guess.
+- Read-first always overrides: a stated/modified maturity ignores every estimate above.
+
+## 🔴 Tests
+```
+assert commercial TERM mortgage, no stated maturity => ~7-yr balloon, basis "commercial term", maturity_source "estimated"
+assert a business/commercial LINE OF CREDIT (is_credit_line) => revolving, NO fixed term, "renews; verify" note
+assert a HELOC (residential credit line) => "draw/repay term, verify", not a 10-yr payoff
+assert residential 2nd (closed-end) => 10-yr; residential 1st => 30-yr; SBA => its schedule
+assert an ESTIMATED past date renders "estimated balloon may have passed — verify", NOT a hard "past maturity"
+assert any stated or modified maturity overrides all estimates (read-first) — the recorded date is used verbatim
+assert maturity_date==null with LOW extraction_confidence => "maturity not captured — verify", NOT a confident estimate
+assert setting COMMERCIAL_BALLOON_YRS=5 changes only the commercial-term estimate, nothing else
+```
+
+## Done when
+A commercial term mortgage with no recorded maturity estimates a **~7-yr balloon** ("est. · 7-yr balloon"), a recorded business line of credit shows **"revolving — no fixed maturity, verify"** instead of a balloon date, residential firsts/juniors keep 30/10, and no estimated date is ever stated as a hard "past due."

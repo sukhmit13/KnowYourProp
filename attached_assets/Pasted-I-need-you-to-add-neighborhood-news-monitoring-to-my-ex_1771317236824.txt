@@ -1,0 +1,109 @@
+I need you to add neighborhood news monitoring to my existing property report backend.
+
+STEP 1: Add "feedparser" to requirements.txt and install it.
+
+STEP 2: Create a new file called news_monitor.py with this code:
+
+- A dict called RSS_FEEDS containing:
+  block_club_west_town: https://blockclubchicago.org/category/wicker-park-bucktown-west-town/feed/
+  block_club_logan_square: https://blockclubchicago.org/category/logan-square/feed/
+  block_club_pilsen: https://blockclubchicago.org/category/pilsen-little-village/feed/
+  block_club_near_west: https://blockclubchicago.org/category/near-west-side-west-loop/feed/
+  block_club_lakeview: https://blockclubchicago.org/category/lake-view/feed/
+  block_club_lincoln_park: https://blockclubchicago.org/category/lincoln-park/feed/
+  block_club_uptown: https://blockclubchicago.org/category/uptown/feed/
+  block_club_humboldt: https://blockclubchicago.org/category/humboldt-park/feed/
+  block_club_citywide: https://blockclubchicago.org/feed/
+  eater_chicago: https://chicago.eater.com/rss/index.xml
+  what_now_chicago: https://whatnow.com/chicago/feed/
+  chicago_yimby: https://chicagoyimby.com/feed/
+  crains_restaurants: https://www.chicagobusiness.com/section/restaurants/rss
+
+- A dict called NEIGHBORHOOD_FEED_MAP:
+  "west town": ["block_club_west_town"]
+  "wicker park": ["block_club_west_town"]
+  "bucktown": ["block_club_west_town"]
+  "ukrainian village": ["block_club_west_town"]
+  "logan square": ["block_club_logan_square"]
+  "humboldt park": ["block_club_humboldt"]
+  "pilsen": ["block_club_pilsen"]
+  "little village": ["block_club_pilsen"]
+  "west loop": ["block_club_near_west"]
+  "near west side": ["block_club_near_west"]
+  "lakeview": ["block_club_lakeview"]
+  "lake view": ["block_club_lakeview"]
+  "lincoln park": ["block_club_lincoln_park"]
+  "uptown": ["block_club_uptown"]
+
+- A list called SIGNAL_KEYWORDS:
+  "opening", "opens", "open soon", "coming soon", "new restaurant",
+  "new bar", "new shop", "new store", "new cafe", "new coffee",
+  "debut", "launching", "launch", "grand opening", "development",
+  "construction", "renovation", "redevelopment", "mixed-use",
+  "apartment", "retail", "lease", "signed", "chef", "restaurateur",
+  "bartender", "baker", "concept", "building permit"
+
+- A simple in-memory cache dict called _cache and CACHE_TTL_SECONDS = 3600
+
+- A function fetch_feed(feed_name, url) that:
+  - Returns cached results if fresh (under 1 hour old)
+  - Otherwise fetches with feedparser.parse(url)
+  - Extracts: title, link (as "url"), summary (first 400 chars), published, source
+  - Caches with timestamp
+  - Returns empty list on any error
+
+- A function find_relevant_articles(neighborhood, days=90) that:
+  - Gets relevant feeds from NEIGHBORHOOD_FEED_MAP for this neighborhood
+  - Always also includes: block_club_citywide, eater_chicago, what_now_chicago, chicago_yimby
+  - Fetches all feeds
+  - Filters to articles published within last N days
+  - Filters to articles mentioning the neighborhood name (case insensitive)
+  - Filters to articles containing at least one SIGNAL_KEYWORD
+  - Deduplicates by URL
+  - Returns up to 10 results
+
+- A function summarize_news_for_ai(articles, neighborhood) that:
+  - Returns "No recent news coverage found." if empty
+  - Otherwise returns plain text formatted as:
+    RECENT NEWS (neighborhood, last 90 days):
+    - [Source] Title
+      → snippet (HTML stripped)
+      URL: link
+  - Max 5 articles
+
+- A function calculate_momentum_score(articles) that:
+  - Returns 20 + (len(articles) * 15), capped at 100
+
+STEP 3: Add a new API route to app.py:
+
+@app.route("/api/neighborhood-news")
+def neighborhood_news():
+    from news_monitor import find_relevant_articles, calculate_momentum_score
+    neighborhood = request.args.get("neighborhood", "")
+    if not neighborhood:
+        return jsonify({"error": "neighborhood param required"}), 400
+    articles = find_relevant_articles(neighborhood, days=90)
+    score = calculate_momentum_score(articles)
+    label = "High Activity ↑" if score >= 75 else "Moderate Activity →" if score >= 50 else "Low Activity —"
+    return jsonify({
+        "neighborhood": neighborhood,
+        "article_count": len(articles),
+        "momentum_score": score,
+        "momentum_label": label,
+        "momentum_signals": f"{len(articles)} recent articles detected",
+        "articles": articles
+    })
+
+STEP 4: In my existing property report route, after property_data is assembled, add:
+
+    from news_monitor import find_relevant_articles, summarize_news_for_ai, calculate_momentum_score
+    neighborhood = property_data.get("neighborhood", "")
+    if neighborhood:
+        news_articles = find_relevant_articles(neighborhood, days=90)
+        property_data["neighborhood_news_text"] = summarize_news_for_ai(news_articles, neighborhood)
+        property_data["neighborhood_articles"] = news_articles
+        property_data["momentum_score"] = calculate_momentum_score(news_articles)
+
+DO NOT touch any frontend files, HTML templates, or CSS.
+Only modify app.py and create news_monitor.py.
+Show me every change you make and which line numbers you changed.

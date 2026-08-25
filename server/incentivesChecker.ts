@@ -294,7 +294,7 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
         });
       }
 
-    // ── Use-based check (project type + zoning inference + unit count) ──────────
+    // ── Use-based check (project use + zoning inference + unit count) ──────────
     } else if (program.method === 'use_based' && program.implement === 'now') {
 
       const knownUnitCount = (input.unitCount != null && !isNaN(input.unitCount)) ? input.unitCount : null;
@@ -329,7 +329,7 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
 
       // ── Step 1: unit count gate (when we have parcel data and a min-unit threshold) ──
       // If the existing parcel unit count is known and below the program's minimum,
-      // the program is not applicable — regardless of project type or zoning.
+      // the program is not applicable — regardless of project use or zoning.
       // Exception: grandfathered parcels (more units than zoning normally allows)
       // still pass through if their unit count meets the threshold.
       if (minUnits != null && knownUnitCount != null) {
@@ -376,7 +376,7 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
                 .replace('{zoning}', input.zoningCode ?? zoningUpper)
               : (program.resultPhrasing.potentiallyEligible ?? `Potentially eligible for ${program.name}.`);
           } else {
-            stmt = program.resultPhrasing.notApplicable ?? `Not applicable for this project type.`;
+            stmt = program.resultPhrasing.notApplicable ?? `Not applicable for this project use.`;
           }
           results.push({
             key: program.key, name: program.name, category: program.category,
@@ -390,7 +390,7 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
           continue;
         }
 
-        // No project type — zoning inference with known unit count (meets threshold)
+        // No project use — zoning inference with known unit count (meets threshold)
         if (hasZoning && (program.requiresZoningPrefix ?? []).length > 0) {
           const zoningQualifies = zoningMatchesPrefixes(zoningUpper, program.requiresZoningPrefix!);
           let stmt: string;
@@ -417,7 +417,7 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
           continue;
         }
 
-        // Meets threshold but no project type / zoning to refine further
+        // Meets threshold but no project use / zoning to refine further
         results.push({
           key: program.key, name: program.name, category: program.category,
           status: eligibleStatus,
@@ -430,7 +430,7 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
 
       // ── Step 2: standard path (no unit count constraint or unknown count) ─────
       if (hasProjectCategory) {
-        // Project type is set — use category matching, with zoning fallback when both are configured
+        // Project use is set — use category matching, with zoning fallback when both are configured
         const cat = input.projectCategory!;
         const categoryQualifies = (program.requiresCategoryPrefix ?? []).some(prefix =>
           cat.toLowerCase().startsWith(prefix.toLowerCase())
@@ -448,7 +448,7 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
           status: qualifies ? eligibleStatus : 'not_applicable',
           statement: qualifies
             ? (program.resultPhrasing.potentiallyEligible ?? `Potentially eligible for ${program.name}.`)
-            : (program.resultPhrasing.notApplicable ?? `Not applicable for this project type.`),
+            : (program.resultPhrasing.notApplicable ?? `Not applicable for this project use.`),
           automatic: program.automatic,
           actionRequired: qualifies ? !program.automatic : false,
           priority: program.priority,
@@ -456,7 +456,7 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
         });
 
       } else if (hasZoning && (program.requiresZoningPrefix ?? []).length > 0) {
-        // No project type yet — infer from zoning designation
+        // No project use yet — infer from zoning designation
         const zoningQualifies = zoningMatchesPrefixes(zoningUpper, program.requiresZoningPrefix!);
         let stmt: string;
         if (zoningQualifies) {
@@ -477,11 +477,11 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
         });
 
       } else {
-        // No project type, no usable zoning — show as awaiting
+        // No project use, no usable zoning — show as awaiting
         results.push({
           key: program.key, name: program.name, category: program.category,
           status: 'data_pending',
-          statement: `Set a project type to check ${program.name} eligibility.`,
+          statement: `Set a project use to check ${program.name} eligibility.`,
           automatic: program.automatic, actionRequired: false,
           priority: program.priority,
           isRequirement: program.isRequirement,
@@ -612,7 +612,7 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
         });
       }
 
-    // ── Project type exact match ──────────────────────────────────────────────
+    // ── Project use exact match ──────────────────────────────────────────────
     } else if (program.method === 'project_type_check' && program.implement === 'now') {
       const projectType = input.projectType ?? null;
       const allowedTypes = program.requiresProjectType ?? [];
@@ -620,7 +620,7 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
         results.push({
           key: program.key, name: program.name, category: program.category,
           status: 'data_pending',
-          statement: `Select a project type to check ${program.name} eligibility.`,
+          statement: `Select a project use to check ${program.name} eligibility.`,
           automatic: program.automatic, actionRequired: false,
           priority: program.priority, awaitingProjectType: true,
         });
@@ -636,7 +636,7 @@ export async function checkIncentives(input: IncentivesCheckInput): Promise<Chec
         results.push({
           key: program.key, name: program.name, category: program.category,
           status: 'not_applicable',
-          statement: program.resultPhrasing.notApplicable ?? `Not applicable — project type does not qualify for ${program.name}.`,
+          statement: program.resultPhrasing.notApplicable ?? `Not applicable — project use does not qualify for ${program.name}.`,
           automatic: program.automatic, actionRequired: false,
           priority: program.priority,
         });

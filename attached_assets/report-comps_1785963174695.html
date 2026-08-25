@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;
+    --good:#2f7d3f;--goodSoft:#e9f4ec;--amber:#8f6a08;--amberSoft:#fdf3d4;--bad:#b3311f;--badSoft:#fbece9;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:980px;margin:0 auto}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:11px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .ic{color:var(--indigo);font-size:15px}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+  .sh .ca{margin-left:auto;color:var(--muted)}
+
+  .summary{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px 20px;margin-bottom:12px}
+  .stop{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .conf{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;letter-spacing:.02em;border-radius:999px;padding:5px 12px}
+  .conf.low{background:var(--amberSoft);color:var(--amber)}
+  .conf.med{background:var(--amberSoft);color:var(--amber)}
+  .conf.high{background:var(--goodSoft);color:var(--good)}
+  .comps{font-size:11.5px;font-weight:600;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+
+  .stats{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:20px}
+  .st .l{font-size:11.5px;color:var(--ink2);margin-bottom:5px}
+  .st .n{font-family:var(--disp);font-size:30px;line-height:1;color:var(--ink)}
+  .st .s{font-size:10.5px;color:var(--muted);margin-top:5px}
+  .range{font-size:11.5px;color:var(--muted);margin-top:15px;padding-top:13px;border-top:1px solid var(--line)}
+
+  .note{display:flex;gap:9px;font-size:12px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin-bottom:16px;line-height:1.5}
+  .note .ic{color:var(--indigo);flex:none}
+
+  .comp{border:1px solid var(--line);border-radius:12px;padding:14px 17px;margin-bottom:10px;background:var(--card)}
+  .crow{display:flex;align-items:center;gap:14px}
+  .crow .rk{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--indigo);flex:none;width:26px;align-self:flex-start;padding-top:2px}
+  .crow .bd{flex:1;min-width:0}
+  .crow .addr{font-size:14.5px;font-weight:700;color:var(--ink)}
+  .crow .meta{display:flex;gap:14px;font-size:11.5px;color:var(--muted);margin-top:4px}
+  .crow .meta .m{display:inline-flex;align-items:center;gap:5px}
+  .crow .meta .ic{color:var(--indigo);font-size:11px}
+  .crow .right{flex:none;text-align:right}
+  .crow .price{font-family:var(--disp);font-size:23px;line-height:1;color:var(--ink)}
+  .crow .ppsf{font-size:11px;color:var(--muted);margin-top:3px}
+  .crow .chev{flex:none;color:var(--indigo);font-size:15px;padding-left:2px;cursor:pointer}
+
+  .cbot{display:flex;align-items:center;justify-content:space-between;margin:12px 0 0 40px;padding-top:11px;border-top:1px solid var(--line)}
+  .specs{display:flex;gap:16px;font-size:12px;color:var(--ink2)}
+  .specs .sp{display:inline-flex;align-items:center;gap:6px}
+  .specs .ic{color:var(--indigo);font-size:12px}
+  .match{display:flex;align-items:center;gap:9px}
+  .match .ml{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .match .mt{width:70px;height:6px;background:#f1efe9;border-radius:3px;overflow:hidden}
+  .match .mt span{display:block;height:100%;background:var(--indigo);border-radius:3px}
+  .match .mv{font-size:12px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .match.g .mt span{background:#2f7d3f} .match.g .mv{color:#2f7d3f}
+  .match.a .mt span{background:#d9a520} .match.a .mv{color:#8f6a08}
+  .match.r .mt span{background:#d13b26} .match.r .mv{color:#b3311f}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sh"><span class="ic">⌂</span><span class="t">Recently Sold Comps</span><span class="ca">▾</span></div>
+
+  <div class="summary">
+    <div class="stop">
+      <span class="conf low">◎ Low Confidence</span>
+      <span class="comps">6 comps</span>
+    </div>
+    <div class="stats">
+      <div class="st"><div class="l">Indicated Value</div><div class="n">$1,144,000</div><div class="s">median $/sqft × subject sqft</div></div>
+      <div class="st"><div class="l">Median Sale Price</div><div class="n">$710K</div></div>
+      <div class="st"><div class="l">Median $/Sqft</div><div class="n">$188</div></div>
+    </div>
+    <div class="range">Range: $455K – $1.25M · 0.75 mi radius · last 18 months · 6 total nearby sales · low match scores drive the low-confidence rating</div>
+  </div>
+
+  <div class="note"><span class="ic">◉</span><div>Comps pulled from Cook County Assessor sales records. Same property class required for matching. Informational only — not a certified appraisal.</div></div>
+
+  <!-- comps -->
+  <div class="comp">
+    <div class="crow"><span class="rk">#1</span>
+      <div class="bd"><div class="addr">3307 W Irving Park Rd</div><div class="meta"><span class="m"><span class="ic">⚲</span>0.36 mi</span><span class="m"><span class="ic">▦</span>Mar 2026 · 4 mo ago</span></div></div>
+      <div class="right"><div class="price">$538K</div><div class="ppsf">$188/sqft</div></div><span class="chev">›</span></div>
+    <div class="cbot"><div class="specs"><span class="sp"><span class="ic">▭</span>2,854 sqft</span><span class="sp"><span class="ic">◠</span>4 bd</span><span class="sp"><span class="ic">▤</span>4 ba</span></div>
+      <div class="match a"><span class="ml">Match</span><span class="mt"><span style="width:46%"></span></span><span class="mv">46</span></div></div>
+  </div>
+
+  <div class="comp">
+    <div class="crow"><span class="rk">#2</span>
+      <div class="bd"><div class="addr">3108 W Irving Park Rd</div><div class="meta"><span class="m"><span class="ic">⚲</span>0.12 mi</span><span class="m"><span class="ic">▦</span>Aug 2025 · 11 mo ago</span></div></div>
+      <div class="right"><div class="price">$455K</div><div class="ppsf">$130/sqft</div></div><span class="chev">›</span></div>
+    <div class="cbot"><div class="specs"><span class="sp"><span class="ic">▭</span>3,500 sqft</span><span class="sp"><span class="ic">◠</span>4 bd</span><span class="sp"><span class="ic">▤</span>4.5 ba</span></div>
+      <div class="match a"><span class="ml">Match</span><span class="mt"><span style="width:44%"></span></span><span class="mv">44</span></div></div>
+  </div>
+
+  <div class="comp">
+    <div class="crow"><span class="rk">#3</span>
+      <div class="bd"><div class="addr">2919 W Irving Park Rd</div><div class="meta"><span class="m"><span class="ic">⚲</span>0.11 mi</span><span class="m"><span class="ic">▦</span>Feb 2026 · 5 mo ago</span></div></div>
+      <div class="right"><div class="price">$560K</div><div class="ppsf">$211/sqft</div></div><span class="chev">›</span></div>
+    <div class="cbot"><div class="specs"><span class="sp"><span class="ic">▭</span>2,652 sqft</span><span class="sp"><span class="ic">◠</span>3 bd</span><span class="sp"><span class="ic">▤</span>2.5 ba</span></div>
+      <div class="match a"><span class="ml">Match</span><span class="mt"><span style="width:30%"></span></span><span class="mv">30</span></div></div>
+  </div>
+
+  <div class="comp">
+    <div class="crow"><span class="rk">#4</span>
+      <div class="bd"><div class="addr">4114 N Kedzie Ave</div><div class="meta"><span class="m"><span class="ic">⚲</span>0.29 mi</span><span class="m"><span class="ic">▦</span>Apr 2025 · 15 mo ago</span></div></div>
+      <div class="right"><div class="price">$710K</div><div class="ppsf">$204/sqft</div></div><span class="chev">›</span></div>
+    <div class="cbot"><div class="specs"><span class="sp"><span class="ic">▭</span>3,472 sqft</span><span class="sp"><span class="ic">◠</span>4 bd</span><span class="sp"><span class="ic">▤</span>3.5 ba</span></div>
+      <div class="match r"><span class="ml">Match</span><span class="mt"><span style="width:28%"></span></span><span class="mv">28</span></div></div>
+  </div>
+
+  <div class="comp">
+    <div class="crow"><span class="rk">#5</span>
+      <div class="bd"><div class="addr">3861 N Elston Ave</div><div class="meta"><span class="m"><span class="ic">⚲</span>0.64 mi</span><span class="m"><span class="ic">▦</span>Feb 2026 · 5 mo ago</span></div></div>
+      <div class="right"><div class="price">$1.25M</div><div class="ppsf">$96/sqft</div></div><span class="chev">›</span></div>
+    <div class="cbot"><div class="specs"><span class="sp"><span class="ic">▭</span>13,000 sqft</span><span class="sp"><span class="ic">◠</span>—</span><span class="sp"><span class="ic">▤</span>—</span></div>
+      <div class="match r"><span class="ml">Match</span><span class="mt"><span style="width:22%"></span></span><span class="mv">22</span></div></div>
+  </div>
+</div>
+</body>
+</html>

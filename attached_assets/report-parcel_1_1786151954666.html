@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .cls{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+
+  /* PIN lookup */
+  .pinbadge{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--good);margin-bottom:10px}
+  .pinbadge svg{width:14px;height:14px;stroke:var(--good);fill:none}
+  .pinrow{display:flex;gap:10px;margin-bottom:12px}
+  .pinput{flex:1;display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;padding:11px 15px;background:var(--paper);font-family:var(--mono);font-size:14px;color:var(--ink);letter-spacing:.02em}
+  .lookup{background:var(--indigo);color:#fff;border:0;border-radius:10px;padding:0 22px;font-size:13px;font-weight:600;cursor:pointer}
+  .pinmeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2)}
+  .pinmeta b{color:var(--ink);font-weight:600}
+  .pinmeta .sep{color:var(--line)}
+  .refresh{margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:600;color:var(--ink2);cursor:pointer}
+  .refresh svg{width:12px;height:12px;stroke:var(--ink2);fill:none}
+
+  /* snapshot — takeaway treatment (neutral facts, derived unit-mix) */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px;margin:16px 0 4px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+  .taket{font-family:var(--disp);font-size:20px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:8px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .cn.i .dt{background:var(--indigo)}
+  .cn b{color:var(--ink);font-weight:600}
+  .caveat{display:flex;gap:9px;align-items:flex-start;margin-top:12px;padding-top:12px;border-top:1px solid #dde1f6;font-size:11.5px;line-height:1.5;color:var(--ink2)}
+  .caveat svg{width:15px;height:15px;stroke:var(--cautionText);fill:none;flex:none;margin-top:1px}
+  .caveat b{color:var(--cautionText);font-weight:700}
+
+  .grouplbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:20px 0 11px;display:flex;align-items:center;gap:9px}
+  .grouplbl .yr{font-weight:500;color:var(--muted);letter-spacing:0;text-transform:none}
+
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .pt{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+  .pt .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .pt .v{font-size:15px;font-weight:600;color:var(--ink);line-height:1.2}
+  .pt .s{font-size:10.5px;color:var(--muted);margin-top:3px}
+
+  .foot{display:flex;align-items:center;gap:14px;margin-top:20px;flex-wrap:wrap}
+  .vbtn{display:inline-flex;align-items:center;gap:8px;background:var(--indigo);color:#fff;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;text-decoration:none}
+  .vbtn svg{width:14px;height:14px;stroke:#fff;fill:none}
+  .tlink{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--indigo);text-decoration:none}
+  .tlink svg{width:13px;height:13px;stroke:var(--indigo);fill:none}
+  .disc{font-size:11px;color:var(--muted);line-height:1.5;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Parcel Information · Cook County</span>
+      <span class="cls">Class 212 · Three- to Six-Flat</span></div>
+
+    <!-- PIN lookup -->
+    <div class="pinbadge"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>PIN auto-detected from address</div>
+    <div class="pinrow">
+      <div class="pinput">14-31-126-044-0000</div>
+      <button class="lookup">Look Up</button>
+    </div>
+    <div class="pinmeta">
+      <span>PIN <b>14-31-126-044-0000</b></span><span class="sep">·</span>
+      <span>Tax year <b>2026</b></span><span class="sep">·</span>
+      <span>Class <b>212</b> — Three- to Six-Flat</span>
+      <button class="refresh"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh</button>
+    </div>
+
+    <!-- snapshot (takeaway treatment) -->
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Snapshot</div>
+      <div class="taket">A 6-unit masonry three-flat+, built 1903 — configured as six matching 1BR / 1BA apartments.</div>
+      <div class="cn i"><span class="dt"></span><span><b>Six 1-bedroom units.</b> A classic six-flat — six matching 1-bed / 1-bath apartments.</span></div>
+      <div class="cn"><span class="dt"></span><span><b>5,760 SF building on a 2,400 SF lot</b> — full basement, no attic, masonry exterior.</span></div>
+      <div class="cn"><span class="dt"></span><span>Built <b>1903</b> (123 yrs) · <b>average</b> construction and condition per the county's 2026 assessment.</span></div>
+      <div class="caveat"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span><b>The active listing differs — needs confirmation.</b> The current listing describes a theater plus two 2-bed apartments, not a six-flat. A live listing usually reflects the property as it stands today, so the listing is likely the more accurate picture — verify against the county record before relying on these figures.</span></div>
+    </div>
+
+    <!-- parcel & structure -->
+    <div class="grouplbl">Parcel &amp; Structure</div>
+    <div class="g4">
+      <div class="pt"><div class="l">Land Size</div><div class="v">2,400 sq ft</div></div>
+      <div class="pt"><div class="l">Building Size</div><div class="v">5,760 sq ft</div></div>
+      <div class="pt"><div class="l">Building Type</div><div class="v">3 Story +</div></div>
+      <div class="pt"><div class="l">Use</div><div class="v">Multi-Family</div></div>
+      <div class="pt"><div class="l">Apartments</div><div class="v">Six</div></div>
+      <div class="pt"><div class="l">Age</div><div class="v">123 yrs</div><div class="s">built 1903</div></div>
+      <div class="pt"><div class="l">Basement</div><div class="v">Full</div></div>
+      <div class="pt"><div class="l">Attic</div><div class="v">None</div></div>
+    </div>
+
+    <!-- building characteristics -->
+    <div class="grouplbl">Building Characteristics <span class="yr">· assessment year 2026</span></div>
+    <div class="g3">
+      <div class="pt"><div class="l">Bedrooms</div><div class="v">6</div></div>
+      <div class="pt"><div class="l">Bathrooms</div><div class="v">6 full</div></div>
+      <div class="pt"><div class="l">Total Rooms</div><div class="v">24</div></div>
+      <div class="pt"><div class="l">Construction Quality</div><div class="v">Average</div></div>
+      <div class="pt"><div class="l">Exterior</div><div class="v">Masonry</div></div>
+      <div class="pt"><div class="l">Roof</div><div class="v">Shingle + Asphalt</div></div>
+      <div class="pt"><div class="l">Garage</div><div class="v">1 car</div></div>
+      <div class="pt"><div class="l">Heating</div><div class="v">Hot Water / Steam</div></div>
+      <div class="pt"><div class="l">Condition</div><div class="v">Average</div></div>
+    </div>
+
+    <div class="foot">
+      <a class="vbtn" href="#"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>Verify on Assessor Site</a>
+      <a class="tlink" href="#"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>View Tax Bill (Treasurer)</a>
+    </div>
+    <div class="disc">Data from the Cook County Open Data Portal may differ from the official Assessor website. Always verify details on the Assessor site for official records.</div>
+  </div>
+</div>
+</body>
+</html>

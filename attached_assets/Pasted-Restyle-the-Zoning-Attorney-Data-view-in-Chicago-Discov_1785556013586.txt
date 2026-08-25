@@ -1,0 +1,19 @@
+Restyle the "Zoning Attorney Data" view in Chicago Discovery to match our report design system. Front-end / styling only — do NOT change the ranking logic (both columns stay ranked by case count), the ARDC links' destinations, the data source, routing, or auth.
+
+Design tokens: JetBrains Mono for section titles / ward chips / rank numbers; Inter for body; --indigo:#2b3a9e, --indigoSoft:#ecedf9, --ink:#141414, --ink2:#565651, --muted:#8b8a84, --line:#eae8e2, --paper:#faf9f6.
+
+Two-column grid, align-items:start. Left card = "Top Attorneys by Ward"; right card = "Top Citywide Attorneys". Each card header is a single indigo icon + mono uppercase title + muted subtitle — one icon only, no bullet beside it.
+
+Rank numbers (#1, #2, #3…) render in indigo JetBrains Mono in both columns — not black, not grey.
+
+ARDC links render in --indigo, small, with a "↗" — not grey.
+
+Ward blocks (left): each ward is a --line-bordered rounded box. Header = an indigo-soft chip ("WARD 27" in indigo mono) followed by muted "N total cases". Each attorney row: indigo rank, bold name, indigo ARDC link, then right-aligned a neutral grey "N cases" pill (
+#f1efe9 background, --ink2 text) and, when present, the approval rate as small muted, uncolored text ("82% approved"). Approval rate is neutral context only — never green/red, never a colored badge, never the sort key.
+
+Citywide rows (right): indigo rank, bold name + indigo ARDC link on the top line; a muted sub-line with "N cases · N approved"; right-aligned a neutral grey "N% approved" pill (same 
+#f1efe9 neutral treatment — not green) and a muted "Last YYYY-MM-DD" beneath it.
+
+About box: --paper background, indigo icon + mono uppercase "ABOUT ZONING ATTORNEY DATA", body text: "Factual public records from Chicago Zoning Board of Appeals resolutions over the past 5 years — not endorsements, rankings of quality, or predictions of outcome. Self-represented cases are excluded. Attorneys with fewer than 2 cases are not shown. Approval rates are historical and shown only for attorneys with 5+ decided cases; a high rate reflects past case mix, not a guarantee."
+
+Do not add stars, colored win-rate badges, "best attorney" language, or any endorsement framing.

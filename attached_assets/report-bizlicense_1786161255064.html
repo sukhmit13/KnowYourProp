@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+  .sh .count b{color:var(--good)}
+
+  /* snapshot */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px;margin-bottom:16px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+  .taket{font-family:var(--disp);font-size:20px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:8px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .cn.g .dt{background:var(--good)}
+  .cn b{color:var(--ink);font-weight:600}
+
+  .intro{font-size:11.5px;color:var(--muted);margin-bottom:6px}
+
+  /* license rows */
+  .lrow{padding:14px 0;border-top:1px solid var(--line)}
+  .lrow:last-of-type{border-bottom:1px solid var(--line)}
+  .ltop{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:9px}
+  .lrow .nm{font-size:14px;font-weight:600;color:var(--ink)}
+  .lrow .dates{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+  .ltags{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .st{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 11px 4px 9px}
+  .st .d{width:7px;height:7px;border-radius:50%;flex:none}
+  .st.active{color:var(--good);background:var(--goodSoft)}.st.active .d{background:var(--good)}
+  .st.expired{color:var(--ink2);background:var(--paper);border:1px solid var(--line)}.st.expired .d{background:#9aa1b0}
+  .st.cancelled{color:var(--muted);background:var(--paper);border:1px solid var(--line)}.st.cancelled .d{background:#c4c3bd}
+  .ltype{font-size:11px;font-weight:500;color:var(--indigo);background:var(--indigoSoft);border-radius:7px;padding:4px 11px}
+  .flag{font-size:10.5px;color:var(--cautionText);display:inline-flex;align-items:center;gap:5px}
+  .flag svg{width:12px;height:12px;stroke:var(--cautionText);fill:none}
+
+  .caveat{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--ink2);line-height:1.5;margin-top:16px;padding:11px 14px;background:var(--card);border:1px solid #ecd49a;border-left:3px solid #e0a92e;border-radius:10px}
+  .caveat svg{width:14px;height:14px;stroke:var(--cautionText);fill:none;flex:none;margin-top:1px}
+  .caveat b{color:var(--cautionText);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Business License History</span>
+      <span class="count">3 total · <b>1 active</b></span></div>
+
+    <!-- SNAPSHOT -->
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Snapshot</div>
+      <div class="taket">A long run of small creative businesses — framing, photography, and a gallery — licensed here since 2004.</div>
+      <div class="cn g"><span class="dt"></span><span><b>One active today.</b> Accentric Custom Framing holds a Limited Business License through <b>2027</b>.</span></div>
+      <div class="cn"><span class="dt"></span><span>The others have lapsed — G&amp;R Photography and Audree Cameon Studio/Gallery are no longer operating. All were small, home-scale creative uses.</span></div>
+    </div>
+
+    <div class="intro">All business licenses ever issued at this address</div>
+
+    <div class="lrow">
+      <div class="ltop"><span class="nm">Accentric Custom Framing, Inc.</span><span class="dates">Sep 2008 – Nov 2027</span></div>
+      <div class="ltags"><span class="st active"><span class="d"></span>Active</span><span class="ltype">Limited Business License</span></div>
+    </div>
+    <div class="lrow">
+      <div class="ltop"><span class="nm">G &amp; R Photography</span><span class="dates">Jun 2004 – Nov 2009</span></div>
+      <div class="ltags"><span class="st expired"><span class="d"></span>Expired</span><span class="ltype">Limited Business License</span><span class="flag"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Record says "Active" — term ended 2009</span></div>
+    </div>
+    <div class="lrow">
+      <div class="ltop"><span class="nm">Audree Cameon Studio/Gallery</span><span class="dates">May 2004 – Nov 2006</span></div>
+      <div class="ltags"><span class="st cancelled"><span class="d"></span>Cancelled</span><span class="ltype">Limited Business License</span></div>
+    </div>
+
+    <div class="caveat"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span><b>Status shown reflects the license term dates.</b> One record (G&amp;R Photography) is flagged "Active" in city data but its term ended in 2009 — treated as expired here. City license status fields can lag; verify current standing with the City of Chicago before relying on it.</span></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--caution:#f0a41c;--cautionText:#96600a;--bad:#d13b26;--badText:#b3311f;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:32px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .glabel{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:13px}
+  .glabel .sc{font-weight:500;color:var(--muted);letter-spacing:0;text-transform:none}
+
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .lvl{border:1px solid var(--line);border-radius:13px;padding:16px 18px;background:var(--card);box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .lvltop{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+  .lvltop .ic{width:26px;height:26px;border-radius:7px;background:var(--indigoSoft);display:flex;align-items:center;justify-content:center;flex:none}
+  .lvltop .ic svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+  .lvltop .nm{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+  .lvltop .badge{margin-left:auto}
+
+  /* shared favorability badge */
+  .badge{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 9px;background:var(--card);border:1px solid;white-space:nowrap}
+  .badge .d{width:7px;height:7px;border-radius:50%;flex:none}
+  .badge.good{color:var(--good);border-color:#bcdcc4} .badge.good .d{background:var(--good)}
+  .badge.mixed{color:var(--cautionText);border-color:#ecd49a} .badge.mixed .d{background:var(--caution)}
+  .badge.limited{color:var(--badText);border-color:#eab5ac} .badge.limited .d{background:var(--bad)}
+
+  .metric{display:flex;align-items:baseline;gap:7px;margin-bottom:3px}
+  .metric .big{font-family:var(--disp);font-size:30px;line-height:1;color:var(--ink)}
+  .metric .u{font-size:12px;color:var(--ink2)}
+  .closest{font-size:11.5px;color:var(--muted);margin-bottom:14px}
+  .closest b{color:var(--ink2);font-weight:600}
+
+  .assigned{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .assigned .al{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .assigned .an{font-size:13px;font-weight:600;color:var(--ink);line-height:1.25}
+  .assigned .am{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--ink2);margin-top:6px}
+  .assigned .am .rd{width:7px;height:7px;border-radius:50%;flex:none}
+  /* CPS level → favorability: 1+/1 good, 2+ neutral, 2 caution, 3 bad */
+  .rd.lv-good{background:var(--good)} .rd.lv-neu{background:#9aa1b0} .rd.lv-cau{background:var(--caution)} .rd.lv-bad{background:var(--bad)}
+  .am .lvtxt{font-weight:600}
+  .am.good .lvtxt{color:var(--good)} .am.neu .lvtxt{color:var(--ink2)} .am.cau .lvtxt{color:var(--cautionText)} .am.bad .lvtxt{color:var(--badText)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="glabel">Schools at a Glance <span class="sc">· within 1.5 mi</span></div>
+  <div class="cards">
+
+    <div class="lvl">
+      <div class="lvltop"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 2 6 2s6-1 6-2v-5"/></svg></span><span class="nm">Elementary · K–8</span><span class="badge good"><span class="d"></span>Strong</span></div>
+      <div class="metric"><span class="big">6</span><span class="u">schools nearby</span></div>
+      <div class="closest">Closest — <b>CICS – Bucktown</b> · 0.17 mi</div>
+      <div class="assigned">
+        <div class="al">Assigned · Boundary</div>
+        <div class="an">Pulaski International School of Chicago</div>
+        <div class="am good"><span class="rd lv-good"></span><span class="lvtxt">Level 1+</span> · 0.21 mi</div>
+      </div>
+    </div>
+
+    <div class="lvl">
+      <div class="lvltop"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 2 6 2s6-1 6-2v-5"/></svg></span><span class="nm">High School</span><span class="badge mixed"><span class="d"></span>Mixed</span></div>
+      <div class="metric"><span class="big">4</span><span class="u">schools nearby</span></div>
+      <div class="closest">Closest — <b>Louisa May Alcott College Prep HS</b> · 1.09 mi</div>
+      <div class="assigned">
+        <div class="al">Assigned · Boundary</div>
+        <div class="an">Roberto Clemente Community Academy HS</div>
+        <div class="am cau"><span class="rd lv-cau"></span><span class="lvtxt">Level 2</span> · 1.25 mi</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

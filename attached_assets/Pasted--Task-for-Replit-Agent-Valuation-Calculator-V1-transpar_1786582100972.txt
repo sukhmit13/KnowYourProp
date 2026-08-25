@@ -1,0 +1,115 @@
+# Task for Replit Agent — Valuation Calculator V1: transparent NOI + Simple/Advanced + mode scaffold
+
+## Why (the bug this fixes)
+NOI is currently a single typed number ("Net — taxes & insurance already deducted"). It nets **only taxes and insurance** and skips vacancy, management, repairs, utilities, and reserves — which **overstates NOI and inflates every downstream metric.** On 1551 W Division it produces a **15% cap rate** (no West Town 4-flat caps that high — it's the missing expenses). V1 makes NOI a transparent, editable build-up so the number is trustworthy, and adds the two-knob structure (mode / tier) with Investor mode built.
+
+Visual targets (render these): **report-calc-integrated.html** (placement + flow), **report-calc-tiers.html** (Simple/Advanced), **report-noi-transparent.html** (the full statement). Reuse the app's existing card CSS.
+
+## Scope of V1
+- **Investor / buy-to-lease mode only.** Build the transparent NOI. Owner-occupant/SBA and Tenant/leasing modes are **V2** (separate spec) — but scaffold the mode control now (below).
+- **Simple + Advanced tiers**, which are the collapsed/expanded views of ONE model (not two calculators).
+
+---
+
+## 1. Placement — a new Step 3 in the existing flow
+Keep the current numbered steps; insert one:
+```
+1 Enter the Deal   2 Deal at a Glance   3 Income → NOI (NEW)   4 Coverage Check   5 How it's Calculated
+```
+Step 3 is the **income-side mirror of Coverage Check** — same "show your work" pattern. It sits right before Coverage Check.
+
+**Step 1 change:** the Operating Income column's NOI stops being a typed field. It becomes a **computed result** (from Step 3) shown as a summary with a "see breakdown ↓" link. (Manual override: see §5.)
+
+## 2. The transparent NOI model (the core)
+NOI is built, never typed:
+```
+INCOME
+  Residential rent          units × rent (from parcel; market or actual per NOI Basis)   [editable]
+  Commercial rent           ONLY if property class is mixed/commercial (see §4)          [editable]
+  Other income              parking/laundry/storage — optional                           [editable]
+  − Vacancy & credit loss   default 5% residential / 10% commercial                      [editable]
+  = Effective Gross Income (EGI)
+OPERATING EXPENSES  (ALL present, ALL editable, each source-tagged)
+  − Property taxes          [from record]
+  − Insurance               [estimate — clearly labeled editable]
+  − Property management     default 6% of EGI (imputed even if self-managed)
+  − Repairs & maintenance   [estimate]
+  − Utilities (owner-paid)  [estimate]
+  − Replacement reserves    default $250/unit/yr
+  = Total operating expenses
+NOI = EGI − Total operating expenses
+```
+- **Source tags on every line:** `from record` (taxes), `estimate · edit` (insurance, R&M, utilities), `from parcel` (rents), `assumption · edit` (vacancy, management, reserves).
+- Editing any line recomputes NOI (and everything downstream) live.
+
+## 3. Simple vs Advanced — same model, different dials (TIER)
+A header toggle. **Both tiers use the identical full-expense model.**
+- **Simple (default):** Step 3 renders **collapsed** — the NOI result + a chip row of the assumptions used ("taxes from record · insurance est · 5% vacancy · 6% mgmt · R&M · reserves") + an "Edit assumptions → Advanced" link. No per-line editing.
+- **Advanced:** Step 3 renders **expanded** — the full statement, every line editable.
+- 🔴 **Simple must never revert to "rent − taxes − insurance."** It is the full model with lines hidden behind defaults, not a lighter calculation. The NOI is identical in both tiers.
+
+## 4. Auto-detect income lines from property composition
+Do NOT ask the user the property type — infer it:
+- **Cook County property class** (primary) + parcel data → residential / mixed / commercial.
+  - Residential class → residential rent line only, **no commercial line**.
+  - Mixed/commercial class → **add** the Commercial rent line.
+- **Zoning is NOT the composition source** (it says what's *allowed*, not what *exists*) — use it only for a validation flag.
+
+## 5. Mode control (SCAFFOLD in V1; only Investor functional)
+A header control (segmented): **Investor · buy-to-lease | Owner-occupant · SBA | Tenant · leasing**.
+- **V1 builds Investor only.** Render the other two as visibly present but "Coming soon" (disabled), so the structure is in place. (V2 implements them.)
+- **Default the mode from the funnel's intended use**; **default the tier from funnel completeness** (filled the deal inputs → Advanced; skipped → Simple). Show a one-line "Defaulted from your project type: … · Change" and make both controls override in one click.
+- **NOI manual override (Advanced only):** allow "enter NOI directly" as an escape for a user pasting a real T-12 — but render a clear **"manual — not from the lines"** state so it's obvious the breakdown isn't driving it. Default is the computed build-up.
+
+## 6. 🔴 One NOI, everywhere
+NOI is computed **once** in Step 3 and read by: Step 1's Operating Income summary, Deal at a Glance (cap rate, DSCR, cash flow), Coverage Check ("Your NOI"), and How it's Calculated. They must **never** show different NOIs. (Same one-resolved-value discipline as the debt-snapshot work.)
+
+## 7. Two DSCR conventions — show both
+Lenders measure debt coverage two ways; show both so a user isn't blindsided when a broker quotes a different number. Visual target: **report-dscr-both.html**.
+- **Economic DSCR** = `NOI ÷ annual debt service` (full operating expenses). The honest, true-cash-flow read; how commercial / portfolio / 5+ unit lenders underwrite. **This is the primary/headline DSCR** in Deal at a Glance. Typical floor 1.25×.
+- **DSCR-loan ratio** = `gross market rent ÷ PITIA`, where **PITIA = P&I + property taxes + insurance + HOA**. Skips vacancy, management, and reserves; what a **1–4 unit non-QM DSCR-loan** lender quotes. Typical floor 1.0–1.25×.
+- **Deal at a Glance:** DSCR tile shows the **economic** number as primary (labeled "Economic — full operating expenses"), with the **DSCR-loan ratio beneath** as a secondary line ("DSCR-loan (1–4 unit): 2.04 · rent ÷ PITIA").
+- **Coverage Check (Step 4):** show both conventions spelled out — name, who-uses-it tag, the formula with real values, the result, and its floor/pass — plus a one-line "both clear / here's which is the term-sheet number" summary.
+- 🔴 **One source, two ratios:** PITIA's taxes & insurance reuse the **same values from the NOI statement** (§2) — don't re-enter or re-estimate them. Gross market rent = the residential-rent line before vacancy. Both ratios recompute live with the inputs.
+- Show the DSCR-loan ratio only for property types where the product applies (1–4 unit); for larger/commercial, economic DSCR alone is fine (note the product doesn't apply).
+
+## 8. Flags (surface, don't block)
+- **Property taxes may reassess on sale** — Cook County resets assessed value on transfer; the current bill can understate a buyer's taxes. Note on the taxes line.
+- **Unusually high cap rate** — if cap rate exceeds ~10%, show "verify your rent and expenses — a cap this high usually means an assumption is off." (This is what would have caught 1551.)
+- **Rent basis** — label whether residential rent is *market* or *actual* (reuse the existing NOI Basis control).
+
+## 9. Do NOT (V1)
+- Do not build Owner-occupant/SBA or Tenant/leasing math (V2) — scaffold the control only.
+- Do not change the structure of Deal at a Glance / Coverage Check / How it's Calculated — they consume NOI unchanged; they just receive the corrected (lower, honest) number.
+
+## 🔴 Tests
+```
+// accuracy
+assert NOI = EGI − (taxes + insurance + management + R&M + utilities + reserves), NOT rent − taxes − insurance
+assert vacancy defaults 5% resi / 10% commercial; management defaults 6% of EGI and is present even when self-managed
+assert every income & expense line has an editable value and a source tag; insurance is labeled an estimate
+assert editing any line recomputes NOI, cap rate, DSCR, cash flow live
+// tiers
+assert Simple and Advanced produce the IDENTICAL NOI for the same inputs
+assert Simple shows the NOI result + assumptions chips (no per-line edit); Advanced shows the full editable statement
+assert Simple never computes NOI as rent − taxes − insurance
+// composition
+assert residential-class parcel shows NO commercial rent line; mixed/commercial class shows one
+// mode scaffold
+assert the mode control renders Investor (active) + Owner-occupant/Tenant (disabled "coming soon")
+assert mode defaults from funnel intended-use; tier defaults from funnel completeness; both overridable in the header
+// one-NOI + flags
+assert Step 1 summary, Deal at a Glance, Coverage Check, and How it's Calculated all read the SAME NOI value
+assert a cap rate > ~10% surfaces the "verify rent & expenses" flag
+assert the property-taxes line shows the "may reassess on sale" note
+// two DSCR conventions
+assert Economic DSCR == NOI ÷ annual debt service; DSCR-loan ratio == gross rent ÷ PITIA (P&I + taxes + insurance + HOA)
+assert PITIA's taxes & insurance equal the same values used in the NOI statement (one source, not re-entered)
+assert Deal at a Glance shows economic DSCR as primary with the DSCR-loan ratio as a secondary line
+assert the DSCR-loan ratio is shown only for 1–4 unit property (hidden/na for larger/commercial)
+// regression
+assert 1551 (4-unit) with full opex yields cap rate materially below 15% and DSCR below 2.42, and the Glance verdict updates accordingly
+```
+
+## Done when
+Step 3 "Income → NOI" renders the transparent build-up (Simple = collapsed result + assumptions; Advanced = full editable statement — same NOI), the commercial line appears only for mixed/commercial property class, the mode control is scaffolded with Investor built, funnel sets the defaults, one NOI feeds every downstream step, and 1551's cap rate drops from the fake 15% to an honest figure with the verdict updating to match. No black-box NOI anywhere.

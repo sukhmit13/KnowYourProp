@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--bad:#d13b26;
+    --caution:#f0a41c;--cautionText:#96600a;--prestige:#1c1b1a;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .subwrap[id]{scroll-margin-top:90px}
+
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+
+  /* major takeaway */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px 17px;margin-bottom:20px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo);margin-bottom:12px}
+  .takeh svg{width:15px;height:15px;stroke:var(--indigo)}
+  .taket{font-family:var(--disp);font-size:21px;line-height:1.28;color:var(--ink);margin-bottom:14px}
+  /* bullet row: dot (top) + text (flex) + jump chip pinned FAR RIGHT, vertically centered */
+  .cn{display:flex;align-items:flex-start;gap:11px;padding:10px 0;font-size:13px;line-height:1.5;color:var(--ink2)}
+  .cn + .cn{border-top:1px solid #e3e5f4}
+  .cn .dt{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .cn.g .dt{background:var(--good)}
+  .cn.i .dt{background:var(--indigo)}
+  .cn.c .dt{background:var(--caution)}
+  .cn b{color:var(--ink);font-weight:600}
+  .cn .tx{flex:1}
+  .jump{flex:none;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid #dde1f6;border-radius:8px;padding:6px 11px;white-space:nowrap}
+  .jump svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+
+  /* subsection header */
+  .subwrap{margin-top:24px}
+  .ssh{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+  .ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+  .ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+  .ssh .rad{font-family:var(--mono);font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .ssh .chip{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--indigo);background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:6px;padding:3px 8px}
+  .ssline{height:1px;background:var(--line);margin-bottom:6px}
+
+  /* list rows */
+  .row{padding:13px 0;border-top:1px solid var(--line)}
+  .row:first-of-type{border-top:none}
+  .rtop{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .rnm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .rnm .name{font-size:14px;font-weight:600;color:var(--ink)}
+  .dist{font-family:var(--mono);font-size:10.5px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 8px;white-space:nowrap}
+  .meta{font-size:12px;color:var(--muted);margin-top:4px}
+  .addr{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+  /* award badges — dark "prestige", NOT status red */
+  .aw{font-family:var(--sans);font-size:10.5px;font-weight:600;border-radius:999px;padding:3px 10px;white-space:nowrap}
+  .aw.bib{background:var(--prestige);color:#fff}
+  .aw.jb{background:var(--prestige);color:#fff}
+  .aw.sel{background:var(--card);color:var(--ink2);border:1px solid #cfccc4}
+  .aw.mich{background:var(--card);color:var(--muted);border:1px solid var(--line);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+  .yr{font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+
+  .src{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:10px}
+  .more{font-size:11.5px;color:var(--indigo);text-decoration:none;font-weight:600;display:inline-block;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Entertainment &amp; Culture</span>
+      <span class="count">10 Michelin · 1 James Beard · 4 murals</span></div>
+
+    <!-- MAJOR TAKEAWAY -->
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Takeaway</div>
+      <div class="taket">This is a destination dining-and-arts corridor — an unusually dense cluster of acclaimed restaurants, plus murals, landmarks and a gallery, all within a mile.</div>
+      <div class="cn g"><span class="dt"></span><span class="tx"><b>Dining is the standout.</b> Ten Michelin Guide restaurants sit within a mile — seven of them Bib Gourmand (the guide's great-value pick) — and Lula Cafe, 0.47 mi away, won a <b>2024 James Beard "Outstanding Hospitality"</b> award. That's a bona-fide food destination, not just a few good spots.</span><a class="jump" href="#michelin">Restaurants <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+      <div class="cn i"><span class="dt"></span><span class="tx"><b>Culture beyond the table.</b> Four registered public murals within a half-mile, several architectural landmarks (a 1924 bank, a 1905 church, a Prairie-School house), and an art studio next door at 0.12 mi round out an established creative neighborhood.</span><a class="jump" href="#murals">Culture <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+      <div class="cn i"><span class="dt"></span><span class="tx"><b>What it means for the property.</b> This level of dining and culture is a real desirability and foot-traffic driver — a plus for residential appeal and for retail, hospitality or service uses. The trade-off of a dining hub is evening activity and parking pressure on the busiest blocks.</span></div>
+    </div>
+
+    <!-- MICHELIN RESTAURANTS -->
+    <div class="subwrap" id="michelin">
+      <div class="ssh"><svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2s2-.9 2-2V2"/><path d="M5 11v11"/><path d="M13 2v20"/><path d="M13 8c0-3 1.8-6 4-6v20"/></svg><span class="t">Michelin Guide Restaurants</span><span class="rad">within 1 mi</span><span class="chip">10 recognized</span></div>
+      <div class="ssline"></div>
+
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">Longman &amp; Eagle</span><span class="aw bib">Bib Gourmand</span></div><span class="dist">0.35 mi</span></div><div class="meta">Gastropub · $$ · Palmer Square</div><div class="addr">2657 N Kedzie Ave</div></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">Superkhana International</span><span class="aw bib">Bib Gourmand</span></div><span class="dist">0.43 mi</span></div><div class="meta">Indian · $$ · Maplewood</div><div class="addr">3059 W Diversey Ave</div></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">Lula Cafe</span><span class="aw bib">Bib Gourmand</span><span class="aw jb">James Beard</span></div><span class="dist">0.47 mi</span></div><div class="meta">American · $$ · Logan Square</div><div class="addr">2537 N Kedzie Blvd</div></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">Cellar Door Provisions</span><span class="aw bib">Bib Gourmand</span></div><span class="dist">0.49 mi</span></div><div class="meta">Mediterranean · $$ · Maplewood</div><div class="addr">3025 W Diversey Ave</div></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">Andros Taverna</span><span class="aw sel">Selected</span></div><span class="dist">0.56 mi</span></div><div class="meta">Greek · $$$ · Palmer Square</div><div class="addr">2542 N Milwaukee Ave</div></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">Warlord</span><span class="aw sel">Selected</span></div><span class="dist">0.71 mi</span></div><div class="meta">American Contemporary · $$$$ · Avondale</div><div class="addr">3198 N Milwaukee Ave</div></div>
+
+      <a class="more" href="#">Show all 10 within 1 mile →</a>
+      <div class="src">Source: Michelin Guide Chicago</div>
+    </div>
+
+    <!-- JAMES BEARD -->
+    <div class="subwrap">
+      <div class="ssh"><svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 0 12 0V4H6z"/><path d="M6 5H4a2 2 0 0 0 0 4h2"/><path d="M18 5h2a2 2 0 0 1 0 4h-2"/><path d="M12 15v4"/><path d="M8 22h8"/><path d="M10 19h4"/></svg><span class="t">James Beard Award Winners</span><span class="rad">within 1 mi</span><span class="chip">1 winner</span></div>
+      <div class="ssline"></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">Lula Cafe</span><span class="aw jb">Outstanding Hospitality · 2024</span></div><span class="dist">0.47 mi</span></div><div class="meta">American · $$ · Logan Square</div><div class="addr">2537 N Kedzie Blvd</div></div>
+      <div class="src">Source: James Beard Foundation</div>
+    </div>
+
+    <!-- MURALS -->
+    <div class="subwrap" id="murals">
+      <div class="ssh"><svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-.9-.5-1.3-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H16a5 5 0 0 0 5-5c0-5-4-9-9-9z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="10.5" r="1"/></svg><span class="t">Registered Murals</span><span class="rad">within 0.5 mi</span><span class="chip">4 murals</span></div>
+      <div class="ssline"></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">The Blue Goose Mural</span><span class="yr">2020</span></div><span class="dist">0.15 mi</span></div><div class="meta">by David Orozco</div><div class="addr">2901–03 N Milwaukee Ave</div></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">Altered Translation</span><span class="yr">2017</span></div><span class="dist">0.17 mi</span></div><div class="meta">by James Jankowiak · Paint</div><div class="addr">2912 N Milwaukee Ave</div></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">Logan</span><span class="yr">2019</span></div><span class="dist">0.17 mi</span></div><div class="meta">by Justus Roe · Acrylic &amp; exterior latex · abstract landscape</div><div class="addr">2827 N Spaulding Ave</div></div>
+      <div class="src">Source: Chicago Mural Registry (City of Chicago Data Portal)</div>
+    </div>
+
+    <!-- LANDMARKS -->
+    <div class="subwrap" id="landmarks">
+      <div class="ssh"><svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10"/><path d="M9 21V10"/><path d="M15 21V10"/><path d="M19 21V10"/><path d="m3 10 9-7 9 7"/><path d="M3 10h18"/></svg><span class="t">Architectural Landmarks</span><span class="rad">within 1 mi</span><span class="chip">4 landmarks</span></div>
+      <div class="ssline"></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">(Former) Kimbell Trust &amp; Savings Bank Bldg</span><span class="yr">Built 1924</span></div><span class="dist">0.57 mi</span></div><div class="meta">Architect: William Gibbons Uffendell · Designated 2008</div><div class="addr">3600 W Fullerton Ave</div></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">Episcopal Church of the Advent &amp; Parish House</span><span class="yr">Built 1905–06</span></div><span class="dist">0.71 mi</span></div><div class="meta">Architect: Elmer C. Jensen · Designated 2018</div><div class="addr">2900 W Logan Blvd</div></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">John Rath House</span><span class="yr">Built 1907</span></div><span class="dist">0.97 mi</span></div><div class="meta">Architect: George W. Maher (Prairie School) · Designated 1993</div><div class="addr">2703 W Logan Blvd</div></div>
+      <a class="more" href="#">Show all 4 within 1 mile →</a>
+      <div class="src">Source: Chicago Landmarks (City of Chicago Data Portal)</div>
+    </div>
+
+    <!-- GALLERIES -->
+    <div class="subwrap">
+      <div class="ssh"><svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-4.5-4.5L6 21"/></svg><span class="t">Art Galleries</span><span class="rad">within 1 mi</span><span class="chip">1 · 0.12 mi</span></div>
+      <div class="ssline"></div>
+      <div class="row"><div class="rtop"><div class="rnm"><span class="name">Pinot's Palette Logan Square</span><span class="aw mich">License · Renewal</span></div><span class="dist">0.12 mi</span></div><div class="meta">Licensed Feb 15, 2026</div><div class="addr">2768 N Milwaukee Ave, 1st</div></div>
+      <div class="src">Source: City of Chicago Business Licenses (Sale of Art)</div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

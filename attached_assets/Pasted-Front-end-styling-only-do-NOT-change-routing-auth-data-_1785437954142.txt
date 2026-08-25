@@ -1,0 +1,25 @@
+Front-end / styling only — do NOT change routing, auth, data, or business logic.
+
+Redesign the New Business Licenses and Area Crime Statistics sections to match the attached report-viz2.html, using the existing design tokens (Instrument Serif display, Inter body, JetBrains Mono labels, deep indigo 
+#2b3a9e, cream, hairline 
+#eae8e2) and the shared section-header + stat-tile components already in the report.
+
+New Business Licenses:
+
+Remove the four count boxes with arbitrary colored numbers. Replace them with a ranked horizontal bar list of license types, sorted descending (Retail Food 24, Liquor/Tavern 9, Art Gallery 2, Entertainment 1): label left, single-indigo bar (
+#3f51c5) on a light track (
+#efeee9, 4px rounded ends), count right-aligned in tabular figures. Bars scale to the largest value. Add a hover tooltip per bar.
+Add a one-line plain-English takeaway under the header (e.g. "a food-and-drink corridor: retail food and liquor lead").
+Keep the recent-openings list below, cleaned up: a small indigo dot, business name in ink weight 600, then address · type · issued date in muted gray, with the distance in a small mono pill on the right.
+
+Area Crime Statistics:
+
+Put a small red status badge in the section header (
+#d13b26 text on 
+#fbecea fill, with a ⚠ icon and the words "High crime · safer than 6% of areas") — status must include the label, never color alone.
+Two stat tiles using the shared tile component: "Within 250 ft" → 2 (qualifier "Assault 1 · Theft 1"), "Within ¼ mile" → 405 (qualifier "Last 12 months").
+Replace the crime-type chip list with a ranked horizontal bar list for the ¼-mile crimes, sorted descending (Theft 235, Motor vehicle theft 36, Deceptive practice 26, Battery 23, Criminal damage 20, Burglary 15): single muted-red bars (
+#c34a39) on a light track, count right-aligned, hover tooltip per bar. Bars scale to the largest value (Theft).
+Add a one-line takeaway (e.g. "Theft accounts for more than half of nearby incidents").
+
+Match spacing, radii, and borders to the mockup.

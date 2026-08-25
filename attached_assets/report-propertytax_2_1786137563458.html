@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;--bad:#d13b26;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04);margin-bottom:20px}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 9px;background:var(--card);border:1px solid #bcdcc4;color:var(--good)}
+  .sh .badge .d{width:7px;height:7px;border-radius:50%;background:var(--good)}
+
+  /* takeaway */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+  .taket{font-family:var(--disp);font-size:20px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+  .cn{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.5;color:var(--ink2);padding:8px 0;border-top:1px solid #dde1f6}
+  .cn:first-of-type{border-top:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+  .cn.g .dt{background:var(--good)}.cn.c .dt{background:var(--caution)}.cn.n .dt{background:#9aa1b0}
+  .cn .txt{flex:1}
+  .cn b{color:var(--ink);font-weight:600}
+  .jump{flex:none;margin-top:1px;display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);background:var(--card);border:1px solid #dfe3f7;border-radius:7px;padding:4px 9px;text-decoration:none;white-space:nowrap}
+  .jump svg{width:10px;height:10px;stroke:var(--indigo);fill:none}
+  .cardbox[id]{scroll-margin-top:90px}
+
+  /* tax bill */
+  .bill{border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .billtop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+  .billtop .big{font-family:var(--disp);font-size:34px;line-height:1;color:var(--ink)}
+  .billtop .sub{font-size:11.5px;color:var(--ink2);margin-top:6px}
+  .billtop .note{font-size:11px;color:var(--muted);margin-top:3px;font-style:italic}
+  .brow{display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:14px;padding:11px 0;border-top:1px solid var(--line);font-size:12.5px}
+  .brow:first-of-type{margin-top:12px}
+  .brow .yr{font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .brow .tg{font-family:var(--mono);font-size:8.5px;font-weight:700;color:var(--indigo);background:var(--indigoSoft);border-radius:5px;padding:2px 6px;letter-spacing:.03em}
+  .brow .chg{font-size:11px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+  .brow .amt{font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+  .brow .paid{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--good);background:var(--goodSoft);border-radius:5px;padding:3px 8px;letter-spacing:.03em}
+  .blink{display:inline-flex;align-items:center;gap:6px;margin-top:13px;font-size:12px;font-weight:500;color:var(--indigo);text-decoration:none}
+  .blink svg{width:13px;height:13px;stroke:var(--indigo)}
+
+  /* assessed tiles */
+  .atiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:18px}
+  .atile{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+  .atile .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .atile .n{font-family:var(--disp);font-size:26px;line-height:1;color:var(--ink)}
+  .atile .s{font-size:10.5px;color:var(--muted);margin-top:6px}
+  .atile .bd{font-size:11.5px;color:var(--ink2);margin-top:2px}.atile .bd span{color:var(--muted)}
+
+  .subh{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:0 0 12px}
+  .chart{border:1px solid var(--line);border-radius:11px;padding:14px 16px 10px}
+  .legend{display:flex;gap:16px;justify-content:center;margin-top:8px}
+  .lg{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--ink2)}
+  .lg .ln{width:16px;height:3px;border-radius:2px}
+  .note2{font-size:10.5px;color:var(--muted);margin-top:12px}
+
+  /* exemptions */
+  .exnote{font-size:12.5px;color:var(--ink2);margin-bottom:14px}
+  .exgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ex{border:1px solid var(--line);border-radius:11px;padding:12px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .ex .nm{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .ex .rd{font-size:11.5px;color:var(--indigo);font-weight:500;margin-top:3px}
+  .ex .el{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .ex .st{font-family:var(--mono);font-size:8px;font-weight:700;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:3px 7px;white-space:nowrap;letter-spacing:.03em}
+  .exsrc{font-size:11px;color:var(--muted);margin-top:13px}.exsrc a{color:var(--indigo);text-decoration:none;font-weight:500}
+
+  /* appeals */
+  .appeal{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  .apptop{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+  .apptop .y{font-size:13px;font-weight:700;color:var(--ink)}
+  .apptop .bd{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.03em;border-radius:5px;padding:3px 8px}
+  .apptop .bd.dec{color:var(--good);background:var(--goodSoft)}
+  .apptop .bd.nc{color:var(--ink2);background:var(--paper);border:1px solid var(--line)}
+  .apptop .rs{font-size:11px;color:var(--muted)}
+  .appgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .av .l{font-size:10px;color:var(--muted);margin-bottom:3px}
+  .av .v{font-size:15px;font-weight:600;color:var(--ink)}
+  .av .v .red{font-size:12px;color:var(--good);font-weight:600;margin-left:6px}
+  .av .sub{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .appft{font-size:10.5px;color:var(--muted);margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+  .appft b{color:var(--ink2);font-weight:600}
+
+  /* tax appeal attorney summary card */
+  .tacard{border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+  .tatop{display:flex;align-items:center;gap:12px}
+  .taav{width:40px;height:40px;border-radius:10px;background:var(--indigoSoft);display:flex;align-items:center;justify-content:center;flex:none;font-family:var(--disp);font-size:19px;color:var(--indigo)}
+  .tawho .nm{font-size:15px;font-weight:600;color:var(--ink)}
+  .tawho .role{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .tarec{margin-left:auto;text-align:right}
+  .tarec .big{font-family:var(--disp);font-size:26px;line-height:1;color:var(--ink)}
+  .tarec .big b{color:var(--good);font-weight:400}
+  .tarec .lab{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+  .tawl{display:flex;height:9px;border-radius:999px;overflow:hidden;margin:14px 0 9px;gap:3px}
+  .tawl .win{background:var(--good);border-radius:999px}
+  .tawl .no{background:#dcdbd4;border-radius:999px}
+  .tafoot{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;font-size:11.5px;color:var(--ink2)}
+  .tafoot .b{color:var(--ink);font-weight:600}.tafoot .sep{color:var(--line)}
+  .tayl{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--good);background:var(--goodSoft);border-radius:5px;padding:2px 7px}
+  .tadisc{font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:14px}
+  .tadisc a{color:var(--indigo);text-decoration:none;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- PROPERTY TAX (parent) -->
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Property Tax</span><span class="badge"><span class="d"></span>Taxes current</span></div>
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>The Takeaway</div>
+      <div class="taket">Taxes are current, but the bill is climbing — and the assessment has been actively appealed almost every year.</div>
+      <div class="cn g"><span class="dt"></span><span class="txt"><b>Paid and current.</b> The 2025 1st installment is <b>$12,066</b>; full-year will land near <b>$24k</b> once the 2nd bills (2024 was $21,940).</span><a class="jump" href="#bill">Tax Bill <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+      <div class="cn c"><span class="dt"></span><span class="txt"><b>The bill is up ~9%, but the assessment isn't.</b> 2025's assessed value held flat at <b>$108,835</b> — unchanged from 2024's post-appeal figure. This year's higher bill is <b>rate-driven</b>.</span><a class="jump" href="#assess">Assessed Value <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+      <div class="cn n"><span class="dt"></span><span class="txt"><b>Actively appealed.</b> The owner has won reductions in <b>4 of the last 8 years</b> through the same tax attorney — the lever that's kept the assessment in check.</span><a class="jump" href="#appeal">Appeal History <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+      <div class="cn n"><span class="dt"></span><span class="txt"><b>No exemptions on file</b>, consistent with a non-owner-occupied / investment use.</span><a class="jump" href="#exempt">Exemptions <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+    </div>
+  </div>
+
+  <!-- TAX BILL -->
+  <div class="cardbox" id="bill">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="t">Property Tax Bill</span></div>
+    <div class="bill">
+      <div class="billtop"><div><div class="big">$12,066.72</div><div class="sub">Tax Year 2025 · 1st installment only</div><div class="note">2nd installment not yet billed — full-year total will be higher.</div></div></div>
+      <div class="brow"><span class="yr">2025 <span class="tg">1st inst.</span></span><span class="chg">+9.3% vs prior 1st</span><span class="amt">$12,066.72</span><span class="paid">Paid</span></div>
+      <div class="brow"><span class="yr">2024</span><span class="chg">+9.3% · $11,039 + $10,900</span><span class="amt">$21,939.50</span><span class="paid">Paid</span></div>
+      <div class="brow"><span class="yr">2023</span><span class="chg">$10,760 + $9,311</span><span class="amt">$20,071.23</span><span class="paid">Paid</span></div>
+      <a class="blink" href="#"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>Full details at Cook County Treasurer</a>
+    </div>
+  </div>
+
+  <!-- ASSESSED VALUE -->
+  <div class="cardbox" id="assess">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="t">2025 Assessed Value</span></div>
+    <div class="atiles">
+      <div class="atile"><div class="l">Assessed Total</div><div class="n">$108,835</div><div class="s">assessed at 10% of market</div></div>
+      <div class="atile"><div class="l">Est. Market Value</div><div class="n">$1,088,350</div><div class="s">implied full value</div></div>
+      <div class="atile"><div class="l">Breakdown</div><div class="bd">Land <b style="color:var(--ink)">$20,880</b></div><div class="bd">Building <b style="color:var(--ink)">$87,955</b></div></div>
+    </div>
+    <div class="subh">Assessment Value Trend · last 20 years</div>
+    <div class="chart">
+      <svg viewBox="0 0 600 150" style="width:100%;height:160px">
+        <g stroke="#efeee9" stroke-width="1"><line x1="0" y1="25" x2="600" y2="25"/><line x1="0" y1="63" x2="600" y2="63"/><line x1="0" y1="101" x2="600" y2="101"/></g>
+        <!-- total (blue, prominent) -->
+        <polyline fill="none" stroke="#2f6fd0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+          points="0,58 32,56 63,57 95,68 126,74 158,80 189,82 221,80 252,64 284,62 315,60 347,58 378,56 410,66 441,40 473,34 504,36 536,26 568,24 600,23"/>
+        <!-- building (orange) -->
+        <polyline fill="none" stroke="#e07b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          points="0,74 32,72 63,73 95,82 126,88 158,93 189,95 221,93 252,80 284,78 315,76 347,74 378,72 410,80 441,56 473,50 504,52 536,42 568,40 600,39"/>
+        <!-- land (green, dashed) -->
+        <polyline fill="none" stroke="#2f9e46" stroke-width="2" stroke-dasharray="3 3" stroke-linecap="round" stroke-linejoin="round"
+          points="0,126 32,126 63,126 95,128 126,130 158,131 189,131 221,130 252,127 284,126 315,126 347,125 378,125 410,124 441,120 473,118 504,118 536,116 568,115 600,115"/>
+      </svg>
+      <div class="legend">
+        <span class="lg"><span class="ln" style="background:#2f6fd0"></span>Total Assessed</span>
+        <span class="lg"><span class="ln" style="background:#e07b2e"></span>Building</span>
+        <span class="lg"><span class="ln" style="background:#2f9e46"></span>Land</span>
+      </div>
+      <div class="note2">Values are final assessed amounts (after Board of Review adjustments where applicable).</div>
+    </div>
+  </div>
+
+  <!-- EXEMPTIONS -->
+  <div class="cardbox" id="exempt">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="t">Exemption History</span></div>
+    <div class="exnote">No exemptions applied in recent years. Below is what this property could qualify for — none are currently on file.</div>
+    <div class="exgrid">
+      <div class="ex"><div><div class="nm">Homeowner Exemption</div><div class="rd">~$10,000 EAV reduction</div><div class="el">Owner-occupied primary residence</div></div><span class="st">Not on file</span></div>
+      <div class="ex"><div><div class="nm">Senior Citizen Exemption</div><div class="rd">~$8,000 EAV reduction</div><div class="el">Age 65+, primary residence</div></div><span class="st">Not on file</span></div>
+      <div class="ex"><div><div class="nm">Senior Assessment Freeze</div><div class="rd">Freezes assessed value</div><div class="el">Age 65+, household income ≤ $65,000</div></div><span class="st">Not on file</span></div>
+      <div class="ex"><div><div class="nm">Persons with Disabilities</div><div class="rd">~$2,000 EAV reduction</div><div class="el">Documented disability, primary residence</div></div><span class="st">Not on file</span></div>
+    </div>
+    <div class="exsrc">Apply at <a href="#">cookcountyassessor.com</a> · deadlines are typically late winter / early spring.</div>
+  </div>
+
+  <!-- APPEAL HISTORY -->
+  <div class="cardbox" id="appeal">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-3 6a3 3 0 0 0 6 0z"/><path d="M19 7l-3 6a3 3 0 0 0 6 0z"/><path d="M8 21h8"/></svg><span class="t">Appeal History</span><span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted)">8 years on record</span></div>
+
+    <div class="appeal">
+      <div class="apptop"><span class="y">Tax Year 2024</span><span class="bd dec">Decrease</span><span class="rs">Overvaluation</span></div>
+      <div class="appgrid">
+        <div class="av"><div class="l">Assessor value</div><div class="v">$127,000</div><div class="sub">Land $20,880 · Bldg $106,120</div></div>
+        <div class="av"><div class="l">Board of Review value</div><div class="v">$108,835 <span class="red">−$18,165</span></div><div class="sub">appeal succeeded</div></div>
+      </div>
+      <div class="appft"><b>Appellant:</b> Nancy David Frej 2100 &nbsp;·&nbsp; <b>Attorney:</b> Caren Gertner (Gertner &amp; Gertner, Ltd.)</div>
+    </div>
+
+    <div class="appeal">
+      <div class="apptop"><span class="y">Tax Year 2023</span><span class="bd nc">No change</span><span class="rs">Overvaluation</span></div>
+      <div class="appgrid">
+        <div class="av"><div class="l">Assessor value</div><div class="v">$94,790</div><div class="sub">Land $16,800 · Bldg $77,990</div></div>
+        <div class="av"><div class="l">Board of Review value</div><div class="v">$94,790</div><div class="sub">no reduction granted</div></div>
+      </div>
+      <div class="appft"><b>Appellant:</b> Nancy David Frej 2100 &nbsp;·&nbsp; <b>Attorney:</b> Caren Gertner (Gertner &amp; Gertner, Ltd.)</div>
+    </div>
+
+    <div class="appeal">
+      <div class="apptop"><span class="y">Tax Year 2021</span><span class="bd dec">Decrease</span><span class="rs">Overvaluation</span></div>
+      <div class="appgrid">
+        <div class="av"><div class="l">Assessor value</div><div class="v">$126,000</div><div class="sub">Land $16,800 · Bldg $109,200</div></div>
+        <div class="av"><div class="l">Board of Review value</div><div class="v">$102,500 <span class="red">−$23,500</span></div><div class="sub">appeal succeeded</div></div>
+      </div>
+      <div class="appft"><b>Appellant:</b> Nancy David Frej 2100 &nbsp;·&nbsp; <b>Attorney:</b> Caren Gertner (Gertner &amp; Gertner, Ltd.)</div>
+    </div>
+  </div>
+
+  <!-- TAX APPEAL REPRESENTATION (attorney summary card) -->
+  <div class="cardbox">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-3 6a3 3 0 0 0 6 0z"/><path d="M19 7l-3 6a3 3 0 0 0 6 0z"/></svg><span class="t">Tax Appeal Representation</span><span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted)">from the appeal record</span></div>
+    <div class="tacard">
+      <div class="tatop">
+        <span class="taav">G</span>
+        <div class="tawho"><div class="nm">Gertner &amp; Gertner, Ltd.</div><div class="role">Caren Gertner · property-tax appeal attorney</div></div>
+        <div class="tarec"><div class="big"><b>4</b>–4</div><div class="lab">Won · No change</div></div>
+      </div>
+      <div class="tawl"><span class="win" style="flex:4"></span><span class="no" style="flex:4"></span></div>
+      <div class="tafoot">
+        <span><b class="b">8</b> appeals filed · 2018–2025</span><span class="sep">·</span>
+        <span><b class="b">$55,820</b> total assessed reduction</span><span class="sep">·</span>
+        <span>Won <span class="tayl">2024</span> <span class="tayl">2022</span> <span class="tayl">2021</span> <span class="tayl">2018</span></span>
+      </div>
+    </div>
+    <div class="tadisc">Record reflects <b style="color:var(--ink2)">this parcel only</b> — not the firm's overall results. A “win” is a Board of Review reduction to assessed value. &nbsp;·&nbsp; <a href="#">Find other attorneys who file in this township ↗</a> (public filings · not an endorsement).</div>
+  </div>
+
+</div>
+</body>
+</html>

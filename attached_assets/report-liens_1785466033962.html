@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--c1:#3f51c5;--track:#efeee9;
+    --red:#d13b26;--redSoft:#fbecea;--redBd:#f2c9c2;--good:#2f7d3f;--goodSoft:#edf6ef;--goodBd:#cfe6d4;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .col{max-width:920px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .ichead{display:flex;align-items:center;gap:10px;padding-bottom:13px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+  .ichead .ic{color:var(--indigo);font-size:16px;flex:none;width:18px;text-align:center}
+  .ichead .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+
+  /* foreclosure alert */
+  .alert{display:flex;gap:12px;background:var(--redSoft);border:1px solid var(--redBd);border-radius:12px;padding:14px 16px;margin-bottom:18px}
+  .alert .ic{color:var(--red);font-size:18px;flex:none;line-height:1.3}
+  .alert .h{font-size:14px;font-weight:700;color:var(--red);margin-bottom:2px}
+  .alert .b{font-size:12.5px;color:var(--ink2);line-height:1.45}
+  .alert .b b{color:var(--ink);font-weight:600}
+
+  .ptag{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);margin-bottom:14px}
+  .ptag .pill{font-size:10.5px;font-weight:700;background:var(--indigoSoft);color:var(--indigo);border-radius:6px;padding:2px 8px;text-transform:uppercase}
+  .lbl{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);margin:2px 0 12px}
+
+  /* debt facts */
+  .dfacts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+  .fact{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+  .fact .l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin-bottom:7px}
+  .fact .v{font-size:15px;font-weight:600;color:var(--ink);line-height:1.2}
+  .fact .q{font-size:11px;color:var(--muted);margin-top:2px}
+
+  /* loan timeline */
+  .tl{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:16px 18px;margin-bottom:18px}
+  .tl .cap{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:18px}
+  .tltrack{position:relative;height:10px;background:var(--track);border-radius:5px;margin:26px 0 6px}
+  .tlfill{position:absolute;left:0;top:0;bottom:0;width:23%;background:var(--c1);border-radius:5px}
+  .tlnow{position:absolute;left:23%;top:-6px;width:3px;height:22px;background:var(--indigo);border-radius:2px}
+  .tlnow .lb{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;color:var(--indigo)}
+  .tlends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+  .tlends b{color:var(--ink2);font-weight:600}
+  .tlnote{font-size:12px;color:var(--ink2);margin-top:9px}
+  .tlnote .ok{color:var(--good);font-weight:700}
+
+  /* KPI sentiment tiles */
+  .kpis{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+  .kt{border:1px solid var(--line);border-radius:11px;padding:13px 15px;text-align:center}
+  .kt .l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .kt .n{font-family:var(--disp);font-size:30px;line-height:1;margin-top:6px;color:var(--ink)}
+  .kt.good{background:var(--goodSoft);border-color:var(--goodBd)} .kt.good .n{color:var(--good)}
+  .kt.bad{background:var(--redSoft);border-color:var(--redBd)} .kt.bad .n{color:var(--red)}
+
+  /* doc table */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);text-align:left;padding:0 0 10px;border-bottom:1px solid var(--line)}
+  thead th:last-child{text-align:right}
+  tbody td{padding:10px 0;border-bottom:1px solid var(--line);vertical-align:middle}
+  tbody td:last-child{text-align:right;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+  tbody tr:last-child td{border-bottom:0}
+  .docn{font-family:var(--mono);font-size:12.5px;color:var(--indigo);text-decoration:underline}
+  .badge{font-size:10px;font-weight:700;border-radius:5px;padding:3px 9px;text-transform:uppercase;letter-spacing:.02em}
+  .badge.neu{background:#f1efe9;color:var(--ink2)}
+  .badge.fore{background:var(--red);color:#fff}
+  .released{color:var(--muted);text-decoration:line-through}
+  .relflag{font-size:10.5px;color:var(--good);font-weight:600;margin-left:8px}
+  .viewall{display:block;text-align:center;font-size:13px;color:var(--indigo);font-weight:600;margin-top:14px;text-decoration:underline}
+
+  .callout{background:var(--indigoSoft);border:1px solid #d7dcf3;border-radius:11px;padding:13px 15px;margin-bottom:14px}
+  .callout .h{font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:2px}
+  .callout .b{font-size:12px;color:var(--ink2)}
+  .src{font-size:11.5px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="col">
+  <div class="card">
+    <div class="ichead"><span class="ic">⚖</span><span class="t">Liens</span></div>
+
+    <!-- FORECLOSURE ALERT -->
+    <div class="alert"><span class="ic">⚠</span><div><div class="h">Active foreclosure on record</div><div class="b">A <b>Lis Pendens foreclosure</b> was recorded <b>1/7/2026</b>. Title is clouded until it resolves, and financing is unlikely until then. Treat this as the property's defining risk.</div></div></div>
+
+    <div class="ptag"><span class="pill">Primary</span> 2821 N Milwaukee Ave</div>
+
+    <!-- DEBT SNAPSHOT -->
+    <div class="lbl">Debt snapshot</div>
+    <div class="dfacts">
+      <div class="fact"><div class="l">Lender</div><div class="v">Belmont B&amp;T Co</div></div>
+      <div class="fact"><div class="l">Loan Amount</div><div class="v">$2,950,000</div><div class="q">recorded Oct 2019</div></div>
+      <div class="fact"><div class="l">Mechanics Liens</div><div class="v">None on record</div></div>
+    </div>
+    <div class="tl">
+      <div class="cap">Loan lifecycle · refinancing runway</div>
+      <div class="tltrack"><div class="tlfill"></div><div class="tlnow"><span class="lb">Now</span></div></div>
+      <div class="tlends"><span>Recorded <b>Oct 2019</b></span><span>Est. maturity <b>~2049</b></span></div>
+      <div class="tlnote">~7 yrs elapsed · <b>23 yrs remaining</b> on a 30-yr term · refinancing risk <span class="ok">Low</span> · 1 modification recorded</div>
+    </div>
+
+    <!-- PROPERTY RECORDS -->
+    <div class="lbl">Property records · this parcel</div>
+    <div class="kpis">
+      <div class="kt"><div class="l">Total Docs</div><div class="n">24</div></div>
+      <div class="kt"><div class="l">Mortgages</div><div class="n">3</div></div>
+      <div class="kt good"><div class="l">Active Liens</div><div class="n">0</div></div>
+      <div class="kt bad"><div class="l">Lis Pendens</div><div class="n">1</div></div>
+    </div>
+    <table>
+      <thead><tr><th>Doc #</th><th>Type</th><th>Recorded</th></tr></thead>
+      <tbody>
+        <tr><td><span class="docn">2617311025</span></td><td><span class="badge neu">Court Doc</span></td><td>6/22/2026</td></tr>
+        <tr><td><span class="docn">2600725004</span></td><td><span class="badge fore">Lis Pendens Foreclosure</span></td><td>1/7/2026</td></tr>
+        <tr><td><span class="docn">1928206157</span></td><td><span class="badge neu">Warranty Deed</span></td><td>10/9/2019</td></tr>
+        <tr><td><span class="docn">1928206159</span></td><td><span class="badge neu">Mortgage</span></td><td>10/9/2019</td></tr>
+        <tr><td><span class="docn released">0823555023</span></td><td><span class="badge neu">Mortgage</span><span class="relflag">✓ Released</span></td><td>8/22/2008</td></tr>
+      </tbody>
+    </table>
+    <a class="viewall">View all 24 documents on Cook County Recorder ↗</a>
+
+    <!-- OWNER LIENS -->
+    <div class="lbl" style="margin-top:22px">Owner liens · Don Deal 6 LLC</div>
+    <div class="callout"><div class="h">4 personal lien records found against the owner</div><div class="b">Personal liens follow the owner, not this property — useful as negotiation context.</div></div>
+    <table>
+      <thead><tr><th>Doc #</th><th>Type</th><th>Recorded</th></tr></thead>
+      <tbody>
+        <tr><td><span class="docn">1803018027</span></td><td><span class="badge neu">Judgment</span></td><td>1/30/2018</td></tr>
+        <tr><td><span class="docn">1505642051</span></td><td><span class="badge neu">Judgment</span></td><td>2/25/2015</td></tr>
+        <tr><td><span class="docn">1235516091</span></td><td><span class="badge neu">Mechanics Lien</span></td><td>12/20/2012</td></tr>
+      </tbody>
+    </table>
+    <div class="src">Source: Cook County Recorder of Deeds. Owner search: Don Deal 6 LLC · last searched Jul 23, 2026.</div>
+  </div>
+</div>
+</body>
+</html>

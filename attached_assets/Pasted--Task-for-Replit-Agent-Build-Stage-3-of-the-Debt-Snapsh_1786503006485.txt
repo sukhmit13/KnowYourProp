@@ -1,0 +1,68 @@
+# Task for Replit Agent — Build "Stage 3" of the Debt Snapshot: render + takeaway
+
+## Goal
+Wire the `resolveState()` output (Stage 2.5) into the **Debt Snapshot card** and generate its **takeaway from the same resolved object** — so what the card shows and what the headline says can never contradict each other. This is the stage that finally replaces the blank/wrong live card. Mockup: **report-debt-snapshot.html** (render it to see the target). Design tokens are the locked system already in the app — reuse the existing card CSS classes, don't invent new ones.
+
+## The one hard rule
+**The card and the takeaway consume the SAME `snap` object. No second computation, no re-fetch, no world knowledge on either side.** The takeaway is generated from `snap` (see the generation prompt, `prompt-debt-snapshot-takeaway-generation.md`); the card is rendered from `snap`. A number on the card and the same number in the takeaway are the same binding. This is the guardrail that killed the "headline says foreclosure, card says resolved" bug.
+
+## Input — the resolved snapshot (from Stage 2.5)
+```js
+{
+  current_owner, ownership_acquired, acquired_via,          // "receiver's/judicial sale" | "arms-length sale"
+  active: [ { doc_number, lender, effective_amount, original_amount, index_consideration_amount,
+              effective_interest_rate, original_interest_rate, effective_maturity_date, maturity_status,
+              maturity_source, position, purchase_money, blanket, suppress_ltv, extraction_gap,
+              display_lender, modifications:[{doc_number, new_amount, new_maturity_date, new_interest_rate, summary}] } ],
+  cleared_by_sale: [ { doc_number, lender, borrower, recording_date, status, title_note } ],
+  distress: [ { doc_type, recording_date, state } ], foreclosure_active,
+  liens: [ { doc_type, recording_date, enforceability, debtor_flag } ],
+  flags: [ ... ]
+}
+```
+
+## Card mapping (primary lien = `active[0]`)
+| Tile / element | Source | Notes |
+|---|---|---|
+| Lender | `active[0].display_lender ?? lender` | "— not extracted (open document)" when `extraction_gap` |
+| Loan Amount | `effective_amount` | sub-label surfaces the mismatch when `index_consideration_amount` differs ("not the $X index figure") |
+| Lien Position | `position` + count of `active` | "1st · sole active" when `active.length==1`; **downgrade confidence badge** when `extraction_gap` |
+| Maturity | `effective_maturity_date` + `maturity_status` | **marigold `.dt2.warn`** when status `at_maturity` or `past_maturity`; neutral when `current`; "est." tag when `maturity_source=="estimated"` |
+| Interest Rate | `effective_interest_rate` | show "was X%" when `original_interest_rate` differs |
+| Recorded | `active[0].recording_date` | + doc number |
+| Acquired | `ownership_acquired` + `acquired_via` | "receiver's (judicial) sale" etc. |
+| Foreclosure | `foreclosure_active` | green "None active" when false; **red** only when `true` |
+| Modification strip | `active[0].modifications` | render only if present; state new amount/rate/maturity + "effective terms reflect the modification" |
+| Cleared-by-sale block | `cleared_by_sale` | one row per loan, "Extinguished"/"Presumed paid" per `status`; hide the whole block if empty |
+| Lifecycle runway | recorded → `effective_maturity_date`, Now marker | marigold Now marker + "at maturity" when status `at_maturity`/`past_maturity` |
+| Caveat | always | recorded-not-balance + inferred-position + judicial-clearing + maturity-source language |
+
+## Favorability discipline (must match the rest of the report)
+- **green** — genuinely good: clean first position, no active distress, released/extinguished liens.
+- **marigold caution** — a real watch-out: `at_maturity`/`past_maturity`, an `inferred — verify` release, a stale-but-live lien, an `extraction_gap`. Calm, not alarm.
+- **red** — only genuinely bad and *active*: `foreclosure_active==true`, a live judgment/mechanics lien in force.
+- **neutral/indigo** — directional/context: acquisition, doc counts, position derivation.
+Never color an `at_maturity` loan red (it's a watch-item, not a default), and never color a resolved foreclosure anything but neutral/green.
+
+## Takeaway wiring
+1. Build `snap` (Stage 2.5 output).
+2. Send `snap` to the model with `prompt-debt-snapshot-takeaway-generation.md`. It returns the Standard Takeaway JSON (`{title, rows:[{tone,html,chip}]}`).
+3. Render that JSON into the existing `.take` component. **Cache the takeaway** keyed on a hash of `snap` — regenerate only when the resolved snapshot changes (recorder docs are immutable, so this is rarely).
+4. Render the card from the same `snap`. Never let the two drift.
+
+## 🔴 Ship these as tests
+```
+assert card.primary.lender, .amount, .maturity are IDENTICAL to the values the takeaway cites (same binding)
+assert maturity tile uses .warn styling WHEN maturity_status in {at_maturity, past_maturity}
+assert foreclosure tile is red ONLY WHEN foreclosure_active==true
+assert cleared_by_sale block renders 2 rows for 3014 and is hidden when the array is empty
+assert when extraction_gap==true: lender shows "— not extracted", position confidence is downgraded, no confident blank
+assert takeaway is regenerated only when hash(snap) changes (cache hit otherwise)
+// 3014 end-to-end:
+assert card shows Albany / $399,000 / 1st sole active / 7-5-2026 at-maturity(marigold) / 3.75% (was 4%) / acquired 2014 receiver's sale / no active foreclosure
+assert takeaway headline references at-maturity AND first-position; never claims active foreclosure
+```
+
+## Done when
+The live 3014 card matches **report-debt-snapshot.html**: Albany at first position, $399K / 3.75% / maturity 7-5-2026 in marigold "at maturity," the 2021 modification noted, the 1999/2005 loans in a "cleared by 2014 receiver's sale" history block, no active distress — and the takeaway above it, generated from the same object, tells that exact story with no contradictions. The blanks and the false "past maturity / 3 mortgages" are gone.
+```

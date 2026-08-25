@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--c1:#3f51c5;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1020px;margin:0 auto}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:11px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .ic{color:var(--indigo);font-size:15px}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+  .sh .ca{margin-left:auto;color:var(--muted)}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+  .kpi{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:17px 16px;text-align:center}
+  .kpi .n{font-family:var(--disp);font-size:33px;line-height:1;color:var(--ink)}
+  .kpi .l{font-size:12px;font-weight:600;color:var(--ink2);margin-top:8px}
+  .kpi .s{font-size:10.5px;color:var(--muted);margin-top:4px}
+
+  .subhd{display:flex;align-items:center;gap:9px;margin:8px 0 6px}
+  .subhd .ic{color:var(--indigo);font-size:14px}
+  .subhd .t{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+  .subhd .badge{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border-radius:5px;padding:3px 8px}
+  .subdesc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:13px}
+
+  .loan{border:1px solid var(--line);border-radius:11px;background:var(--card);padding:13px 16px;margin-bottom:9px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+  .loan .bd{min-width:0}
+  .loan .nm{font-size:14px;font-weight:700;color:var(--ink)}
+  .loan .ind{font-size:11.5px;color:var(--ink2);margin-top:2px}
+  .loan .via{font-size:11px;color:var(--muted);margin-top:3px}
+  .loan .r{text-align:right;flex:none}
+  .loan .amt{font-family:var(--disp);font-size:21px;line-height:1;color:var(--ink)}
+  .loan .jobs{font-size:11px;color:var(--ink2);margin-top:5px;display:inline-flex;align-items:center;gap:5px}
+  .loan .jobs .ic{color:var(--indigo)}
+  .loan .dt{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:4px}
+
+  .topl{margin:16px 0 22px}
+  .topl .tl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+  .lr{margin-bottom:11px}
+  .lr .top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px}
+  .lr .nm{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .lr .ct{font-size:11.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .lr .ct b{color:var(--ink);font-weight:700}
+  .lr .bt{height:8px;background:#f1efe9;border-radius:4px;overflow:hidden}
+  .lr .bt span{display:block;height:100%;background:var(--c1);border-radius:4px}
+
+  .src{font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sh"><span class="ic">▨</span><span class="t">Commercial Lending Activity</span><span class="ca">▾</span></div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n">101</div><div class="l">7(a) Loans</div><div class="s">$38.1M total</div></div>
+    <div class="kpi"><div class="n">51</div><div class="l">504 (CRE)</div><div class="s">$22.0M total</div></div>
+    <div class="kpi"><div class="n">$60.1M</div><div class="l">Total Deployed</div><div class="s">ZIP 60647</div></div>
+    <div class="kpi"><div class="n">8</div><div class="l">Active Lenders</div><div class="s">in this ZIP</div></div>
+  </div>
+
+  <!-- 504 -->
+  <div class="subhd"><span class="ic">▦</span><span class="t">SBA 504 Loans — Commercial Real Estate</span><span class="badge">CRE Financing</span></div>
+  <div class="subdesc">SBA 504 loans fund owner-occupied commercial real estate. The SBA FOIA dataset does not disclose the financed property address — only the borrower entity name, industry, loan amount, and CDC lender.</div>
+
+  <div class="loan"><div class="bd"><div class="nm">Josephine's Market LLC</div><div class="ind">Limited-Service Restaurants</div><div class="via">via Small Business Growth Corporation</div></div>
+    <div class="r"><div class="amt">$209K</div><div class="dt">Dec 2025</div></div></div>
+  <div class="loan"><div class="bd"><div class="nm">SouthLoopLoft, LLC</div><div class="ind">Furniture Retailers</div><div class="via">via SomerCor 504, Inc.</div></div>
+    <div class="r"><div class="amt">$1.3M</div><div class="dt">Dec 2025</div></div></div>
+  <div class="loan"><div class="bd"><div class="nm">Camera Department Inc.</div><div class="ind">Photography Studios, Portrait</div><div class="via">via Small Business Growth Corporation</div></div>
+    <div class="r"><div class="amt">$963K</div><div class="dt">Jul 2025</div></div></div>
+
+  <div class="topl">
+    <div class="tl">Top 504 Lenders (CDCs)</div>
+    <div class="lr"><div class="top"><span class="nm">Small Business Growth Corporation</span><span class="ct"><b>25</b> loans · $13.6M</span></div><div class="bt"><span style="width:100%"></span></div></div>
+    <div class="lr"><div class="top"><span class="nm">SomerCor 504, Inc.</span><span class="ct"><b>24</b> loans · $7.7M</span></div><div class="bt"><span style="width:96%"></span></div></div>
+    <div class="lr"><div class="top"><span class="nm">Wessex 504 Corporation</span><span class="ct"><b>2</b> loans · $681K</span></div><div class="bt"><span style="width:8%"></span></div></div>
+  </div>
+
+  <!-- 7a -->
+  <div class="subhd"><span class="ic">▤</span><span class="t">SBA 7(a) Loans — Small Business</span><span class="badge">Business Financing</span></div>
+  <div class="subdesc">SBA 7(a) loans support small businesses at this location. High activity signals an economically active neighborhood.</div>
+
+  <div class="loan"><div class="bd"><div class="nm">The Duron Law Firm P.C.</div><div class="ind">2016 N Western Ave Suite C, Chicago</div><div class="via">via The Huntington National Bank</div></div>
+    <div class="r"><div class="amt">$100K</div><div class="jobs"><span class="ic">◍</span>1 job</div><div class="dt">May 2026</div></div></div>
+  <div class="loan"><div class="bd"><div class="nm">Bucktown Golf Club LLC</div><div class="ind">2309 North Damen Ave, Chicago</div><div class="via">via Byline Bank</div></div>
+    <div class="r"><div class="amt">$320K</div><div class="jobs"><span class="ic">◍</span>1 job</div><div class="dt">Apr 2026</div></div></div>
+  <div class="loan"><div class="bd"><div class="nm">Barnette Academy LLC</div><div class="ind">1894 N. Milwaukee Ave, Chicago</div><div class="via">via Byline Bank</div></div>
+    <div class="r"><div class="amt">$280K</div><div class="jobs"><span class="ic">◍</span>16 jobs</div><div class="dt">Mar 2026</div></div></div>
+
+  <div class="topl">
+    <div class="tl">Top 7(a) Lenders</div>
+    <div class="lr"><div class="top"><span class="nm">The Huntington National Bank</span><span class="ct"><b>26</b> loans · $3.0M</span></div><div class="bt"><span style="width:100%"></span></div></div>
+    <div class="lr"><div class="top"><span class="nm">Byline Bank</span><span class="ct"><b>9</b> loans · $7.0M</span></div><div class="bt"><span style="width:35%"></span></div></div>
+    <div class="lr"><div class="top"><span class="nm">JPMorgan Chase Bank, N.A.</span><span class="ct"><b>7</b> loans · $852K</span></div><div class="bt"><span style="width:27%"></span></div></div>
+    <div class="lr"><div class="top"><span class="nm">Northeast Bank</span><span class="ct"><b>7</b> loans · $437K</span></div><div class="bt"><span style="width:27%"></span></div></div>
+    <div class="lr"><div class="top"><span class="nm">U.S. Bank, National Association</span><span class="ct"><b>4</b> loans · $729K</span></div><div class="bt"><span style="width:15%"></span></div></div>
+  </div>
+
+  <div class="src">Source: SBA FOIA 7(a) &amp; 504 loan data · FY2020–present · ZIP 60647</div>
+</div>
+</body>
+</html>

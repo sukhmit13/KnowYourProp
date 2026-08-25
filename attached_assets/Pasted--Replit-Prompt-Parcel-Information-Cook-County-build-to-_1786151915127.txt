@@ -1,0 +1,141 @@
+# Replit Prompt — Parcel Information (Cook County) — build to spec
+
+Rebuild the **Parcel Information (Cook County)** section to match this spec exactly. Front-end / CSS + markup, with TWO small pieces of derived logic noted in the LOGIC section (the hardcoded unit-mix line and the conditional listing-discrepancy caveat). Bind all shown values to the real data already in the component; strings below are placeholders. Implement the CSS and structure **verbatim** — do not approximate. Check every item in CRITICAL DETAILS before considering it done.
+
+## Design tokens (add if missing)
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f; --goodSoft:#e9f4ec; --caution:#f0a41c; --cautionText:#96600a;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+
+## CSS (verbatim)
+```css
+.cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+.sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+.sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+.sh .cls{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+
+/* PIN lookup */
+.pinbadge{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--good);margin-bottom:10px}
+.pinbadge svg{width:14px;height:14px;stroke:var(--good);fill:none}
+.pinrow{display:flex;gap:10px;margin-bottom:12px}
+.pinput{flex:1;display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;padding:11px 15px;background:var(--paper);font-family:var(--mono);font-size:14px;color:var(--ink);letter-spacing:.02em}
+.lookup{background:var(--indigo);color:#fff;border:0;border-radius:10px;padding:0 22px;font-size:13px;font-weight:600;cursor:pointer}
+.pinmeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2)}
+.pinmeta b{color:var(--ink);font-weight:600}
+.pinmeta .sep{color:var(--line)}
+.refresh{margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:600;color:var(--ink2);cursor:pointer}
+.refresh svg{width:12px;height:12px;stroke:var(--ink2);fill:none}
+
+/* snapshot — uses the indigo takeaway treatment */
+.take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px;margin:16px 0 4px}
+.takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+.takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+.taket{font-family:var(--disp);font-size:20px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+.cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:8px}
+.cn:last-child{margin-bottom:0}
+.cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.cn.i .dt{background:var(--indigo)}
+.cn b{color:var(--ink);font-weight:600}
+.caveat{display:flex;gap:9px;align-items:flex-start;margin-top:12px;padding-top:12px;border-top:1px solid #dde1f6;font-size:11.5px;line-height:1.5;color:var(--ink2)}
+.caveat svg{width:15px;height:15px;stroke:var(--cautionText);fill:none;flex:none;margin-top:1px}
+.caveat b{color:var(--cautionText);font-weight:700}
+
+/* groups + tiles */
+.grouplbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:20px 0 11px;display:flex;align-items:center;gap:9px}
+.grouplbl .yr{font-weight:500;color:var(--muted);letter-spacing:0;text-transform:none}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pt{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+.pt .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.pt .v{font-size:15px;font-weight:600;color:var(--ink);line-height:1.2}
+.pt .s{font-size:10.5px;color:var(--muted);margin-top:3px}
+
+/* footer */
+.foot{display:flex;align-items:center;gap:14px;margin-top:20px;flex-wrap:wrap}
+.vbtn{display:inline-flex;align-items:center;gap:8px;background:var(--indigo);color:#fff;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;text-decoration:none}
+.vbtn svg{width:14px;height:14px;stroke:#fff;fill:none}
+.tlink{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--indigo);text-decoration:none}
+.tlink svg{width:13px;height:13px;stroke:var(--indigo);fill:none}
+.disc{font-size:11px;color:var(--muted);line-height:1.5;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+```
+
+## HTML (verbatim; bind placeholders to data)
+```html
+<div class="cardbox">
+  <div class="sh"><span class="sq"></span><span class="t">Parcel Information · Cook County</span>
+    <span class="cls">Class {CLASS} · {CLASS_DESC}</span></div>
+
+  <div class="pinbadge"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>PIN auto-detected from address</div>
+  <div class="pinrow">
+    <div class="pinput">{PIN}</div>
+    <button class="lookup">Look Up</button>
+  </div>
+  <div class="pinmeta">
+    <span>PIN <b>{PIN}</b></span><span class="sep">·</span>
+    <span>Tax year <b>{TAX_YEAR}</b></span><span class="sep">·</span>
+    <span>Class <b>{CLASS}</b> — {CLASS_DESC}</span>
+    <button class="refresh"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh</button>
+  </div>
+
+  <div class="take">
+    <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Snapshot</div>
+    <div class="taket">A 6-unit masonry three-flat+, built 1903 — configured as six matching 1BR / 1BA apartments.</div>
+    <div class="cn i"><span class="dt"></span><span><b>Six 1-bedroom units.</b> A classic six-flat — six matching 1-bed / 1-bath apartments.</span></div>
+    <div class="cn"><span class="dt"></span><span><b>5,760 SF building on a 2,400 SF lot</b> — full basement, no attic, masonry exterior.</span></div>
+    <div class="cn"><span class="dt"></span><span>Built <b>1903</b> (123 yrs) · <b>average</b> construction and condition per the county's {TAX_YEAR} assessment.</span></div>
+    <!-- CAVEAT: render ONLY when an active listing exists AND conflicts with county data (see LOGIC) -->
+    <div class="caveat"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span><b>The active listing differs — needs confirmation.</b> The current listing describes {LISTING_DESC}, not {COUNTY_DESC}. A live listing usually reflects the property as it stands today, so the listing is likely the more accurate picture — verify against the county record before relying on these figures.</span></div>
+  </div>
+
+  <div class="grouplbl">Parcel &amp; Structure</div>
+  <div class="g4">
+    <div class="pt"><div class="l">Land Size</div><div class="v">{LAND} sq ft</div></div>
+    <div class="pt"><div class="l">Building Size</div><div class="v">{BLDG} sq ft</div></div>
+    <div class="pt"><div class="l">Building Type</div><div class="v">{TYPE}</div></div>
+    <div class="pt"><div class="l">Use</div><div class="v">{USE}</div></div>
+    <div class="pt"><div class="l">Apartments</div><div class="v">{APTS}</div></div>
+    <div class="pt"><div class="l">Age</div><div class="v">{AGE} yrs</div><div class="s">built {YEAR}</div></div>
+    <div class="pt"><div class="l">Basement</div><div class="v">{BASEMENT}</div></div>
+    <div class="pt"><div class="l">Attic</div><div class="v">{ATTIC}</div></div>
+  </div>
+
+  <div class="grouplbl">Building Characteristics <span class="yr">· assessment year {TAX_YEAR}</span></div>
+  <div class="g3">
+    <div class="pt"><div class="l">Bedrooms</div><div class="v">{BEDS}</div></div>
+    <div class="pt"><div class="l">Bathrooms</div><div class="v">{BATHS} full</div></div>
+    <div class="pt"><div class="l">Total Rooms</div><div class="v">{ROOMS}</div></div>
+    <div class="pt"><div class="l">Construction Quality</div><div class="v">{QUALITY}</div></div>
+    <div class="pt"><div class="l">Exterior</div><div class="v">{EXTERIOR}</div></div>
+    <div class="pt"><div class="l">Roof</div><div class="v">{ROOF}</div></div>
+    <div class="pt"><div class="l">Garage</div><div class="v">{GARAGE}</div></div>
+    <div class="pt"><div class="l">Heating</div><div class="v">{HEATING}</div></div>
+    <div class="pt"><div class="l">Condition</div><div class="v">{CONDITION}</div></div>
+  </div>
+
+  <div class="foot">
+    <a class="vbtn" href="{ASSESSOR_URL}"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>Verify on Assessor Site</a>
+    <a class="tlink" href="{TREASURER_URL}"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>View Tax Bill (Treasurer)</a>
+  </div>
+  <div class="disc">Data from the Cook County Open Data Portal may differ from the official Assessor website. Always verify details on the Assessor site for official records.</div>
+</div>
+```
+
+## LOGIC (two small derived pieces — the rest is pure display of existing data)
+1. **Unit-mix line (hardcoded from counts).** Build the headline + first bullet from apartments / bedrooms / bathrooms:
+   - If `apartments == bedrooms == bathrooms` → state "{N} 1-bedroom units" / "…configured as {N} matching 1BR/1BA apartments." (This is the six-flat case shown.)
+   - Otherwise (counts don't line up evenly) → DO NOT claim matching units. Fall back to a neutral statement of the raw counts, e.g. "{apartments} units · {bedrooms} beds / {baths} baths — mixed unit sizes." Never force the "matching 1BR" phrasing when the math doesn't support it.
+2. **Listing-discrepancy caveat (conditional).** Render the `.caveat` block ONLY when: (a) an active listing exists for this property, AND (b) its unit/config info conflicts with the county record. Fill `{LISTING_DESC}` and `{COUNTY_DESC}` from the two sources. If there is no active listing, or the listing agrees with the county, DO NOT render the caveat at all. Keep the wording's lean ("the listing is likely the more accurate picture — verify") — the listing reflects current state, the county record can be stale, but it still says "verify."
+
+## CRITICAL DETAILS (check ALL — this is where 20% gets lost)
+1. **The Snapshot uses the INDIGO takeaway box** (`--indigoSoft` bg, `#dde1f6` border, lightbulb icon, `--disp` serif headline) — NOT the plain paper box. Label reads "SNAPSHOT" in the mono takeaway-header style.
+2. **First bullet dot is INDIGO** (`.cn.i`) — it's the derived insight. The other two bullet dots are neutral grey. The caveat is separate (amber).
+3. **The caveat icon is an amber alert-triangle**, `--cautionText` stroke; the caveat lead phrase is **bold `--cautionText`**; body text is `--ink2`. It sits inside the snapshot box, separated by a top border. This is the ONLY amber in the section.
+4. **Header uses the filled indigo SQUARE** (top-level section). The class chip is a mono paper pill on the right.
+5. **PIN "auto-detected" badge is green** (check-circle icon + green text) — a real confirmation. **"Look Up" is a solid indigo button; "Refresh" is an outlined button.** The PIN input is mono, on `--paper`.
+6. **Tiles are two groups:** "Parcel & Structure" as `.g4` (4 columns, 8 tiles), "Building Characteristics · assessment year {year}" as `.g3` (3 columns, 9 tiles). Tile = paper bg, mono uppercase label, 15px semibold value, optional muted sub (only the Age tile has "built {year}").
+7. **Footer:** "Verify on Assessor Site" = solid indigo button; "View Tax Bill (Treasurer)" = indigo text link; both with an external-link icon. Disclaimer below a top border, muted.
+8. **Fonts:** serif (`--disp`) is used ONLY for the snapshot headline. Everything else is Inter; labels are JetBrains Mono. Tile values are Inter semibold, NOT serif.
+9. Nothing is red. Nothing is beige. The only non-indigo/neutral color is the single amber caveat (when shown) and the green PIN-detected check.

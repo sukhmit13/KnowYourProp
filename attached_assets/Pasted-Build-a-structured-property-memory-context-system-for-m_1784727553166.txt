@@ -1,0 +1,287 @@
+Build a structured “property memory context” system for my real-estate report workflow.
+
+Goal:
+Create a source-linked canonical context object for each property report so later prompts can generate a one-page PROPERTY INSIGHT REPORT using only verified, traceable evidence. Do NOT rely on chat history or freeform AI memory. The app-owned structured context object must be the source of truth.
+
+Core principle:
+Every material fact must be traceable back to the uploaded report section and page it came from. Every derived metric must reference the source facts it was computed from. Any fact without source linkage should be treated as unverified.
+
+What to build:
+1. A property-level context model
+2. Section-level evidence containers
+3. A source index with linkable references back to the report
+4. Derived metric support
+5. Placeholder fields for future mini-summaries / major takeaways
+6. Utility functions to read, write, update, and validate the context object
+
+Do this in phases.
+
+==================================================
+PHASE 1 — DATA MODEL
+==================================================
+
+Create a structured schema called `property_context`.
+
+Recommended top-level shape:
+
+{
+  "property_id": string,
+  "report_id": string,
+  "created_at": string,
+  "updated_at": string,
+  "status": {
+    "report_parsed": boolean,
+    "sources_indexed": boolean,
+    "derived_metrics_computed": boolean,
+    "section_summaries_generated": boolean,
+    "onepager_ready": boolean
+  },
+  "property_snapshot": {
+    "address": string | null,
+    "city": string | null,
+    "state": string | null,
+    "zip": string | null,
+    "neighborhood": string | null,
+    "ward": string | null,
+    "parcel_count": number | null,
+    "building_sf": number | null,
+    "lot_sf": number | null,
+    "year_built": number | null
+  },
+  "ui_context": {
+    "project_type": string | null,
+    "project_subtype": string | null,
+    "user_goal": string | null,
+    "requested_focus_areas": [],
+    "show_zoning_attorneys": false,
+    "show_tax_attorneys": false
+  },
+  "sections": {
+    "title_distress": {},
+    "zoning_use": {},
+    "taxes_assessment": {},
+    "physical_constraints": {},
+    "sale_history": {},
+    "market_demand": {},
+    "property_linked_professionals": {}
+  },
+  "onepager_context": {
+    "top_cards": [],
+    "our_take_verdict": null,
+    "our_take_body": null
+  },
+  "source_index": []
+}
+
+Each section object should include:
+
+{
+  "facts": [],
+  "derived": [],
+  "mini_summary": null,
+  "confidence": null,
+  "eligible_for_onepager": null,
+  "notes": []
+}
+
+==================================================
+PHASE 2 — FACT OBJECTS
+==================================================
+
+Create a standard shape for every extracted fact.
+
+Fact object:
+
+{
+  "id": string,
+  "field": string,
+  "value": any,
+  "display_value": string | null,
+  "fact_type": "confirmed_fact" | "open_diligence_item" | "reported_context",
+  "verified": boolean,
+  "source_ref_ids": [],
+  "tags": []
+}
+
+Rules:
+- `field` should be a stable machine-readable key like `annual_tax_2024`
+- `display_value` should preserve the user-facing exact formatting where helpful
+- `verified` should be true only if the fact has valid source references
+- `source_ref_ids` should point to one or more records in `source_index`
+
+==================================================
+PHASE 3 — DERIVED METRIC OBJECTS
+==================================================
+
+Create a standard shape for derived values.
+
+Derived object:
+
+{
+  "id": string,
+  "field": string,
+  "value": any,
+  "display_value": string | null,
+  "fact_type": "derived_metric",
+  "derived_from_fact_ids": [],
+  "formula": string | null,
+  "verified": boolean,
+  "source_ref_ids": [],
+  "tags": []
+}
+
+Rules:
+- A derived metric is only valid if all underlying facts are verified
+- `derived_from_fact_ids` must reference the exact input fact records
+- `formula` should store a readable description like `annual_tax_2024 / 12`
+- `source_ref_ids` should inherit or union the source refs from the input facts
+
+==================================================
+PHASE 4 — SOURCE INDEX
+==================================================
+
+Create a source index that stores linkable references back to the report.
+
+Each source reference should look like:
+
+{
+  "id": string,
+  "source_document": string,
+  "source_section": string,
+  "source_page_start": number | null,
+  "source_page_end": number | null,
+  "source_anchor": string | null,
+  "source_snippet": string | null,
+  "source_url": string | null,
+  "source_type": string | null
+}
+
+Requirements:
+- `source_section` should correspond to the report section name
+- `source_anchor` should be a slug or internal anchor that can later support UI linking
+- `source_url` should support linking back to the report viewer if available
+- `source_snippet` should store a short excerpt supporting the fact
+- `source_type` should classify the source, e.g. `taxes`, `zoning`, `permit_history`, `title`, `market`, `article`, etc.
+
+Important:
+Every material fact must reference at least one `source_ref_id`.
+If a fact cannot be linked to a source reference, mark it unverified.
+
+==================================================
+PHASE 5 — SECTION SETUP
+==================================================
+
+Initialize these sections:
+
+1. `title_distress`
+2. `zoning_use`
+3. `taxes_assessment`
+4. `physical_constraints`
+5. `sale_history`
+6. `market_demand`
+7. `property_linked_professionals`
+
+For now, do NOT require mini-summaries or takeaways.
+Just make the schema ready for them later.
+
+==================================================
+PHASE 6 — PROPERTY-LINKED PROFESSIONALS
+==================================================
+
+Create a section to store professionals tied to the specific property through public-record history.
+
+This is NOT a recommendation engine.
+These are factual public-record references only.
+
+Use entries like:
+
+{
+  "id": string,
+  "name": string,
+  "role_type": "zoning_attorney" | "tax_attorney" | "architect" | "other",
+  "linked_record_type": string,
+  "display_context": string | null,
+  "verified": boolean,
+  "source_ref_ids": [],
+  "activity_context": {
+    "citywide_record_count": number | null,
+    "recent_activity_window": string | null
+  }
+}
+
+Rules:
+- Only include professionals tied to the property through supplied records
+- Do not infer quality or endorsement
+- Do not label anyone as recommended, top, preferred, best, etc.
+- This section exists so future prompts can refer to public-record participants neutrally
+
+==================================================
+PHASE 7 — UTILITY FUNCTIONS
+==================================================
+
+Build utility functions for:
+
+- `createPropertyContext(reportId, propertyId)`
+- `getPropertyContext(propertyId)`
+- `updatePropertySnapshot(propertyId, snapshotData)`
+- `addSourceReference(propertyId, sourceRef)`
+- `addSectionFact(propertyId, sectionName, factObject)`
+- `addDerivedMetric(propertyId, sectionName, derivedObject)`
+- `markFactVerified(propertyId, factId)`
+- `markFactUnverified(propertyId, factId)`
+- `setSectionMiniSummary(propertyId, sectionName, summaryText)`  // placeholder for later
+- `setSectionEligibility(propertyId, sectionName, eligibleBoolean)`  // placeholder for later
+- `validatePropertyContext(propertyId)`
+
+Validation function should check:
+- every verified fact has source references
+- every derived metric references existing verified facts
+- no broken source_ref_ids
+- required top-level sections exist
+- source index entries are well-formed
+
+==================================================
+PHASE 8 — VALIDATION RULES
+==================================================
+
+Add validation rules:
+
+1. A fact cannot be `verified = true` unless it has at least one valid source reference.
+2. A derived metric cannot be `verified = true` unless all underlying facts are verified.
+3. If a fact or derived metric has no source linkage, it must be treated as unverified.
+4. The property context should be extensible so future prompts can add:
+   - section mini-summaries
+   - major takeaways
+   - one-pager card ranking
+   - article-derived context
+   - corridor trends
+   - nearby project pipeline data
+
+==================================================
+PHASE 9 — STORAGE AND INTEGRATION
+==================================================
+
+Store this context object in a durable app-owned layer (database, structured file, or app store).
+Do not keep it only in temporary memory.
+
+This property_context object must become the canonical input for later Claude prompts.
+Later prompts should consume structured context from this object rather than raw report text whenever possible.
+
+==================================================
+PHASE 10 — IMPLEMENTATION NOTES
+==================================================
+
+- Keep the schema clean, readable, and extensible
+- Use TypeScript types or interfaces if the codebase supports them
+- Prefer JSON-compatible structures
+- Include comments or developer docs explaining how later prompts should consume this object
+- Build for source traceability first, summaries later
+- Do not over-engineer front-end UI yet unless needed to test the source links
+
+Final deliverable:
+Implement the schema, types, storage, validation, and utility functions for the property memory context system.
+Then provide a short developer note explaining:
+1. where the context is stored,
+2. how new facts and source links are added,
+3. how later prompts should read from it,
+4. and how this prepares the app for section summaries and one-pager generation.

@@ -1,0 +1,66 @@
+# Replit — Crime Takeaway generator (hardened pilot)
+
+Build the backend that generates the "Takeaway" for the **Crime** section, with accuracy guards. This is the pilot; keep it a normal function so other sections can reuse it later. Reuse the Anthropic API key/client already configured for the Report Assistant chat — this is a separate call, not the chat.
+
+## Core principle
+The model does NOT compute anything and does NOT supply any number. Your backend pre-computes every figure and passes it in. The model's only job is to phrase pre-computed facts into a short read. Every number in its output must already exist in the input, or the output is rejected.
+
+## Step 1 — Pre-compute the crime data object (backend, deterministic)
+Before calling the model, assemble this object from the crime data. Compute all numbers, percentages, tiers, and a `favor` for each metric in code — do not leave any of this to the model:
+```
+{
+  address: "2100 N Hoyne Ave",
+  local: {                         // trailing 12 months, around the address
+    within250ftCount: 11,
+    withinQuarterMileCount: 196,
+    topTypeBlock: "motor vehicle theft",
+    breakdownQuarterMile: [
+      { type: "Criminal damage", count: 45, category: "property" },
+      { type: "Battery", count: 13, category: "violent" }, ...
+    ],
+    violentShare: { count: 25, total: 196, pct: 13 }   // pct pre-computed
+  },
+  ranks: {                         // community area, last full year, per capita
+    violent:  { ratePer1000: 14.1, saferThanPct: 77, tier: "Low",           favor: "good" },
+    property: { ratePer1000: 49.4, saferThanPct: 58, tier: "Below average",  favor: "neutral" }
+  },
+  trend: { years: [{y:2023,n:5256},{y:2024,n:5459},{y:2025,n:4526}],
+           yoyPct: 17, sinceBasePct: 14, direction: "down", favor: "good" }
+}
+```
+Rules for the code-computed `favor`: violent/property `favor` comes from the percentile tier (higher safer-than % = better); trend `favor` = "good" if direction down, "bad" if up. **Favor is decided in code, not by the model.**
+
+## Step 2 — Call the model (Claude Sonnet, not Haiku)
+Customer-facing interpretation of sensitive data — use Sonnet. `max_tokens` ~400. Pass the object above as the user message (`JSON.stringify`), and the SYSTEM PROMPT below verbatim as `system`. Expect JSON back:
+`{ "headline": string, "bullets": [ { "text": string, "favor": "good"|"neutral"|"bad", "metric": string } ] }`
+(`metric` = which data field the bullet is about, e.g. "ranks.violent" — used for validation.)
+
+## Step 3 — Validate BEFORE caching (deterministic guards; reject → retry once → null)
+1. **JSON shape:** parses; `headline` non-empty; 2–4 bullets; every `favor` ∈ {good,neutral,bad}.
+2. **Number tracing (anti-fabrication):** extract every number from headline+all bullet text (strip commas/`%`). Build `allowedNumbers` = every numeric value in the Step-1 object **plus** the whitelist [250, 1000]. Every output number MUST be in `allowedNumbers`. If any isn't → reject.
+3. **Favor matches the data:** for each bullet, its `favor` must equal the code-computed `favor` of the metric it cites (`ranks.violent.favor`, etc.). If a bullet's favor contradicts the data → reject.
+4. **Banned phrases (safety):** lowercase the full text; reject if it contains any of: `unsafe`, `dangerous`, `safe neighborhood`, `safe area`, `good neighborhood`, `bad neighborhood`, `sketchy`, `avoid this`, `crime-ridden`.
+On reject: regenerate once. If it still fails: **store `null` and render no takeaway** (fail closed — a missing takeaway is fine; a wrong one is not).
+
+## Step 4 — Cache
+Call this ONCE when a property's crime analysis runs (or refreshes), store the validated object at `report.crime.takeaway`. Front-end renders the stored object; if it's `null`, render nothing. NEVER call the model on page render.
+
+## SYSTEM PROMPT (pass verbatim as `system`)
+"""
+You write the one-paragraph "Takeaway" for the Crime section of a real-estate property report. You are given a JSON object with pre-computed crime figures for one address. INTERPRET it into a short, grounded read — do not restate it, and do not calculate anything. Rules:
+
+1. Use ONLY numbers that appear in the provided JSON. Never compute, estimate, or introduce a number that isn't already there. Copy figures exactly as given.
+2. Never invent facts or context beyond the JSON. If something isn't in the data, don't mention it.
+3. Every bullet must cite a specific figure from the data and name the metric it comes from (in the `metric` field).
+4. Do NOT decide favorability yourself. Each metric in the JSON has a `favor` value — use that metric's `favor` for the bullet about it. Set each bullet's `favor` to the value the data gives.
+5. Lead with what matters most for a buyer. Violent crime is the metric buyers weigh most; if it's low, that's the headline. Write what THIS data says — the same section on another property may warrant the opposite headline.
+6. NEVER issue a bare safety verdict. Do not call the area safe, unsafe, dangerous, good, or bad. Report specific, data-anchored facts (e.g. "violent crime is low — safer than 77% of areas; property crime is the more common type") and let the reader judge. Keep violent and property crime as distinct facts; never collapse them into one label.
+7. Descriptive first. At most one brief, grounded practical implication that follows directly from the data; no advice or opinions beyond that.
+8. Tone: plain, confident, concise. No hedging, no marketing language. Bold each figure in `text` with markdown (e.g. **77%**).
+9. Output ONLY the JSON object: { "headline": string, "bullets": [ { "text": string, "favor": "good"|"neutral"|"bad", "metric": string } ] }. Nothing else.
+"""
+
+## Step 5 — Test before trusting (do this, don't skip)
+- Log `generateTakeaway("crime", <the sample object above>)` and confirm the JSON shape and that it passes all validators.
+- Then run it on 25–30 real properties and read the outputs. Confirm: numbers are correct, violent/property are never conflated, no safety verdict slips through, and the headline actually changes for a high-violent-crime property (test one). If a high-crime property still reads "low crime," generation is broken — fix before shipping.
+- Watch the reject rate. If validation rejects often, the guards are working — but check whether the prompt needs tightening.

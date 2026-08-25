@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--bad:#d13b26;
+    --caution:#f0a41c;--cautionText:#96600a;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .cardbox[id],.subwrap[id]{scroll-margin-top:90px}
+
+  /* header */
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+
+  /* takeaway */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px 17px;margin-bottom:20px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+  .taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:13px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:9px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .cn.g .dt{background:var(--good)}
+  .cn.c .dt{background:var(--caution)}
+  .cn.i .dt{background:var(--indigo)}
+  .cn b{color:var(--ink);font-weight:600}
+  .cn .tx{flex:1}
+  .jump{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:9.5px;font-weight:600;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid #dde1f6;border-radius:6px;padding:2px 7px;margin-left:7px;white-space:nowrap;vertical-align:middle}
+  .jump svg{width:10px;height:10px;stroke:var(--indigo);fill:none}
+
+  /* subsection header */
+  .subwrap{margin-top:22px}
+  .ssh{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+  .ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+  .ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+  .ssh .sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto}
+
+  /* scope toggle */
+  .toggle{display:inline-flex;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:4px;gap:4px;margin-bottom:12px}
+  .toggle .tg{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink2);padding:7px 15px;border-radius:7px;cursor:pointer}
+  .toggle .tg svg{width:13px;height:13px;stroke:currentColor;fill:none}
+  .toggle .tg.on{background:var(--indigo);color:#fff}
+  .scopeline{font-size:11.5px;color:var(--muted);margin-bottom:14px}
+  .scopeline b{color:var(--ink2);font-weight:600}
+
+  /* daycare gauge */
+  .dcard{border:1px solid var(--line);border-radius:12px;padding:17px 19px;background:var(--card)}
+  .dctop{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .dpill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--cautionText);background:#fdf3df;border:1px solid #f0d79a;border-radius:999px;padding:5px 12px;flex:none}
+  .dpill .d{width:7px;height:7px;border-radius:50%;background:var(--caution)}
+  .dhead{font-size:13px;color:var(--ink2)}
+  .dhead b{font-family:var(--disp);font-size:26px;color:var(--ink);font-weight:400;margin-right:4px;vertical-align:-2px}
+  .gauge{display:flex;gap:5px;margin-bottom:9px}
+  .gs{flex:1;height:9px;border-radius:5px;background:#eceae3}
+  .gs.on{background:var(--caution)}
+  .glabels{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:16px}
+  .gl{text-align:center}
+  .gl .n{font-size:11px;font-weight:600;color:var(--muted)}
+  .gl .r{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:1px}
+  .gl.on .n{color:var(--cautionText)}
+  .gl.on .r{color:var(--cautionText)}
+  .dstats{font-size:12px;color:var(--ink2);line-height:1.5;padding-top:13px;border-top:1px solid var(--line)}
+  .dstats b{color:var(--ink);font-weight:600}
+  .dsrc{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+  /* glance cards */
+  .glancehd{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:13px}
+  .glancehd span{color:var(--muted);font-weight:400}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+  .glance{border:1px solid var(--line);border-radius:12px;padding:15px 16px;background:var(--card)}
+  .gltop{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .glic{width:26px;height:26px;border-radius:7px;background:var(--indigoSoft);display:flex;align-items:center;justify-content:center;flex:none}
+  .glic svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+  .gllab{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+  .glrate{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--good);background:var(--goodSoft);border-radius:999px;padding:4px 10px}
+  .glrate .d{width:6px;height:6px;border-radius:50%;background:var(--good)}
+  .glnum{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+  .glnum .n{font-family:var(--disp);font-size:30px;color:var(--ink);line-height:.9}
+  .glnum .u{font-size:12px;color:var(--ink2)}
+  .glclose{font-size:12px;color:var(--ink2);line-height:1.4}
+  .glclose b{color:var(--ink);font-weight:600}
+  .glassign{margin-top:11px;padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:9px}
+  .glassign .k{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .glassign .nm{font-size:13px;font-weight:600;color:var(--ink)}
+  .glassign .lv{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2);margin-top:4px}
+  .glassign .lv .d{width:6px;height:6px;border-radius:50%;background:var(--good)}
+  .glnote{margin-top:11px;font-size:11px;color:var(--cautionText);background:#fdf3df;border:1px solid #f0d79a;border-radius:8px;padding:8px 11px;line-height:1.45}
+
+  /* school list */
+  .srow{padding:13px 0;border-top:1px solid var(--line)}
+  .srow:first-of-type{border-top:none}
+  .stop{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .snm{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .snm .name{font-size:14px;font-weight:600;color:var(--ink)}
+  .lvl{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.02em;color:var(--good);background:var(--goodSoft);border-radius:6px;padding:3px 8px}
+  .acc{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.02em;border-radius:6px;padding:3px 8px}
+  .acc.boundary{color:var(--indigo);background:var(--indigoSoft)}
+  .acc.enroll{color:var(--ink2);background:var(--paper);border:1px solid var(--line)}
+  .assigned{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);display:inline-flex;align-items:center;gap:4px}
+  .assigned svg{width:11px;height:11px;fill:var(--indigo);stroke:none}
+  .sdist{font-family:var(--mono);font-size:10.5px;color:var(--ink2);white-space:nowrap}
+  .sgrades{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:5px}
+
+  .src{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:16px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Schools &amp; Day Care</span>
+      <span class="count">6 elementary · 4 high · within 1.5 mi</span></div>
+
+    <!-- TAKEAWAY (now first, covers day care + schools) -->
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Takeaway</div>
+      <div class="taket">Strong schools all around — but licensed daycare is genuinely tight for the youngest families.</div>
+      <div class="cn c"><span class="dt"></span><span class="tx"><b>Daycare is the weak spot.</b> The area is <b>underserved</b> — about 2.2 children under 5 for every licensed slot, a rough 1,248-slot gap to reach adequate coverage. Families needing infant/toddler care should expect waitlists.<a class="jump" href="#daycare"><svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Day care</a></span></div>
+      <div class="cn g"><span class="dt"></span><span class="tx"><b>Elementary is a real strength.</b> The assigned school — Frank W. Reilly (Level 1, 0.67 mi) — is a solid default, and all six elementary schools within 1.5 mi are rated Level 1 or 1+.<a class="jump" href="#elementary"><svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Elementary</a></span></div>
+      <div class="cn i"><span class="dt"></span><span class="tx"><b>High school is choice-based.</b> No high school is assigned to this address — all four nearby (closest: Marine Leadership Academy, 1.23 mi) are application/lottery. The options are strong, but plan for the CPS choice process.<a class="jump" href="#highschools"><svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>High schools</a></span></div>
+    </div>
+
+    <!-- DAY CARE -->
+    <div class="subwrap" id="daycare">
+      <div class="ssh">
+        <svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a3 3 0 1 0 6 0"/><circle cx="12" cy="6" r="3"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>
+        <span class="t">Day Care</span>
+        <span class="sub">licensed early-childhood supply</span>
+      </div>
+
+      <div class="toggle">
+        <div class="tg on"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>By ZIP Code</div>
+        <div class="tg"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>By Neighborhood</div>
+      </div>
+      <div class="scopeline">ZIP <b>60618</b> · Neighborhood <b>Avondale</b> · Ward <b>35</b> — boundaries differ, so metrics may vary between views.</div>
+
+      <div class="dcard">
+        <div class="dctop">
+          <span class="dpill"><span class="d"></span>Underserved</span>
+          <span class="dhead"><b>2.2</b> children under 5 per licensed slot</span>
+        </div>
+        <div class="gauge">
+          <div class="gs"></div><div class="gs on"></div><div class="gs"></div><div class="gs"></div>
+        </div>
+        <div class="glabels">
+          <div class="gl"><div class="n">Childcare desert</div><div class="r">&gt; 3.0</div></div>
+          <div class="gl on"><div class="n">Underserved</div><div class="r">1.5 – 3.0</div></div>
+          <div class="gl"><div class="n">Adequate</div><div class="r">1.0 – 1.5</div></div>
+          <div class="gl"><div class="n">Plentiful</div><div class="r">&lt; 1.0</div></div>
+        </div>
+        <div class="dstats"><b>6,004</b> children under 5 · <b>2,755</b> licensed slots (2,446 center · 309 home) · roughly a <b>1,248-slot gap</b> to reach adequate coverage.</div>
+        <div class="dsrc">Source: U.S. Census Bureau, American Community Survey 2023 · Illinois Network of Child Care Resource &amp; Referral Agencies 2024</div>
+      </div>
+    </div>
+
+    <!-- SCHOOLS AT A GLANCE -->
+    <div class="subwrap">
+      <div class="glancehd">Schools at a glance <span>· within 1.5 mi</span></div>
+      <div class="g2">
+        <div class="glance">
+          <div class="gltop"><span class="glic"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5a6 3 0 0 0 12 0v-5"/></svg></span><span class="gllab">Elementary · K-8</span><span class="glrate"><span class="d"></span>Strong</span></div>
+          <div class="glnum"><span class="n">6</span><span class="u">schools nearby</span></div>
+          <div class="glclose">Closest — <b>Frank W. Reilly Elementary</b> · 0.67 mi</div>
+          <div class="glassign"><div class="k">Assigned · boundary</div><div class="nm">Frank W. Reilly Elementary School</div><div class="lv"><span class="d"></span>Level 1 · 0.67 mi</div></div>
+        </div>
+        <div class="glance">
+          <div class="gltop"><span class="glic"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5a6 3 0 0 0 12 0v-5"/><path d="M22 10v6"/></svg></span><span class="gllab">High School</span><span class="glrate"><span class="d"></span>Strong</span></div>
+          <div class="glnum"><span class="n">4</span><span class="u">schools nearby</span></div>
+          <div class="glclose">Closest — <b>Marine Leadership Academy at Ames</b> · 1.23 mi</div>
+          <div class="glnote"><b>No assigned high school</b> at this address — all four are application / lottery. Plan for the CPS choice process.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ELEMENTARY LIST -->
+    <div class="subwrap" id="elementary">
+      <div class="ssh">
+        <svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5a6 3 0 0 0 12 0v-5"/></svg>
+        <span class="t">Elementary Schools</span>
+        <span class="sub">6 within 1.5 mi</span>
+      </div>
+
+      <div class="srow">
+        <div class="stop"><div class="snm"><span class="name">Jonathan Y. Scammon Elementary</span><span class="lvl">Level 1+</span><span class="acc boundary">Boundary</span></div><span class="sdist">1.16 mi</span></div>
+        <div class="sgrades">Grades PK, K, 1–8</div>
+      </div>
+      <div class="srow">
+        <div class="stop"><div class="snm"><span class="name">Johann W. von Goethe Elementary</span><span class="lvl">Level 1+</span><span class="acc boundary">Boundary</span></div><span class="sdist">1.24 mi</span></div>
+        <div class="sgrades">Grades PK, K, 1–8</div>
+      </div>
+      <div class="srow">
+        <div class="stop"><div class="snm"><span class="name">CICS — Irving Park</span><span class="lvl">Level 1+</span><span class="acc enroll">Open Enrollment</span></div><span class="sdist">1.27 mi</span></div>
+        <div class="sgrades">Grades K, 1–8 · application / lottery</div>
+      </div>
+      <div class="srow">
+        <div class="stop"><div class="snm"><span class="name">Salmon P. Chase Elementary</span><span class="lvl">Level 1+</span><span class="acc boundary">Boundary</span></div><span class="sdist">1.39 mi</span></div>
+        <div class="sgrades">Grades PK, K, 1–8</div>
+      </div>
+      <div class="srow">
+        <div class="stop"><div class="snm"><span class="name">Frank W. Reilly Elementary</span><span class="lvl">Level 1</span><span class="acc boundary">Boundary</span><span class="assigned"><svg viewBox="0 0 24 24"><path d="m12 2 3 6.5 7 .8-5.2 4.8 1.4 7L12 17.8 5.4 21l1.4-7L1.6 9.3l7-.8z"/></svg>Assigned</span></div><span class="sdist">0.67 mi</span></div>
+        <div class="sgrades">Grades PK, K, 1–8</div>
+      </div>
+      <div class="srow">
+        <div class="stop"><div class="snm"><span class="name">Carl von Linne Elementary</span><span class="lvl">Level 1</span><span class="acc boundary">Boundary</span></div><span class="sdist">0.74 mi</span></div>
+        <div class="sgrades">Grades PK, K, 1–8</div>
+      </div>
+    </div>
+
+    <!-- HIGH SCHOOL LIST -->
+    <div class="subwrap" id="highschools">
+      <div class="ssh">
+        <svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5a6 3 0 0 0 12 0v-5"/><path d="M22 10v6"/></svg>
+        <span class="t">High Schools</span>
+        <span class="sub">4 within 1.5 mi · all lottery</span>
+      </div>
+
+      <div class="srow">
+        <div class="stop"><div class="snm"><span class="name">DeVry University Advantage Academy HS</span><span class="lvl">Level 1+</span><span class="acc enroll">Open Enrollment</span></div><span class="sdist">1.30 mi</span></div>
+        <div class="sgrades">Grades 11–12 · application / lottery</div>
+      </div>
+      <div class="srow">
+        <div class="stop"><div class="snm"><span class="name">Noble — Pritzker College Prep</span><span class="lvl">Level 1+</span><span class="acc enroll">Open Enrollment</span></div><span class="sdist">1.49 mi</span></div>
+        <div class="sgrades">Grades 9–12 · application / lottery</div>
+      </div>
+      <div class="srow">
+        <div class="stop"><div class="snm"><span class="name">Albert G. Lane Technical HS</span><span class="lvl">Level 1+</span><span class="acc enroll">Open Enrollment</span></div><span class="sdist">1.49 mi</span></div>
+        <div class="sgrades">Grades 7–12 · application / lottery</div>
+      </div>
+      <div class="srow">
+        <div class="stop"><div class="snm"><span class="name">Marine Leadership Academy at Ames</span><span class="lvl">Level 1</span><span class="acc enroll">Open Enrollment</span></div><span class="sdist">1.23 mi</span></div>
+        <div class="sgrades">Grades 7–12 · application / lottery</div>
+      </div>
+
+      <div class="src">Within 1.5 mi · Source: Chicago Public Schools (Chicago Data Portal). <b style="color:var(--ink2)">Boundary</b> = students in the area may attend; <b style="color:var(--ink2)">Open Enrollment</b> = application / lottery. Ratings are CPS School Quality Rating Policy (SQRP) levels — Level 1+ highest, then Level 1.</div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

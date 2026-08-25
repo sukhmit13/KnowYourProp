@@ -2,7 +2,7 @@
 // Self-contained (cross_reference_allowed: false): the takeaway is deterministic
 // and uses ONLY this section's own corridor data — no AI, no cross-section waits.
 // Styles live in index.css scoped under .corrwrap.
-import { Navigation, Briefcase, HardHat, Newspaper, Scale, Lightbulb } from "lucide-react";
+import { Navigation, Briefcase, HardHat, Newspaper, Scale, Lightbulb, FileText } from "lucide-react";
 
 export interface CorrLicense {
   name: string;
@@ -43,6 +43,17 @@ export interface CorrZoning {
   distanceMi: number | null;
   use: string;             // plain-language description
 }
+export interface CorrDpdApplication {
+  address: string;
+  applicationType: string;
+  applicant: string | null;
+  status: string;
+  hearingDate: string | null;
+  proposal: string;
+  applicationUrl: string | null;
+  hearingUrl: string;
+  distanceMi: number | null;
+}
 
 export interface CorridorCardData {
   key: string;
@@ -56,6 +67,7 @@ export interface CorridorCardData {
   construction: CorrConstruction[];
   coverage: CorrCoverage[];
   zoning: CorrZoning[];
+  dpdApplications: CorrDpdApplication[];
 }
 
 export interface CorridorKpis {
@@ -64,6 +76,7 @@ export interface CorridorKpis {
   licenses: number;
   articles: number;
   zoningAppeals: number;
+  dpdApplications: number;
 }
 
 const fmtCost = (n: number) =>
@@ -72,7 +85,7 @@ const fmtCost = (n: number) =>
 const NUM_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
 const numWord = (n: number) => (n >= 0 && n <= 10 ? NUM_WORDS[n] : String(n));
 
-export default function CorridorIntelligenceView({ kpis, corridors }: { kpis: CorridorKpis; corridors: CorridorCardData[] }) {
+export default function CorridorIntelligenceView({ kpis, corridors, licensesLoading = false }: { kpis: CorridorKpis; corridors: CorridorCardData[]; licensesLoading?: boolean }) {
   // Sort closest-first: on_corridor → 0; tier is a label, not a sort key. Tie-break by name.
   const sorted = corridors.slice().sort((a, b) => {
     const da = a.onCorridor ? 0 : a.distanceMi;
@@ -125,7 +138,9 @@ export default function CorridorIntelligenceView({ kpis, corridors }: { kpis: Co
         <div className="take-row insight">
           <span className="dot" />
           <div className="body">
-            {kpis.licenses > 0 ? (
+            {licensesLoading ? (
+              <>Business-license records are still loading, so corridor formation is not yet available.</>
+            ) : kpis.licenses > 0 ? (
               <><b>Steady new-business formation.</b> <b>{kpis.licenses} new business license{kpis.licenses !== 1 ? "s" : ""}</b> opened along these corridors in the last 12 months{topCats.length > 0 ? <> — heavily {topCats.join(", ")}</> : null}
               {covHeadline ? <> — and recent press ties {covHeadline.source ? `${covHeadline.source} coverage` : "local coverage"} to corridor momentum{covHeadline.title ? <> (&ldquo;{covHeadline.title}&rdquo;)</> : null}.</> : <>.</>}</>
             ) : (
@@ -159,17 +174,19 @@ export default function CorridorIntelligenceView({ kpis, corridors }: { kpis: Co
         <div className="kpi"><div className="n">{kpis.licenses}</div><div className="l">New business licenses</div><div className="s">Last 12 mo · via Chicago Business Licenses</div></div>
         <div className="kpi"><div className="n">{kpis.articles}</div><div className="l">News article{kpis.articles !== 1 ? "s" : ""}</div><div className="s">Last 90 days · Block Club / Curbed / local news</div></div>
         <div className="kpi"><div className="n">{kpis.zoningAppeals}</div><div className="l">Zoning appeal{kpis.zoningAppeals !== 1 ? "s" : ""}</div><div className="s">Recent decisions &amp; hearings · via Zoning Board of Appeals</div></div>
+        <div className="kpi"><div className="n">{kpis.dpdApplications}</div><div className="l">DPD application{kpis.dpdApplications !== 1 ? "s" : ""}</div><div className="s">Plan Commission pages · application signals</div></div>
       </div>
 
       {/* ── Corridor cards, closest-first ── */}
       {sorted.map((c, ci) => {
-        const hasData = c.licenses.length > 0 || c.construction.length > 0 || c.coverage.length > 0 || c.zoning.length > 0;
+        const hasData = c.licenses.length > 0 || c.construction.length > 0 || c.coverage.length > 0 || c.zoning.length > 0 || c.dpdApplications.length > 0;
         const chips = (
           <div className="corrchips">
             {c.licenses.length > 0 && <span className="cchip">{c.licenses.length} license{c.licenses.length !== 1 ? "s" : ""}</span>}
             {c.construction.length > 0 && <span className="cchip">{c.construction.length} permit{c.construction.length !== 1 ? "s" : ""}</span>}
             {c.coverage.length > 0 && <span className="cchip">{c.coverage.length} article{c.coverage.length !== 1 ? "s" : ""}</span>}
             {c.zoning.length > 0 && <span className="cchip">{c.zoning.length} zoning appeal{c.zoning.length !== 1 ? "s" : ""}</span>}
+            {c.dpdApplications.length > 0 && <span className="cchip">{c.dpdApplications.length} DPD application{c.dpdApplications.length !== 1 ? "s" : ""}</span>}
           </div>
         );
         const dist = c.onCorridor
@@ -269,13 +286,31 @@ export default function CorridorIntelligenceView({ kpis, corridors }: { kpis: Co
                 ))}
               </div>
             )}
+            {c.dpdApplications.length > 0 && (
+              <div className="corrextra">
+                <div className="cexlabel"><FileText /> DPD application signals</div>
+                {c.dpdApplications.map((application, i) => (
+                  <div key={i} data-testid={`corridor-dpd-${c.key}-${i}`} style={i > 0 ? { marginTop: 10 } : undefined}>
+                    <div className="zrow">
+                      <span className="zaddr">{application.address}</span>
+                      <span className="zmeta">{[application.applicationType, application.hearingDate].filter(Boolean).join(" · ")}</span>
+                      <span className="zstatus">{application.status}</span>
+                      {application.distanceMi != null && <span className="zmeta">{application.distanceMi.toFixed(2)} mi</span>}
+                    </div>
+                    {application.applicant && <div className="zuse">Applicant: {application.applicant}</div>}
+                    {application.proposal && <div className="zuse">{application.proposal} — a corridor-matched application, not the subject parcel.</div>}
+                    <div className="zuse">{application.applicationUrl ? <a className="text-primary hover:underline" href={application.applicationUrl} target="_blank" rel="noopener noreferrer">Filed application</a> : <a className="text-primary hover:underline" href={application.hearingUrl} target="_blank" rel="noopener noreferrer">Hearing page</a>}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       })}
 
       {/* ── Footer: single line ── */}
       <div className="foot" data-testid="corridor-footer">
-        Showing primary commercial corridors within ~0.5 mi of the property (nearest point). <b>Tier 1</b> = primary commercial corridor · <b>Tier 2</b> = secondary / emerging. Individual licenses, permits and appeals can sit farther along a corridor (distance shown per item). Permit &ldquo;city class&rdquo; labels are raw Building-Permit classifications. Sources: City Building Permits · Chicago Business Licenses · Zoning Board of Appeals · Block Club / Curbed / local news.
+        Showing primary commercial corridors within ~0.5 mi of the property (nearest point). <b>Tier 1</b> = primary commercial corridor · <b>Tier 2</b> = secondary / emerging. Individual licenses, permits, appeals, and DPD applications can sit farther along a corridor (distance shown per item). DPD rows are published application signals, not approvals or construction proof. Sources: City Building Permits · Chicago Business Licenses · Zoning Board of Appeals · Chicago DPD Plan Commission · Block Club / Curbed / local news.
       </div>
     </div>
   );

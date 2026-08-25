@@ -30,9 +30,11 @@ import { getGroceryAccessByCommunityArea, type GroceryAccessData } from './groce
 import { checkTODStatus, type TODStatus } from './transit';
 import { checkNmtcEligibility } from './nmtc';
 import { getUpcomingDevelopments, type UpcomingDevelopment } from './upcomingDevelopments';
+import { getNearbyNewConstruction } from './newConstruction';
 import { getVehicleOwnership, getSeniorsData, type VehicleOwnershipEntry, type SeniorsEntry } from './localDemographics';
 import { findNearbyRestaurants, findNearbyCoffeeShops, findNearbyBars, findNearbyHotels, findNearbyGasStations, findNearbyEvStations } from './ev-stations';
 import { getNearbyBusinessLicenses } from './businessLicenses';
+import { buildListingChecks, classifyDisclosures, hasValidatedArmLengthSaleAfterFinding } from './listingChecks';
 
 /** GET/POST against our own free local-data routes (no auth, no paid calls). */
 async function localApi<T = any>(pathname: string, body?: unknown): Promise<T | null> {
@@ -100,6 +102,7 @@ interface GatheredData {
   licenses: any | null;
   traffic: any | null;
   developments: UpcomingDevelopment[] | null;
+  construction: Awaited<ReturnType<typeof getNearbyNewConstruction>> | null;
   landmark: any | null;
 }
 
@@ -164,7 +167,7 @@ async function gatherData(run: Run, ward?: WardInfo): Promise<GatheredData> {
     hmda: null, sba: null, comps: null, airbnb: null, grocery: null, tod: null,
     nmtc: null, sbif: null, mmrp: null, lodes: null, elections: null, vehicle: null,
     seniors: null, amenities: null, licenses: null, traffic: null, developments: null,
-    landmark: null,
+    landmark: null, construction: null,
   };
 
   const geo = await readGeocodeFromCache(run.address).catch(() => undefined);
@@ -258,7 +261,7 @@ async function gatherData(run: Run, ward?: WardInfo): Promise<GatheredData> {
       ? soft(getComparableSales(d.lat!, d.lon!, t0.propertyClass, t0.buildingSquareFeet ?? null, null, null), 'comps')
       : null,
     soft(getUpcomingDevelopments(), 'developments'),
-    hasGeo ? soft(getNearbyBusinessLicenses(d.lat!, d.lon!), 'licenses') : null,
+    hasGeo ? soft(getNearbyBusinessLicenses(d.lat!, d.lon!, 1), 'licenses') : null,
     hasGeo ? soft(localApi('/api/landmark-status', { lat: d.lat, lon: d.lon, address: run.address }), 'landmark') : null,
     hasGeo ? soft(checkNmtcEligibility(d.lat!, d.lon!), 'nmtc') : null,
     d.tifName ? soft(localApi('/api/sbif/check', { tifName: d.tifName }), 'sbif') : null,
@@ -273,6 +276,7 @@ async function gatherData(run: Run, ward?: WardInfo): Promise<GatheredData> {
   d.developments = developments && ward?.ward
     ? developments.filter((dev) => dev.ward != null && String(dev.ward) === String(ward.ward)).slice(0, 12)
     : null;
+  if (hasGeo) d.construction = await soft(getNearbyNewConstruction(d.lat!, d.lon!, d.communityArea || undefined, 1), 'new construction');
 
   // Local-data reads
   try { if (d.communityArea) d.airbnb = await getAirbnbStats(d.communityArea); } catch (e) { console.error('[REPORT PDF] airbnb failed:', (e as Error).message); }
@@ -432,6 +436,24 @@ export function buildReportPdfHtml(run: Run, d: GatheredData, ward: WardInfo, op
     </table>` : ''}
   </section>` });
 
+  // --- New construction ---
+  const NC = d.construction;
+  sections.push({ title: 'New Construction', html: (no) => `
+  <section class="chap">
+    <h2 class="sec-h"><span class="sec-no">${no}</span> New Construction</h2>
+    ${NC ? `
+      <div class="grid3">
+        ${fact('Nearby qualifying permits', fmtNum(NC.subject.totalPermits), 'Within one mile · three-year source period')}
+        ${fact('Likely still building', fmtNum(NC.activePermitCount), 'Issued within 18 months; proxy only')}
+        ${fact('Median reported cost', fmtMoney(NC.subject.medianReportedCost))}
+      </div>
+      <p class="body-p">${esc(`By type: single family ${NC.subject.byCategory.singleFamily} • multifamily ${NC.subject.byCategory.multifamily} • commercial ${NC.subject.byCategory.commercial}`)}</p>
+      <p class="body-p">${NC.trend.suppressed ? esc(`12-month trend not shown: only ${NC.trend.current12Months + NC.trend.prior12Months} permits across both comparison windows.`) : esc(`Trailing 12 months: ${NC.trend.current12Months}; prior 12 months: ${NC.trend.prior12Months} (${NC.trend.changePct! > 0 ? '+' : ''}${NC.trend.changePct}%).`)}</p>
+      ${NC.permits.length ? `<table class="dt"><thead><tr><th>Address</th><th>Type</th><th>Issued</th><th>Distance</th><th>Units</th></tr></thead><tbody>${NC.permits.slice(0, 10).map((p) => `<tr><td>${esc(p.address)}</td><td>${esc(p.category)}</td><td>${esc(p.issueDate || '—')}</td><td>${p.distanceMiles.toFixed(2)} mi</td><td>${p.units ?? '—'}</td></tr>`).join('')}</tbody></table>` : '<p class="unavail">No qualifying new-construction permits were found within one mile.</p>'}
+      <p class="fn">Source: Chicago Building Permits. Accessory and temporary structures are excluded. “Likely still building” is not a verified construction-status claim.</p>
+    ` : '<p class="unavail">New construction permit data unavailable.</p>'}
+  </section>` });
+
   // --- Permits, violations & area development ---
   const P = d.permits, V = d.violations;
   sections.push({ title: 'Permits, Violations & Development Activity', html: (no) => `
@@ -497,6 +519,26 @@ export function buildReportPdfHtml(run: Run, d: GatheredData, ward: WardInfo, op
   // --- Active listing (stored snapshot only — never a live paid fetch) ---
   const L = d.listing;
   if (L) {
+    const checkRows = L.status === 'not_found' ? [] : buildListingChecks(L.claims, {
+      annualTaxes: d.tax?.totalAnnualTaxAmount ?? null,
+      lotSizeSf: d.tax?.landSquareFeet ?? null,
+      assessorApartments: (() => {
+        const n = Number(d.tax?.apartments);
+        return Number.isFinite(n) && n > 0 ? n : null;
+      })(),
+      yearBuilt: d.tax?.yearBuilt ?? null,
+      permitYears: (d.permits?.permits ?? []).map((p: any) => new Date(p.issueDate).getFullYear()).filter(Number.isFinite),
+    });
+    const pdfViolationDates = (d.violations?.violations ?? [])
+      .map((violation: any) => new Date(violation.violationDate || violation.date || violation.openDate).getTime())
+      .filter((time: number) => Number.isFinite(time));
+    const pdfLatestFinding = pdfViolationDates.length ? Math.max(...pdfViolationDates) : null;
+    const pdfArmLengthSale = pdfLatestFinding !== null
+      && hasValidatedArmLengthSaleAfterFinding(d.pinDetail?.saleHistory, pdfLatestFinding);
+    const pdfDisclosures = L.status === 'not_found' ? [] : classifyDisclosures(L.disclosures, {
+      hasArmLengthSaleAfterFinding: pdfArmLengthSale,
+      hasPermittedWorkAfterFinding: false,
+    });
     sections.push({ title: 'Active Listing', html: (no) => `
   <section class="chap">
     <h2 class="sec-h"><span class="sec-no">${no}</span> Active Listing</h2>
@@ -504,21 +546,22 @@ export function buildReportPdfHtml(run: Run, d: GatheredData, ward: WardInfo, op
       ${fact('Status', L.statusLabel ?? L.status ?? '—')}
       ${fact('List price', L.listPrice != null ? fmtMoney(L.listPrice) : '—', L.daysOnMarket != null ? `${L.daysOnMarket} days on market` : undefined)}
       ${fact('Source', L.sourceName ?? '—', L.listedDate ? `Listed ${L.listedDate}` : undefined)}
-      ${L.soldPrice != null ? fact('Sold price', fmtMoney(L.soldPrice), L.soldDate ?? undefined) : ''}
+      ${L.soldPrice != null && (L.status === 'off_market' || L.status === 'pending') ? fact('Sold price', fmtMoney(L.soldPrice), L.soldDate ?? undefined) : ''}
       ${L.unitCount != null ? fact('Units', String(L.unitCount)) : ''}
       ${L.grossAnnualIncome != null ? fact('Gross annual income', fmtMoney(L.grossAnnualIncome)) : ''}
       ${L.statedNoi != null ? fact('Stated NOI', fmtMoney(L.statedNoi)) : ''}
     </div>
     ${L.remarksSummary ? `<h3 class="sub-h">Listing Summary</h3><p class="body-p">${esc(L.remarksSummary)}</p>` : ''}
-    ${L.keyFacts?.length ? `<h3 class="sub-h">Key Facts</h3><ul class="bl">${L.keyFacts.map((f: string) => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
-    ${L.disclosures?.length ? `<h3 class="sub-h">Disclosures</h3><ul class="bl">${L.disclosures.map((f: string) => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
+    ${checkRows.length ? `<h3 class="sub-h">Claims Checked Against the Record</h3><table class="dt"><thead><tr><th>Claim</th><th>Record</th><th>Result</th></tr></thead><tbody>${checkRows.map((check) => `<tr><td>${esc(check.claimLabel)}</td><td>${esc(check.recordLabel)}${check.note ? `<br><small>${esc(check.note)}</small>` : ''}</td><td>${esc(check.result)}</td></tr>`).join('')}</tbody></table>` : ''}
+    ${L.keyFacts?.length ? `<h3 class="sub-h">Key Facts</h3><ul class="bl">${L.keyFacts.slice(0, 10).map((f: string) => `<li>${esc(f)}</li>`).join('')}</ul>${L.keyFacts.length > 10 ? `<p class="fn">+${L.keyFacts.length - 10} more listing highlights in the web report.</p>` : ''}` : ''}
+    ${pdfDisclosures.length ? `<h3 class="sub-h">Seller Disclosures</h3><ul class="bl">${pdfDisclosures.map((item) => `<li><b>${esc(item.text)}</b> — ${esc(item.resolution?.because ?? item.consequence)}</li>`).join('')}</ul>` : ''}
     ${L.rentRoll?.length ? `
     <h3 class="sub-h">Rent Roll</h3>
     <table class="dt">
       <thead><tr><th>Unit</th><th>Beds</th><th>Baths</th><th>Monthly rent</th></tr></thead>
       <tbody>${L.rentRoll.map((u: any) => `<tr><td>${esc(u.unit)}</td><td>${esc(u.beds ?? '—')}</td><td>${esc(u.baths ?? '—')}</td><td>${u.monthlyRent != null ? fmtMoney(u.monthlyRent) : '—'}</td></tr>`).join('')}</tbody>
     </table>` : ''}
-    <p class="fn">Snapshot checked ${esc(L.checkedAt ? new Date(L.checkedAt).toLocaleDateString('en-US') : '—')} • ${L.sourceUrl ? esc(L.sourceUrl) : 'source link on the web report'}</p>
+    <p class="fn"><b>Seller-side listing claims, not verified property facts.</b> Record checks compare only claims the listing made and do not replace inspection, title review, lease diligence, or a current tax bill. Snapshot checked ${esc(L.checkedAt ? new Date(L.checkedAt).toLocaleDateString('en-US') : '—')} • ${L.sourceUrl ? esc(L.sourceUrl) : 'source link on the web report'}</p>
   </section>` });
   }
 
@@ -609,7 +652,7 @@ export function buildReportPdfHtml(run: Run, d: GatheredData, ward: WardInfo, op
       <tbody>${Object.entries(d.amenities).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${fmtNum(v.total)}</td><td>${fmtNum(v.within1)}</td><td class="wrap">${esc(v.names.join(', '))}</td></tr>`).join('')}</tbody>
     </table>
     <p class="fn">Restaurants, coffee, and bars counted within 1 mile; hotels, gas, and EV charging within 3 miles. Local licensed-business datasets.</p>` : '<p class="unavail">Nearby business data unavailable.</p>'}
-    ${d.licenses?.licenses?.length || d.licenses?.count ? `<p class="body-p">${fmtNum(d.licenses.count ?? d.licenses.licenses.length)} active business licenses within a half mile.</p>` : ''}
+    ${d.licenses?.licenses?.length ? `<p class="body-p">${fmtNum(d.licenses.totalCount)} new business${d.licenses.totalCount === 1 ? '' : 'es'} within 1 mile in the past 12 months, from ${fmtNum(d.licenses.licenseCount)} new issuance${d.licenses.licenseCount === 1 ? '' : 's'}.</p>` : ''}
     ${d.traffic?.latestCount ? `<p class="body-p">Street traffic: ${fmtNum(d.traffic.latestCount)} vehicles/day${d.traffic.roadName ? ` on ${esc(d.traffic.roadName)}` : ''}${d.traffic.percentile ? ` — busier than ${esc(String(d.traffic.percentile))}% of measured Chicago segments` : ''}${d.traffic.latestDate ? ` (counted ${esc(String(d.traffic.latestDate).slice(0, 10))})` : ''}.</p>` : ''}
   </section>` });
 

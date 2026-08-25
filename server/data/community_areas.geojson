@@ -1,0 +1,4487 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.626243,
+          41.736172
+        ]
+      },
+      "properties": {
+        "zip": "60620",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "87 W 87th St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.71437,
+          41.854608
+        ]
+      },
+      "properties": {
+        "zip": "60623",
+        "store_name": "Farm on Ogden",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "3555 W OGDEN AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.659887,
+          41.978998
+        ]
+      },
+      "properties": {
+        "zip": "60640-2311",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "5343 N Broadway St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.737127,
+          41.924425
+        ]
+      },
+      "properties": {
+        "zip": "60639",
+        "store_name": "International Foods NW",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4404 W FULLERTON AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.785559,
+          41.926236
+        ]
+      },
+      "properties": {
+        "zip": "60639-1041",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "2520 N Narragansett Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.647384,
+          41.880557
+        ]
+      },
+      "properties": {
+        "zip": "60661-3506",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": null,
+        "address": "40 S Halsted St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.66563800000002,
+          41.836512
+        ]
+      },
+      "properties": {
+        "zip": "60608",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "3145 South Ashland Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.587472,
+          41.752778
+        ]
+      },
+      "properties": {
+        "zip": "60619-2724",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "7800 S South Chicago Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.663901,
+          41.765174
+        ]
+      },
+      "properties": {
+        "zip": "60636-3948",
+        "store_name": "Food 4 Less",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "7030 S Ashland Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.647331,
+          41.882501
+        ]
+      },
+      "properties": {
+        "zip": "60661-2176",
+        "store_name": "Whole Foods Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1 N Halsted St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.701088,
+          41.99753
+        ]
+      },
+      "properties": {
+        "zip": "60645",
+        "store_name": "Ted's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2840 W Devon Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.743743,
+          41.931592
+        ]
+      },
+      "properties": {
+        "zip": "60639",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4645 W. Diversy Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.712866,
+          41.931959
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Foodsmart",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3415 W Diversey Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.787504,
+          41.996164
+        ]
+      },
+      "properties": {
+        "zip": "60646",
+        "store_name": "Shop & Save Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "6312 N Nagle Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.535294,
+          41.699723
+        ]
+      },
+      "properties": {
+        "zip": "60617",
+        "store_name": "La Cienega Super Food",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "10736 S EWING AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.715926,
+          41.968373
+        ]
+      },
+      "properties": {
+        "zip": "60625-5612",
+        "store_name": "Chicago Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3500 W Lawrence Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.673098,
+          42.020029
+        ]
+      },
+      "properties": {
+        "zip": "60626-1018",
+        "store_name": "Paulina Super Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "7622 N Paulina St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.765278,
+          41.90935000000001
+        ]
+      },
+      "properties": {
+        "zip": "60639",
+        "store_name": "Save A Lot",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "5555 W North Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.628203,
+          41.736274
+        ]
+      },
+      "properties": {
+        "zip": "60620-1318",
+        "store_name": "Food 4 Less",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "112 W 87Th St Ste G1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.68756200000001,
+          41.920967000000005
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Fresh Marketplace",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2134 N Western Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.728091,
+          41.928127
+        ]
+      },
+      "properties": {
+        "zip": "60639-2125",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4030 W Wrightwood Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.723709,
+          41.813795
+        ]
+      },
+      "properties": {
+        "zip": "60632",
+        "store_name": "Pete's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4343 S Pulaski Rd."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.606539,
+          41.80867
+        ]
+      },
+      "properties": {
+        "zip": "60615-1612",
+        "store_name": "Walmart Neighborhood Market",
+        "new_status": "CLOSED",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4720 S Cottage Grove Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.75198,
+          41.924229
+        ]
+      },
+      "properties": {
+        "zip": "60639",
+        "store_name": "Fresh Marketplace",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "5020 W Fullerton Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.681868,
+          41.913241
+        ]
+      },
+      "properties": {
+        "zip": "60647-5423",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1753 N Milwaukee Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.666318,
+          41.862387
+        ]
+      },
+      "properties": {
+        "zip": "60608-2040",
+        "store_name": "Costco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1430 S Ashland Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.670037,
+          41.90332
+        ]
+      },
+      "properties": {
+        "zip": "60622-3922",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "1664 W Division St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.667272,
+          42.007928
+        ]
+      },
+      "properties": {
+        "zip": "60626",
+        "store_name": "Morse Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "1430 W MORSE AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.574498,
+          41.766083
+        ]
+      },
+      "properties": {
+        "zip": "60649",
+        "store_name": "Local Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2101 E 71ST ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.643205,
+          41.903741
+        ]
+      },
+      "properties": {
+        "zip": "60610-1746",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "1200 N Larrabee St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.728134,
+          41.972832
+        ]
+      },
+      "properties": {
+        "zip": "60630-2706",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": null,
+        "address": "5001 N Pulaski Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.710816,
+          41.939357
+        ]
+      },
+      "properties": {
+        "zip": "60618-5513",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3320 W Belmont Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.65979300000001,
+          41.975531
+        ]
+      },
+      "properties": {
+        "zip": "60640",
+        "store_name": "Old World Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "5129 N BROADWAY"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.639156,
+          41.864386
+        ]
+      },
+      "properties": {
+        "zip": "60607",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "1340 S Canal St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.638889,
+          41.856363
+        ]
+      },
+      "properties": {
+        "zip": "60616",
+        "store_name": "Park to Shop Supermarket Canal",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "1835 S CANAL ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.66857,
+          41.93556
+        ]
+      },
+      "properties": {
+        "zip": "60657-4004",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "2940 N Ashland Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.732431,
+          41.844143
+        ]
+      },
+      "properties": {
+        "zip": "60623",
+        "store_name": "La Merced",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4335 W 26TH ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.6058,
+          41.774139000000005
+        ]
+      },
+      "properties": {
+        "zip": "60637-4126",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "6621 S Cottage Grove Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.685717,
+          41.851983
+        ]
+      },
+      "properties": {
+        "zip": "60608",
+        "store_name": "Fairplay Neighborhood Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2200 S Western Ave."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.695711,
+          41.997625
+        ]
+      },
+      "properties": {
+        "zip": "60659",
+        "store_name": "Fresh Farms",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2626 W Devon Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.662811,
+          41.723015
+        ]
+      },
+      "properties": {
+        "zip": "60620-5121",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "9400 S Ashland Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.662937,
+          41.808677
+        ]
+      },
+      "properties": {
+        "zip": "60609-3236",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "1508 W 47th St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.660357,
+          41.995236
+        ]
+      },
+      "properties": {
+        "zip": "60660-1902",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "6221 N Broadway St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.640843,
+          41.920154
+        ]
+      },
+      "properties": {
+        "zip": "60614",
+        "store_name": "Carnival Grocery & Liquor",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "458 W Dickens Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.747691,
+          41.909574
+        ]
+      },
+      "properties": {
+        "zip": "60639-4529",
+        "store_name": "Food 4 Less",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "4821 W North Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.748332,
+          41.990481
+        ]
+      },
+      "properties": {
+        "zip": "60646-4302",
+        "store_name": "Whole Foods Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "6020 N Cicero Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.634052,
+          41.740814
+        ]
+      },
+      "properties": {
+        "zip": "60620-1728",
+        "store_name": "Walmart",
+        "new_status": "CLOSED",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "8331 S Stewart Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.66875400000002,
+          41.941143
+        ]
+      },
+      "properties": {
+        "zip": "60657-2109",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "3300 N Ashland Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.674552,
+          42.012
+        ]
+      },
+      "properties": {
+        "zip": "60626",
+        "store_name": "Supermercado Chapala",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "7117 N CLARK ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.614178,
+          41.707306
+        ]
+      },
+      "properties": {
+        "zip": "60628",
+        "store_name": "Grocery Basket",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "351 E 103RD ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.693138,
+          41.793733
+        ]
+      },
+      "properties": {
+        "zip": "60632",
+        "store_name": "Carniceria La Hacienda",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2744 W 55th St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.73185,
+          41.909879
+        ]
+      },
+      "properties": {
+        "zip": "60639",
+        "store_name": "Carniceria Jimenez",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T21:30:00.000",
+        "address": "4204 W North Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.68456,
+          41.881155
+        ]
+      },
+      "properties": {
+        "zip": "60612",
+        "store_name": "Pete's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2333 W Madison St."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.660677,
+          41.998785
+        ]
+      },
+      "properties": {
+        "zip": "60626-5336",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "6422 N Sheridan Rd Unit A"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.644337,
+          41.888757
+        ]
+      },
+      "properties": {
+        "zip": "60661-1106",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "370 N Desplaines St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.644278,
+          41.934267000000006
+        ]
+      },
+      "properties": {
+        "zip": "60657-6017",
+        "store_name": "Walmart",
+        "new_status": "CLOSED",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2844 N Broadway St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.675803,
+          41.949969
+        ]
+      },
+      "properties": {
+        "zip": "60613",
+        "store_name": "Trader Joe's",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "3745 N LINCOLN AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.676229,
+          41.831333
+        ]
+      },
+      "properties": {
+        "zip": "60608",
+        "store_name": "Cermak Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3435 S Archer"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.624864,
+          41.760589
+        ]
+      },
+      "properties": {
+        "zip": "60619-1622",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "7345 S State St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.62773100000001,
+          41.881754
+        ]
+      },
+      "properties": {
+        "zip": "60603-2802",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "1 S State St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.766131,
+          41.928447
+        ]
+      },
+      "properties": {
+        "zip": "60639",
+        "store_name": "Fresh Marketplace",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2600 N Central Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.770457,
+          41.880104
+        ]
+      },
+      "properties": {
+        "zip": "60644",
+        "store_name": "Mario's Butcher Shop",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "5817 W Madison St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.673898,
+          42.008677
+        ]
+      },
+      "properties": {
+        "zip": "60626",
+        "store_name": "Super Mercado Roman",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "6978 N CLARK ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.6814,
+          41.69714900000001
+        ]
+      },
+      "properties": {
+        "zip": "60643",
+        "store_name": "County Fair Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "10800 S Western Avenue"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.663497,
+          41.75482
+        ]
+      },
+      "properties": {
+        "zip": "60620-4248",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "7627 S Ashland Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.566623,
+          41.722569
+        ]
+      },
+      "properties": {
+        "zip": "60617-4806",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "2333 E 95th St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.616756,
+          41.780225
+        ]
+      },
+      "properties": {
+        "zip": "60637",
+        "store_name": "Save A Lot",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "344 E 63rd St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.676224,
+          41.930664
+        ]
+      },
+      "properties": {
+        "zip": "60614-1006",
+        "store_name": "Costco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "2746 N Clybourn Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.668645,
+          41.982857
+        ]
+      },
+      "properties": {
+        "zip": "60640-1214",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "5516 N Clark St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.790105,
+          41.923654
+        ]
+      },
+      "properties": {
+        "zip": "60707",
+        "store_name": "Farmer's Best Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "6420 W FULLERTON AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.619678,
+          41.892621
+        ]
+      },
+      "properties": {
+        "zip": "60601",
+        "store_name": "Bockwinkel's at McClurg",
+        "new_status": "OPEN",
+        "last_updated": null,
+        "address": "320 E Ohio"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.601174,
+          41.751322
+        ]
+      },
+      "properties": {
+        "zip": "60619",
+        "store_name": "Food Town",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "935 E 79TH ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.646261,
+          41.908623
+        ]
+      },
+      "properties": {
+        "zip": "60610",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "1500 N Clybourn Ave. #C104"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.667504,
+          41.808611
+        ]
+      },
+      "properties": {
+        "zip": "60609",
+        "store_name": "Supermercado El Guero",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1701 W 47th Street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.734011,
+          41.778509
+        ]
+      },
+      "properties": {
+        "zip": "60629",
+        "store_name": "Save A Lot",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4439 W 63rd St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.689379,
+          41.852011
+        ]
+      },
+      "properties": {
+        "zip": "60608",
+        "store_name": "Pete's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2526 W Cermak Rd."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.723369,
+          41.797972
+        ]
+      },
+      "properties": {
+        "zip": "60632",
+        "store_name": "Cermak Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "5220 S Pulaski"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.670004,
+          41.906389
+        ]
+      },
+      "properties": {
+        "zip": "60622-2145",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "1341 N Paulina St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "zip": "60653",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "3857 S Dr. Martin Luther King Jr. Dr."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.742133,
+          41.938918
+        ]
+      },
+      "properties": {
+        "zip": "60641",
+        "store_name": "Tony's Finer Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4608 W. Belmont Avenue"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.615743,
+          41.88494
+        ]
+      },
+      "properties": {
+        "zip": "60601",
+        "store_name": "Bockwinkel's Fresh Express",
+        "new_status": "OPEN",
+        "last_updated": null,
+        "address": "155 N Harbor Drive"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.701338,
+          41.94667
+        ]
+      },
+      "properties": {
+        "zip": "60618-4635",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "2939 W Addison St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.680301,
+          42.002765
+        ]
+      },
+      "properties": {
+        "zip": "60645",
+        "store_name": "Cermak Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "6623 Damen Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.646252,
+          41.779755
+        ]
+      },
+      "properties": {
+        "zip": "60621-1902",
+        "store_name": "Whole Foods Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "832 W 63rd St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.757473,
+          41.978765
+        ]
+      },
+      "properties": {
+        "zip": "60630",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "5353 N Elston"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.689822,
+          41.961329
+        ]
+      },
+      "properties": {
+        "zip": "60618-1605",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2431 W Montrose Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.704836,
+          41.838177
+        ]
+      },
+      "properties": {
+        "zip": "60623-4713",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3030 S Kedzie Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.786653,
+          41.923634
+        ]
+      },
+      "properties": {
+        "zip": "60707",
+        "store_name": "Gordon Food Service Store",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "6431 W FULLERTON AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.737017,
+          41.91706
+        ]
+      },
+      "properties": {
+        "zip": "60639",
+        "store_name": "Cermak Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4401 W ARMITAGE AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.654886,
+          41.877858
+        ]
+      },
+      "properties": {
+        "zip": "60607-2905",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "1101 W Jackson Blvd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.587718,
+          41.80173500000001
+        ]
+      },
+      "properties": {
+        "zip": "60615-4115",
+        "store_name": "Whole Foods Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "5118 S Lake Park Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.678526,
+          41.852157
+        ]
+      },
+      "properties": {
+        "zip": "60608",
+        "store_name": "Supermercado El Guero",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2101 W Cermak Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.743743,
+          41.931592
+        ]
+      },
+      "properties": {
+        "zip": "60639-1828",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4645 W Diversey Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.693738,
+          41.820567
+        ]
+      },
+      "properties": {
+        "zip": "60632",
+        "store_name": "Supermercado El Guero",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4023 S Archer Ave."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.74364,
+          41.830299
+        ]
+      },
+      "properties": {
+        "zip": null,
+        "store_name": "Walmart",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "3320 South Cicero Avenue"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.663181,
+          41.73671
+        ]
+      },
+      "properties": {
+        "zip": "60620",
+        "store_name": "Beverly Food Mart",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "8636 S ASHLAND AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.714614,
+          41.844396
+        ]
+      },
+      "properties": {
+        "zip": "60623",
+        "store_name": "Food Market La Chicquita",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3555 W 26th Street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.788159,
+          41.923717
+        ]
+      },
+      "properties": {
+        "zip": "60707-3431",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "6520 W Fullerton Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.724514,
+          41.843419
+        ]
+      },
+      "properties": {
+        "zip": "60623",
+        "store_name": "Supermercado La Chiqutia",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2623 S PULASKI RD"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.69240600000002,
+          41.976631
+        ]
+      },
+      "properties": {
+        "zip": "60625",
+        "store_name": "Tony's Finer Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "5233 N. Lincoln Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.68370700000001,
+          41.78380000000001
+        ]
+      },
+      "properties": {
+        "zip": "60636-2019",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "6025 S Western Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.644291,
+          41.937393
+        ]
+      },
+      "properties": {
+        "zip": "60657",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "3030 N Broadway Suite 100"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.703961,
+          41.807662
+        ]
+      },
+      "properties": {
+        "zip": "60632",
+        "store_name": "Pete's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4700 S Kedzie Ave."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.66251200000002,
+          41.6814
+        ]
+      },
+      "properties": {
+        "zip": "60643-4904",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "11730 S Marshfield Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.664031,
+          41.94821400000001
+        ]
+      },
+      "properties": {
+        "zip": "60613-3710",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "3630 N Southport Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.622865,
+          41.899246
+        ]
+      },
+      "properties": {
+        "zip": "60611",
+        "store_name": "Potash Markets",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "175 E Delaware"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.722009,
+          41.88078
+        ]
+      },
+      "properties": {
+        "zip": "60624-2335",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3835 W Madison St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.689211,
+          41.852013
+        ]
+      },
+      "properties": {
+        "zip": "60608-3719",
+        "store_name": "Walmart",
+        "new_status": "CLOSED",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2551 W Cermak Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.714114,
+          41.7788
+        ]
+      },
+      "properties": {
+        "zip": "60629",
+        "store_name": "Carniceria La Hacienda",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3629 W 63rd St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.644687,
+          41.87801
+        ]
+      },
+      "properties": {
+        "zip": "60661",
+        "store_name": "H Mart",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "711 W JACKSON BLVD"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.707076,
+          41.866411
+        ]
+      },
+      "properties": {
+        "zip": "60624",
+        "store_name": "Leamington Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3240 W Roosevelt Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.586146,
+          41.758397
+        ]
+      },
+      "properties": {
+        "zip": "60649-3999",
+        "store_name": "Jewel - Osco",
+        "new_status": "CLOSED",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "7530 S Stony Island Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.631522,
+          41.90392
+        ]
+      },
+      "properties": {
+        "zip": "60610",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "102 W Division St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.703411,
+          41.788825
+        ]
+      },
+      "properties": {
+        "zip": "60629",
+        "store_name": "Pete's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "5724 S Kedzie Ave."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.674989,
+          41.809458
+        ]
+      },
+      "properties": {
+        "zip": "60609-4043",
+        "store_name": "Food 4 Less",
+        "new_status": "OPEN",
+        "last_updated": null,
+        "address": "4620 S Damen Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.58648500000001,
+          41.736904
+        ]
+      },
+      "properties": {
+        "zip": "60619",
+        "store_name": "Pete's Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1543 East 87th Street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.651946,
+          41.908333
+        ]
+      },
+      "properties": {
+        "zip": "60642-2532",
+        "store_name": "Whole Foods Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1550 N Kingsbury St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.708144,
+          41.958242
+        ]
+      },
+      "properties": {
+        "zip": "60618",
+        "store_name": "Cermak Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4234 N Kedzie Ave."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.662098,
+          41.856785
+        ]
+      },
+      "properties": {
+        "zip": "60608",
+        "store_name": "La Casa Del Pueblo",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1810 S Blue Island Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.656115,
+          41.963321
+        ]
+      },
+      "properties": {
+        "zip": "60640-5660",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": null,
+        "address": "4466 N Broadway St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.641933,
+          41.848631
+        ]
+      },
+      "properties": {
+        "zip": "60616",
+        "store_name": "Park to Shop Supermarket",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2425 S WALLACE ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.748197,
+          41.93153
+        ]
+      },
+      "properties": {
+        "zip": "60639",
+        "store_name": "Morelia Supermarket",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4833 W DIVERSEY AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.595593,
+          41.799496
+        ]
+      },
+      "properties": {
+        "zip": "60615",
+        "store_name": "Hyde Park Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "1226 E 53RD ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.639626,
+          41.903827
+        ]
+      },
+      "properties": {
+        "zip": "60610-3190",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "424 W Division St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.708464,
+          41.967651
+        ]
+      },
+      "properties": {
+        "zip": "60625",
+        "store_name": "Andy's Fruit Ranch",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4733 N KEDZIE AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.655022,
+          41.976906
+        ]
+      },
+      "properties": {
+        "zip": "60640",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "5201 N Sheridan Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.593095,
+          41.799527
+        ]
+      },
+      "properties": {
+        "zip": "60615-4046",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "1346 E 53rd St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.675062,
+          41.968858
+        ]
+      },
+      "properties": {
+        "zip": "60640",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "1800 West Lawrence Ave."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.680391,
+          41.691788
+        ]
+      },
+      "properties": {
+        "zip": "60643",
+        "store_name": "Fairplay Neighborhood Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2323 W 111th St."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.540984,
+          41.68094700000001
+        ]
+      },
+      "properties": {
+        "zip": "60617",
+        "store_name": "Pete's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3448 E 118th St."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.76795,
+          41.938567
+        ]
+      },
+      "properties": {
+        "zip": "60634",
+        "store_name": "Tony's Finer Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "5630 W. Belmont Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.662846,
+          41.730156
+        ]
+      },
+      "properties": {
+        "zip": "60620",
+        "store_name": "Stumpy's Grocery & Deli",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "9001 S ASHLAND AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.667512,
+          41.998125
+        ]
+      },
+      "properties": {
+        "zip": "60660",
+        "store_name": "Devon Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1440 W Devon Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.621346,
+          41.891801
+        ]
+      },
+      "properties": {
+        "zip": "60611-3315",
+        "store_name": "Whole Foods Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "255 E Grand Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.630528,
+          41.867843
+        ]
+      },
+      "properties": {
+        "zip": "60605-2159",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "1154 S Clark St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.668539,
+          41.920702
+        ]
+      },
+      "properties": {
+        "zip": "60614",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "2112 N Ashland"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.72213,
+          41.955747
+        ]
+      },
+      "properties": {
+        "zip": "60618",
+        "store_name": "Tony's Finer Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4137 N. Elston Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.657622,
+          41.856653
+        ]
+      },
+      "properties": {
+        "zip": "60608",
+        "store_name": "Los Cuatro Hermanos Grocery",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "1858 S ALLPORT ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.742015,
+          41.764792
+        ]
+      },
+      "properties": {
+        "zip": "60629-5891",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "7100 S Cicero Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.659728,
+          41.971045
+        ]
+      },
+      "properties": {
+        "zip": "60640",
+        "store_name": "Park to Shop Supermarket Broadway",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4879 N BROADWAY"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.710541,
+          41.930966
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Dill Pickle Food Co-op",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2746 N MILWAUKEE AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.723656,
+          41.812519
+        ]
+      },
+      "properties": {
+        "zip": "60632-4010",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4433 S Pulaski Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.752533,
+          41.902306
+        ]
+      },
+      "properties": {
+        "zip": "60651",
+        "store_name": "Moses Butcher Shop",
+        "new_status": "OPEN",
+        "last_updated": null,
+        "address": "5057 W DIVISION ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.744868,
+          41.953468
+        ]
+      },
+      "properties": {
+        "zip": "60641-2888",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "4660 W Irving Park Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.688178,
+          41.942805
+        ]
+      },
+      "properties": {
+        "zip": "60618",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "3350 North Western Avenue"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.763514,
+          41.998118
+        ]
+      },
+      "properties": {
+        "zip": "60646",
+        "store_name": "Happy Foods - Edgebrook",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "6415 N Central Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.683798,
+          41.929451
+        ]
+      },
+      "properties": {
+        "zip": "60647-2019",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "2656 N Elston Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.645939,
+          41.932807
+        ]
+      },
+      "properties": {
+        "zip": "60614",
+        "store_name": "Trader Joe's",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "667 W DIVERSEY PKWY"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.688311,
+          41.768259
+        ]
+      },
+      "properties": {
+        "zip": "60629",
+        "store_name": "Ogies Food",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2600 W LITHUANIAN PLAZA CT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.596618,
+          41.696117
+        ]
+      },
+      "properties": {
+        "zip": "60628-3804",
+        "store_name": "Walmart",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "10900 S Doty Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.663538,
+          41.756362
+        ]
+      },
+      "properties": {
+        "zip": "60620-4246",
+        "store_name": "Walmart",
+        "new_status": "CLOSED",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "7535 S Ashland Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.669358,
+          41.852296
+        ]
+      },
+      "properties": {
+        "zip": "60608",
+        "store_name": "Cermak Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1711 W Cermak"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.646295,
+          41.838836
+        ]
+      },
+      "properties": {
+        "zip": "60608",
+        "store_name": "Cermak Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3033 S Halsted St."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.723053,
+          41.786519
+        ]
+      },
+      "properties": {
+        "zip": "60629",
+        "store_name": "Pete's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "5838 S Pulaski Rd."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.668592,
+          41.93976
+        ]
+      },
+      "properties": {
+        "zip": "60657-2156",
+        "store_name": "Whole Foods Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3201 N Ashland Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.617634,
+          41.891053
+        ]
+      },
+      "properties": {
+        "zip": "60611-4305",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "401 E Illinois St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.770696,
+          41.794391
+        ]
+      },
+      "properties": {
+        "zip": "60638-2743",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "6107 S Archer Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.699617,
+          41.917474
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Foodsmart",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2901 W Armitage Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.702326,
+          41.925616
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Target",
+        "new_status": "CLOSED",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2434 N SACRAMENTO AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.586265,
+          41.762774
+        ]
+      },
+      "properties": {
+        "zip": "60649",
+        "store_name": "Save A Lot",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "7240 S Stony Island"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.64258800000002,
+          41.685074
+        ]
+      },
+      "properties": {
+        "zip": "60643-4618",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "821 W 115th St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.626344,
+          41.89332300000001
+        ]
+      },
+      "properties": {
+        "zip": "60611",
+        "store_name": "Trader Joe's",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "44 E ONTARIO ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.76380600000002,
+          41.880217
+        ]
+      },
+      "properties": {
+        "zip": "60644",
+        "store_name": "Leamington Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "5467 W Madison St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.70826800000002,
+          41.844499000000006
+        ]
+      },
+      "properties": {
+        "zip": "60623",
+        "store_name": "Cermak Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3311 W 26th St."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.649502,
+          41.948387
+        ]
+      },
+      "properties": {
+        "zip": "60613-4316",
+        "store_name": "Whole Foods Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3640 N Halsted St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.787727,
+          41.952915
+        ]
+      },
+      "properties": {
+        "zip": "60634-2459",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "6430 W Irving Park Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.723901,
+          41.924575
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Carniceria Jimenez",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T21:30:00.000",
+        "address": "3850 W Fullerton Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.787135,
+          41.930987
+        ]
+      },
+      "properties": {
+        "zip": "60707-2312",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "6525 W Diversey Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.525607,
+          41.703728
+        ]
+      },
+      "properties": {
+        "zip": "60617-6355",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "10532 S Indianapolis Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.741835,
+          41.760134
+        ]
+      },
+      "properties": {
+        "zip": "60629-5817",
+        "store_name": "Costco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "7300 S Cicero Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.64393700000001,
+          41.930805
+        ]
+      },
+      "properties": {
+        "zip": "60614",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2650 N CLARK ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.74243,
+          41.931608
+        ]
+      },
+      "properties": {
+        "zip": "60639-1829",
+        "store_name": "Walmart",
+        "new_status": "CLOSED",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4626 W Diversey Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.630264,
+          41.859325
+        ]
+      },
+      "properties": {
+        "zip": "60616",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "1615 S Clark Street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.65629,
+          41.963599
+        ]
+      },
+      "properties": {
+        "zip": "60640-5602",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4500 N Broadway St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.631939,
+          41.73934
+        ]
+      },
+      "properties": {
+        "zip": "60620-1338",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "8500 S Holland Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.660244,
+          41.991499000000005
+        ]
+      },
+      "properties": {
+        "zip": "60660-2500",
+        "store_name": "Whole Foods Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "6009 N Broadway St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.710835,
+          41.917361
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Armitage Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "3334 W. Armitage Ave."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.715646,
+          41.917317
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Que Rico Supermercado",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "3552 W ARMITAGE AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.723312,
+          41.795953
+        ]
+      },
+      "properties": {
+        "zip": "60632-4224",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "5320 S Pulaski Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.649781,
+          41.958174
+        ]
+      },
+      "properties": {
+        "zip": "60613",
+        "store_name": "Clarendon Food Mart",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4183 N CLARENDON AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.654343,
+          41.914418
+        ]
+      },
+      "properties": {
+        "zip": "60614",
+        "store_name": "Trader Joe's",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "1840 N CLYBOURN AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.642075,
+          41.848785
+        ]
+      },
+      "properties": {
+        "zip": "60616",
+        "store_name": "J Freshmart",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2411 S WALLACE ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.634502,
+          41.904751
+        ]
+      },
+      "properties": {
+        "zip": "60610",
+        "store_name": "Plum Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "1233 N WELLS ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.682232,
+          41.959156
+        ]
+      },
+      "properties": {
+        "zip": "60618-2902",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "4250 N Lincoln Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.550363,
+          41.73008
+        ]
+      },
+      "properties": {
+        "zip": "60617",
+        "store_name": "First Choice Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "3019 E 91ST ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.55104,
+          41.718849
+        ]
+      },
+      "properties": {
+        "zip": "60617",
+        "store_name": "La Feria Grocery",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "9704 S COMMERCIAL AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.674594,
+          41.834066
+        ]
+      },
+      "properties": {
+        "zip": "60608-6107",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "1940 W 33rd St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.76607,
+          41.926441
+        ]
+      },
+      "properties": {
+        "zip": "60639",
+        "store_name": "Tony's Finer Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2500 N Central Avenue"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.628072,
+          41.89219
+        ]
+      },
+      "properties": {
+        "zip": "60654-4815",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "550 N State St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.836778,
+          41.965579
+        ]
+      },
+      "properties": {
+        "zip": "60656-4239",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "4734 N Cumberland Ave Apt N"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.659695,
+          41.972167
+        ]
+      },
+      "properties": {
+        "zip": "60640",
+        "store_name": "Tai Nam Food Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4925 N BROADWAY"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.6258,
+          41.866345
+        ]
+      },
+      "properties": {
+        "zip": "60605-2401",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "1224 S Wabash Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.717603,
+          41.924571
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Tony's Finer Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3607 W Fullerton"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.588351,
+          41.795263
+        ]
+      },
+      "properties": {
+        "zip": "60615",
+        "store_name": "Trader Joe's",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "1528 E 55TH ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.654722,
+          41.961462
+        ]
+      },
+      "properties": {
+        "zip": "60613-1497",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "4355 N Sheridan Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.625838,
+          41.86804
+        ]
+      },
+      "properties": {
+        "zip": "60605",
+        "store_name": "Trader Joe's",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "1147 S WABASH AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.67355,
+          41.928315
+        ]
+      },
+      "properties": {
+        "zip": "60614",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "2550 N Clybourn Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.767429,
+          41.966981
+        ]
+      },
+      "properties": {
+        "zip": "60630-3269",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "4729 N Central Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.729907,
+          41.975461
+        ]
+      },
+      "properties": {
+        "zip": "60630-2747",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "4042 W Foster Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.674817,
+          42.019397
+        ]
+      },
+      "properties": {
+        "zip": "60626-1626",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "1763 W Howard St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.70659,
+          41.895992
+        ]
+      },
+      "properties": {
+        "zip": "60651",
+        "store_name": "Market Fresh Finer Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "800 N Kedzie Avenue"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.818421,
+          42.004199
+        ]
+      },
+      "properties": {
+        "zip": "60631",
+        "store_name": "Happy Foods - Edison Park",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "6783 Northwest Highway"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.699375,
+          41.706252
+        ]
+      },
+      "properties": {
+        "zip": "60655-2010",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "3128 W 103rd St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.766235,
+          41.931987
+        ]
+      },
+      "properties": {
+        "zip": "60634-5306",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2828 N Central Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.766267,
+          41.867428
+        ]
+      },
+      "properties": {
+        "zip": "60644-5504",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "5629 W Fillmore St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.614421,
+          41.779709
+        ]
+      },
+      "properties": {
+        "zip": "60637",
+        "store_name": "Woodlawn Super Fair LLC",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "6319 S VERNON AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.650766,
+          41.940086
+        ]
+      },
+      "properties": {
+        "zip": "60657",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "3204 N CLARK ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.670188,
+          41.852282
+        ]
+      },
+      "properties": {
+        "zip": "60608-4315",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1739 W Cermak Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.736287,
+          41.907435
+        ]
+      },
+      "properties": {
+        "zip": "60651-1602",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1440 N Kostner Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.628297,
+          41.898681
+        ]
+      },
+      "properties": {
+        "zip": "60610",
+        "store_name": "Potash Markets",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "875 N State Street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.614555,
+          41.83312
+        ]
+      },
+      "properties": {
+        "zip": "60616-4135",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "443 E 34th St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.746374,
+          41.971936
+        ]
+      },
+      "properties": {
+        "zip": "60630",
+        "store_name": "Seafood City Supermarket",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "5033 N ELSTON AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.683199,
+          41.990654
+        ]
+      },
+      "properties": {
+        "zip": "60659-4277",
+        "store_name": "Target",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2112 W Peterson Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.688073,
+          41.943389
+        ]
+      },
+      "properties": {
+        "zip": "60618-6012",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "3400 N Western Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.743003,
+          41.909734
+        ]
+      },
+      "properties": {
+        "zip": "60639-4611",
+        "store_name": "Walmart",
+        "new_status": "CLOSED",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4650 W North Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "zip": "60647",
+        "store_name": "Cermak Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4000 West Diversey Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.658721,
+          41.73579600000001
+        ]
+      },
+      "properties": {
+        "zip": "60620",
+        "store_name": "Pete's Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1411 West 87th Street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.639224,
+          41.868909
+        ]
+      },
+      "properties": {
+        "zip": "60607-4932",
+        "store_name": "Whole Foods Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1101 S Canal St Ste 107"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.674207,
+          41.928914
+        ]
+      },
+      "properties": {
+        "zip": "60614-1004",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2600 N Clybourn Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.710412,
+          41.78613800000001
+        ]
+      },
+      "properties": {
+        "zip": "60629",
+        "store_name": "Carniceria La Hacienda",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "3459 W 59th St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.620734,
+          41.886498
+        ]
+      },
+      "properties": {
+        "zip": "60601",
+        "store_name": "Bockwinkel's at Park Millenium",
+        "new_status": "OPEN",
+        "last_updated": null,
+        "address": "222 N Columbus"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.742029,
+          41.765309
+        ]
+      },
+      "properties": {
+        "zip": "60638-6402",
+        "store_name": "Walmart",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "7050 S Cicero Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.682933,
+          41.756043
+        ]
+      },
+      "properties": {
+        "zip": "60620-5817",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "7545 S Western Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.759575,
+          41.796111
+        ]
+      },
+      "properties": {
+        "zip": "60638",
+        "store_name": "Shop & Save Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "5829 S Archer Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.69471,
+          41.910211
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Cermak Produce",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2701 W NORTH AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.640454,
+          41.779823
+        ]
+      },
+      "properties": {
+        "zip": "60621-2012",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "620 W 63rd St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.598545,
+          41.816482
+        ]
+      },
+      "properties": {
+        "zip": "60653",
+        "store_name": "One Stop Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4301 S Lake Park Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.584006,
+          41.722319
+        ]
+      },
+      "properties": {
+        "zip": "60617-4707",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "1655 E 95th St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.64562400000001,
+          41.810628
+        ]
+      },
+      "properties": {
+        "zip": "60609",
+        "store_name": "Fairplay Neighborhood Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "4640 S Halsted St."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.6533,
+          41.925405
+        ]
+      },
+      "properties": {
+        "zip": "60614-2406",
+        "store_name": "Whole Foods Market",
+        "new_status": "ONLINE ORDERS ONLY",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "959 W Fullerton Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.725425,
+          41.874532
+        ]
+      },
+      "properties": {
+        "zip": "60624",
+        "store_name": "Save A Lot",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "420 S Pulaksi Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.63163300000001,
+          41.910246
+        ]
+      },
+      "properties": {
+        "zip": "60610",
+        "store_name": "Potash Markets",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1525 N Clark Street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.677972,
+          41.895918
+        ]
+      },
+      "properties": {
+        "zip": "60622",
+        "store_name": "Mariano's Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "2021 W Chicago Avenue"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.703718,
+          41.799112
+        ]
+      },
+      "properties": {
+        "zip": "60632",
+        "store_name": "Carniceria La Hacienda",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "5153 S Kedzie Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.703824,
+          41.802995
+        ]
+      },
+      "properties": {
+        "zip": "60632-3042",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4934 S Kedzie Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.660633,
+          41.656854
+        ]
+      },
+      "properties": {
+        "zip": "60827-6333",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "13085 S Ashland Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.606036,
+          41.784548
+        ]
+      },
+      "properties": {
+        "zip": "60637",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "6014 S Cottage Grove"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.707291,
+          41.778911
+        ]
+      },
+      "properties": {
+        "zip": "60629",
+        "store_name": "Rio Valley Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "3307 W 63RD ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.663836,
+          41.763146
+        ]
+      },
+      "properties": {
+        "zip": "60636",
+        "store_name": "Johnny's Foods",
+        "new_status": "CLOSED",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "7158 S ASHLAND AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.811426,
+          41.974395
+        ]
+      },
+      "properties": {
+        "zip": "60656-3617",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "7342 W Foster Ave Ste 1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.642681,
+          41.699358
+        ]
+      },
+      "properties": {
+        "zip": "60628",
+        "store_name": "Save A Lot",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "10700 S Halsed St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.708163,
+          41.946197
+        ]
+      },
+      "properties": {
+        "zip": "60618-4318",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "3570 N Elston Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.723227,
+          41.909993
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Carniceria Jimenez",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T21:30:00.000",
+        "address": "3850 W North Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.724506,
+          41.843096
+        ]
+      },
+      "properties": {
+        "zip": "60623",
+        "store_name": "Food Market La Chicquita",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "2637 S Pulaski Road"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.760298,
+          41.938673
+        ]
+      },
+      "properties": {
+        "zip": "60641",
+        "store_name": "Carniceria Jimenez",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T21:30:00.000",
+        "address": "5330 W Belmont Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.629609,
+          41.894857
+        ]
+      },
+      "properties": {
+        "zip": "60654-6402",
+        "store_name": "Whole Foods Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "30 W Huron St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.68249100000001,
+          41.827526
+        ]
+      },
+      "properties": {
+        "zip": "60609-1044",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "3644 S Archer Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.654184,
+          41.914306
+        ]
+      },
+      "properties": {
+        "zip": "60614-4902",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "1836 N Clybourn Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.666452,
+          41.866306
+        ]
+      },
+      "properties": {
+        "zip": "60608",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "1220 S Ashland Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.723596,
+          41.810456
+        ]
+      },
+      "properties": {
+        "zip": "60632-4035",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "4501 S Pulaski Rd"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.801377,
+          41.791634
+        ]
+      },
+      "properties": {
+        "zip": "60638",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "5501 S HARLEM AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.680485,
+          41.927161000000005
+        ]
+      },
+      "properties": {
+        "zip": "60647",
+        "store_name": "Fresh Thyme Farmers Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2500 N ELSTON AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.639871,
+          41.924644
+        ]
+      },
+      "properties": {
+        "zip": "60614-3422",
+        "store_name": "Big Apple Finer Foods",
+        "new_status": "OPEN",
+        "last_updated": null,
+        "address": "2345 N Clark St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.746768,
+          41.931564
+        ]
+      },
+      "properties": {
+        "zip": "60639",
+        "store_name": "Centro Fresh Market",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "4804 W DIVERSEY AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.554402,
+          41.74461
+        ]
+      },
+      "properties": {
+        "zip": "60617",
+        "store_name": "Save A Lot",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "2858 E 83rd St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.61846,
+          41.885515
+        ]
+      },
+      "properties": {
+        "zip": "60601-7412",
+        "store_name": "Mariano's Lakeshore East",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-05T13:21:00.000",
+        "address": "333 E Benton Pl"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.740988,
+          41.740856
+        ]
+      },
+      "properties": {
+        "zip": "60652-3596",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "8333 S Cicero Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.790868,
+          41.952851
+        ]
+      },
+      "properties": {
+        "zip": "60634",
+        "store_name": "Montrose Food Mart & Deli",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "6601 W IRVING PARK RD"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.646797,
+          41.946598
+        ]
+      },
+      "properties": {
+        "zip": "60657-1825",
+        "store_name": "Jewel - Osco",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-03T17:00:00.000",
+        "address": "3531 N Broadway St"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.633033,
+          41.843813
+        ]
+      },
+      "properties": {
+        "zip": "60616",
+        "store_name": "Fat Lee Supermarket",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "2707 S WELLS ST"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.699541,
+          41.994349
+        ]
+      },
+      "properties": {
+        "zip": "60659-2608",
+        "store_name": "Aldi",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "6220 N California Ave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.782075,
+          41.777702
+        ]
+      },
+      "properties": {
+        "zip": "60638",
+        "store_name": "Fair Share Finer Foods",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-04T15:00:00.000",
+        "address": "6422 W 63rd Street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.79769200000001,
+          41.938134
+        ]
+      },
+      "properties": {
+        "zip": "60634",
+        "store_name": "Avenue Food Mart",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "6850 W BELMONT AVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.707908,
+          41.968473
+        ]
+      },
+      "properties": {
+        "zip": "60625",
+        "store_name": "Lindo Michoacan",
+        "new_status": "OPEN",
+        "last_updated": "2020-06-10T00:00:00.000",
+        "address": "3142 W LAWRENCE  AVE"
+      }
+    }
+  ],
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  }
+}

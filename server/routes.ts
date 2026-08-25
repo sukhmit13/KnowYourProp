@@ -21,6 +21,11 @@ import { checkChaOpportunityArea } from "./chaOpportunity";
 import { checkLocationIncentives } from "./locationIncentives";
 import { initTransit, findNearestTransit, isTransitInitialized, checkTODStatus } from "./transit";
 import { getPropertyTax } from "./propertyTax";
+import {
+  getWestTownTaxPilotSummary,
+  listWestTownTaxPilotProperties,
+  scheduleWestTownTaxPilot,
+} from "./westTownTaxPilot";
 import { getLienData, searchOwnerLiensOnly } from "./lienSearch";
 import { resolvePinFromAddress, getAssociatedAddresses, fetchProximityData } from "./pinResolver";
 import { createPropertyContext, getPropertyContext, resolvePropertyIdForAddress, validateContextObject } from "./propertyContext";
@@ -29,6 +34,7 @@ import type { PropertyContext } from "@shared/propertyContext";
 import { findNearbyEvStations, findNearbyGasStations, findNearbyHotels, findNearbyRestaurants, findNearbyCoffeeShops, findNearbyBars, findNearbyDayCares } from "./ev-stations";
 import { getDemographicTrends, warmDemographicsCache, getCachedDemographics } from "./demographics";
 import { fetchPermitHistory, fetchViolationHistory, fetchCrimeStats, fetchCrimeTractRanking, categorizePermitType } from "./permits";
+import { getContractorSearchMatch } from "./utils/contractorSearch";
 import { getNewConstructionStats, getNearbyNewConstruction } from "./newConstruction";
 import { getSBALoans, getCookCountyCommercialLenders } from "./sbaLoans";
 import { readCachedCrexi } from "./crexi";
@@ -205,7 +211,7 @@ async function buildPropertyChatContext(run: any, geo: any): Promise<string> {
   if (geo) lines.push(`OPPORTUNITY ZONE: ${geo.opportunityZone ? 'Yes' : 'No'}`);
 
   // Run fields
-  if (run.lastProjectType) lines.push(`SELECTED PROJECT TYPE: ${run.lastProjectType}`);
+  if (run.lastProjectType) lines.push(`SELECTED PROJECT USE: ${run.lastProjectType}`);
   if (run.lastRole) lines.push(`USER ROLE: ${run.lastRole}`);
   if (run.lastTransactionType) lines.push(`TRANSACTION TYPE: ${run.lastTransactionType}`);
   if (run.lastFreeformDescription) lines.push(`PROJECT DESCRIPTION: ${run.lastFreeformDescription}`);
@@ -410,9 +416,9 @@ async function buildPropertyChatContext(run: any, geo: any): Promise<string> {
     );
   }
 
-  // Childcare blocks — gated on the user's selected project type (STEP C).
+  // Childcare blocks — gated on the user's selected project use (STEP C).
   // Full analysis only for childcare projects; a single amenity line for
-  // residential projects; omitted entirely when no project type is selected
+  // residential projects; omitted entirely when no project use is selected
   // or the selected use is a non-childcare commercial type.
   const CHILDCARE_PROJECT_TYPES = ['Day Care Center', 'School (Private)', 'School (Private K-12)'];
   const RESIDENTIAL_PROJECT_TYPES = [
@@ -487,7 +493,7 @@ async function buildPropertyChatContext(run: any, geo: any): Promise<string> {
       console.error('[EVIDENCE] block failed: childcareAmenity', e);
     }
   }
-  // No project type selected, or a non-childcare commercial use → childcare data omitted entirely.
+  // No project use selected, or a non-childcare commercial use → childcare data omitted entirely.
 
   return lines.join('\n');
 }
@@ -881,7 +887,7 @@ async function buildInsightReportEvidence(runId: number, opts?: { publicRecordOn
         unitCount: (run.listingData as any)?.unitCount ?? null,
       });
       extraLines.push('\nINCENTIVE PROGRAM SCREENING (automated checker):');
-      extraLines.push(`  Screened with project type: ${run.lastProjectType || 'none selected'}${projectCategory ? ` (category: ${projectCategory})` : ''}`);
+      extraLines.push(`  Screened with project use: ${run.lastProjectType || 'none selected'}${projectCategory ? ` (category: ${projectCategory})` : ''}`);
       const trunc = (s: string) => (s || '').length > 220 ? `${s.slice(0, 217)}...` : (s || '');
       const positive = screenResults.filter(r => r.status === 'in_area' || r.status === 'potentially_eligible');
       const manual = screenResults.filter(r => r.status === 'manual_check');
@@ -923,7 +929,7 @@ async function buildInsightReportEvidence(runId: number, opts?: { publicRecordOn
     extraLines.push('\nMLS LISTING DATA: [EXTRACTION FAILED — no listing details were scraped for this run (no listing URL, or scrape found no unit/price data). Do not state or imply anything about listed units, rents, or list price.]');
   }
 
-  // Nearby competitors via Google Places (needs a project type to derive the search)
+  // Nearby competitors via Google Places (needs a project use to derive the search)
   if (run.lastProjectType && hasCoords) {
     try {
       const term = derivePlacesSearchTerm(run.lastProjectType, run.lastFreeformDescription);
@@ -966,7 +972,7 @@ async function buildInsightReportEvidence(runId: number, opts?: { publicRecordOn
       extraLines.push('\nNEARBY COMPETITORS (Google Places): [EXTRACTION FAILED — competitor data could not be read from the source. Do not state or imply anything about nearby competitors.]');
     }
   } else {
-    extraLines.push(`\nNEARBY COMPETITORS (Google Places): [EXTRACTION FAILED — ${!hasCoords ? 'no coordinates resolved for this address' : 'no project type selected for this run'}, so no competitor search was performed. Do not state or imply anything about nearby competitors.]`);
+    extraLines.push(`\nNEARBY COMPETITORS (Google Places): [EXTRACTION FAILED — ${!hasCoords ? 'no coordinates resolved for this address' : 'no project use selected for this run'}, so no competitor search was performed. Do not state or imply anything about nearby competitors.]`);
   }
 
   // Commercial for-lease market (LoopNet/Crexi via Apify) — cache-read ONLY.
@@ -1035,7 +1041,7 @@ async function buildInsightReportEvidence(runId: number, opts?: { publicRecordOn
     extraLines.push('\nVEHICLE OWNERSHIP: [EXTRACTION FAILED — no community area resolved for this address, so vehicle ownership data could not be read. Do not state or imply anything about car ownership rates.]');
   }
 
-  // Senior population (only when relevant to the selected project type)
+  // Senior population (only when relevant to the selected project use)
   const seniorRelevant = /senior|assisted|nursing|memory care|adult day|residential|apartment|housing|multi|medical|clinic|home care/i.test(run.lastProjectType || '');
   if (seniorRelevant) {
     const sr = getSeniorsData(geo?.communityArea);
@@ -1106,7 +1112,7 @@ async function buildInsightReportEvidence(runId: number, opts?: { publicRecordOn
 async function generateInsightReportContent(
   runId: number,
   opts?: {
-    /** "as_is" = public-record read: no user deal inputs (project type, context, valuation) in the prompt. */
+    /** "as_is" = public-record read: no user deal inputs (project use, context, valuation) in the prompt. */
     mode?: 'tailored' | 'as_is';
     /** Called with the count of findings the model has finished streaming — drives REAL progress. */
     onFinding?: (count: number) => void;
@@ -1128,7 +1134,7 @@ async function generateInsightReportContent(
     funnelLines.push('funnel: none — the user requested a PUBLIC-RECORD read. Do not assume any intended use, deal terms, or user plans; synthesize from the public record only.');
   }
 
-  // Derive requires_zoning_relief from project type vs zoning (conservative: only set true if explicit mismatch)
+  // Derive requires_zoning_relief from project use vs zoning (conservative: only set true if explicit mismatch)
   let requiresZoningRelief = false;
   if (!asIs && run.lastProjectType && geo?.zoning) {
     const compat = checkZoningCompatibility(run.lastProjectType, geo.zoning);
@@ -1342,9 +1348,24 @@ export async function registerRoutes(
 
   app.post(api.runs.create.path, async (req, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user) {
+      // Session cookie OR Bearer token (iframe contexts block cookies — same pattern as loadOwnedRun)
+      let authUser = (req.isAuthenticated?.() && req.user) ? req.user : null;
+      if (!authUser) {
+        const authHeader = req.headers.authorization;
+        if (authHeader?.startsWith('Bearer ')) {
+          const { resolveUserFromToken } = await import('./auth.js');
+          authUser = await resolveUserFromToken(authHeader.slice(7).trim());
+        }
+      }
+      if (!authUser) {
         return res.status(401).json({ message: 'You must be signed in to run a report.' });
       }
+      // Team accounts are paused from creating new reports during the redesign.
+      const { isPausedTeamMember } = await import('./teamAccounts.js');
+      if (isPausedTeamMember(authUser.email)) {
+        return res.status(403).json({ message: 'New reports are paused while the site is being redesigned. Sukhmit will reach out when it\'s ready for your feedback.' });
+      }
+      req.user = authUser;
       const input = api.runs.create.input.parse(req.body);
       if (input.address && !hasUserSpecifiedUnit(input.address)) {
         input.address = stripCensusUnitArtifact(input.address);
@@ -1433,7 +1454,7 @@ export async function registerRoutes(
     res.json(run);
   });
 
-  // Update project type
+  // Update project use
   app.patch('/api/runs/:id/project-type', async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(404).json({ message: "Invalid ID" });
@@ -2305,7 +2326,7 @@ export async function registerRoutes(
     // Report's own permit records (the join target for the dedup)
     let permitRecords: Array<{ address: string; date: string | null }> = [];
     if (lat != null && lng != null) {
-      const nearby = await getNearbyNewConstruction(lat, lng, 1.0).catch(() => null);
+      const nearby = await getNearbyNewConstruction(lat, lng, undefined, 1.0).catch(() => null);
       permitRecords = (nearby?.permits || []).map(p => ({ address: p.address, date: p.issueDate || null }));
     }
     const { createHash } = await import('crypto');
@@ -2927,7 +2948,7 @@ The report contains data on:
 - Address, zoning code, TIF district, community area, opportunity zone
 - Physical property: lot size, building sf, year built, stories (Cook County Assessor)
 - FAR analysis: current FAR, max FAR, max buildable sf, remaining capacity
-- Zoning details: FAR limit, height limit, parking requirements, permitted and special-use project types
+- Zoning details: FAR limit, height limit, parking requirements, permitted and special-use project uses
 - Transit: nearest CTA rail/bus and Metra stations with exact distances, TOD eligibility
 - Demographics: population, income, poverty rate, age breakdown (2010 vs 2023)
 - Childcare access (only included for childcare/school projects; a single amenity line for residential projects; absent otherwise): children under 5, licensed slots, desert status by ZIP and community area
@@ -3014,7 +3035,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     }
   });
 
-  // Update compare history project types
+  // Update compare history project uses
   app.patch('/api/compare-history/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -6412,8 +6433,11 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         other: [],
         activeLienCount: 0,
         activeMortgageCount: 0,
+        activeListPendensCount: 0,
+        waterDeptLienCount: 0,
         hasForeclosure: false,
         overallStatus: 'unknown',
+        searchFailed: true,
         ownerName: null,
         ownerLiens: [],
         ownerLienScrapedAt: null,
@@ -7922,7 +7946,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     }
   });
 
-  // EV Registrations - Cook County trends for gas station project type
+  // EV Registrations - Cook County trends for gas station project use
   app.get('/api/ev-registrations/:zipCode', async (req, res) => {
     try {
       const zipCode = req.params.zipCode;
@@ -8520,6 +8544,53 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     }
   });
 
+  // West Town tax-delinquency pilot. These endpoints require an active
+  // subscriber even though the Discovery page itself is subscriber-gated,
+  // preventing direct API access from bypassing that product boundary.
+  function requireDiscoverySubscriber(req: Request, res: Response): boolean {
+    if (!req.isAuthenticated?.() || !req.user || (req.user as any).plan !== 'subscriber') {
+      res.status(403).json({ error: 'A subscriber account is required for Market Discovery.' });
+      return false;
+    }
+    return true;
+  }
+
+  app.get('/api/discovery/west-town-tax-pilot', async (req, res) => {
+    if (!requireDiscoverySubscriber(req, res)) return;
+    try {
+      scheduleWestTownTaxPilot();
+      res.json(await getWestTownTaxPilotSummary());
+    } catch (error: any) {
+      console.error('[WEST-TOWN TAX] Summary endpoint failed:', error?.message || error);
+      res.status(500).json({ error: 'Unable to load the West Town tax pilot.' });
+    }
+  });
+
+  app.get('/api/discovery/west-town-tax-pilot/properties', async (req, res) => {
+    if (!requireDiscoverySubscriber(req, res)) return;
+    scheduleWestTownTaxPilot();
+    const requestedStatus = typeof req.query.status === 'string' ? req.query.status : 'all';
+    const validStatuses = ['all', 'current', 'delinquent', 'sold', 'unknown'];
+    if (!validStatuses.includes(requestedStatus)) {
+      return res.status(400).json({ error: 'Invalid tax-status filter.' });
+    }
+    const page = typeof req.query.page === 'string' ? Number.parseInt(req.query.page, 10) : 1;
+    const pageSize = typeof req.query.pageSize === 'string' ? Number.parseInt(req.query.pageSize, 10) : 25;
+    if (!Number.isFinite(page) || !Number.isFinite(pageSize)) {
+      return res.status(400).json({ error: 'Pagination values must be numbers.' });
+    }
+    try {
+      res.json(await listWestTownTaxPilotProperties(
+        requestedStatus as 'all' | 'current' | 'delinquent' | 'sold' | 'unknown',
+        page,
+        pageSize,
+      ));
+    } catch (error: any) {
+      console.error('[WEST-TOWN TAX] Properties endpoint failed:', error?.message || error);
+      res.status(500).json({ error: 'Unable to load West Town tax records.' });
+    }
+  });
+
   // Discovery rankings endpoint
   app.get('/api/discovery/rankings/:type', async (req, res) => {
     try {
@@ -8910,8 +8981,9 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
   const contractorQuerySchema = z.object({
     specialty: z.string().optional(),
     neighborhood: z.string().optional(),
+    search: z.string().max(100).optional(),
     activeOnly: z.enum(['true', 'false']).optional(),
-    sortBy: z.enum(['totalPermits', 'recentActivity', 'avgProjectValue', 'yearsActive']).optional(),
+    sortBy: z.enum(['totalPermits', 'recentActivity', 'avgProjectValue', 'yearsActive', 'searchMatch']).optional(),
     limit: z.string().regex(/^\d+$/).optional().default('50'),
     offset: z.string().regex(/^\d+$/).optional().default('0')
   });
@@ -8923,7 +8995,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         return res.status(400).json({ error: 'Invalid query parameters', details: parsed.error.errors });
       }
       
-      const { specialty, neighborhood, activeOnly, sortBy, limit, offset } = parsed.data;
+      const { specialty, neighborhood, search, activeOnly, sortBy, limit, offset } = parsed.data;
       
       const rankingsPath = path.join(__dirname, 'data/contractors/rankings.json');
       
@@ -8972,11 +9044,31 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
           c.lastPermitDate && new Date(c.lastPermitDate).getTime() >= cutoff
         );
       }
+
+      const searchText = search?.trim() || '';
+      if (searchText) {
+        contractors = contractors
+          .map(c => {
+            const match = getContractorSearchMatch(c, searchText);
+            return {
+              ...c,
+              searchMatchCount: match.count,
+              searchMatches: match.labels,
+            };
+          })
+          .filter(c => c.searchMatchCount > 0);
+      }
       
       // Sort — when a trade is selected, the default "totalPermits" sort ranks
       // by permits in that trade so the list actually reflects the selection.
       const sortField = sortBy as string || 'totalPermits';
-      if (sortField === 'totalPermits') {
+      if (sortField === 'searchMatch') {
+        contractors.sort((a, b) =>
+          ((b.searchMatchCount || 0) - (a.searchMatchCount || 0)) ||
+          ((b.specialtyPermits || 0) - (a.specialtyPermits || 0)) ||
+          (b.totalPermits - a.totalPermits)
+        );
+      } else if (sortField === 'totalPermits') {
         if (bySpecialty) {
           contractors.sort((a, b) =>
             (b.specialtyPermits - a.specialtyPermits) || (b.totalPermits - a.totalPermits)
@@ -9044,11 +9136,11 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
   // === NEW CONSTRUCTION PERMITS ===
   app.post('/api/new-construction', async (req, res) => {
     try {
-      const { communityArea, zipCode } = req.body;
-      if (!communityArea && !zipCode) {
-        return res.status(400).json({ message: "Community area or ZIP code required" });
+      const { communityArea, lat, lng } = req.body;
+      if (lat == null || lng == null) {
+        return res.status(400).json({ message: "Latitude and longitude required" });
       }
-      const stats = await getNewConstructionStats(communityArea || '', zipCode || '');
+      const stats = await getNewConstructionStats(communityArea || '', '', parseFloat(lat), parseFloat(lng));
       res.json(stats);
     } catch (err) {
       console.error('New construction lookup error:', err);
@@ -9092,46 +9184,51 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       if (!lat || !lng) return res.status(400).json({ message: 'lat and lng required' });
       const pLat = parseFloat(lat);
       const pLng = parseFloat(lng);
-      const around = `around:1609,${pLat},${pLng}`;
-      const namePattern = `gurdwara|gurudwara|masjid|mosque|mandir|temple|islamic center|islamic centre|muslim|sufi|sufism|sikh|hindu|jain|buddhist|church|synagogue|chapel|cathedral|shrine|bahai|baha'i|pagoda|abbey|convent|monastery|meditation center|meditation centre|dhamma|dharma`;
-      const query = `[out:json];(nwr["amenity"="place_of_worship"](${around});nwr["building"~"mosque|masjid|temple|synagogue|church|chapel|cathedral|shrine|pagoda|gurudwara|gurdwara|religious"](${around});nwr["religion"~"."](${around});nwr["name"~"${namePattern}",i](${around}););out center;`;
-      const overpassRes = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `data=${encodeURIComponent(query)}`,
-      });
-      if (!overpassRes.ok) throw new Error(`Overpass error: ${overpassRes.status}`);
-      const overpassData = await overpassRes.json() as { elements: any[] };
-      // Infer religion from building type when religion tag is absent
-      const buildingReligionMap: Record<string, string> = {
-        mosque: 'muslim', masjid: 'muslim', church: 'christian', chapel: 'christian',
-        cathedral: 'christian', synagogue: 'jewish', pagoda: 'buddhist',
-        shrine: 'shinto', gurudwara: 'sikh', gurdwara: 'sikh', temple: null,
+      const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+      if (!apiKey) throw new Error('GOOGLE_PLACES_API_KEY not configured');
+      // Google Places API (New) searchNearby — one query per worship type (max 20 each),
+      // run in parallel so churches don't crowd out mosques/synagogues/temples.
+      const typeReligionMap: Record<string, string> = {
+        church: 'christian', mosque: 'muslim', synagogue: 'jewish', hindu_temple: 'hindu',
       };
+      const worshipTypes = Object.keys(typeReligionMap);
+      const searchOne = async (includedType: string) => {
+        const r = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': apiKey,
+            'X-Goog-FieldMask': 'places.id,places.displayName,places.shortFormattedAddress,places.location,places.types,places.businessStatus',
+          },
+          body: JSON.stringify({
+            includedTypes: [includedType],
+            maxResultCount: 20,
+            locationRestriction: { circle: { center: { latitude: pLat, longitude: pLng }, radius: 1609 } },
+          }),
+        });
+        const j = await r.json() as { places?: any[]; error?: { message?: string; status?: string } };
+        if (!r.ok || j.error) throw new Error(`Google Places (${includedType}): ${j.error?.status || r.status} ${j.error?.message || ''}`);
+        return (j.places || []).map((p: any) => ({ ...p, _requestedType: includedType }));
+      };
+      const allResults = (await Promise.all(worshipTypes.map(searchOne))).flat();
       // Words that indicate a non-religious business even if a religious word appears in the name
       const foodBevEntertainmentBlocklist = /\b(beer|brew|brewing|brewery|bar |bars|pub |pubs|tavern|winery|wine |spirits|liquor|cocktail|restaurant|cafe|coffee|diner|grill|kitchen|bistro|eatery|food|bbq|pizza|burger|sushi|ramen|taco|bakery|nightclub|club |clubs|lounge|theater|theatre|cinema|arcade|bowling|gym|fitness|spa |salon|tattoo|vape|smoke|chicken|wings|ribs|steak|seafood|sandwich|hot dog|donut|doughnut|bagel|waffle|pancake|burrito|noodle|juice bar|smoothie|ice cream|steakhouse|chophouse|buffet|catering|takeout|drive.thru)\b/i;
       const educationBlocklist = /\b(school|college|university|academy|preparatory|montessori|preschool|kindergarten|day care|daycare|nursery school|high school|middle school|elementary|k-12|law school|language school)\b/i;
-      // Non-worship OSM amenity values — skip anything tagged with these even if it also has a religion tag
-      const nonWorshipAmenities = new Set(['school', 'college', 'university', 'kindergarten', 'childcare', 'library', 'hospital', 'clinic', 'social_facility', 'community_centre', 'arts_centre', 'theatre', 'cinema', 'gym', 'sports_centre', 'restaurant', 'fast_food', 'cafe', 'bar', 'pub', 'nightclub']);
       const seen = new Set<string>();
-      const places = (overpassData.elements || []).reduce((acc: any[], el: any) => {
-        const name = el.tags?.name || el.tags?.['name:en'] || null;
-        if (!name) return acc; // skip unnamed
-        // Skip non-worship OSM amenity types (schools, hospitals, restaurants, etc.)
-        const amenityTag = (el.tags?.amenity || '').toLowerCase();
-        if (amenityTag && amenityTag !== 'place_of_worship' && nonWorshipAmenities.has(amenityTag)) return acc;
+      const places = allResults.reduce((acc: any[], el: any) => {
+        const name = el.displayName?.text || null;
+        if (!name) return acc;
+        if (el.businessStatus === 'CLOSED_PERMANENTLY') return acc;
         const nameLower = name.toLowerCase();
-        // Exclude food/beverage/entertainment businesses
+        // Exclude non-religious businesses and schools that slip in
         if (foodBevEntertainmentBlocklist.test(nameLower)) return acc;
-        // Exclude educational institutions
         if (educationBlocklist.test(nameLower)) return acc;
         // Exclude yoga unless it also mentions meditation or is a specifically spiritual yoga tradition
         if (/yoga/.test(nameLower) && !/meditation|kriya|kundalini|vedanta|ashram|tantra/.test(nameLower)) return acc;
-        const address = [el.tags?.['addr:housenumber'], el.tags?.['addr:street']].filter(Boolean).join(' ') || null;
+        const address = (el.shortFormattedAddress || '').replace(/, Chicago$/i, '') || null;
         const dedupeKey = `${name}|${address}`;
         if (seen.has(dedupeKey)) return acc;
         seen.add(dedupeKey);
-        const buildingVal = (el.tags?.building || '').toLowerCase();
         const inferFromName = () => {
           if (/gurdwara|gurudwara|sikh/.test(nameLower)) return 'sikh';
           if (/masjid|mosque|islamic center|islamic centre|muslim|sufi|sufism/.test(nameLower)) return 'muslim';
@@ -9144,10 +9241,17 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
           if (/church|cathedral|chapel|christian|st\.|saint |holy |sacred/.test(nameLower)) return 'christian';
           return null;
         };
-        const religion = el.tags?.religion || buildingReligionMap[buildingVal] || inferFromName();
-        const lat = el.lat ?? el.center?.lat ?? null;
-        const lng = el.lon ?? el.center?.lon ?? null;
-        acc.push({ id: `${el.type}-${el.id}`, name, religion, denomination: el.tags?.denomination || null, address, lat, lng });
+        const typeReligion = (el.types || []).map((t: string) => typeReligionMap[t]).find(Boolean) || null;
+        const religion = typeReligion || inferFromName() || typeReligionMap[el._requestedType] || null;
+        acc.push({
+          id: el.id || `${name}-${address}`,
+          name,
+          religion,
+          denomination: null,
+          address,
+          lat: el.location?.latitude ?? null,
+          lng: el.location?.longitude ?? null,
+        });
         return acc;
       }, []);
       places.sort((a: any, b: any) => {
@@ -9221,9 +9325,10 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         return res.json({ is_near_corridor: false, corridors: [] });
       }
       const corridorKeys = corridors.map(c => c.corridorKey);
-      const [articles, corridorPodcasts] = await Promise.all([
+      const [articles, corridorPodcasts, dpdResult] = await Promise.all([
         findCorridorArticles(corridorKeys, 90),
         findCorridorPodcasts(corridorKeys, 90),
+        import('./dpdApplications').then(({ getDpdApplications }) => getDpdApplications()),
       ]);
 
       // Build allowed area set: current neighborhood + bordering community areas
@@ -9242,12 +9347,20 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         }
         return { ...article, corridorKeys: matchedCorridors, mentionsNeighborhood };
       }).filter((a): a is NonNullable<typeof a> => a !== null && (a.corridorKeys.length > 0 || a.mentionsNeighborhood)).slice(0, 30);
+      const dpdApplications = dpdResult.applications.flatMap(application => {
+        if (application.latitude == null || application.longitude == null) return [];
+        const matchedCorridors = findNearbyCorridors(application.latitude, application.longitude, application.address)
+          .map(c => c.corridorKey).filter(key => corridorKeys.includes(key));
+        return matchedCorridors.length ? [{ ...application, corridorKeys: matchedCorridors }] : [];
+      });
       res.json({
         is_near_corridor: true,
         corridors,
         news_count: taggedArticles.length,
         articles: taggedArticles,
         podcasts: corridorPodcasts,
+        dpdApplications,
+        dpdCoverage: dpdResult.coverage,
       });
     } catch (err) {
       console.error('Corridor news error:', err);
@@ -9476,7 +9589,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     }
   });
 
-  // Upcoming Developments - YIMBY, Block Club, Councilmatic zoning
+  // Upcoming Developments - news and permits, supplemented by bounded DPD Plan Commission applications.
   function haversineDistanceMi(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 3958.8;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -9491,12 +9604,16 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       const communityArea = (req.query.communityArea as string) || '';
       const subjectLat = req.query.lat ? parseFloat(req.query.lat as string) : null;
       const subjectLon = req.query.lon ? parseFloat(req.query.lon as string) : null;
-      const radiusMi = 0.5;
+      const requestedRadius = Number(req.query.radiusMi);
+      const radiusMi = requestedRadius === 1 ? 1 : 0.5;
 
       const { getUpcomingDevelopments, filterDevelopmentsByNeighborhood, isDevelopmentArticle, parseUnits, parseStories, extractStatus, parseUseType, parseDeveloper, detectNeighborhoods, parseAddress } = await import('./upcomingDevelopments');
       const { getBorderingAreas, findRelevantArticles } = await import('./newsMonitor');
 
-      const all = await getUpcomingDevelopments();
+      const [all, dpdResult] = await Promise.all([
+        getUpcomingDevelopments(),
+        import('./dpdApplications').then(({ getDpdApplications }) => getDpdApplications()),
+      ]);
 
       // Augment with multi-source neighborhood articles (Crain's, YIMBY, Real Deal, Block Club neighborhood feeds)
       // These are already neighborhood-scoped by findRelevantArticles — just filter to dev keywords
@@ -9558,6 +9675,15 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
 
       const stage2 = filteredWithDistance.filter(d => d.stage === 2);
       const stage1 = filteredWithDistance.filter(d => d.stage === 1);
+      const dpdApplications = subjectLat != null && subjectLon != null
+        ? dpdResult.applications
+          .filter(application => application.latitude != null && application.longitude != null)
+          .map(application => ({
+            ...application,
+            distanceMi: Math.round(haversineDistanceMi(subjectLat, subjectLon, application.latitude!, application.longitude!) * 100) / 100,
+          }))
+          .filter(application => application.distanceMi <= radiusMi)
+        : [];
 
       // Normalize an address string down to "NUMBER STREETNAME" for fuzzy cross-referencing
       function normalizeAddrForMatch(addr: string): string {
@@ -9613,6 +9739,8 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         stage2Count: stage2.length,
         stage1Count: stage1.length,
         developments: filteredWithDistance,
+        dpdApplications,
+        dpdCoverage: dpdResult.coverage,
         citywideFallback,
         unitsNearby,
         articlePermitOverlapCount,
@@ -9661,13 +9789,70 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
   app.get('/api/discovery/general-contractors', async (req, res) => {
     try {
       const { getGeneralContractorRankings } = await import('./architectRankings');
-      const all = await getGeneralContractorRankings();
       const sortBy = (req.query.sortBy as string) || 'total_projects';
+      const search = typeof req.query.search === 'string' ? req.query.search.trim().slice(0, 100) : '';
       const limit = Math.min(parseInt(req.query.limit as string || '100'), 200);
       const offset = parseInt(req.query.offset as string || '0');
+      const rankingsPath = path.join(__dirname, 'data/contractors/rankings.json');
+      let usingSearchFallback = false;
+      let all: any[];
+
+      try {
+        all = await getGeneralContractorRankings();
+      } catch (error) {
+        if (!search || !fs.existsSync(rankingsPath)) throw error;
+        const contractorIndex = JSON.parse(fs.readFileSync(rankingsPath, 'utf-8'));
+        all = (contractorIndex.contractors || [])
+          .filter((contractor: any) => contractor.totalPermits >= 3)
+          .map((contractor: any) => ({
+            name: contractor.name,
+            isOwnerGC: false,
+            totalProjects: contractor.totalPermits,
+            totalValue: contractor.totalReportedValue || 0,
+            newConstructionCount: contractor.specialtyBreakdown?.['new-construction'] || 0,
+            renovationCount: contractor.specialtyBreakdown?.general || 0,
+            singleFamilyCount: 0,
+            multiFamilyCount: 0,
+            mixedUseCommercialCount: 0,
+            industrialCount: 0,
+            lastPermitDate: contractor.lastPermitDate || null,
+          }));
+        usingSearchFallback = true;
+        console.warn('[GC RANKINGS] Live source timed out; serving project-work search from the local permit index');
+      }
+
+      if (search) {
+        const indexByName = new Map<string, any>();
+        if (fs.existsSync(rankingsPath)) {
+          const contractorIndex = JSON.parse(fs.readFileSync(rankingsPath, 'utf-8'));
+          for (const contractor of contractorIndex.contractors || []) {
+            const key = String(contractor.name || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (key) indexByName.set(key, contractor);
+          }
+        }
+
+        all = all
+          .map(contractor => {
+            const key = contractor.name.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const indexedContractor = indexByName.get(key);
+            const match = getContractorSearchMatch(
+              indexedContractor || { name: contractor.name },
+              search,
+            );
+            return {
+              ...contractor,
+              searchMatchCount: match.count,
+              searchMatches: match.labels,
+            };
+          })
+          .filter(contractor => contractor.searchMatchCount > 0);
+      }
 
       const sorted = [...all].sort((a, b) => {
         switch (sortBy) {
+          case 'search_match':
+            return (b.searchMatchCount || 0) - (a.searchMatchCount || 0) ||
+              b.totalProjects - a.totalProjects;
           case 'total_value': return b.totalValue - a.totalValue;
           case 'new_construction': return b.newConstructionCount - a.newConstructionCount;
           case 'renovation': return b.renovationCount - a.renovationCount;
@@ -9683,8 +9868,11 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         total: sorted.length,
         contractors: sorted.slice(offset, offset + limit),
         sortBy,
+        search: search || null,
         dataWindow: 'Last 5 Years (2020–present)',
-        source: 'Chicago Data Portal – Building Permits (ydr8-5enu)',
+        source: usingSearchFallback
+          ? 'Chicago Building Permits local search index (ydr8-5enu)'
+          : 'Chicago Data Portal – Building Permits (ydr8-5enu)',
       });
     } catch (err) {
       console.error('[GC RANKINGS] Error:', err);
@@ -9918,11 +10106,11 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
 
   app.post('/api/new-construction-nearby', async (req, res) => {
     try {
-      const { lat, lng } = req.body;
+      const { lat, lng, communityArea } = req.body;
       if (!lat || !lng) {
         return res.status(400).json({ message: "Latitude and longitude required" });
       }
-      const result = await getNearbyNewConstruction(parseFloat(lat), parseFloat(lng), 1.0);
+      const result = await getNearbyNewConstruction(parseFloat(lat), parseFloat(lng), communityArea, 1.0);
       res.json(result);
     } catch (err) {
       console.error('Nearby new construction lookup error:', err);
@@ -10176,9 +10364,23 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       const address = (req.query.address as string) || '';
       const ward = req.query.ward ? parseInt(req.query.ward as string, 10) : null;
       if (!address) return res.status(400).json({ error: 'address required' });
-      const { getZoningHistory } = await import('./zoningHistory');
-      const result = await getZoningHistory({ address, ward });
-      res.json(result);
+      // Optional co-parcel addresses (repeated ?alt= params from verified assemblage)
+      const altRaw = req.query.alt;
+      const altAddresses = (Array.isArray(altRaw) ? altRaw : altRaw ? [altRaw] : [])
+        .map((a) => String(a)).filter(Boolean).slice(0, 3);
+      const [{ getZoningHistory }, { getDpdApplications, matchesDpdAddress }] = await Promise.all([
+        import('./zoningHistory'),
+        import('./dpdApplications'),
+      ]);
+      const [result, dpdResult] = await Promise.all([
+        getZoningHistory({ address, ward, altAddresses }),
+        getDpdApplications(),
+      ]);
+      const targets = [address, ...altAddresses];
+      const pendingDpd = dpdResult.applications.filter(application =>
+        targets.some(target => matchesDpdAddress(application.address, target)),
+      );
+      res.json({ ...result, pendingDpd, dpdCoverage: dpdResult.coverage });
     } catch (err: any) {
       console.error('[zoning-history]', err);
       res.status(500).json({ error: err.message || 'Failed to fetch zoning history' });
@@ -10299,9 +10501,9 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         mode,
         onFinding: (n) => { if (owns()) progress.done = Math.min(1 + n, progress.total - 1); },
       }) as { html: string; generatedForProjectType?: string | null; mode?: string };
-      // Stamp the project type the report was generated for, so the client can
-      // flag the report as stale if the run's project type changes later.
-      // As-is reports are public-record: no project type, mode stamped instead.
+      // Stamp the project use the report was generated for, so the client can
+      // flag the report as stale if the run's project use changes later.
+      // As-is reports are public-record: no project use, mode stamped instead.
       content.generatedForProjectType = mode === 'as_is' ? null : (run.lastProjectType ?? null);
       content.mode = mode;
       await storage.saveInsightReport(id, content);

@@ -1,0 +1,294 @@
+# KYP — Step 9: Active Listing → verified against the record
+
+🔴 **Scope:** change only what this document specifies. Do not restyle, refactor, or "make
+consistent" any other section. The exceptions are named explicitly in §7 and §8.
+
+The section is already top-level (`RunDetail.tsx:4357–4586`, key `listingSnapshot`). This step
+does not move it. It changes what it *does*: today it shows the seller's numbers and tells the
+reader to go cross-check them. After this, we run the checks.
+
+| | Today | After |
+|---|---|---|
+| Verification | a caveat + two "go look yourself" buttons | **6 automated checks** against data the report already holds |
+| `disclosures[]` | collected, stored, rendered in the PDF, **invisible in the web app** | surfaced, classified, and auto-resolved where the record allows |
+| Days on market | a bare number | verdict on a **unit-count-aware** scale |
+| Claim provenance | one 9.5px "per listing" sub-line | a `CLAIMED` tag on every seller-sourced figure |
+
+---
+
+## 1. Server — typed claims (`server/listingSnapshot.ts`)
+
+The checks are impossible today because `keyFacts: string[]` is free prose ("Taxes quoted at
+$8,400/yr"). The model must emit **structured claims** alongside the prose it already returns.
+
+Add to `ListingSnapshot`:
+
+```ts
+/** Machine-checkable assertions extracted from the listing. Prose stays in keyFacts. */
+claims: Array<{
+  field: 'unitCount' | 'yearBuilt' | 'lotSizeSf' | 'annualTaxes' | 'renovationYear' | 'grossAnnualIncome';
+  value: number;
+  raw: string;          // the exact listing sentence this came from
+}>;
+```
+
+Prompt change (`:42–93`): after the existing instructions, require that any fact matching one
+of those six fields is **also** emitted in `claims`, with `raw` quoting the source sentence
+verbatim. Do not remove it from `keyFacts` — the prose list stays as-is.
+
+Validate like the rest of the payload (`:125–157`): drop any entry whose `field` is not in the
+enum or whose `value` is not a finite number. **Never invent a claim the listing did not
+make** — an absent field means the listing was silent, which is different from a mismatch.
+
+---
+
+## 2. Server — the check engine
+
+New module `server/listingChecks.ts`. Input: the `claims[]` above plus data the report already
+fetches. Output one row per claim.
+
+```ts
+export type CheckResult = 'match' | 'differs' | 'wrong' | 'unavailable';
+
+export interface ListingCheck {
+  field: string;
+  claimLabel: string;      // "6 units"
+  recordLabel: string;     // "4 apartments"
+  recordSource: string;    // "Cook County Assessor"
+  result: CheckResult;
+  note: string | null;
+}
+```
+
+### 🔒 The result rule — this is the whole point of the step
+
+**`wrong` (red) only when the record is authoritative on that exact question.** Otherwise
+`differs` (orange). Per field:
+
+| Claim | Compare against | Authoritative? | Mismatch → |
+|---|---|---|---|
+| `annualTaxes` | property-tax data already in the report | **Yes** — the bill *is* the tax | **`wrong`** |
+| `lotSizeSf` | assessor parcel | **Yes** — the parcel is the parcel | **`wrong`** |
+| `unitCount` | assessor `apartments` | **No** — apartments ≠ legal dwelling units | `differs` |
+| `unitCount` | zoning max units for the lot (`ZoningInfo`) | **Yes, one-directional** | **`wrong` only if over the max** |
+| `yearBuilt` | assessor | No — assessor errors are common | `differs` |
+| `renovationYear` | DOB permits in that window | **No** — see below | `differs` |
+| `grossAnnualIncome` | — | no public record exists | `unavailable` |
+
+### 🔴 Absence is never `wrong`
+
+"No permit found 2016–2021" does **not** establish that work was unpermitted. Indexes are
+incomplete and work gets filed under prior addresses. A missing record is **always `differs`,
+never `wrong`.** Same rule as `debtResolveState` ("a failed scrape is not a clean title") and
+the permits section ("stale, unverified" ≠ "resolved").
+
+`unavailable` is **not a verdict** and must never be styled as one — it is the admission that
+we have nothing, which is materially different from "we checked and it's fine."
+
+Run all six even when the listing is `off_market` — a stale listing's claims are still worth
+checking. Skip entirely when `status === 'not_found'`.
+
+---
+
+## 3. Server — disclosure classification
+
+`disclosures: string[]` is collected today and rendered **nowhere in the web app** (only
+`reportPdf.ts:514`). Surface it, classified.
+
+```ts
+export interface ClassifiedDisclosure {
+  text: string;
+  kind: 'standard' | 'finding';
+  resolution: { resolved: true; because: string } | null;
+  consequence: string;   // required, even for 'standard'
+}
+```
+
+**`standard`** — ordinary commercial terms. As-is sale, tenant-occupied, estate/probate, no
+survey provided. These are **not findings** and never get a verdict colour: nearly every income
+property sells as-is, and tenancy is what a rental building *is*. Match on keywords.
+
+**`finding`** — asserts a defect or constrains the transaction: known violations, cash-only,
+short sale, structural/environmental issues.
+
+Every disclosure carries a `consequence` regardless of kind. Neutral does not mean silent —
+"shifts inspection cost to you, it is not a defect"; "you cannot deliver vacant, demand the
+leases in diligence."
+
+### 🔒 Resolve before you flag
+
+A `finding` that asserts a recorded problem must be checked against the report's own data
+**before** it is coloured. Reuse the shape of `server/debtResolveState.ts` — a violation is
+resolved when either holds:
+
+1. **An arm's-length sale post-dates it** — title would have required it cleared.
+2. **Permitted work post-dates it** of a type that would cure the cited condition.
+
+When resolved, set `resolution` and render **green**, stating the evidence: *"predates the
+arm's-length sale in Mar 2013 and the $248K of permitted work recorded since."*
+
+Flagging something the report already holds the evidence to dismiss is the same failure as
+telling the reader to go check it themselves — it costs attention instead of time.
+
+---
+
+## 4. Days on market — two scales
+
+Compute `daysOnMarket` and colour it by **unit count**, taken from the listing's claim and
+falling back to the assessor's when the listing is silent.
+
+| Property | Trades on | indigo | orange | red |
+|---|---|---|---|---|
+| **1–4 units** | residential MLS | ≤ 45 | 46 – 90 | 90 + |
+| **5+ units** | commercially | ≤ 90 | 91 – 180 | 180 + |
+
+### 🔴 Fast is indigo, not green
+
+We write for the **buyer**. A 10-day listing means competition, no negotiating room, and a
+market where **50.4% of Chicago homes currently sell above ask** — that is not good news for
+them. Calling it green reports the *seller's* position. The fast end gets **no verdict**: a
+quick sale is unremarkable, there is nothing to flag.
+
+Leverage is stated as a **consequence** in the sub-line, never as the verdict:
+
+> **118 · Days on market** — past the 90-day mark for a 5+ unit building, short of 180.
+> Worth asking why — and it is negotiating room.
+
+Footnote must disclose both weaknesses verbatim: the residential median (**46 days**) is
+**all-residential and citywide**, and the commercial thresholds are **inferred from
+transaction-timeline norms, not a measured Chicago median**.
+
+---
+
+## 5. CSS — append to `kyp-base.css`
+
+```css
+/* provenance: CLAIMED = the seller says so. Slate because it describes the record, not the property. */
+.kyp-prov{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:3px 7px;flex:none}
+.kyp-prov.claimed{color:#fff;background:var(--kyp-slate)}
+.kyp-block .bclaim{align-self:flex-start;font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.22);border-radius:5px;padding:3px 7px;margin-bottom:9px}
+
+.kyp-lstat{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--kyp-wash);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:12.5px;color:var(--kyp-ink2)}
+.kyp-lstat .pill{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--kyp-green);border-radius:5px;padding:4px 9px;flex:none}
+.kyp-lstat b{color:var(--kyp-ink);font-weight:600}
+.kyp-lstat a{color:var(--kyp-indigo);text-decoration:none;font-weight:600}
+.kyp-lstat .rc{margin-left:auto;font-family:var(--kyp-mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--kyp-indigo);cursor:pointer;white-space:nowrap}
+
+.kyp-xrow{display:grid;grid-template-columns:1fr 1fr 118px;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--kyp-line)}
+.kyp-xrow:last-of-type{border-bottom:none}
+.kyp-xrow .k{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted);display:block;margin-bottom:3px}
+.kyp-xrow .v{font-size:14.5px;font-weight:600;color:var(--kyp-ink)}
+.kyp-xrow .v.na{color:var(--kyp-muted);font-weight:400;font-size:13px}
+.kyp-xrow .res{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;border-radius:6px;padding:5px 9px;text-align:center}
+.kyp-xrow .res.ok{background:var(--kyp-green)}
+.kyp-xrow .res.diff{background:var(--kyp-orange)}
+.kyp-xrow .res.bad{background:var(--kyp-bad)}
+.kyp-xrow .res.none{background:var(--kyp-wash);color:var(--kyp-ink2);border:1px solid var(--kyp-line)}
+
+/* disclosures — standard is indigo ("no claim"), never slate */
+.kyp-disc{display:flex;gap:11px;align-items:flex-start;padding:11px 14px;border-radius:10px;margin-bottom:8px;background:#fdf8f0;border:1px solid #e6cfa0;border-left:4px solid var(--kyp-orange)}
+.kyp-disc.noted{background:var(--kyp-indigoSoft);border-color:#dfe3f7;border-left-color:var(--kyp-indigo)}
+.kyp-disc.noted .ic{background:var(--kyp-indigo)}
+.kyp-disc.cleared{background:#e9f4ec;border-color:#cfe6d5;border-left-color:var(--kyp-green)}
+.kyp-disc.cleared .ic{background:var(--kyp-green)}
+.kyp-disc .ic{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--kyp-orange);border-radius:5px;padding:4px 8px;flex:none}
+.kyp-disc .tx{font-size:13px;color:var(--kyp-ink);line-height:1.5}
+```
+
+**Delete** `.lsnwrap`'s dead `--indigoSoft` and `--sans` custom properties (`index.css:2504`),
+and the no-op `.lsnwrap .verify .lk{text-decoration:none}` (it targets `<button>`).
+
+---
+
+## 6. Body layout — in this order
+
+1. **Status strip** (`kyp-lstat`) — status pill, source link, listed date, checked date,
+   re-check control. Replaces the four hard-coded status sentences at `:4420–4433`.
+2. **Three blocks** — asking price (indigo, `CLAIMED`), the most material disputed claim
+   (orange/red per §2), days on market (§4). Each carries a `.bclaim` provenance tag.
+3. **What the seller disclosed** (§3) — `standard` items first, then findings.
+4. **Claims checked against the record** (§2) — one `kyp-xrow` per check.
+5. **What the listing says** — `remarksSummary`, unchanged.
+6. **Listing highlights** — `keyFacts`, **capped at 10** with `+{n} more`. It is uncapped today
+   and the prompt asks for "EVERY concrete fact", so it routinely runs long.
+7. Caveat + `kyp-src`.
+
+**Delete the two cross-check buttons** (`:4549–4577`). They are the homework this step replaces.
+Keep deep links only where they point at *evidence for a result we computed* — e.g. the
+resolved-violation row linking to Permits & Violations.
+
+---
+
+## 7. 🔒 Gated logic
+
+1. `status === 'not_found'` → status strip only. No blocks, no checks, no disclosures.
+2. **Checks render only for claims the listing actually made.** No claim = no row. Never a row
+   reading "not stated."
+3. **`unavailable` rows render last** and are visually distinct from verdicts.
+4. **Disclosure `finding` colour is applied only after the resolution attempt** in §3.
+5. **DOM verdict requires `listedDate`.** Without it, show nothing rather than assuming.
+6. `keyFacts` capped at 10 + `+{n} more`. **Never truncate silently.**
+7. **Sold tile** renders only when `status` is `off_market`/`pending` — today it renders on
+   `soldPrice != null` with no status gate (`:4494`), so an active listing can show
+   "Actively listed" and a "Sold" tile at once.
+
+---
+
+## 8. Bugs — fix 1–6, log the rest
+
+1. **Error renders as "never checked."** `:1101` destructures only `data`/`isFetched`;
+   `isLoading`/`isError` are dropped. A 500 is visually identical to a run that was never
+   checked. Surface an explicit error state.
+2. **`disclosures[]` is invisible.** Zero references in `client/`. §3 fixes this — it is the
+   single biggest content gap in the section.
+3. **`NaN` poisons the unit-count chain.** `Number(listingData.unitCount)` on junk yields `NaN`,
+   and `NaN ?? fallback` does **not** fall through (`??` tests null/undefined only). Affects
+   `:1786`, `:1878`, `:10047`, `:21226` — incentive eligibility and the whole NOI model. Guard
+   with `Number.isFinite`.
+4. **The unit-count caveat almost never fires.** `:10046–10052` gates on
+   `listingSnapshot.status` but compares `listingData.unitCount` — and `listingData` only exists
+   when `sourceListingUrl` is a real Redfin URL. Compare the **snapshot's** `unitCount`.
+5. **Contradictory guidance about the same data.** `:10076–10081` says the listing "is likely
+   the more accurate picture"; `:4547` says it "can all differ from the record." Delete the
+   first — §2 now produces an actual result instead of an opinion.
+6. **The PDF has no caveat at all.** `reportPdf.ts:498–524` prints list price, units, gross
+   income, stated NOI, rent roll and disclosures with no "seller's side" framing; the on-screen
+   `.verify` block has no PDF counterpart. Add one, and include the §2 check results.
+
+Log or fix as time allows:
+
+7. `propertyContextExtraction.ts:670`/`:682` set **`verified: true`** on scraped listing unit
+   count and rent, which passes the `verified === true` filter `shared/propertyContext.ts:17-18`
+   prescribes for user-facing claims. Marketing data is not verified data.
+8. `:21322–21327` + `:21413` — selecting `listing_noi` sets `rentalNoi = statedNoi` and bypasses
+   the entire transparent NOI build-up. A broker's NOI typically excludes reserves, management
+   and real vacancy, then flows into cap rate and the verdict identically to a modelled one.
+9. `use-runs.ts:3921` — `401 → return null` collapses "not signed in" into "no listing".
+10. `:4435` — `new Date(checkedAt)` unguarded renders `Invalid Date` for legacy records. The
+    7-day address cache (`routes.ts:1626–1637`) also copies another run's `checkedAt` verbatim,
+    so a new run can display a 6-day-old check date with no indication it was reused.
+11. `listingScraper.ts:57–62` — `unitTypes` is built by **positional zip** of independently
+    collected fact arrays; one missing value shifts every later unit's beds/baths onto the wrong
+    rent.
+12. `listingScraper.ts:193` — `listPrice` is never populated by either extractor, so the "List
+    Price" row at `:12484` is permanently dead.
+13. `:4389–4403` — the empty-state CTA has no `no-print`, so a printed report for an unchecked
+    run contains a button reading "Check for active listing… takes ~30-60 seconds."
+14. Name disagreement: header says "Active Listing" (`:4372`), print registry and jump menu say
+    "Active Listing Snapshot" (`:338`, `:3206`). Pick one.
+
+---
+
+## ✅ Done-when
+
+- [ ] `claims[]` is emitted, validated, and never invented where the listing was silent.
+- [ ] Six checks run and render; `wrong` appears **only** where the record is authoritative;
+      a missing record is `differs`, never `wrong`; `unavailable` is not styled as a verdict.
+- [ ] `disclosures[]` renders, classified — as-is and tenant-occupied are **indigo/standard**,
+      not orange — and every item states its consequence.
+- [ ] A recorded violation is **resolved against sale + permit history before** it is coloured.
+- [ ] DOM uses the unit-count-aware scale; the fast end is **indigo, not green**; both
+      benchmark caveats appear in the footnote.
+- [ ] The two "cross-check it yourself" buttons are gone.
+- [ ] `keyFacts` capped at 10 with an explicit `+{n} more`.
+- [ ] Bugs 1–6 fixed; 7–14 fixed or logged with a reason.

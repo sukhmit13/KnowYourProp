@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;--bad:#d13b26;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:34px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:17px;flex-wrap:wrap}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .badges{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+
+  /* favorability badges (color = good/neutral/bad, not all-red) */
+  .bdg{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;border-radius:999px;padding:4px 11px 4px 9px;background:var(--card);border:1px solid;white-space:nowrap}
+  .bdg .d{width:7px;height:7px;border-radius:50%;flex:none}
+  .bdg.good{color:var(--good);border-color:#bcdcc4}.bdg.good .d{background:var(--good)}
+  .bdg.neu{color:var(--ink2);border-color:var(--line)}.bdg.neu .d{background:#9aa1b0}
+
+  /* THE TAKEAWAY */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px;margin-bottom:18px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+  .taket{font-family:var(--disp);font-size:20px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+  .conn{display:flex;flex-direction:column;gap:8px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2)}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+  .cn.g .dt{background:var(--good)}.cn.n .dt{background:#9aa1b0}
+  .cn b{color:var(--ink);font-weight:600}
+
+  /* scope zone header */
+  .zone{display:flex;align-items:center;gap:8px;margin:0 0 13px}
+  .zone svg{width:14px;height:14px;stroke:var(--indigo);flex:none}
+  .zone .zt{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+  .zone .sc{font-size:11px;color:var(--muted)}
+
+  /* toggle + breakdown */
+  .toggle2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .tg{border:1px solid var(--line);border-radius:11px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;background:var(--card)}
+  .tg.on{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo) inset}
+  .tg .tl{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .tg .ts{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .tg.on .ts{color:var(--indigo);font-weight:600}
+  .tg .tn{font-family:var(--disp);font-size:28px;line-height:1;color:var(--ink)}
+  .bkhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .bkhead .l{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+  .key2{display:flex;gap:13px}
+  .k2{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;color:var(--ink2);font-weight:500}
+  .k2 .d{width:9px;height:9px;border-radius:3px}
+  .k2 .d.prop{background:#4457b8}.k2 .d.viol{background:var(--bad)}
+  .bkrow{display:grid;grid-template-columns:145px 1fr 30px;align-items:center;gap:12px;margin-bottom:8px}
+  .bkrow .bl{font-size:12px;color:var(--ink)}
+  .bkrow .bt{height:9px;background:#eceae4;border-radius:999px;overflow:hidden}
+  .bkrow .bt i{display:block;height:100%;border-radius:999px}
+  .bkrow .bt i.prop{background:#4457b8}.bkrow .bt i.viol{background:var(--bad)}
+  .bkrow .bv{font-family:var(--mono);font-size:11.5px;color:var(--ink2);text-align:right}
+  .bkmore{font-size:11px;color:var(--muted);margin-top:4px}
+  .bkdiv{height:1px;background:var(--line);margin:18px 0}
+
+  /* ranking tiles */
+  .rlbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:11px}
+  .ranks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+  .rank{border:1px solid var(--line);border-radius:12px;padding:15px 17px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .rank .lt .cat{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+  .rank .lt .rate{font-size:11.5px;color:var(--muted)}
+  .rank .lt .lab{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;margin-top:8px}
+  .rank .lt .lab .d{width:7px;height:7px;border-radius:50%}
+  .rank.good .lt .lab{color:var(--good)}.rank.good .lt .lab .d{background:var(--good)}
+  .rank.neu .lt .lab{color:var(--ink2)}.rank.neu .lt .lab .d{background:#9aa1b0}
+  .rank .big{font-family:var(--disp);font-size:34px;line-height:1;color:var(--ink);white-space:nowrap}
+  .rank .big small{font-family:var(--sans);font-size:11px;color:var(--muted);font-weight:500;display:block;text-align:right;margin-top:5px}
+
+  /* trend */
+  .trend{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 17px}
+  .trendtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .trendtop .l{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .trendtop .chg{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--good)}
+  .trendtop .chg svg{width:13px;height:13px;stroke:var(--good)}
+  .bars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:end;height:78px}
+  .tb{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .tb .bar{width:100%;max-width:120px;border-radius:6px 6px 0 0;background:#d7d5cd}
+  .tb.cur .bar{background:var(--good)}
+  .tb .yr{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:7px}
+  .tb .val{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px}
+  .tb.cur .val{color:var(--good)}
+
+  .src{font-size:10.5px;color:var(--muted);margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+    <div class="sh">
+      <span class="sq"></span><span class="t">Area Crime Statistics</span>
+      <div class="badges">
+        <span class="bdg good"><span class="d"></span>Violent · safer than 77%</span>
+        <span class="bdg neu"><span class="d"></span>Property · safer than 58%</span>
+        <span class="bdg good"><span class="d"></span>Trend ↓ 17% YoY</span>
+      </div>
+    </div>
+
+    <!-- THE TAKEAWAY (rewritten for the new split metric) -->
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>The Takeaway</div>
+      <div class="taket">Violent crime here is low — property crime is the more common issue, and it's falling.</div>
+      <div class="conn">
+        <div class="cn g"><span class="dt"></span><span><b>Violent crime is the low end for Chicago</b> — safer than <b>77% of community areas</b> per capita (14.1 per 1,000). This is the number most buyers weigh, and it's well above the city middle.</span></div>
+        <div class="cn n"><span class="dt"></span><span><b>Property crime is the more common concern</b>, though still below average — safer than <b>58%</b> (49.4 per 1,000). On the immediate block, the top type is <b>motor-vehicle theft</b>.</span></div>
+        <div class="cn g"><span class="dt"></span><span>And the direction is good: total incidents are <b>down 17% year-over-year</b> (and down 14% since 2023).</span></div>
+      </div>
+    </div>
+
+    <!-- ZONE 1: around the address -->
+    <div class="zone"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="zt">Around this address</span><span class="sc">· trailing 12 months</span></div>
+    <!-- TOGGLE + BREAKDOWN -->
+    <div class="toggle2">
+      <div class="tg"><div><div class="tl">Within 250 ft — my block</div><div class="ts">Click to see breakdown</div></div><div class="tn">11</div></div>
+      <div class="tg on"><div><div class="tl">Within ¼ mile</div><div class="ts">Showing breakdown below</div></div><div class="tn">196</div></div>
+    </div>
+    <div class="bkhead">
+      <span class="l">Breakdown by type · ¼ mile</span>
+      <span class="key2"><span class="k2"><span class="d prop"></span>Property / other</span><span class="k2"><span class="d viol"></span>Violent</span></span>
+    </div>
+    <div class="bkrow"><span class="bl">Criminal damage</span><span class="bt"><i class="prop" style="width:100%"></i></span><span class="bv">45</span></div>
+    <div class="bkrow"><span class="bl">Theft</span><span class="bt"><i class="prop" style="width:98%"></i></span><span class="bv">44</span></div>
+    <div class="bkrow"><span class="bl">Burglary</span><span class="bt"><i class="prop" style="width:76%"></i></span><span class="bv">34</span></div>
+    <div class="bkrow"><span class="bl">Motor vehicle theft</span><span class="bt"><i class="prop" style="width:49%"></i></span><span class="bv">22</span></div>
+    <div class="bkrow"><span class="bl">Deceptive practice</span><span class="bt"><i class="prop" style="width:42%"></i></span><span class="bv">19</span></div>
+    <div class="bkrow"><span class="bl">Battery</span><span class="bt"><i class="viol" style="width:29%"></i></span><span class="bv">13</span></div>
+    <div class="bkrow"><span class="bl">Assault</span><span class="bt"><i class="viol" style="width:20%"></i></span><span class="bv">9</span></div>
+    <div class="bkrow"><span class="bl">Other offense</span><span class="bt"><i class="prop" style="width:13%"></i></span><span class="bv">6</span></div>
+    <div class="bkrow"><span class="bl">Robbery</span><span class="bt"><i class="viol" style="width:4%"></i></span><span class="bv">2</span></div>
+    <div class="bkrow"><span class="bl">Sex offense</span><span class="bt"><i class="viol" style="width:2%"></i></span><span class="bv">1</span></div>
+    <div class="bkmore">Violent types (battery, assault, robbery, sex offense) make up <b style="color:var(--ink2)">25 of 196</b> incidents — about 13%.</div>
+
+    <div class="bkdiv"></div>
+
+    <!-- ZONE 2: community area -->
+    <div class="zone"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg><span class="zt">Logan Square community area</span><span class="sc">· last full calendar year, per capita</span></div>
+    <!-- HOW THIS AREA RANKS -->
+    <div class="rlbl">Ranked per 1,000 residents vs. all Chicago community areas</div>
+    <div class="ranks">
+      <div class="rank good">
+        <div class="lt"><div class="cat">Violent crime</div><div class="rate">14.1 per 1,000 residents</div><div class="lab"><span class="d"></span>Low crime</div></div>
+        <div class="big">77%<small>safer than</small></div>
+      </div>
+      <div class="rank neu">
+        <div class="lt"><div class="cat">Property &amp; other crime</div><div class="rate">49.4 per 1,000 residents</div><div class="lab"><span class="d"></span>Below average</div></div>
+        <div class="big">58%<small>safer than</small></div>
+      </div>
+    </div>
+
+    <!-- TREND -->
+    <div class="trend">
+      <div class="trendtop"><span class="l">All incidents · full calendar years</span><span class="chg"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17l-8.5-8.5-5 5L2 7"/><path d="M16 17h6v-6"/></svg>Down 17% YoY · 14% since 2023</span></div>
+      <div class="bars">
+        <div class="tb"><span class="val">5,256</span><span class="bar" style="height:80%"></span><span class="yr">2023</span></div>
+        <div class="tb"><span class="val">5,459</span><span class="bar" style="height:84%"></span><span class="yr">2024</span></div>
+        <div class="tb cur"><span class="val">4,526</span><span class="bar" style="height:69%"></span><span class="yr">2025</span></div>
+      </div>
+    </div>
+
+    <div class="src">Source: Chicago Data Portal — crimes reported to CPD · rates per 2023 ACS population · rankings use the last full calendar year so numbers don't wobble as the current year fills in.</div>
+  </div>
+</div>
+</body>
+</html>

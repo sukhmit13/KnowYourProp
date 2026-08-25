@@ -1,0 +1,745 @@
+{
+  "programs": [
+    {
+      "key": "ssa",
+      "name": "Special Service Area (SSA)",
+      "category": "Tax / Grant",
+      "method": "chicago_polygon",
+      "implement": "now",
+      "geojsonEndpoint": "https://data.cityofchicago.org/resource/cmr6-dn8c.geojson",
+      "featureNameProp": [
+        "name",
+        "NAME"
+      ],
+      "featureNumberProp": [
+        "ref_no",
+        "REF_NO"
+      ],
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "inArea": "This property is within {name} ({number}). SSAs are tax-funded business improvement districts that may provide facade grants, security rebates, marketing support, and beautification programs administered by a local service provider. Contact the SSA manager directly to confirm current programs.",
+        "notInArea": "Not within a Special Service Area — SSAs provide business improvement grants and programs in specific commercial corridors. Check chicago.gov/ssas for the nearest SSA."
+      },
+      "learnMoreUrl": "https://www.chicago.gov/city/en/depts/bacp/supp_info/special_service_areas.html"
+    },
+    {
+      "key": "industrial_corridor",
+      "name": "Industrial Corridor / Industrial Growth Zone",
+      "category": "Program / Zoning",
+      "method": "chicago_polygon",
+      "implement": "now",
+      "geojsonEndpoint": "https://data.cityofchicago.org/resource/3tu3-iesz.geojson",
+      "featureNameProp": [
+        "name",
+        "NAME"
+      ],
+      "featureNumberProp": [
+        "no",
+        "NO"
+      ],
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "inArea": "This property is within the {name} Industrial Corridor (#{number}). Chicago's Industrial Corridors are protected employment districts with expedited permitting, infrastructure investment priority, and retention support from the Department of Planning and Development. Industrial uses are strongly preferred — residential conversion requires City Council approval.",
+        "notInArea": "Not within a Chicago Industrial Corridor — industrial corridors are protected employment districts with expedited permitting and business retention support."
+      },
+      "learnMoreUrl": "https://www.chicago.gov/city/en/depts/dcd/supp_info/industrial_corridors.html"
+    },
+    {
+      "key": "cook_class_7c",
+      "name": "Cook County Class 7c (CURE)",
+      "category": "Property Tax",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Commercial",
+        "Vehicular"
+      ],
+      "requiresZoningPrefix": [
+        "B",
+        "C",
+        "D",
+        "T"
+      ],
+      "zoningFallback": true,
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — Class 7c provides a 5-year reduced assessment (16% of market value) for commercial rehabilitation or re-occupancy. Easier to qualify than Class 7a/7b. Requires Cook County Assessor application.",
+        "zoningInferred": "Commercial zoning ({zoning}) suggests Class 7c may apply — a 5-year reduced assessment for commercial rehabilitation. Confirm by selecting a project use.",
+        "notApplicable": "Not applicable — commercial project use required for Class 7c."
+      },
+      "learnMoreUrl": "https://prodassets.cookcountyassessoril.gov/s3fs-public/2026-01/Class%207c%20Bulletin%20(revised).pdf"
+    },
+    {
+      "key": "cook_class_8",
+      "name": "Cook County Class 8",
+      "category": "Property Tax",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Commercial",
+        "Industrial",
+        "Vehicular"
+      ],
+      "requiresZoningPrefix": [
+        "B",
+        "C",
+        "D",
+        "M",
+        "PMD",
+        "T"
+      ],
+      "zoningFallback": true,
+      "automatic": false,
+      "priority": "HIGH",
+      "resultPhrasing": {
+        "potentiallyEligible": "Needs confirmation — Class 8 (10% assessed rate) is automatic only in Bloom, Bremen, Calumet, Rich, and Thornton townships, none of which include Chicago. Elsewhere it requires the municipality to obtain a 'severe economic depression' designation from the Assessor — Chicago generally uses the Class 7 programs instead. Treat as unlikely unless a specific designation exists for this area.",
+        "zoningInferred": "Needs confirmation — commercial/industrial zoning ({zoning}) fits Class 8's property test, but Class 8 is automatic only in five south-suburban townships (Bloom, Bremen, Calumet, Rich, Thornton) that do not include Chicago. Elsewhere it requires a municipal 'severe economic depression' designation, which Chicago generally does not pursue (Class 7a/7b/7c serve that role in the city).",
+        "notApplicable": "Not applicable — commercial or industrial project use required for Class 8."
+      },
+      "learnMoreUrl": "https://www.cookcountyassessoril.gov/incentives",
+      "eligibleStatus": "manual_check"
+    },
+    {
+      "key": "cook_class_9",
+      "name": "Cook County Class 9 (Multifamily Affordable)",
+      "category": "Property Tax",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Residential"
+      ],
+      "requiresZoningPrefix": [
+        "R"
+      ],
+      "minUnits": 7,
+      "automatic": false,
+      "priority": "HIGH",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — Class 9 reduces the assessed rate to 10% for new or substantially rehabilitated multifamily buildings (7+ units) with an affordability commitment. Requires Cook County Assessor application.",
+        "potentiallyEligibleGrandfathered": "Potentially eligible — parcel has {unitCount} units in a {zoning} zone (likely grandfathered). Class 9 requires 7+ units with an affordability commitment. Verify nonconforming status and confirm with Cook County Assessor.",
+        "zoningInferred": "Residential zoning ({zoning}) suggests Class 9 may apply if the project will have 7+ units. Confirm by selecting a project use.",
+        "notApplicableUnits": "Not applicable — Class 9 requires 7+ units; this parcel has {unitCount} unit(s). A new-construction or addition project creating 7+ units could qualify.",
+        "notApplicable": "Not applicable — multifamily residential project use required for Class 9."
+      },
+      "learnMoreUrl": "https://www.cookcountyassessoril.gov/incentives"
+    },
+    {
+      "key": "ahsap",
+      "name": "Affordable Housing Special Assessment (AHSAP / HB2621)",
+      "category": "Property Tax",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Residential"
+      ],
+      "requiresZoningPrefix": [
+        "R"
+      ],
+      "minUnits": 7,
+      "automatic": false,
+      "priority": "HIGH",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — AHSAP reduces assessed value for rental buildings (7+ units) that rent a share of units affordably. Tiers 1–3 offer different levels of relief; Tier 3 has an additional geographic requirement. Requires Cook County Assessor application.",
+        "potentiallyEligibleGrandfathered": "Potentially eligible — parcel has {unitCount} units in a {zoning} zone (likely grandfathered). AHSAP requires 7+ rental units with an affordability commitment. Verify nonconforming status and confirm with Cook County Assessor.",
+        "zoningInferred": "Residential zoning ({zoning}) suggests AHSAP may apply if the project will have 7+ rental units. Confirm by selecting a project use.",
+        "notApplicableUnits": "Not applicable — AHSAP requires 7+ units; this parcel has {unitCount} unit(s). A new-construction or addition project creating 7+ units could qualify.",
+        "notApplicable": "Not applicable — multifamily rental project use required for AHSAP."
+      },
+      "learnMoreUrl": "https://www.cookcountyassessoril.gov/incentives"
+    },
+    {
+      "key": "lihtc",
+      "name": "Low-Income Housing Tax Credit (LIHTC 9% / 4%)",
+      "category": "Tax Credit",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Residential"
+      ],
+      "requiresZoningPrefix": [
+        "R"
+      ],
+      "minUnits": 7,
+      "automatic": false,
+      "priority": "HIGH",
+      "grantType": "tax_credit",
+      "nextRoundNote": "9% competitive round: 2026 closed June 2026; 2027–28 QAP in development, expected release late 2026. 4% bond-paired credits: rolling year-round.",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — LIHTC provides equity for affordable rental housing. 9% credits are competitive (via IHDA QAP); 4% are bond-paired. A QCT or DDA location boosts the eligible basis by 30%. Allocation is competitive — not a guaranteed benefit.",
+        "potentiallyEligibleGrandfathered": "Potentially eligible — parcel has {unitCount} units in a {zoning} zone (likely grandfathered). LIHTC requires meaningful scale (typically 7+ units) for IHDA consideration. Verify nonconforming status.",
+        "zoningInferred": "Residential zoning ({zoning}) suggests LIHTC may apply for a multifamily project with 7+ affordable rental units. Confirm by selecting a project use.",
+        "notApplicableUnits": "Not applicable — LIHTC requires meaningful project scale (7+ units); this parcel has {unitCount} unit(s). A new-construction project creating sufficient units could qualify.",
+        "notApplicable": "Not applicable — affordable residential project use required for LIHTC.",
+        "notApplicableZoningCap": "Not applicable as-is — LIHTC requires meaningful project scale (7+ affordable rental units), but {zoning} zoning typically allows a maximum of {zoningMax} unit(s). A zoning change, or an existing legal nonconforming building with 7+ units, could still qualify — verify the actual unit count."
+      },
+      "learnMoreUrl": "https://www.ihda.org/developers/rental-housing/low-income-housing-tax-credits/"
+    },
+    {
+      "key": "aro",
+      "name": "Affordable Requirements Ordinance (ARO)",
+      "category": "Zoning / Affordability",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Residential"
+      ],
+      "requiresZoningPrefix": [
+        "R"
+      ],
+      "minUnits": 10,
+      "skipUnitCheckForNewConstruction": true,
+      "automatic": true,
+      "isRequirement": true,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "ARO may apply — this ordinance REQUIRES that residential projects of 10+ units with a City nexus (City financial assistance or a zoning change) include a share of affordable units or pay an in-lieu fee. This is a compliance requirement, not a benefit. Confirm the applicable ARO tier with Chicago DOH.",
+        "potentiallyEligibleGrandfathered": "ARO may apply — parcel has {unitCount} units in a {zoning} zone (likely grandfathered). If a City nexus exists, ARO compliance may be triggered. Confirm with Chicago DOH.",
+        "zoningInferred": "Residential zoning ({zoning}) — ARO may apply to residential projects of 10+ units with a City nexus. This is a compliance requirement. Confirm by selecting a project use.",
+        "notApplicableUnits": "ARO not triggered — applies to projects of 10+ units with a City nexus; this parcel has {unitCount} unit(s). Would apply to a new-construction or large addition project.",
+        "notApplicable": "ARO typically applies to residential projects of 10+ units with a City nexus."
+      },
+      "learnMoreUrl": "https://www.chicago.gov/city/en/depts/dcd/supp_info/affordable_requirementsordinance.html"
+    },
+    {
+      "key": "cook_class_c",
+      "name": "Cook County Class C (Brownfield Remediation)",
+      "category": "Property Tax",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Commercial",
+        "Industrial"
+      ],
+      "requiresZoningPrefix": [
+        "B",
+        "C",
+        "D",
+        "M",
+        "PMD"
+      ],
+      "zoningFallback": true,
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — Class C provides reduced assessment for commercial/industrial property that undergoes documented environmental remediation to IEPA 'No Further Remediation' standard. Requires Assessor application.",
+        "zoningInferred": "Commercial/industrial zoning ({zoning}) suggests Class C may apply — reduced assessment for brownfield remediation projects. Confirm by selecting a project use.",
+        "notApplicable": "Not applicable — commercial or industrial project use required for Class C."
+      },
+      "learnMoreUrl": "https://www.cookcountyassessoril.gov/incentives"
+    },
+    {
+      "key": "cook_class_l",
+      "name": "Cook County Class L (Landmark Rehabilitation)",
+      "category": "Property Tax",
+      "method": "conditional",
+      "implement": "now",
+      "requiresLandmark": true,
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — Class L provides a 12-year reduced assessment (10% for years 1–8, then 15%) for substantial rehabilitation of a designated Chicago or Cook County Landmark. Rehab spend must meet the Assessor's threshold. Requires Assessor application.",
+        "notApplicable": "Class L applies to designated landmarks undergoing substantial rehabilitation. No landmark designation detected for this property."
+      },
+      "learnMoreUrl": "https://www.cookcountyassessoril.gov/incentives"
+    },
+    {
+      "key": "historic_fed",
+      "name": "Federal Historic Rehabilitation Tax Credit (20%)",
+      "category": "Tax Credit",
+      "method": "conditional",
+      "implement": "now",
+      "requiresLandmark": true,
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — the 20% Federal Historic Tax Credit applies to certified rehabilitation of income-producing historic buildings. A local landmark designation is a helpful indicator but the building must also receive NPS 'certified historic structure' status. Requires NPS Parts 1–3 certification.",
+        "notApplicable": "Not applicable — requires a certified historic structure undergoing income-producing rehabilitation. No landmark designation detected."
+      },
+      "learnMoreUrl": "https://www.nps.gov/subjects/taxincentives/index.htm"
+    },
+    {
+      "key": "historic_il",
+      "name": "Illinois Historic Preservation Tax Credit (25%)",
+      "category": "Tax Credit",
+      "method": "conditional",
+      "implement": "now",
+      "requiresLandmark": true,
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — Illinois offers a 25% state credit for certified rehabilitation of historic structures, stackable with the 20% federal credit. Requires IL SHPO certification and is subject to an annual statewide cap. Confirm current availability with IL DNR/SHPO.",
+        "notApplicable": "Not applicable — requires a certified historic structure undergoing rehabilitation. No landmark designation detected."
+      },
+      "learnMoreUrl": "https://www.illinoishistory.gov/historic-preservation/tax-credit-program/"
+    },
+    {
+      "key": "dda",
+      "name": "Difficult Development Area (DDA)",
+      "category": "Federal Designation",
+      "method": "chicago_polygon",
+      "implement": "now",
+      "geojsonEndpoint": "chicago_dda.geojson",
+      "featureNameProp": [
+        "DDA_NAME"
+      ],
+      "featureNumberProp": [
+        "ZCTA5"
+      ],
+      "sourceUrl": "https://hudgis-hud.opendata.arcgis.com/datasets/HUD::difficult-development-areas-2026/about",
+      "sourceYear": 2026,
+      "updateNote": "HUD publishes new DDA lists annually. Replace chicago_dda.geojson each year by downloading the updated dataset from sourceUrl and re-running the Illinois/METRO16980 filter.",
+      "automatic": true,
+      "priority": "MED",
+      "resultPhrasing": {
+        "inArea": "This property is in a HUD Difficult Development Area (DDA) — {name} (ZIP {number}). DDA status boosts the eligible basis for LIHTC projects by 30%, making affordable housing development more financially feasible. Confirm with your tax credit syndicator.",
+        "notInArea": "Not in a HUD Difficult Development Area — DDA status would boost LIHTC eligible basis by 30%. This ZIP code is not among the HUD 2026 DDA designations for the Chicago Metro FMR Area."
+      },
+      "learnMoreUrl": "https://www.huduser.gov/portal/datasets/qct.html"
+    },
+    {
+      "key": "cejst",
+      "name": "J40 Disadvantaged Community (CEJST — Discontinued)",
+      "category": "Context / Clean Energy",
+      "method": "federal_tract",
+      "implement": "discontinued",
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "discontinued": "The federal CEJST / Justice40 program was discontinued by the Trump administration in early 2025 and the official CEQ tool was taken down. The underlying tract-level data is preserved by the Environmental Data & Governance Initiative — use the community archive (public-environmental-data-partners.github.io/j40-cejst-2) to check whether this census tract was identified as disadvantaged. Illinois state programs (Illinois Solar for All, ILPA equity provisions) may still use J40-equivalent criteria; check with the program administrator."
+      }
+    },
+    {
+      "key": "nob",
+      "name": "Neighborhood Opportunity Bonus (NOB) / Downtown",
+      "category": "Density / Zoning",
+      "method": "zoning_check",
+      "implement": "now",
+      "requiresZoningPrefix": [
+        "DC",
+        "DX",
+        "DS",
+        "DR"
+      ],
+      "automatic": true,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "This property is in a Chicago Downtown '{zoning}' district — eligible for the Neighborhood Opportunity Bonus (NOB). Developers can purchase additional Floor Area Ratio (FAR) beyond the base zoning limit; fees collected fund the Neighborhood Opportunity Fund (NOF), which supports community development in underserved neighborhoods. Confirm current FAR pricing and NOB application requirements with DPD at chicago.gov/dcd.",
+        "notApplicable": "The NOB program applies only to Chicago's Downtown 'D' zoning districts (DC, DX, DS, DR). This property is zoned {zoning} and is not in a NOB-eligible area.",
+        "manual": "NOB eligibility requires a Downtown 'D' district zoning designation (DC, DX, DS, DR). Zoning data is unavailable for this property — confirm with DPD or check chicago.gov/dcd."
+      },
+      "learnMoreUrl": "https://www.chicago.gov/city/en/depts/dcd/supp_info/neighborhood-opportunity-fund.html"
+    },
+    {
+      "key": "adopt_landmark",
+      "name": "Adopt-a-Landmark Grant",
+      "category": "Grant",
+      "method": "conditional",
+      "implement": "now",
+      "requiresOfficialLandmark": true,
+      "automatic": false,
+      "priority": "LOW",
+      "resultPhrasing": {
+        "potentiallyEligible": "This property is a designated Chicago Landmark and may be eligible for the Adopt-a-Landmark Grant. These NOB-funded grants support rehabilitation of designated landmarks. Contact DPD Landmarks Division to confirm current funding cycles and application requirements.",
+        "notApplicable": "Adopt-a-Landmark grants are available only for officially designated Chicago Landmarks. This property does not appear in the City's designated landmarks database (uct4-hrvh). If you believe this is a designated landmark, contact DPD Landmarks Division to verify."
+      },
+      "learnMoreUrl": "https://www.chicago.gov/city/en/depts/dcd/supp_info/landmarks_grants.html"
+    },
+    {
+      "key": "r3",
+      "name": "R3 (Restore, Reinvest, Renew) Program",
+      "category": "Grant",
+      "method": "tract_lookup",
+      "implement": "now",
+      "tractLookupFile": "r3_target_tracts.json",
+      "automatic": true,
+      "priority": "LOW",
+      "resultPhrasing": {
+        "inAreaHighNeed": "This property is in an R3 High Need Disproportionately Impacted Area — designated for priority cannabis-tax-funded grants covering capital improvements, violence interruption, mental health, reentry, and youth development. High Need areas receive priority consideration in ICJIA funding rounds. Visit icjia.illinois.gov/r3 to connect with a local grantee or apply.",
+        "inArea": "This property is in an R3 Disproportionately Impacted Area — eligible for cannabis-tax-funded grants covering capital improvements, violence interruption, mental health, reentry, and youth development services. Visit icjia.illinois.gov/r3 to find your local R3 grantee or apply.",
+        "notInArea": "This property is not in a designated R3 Disproportionately Impacted Area. R3 grants are targeted to historically disinvested communities based on ICJIA tract designations.",
+        "manual": "R3 census tract could not be determined — check the ICJIA R3 program map at icjia.illinois.gov/r3 to confirm eligibility."
+      },
+      "learnMoreUrl": "https://icjia.illinois.gov/r3"
+    },
+    {
+      "key": "homegrown",
+      "name": "HomeGrown Purchase Assistance Program",
+      "category": "Grant",
+      "method": "tract_lookup",
+      "implement": "now",
+      "tractLookupFile": "homegrown_zone_b_tracts.json",
+      "residentialOnly": true,
+      "maxUnits": 2,
+      "automatic": true,
+      "priority": "HIGH",
+      "resultPhrasing": {
+        "inAreaHighNeed": "This property is in a HomeGrown Zone B tract — eligible for up to $50,000 toward down payment and closing costs (max 25% of purchase price). Income limit: 150% AMI. Zone B tracts are low-income census tracts where 70%+ of families earn below 80% of the Illinois statewide median family income. For owner-occupant buyers of 1–2 unit homes only; 5-year primary residence required. Cannot be combined with TaxSmart MCC. Apply through NLS (nhschicago.org/homegrown) or TRP Lending (resurrectionproject.org/homegrown).",
+        "inArea": "This property is in a HomeGrown Zone A area — eligible for up to $70,000 toward down payment and closing costs (max 25% of purchase price). Income limit: 120% AMI. For owner-occupant buyers of 1–2 unit homes only; 5-year primary residence required. Cannot be combined with TaxSmart MCC. Apply through NLS (nhschicago.org/homegrown) or TRP Lending (resurrectionproject.org/homegrown).",
+        "notInArea": "This property does not appear to be in a HomeGrown eligible area. HomeGrown grants are available for Chicago properties — confirm at chicago.gov/homegrown.",
+        "manual": "Census tract unavailable — check zone eligibility at chicago.gov/homegrown using the Zone Lookup Tool.",
+        "notApplicable": "HomeGrown grants are for residential 1–2 unit homebuyers only (SFH, condo, townhome, 2-flat). Commercial and industrial properties are not eligible.",
+        "notApplicableUnits": "HomeGrown grants are limited to 1–2 unit properties. This property has {unitCount} units and does not qualify."
+      },
+      "learnMoreUrl": "https://www.chicago.gov/city/en/depts/doh/supp_info/homegrown.html"
+    },
+    {
+      "key": "taxsmart_mcc",
+      "name": "TaxSmart Mortgage Credit Certificate (MCC)",
+      "category": "Tax Credit",
+      "method": "tract_lookup",
+      "implement": "now",
+      "tractLookupFile": "taxsmart_target_tracts.json",
+      "residentialOnly": true,
+      "automatic": true,
+      "priority": "MED",
+      "lenders": [
+        {
+          "name": "Fairway Independent Mortgage",
+          "contact": "Suzette Sanders — hfabulletins@fairwaymc.com",
+          "phone": "469-252-6646"
+        },
+        {
+          "name": "Guaranteed Rate, Inc.",
+          "contact": "Jason P. Hasner — jason.hasner@rate.com",
+          "phone": "773-328-6608"
+        },
+        {
+          "name": "Guaranteed Rate Affinity",
+          "contact": "Natasha Robinson — natasha.robinson@grarate.com",
+          "phone": "773-897-6604"
+        },
+        {
+          "name": "Neighborhood Lending Services",
+          "contact": "David Kottmann — dkottmann@nhschicago.org",
+          "phone": "773-329-4106"
+        },
+        {
+          "name": "Self-Help Federal Credit Union",
+          "contact": "Rodolfo Medina — rmedina@self-help.org",
+          "phone": "773-635-2038"
+        },
+        {
+          "name": "The Federal Savings Bank",
+          "contact": "John T. Calk — jcalk@thefederalsavingsbank.com",
+          "phone": "312-738-6000"
+        },
+        {
+          "name": "Wintrust Mortgage",
+          "contact": "James Harris — jharris@wintrustmortgage.com",
+          "phone": "847-939-9388"
+        }
+      ],
+      "resultPhrasing": {
+        "inArea": "This property is in an IRS-designated targeted area, making TaxSmart MCC more accessible. Eligible homebuyers can claim a federal income-tax credit of up to 25% of annual mortgage interest (max $2,000/yr). Targeted-area limits: income $143,880 (1–2 person) / $167,860 (3+), purchase price $665,173. First-time buyer requirement is waived in targeted areas. Apply before closing through a 2026 participating lender listed below.",
+        "notInArea": "This property is not in an IRS-designated targeted area. TaxSmart MCC is still available to first-time homebuyers meeting standard limits: income $119,900 (1–2 person) / $137,885 (3+), purchase price $544,232. The MCC provides a federal income-tax credit of up to 25% of annual mortgage interest. Apply before closing through a 2026 participating lender listed below.",
+        "manual": "TaxSmart MCC census tract could not be determined — check eligibility at chicago.gov/doh or contact a 2026 participating lender listed below."
+      },
+      "learnMoreUrl": "https://www.chicago.gov/city/en/depts/doh/supp_info/taxsmart-mortgage-credit-certificate-program.html"
+    },
+    {
+      "key": "solar_for_all",
+      "name": "Illinois Solar for All",
+      "category": "Grant / Program",
+      "method": "manual",
+      "implement": "stub",
+      "automatic": false,
+      "priority": "LOW",
+      "resultPhrasing": {
+        "manual": "Illinois Solar for All provides low-cost solar access in Environmental Justice communities for residential and nonprofit properties. Contact Elevate Energy or IL DCEO to check if this property qualifies."
+      },
+      "learnMoreUrl": "https://www.illinoissolarforall.org/"
+    },
+    {
+      "key": "idhs_smart_start",
+      "name": "IDHS Smart Start Illinois",
+      "category": "State Operating Grant",
+      "method": "project_type_check",
+      "implement": "now",
+      "requiresProjectType": [
+        "Day Care Center"
+      ],
+      "grantType": "grant",
+      "applicationDates": "FY26 active — annual cycle; apply through IDHS Illinois Gateways (ilgateways.com)",
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — IDHS Smart Start Illinois provides operational grants to licensed DCFS child care providers covering workforce wages, staff benefits, and classroom resources. Providers must be licensed by DCFS and enrolled through the Illinois Gateways portal (ilgateways.com). FY26 active; annual funding cycle.",
+        "notApplicable": "Not applicable — IDHS Smart Start Illinois is for licensed Day Care Center operators only."
+      },
+      "learnMoreUrl": "https://www.dhs.state.il.us/page.aspx?item=30275"
+    },
+    {
+      "key": "idhs_esg",
+      "name": "Emergency Solutions Grant (IDHS ESG)",
+      "category": "Federal Pass-Through Grant",
+      "method": "project_type_check",
+      "implement": "now",
+      "requiresProjectType": [
+        "Emergency Shelter",
+        "Interim Housing"
+      ],
+      "grantType": "grant",
+      "applicationDates": "FY26 active — sub-awarded through Chicago DFSS; contact DFSS for local application",
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — the federal Emergency Solutions Grant (ESG), administered by IDHS, funds emergency shelter operations, essential services, rapid re-housing, and homelessness prevention. In Chicago, funds are sub-awarded through DFSS (Dept. of Family and Support Services). Contact DFSS or check grants.illinois.gov for current NOFO.",
+        "notApplicable": "Not applicable — ESG funds emergency shelters and interim/transitional housing only."
+      },
+      "learnMoreUrl": "https://www.dhs.state.il.us/page.aspx?item=35179"
+    },
+    {
+      "key": "idhs_homeless_youth",
+      "name": "IDHS Homeless Youth Grant",
+      "category": "State Grant",
+      "method": "project_type_check",
+      "implement": "now",
+      "requiresProjectType": [
+        "Emergency Shelter"
+      ],
+      "grantType": "grant",
+      "nextRoundNote": "FY27 is continuation-only for existing grantees; new competitive NOFO expected spring 2027 — monitor idhs.state.il.us",
+      "automatic": false,
+      "priority": "LOW",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — IDHS Homeless Youth grants (CSFA #711) fund transitional and supportive services for youth experiencing homelessness. FY27 is a continuation cycle for existing grantees; new competitive applications expected in a future NOFO. Monitor idhs.state.il.us for the FY28 competitive round.",
+        "notApplicable": "Not applicable — IDHS Homeless Youth grant targets emergency shelter and youth housing service providers."
+      },
+      "learnMoreUrl": "https://www.dhs.state.il.us/page.aspx?item=102660"
+    },
+    {
+      "key": "ihda_psh",
+      "name": "IHDA Permanent Supportive Housing (PSH)",
+      "category": "State Grant / Loan",
+      "method": "project_type_check",
+      "implement": "now",
+      "requiresProjectType": [
+        "Emergency Shelter",
+        "Domestic Violence Residence / Shelter",
+        "Interim Housing",
+        "Residential Support Services"
+      ],
+      "grantType": "grant",
+      "nextRoundNote": "Round XII ($50M, 142 units) completed; Round XIII RFA expected mid-to-late 2026 — monitor ihda.org",
+      "automatic": false,
+      "priority": "HIGH",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — IHDA PSH provides loans and forgivable grants for permanent supportive housing serving people with disabilities, experiencing homelessness, or at risk of housing instability. For-profit and nonprofit developers both eligible. Round XII recently completed; Round XIII RFA expected mid-to-late 2026. Monitor ihda.org for announcement.",
+        "notApplicable": "Not applicable — IHDA PSH funds permanent supportive housing developments (shelter, DV housing, interim housing, residential support services)."
+      },
+      "learnMoreUrl": "https://www.ihda.org/developers/rental-housing/permanent-supportive-housing/"
+    },
+    {
+      "key": "iaca_gos",
+      "name": "IL Arts Council — General Operating Support (GOS)",
+      "category": "State Grant",
+      "method": "project_type_check",
+      "implement": "now",
+      "requiresProjectType": [
+        "Cultural Exhibit / Library / Museum",
+        "Movie Theater",
+        "Performing Arts Venue / Live Theater"
+      ],
+      "grantType": "grant",
+      "applicationDates": "Annual cycle — FY27 deadline passed Mar 18, 2026; FY28 application opens ~Feb 2027 at arts.illinois.gov",
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — IACA GOS provides formula-based operating support to 501(c)(3) arts nonprofits and government arts organizations with ongoing programming. Applicants must have a primary arts mission and meet prior-year activity requirements. FY28 application expected ~Feb 2027. Apply at arts.illinois.gov.",
+        "notApplicable": "Not applicable — IACA GOS is for cultural venues, performing arts organizations, libraries, and arts nonprofits only."
+      },
+      "learnMoreUrl": "https://arts.illinois.gov/grants/general-operating-support"
+    },
+    {
+      "key": "iaca_cpg",
+      "name": "IL Arts Council — Creative Project Grant (CPG)",
+      "category": "State Grant",
+      "method": "project_type_check",
+      "implement": "now",
+      "requiresProjectType": [
+        "Cultural Exhibit / Library / Museum",
+        "Movie Theater",
+        "Performing Arts Venue / Live Theater"
+      ],
+      "grantType": "grant",
+      "nextRoundNote": "Chicago Metro FY27 funds exhausted July 15, 2026; FY28 cycle opens ~late 2026 at arts.illinois.gov",
+      "automatic": false,
+      "priority": "LOW",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — IACA Creative Project Grants (up to $12,000) support arts projects by Illinois nonprofits, municipalities, artists, and colleges. Note: Chicago Metro FY27 funds were fully expended July 15, 2026. FY28 cycle expected late 2026/early 2027. Watch arts.illinois.gov for announcement.",
+        "notApplicable": "Not applicable — IACA Creative Project Grants are for arts and cultural programming projects."
+      },
+      "learnMoreUrl": "https://arts.illinois.gov/grants/creative-project-grant"
+    },
+    {
+      "key": "ifa_irb",
+      "name": "IFA Industrial Revenue Bonds (IRBs)",
+      "category": "State Incentive / Financing",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Industrial"
+      ],
+      "requiresZoningPrefix": [
+        "M",
+        "PMD"
+      ],
+      "zoningFallback": true,
+      "grantType": "incentive",
+      "applicationDates": "Rolling — no deadline; apply at any time through IFA (il-fa.com)",
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — the Illinois Finance Authority issues tax-exempt Industrial Revenue Bonds (IRBs) to finance land, buildings, machinery, and equipment for manufacturing companies. IRBs lower borrowing costs versus conventional financing. Apply directly to IFA (il-fa.com); rolling basis, no application deadline.",
+        "zoningInferred": "Industrial zoning ({zoning}) suggests IFA Industrial Revenue Bonds may apply — tax-exempt financing for manufacturing land, buildings, and equipment. Confirm by selecting an Industrial project use.",
+        "notApplicable": "Not applicable — IFA IRBs are for manufacturing and industrial projects in M or PMD zoning."
+      },
+      "learnMoreUrl": "https://www.il-fa.com/programs/industrial-revenue-bonds/"
+    },
+    {
+      "key": "dceo_micro",
+      "name": "DCEO MICRO (Manufacturing IL Chips for Real Opportunity)",
+      "category": "State Tax Credit",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Industrial"
+      ],
+      "requiresZoningPrefix": [
+        "M",
+        "PMD"
+      ],
+      "zoningFallback": true,
+      "grantType": "tax_credit",
+      "applicationDates": "Rolling — no fixed deadline; apply through dceo.illinois.gov/micro",
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — DCEO MICRO provides tax credits for semiconductor, microchip, and advanced manufacturing businesses locating or expanding in Illinois. Credits reward capital investment and job creation. Signed into law April 2022; rolling basis, no fixed deadline. Apply through dceo.illinois.gov.",
+        "zoningInferred": "Industrial zoning ({zoning}) suggests DCEO MICRO may apply — tax credits for semiconductor and advanced manufacturing businesses. Confirm by selecting an Industrial project use.",
+        "notApplicable": "Not applicable — DCEO MICRO is for manufacturing and semiconductor businesses in industrial-zoned (M/PMD) locations."
+      },
+      "learnMoreUrl": "https://dceo.illinois.gov/micro"
+    },
+    {
+      "key": "ifa_cpace",
+      "name": "IFA C-PACE (Commercial Property Assessed Clean Energy)",
+      "category": "State Incentive / Financing",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Commercial",
+        "Industrial",
+        "Vehicular"
+      ],
+      "requiresZoningPrefix": [
+        "B",
+        "C",
+        "D",
+        "M",
+        "PMD",
+        "T"
+      ],
+      "zoningFallback": true,
+      "grantType": "incentive",
+      "applicationDates": "Rolling — ongoing; 3-year lookback on eligible improvements (il-fa.com/cpace)",
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — IFA C-PACE provides long-term, property-assessed financing for energy efficiency, renewable energy, and water conservation improvements on commercial and industrial properties. Repaid through a special assessment on the property tax bill (up to 30-year term). Not a grant — no upfront public outlay. Cook County participates. Multifamily 5+ units is also eligible. Apply through IFA's C-PACE Open Market Initiative (il-fa.com/cpace); rolling basis.",
+        "zoningInferred": "Commercial/industrial zoning ({zoning}) suggests IFA C-PACE financing may apply for energy efficiency or renewable energy improvements. Confirm by selecting a project use.",
+        "notApplicable": "Not applicable — C-PACE is for commercial, industrial, and multifamily (5+ units) properties. Purely residential single-family properties are not eligible."
+      },
+      "learnMoreUrl": "https://www.il-fa.com/programs/c-pace/"
+    },
+    {
+      "key": "dceo_oe3",
+      "name": "DCEO OE3 Small Business Capital Grant",
+      "category": "State Grant",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Commercial",
+        "Vehicular"
+      ],
+      "requiresZoningPrefix": [
+        "B",
+        "C",
+        "D",
+        "T"
+      ],
+      "zoningFallback": true,
+      "grantType": "grant",
+      "nextRoundNote": "2025 cycle closed; 2026 cycle not yet announced — watch dceo.illinois.gov/oe3",
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — DCEO OE3 Small Business Capital & Infrastructure Grants ($10K–$245K, no match required) fund capital improvements for SEDI-owned businesses (≤25 employees) and very small businesses (<10 employees). Eligible costs: acquisition, construction, equipment, site improvements. 2025 cycle closed; 2026 cycle not yet announced — watch dceo.illinois.gov/oe3 for next NOFO.",
+        "zoningInferred": "Commercial zoning ({zoning}) suggests DCEO OE3 Small Business Capital Grant may apply for SEDI-owned or very small businesses. Confirm by selecting a project use.",
+        "notApplicable": "Not applicable — OE3 Small Business Capital Grant is for commercial project uses with SEDI-owned or very small businesses (≤25 employees)."
+      },
+      "learnMoreUrl": "https://dceo.illinois.gov/aboutdceo/grantopportunities/oe3.html"
+    },
+    {
+      "key": "dceo_baps",
+      "name": "DCEO Business Attraction Prime Sites",
+      "category": "State Grant",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Commercial",
+        "Industrial",
+        "Vehicular"
+      ],
+      "requiresZoningPrefix": [
+        "B",
+        "C",
+        "D",
+        "M",
+        "PMD",
+        "T"
+      ],
+      "zoningFallback": true,
+      "grantType": "grant",
+      "applicationDates": "Rolling — deadline June 30, 2027; apply through dceo.illinois.gov",
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — DCEO Business Attraction Prime Sites grants support large-scale capital investment projects by companies relocating or expanding operations in Illinois with a commitment to significant job creation for Illinois residents. Eligible costs include infrastructure and capital equipment purchases. Rolling applications through June 30, 2027. Apply at dceo.illinois.gov.",
+        "zoningInferred": "Commercial/industrial zoning ({zoning}) suggests DCEO Business Attraction Prime Sites may apply for large-scale relocation or expansion projects with significant job creation. Confirm by selecting a project use.",
+        "notApplicable": "Not applicable — Business Attraction Prime Sites is for commercial and industrial business relocations or expansions with large capital investment and job creation commitments."
+      },
+      "learnMoreUrl": "https://dceo.illinois.gov/aboutdceo/grantopportunities/2608-2023.html"
+    },
+    {
+      "key": "ihda_iahtc",
+      "name": "IHDA Illinois Affordable Housing Tax Credit (IAHTC)",
+      "category": "State Tax Credit",
+      "method": "use_based",
+      "implement": "now",
+      "requiresCategoryPrefix": [
+        "Residential"
+      ],
+      "requiresZoningPrefix": [
+        "R"
+      ],
+      "minUnits": 7,
+      "grantType": "tax_credit",
+      "applicationDates": "Active — rolling applications; apply at ihda.org",
+      "automatic": false,
+      "priority": "MED",
+      "resultPhrasing": {
+        "potentiallyEligible": "Potentially eligible — IHDA IAHTC provides a 50% Illinois state tax credit to donors who make qualified contributions (cash, land, or property) to nonprofit affordable housing sponsors. The nonprofit syndicates these credits to generate additional project equity. Applicants must be IHDA-approved nonprofit affordable housing sponsors. Rolling applications at ihda.org.",
+        "potentiallyEligibleGrandfathered": "Potentially eligible — parcel has {unitCount} units in a {zoning} zone (likely grandfathered). IAHTC provides a 50% IL state credit on qualified donations to nonprofit affordable housing sponsors for meaningful-scale projects. Verify nonconforming status.",
+        "zoningInferred": "Residential zoning ({zoning}) suggests IAHTC may apply for affordable housing nonprofit projects with 7+ units. Confirm by selecting a project use.",
+        "notApplicableUnits": "Not applicable — IAHTC requires meaningful affordable housing scale (7+ units); this parcel has {unitCount} unit(s).",
+        "notApplicable": "Not applicable — IAHTC is for nonprofit affordable housing sponsors developing or rehabbing residential properties (7+ units).",
+        "notApplicableZoningCap": "Not applicable as-is — IAHTC targets meaningful affordable housing scale (7+ units), but {zoning} zoning typically allows a maximum of {zoningMax} unit(s). A zoning change, or an existing legal nonconforming building with 7+ units, could still qualify — verify the actual unit count."
+      },
+      "learnMoreUrl": "https://www.ihda.org/developers/rental-housing/illinois-affordable-housing-tax-credit/"
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+# Replit Prompt — New Business Licenses (UI) — build to spec
+
+Rebuild the **New Business Licenses** section UI to match this spec exactly. Assumes the **dedup step is already done** (see the separate dedup instruction) — this prompt renders the deduped output: `total_businesses`, `total_licenses`, the license-mix buckets, and the nearest-first business list. Implement CSS/HTML **verbatim**; bind placeholders; check every CRITICAL DETAIL.
+
+This is a **SUBSECTION** — 17px outline **briefcase** icon in the header, NOT a filled indigo square.
+
+Replit usually gets ~80% of a mockup; the missing 20% here is: (a) mix-bar fills that ignore `display:block`/width, (b) the wrong header icon (square instead of outline), (c) the "N licenses" tag colored red instead of amber, (d) losing the food-vs-liquor distinction in the copy. The values below prevent all four.
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --caution:#f0a41c; --cautionText:#96600a;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+Font roles: **Instrument Serif** ONLY on the takeaway headline and the mix-row counts (`.mixcount`). Everything else Inter; all labels/tags/dates/distances/source are JetBrains Mono. The breakdown is a **single-hue magnitude** chart — indigo bars only, no category color palette (identity comes from the tag chips + row label, not bar color).
+
+## CSS (verbatim — copy every value)
+```css
+.cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+
+/* subsection header */
+.ssh{display:flex;align-items:center;gap:9px;margin-bottom:16px}
+.ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+.ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.ssh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+
+/* takeaway */
+.take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px 17px;margin-bottom:18px}
+.takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+.takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+.taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:13px}
+.cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:9px}
+.cn:last-child{margin-bottom:0}
+.cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.cn.c .dt{background:var(--caution)}
+.cn.i .dt{background:var(--indigo)}
+.cn b{color:var(--ink);font-weight:600}
+.cn .tx{flex:1}
+
+/* license-mix breakdown */
+.mixhead{display:flex;align-items:baseline;gap:8px;margin-bottom:13px}
+.mixhead .h{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.mixhead .hint{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
+.mixrow{display:grid;grid-template-columns:238px 1fr 26px;align-items:center;gap:13px;margin-bottom:7px;padding:4px 6px;border-radius:8px;cursor:pointer}
+.mixrow:hover{background:#f6f5ff}
+.mixrow.active{background:#eef0fb}
+.mixtags{display:flex;flex-wrap:wrap;gap:4px}
+.mixtag{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.02em;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:2px 6px;white-space:nowrap}
+.mixtag.lead{color:var(--indigo);background:var(--indigoSoft);border-color:#dde1f6}
+.mixtrack{height:15px;background:var(--paper);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.mixtrack i{display:block;height:100%;background:var(--indigo);border-radius:6px}
+.mixcount{font-family:var(--disp);font-size:16px;color:var(--ink);text-align:right;line-height:1}
+
+/* divider */
+.divl{display:flex;align-items:center;gap:11px;margin:20px 0 6px}
+.divl .lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+.divl .ln{flex:1;height:1px;background:var(--line)}
+
+/* nearby list */
+.biz{padding:13px 0;border-top:1px solid var(--line)}
+.biz:first-of-type{border-top:none}
+.biztop{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.biznm{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink)}
+.biznm .d{width:6px;height:6px;border-radius:50%;background:var(--indigo);flex:none}
+.bizdist{font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 8px;white-space:nowrap}
+.bizaddr{font-size:12px;color:var(--muted);margin:3px 0 0 14px}
+.bizmeta{font-family:var(--mono);font-size:10.5px;color:var(--ink2);margin:6px 0 0 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bizmeta .lic{color:var(--indigo)}
+.bizmeta .dot{color:var(--muted)}
+.bizmeta .n2{color:var(--cautionText);background:#fdf3df;border:1px solid #f0d79a;border-radius:5px;padding:2px 6px;font-size:9px;font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+.more{font-size:11.5px;color:var(--indigo);text-decoration:none;font-weight:600;display:inline-block;margin-top:13px}
+
+.src{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:16px;line-height:1.5}
+.src b{color:var(--ink2)}
+```
+
+## HTML (verbatim structure; bind placeholders, loop the repeated blocks)
+Order inside the single `.cardbox`: header → takeaway → mix breakdown → "nearest first" divider → business list → "show all" link → source. Copy the reference `report-bizlicenses.html` markup exactly. Bindings:
+
+**Header** (outline briefcase, count chip):
+```html
+<div class="ssh">
+  <svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M2 13h20"/></svg>
+  <span class="t">New Business Licenses</span>
+  <span class="count">{TOTAL_BUSINESSES} businesses · 1 mi · 12 mo</span>
+</div>
+```
+
+**Takeaway** — headline + 3 bullets, all `.cn.i`. Copy is derived (not the LLM engine) from the mix — see LOGIC 3. Order: food-vs-nightlife read → closest three → dedup note.
+
+**Mix row** (loop one per license-mix bucket, sorted by count desc):
+```html
+<div class="mixrow" data-bucket="{BUCKET_KEY}">
+  <div class="mixtags">
+    <span class="mixtag lead">{FIRST_TYPE}</span>
+    <span class="mixtag">{NEXT_TYPE}</span>   <!-- 0..n more -->
+  </div>
+  <div class="mixtrack"><i style="width:{PCT}%"></i></div>
+  <span class="mixcount">{COUNT}</span>
+</div>
+```
+- `lead` class goes on the **first / most-defining** type of the mix (Food if present, else the single type). Remaining types are plain `.mixtag`.
+- `{PCT}` = `count / maxBucketCount * 100` (proportional to the largest bucket).
+
+**Business row** (loop, nearest first):
+```html
+<div class="biz">
+  <div class="biztop"><span class="biznm"><span class="d"></span>{NAME}</span><span class="bizdist">{DIST} mi</span></div>
+  <div class="bizaddr">{ADDRESS}</div>
+  <div class="bizmeta">
+    <span class="lic">{LICENSE_TYPE_1}</span>
+    <!-- repeat: <span class="dot">·</span><span class="lic">{LICENSE_TYPE_n}</span> -->
+    <span class="dot">·</span>{ISSUE_MONTH_YEAR}
+    <!-- only when license_count > 1: --><span class="n2">{LICENSE_COUNT} licenses</span>
+  </div>
+</div>
+```
+
+## LOGIC (front-end / binding rules)
+
+### 1. Mix bars
+- One row per **distinct license-mix combination** present in the data (e.g. `{Retail Food}`, `{Retail Food, Liquor/Tavern}`, `{Retail Food, Liquor/Tavern, Entertainment}`, `{Liquor/Tavern}`, …). Sort rows by business count **descending**.
+- Bar width `{PCT}` = `count / maxBucketCount * 100`. Fill is `<i>` `display:block`, indigo — never inline `<span>`.
+- Counts across all mix rows **must sum to `{TOTAL_BUSINESSES}`** (each business is in exactly one mix bucket). This is the integrity check.
+- Tag order inside a row: put the "lead" type first with `.mixtag.lead` (Food if the mix contains food; else the primary type). Keeps the eye on the dominant use.
+
+### 2. Click-to-filter
+- Clicking a `.mixrow` filters the business list below to that exact mix bucket; add `.active` to the clicked row, filter the `.biz` list to `business.mix_key === bucketKey`, and update the divider label to `{N} businesses · {mix label}`. Clicking the active row again clears the filter (back to all, nearest first).
+- **Filter model = exact combination** (clicking "Retail Food + Liquor/Tavern" shows only those, not all liquor holders). If instead you want a type-level filter ("show all liquor holders across any combo"), that's a different model — pick ONE and keep the hint copy honest ("click a row to filter"). Default: exact combination.
+
+### 3. Takeaway copy is DERIVED from the mix (compute, don't free-form)
+Compute these from the buckets and fill the sentence templates:
+- `food_involved` = businesses whose mix contains Retail Food. `liquor_involved` = mix contains Liquor/Tavern. `standalone_bars` = mix is exactly `{Liquor/Tavern}`. `food_only` = mix is exactly `{Retail Food}`.
+- **Bullet 1 (the important one):** state `food_involved` of `total`, then `food_only`, then "plus {food_involved − food_only} that pair food with liquor or entertainment," then **`standalone_bars` standalone bars.** The conclusion ("dining scene with a nightlife layer, not a bar district") is only valid when `standalone_bars` is small relative to `food_involved` — if standalone bars are actually a large share, flip the framing to match the data. Never hardcode "not a bar district."
+- **Bullet 2:** the three **nearest** businesses with their distances.
+- **Bullet 3 (dedup note):** "{TOTAL_LICENSES} licenses grouped by establishment → {TOTAL_BUSINESSES} real openings." Show ONLY when `TOTAL_LICENSES > TOTAL_BUSINESSES` (something was actually merged); otherwise omit it.
+
+### 4. Business list
+- Sorted by `distance_mi` ascending (nearest first). Cap the initial render (e.g. 6); "Show all {TOTAL_BUSINESSES} within 1 mile →" reveals the rest.
+- `license_type` values: display each DISTINCT type the business holds, `·`-separated, in indigo (`.lic`). Append the amber `.n2` "{N} licenses" tag **only when `license_count > 1`** — this is the visible proof of the dedup. **The tag is amber (`--cautionText`/`#fdf3df`), never red** — holding several licenses isn't bad, it's just informative.
+- `{ISSUE_MONTH_YEAR}` = the business's earliest in-window issue date, formatted "Mon YYYY" (not ISO). If license issue dates differ across the business's licenses, you may show per-license dates in parentheses (see Deliz row in the reference).
+
+### 5. Source line
+Fixed methodology copy: new issuances only / excludes renewals / past 12 months / **grouped by establishment** (state the exact key you used — name+address or account+site) / count-once note / covered license categories. Match the dedup key you actually implemented.
+
+## CRITICAL DETAILS (check ALL)
+1. **Subsection header** = 17px outline briefcase icon (`.ssh .hic`), NOT a filled indigo square.
+2. **Mix bars are single-hue indigo** proportional to the largest bucket; fills are `<i>` `display:block` with a `width:%`. No category color palette — identity comes from the tag chips.
+3. **Mix counts sum to `{TOTAL_BUSINESSES}`** — each business in exactly one mix bucket (integrity check; if it fails, a business has 0 or 2 buckets).
+4. **Lead tag** (`.mixtag.lead`, indigo) is the mix's dominant type (Food if present); other types are neutral `.mixtag`.
+5. **Click-to-filter**: `.active` on the clicked row, list filters to that exact bucket, divider label updates, re-click clears. Keep the hint copy matching the real behavior.
+6. **"N licenses" tag is amber, only when license_count > 1** — never red. It's the visible dedup proof.
+7. **Takeaway is derived from the mix** (LOGIC 3), not free-form. The "not a bar district" conclusion is conditional on standalone bars being a small share — recompute, don't hardcode.
+8. **Dedup note bullet + "grouped from N licenses" appear only when licenses > businesses.**
+9. **Dates render "Mon YYYY", not ISO** (`Oct 2025`, not `2025-10-09`), in the report voice.
+10. **List sorted nearest-first**, distance chips are mono paper pills.
+11. **Serif (`--disp`) only** on the takeaway headline and `.mixcount`. Everything else Inter; labels/tags/dates Mono.

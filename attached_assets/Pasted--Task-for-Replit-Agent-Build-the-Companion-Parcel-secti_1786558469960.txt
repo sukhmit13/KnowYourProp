@@ -1,0 +1,79 @@
+# Task for Replit Agent — Build the "Companion Parcel" section (assemblage detection)
+
+## Goal
+Add a **Companion Parcel** section that appears **only when the subject is part of an assemblage** — two or more adjacent parcels acquired together and under likely-common ownership. It surfaces the ownership structure and development/resale optionality that a single-PIN view hides. Visual target: **report-assemblage.html** (render it). Reuse the app's existing card CSS — do not copy the mockup's style block.
+
+## Placement
+- Lives in **Property Details**, rendered **immediately after the Liens / Debt Snapshot section**.
+- **Conditional:** render nothing when no assemblage is detected (the common case). When it renders, it's a signal that something structurally notable exists.
+
+## 🔴 Detection trigger (this is the part to get right)
+Anchor on **shared acquisition, NOT owner-name match.** A bare "same owner also owns another parcel" is just a co-parcel/portfolio fact and does NOT trigger this section. Trigger ONLY when a co-parcel meets **both**:
+1. **Shared acquisition** — conveyed to the subject's owner in the **same transaction**: same deed doc number, OR same recording date with the recorder/sales "total for all N parcels" flag.
+2. **Adjacency** — contiguous PIN (sequential parcel number) or adjacent street address on the same block.
+
+Optional enrichment (not required to trigger):
+- **Separation event** — each PIN later individually conveyed to *different* grantees around the same time (e.g. one to a person, one to an LLC). Flag `separated: true` and capture the split year.
+
+Reuse the co-parcel linkage the report already computes (it already knows 520 is the subject's co-parcel from the joint 2013 acquisition). This section **promotes** that existing linkage into the richer view when the two tests pass.
+
+## Resolved object (build once; the section + the cross-refs consume it)
+```js
+assemblage = {
+  is_assemblage: true,
+  members: [
+    { pin, address, role:"subject"|"companion", owner, owner_entity_type:"personal"|"llc"|"trust",
+      current_debt_summary }              // e.g. "UWM $712,500 + 2nd" | "separately financed"
+  ],
+  combined_frontage_ft: 50,               // if lot dimensions available; else null
+  zoning,                                 // reuse the report's zoning value
+  acquired_together: { year, price, doc_number },
+  separated: true|false, separated_year,
+  common_control: "likely"|"exact"|"unclear",   // NEVER "certain" across an entity line
+  confidence_note: "LLC membership not in public record — confirm"
+}
+```
+
+## Content mapping (to report-assemblage.html)
+| Element | Source | Notes |
+|---|---|---|
+| Takeaway | `assemblage` (deterministic — see below) | headline + acquired-together / separated / PIN-only-debt rows |
+| Lot diagram | `members`, `combined_frontage_ft`, `zoning` | subject highlighted (indigo), companion neutral; frontage line |
+| This / Companion cards | `members` | address, PIN, owner, entity chip, current-debt summary |
+| Common control panel | `common_control`, `confidence_note` | marigold "Confirm identity" — inferred, never asserted |
+| Ownership history timeline | `acquired_together`, `separated_year` | acquired together → separated → now separately financed |
+| Optionality (green) | `combined_frontage_ft`, `zoning` | combinable frontage; buildable-envelope note; "weigh alongside standalone value" — **flag only, no combined valuation** |
+| Footnote | `confidence_note` | anchored on shared acquisition; common control inferred, not asserted |
+
+## 🔴 Cross-reference requirement (the "link everywhere" part)
+**Every place the site surfaces a co-parcel must link to this section when `is_assemblage`.**
+- **Liens / Debt Snapshot** — the one-line chip only: "Part of a historically combined double lot with {companion}; debt shown is for this PIN only — see Companion Parcel." Debt stays PIN-scoped; it never aggregates the companion's debt.
+- **Sales / ownership** — the existing co-parcel mention becomes a link into this section (don't re-explain there).
+- **Any other co-parcel mention** (map, transaction trends, etc.) — link here.
+One home, thin pointers. Nothing is duplicated; the analysis lives only in this section.
+
+## 🔴 Confidence discipline
+- **Common control across an entity line (personal ↔ LLC) is INFERRED, never asserted.** Recorder data can't prove LLC membership. Use "likely — confirm" everywhere. Only `common_control:"exact"` (identical named owner on both) may drop the hedge.
+- **False-assemblage guard:** never trigger on owner-name match alone. Shared acquisition + adjacency is the gate.
+- **Debt is the inverse of blanket:** separate single-PIN loans are NOT aggregated. State "own single-PIN debt, no cross-collateralization." (Contrast the blanket case, where one loan spans parcels and the collateral IS pooled.)
+
+## Takeaway — generate DETERMINISTICALLY (not via LLM)
+The facts are structured (years, entities, frontage) and the confidence language is safety-critical, so template the takeaway in code rather than an LLM call — this removes any chance of a model over-asserting common control. Template:
+- Headline: "One half of a {combined_frontage_ft}-ft assemblage — acquired with {companion} in {acquired_year}{, split in separated_year}, likely still one owner."
+- Row (good): acquired together, combined frontage, block context.
+- Row (caution, if separated): separated into {entities}; common control likely — confirm.
+- Row (neutral): each lot carries its own single-PIN debt; this parcel's Debt Snapshot is complete on its own.
+
+## 🔴 Tests
+```
+assert section renders ONLY when is_assemblage (shared acquisition + adjacency); hidden otherwise
+assert owner-name match WITHOUT shared acquisition does NOT trigger the section
+assert common_control across a personal↔LLC split renders "likely — confirm", never "certain"
+assert the Debt Snapshot shows the PIN-only chip linking here, and does NOT aggregate the companion's debt
+assert every co-parcel mention in the report links to this section when is_assemblage
+// 522/520 regression:
+assert 522 triggers (joint 2013 acquisition, adjacent PIN 17-07-117-024/025), separated:true (2021), common_control:"likely"
+```
+
+## Done when
+On 522 N Claremont, a Companion Parcel section renders under Liens showing 522 + 520 as a ~50-ft assemblage acquired together in 2013 and split in 2021, common control flagged "likely — confirm," the optionality note in green, and the Debt Snapshot carrying only the PIN-only cross-reference chip that links to it. On a normal single parcel, the section doesn't render at all.

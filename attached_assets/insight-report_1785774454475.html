@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;--paper:#faf9f6;
+    --navy:#232d6e;--indigo:#2b3a9e;--band:#3a49bd;--gold:#e0a615;
+    --red:#b23b2e;--redSoft:#fbecea;--green:#2f7d3f;--greenSoft:#edf6ef;
+    --amber:#c98400;--amberBd:#e6a70a;--amberSoft:#fdf6cf;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#d9d7d1;font-family:var(--sans);color:var(--ink)}
+  .page{width:816px;min-height:1056px;margin:0 auto;background:#fff;padding:18px 30px 14px;display:flex;flex-direction:column}
+  .rhead{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:8px}
+
+  /* HERO — address on top, Our Take stacked below a divider */
+  .hero{background:var(--navy);border-bottom:3px solid var(--gold);border-radius:8px 8px 0 0;padding:15px 24px 14px;color:#fff}
+  .kicker{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.16em;color:#aab0d8;margin-bottom:5px}
+  .addr{font-family:var(--disp);font-size:31px;line-height:1;margin-bottom:6px}
+  .meta1{font-size:11px;color:#c9cde6;line-height:1.45}
+  .hrule{border:0;border-top:1px solid rgba(255,255,255,.22);margin:11px 0 9px}
+  .takelbl{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.16em;color:var(--gold);margin-bottom:5px}
+  .takehd{font-family:var(--disp);font-size:19px;line-height:1.1;margin-bottom:6px}
+  .takebody{font-size:10.5px;line-height:1.42;color:#dcdfef}
+
+  /* METADATA STRIP — label + value only, no grey descriptor */
+  .strip{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);border-top:0;border-radius:0 0 8px 8px;margin-bottom:12px}
+  .mcell{padding:8px 11px;border-right:1px solid var(--line)}
+  .mcell:last-child{border-right:0}
+  .mcell .l{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+  .mcell .v{font-family:var(--disp);font-size:20px;line-height:1;color:var(--ink)}
+  .mcell .v.flag{color:var(--red)}
+  .mcell .v.sm{font-size:15.5px}
+  .vrow{display:flex;align-items:baseline;gap:6px}
+  .mcell .dt{font-size:10px;color:var(--muted);white-space:nowrap}
+
+  /* BAND */
+  .band{background:var(--band);color:#fff;border-radius:7px;padding:6px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+  .band .bt{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em}
+  .band .bn{font-size:10px;color:#c9cde6}
+
+  /* FINDINGS */
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px}
+  .fc{border:1px solid var(--line);border-left-width:4px;border-radius:9px;padding:9px 13px;display:flex;gap:8px}
+  .fc.red{border-left-color:var(--red);background:var(--redSoft)}
+  .fc.amber{border-left-color:var(--amberBd);background:var(--amberSoft)}
+  .fc.green{border-left-color:var(--green);background:var(--greenSoft)}
+  .mk{flex:none;margin-top:1px;font-size:12px;font-weight:700;line-height:1.15;width:13px;text-align:center}
+  .fc.red .mk{color:var(--red)} .fc.amber .mk{color:var(--amber)} .fc.green .mk{color:var(--green)}
+  .fbd{flex:1;min-width:0}
+  .ft{font-size:11.5px;font-weight:700;line-height:1.22;color:var(--ink)}
+  .fb{font-size:9.5px;line-height:1.34;color:var(--ink2);margin-top:5px}
+
+  /* NEXT STEPS */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+  .stp{border:1px solid var(--line);border-radius:9px;padding:10px 13px}
+  .stp .num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:var(--indigo);color:#fff;font-family:var(--mono);font-size:10.5px;font-weight:700;border-radius:6px;margin-bottom:7px}
+  .stp .st{font-size:11.5px;font-weight:700;line-height:1.22;margin-bottom:4px;color:var(--ink)}
+  .stp .sb{font-size:9.5px;line-height:1.36;color:var(--ink2)}
+
+  /* SOURCES */
+  .src{margin-top:auto;border-top:1px solid var(--line);padding-top:9px}
+  .src .g{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+  .src p{font-size:8.5px;color:var(--muted);line-height:1.45}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="rhead"><span>Property Insight Report — 3014 W Irving Park Rd</span><span>Generated August 1, 2026</span></div>
+
+  <div class="hero">
+    <div class="kicker">PROPERTY INSIGHT REPORT</div>
+    <div class="addr">3014 W Irving Park Rd</div>
+    <div class="meta1">Irving Park · Chicago, IL 60618 · Zoned B3-1 (Community Shopping) · 6,085 SF building / 2 stories on 5,850 SF lot · Built 1915</div>
+    <hr class="hrule">
+    <div class="takelbl">OUR TAKE</div>
+    <div class="takehd">Good bones, but the intended use isn't a clean path.</div>
+    <div class="takebody">The building itself is unremarkable in a good way — no landmark constraint, taxes current, and B3-1 zoning gives a deep list of as-of-right fallback uses. But the cannabis dispensary this deal is evaluating needs a discretionary Special Use Permit here, which conflicts with the deal's own zoning-relief flag, and three old lis pendens filings still show as unreleased on title. Underwrite the entitlement timeline and clear the title history before getting attached to a use that isn't guaranteed.</div>
+  </div>
+
+  <div class="strip">
+    <div class="mcell"><div class="l">LAST SOLD</div><div class="vrow"><span class="v">$411,000</span><span class="dt">4/24/2014</span></div></div>
+    <div class="mcell"><div class="l">ZONING</div><div class="v">B3-1</div></div>
+    <div class="mcell"><div class="l">PROPERTY TAXES</div><div class="vrow"><span class="v">$16,290</span><span class="dt">2024</span></div></div>
+    <div class="mcell"><div class="l">TITLE STATUS</div><div class="v flag sm">Flagged</div></div>
+    <div class="mcell"><div class="l">LANDMARK</div><div class="v sm">Not Designated</div></div>
+  </div>
+
+  <div class="band"><span class="bt">WHAT THE PUBLIC RECORD SAYS ABOUT THIS ASSET</span><span class="bn">Independent of what you plan to do with it</span></div>
+
+  <div class="cards">
+    <div class="fc red"><span class="mk">&times;</span><div class="fbd"><div class="ft">A cannabis dispensary needs a Special Use Permit here — the deal's own zoning flag says otherwise.</div>
+      <div class="fb">B3-1 (Community Shopping) explicitly lists "Cannabis Dispensary" as a Special Use — not an as-of-right use. That conflicts directly with the deal's funnel flag marking zoning relief as "not required." Confirm the special-use hearing process and realistic timeline with the City before underwriting an operating date; this is a discretionary approval, not a formality.</div></div></div>
+
+    <div class="fc red"><span class="mk">&times;</span><div class="fbd"><div class="ft">Three lis pendens / foreclosure filings sit unreleased on the record, all predating the 2014 purchase.</div>
+      <div class="fb">Recorder data shows lis pendens from 3/23/1987, 1/25/2001, and 2/9/2012 — all before Happy Arts LLC bought the property for $411,000 on 4/24/2014 — flagged as unreleased. Across 46 recorded docs on this PIN, no release appears for the three. Likely resolved at the 2014 closing, but "unreleased" is exactly what a title company or lender will flag. Confirm the releases exist before financing.</div></div></div>
+
+    <div class="fc amber"><span class="mk">!</span><div class="fbd"><div class="ft">The building is already close to its FAR ceiling — expansion room is thin.</div>
+      <div class="fb">Lot is 5,850 sf at max FAR 1.2 = 7,020 sf buildable. The existing 6,085 sf building already runs a 1.04 FAR, leaving about 935 sf — roughly 15% of current floor area. Height cap is 38 ft / 3 stories against a 2-story building, but it's the FAR ceiling, not height, that actually limits any add-on.</div></div></div>
+
+    <div class="fc amber"><span class="mk">!</span><div class="fbd"><div class="ft">Taxes jumped about 14% in a year, and the newest figure on file isn't the full bill.</div>
+      <div class="fb">Confirmed full-year tax rose from $14,244.64 (2023) to $16,289.71 (2024) — up about 14.4%. The 2025 record shows only a first installment of $8,959.34 with no second installment posted, so it isn't a reliable full-year figure. Budget off the confirmed $16,290 2024 total (~$1,357/mo) until the 2025 bill is complete, and expect it may land higher given the two-year trend.</div></div></div>
+
+    <div class="fc amber"><span class="mk">!</span><div class="fbd"><div class="ft">Only one cannabis competitor turned up within a mile — a thin data point, not a saturation study.</div>
+      <div class="fb">A Google Places search for "Cannabis Dispensary" within 1 mile returned a single match: BLOC Dispensary – Kedzie, 0.57 mi away, rated 4.9 from 748 reviews. Low nearby competition is encouraging, but the record excludes license caps and pending applications — treat this as a starting point, not proof of open demand.</div></div></div>
+
+    <div class="fc green"><span class="mk">&checkmark;</span><div class="fbd"><div class="ft">If the dispensary approval stalls, B3-1 still gives you a long list of as-of-right fallback uses.</div>
+      <div class="fb">The district permits retail stores, restaurants (with or without liquor), medical/dental offices, banks, salons, gyms, and coworking space — all without discretionary review. That's a real backstop if the Special Use Permit process for the dispensary is denied or delayed; the building isn't stranded waiting on one use.</div></div></div>
+  </div>
+
+  <div class="band"><span class="bt">BEFORE YOU MOVE FORWARD</span><span class="bn">Three things to confirm before you make an offer</span></div>
+
+  <div class="steps">
+    <div class="stp"><div class="num">1</div><div class="st">Clear the title before you rely on it.</div><div class="sb">Confirm with a title company that the 1987, 2001, and 2012 lis pendens / foreclosure filings were actually released as part of the 2014 sale — the recorder's data still shows them as unreleased.</div></div>
+    <div class="stp"><div class="num">2</div><div class="st">Verify the Special Use Permit path directly with the City.</div><div class="sb">Don't rely on this deal's "no zoning relief needed" flag — it conflicts with the recorded rules, which list Cannabis Dispensary as a special-use category in B3-1. Confirm process and timeline before underwriting.</div></div>
+    <div class="stp"><div class="num">3</div><div class="st">Treat the incentive flags as leads, not approvals.</div><div class="sb">The parcel sits in an NMTC Qualified Census Tract and screens as "potentially eligible" for Cook County Class 7c/8/C and IFA C-PACE. All require separate applications — don't build them into the pro forma until confirmed.</div></div>
+  </div>
+
+  <div class="src">
+    <div class="g">SOURCES</div>
+    <p>Cook County Assessor · Cook County Treasurer · Cook County Clerk Recorder of Deeds · Chicago zoning reference data · Chicago Landmarks &amp; Historic Resources Survey · Google Places · U.S. Census Geocoder. This report is informational only and does not constitute legal, tax, or investment advice.</p>
+  </div>
+</div>
+</body>
+</html>

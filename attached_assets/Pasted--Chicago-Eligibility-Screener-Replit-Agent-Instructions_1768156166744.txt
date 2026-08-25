@@ -1,0 +1,120 @@
+# Chicago Eligibility Screener - Replit Agent Instructions
+
+Build a public Chicago-only eligibility screener web app in Next.js (App Router) + TypeScript.
+
+## CRITICAL REQUIREMENTS
+- NO LOGIN / NO PASSWORD - completely public
+- Must be live and working today
+- Accuracy is PRIORITY #1
+- Add basic rate limiting (20 req/min per IP) + caching to prevent abuse
+
+## DATA SOURCES
+Create a `/data` folder that will contain (optional, app should work without them):
+- `chicago_tif.geojson` - Chicago TIF district polygons
+- `chicago_zoning.geojson` - Chicago zoning district polygons
+
+If files are missing, show "Data not configured" but app still runs.
+
+## GEOGRAPHY SERVICE
+Use the FREE U.S. Census Geocoder API (no API key needed):
+- Endpoint: `https://geocoding.geo.census.gov/geocoder/geographies/address`
+- Parameters: street, city=Chicago, state=IL, benchmark=Public_AR_Current, vintage=Current_Current, format=json
+- Returns: lat/lon coordinates + census tract GEOID
+- Cache all geocoding results in SQLite for 7 days
+
+## GEOGRAPHIC LOOKUPS
+- **TIF District**: Point-in-polygon check against chicago_tif.geojson → return TIF district name
+- **Zoning**: Point-in-polygon check against chicago_zoning.geojson → return zoning designation
+- Use @turf/boolean-point-in-polygon for point-in-polygon checks
+- Make GeoJSON property names configurable (constants: TIF_NAME_FIELD, ZONING_FIELD)
+
+## USER INTERFACE
+
+### Left Sidebar
+- App title: "Chicago Screener"
+- "New Run" button
+- List of saved runs (address + date)
+- Click to view, delete button for each
+
+### Main Panel
+- **Address Input**: Simple form to enter Chicago address
+- **Results Section**: Shows after geocoding
+  - Location Facts: Census Tract GEOID, TIF District name (or "Not in TIF"), Zoning designation
+  - Button: "+ Add Scenario"
+
+### Scenarios
+Each Run can have multiple Scenarios with these inputs:
+- **Scenario name** (required text input)
+- **Project type** (dropdown): Commercial Development, Industrial, Mixed-Use, Affordable Housing, Market-Rate Housing, Retail, Community Facility, Other
+- **Sponsor type** (dropdown): Unknown, Nonprofit, For-profit
+- **Project size** (number input in USD)
+- **Feature checkboxes**:
+  - Workforce training
+  - Reentry hiring
+  - On-site roasting/manufacturing
+  - Adaptive reuse
+  - Corridor storefront improvements
+  - Nonprofit anchor tenant
+  - Job creation focus
+
+### Scenario Output (for each scenario)
+1. **Show "Assumptions used"** - list all inputs selected for this scenario
+
+2. **Location Facts** (same for all scenarios of a run):
+   - Census Tract GEOID
+   - TIF District name (or "Not in TIF district")
+   - Zoning designation
+
+3. **NMTC Feasibility** (based on project size):
+   - < $3M → "Very unlikely" (red text)
+   - $3-5M → "Marginal (pooling only)" (orange text)
+   - $5-7M → "Moderate (pooling likely)" (yellow text)
+   - $7-10M → "Feasible" (blue text)
+   - > $10M → "Strong" (green text)
+
+4. **Additional Info**:
+   - If project size < $7M, show note: "Projects under $7M typically require pooling with other projects"
+   - If census tract GEOID is known, show link: "Verify NMTC eligibility in CDFI Fund CIMS tool" → `https://cims.newmarkets.org/?geoid={tract_geoid}`
+   - Always show disclaimer: "Screening tool only; verify with official sources."
+
+## DATABASE (SQLite)
+Three tables:
+1. **runs**: id, address, created_at
+2. **scenarios**: id, run_id (FK), name, project_type, sponsor_type, project_size, workforce_training, reentry_hiring, onsite_manufacturing, adaptive_reuse, corridor_improvements, nonprofit_anchor, job_creation_focus, created_at
+3. **geocode_cache**: address (PK), lat, lon, tract_geoid, cached_at
+
+## TECHNICAL STACK
+- Next.js 15+ App Router
+- TypeScript
+- better-sqlite3 for database
+- @turf/turf for geospatial
+- No authentication libraries
+- Simple in-memory rate limiting (Map with IP → request count)
+
+## RATE LIMITING
+- Track by IP address (x-forwarded-for header)
+- 20 requests per minute per IP
+- Return 429 status if exceeded
+
+## CONFIGURATION CONSTANTS
+Create these in a constants file so they're easy to change:
+```typescript
+export const TIF_NAME_FIELD = 'TIF_NAME'; // GeoJSON property for TIF name
+export const ZONING_FIELD = 'ZONE_CLASS'; // GeoJSON property for zoning
+export const RATE_LIMIT = { WINDOW_MS: 60000, MAX_REQUESTS: 20 };
+export const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+```
+
+## STYLING
+- Clean, professional UI
+- Use simple CSS (no heavy frameworks needed)
+- Responsive layout
+- Clear visual hierarchy
+
+## ERROR HANDLING
+- Graceful failures if geocoding fails
+- Clear error messages to users
+- App continues working if GeoJSON files are missing
+- Console logging for debugging
+
+Build this as a complete, working application ready to deploy.

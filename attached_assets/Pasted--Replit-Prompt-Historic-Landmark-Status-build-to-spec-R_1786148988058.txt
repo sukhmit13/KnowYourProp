@@ -1,0 +1,125 @@
+# Replit Prompt — Historic Landmark Status (build to spec)
+
+Rebuild the **Historic Landmark Status** section to match this spec exactly. Front-end / CSS + markup only — bind the shown values (address, parcels, CHRS rating, era, era-decade) to the real data already in the component; the strings below are placeholders. Implement the CSS and structure **as given** — do not approximate spacing, colors, or layout. A "close enough" version is not acceptable here; match the details in the CRITICAL DETAILS list at the bottom.
+
+## Design tokens
+Add these if not present. NOTE the two CHRS orange tokens — they are a **real Chicago survey designation color, NOT part of the status palette**. Never substitute the marigold/caution color for them, and never include them in any global find-and-replace of the caution color.
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f; --caution:#f0a41c; --cautionText:#96600a; --bad:#d13b26;
+--chrsOrange:#e07d1f; --chrsOrangeSoft:#fdf0e2;   /* CHRS "Orange" rating color — domain color, keep separate */
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+
+## Structure (one section card, in this exact order)
+1. **Header** — indigo SQUARE (this is a top-level section, so the filled square, NOT an icon) + mono uppercase title + a right-aligned **Orange Tag** badge (solid CHRS orange, white text, landmark icon).
+2. **Takeaway** — indigo-soft box, lightbulb label, serif headline, THREE favorability-dotted bullets (caution / good / neutral). This is a two-sided verdict: a constraint AND a tax-credit upside.
+3. **Resource detail card** — white card: header row (orange-soft icon chip + "Historic Resource" + "Chicago Historic Resources Survey" subtitle), divider, then a 2×2 fact grid (Landmark Address, Tagged Parcels, CHRS Rating with an orange swatch, Era).
+4. **What This Means** — paper box, mono label, four favorability-dotted bullets.
+5. **Source row** — "Historic Preservation Division" external link + "Source: …".
+
+## CSS (use verbatim)
+```css
+.cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+.sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+.sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+.sh .tag{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 11px;background:var(--chrsOrange);color:#fff}
+.sh .tag svg{width:12px;height:12px;stroke:#fff;fill:none}
+
+/* takeaway */
+.take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+.takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+.taket{font-family:var(--disp);font-size:20px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+.cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:8px}
+.cn:last-child{margin-bottom:0}
+.cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+.cn.g .dt{background:var(--good)} .cn.c .dt{background:var(--caution)} .cn.n .dt{background:#9aa1b0}
+.cn b{color:var(--ink);font-weight:600}
+
+/* resource detail */
+.res{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.restop{display:flex;align-items:center;gap:11px;padding-bottom:13px;border-bottom:1px solid var(--line);margin-bottom:13px}
+.restop .ic{width:34px;height:34px;border-radius:9px;background:var(--chrsOrangeSoft);display:flex;align-items:center;justify-content:center;flex:none}
+.restop .ic svg{width:18px;height:18px;stroke:var(--chrsOrange);fill:none}
+.restop .nm{font-size:15px;font-weight:600;color:var(--ink)}
+.restop .sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px 22px}
+.rf .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.rf .v{font-size:13px;font-weight:600;color:var(--ink)}
+.rf .v .sw{display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--chrsOrange);margin-right:6px}
+.rf .v small{font-weight:400;color:var(--muted)}
+
+/* what this means */
+.wtm{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+.wtmh{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:12px}
+.b{display:flex;gap:9px;margin-bottom:9px;font-size:12.5px;line-height:1.5;color:var(--ink2)}
+.b:last-child{margin-bottom:0}
+.b .dot{width:5px;height:5px;border-radius:50%;flex:none;margin-top:6px}
+.b.con .dot{background:var(--caution)} .b.up .dot{background:var(--good)} .b.neu .dot{background:#9aa1b0}
+.b b{color:var(--ink);font-weight:600}
+
+/* source */
+.src{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.src a{color:var(--indigo);text-decoration:none;font-weight:500;display:inline-flex;align-items:center;gap:5px}
+.src a svg{width:12px;height:12px;stroke:var(--indigo);fill:none}
+.src .sep{color:var(--line)}
+```
+
+## HTML (use verbatim; bind placeholders to data)
+```html
+<div class="cardbox">
+  <div class="sh"><span class="sq"></span><span class="t">Historic Landmark Status</span>
+    <span class="tag"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>{CHRS_RATING} Tag</span></div>
+
+  <div class="take">
+    <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>The Takeaway</div>
+    <div class="taket">A locally significant 1890s resource, Orange-rated in the city survey — extra review on changes, but potential access to historic tax credits.</div>
+    <div class="cn c"><span class="dt"></span><span><b>Changes draw extra scrutiny.</b> Exterior alterations and especially <b>demolition</b> trigger Commission on Chicago Landmarks review (a demolition-delay hold) — a real constraint on redevelopment.</span></div>
+    <div class="cn g"><span class="dt"></span><span><b>But it can unlock real money.</b> Historic status may qualify a rehab for <b>Class L</b>, <b>Federal Historic (20%)</b>, and <b>Illinois Historic (25%)</b> tax incentives.</span></div>
+    <div class="cn n"><span class="dt"></span><span><b>It's a survey "Orange" rating</b> — community/locally significant — not necessarily a fully designated landmark. Confirm exact protections before planning work.</span></div>
+  </div>
+
+  <div class="res">
+    <div class="restop">
+      <span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg></span>
+      <div><div class="nm">Historic Resource</div><div class="sub">Chicago Historic Resources Survey</div></div>
+    </div>
+    <div class="rgrid">
+      <div class="rf"><div class="l">Landmark Address</div><div class="v">{ADDRESS}</div></div>
+      <div class="rf"><div class="l">Tagged Parcels on Site</div><div class="v">{PARCELS} <small>· {N} parcel(s)</small></div></div>
+      <div class="rf"><div class="l">CHRS Rating</div><div class="v"><span class="sw"></span>{CHRS_RATING} <small>— community / locally significant</small></div></div>
+      <div class="rf"><div class="l">Era</div><div class="v">{ERA}</div></div>
+    </div>
+  </div>
+
+  <div class="wtm">
+    <div class="wtmh">What This Means</div>
+    <div class="b con"><span class="dot"></span><span>Exterior modifications may face <b>restrictions</b>, and alterations are expected to <b>preserve historic character</b>.</span></div>
+    <div class="b con"><span class="dot"></span><span>Demolition permits require <b>Commission on Chicago Landmarks</b> review.</span></div>
+    <div class="b up"><span class="dot"></span><span>May qualify for <b>Class L</b>, Federal Historic <b>(20%)</b>, and Illinois Historic <b>(25%)</b> tax incentives.</span></div>
+    <div class="b neu"><span class="dot"></span><span>Applies to survey-rated resources; exact requirements depend on whether it's individually designated or in a landmark district.</span></div>
+  </div>
+
+  <div class="src">
+    <a href="{HPD_URL}"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>Historic Preservation Division</a>
+    <span class="sep">·</span><span>Source: Chicago Landmarks &amp; Historic Resources Survey</span>
+  </div>
+</div>
+```
+
+## CRITICAL DETAILS — the spots that usually get missed (get ALL of these right)
+1. **The Orange Tag badge is SOLID `--chrsOrange` with white text** — not an outline, not marigold, not indigo. Landmark icon is white, sits left of the text.
+2. **The section header uses the filled indigo SQUARE** (top-level marker), not an icon. Only the badge on the right is orange.
+3. **The resource-card icon chip uses `--chrsOrangeSoft` background with a `--chrsOrange` stroke icon** — a soft peach square, orange icon. Do not make it indigo.
+4. **The CHRS Rating value has a 9×9 orange square swatch** inline before the word "Orange".
+5. **Takeaway bullet dots are colored per bullet:** bullet 1 = caution (amber) `.cn.c`, bullet 2 = green `.cn.g`, bullet 3 = neutral grey `.cn.n`. This two-sided coloring is the point — do not make them all one color.
+6. **"What This Means" bullet dots** likewise: the two constraint bullets = `.con` (amber), the tax-incentive bullet = `.up` (green), the last = `.neu` (grey).
+7. **Numbers/keywords are bolded to `--ink`** inside otherwise `--ink2` bullet text (e.g. **demolition**, **Class L**, **(20%)**, **(25%)**).
+8. **The `.rgrid` is exactly two columns** (`1fr 1fr`) with `13px 22px` gap — Address top-left, Parcels top-right, CHRS Rating bottom-left, Era bottom-right.
+9. **Source row**: indigo external-link icon + "Historic Preservation Division" (link) · muted "Source:" text, separated by a light `·`. Top border above it.
+10. **Fonts:** the takeaway headline and nothing else here uses Instrument Serif (`--disp`); labels are JetBrains Mono; body is Inter. Don't render the headline in Inter.
+
+## Content accuracy note (not styling — verify before shipping)
+An "Orange" rating in the Chicago Historic Resources **Survey** primarily triggers the **demolition-delay ordinance** (a ~90-day hold), which is NOT the same as being an officially **designated** Chicago Landmark (which carries the strict alteration controls). The current "What This Means" restrictions bullets read firmly — confirm which protections actually apply to a survey-Orange parcel vs. a designated landmark, and soften if needed. The takeaway's third bullet already hedges this.

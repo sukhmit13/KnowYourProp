@@ -12,6 +12,7 @@ export interface ZbaApproval {
   decision: 'Approved' | 'Denied' | 'Continued' | 'Withdrawn';
   meetingDate: string;
   meetingMonth: string;
+  sourceUrl?: string;
   lat?: number;
   lon?: number;
 }
@@ -25,6 +26,7 @@ export interface ZbaUpcoming {
   subject: string;
   hearingDate: string;   // actual meeting date extracted from PDF, e.g. "2026-03-20"
   hearingMonth: string;
+  sourceUrl?: string;
   lat?: number;
   lon?: number;
 }
@@ -277,7 +279,12 @@ function extractCaseFields(block: string): {
   return { ward, zoningDistrict, address, applicant, subject };
 }
 
-function parseZbaText(text: string, meetingMonth: string, meetingDate: string): Omit<ZbaApproval, 'lat' | 'lon'>[] {
+function parseZbaText(
+  text: string,
+  meetingMonth: string,
+  meetingDate: string,
+  sourceUrl?: string,
+): Omit<ZbaApproval, 'lat' | 'lon'>[] {
   const results: Omit<ZbaApproval, 'lat' | 'lon'>[] = [];
   for (const { caseNumber, block } of parseCaseBlocks(text)) {
     const fields = extractCaseFields(block);
@@ -296,7 +303,7 @@ function parseZbaText(text: string, meetingMonth: string, meetingDate: string): 
       continue;
     }
 
-    results.push({ caseNumber, ...fields, decision, meetingDate, meetingMonth });
+    results.push({ caseNumber, ...fields, decision, meetingDate, meetingMonth, sourceUrl });
   }
   return results;
 }
@@ -307,6 +314,7 @@ function parseAgendaText(
   text: string,
   fallbackHearingDate: string,
   fallbackHearingMonth: string,
+  sourceUrl?: string,
 ): Omit<ZbaUpcoming, 'lat' | 'lon'>[] {
   const extracted = extractMeetingDateFromText(text);
   const hearingDate = extracted ?? fallbackHearingDate;
@@ -322,7 +330,7 @@ function parseAgendaText(
   for (const { caseNumber, block } of parseCaseBlocks(text)) {
     const fields = extractCaseFields(block);
     if (!fields) continue;
-    results.push({ caseNumber, ...fields, hearingDate, hearingMonth });
+    results.push({ caseNumber, ...fields, hearingDate, hearingMonth, sourceUrl });
   }
   return results;
 }
@@ -419,7 +427,7 @@ async function refreshCache(): Promise<void> {
         for (const url of s.agendaUrls) {
           const text = await fetchPdfText(url);
           if (!text) continue;
-          const parsed = parseAgendaText(text, s.fallbackHearingDate, s.hearingMonth);
+          const parsed = parseAgendaText(text, s.fallbackHearingDate, s.hearingMonth, url);
           for (const u of parsed) {
             if (!seenUpcoming.has(u.caseNumber)) {
               seenUpcoming.add(u.caseNumber);
@@ -444,7 +452,7 @@ async function refreshCache(): Promise<void> {
         for (const url of s.decisionUrls) {
           const text = await fetchPdfText(url);
           if (!text) continue;
-          const parsed = parseZbaText(text, s.meetingMonth, s.meetingDate);
+          const parsed = parseZbaText(text, s.meetingMonth, s.meetingDate, url);
           for (const a of parsed) {
             if (!seenApprovals.has(a.caseNumber)) {
               seenApprovals.add(a.caseNumber);
@@ -476,6 +484,13 @@ async function refreshCache(): Promise<void> {
 export async function getZbaApprovals(ward: number): Promise<ZbaApproval[]> {
   await refreshCache();
   return cachedApprovals.filter(a => a.ward === ward);
+}
+
+/** Current monthly decisions across all wards. Property history matches these
+ * by address, rather than by the property's current ward. */
+export async function getAllZbaApprovals(): Promise<ZbaApproval[]> {
+  await refreshCache();
+  return cachedApprovals;
 }
 
 export async function getZbaUpcoming(ward: number): Promise<ZbaUpcoming[]> {

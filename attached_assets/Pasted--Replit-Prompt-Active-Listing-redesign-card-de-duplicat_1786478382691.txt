@@ -1,0 +1,127 @@
+# Replit Prompt — Active Listing — redesign (card + de-duplicated caveats) — build to spec
+
+Rebuild the **Active Listing** section into the carded standard, and reorganize it around the two DISTINCT caveats it was conflating. Implement CSS/HTML **verbatim**; check CRITICAL DETAILS.
+
+## 🔴 The core fix — two different caveats, each shown ONCE
+The old section said "this is unverified, cross-check it" in three places (top disclaimer + a separate cross-check box + a "Disclosed by seller" box that duplicated the highlights). Collapse to two caveats, by what they actually tell the reader:
+1. **Currency** — *how current is this data?* → stays at the **TOP** (it governs how you read everything below): "No active listing — this is the last known listing (2017), may be outdated," + the Re-check control + source. Plus a "why this reads as historical" note built from the currency evidence.
+2. **Verification** — *how do I confirm it?* → moves to the **BOTTOM**, as ONE consolidated caution with the cross-check links. This single box replaces BOTH the old top "not verified" disclaimer AND the separate "cross-check these claims" box.
+- **Delete the "Disclosed by seller" box** — its facts already live in Listing Highlights. One place only.
+
+Read order becomes: **how current → what it claims → how to verify.**
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --takeBorder:#dde1f6;
+--caution:#f0a41c; --cautionText:#b26c07; --cautionSoft:#fdf8f0; --cautionLine:#f3e2c2;  /* clean amber, NOT beige/brown */
+--disp:"Instrument Serif"; --mono:"JetBrains Mono"; --sans:"Inter";
+```
+
+## Input
+```json
+{
+  "status": "delisted",                     // active | delisted | none
+  "status_label": "Delisted · historical 2017 record",
+  "currency_headline": "No active listing. The details below are from the last known listing (listed Mar 31, 2017) and may be outdated.",
+  "checked_date": "Aug 11, 2026",
+  "source": {"label":"@properties / Realty.com · MLS# 9581031","href":"…"},
+  "tiles": [
+    {"label":"List price","value":"$599,000","sub":"asking · per Realty.com"},
+    {"label":"Config","value":"4 units","sub":"per listing"},
+    {"label":"Last sold","value":"$557,000","sub":"per @properties"}
+  ],
+  "lede": "A solid brick, three-story mixed-use building…",
+  "highlights": [ ["Solid brick, 3-story building", "…"], ["All tenants on leases…", "…"] ],  // two columns
+  "why_historical": "the MLS record is dated 2017; no newer active listing (2024–2026) could be verified on Zillow, Redfin, LoopNet or Crexi; and the address currently appears occupied by a business (Las Americas Chicago Travel, per Waze)…",
+  "verify_links": [ {"label":"Permit & Building History","href":"#permits"}, {"label":"Pre-Title Check","href":"#title"} ]
+}
+```
+
+## CSS (verbatim)
+```css
+/* section header (carded standard) + status pill */
+.secthead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:14px}
+.secthead .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+.secthead .pill{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.02em;text-transform:none;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 10px}
+.secthead .pill .d{width:6px;height:6px;border-radius:50%;background:#9aa1b0;flex:none}
+
+.seccard{border:1px solid var(--line);border-radius:16px;padding:24px 26px;box-shadow:0 1px 3px rgba(20,20,20,.03)}
+
+/* 1 — currency status (top) */
+.status{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.status .sx{flex:1;min-width:260px}
+.status .hl{font-size:15px;font-weight:600;color:var(--ink);line-height:1.4} .status .hl b{font-weight:700}
+.status .meta{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.6} .status .meta a{color:var(--indigo);text-decoration:none}
+.recheck{flex:none;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.02em;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 14px;cursor:pointer}
+.recheck svg{width:13px;height:13px;stroke:var(--ink2);fill:none}
+
+/* stat tiles */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0 6px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.tile .tl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.tile .tv{font-family:var(--disp);font-size:34px;color:var(--ink);line-height:1;margin-top:8px}
+.tile .ts{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:8px}
+
+/* 2 — listing content */
+.datalabel{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin:24px 0 11px}
+.lede{font-size:13.5px;color:var(--ink2);line-height:1.6}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:6px}
+.cols ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.cols li{font-size:12.5px;color:var(--ink2);line-height:1.45;padding-left:14px;position:relative}
+.cols li::before{content:"";position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:var(--indigo)}
+
+/* currency evidence note (supports the top status) */
+.stale{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.6;margin-top:16px;padding:11px 14px;background:var(--paper);border:1px solid var(--line);border-radius:9px}
+.stale b{color:var(--ink2);font-weight:700}
+
+/* 3 — ONE consolidated verify caution (bottom) */
+.verify{margin-top:20px;background:var(--cautionSoft);border:1px solid var(--cautionLine);border-radius:12px;padding:15px 17px;box-shadow:inset 3px 0 0 var(--caution)}
+.verify .vh{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.verify .vh svg{width:15px;height:15px;stroke:var(--cautionText);fill:none;flex:none}
+.verify .vh .t{font-size:13.5px;font-weight:700;color:var(--cautionText)}
+.verify .vb{font-size:12.5px;color:var(--ink2);line-height:1.55} .verify .vb b{color:var(--ink);font-weight:600}
+.verify .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.verify .lk{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid var(--takeBorder);border-radius:8px;padding:8px 12px}
+.verify .lk svg{width:12px;height:12px;stroke:var(--indigo);fill:none}
+```
+
+## HTML order (verbatim structure)
+```html
+<div class="secthead"><span class="sq"></span>Active Listing<span class="pill"><span class="d"></span>{status_label}</span></div>
+<div class="seccard">
+  <!-- 1 currency -->
+  <div class="status">
+    <div class="sx"><div class="hl">{currency_headline}</div><div class="meta">Checked {checked_date} · Source: <a href="{source.href}">{source.label} ↗</a></div></div>
+    <button class="recheck"><svg …refresh…></svg>Re-check now</button>
+  </div>
+  <!-- tiles -->
+  <div class="tiles"> …one .tile per tiles[] … </div>
+  <!-- 2 content -->
+  <div class="datalabel">What the listing says</div><div class="lede">{lede}</div>
+  <div class="datalabel">Listing highlights</div><div class="cols"><ul>…col1…</ul><ul>…col2…</ul></div>
+  <div class="stale"><b>Why this reads as historical:</b> {why_historical}</div>
+  <!-- 3 verify (bottom) -->
+  <div class="verify">
+    <div class="vh"><svg …triangle-alert…></svg><span class="t">This is the seller's side — not verified against city records</span></div>
+    <div class="vb">Everything above is <b>public listing marketing</b> (Zillow, Redfin, LoopNet, brokerage sites), not official data. Unit count, condition, tenancy and price can all differ from the record — cross-check anything that matters:</div>
+    <div class="links"> …one .lk per verify_links[] (arrow icon)… </div>
+  </div>
+</div>
+```
+
+## LOGIC
+1. **Currency vs. verification are separate** — top block = "how current" (status + evidence); bottom block = "how to verify" (seller-side caveat + cross-check links). Never merge them, never repeat either.
+2. **`why_historical` is currency EVIDENCE, not a listing highlight** — pull the "no newer listing found / now occupied by a business" findings OUT of the highlights and into the `.stale` note under the status. Highlights carry only the seller's own claims.
+3. **No "Disclosed by seller" block** — those facts are already in the highlights; render them once.
+4. **Status pill reflects reality** — `delisted`/`none` → grey neutral pill (not red/green; delisted isn't good/bad). If a genuinely `active` listing exists, the headline changes to the active copy and the pill can read "Active."
+5. **Attribute conflicting figures** — when two sources disagree (list $599K per Realty.com vs. $557K sale per @properties), show both with their source on the tile `.sub` / a highlight; never silently pick one.
+6. **Re-check is a control**, not decoration — wire it to re-run the listing fetch; show the new `checked_date` on success.
+
+## CRITICAL DETAILS
+1. **Two caveats, each once** — currency at top, verification at bottom; delete the duplicate top disclaimer and the duplicate seller box.
+2. **Carded Standard Structure** — section header (indigo square) + status pill; all content inside the `.seccard`.
+3. **Verify box is the clean amber caution** (near-white fill + marigold left rail + `#b26c07` text) — never beige/brown; cross-check links live inside it.
+4. **Currency evidence** (`.stale`) sits with the status, not in the highlights.
+5. **Serif (`--disp`) ONLY** on the three tile values. Everything else Inter/Mono.
+6. **No takeaway box** — the currency status IS the section's headline; adding a takeaway would duplicate it. (If a takeaway is later wanted for visual parity, keep it to the *building summary*, not the currency/verify caveats.)

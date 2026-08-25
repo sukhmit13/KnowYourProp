@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--s1:#3f51c5;--s2:#d1671e;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .col{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .cap{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:12px}
+  .lbl{font-size:11px;color:#a6a49d;text-align:center;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+  svg{width:100%;height:auto;display:block}
+  .grid{stroke:var(--line);stroke-width:1}
+  .axis{font-family:var(--mono);font-size:9px;fill:var(--muted)}
+  .legend{display:flex;gap:22px;justify-content:center;margin-top:8px}
+  .lg{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);font-weight:600}
+  .lg svg{width:22px;height:4px}
+</style>
+</head>
+<body>
+<div class="col">
+
+  <div class="lbl">Orange A — deeper (#d1671e)</div>
+  <div class="card">
+    <div class="cap">Weekday ridership trend · 36 months</div>
+    <svg id="c1" viewBox="0 0 700 170"></svg>
+    <div class="legend"><span class="lg"><svg><line x1="0" y1="2" x2="22" y2="2" stroke="#3f51c5" stroke-width="2.6"/></svg>#66 Chicago</span><span class="lg"><svg><line x1="0" y1="2" x2="22" y2="2" stroke="#d1671e" stroke-width="2.6"/></svg>#49 Western</span></div>
+  </div>
+
+  <div class="lbl" style="color:#2b3a9e">Orange B — brighter (#f4610a)</div>
+  <div class="card">
+    <div class="cap">Weekday ridership trend · 36 months</div>
+    <svg id="c2" viewBox="0 0 700 170"></svg>
+    <div class="legend"><span class="lg"><svg><line x1="0" y1="2" x2="22" y2="2" stroke="#3f51c5" stroke-width="2.6"/></svg>#66 Chicago</span><span class="lg"><svg><line x1="0" y1="2" x2="22" y2="2" stroke="#f4610a" stroke-width="2.6"/></svg>#49 Western</span></div>
+  </div>
+
+</div>
+<script>
+  const a=[15.5,15.8,15.3,16.4,16.0,16.8,16.2,17.2,17.6,16.9,17.4,18.1,17.8,18.4,18.0,18.6,18.2,18.9,18.5,19.1,18.8,19.0,18.7,19.2];
+  const b=[10.8,11.0,10.6,11.4,11.0,11.6,11.2,12.0,12.4,11.9,12.6,13.2,13.0,13.6,13.2,13.8,13.4,14.0,13.7,14.2,13.9,14.4,14.1,14.6];
+  const N=a.length, X0=46,X1=690,Y0=14,Y1=130,MAX=22;
+  const px=i=>X0+(X1-X0)*i/(N-1), py=v=>Y1-(Y1-Y0)*v/MAX;
+  const NS='http://www.w3.org/2000/svg';
+  function draw(id,c2){
+    const svg=document.getElementById(id);
+    [0,10,20].forEach(v=>{const y=py(v);const l=document.createElementNS(NS,'line');l.setAttribute('x1',X0);l.setAttribute('x2',X1);l.setAttribute('y1',y);l.setAttribute('y2',y);l.setAttribute('class','grid');svg.appendChild(l);const t=document.createElementNS(NS,'text');t.setAttribute('x',6);t.setAttribute('y',y+3);t.setAttribute('class','axis');t.textContent=v+'k';svg.appendChild(t);});
+    [['06/23',0],['12/24',12],['06/26',23]].forEach(([lb,i])=>{const t=document.createElementNS(NS,'text');t.setAttribute('x',px(i)-8);t.setAttribute('y',152);t.setAttribute('class','axis');t.textContent=lb;svg.appendChild(t);});
+    function line(data,color){const pts=data.map((v,i)=>px(i)+','+py(v)).join(' ');const p=document.createElementNS(NS,'polyline');p.setAttribute('points',pts);p.setAttribute('fill','none');p.setAttribute('stroke',color);p.setAttribute('stroke-width','2.4');p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');svg.appendChild(p);}
+    line(a,'#3f51c5'); line(b,c2);
+  }
+  draw('c1','#d1671e'); draw('c2','#f4610a');
+</script>
+</body>
+</html>

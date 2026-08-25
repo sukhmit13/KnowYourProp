@@ -1,0 +1,585 @@
+# KYP — Step 14: `NN · ZONING HISTORY` — promote to a top-level section
+
+🔴 **Scope:** the Zoning History subsection and `server/zoningHistory.ts` only. Change only what
+this document specifies. Do not touch `05 · Zoning & What You Can Build`, Development Potential,
+Permit History, or any other section.
+
+---
+
+## Where it is today
+
+`RunDetail.tsx:9351–9566` — a `Collapsible` nested inside the **Property Details** card, sibling
+to DOB Info, Business License History, Historic Landmark, Parcel Information, Sale History, Liens
+and Property Tax Information. Default closed (`sectionStates.zoningHistory = false`, line 537).
+Two clicks to reach it.
+
+On **522 N Claremont** it renders: a "Plain-language read" box, one bullet row (title, date,
+ordinance id, source, description, `Atty:` line, a Legistar globe icon), and a
+`Current designation: RT-4` footer.
+
+**Before anything else, delete the dead duplicate.** `RunDetail.tsx:4590` opens a second, nearly
+identical zoning-history render guarded by `{false && run?.address && (` — roughly 215 lines that
+can never execute, carrying their own `data-testid`s (`trigger-zoning-history-old`,
+`badge-zoning-history-count-old`) and shipping in the bundle. Delete the whole block, including
+`id="print-section-zoning-history-placeholder"` if nothing references it.
+
+---
+
+## 1. Promote it, and give it a takeaway
+
+Zoning History becomes a **top-level accordion row**. It has a subject of its own — the recorded
+legislative actions on this parcel — and it is the only section that answers "has anyone tried to
+change what this parcel is allowed to be?"
+
+`05 · Zoning & What You Can Build` answers *what is allowed now*. This section answers *how it got
+that way, and who did the work*. They are different questions and both are load-bearing.
+
+### The takeaway is a finding, not a description
+
+Today the section subtitle reads *"Ordinances, rezonings, and ZBA cases for this address"* — the
+same string on every parcel in Chicago. Replace it with a computed sentence:
+
+| Condition | Takeaway |
+|---|---|
+| A Board order states the existing unit configuration | `Subdivided in {year} — the Board's order kept all {n} units, front and rear.` |
+| Amendment names a **different** development address (§2.1) | `Split from {addr}'s zoning lot in {year} — {the parcel-specific caveat}.` |
+| Rezoning, sale within 24 months before it, no permit since, **and** §2.1's four gates pass | `Rezoned {n} months after the {year} sale — and nothing built since.` |
+| Rezoning, permits followed | `Rezoned to {district} in {year} — built out {year}.` |
+| Rezoning, no sale correlation | `Rezoned to {district} in {year} — {n} years ago.` |
+| ZBA grant on record | `{Approved\|Denied} at the Zoning Board — {case} in {year}.` |
+| No actions at all | `No rezoning or ZBA case on record — {district} since the 2004 code rewrite.` |
+| Still loading | render a skeleton, **not** a sentence |
+
+Badge: `{n} actions · {district}` in indigo — count **cases**, not hearing entries (§5.0). **Indigo, not green or orange** — a zoning history
+is a state, not a verdict. There is no good or bad number of rezonings.
+
+**When there are no actions on record, render no badge and leave the row collapsed.** That is the
+normal state for most Chicago parcels; it is not a finding and it should not occupy a screen. The
+takeaway carries the whole answer.
+
+---
+
+## 2. The finding — and a trap to avoid on the way to it
+
+The Councilmatic extraction now returns the application's stated purpose. For 522 N Claremont it
+says: the amendment was filed **to develop 520 N Claremont with a new single-family home**; 520 and
+522 **comprised one zoning lot**; the amendment lets that lot **be divided**; and the existing
+**multi-unit building and detached coach house at 522 would remain**.
+
+### 2.1 Do not compute "rezoned then never built" on this parcel
+
+The obvious-looking finding — sold Dec 2013, rezoned Jul 2014, **zero permits since** — is wrong
+here, and an earlier draft of this spec asserted it.
+
+The development was proposed at **520**. A different address. Zero permits at 522 is precisely
+what the filing anticipated: 522's buildings were to stay as they are. Rendering it as a stalled
+project invents a problem out of the section's own success.
+
+**Rule: a rezoning's outcome must be measured at the address the application names, not at the
+report's subject address.** They are frequently different — that is the whole point of a
+lot-division amendment.
+
+Gate the correlation on all of:
+
+1. The application's stated development address **matches this parcel**, or no development address
+   was extracted at all.
+2. A qualifying transfer falls within 24 months before the rezoning.
+3. The permit count at **this** parcel since the rezoning is zero.
+4. The transfer record is non-empty (Step 7b §3.3 — fail closed on zero transfers).
+
+Where the development address is a **different** parcel, do not treat the permit count as evidence
+of anything, and do not write a paragraph about it either. Hero block 3 carries it — see §3.
+
+**No "Pattern" callout.** An earlier draft opened the section with a prose block narrating the
+sale → rezoning → permits sequence. It is gone. The takeaway states the finding, the hero blocks
+carry the facts, and the section does not also argue its case in a paragraph. If a correlation
+cannot be said in the takeaway plus three blocks, it is not established well enough to assert.
+
+### 2.2 The real finding is the rear unit — and the Board settled more of it than the application did
+
+For a buyer of 522 the load-bearing fact is how many dwelling units legally stand here. Two records
+speak to it, and they are **not** equal weight:
+
+- The **2014 application** (applicant's words): a multi-unit building and a detached coach house
+  "would remain." That is a statement of intent made to win an approval.
+- **ZBA order 70-17-Z, Jun 16 2017** (the Board's words): *"The existing two-story, two dwelling
+  unit front building and one dwelling unit rear building will remain."* The Board granted setback
+  relief **on that basis**.
+
+A Board order predicated on a configuration is materially stronger evidence than an applicant
+describing one — but it is still not a certificate of occupancy, and the section must not upgrade
+it into one. Cook County records `Two (primary bldg of 2) Apts`; the rear unit is not in that
+figure. Three dwellings, two of them counted.
+
+Takeaway: **`Subdivided in 2017 — the Board's order kept all three units, front and rear.`**
+
+Both the subdivision and the unit count are verified facts about **this** parcel. The variation
+package next door (§5.1, Matter 2) is context, not the headline — it concerns the other lot.
+
+---
+
+## 3. Three hero blocks
+
+| Block | Value | Label | Breakdown |
+|---|---|---|---|
+| 1 | `RT-4` | Today's designation | Set by · Allows |
+| 2 | `2 lots` | Created from one — rezoning then variation | 2014 · 2017 |
+| 3 | `3` | Dwelling units the 2017 order kept here | Front · Rear |
+
+All three indigo. A zoning history is a state, not a verdict, and a unit count is a fact rather
+than a rating — do not colour block 3 even though it carries the section's most consequential
+number.
+
+Block 2 makes the two-step visible: the 2014 rezoning cleared the split-zoning, the 2017 variation
+cleared the setback. Either alone would not have divided the lot, and a reader shown only one will
+draw the wrong conclusion about when this parcel became its own.
+
+Where the record does not establish a unit configuration, block 3 falls back to the development
+address named in the application (§2.1) so a reader cannot mistake this parcel's permit count for
+the amendment's outcome.
+
+---
+
+## 4. `WHAT CHANGED`, then `WHAT THE RECORD ESTABLISHES`
+
+### 4.1 The district diff
+
+With Councilmatic extraction the diff is real: **RS-3 + RT-4 → RT-4**. Render it as a two-column
+`.kyp-xfer`.
+
+The "before" value is doing more work than it looks. `RS-3 + RT-4` means the lot was
+**split-zoned** — one zoning lot carrying two districts. Say that, because it is the reason the
+amendment was needed at all: you cannot cleanly divide a zoning lot whose halves sit in different
+districts. A reader who sees two codes and no explanation will assume a typo.
+
+The "after" column keeps the standing note that RT-4 is **confirmed against the current zoning
+map, not inferred from ordinance text.**
+
+**When extraction fails** — and it still will, since it depends on a published PDF and a regex —
+render `Not in the record` at full size in the before column rather than hedging in prose, and
+say what would close the gap: the pre-amendment zoning map for the block, which a zoning attorney
+can pull in an afternoon. An honest empty cell shows the reader exactly which half of the question
+we answered.
+
+### 4.2 `WHAT THE RECORD ESTABLISHES` — split what is found from what is still open
+
+This is the new subsection the better extraction earns, and it is where the section becomes worth
+more than the record it summarizes. Two columns — **Found in the record** and
+**Still to confirm**:
+
+| **Stated in the application** (indigo) | **What it does not establish** (amber) |
+|---|---|
+| The purpose was to develop 520 N Claremont with a new single-family home. | This is application context, **not a variance**. Nothing here grants relief from RT-4's bulk or density limits. |
+| 520 and 522 comprised one zoning lot; the amendment allows it to be divided. | It is **not a blanket grandfathering approval**. Describing the coach house is not the same as legalizing it. |
+| The existing multi-unit building and detached coach house at 522 would remain. | **Verify the legal unit count separately.** Cook County records two apartments in the primary building; the coach house is a third dwelling and its status is not settled by this document. |
+
+### 4.3 Colour: the right column is slate, not amber
+
+An earlier draft rendered "what it does not establish" in amber with amber bullets. **Wrong, and
+against our own rule** — amber is not in the categorical palette, and the custom brown used
+(`#a65f14`) was off-system entirely.
+
+More importantly it was the wrong *claim*. Amber means **watch — this needs checking**, which
+asserts a problem. We are not asserting one: we do not know the coach house is unlawful, and
+Chicago's ADU history makes it genuinely ambiguous. This column is **context** — the boundary of
+what one document proves. That is slate, on `--wash`, with slate bullets. No verdict colour on
+either side of this panel.
+
+The same applies to the ZBA lapse line: the closed-window fact renders in `--ink2` with the date
+bolded, and the row's decision chip carries the only colour. A stray brown for "expired" was the
+same mistake in a different place.
+
+### 4.4 Bold the finding, not the setup
+
+Each bullet leads with what happened and bolds that clause. The earlier draft bolded
+*"comprised one zoning lot"* — the prior state, not the action — which buried the point in the
+middle of a sentence and made the panel hard to scan.
+
+Left column, each bullet opening with the operative fact: **The zoning lot was divided.** /
+**520 was to be developed** / **522's buildings were to stay**. Right column parallel and short:
+**Not a variance** / **Not a grandfathering approval** / **Not a unit count**.
+
+Parallel openings let a reader take the whole panel in one pass. One bold phrase per bullet, at
+the front.
+
+⚠️ Render the left column as **the applicant's words**, labelled as such in the subhead. Never
+restate an application's description in the product's own voice. An applicant's description is a
+statement of intent made to win an approval — evidence of what was *proposed*, never a
+determination of what is *lawful*.
+
+---
+
+## 5. `THE RECORD` — group by matter, one row per case, every field once
+
+### 5.1 The full record duplicates cases — 8 entries for 4 cases
+
+With the ZBA fetch fixed, 522 N Claremont returns **eight entries**:
+
+| Date | Case | Status |
+|---|---|---|
+| Jul 21, 2017 | 71-17-Z · 72-17-Z · 73-17-Z | Approved |
+| Jun 16, 2017 | 70-17-Z | Approved |
+| Jun 16, 2017 | 71-17-Z · 72-17-Z · 73-17-Z | **Continued** |
+| Jul 30, 2014 | O2014-4194 | Passed |
+
+Cases 71, 72 and 73 each render **twice** — once `Continued` on Jun 16, once `Approved` on Jul 21.
+A continuance is not an action; it is the same case being held over to the next hearing. Rendering
+it as a peer row makes a four-case docket look like eight, and puts a grey `Continued` chip
+directly above a green `Approved` chip **for the same case number** — which reads as a contradiction.
+
+**Fix: key rows by case number.** One row per case, carrying its **final disposition**. Earlier
+hearing dates render as a hearing track on that row, not as rows of their own:
+
+```
+[VARIATION] [APPROVED]                                        Jul 21, 2017
+Reduce minimum lot area per dwelling unit 3,000 → 2,884.37 sf
+· Case 71-17-Z  continued from Jun 16
+```
+
+Where a case is **still** continued with no later disposition, that is its current status and it
+renders as one row reading `Continued` — an open matter, indigo, not a verdict.
+
+Keep the raw hearing count visible in the subhead — `5 actions · 2 matters · 8 hearing entries` —
+so nothing looks dropped.
+
+### 5.2 Group rows by matter
+
+The four ZBA cases are not four separate stories. Cases 71/72/73 are a **variation package for one
+proposed building** — lot area per unit, setbacks, parking — all heard together, all continued
+together, all approved together. Case 70 is a different matter: the setback relief that let the lot
+be subdivided.
+
+Render two labelled groups:
+
+- **Matter 1 — the subdivision** *(one lot became two)*: the 2014 map amendment + case 70-17-Z.
+- **Matter 2 — the new building** *(three storeys, three units, on the other lot)*: cases
+  71/72/73 + the lapse note.
+
+Group by the project the relief serves, not by hearing date. Three variations for one building
+listed flat, interleaved with an unrelated subdivision case, forces the reader to reconstruct the
+grouping themselves — and most will not.
+
+**How to group without guessing:** cases sharing a hearing date, a continuance track **and** a
+common phrase in the relief description (`for a proposed three-story, three dwelling unit
+building`) are one matter. Where that inference is not available, render one group of ungrouped
+actions rather than inventing a relationship.
+
+### 5.3 One row per action, and every field printed once
+
+Map amendments, ZBA variations, special uses and administrative adjustments all render here,
+newest first.
+
+**Not a card — a row.** A card per action restated the same facts three and four times over: the
+date in the card header and again in a field, "map amendment" in the title and again in a chip,
+the ordinance id in the subhead and again in the docref, and a `Subject` field carrying the
+address the whole report is about. Three lines carry all of it with nothing repeated:
+
+```
+[MAP AMENDMENT] [PASSED]                      Introduced & passed Jul 30, 2014
+Zoning Reclassification Map No. 1-H · App No. 18063 · City Council
+Ordinance O2014-4194 ↗ · Filed PDF ↗ · Chicago City Clerk (Legistar)
+```
+
+Line 1 is type, outcome, date. Line 2 is what it was. Line 3 is where to verify it. The ordinance
+id moves **out** of the `WHAT CHANGED` subhead — provenance belongs with the record, not with the
+finding, and it was printing twice.
+
+### 5.4 Quote the Board where it settles a question
+
+Case 70-17-Z's description contains the single most valuable sentence in this section:
+
+> *"The existing two-story, two dwelling unit front building and one dwelling unit rear building
+> will remain."*
+
+Render it as a quotation on its row, attributed to the order. This is a **Board finding**, not an
+applicant's description — a different and much stronger class of evidence than the 2014
+application text (§4.2). Where a decision's text states a fact about the property's existing
+configuration, quote it rather than paraphrasing.
+
+---
+
+### 5.5 Colour: a Board decision is a verdict, a map amendment is not
+
+- Map amendment / administrative adjustment → **indigo**. A rezoning is a state. There is no good
+  or bad number of them and none of them is a claim about the property's quality.
+- ZBA `Approved` → **green**; ZBA `Denied` → **red**. The Board is authoritative on the exact
+  question it answered, which is the standing test for red.
+
+### 5.6 A ZBA grant shows its lapse window — the rule is 12 months
+
+**Chicago Zoning Ordinance §17-13-1106:** an order granting a variation is valid for **12 months**
+from the date of the order unless a complete building-permit application is submitted and
+diligently pursued, or the use is commenced. The section states no extension provision.
+
+So the three Jul 21, 2017 approvals here were valid to **Jul 21, 2018**. Print that on the group,
+cite the ordinance section, and say what would have preserved them:
+
+> *Each order was valid 12 months — to Jul 21, 2018 — unless a complete building-permit
+> application was filed and diligently pursued, or the use commenced (§17-13-1106). Confirm with
+> the Board whether these were exercised.*
+
+⚠️ **Do not assert that they lapsed.** We know the window and we know this report shows no permits
+at this address — but the building those variations serve sits on the **other** lot, and its
+permits file under that address. This is §2.1's trap again, one layer down. State the window,
+state that the permit count on this report does not answer it, and stop:
+
+> *Permits for this building would sit under the other lot's address, not this one, so the permit
+> count on this report does not answer it.*
+
+An expired variation rendered with no lapse indicator is worse than not rendering it at all. A
+variation asserted to have expired on evidence we do not hold is worse still.
+
+### 5.7 Do not label an introduction date as the action date
+
+`zoningHistory.ts:422` sets `date: introDate` — the date the matter was **introduced**, not the
+date it passed. Items sort on it, and the UI prints it top-right beside a description that says
+*"passed by City Council on {passedDate}"*. On this parcel the two dates coincide; in general an
+ordinance is introduced months before it passes, and the row will read as though the action
+happened on the filing date.
+
+- Render **both** when they differ: `Introduced {date}` and `Passed {date}`.
+- Render **one row** labelled `Introduced & passed` when they are the same day.
+- Where a matter has not passed, print the status (`Introduced — referred to {committee}`) and do
+  **not** describe it as an action taken.
+- Sorting may stay on intro date; the label must not.
+
+### 5.8 ZBA cases keep their applicant
+
+`fetchAddressZba` puts the applicant into `description` with no label
+(`zoningHistory.ts:479`), so it renders as an unlabelled sentence fragment. Give it a field:
+`Applicant · {name}`. Keep the decision badge — `Approved` green, `Denied` red — because a Board
+decision **is** authoritative on that exact question.
+
+---
+
+## 6. `WHO FILED THEM` — identical to the permit-professionals treatment
+
+The zoning attorney is the same object as the permit professional rendered at
+`RunDetail.tsx:9145–9185`. **Match that structure field for field.** That block is already the
+right design and it has a slot for everything asked here:
+
+| `.procard` / `.pro2` (permits, live) | Zoning counsel |
+|---|---|
+| `.prole` role label | `Zoning counsel` / `Architect` |
+| `.pnm` name | `Sara K. Barnes, Esq.` |
+| `.pstat` — **this property** | `Here · 1 zoning action — the 2014 map amendment that set RT-4 · passed on first reading` |
+| `.pcite` — **citywide index** + `View profile →` | see §6.1 |
+| `.pcite.nomatch` fallback | see §6.1 |
+| `.pera` current / prior owner | `Prior owner` |
+
+In the bold-hybrid language this is `.kyp-procard`, which already carries `.phere` (the `.pstat`
+slot) and `.pcity` (the `.pcite` slot). No new component.
+
+### 6.1 There is no citywide zoning-counsel record — so render the honest fallback
+
+The permits block links to `/discovery?view=architect-rankings&highlight={name}` when a
+professional matches the citywide index, and falls back to
+*"No confident citywide match — showing this property's record only."* when they do not.
+
+**We have no zoning-counsel index at all.** The attorney name is extracted by regex from inside a
+single ordinance PDF for this one parcel; there is no citywide table to join against, and a
+Legistar name search will not find her because the name is in a PDF attachment, not the matter
+title. So a "view her record" link would be a fake affordance pointing at nothing.
+
+Render `.pcity.nomatch` — *"No citywide zoning-counsel record — showing this parcel's filings
+only."* — with the only real link we have: the filed PDF.
+
+⚠️ Building the index is a **data** task, not a design one, and it is the same shape as the
+county-wide tax-appeal-attorney file already on the benchmark backlog: sweep Legistar zoning
+matters, extract counsel from each PDF, cache by ordinance id. Add it to that backlog. When it
+lands, `.pcity` populates and the `View profile →` link turns on with **no design change** —
+which is the point of matching the permits treatment now.
+
+### 6.2 Delete the bar
+
+The `.pwl` win/loss bar does not belong here. It encodes a **distribution** — wins against losses
+across many filings — and this parcel has one filing. A bar rendered at 100% with a single segment
+charts n=1, communicates nothing, and implies a success rate we did not compute. Per the standing
+rule: where a claim must not be made, remove the channel rather than recolour it.
+
+**This applies backwards to Step 13.** Gate the tax-appeal attorney's `.pwl` bar on **n ≥ 3
+appeals with recorded outcomes**. Below that, print the record as text in `.phere` and draw no bar.
+
+### 6.3 The architect renders only when named
+
+`item.architect` is extracted by the same PDF pass (`zoningHistory.ts:135–205`) and is **not
+rendered anywhere today** — a dropped field. Give it a row with role chip `Architect` **when the
+filing names one.**
+
+When it does not, **print nothing.** No placeholder, no "not named in the application" line. An
+unnamed architect is not a finding — it is the ordinary case, since most map amendments have no
+architect of record — and a line explaining its absence is noise that reads as a defect. This is
+the same rule as the empty-state row in §1: absence of an optional attribution does not earn
+space.
+
+The one exception is §7.1's `enriched: false` — *"we did not look"* is different from *"we looked
+and it was not there,"* and only the former gets a line.
+
+### 6.4 Do not rate zoning counsel
+
+One filing is not a track record. Use the same disclaimer register as `.profind` on the permits
+block — every professional named is listed, a starting point and not a recommendation — plus the
+reason they are worth showing: whoever handled the last rezoning already knows this block, this
+alderman and this parcel's file, which is worth something if you plan another application.
+
+---
+
+## 7. Four data defects in `server/zoningHistory.ts`
+
+### 7.1 Enrichment stops at three PDFs — and the UI shows a blank
+
+`filtered.map(...)` at line 378 returns **every** matching matter, but:
+
+- attachment URL and Councilmatic lookup run only on `top5` (line 339)
+- PDF extraction stops after **three** fetches (line 360, `pdfFetches >= 3`)
+
+So the 4th matter onward renders with `zoningAttorney`, `architect`, `fromZone` and `toZone` all
+undefined — and the UI prints nothing, which reads as *"no attorney filed this one."* We did not
+look. Absence of evidence is being rendered as evidence of absence.
+
+**Fix:** carry a per-item `enriched: boolean`. Where false, render
+`Attorney · not checked` in muted mono, never a blank, and state the cap in the section source
+line. Best is to raise the cap and cache extractions per ordinance id — the same ordinance PDF is
+re-fetched on every report run for every parcel it touches — but the display fix ships first and
+independently.
+
+### 7.2 The ZBA orders carry no attorney, and that is not the same as no attorney
+
+`fetchAddressZba` (`zoningHistory.ts:466–486`) maps Board decisions with no PDF pass, so
+`zoningAttorney` and `architect` are always undefined on ZBA items. Four of this parcel's five
+actions therefore name nobody.
+
+Do not let `WHO FILED THEM` imply that. The subhead reads `1 named · ZBA orders carry no attorney
+field`, and the disclaimer says it outright: *the Board's published decisions do not carry that
+field, so this is not a record of who did not appear.* Same rule as §7.1 — a field we never
+collected must never render as an absence we observed.
+
+### 7.3 The ZBA lookup defaults to ward 1
+
+`fetchAddressZba` line 470: `const wardNum = ward ?? 1;`
+
+When the ward does not resolve, we fetch **ward 1's** ZBA calendar and match this address against
+it. It will never match, and the section will report no ZBA case with full confidence — a silent
+false negative on every parcel whose ward lookup fails.
+
+**Fix:** when `ward` is null, do not call `getZbaApprovals` at all. Return an explicit
+`zbaChecked: false` and render `ZBA record not checked — ward unresolved for this address`. Never
+substitute a different ward's data for a missing one.
+
+### 7.4 The address match is a title substring, and the query is capped at 25
+
+Line 315–316: `substringof('{num} {dir} {street}', MatterTitle)` over the 25 most recent matters.
+
+- A rezoning filed under a co-address (`520 N Claremont` for this 520–522 parcel) is missed
+  unless the title happens to contain the searched number.
+- `$top=25` before keyword filtering means a busy address can silently lose older actions.
+
+**Fix now (display):** the source line must describe what was actually searched — *"the 25 most
+recent matters whose title contains this street address"* — not imply a complete history.
+**Fix next (data):** search the parcel's alternate address forms, which `pinResolver` already
+computes, and page past 25 when the cap is hit.
+
+⚠️ Until 7.4 is done, **no copy anywhere in this section may claim the record is complete.**
+"No rezoning on record" is accurate; "this parcel has never been rezoned" is not.
+
+---
+
+## 9. The prose budget — three blocks, not seven
+
+A draft of this section carried **seven** blocks of explanatory text for a parcel with **one**
+recorded action: a Pattern callout, four `.kyp-barkey` lines, a footnote and a source line. The
+section spent more words explaining itself than reporting the record.
+
+Most of it was **design-rule commentary leaking into product copy** — sentences describing how the
+section behaves rather than what this parcel is:
+
+- *"Map amendments, ZBA variations, special uses and administrative adjustments all render here,
+  newest first"* — the reader can see what renders. Deleted; the ZBA-not-found fact moved into the
+  subhead count: `1 action · no ZBA case · Chicago Councilmatic`.
+- *"An applicant's description of a property is a statement of intent made to win an approval…"* —
+  the column header **What it does not establish** already says this. Deleted.
+- *"Both districts are read from the filed application on Chicago Councilmatic…"* — provenance,
+  already in the source line. Deleted.
+
+**Budget for this section: three prose blocks maximum.**
+
+1. One `.kyp-barkey` under `WHO FILED THEM` — the liability disclaimer, one sentence, matching
+   `.profind` on the permits block.
+2. One footnote — the map-amendment-runs-with-the-land rule, stated once (§8).
+3. One source line — one sentence naming the sources, no methodology essay.
+
+**Test before adding any fourth:** would this sentence render identically on a different parcel? If
+yes it is a rule, and rules go in the footnote — once. Does it describe how the section works
+rather than what this property is? Then delete it; the layout is the explanation.
+
+Subhead counters (`1 action · no ZBA case`) absorb facts that would otherwise become sentences.
+Prefer them.
+
+---
+
+## 8. State the map-amendment rule in exactly one place
+
+The distinction matters because it changes what a buyer inherits, so it earns a footnote:
+
+> A **map amendment** permanently changes the parcel's zoning district and runs with the land — a
+> new owner inherits it and it never expires. A **ZBA variation or special use is different**: it
+> attaches to a specific proposal and can lapse if it is not exercised within the period the Board
+> set.
+
+**That is the only place it is defined.** The first draft of this section said the same thing
+twice — once in the Pattern callout ("a map amendment is permanent, it runs with the land, it does
+not expire, and it does not need to be re-earned by a new owner") and again verbatim in the
+footnote, plus a third partial statement in a hero-block breakdown ("Still valid · map amendments
+do not lapse"). Three statements of one rule.
+
+The split:
+
+- **Footnote** = the rule. What a map amendment is, and how it differs from a ZBA grant.
+- **Pattern callout** = the consequence *for this parcel*, in one clause, with no re-definition:
+  *"The entitlement work is done and it survives the sale, so a buyer inherits RT-4 without
+  re-applying."*
+- **Hero blocks** = facts only. No rule statements.
+
+Apply the same audit to the section as a whole before shipping: **any sentence that would render
+identically on a different parcel belongs in the footnote, and appears once.**
+
+---
+
+## ✅ Done-when
+
+- [ ] The `{false && ...}` duplicate at `RunDetail.tsx:4590` is deleted.
+- [ ] Zoning History is a top-level accordion row with a computed takeaway; the string
+      "Ordinances, rezonings, and ZBA cases for this address" appears nowhere.
+- [ ] A parcel with no zoning actions renders a collapsed row, no badge, no verdict colour.
+- [ ] The "rezoned then never built" correlation is **suppressed** whenever the application names a
+      development address other than this parcel, and the section says so instead.
+- [ ] `WHAT CHANGED` renders the real district diff, explains a split-zoned "before", and renders
+      an unhedged `Not in the record` when extraction fails — never an inference.
+- [ ] `WHAT THE FILING SAYS` separates the applicant's stated purpose from what it does not
+      establish, in the applicant's voice. Both columns are colour-free — slate on `--wash`, never
+      amber and never red. No `#a65f14` or other off-palette brown survives anywhere.
+- [ ] Every bullet leads with its operative fact and bolds that clause, not the prior state.
+- [ ] The section carries **at most three** prose blocks: one disclaimer, one footnote, one source
+      line. No Pattern callout. No sentence describes how the section renders.
+- [ ] Introduction and passage dates are labelled distinctly; an unpassed matter is not described
+      as an action taken.
+- [ ] Each recorded action is a three-line row; no field appears twice in the section.
+- [ ] Rows are keyed by case number — a case continued then approved renders **once**, with its
+      final disposition and a `continued from {date}` track. No case number appears twice.
+- [ ] Rows are grouped by matter, with the raw hearing count still visible in the subhead.
+- [ ] A Board finding about the existing configuration is quoted, not paraphrased.
+- [ ] An approved variation prints the §17-13-1106 12-month window and does **not** assert it
+      lapsed; where the relief serves another lot, the section says the permit count here cannot
+      answer it.
+- [ ] `WHO FILED THEM` states that ZBA orders carry no attorney field, rather than implying nobody
+      appeared.
+- [ ] ZBA rows colour on the decision; map amendments stay indigo. An approved variation shows its
+      lapse window and whether it has closed.
+- [ ] `WHO FILED THEM` matches the permit-professionals structure — role, name, `Here`, citywide
+      slot, owner era — and renders `.pcity.nomatch` because no zoning-counsel index exists.
+- [ ] No win/loss bar renders for zoning counsel, and Step 13's tax-appeal bar is gated on n ≥ 3.
+- [ ] `item.architect` renders when named and prints **nothing** when absent.
+- [ ] The map-amendment rule is stated exactly once, in the footnote.
+- [ ] Items past the enrichment cap render `not checked`, never a blank.
+- [ ] With an unresolved ward, no ZBA lookup runs and the UI says the record was not checked.
+- [ ] The source line states the actual query scope; no copy claims a complete zoning history.

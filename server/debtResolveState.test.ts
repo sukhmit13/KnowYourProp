@@ -248,5 +248,176 @@ if (!docs.some(d => d.doc_number === "1618022008")) {
   assert.notEqual(st.active[2].lien_kind, "junior", "480k over a 100k junior is NOT junior");
 }
 
+// ── 2A. Blanket/PIN derivation runs on CLEARED mortgages too ──
+{
+  // A prior-owner blanket mortgage (cleared at sale) must still get blanket_pins computed.
+  const pin14a = "12345678901234";
+  const pin14b = "98765432109876";
+  const docs = [
+    base({
+      doc_number: "MOLD",
+      doc_type: "mortgage",
+      recording_date: "2010-01-01",
+      amount: 800000,
+      pins: [pin14a, pin14b],
+      parties: { borrower: "OLD OWNER", lender: "Big Bank", assignor: null, assignee: null },
+    }),
+    base({
+      doc_number: "D2015",
+      doc_type: "deed",
+      recording_date: "2015-06-01",
+      index_consideration_amount: 900000,
+      parties: { borrower: null, lender: null, assignor: "OLD OWNER", assignee: "NEW OWNER" },
+    }),
+    base({
+      doc_number: "MNEW",
+      doc_type: "mortgage",
+      recording_date: "2015-06-01",
+      amount: 600000,
+      pins: [pin14a],
+      parties: { borrower: "NEW OWNER", lender: "New Bank", assignor: null, assignee: null },
+    }),
+  ];
+  const salesSection = { most_recent_sale_date: "2015-06-01", sales: [{ date: "2015-06-01", price: 900000, doc_number: "D2015", is_arms_length: true }] };
+  const s = resolveState(reconcile(docs, "2026-08-12"), docs, { pin: pin14a }, { salesSection }, "2026-08-12");
+  assert.equal(s.cleared_by_sale.length, 1, "old blanket mortgage clears at sale");
+  const cleared = s.cleared_by_sale[0];
+  assert.equal(cleared.doc_number, "MOLD");
+  assert.equal(cleared.blanket, true, "2A: cleared mortgage must have blanket flag computed");
+  assert.ok(cleared.blanket_pins!.includes(pin14b), "2A: cleared mortgage must have blanket_pins computed");
+  const active = s.active[0];
+  assert.equal(active.doc_number, "MNEW");
+  assert.equal(active.blanket, false, "new single-PIN mortgage is not blanket");
+}
+
+// ── 2B. scopeChanges emitted for refi chain with differing PIN sets ──
+{
+  const pinA = "11111111110000";
+  const pinB = "22222222220000";
+  // Two mortgages: older covers pinA + pinB (blanket), newer covers only pinA (narrowed scope)
+  // Older is position 1 (no sale between them so it stays active, becomes refi_suspect when newer arrives)
+  const docs = [
+    base({
+      doc_number: "MA",
+      doc_type: "mortgage",
+      recording_date: "2015-01-01",
+      amount: 500000,
+      pins: [pinA, pinB],
+      parties: { borrower: "OWNER", lender: "Bank A", assignor: null, assignee: null },
+    }),
+    base({
+      doc_number: "MB",
+      doc_type: "mortgage",
+      recording_date: "2020-01-01",
+      amount: 480000,
+      pins: [pinA],
+      parties: { borrower: "OWNER", lender: "Bank B", assignor: null, assignee: null },
+    }),
+  ];
+  const s = resolveState(reconcile(docs, "2026-08-12"), docs, { pin: pinA }, null, "2026-08-12");
+  assert.equal(s.active[0].refi_suspect, true, "older loan flagged refi_suspect");
+  assert.equal(s.scopeChanges.length, 1, "2B: one scope change emitted when PIN sets differ");
+  const sc = s.scopeChanges[0];
+  assert.equal(sc.atDocNumber, "MB", "scope change points to the newer loan");
+  assert.deepEqual(sc.droppedPins, [pinB], "2B: PIN B was dropped");
+  assert.deepEqual(sc.addedPins, [], "2B: no PINs added");
+}
+
+// ── 2B. No scopeChanges when PIN sets are equal ──
+{
+  const pinA = "11111111110000";
+  const docs = [
+    base({
+      doc_number: "MA",
+      doc_type: "mortgage",
+      recording_date: "2015-01-01",
+      amount: 500000,
+      pins: [pinA],
+      parties: { borrower: "OWNER", lender: "Bank A", assignor: null, assignee: null },
+    }),
+    base({
+      doc_number: "MB",
+      doc_type: "mortgage",
+      recording_date: "2020-01-01",
+      amount: 480000,
+      pins: [pinA],
+      parties: { borrower: "OWNER", lender: "Bank B", assignor: null, assignee: null },
+    }),
+  ];
+  const s = resolveState(reconcile(docs, "2026-08-12"), docs, { pin: pinA }, null, "2026-08-12");
+  assert.equal(s.scopeChanges.length, 0, "2B: no scope change when PIN sets are equal");
+}
+
+// ── 2B. No scopeChanges when either PIN set is empty/unknown ──
+{
+  const docs = [
+    base({ doc_number: "MA", doc_type: "mortgage", recording_date: "2015-01-01", amount: 500000, parties: { borrower: "OWNER", lender: "Bank A", assignor: null, assignee: null } }),
+    base({ doc_number: "MB", doc_type: "mortgage", recording_date: "2020-01-01", amount: 480000, parties: { borrower: "OWNER", lender: "Bank B", assignor: null, assignee: null } }),
+  ];
+  const s = resolveState(reconcile(docs, "2026-08-12"), docs, null, null, "2026-08-12");
+  assert.equal(s.scopeChanges.length, 0, "2B: no scope change when PIN sets are empty (missing data)");
+}
+
+// ── 2C. cashOutSuspect and recordedDelta on the newer refi loan ──
+{
+  const docs = [
+    base({ doc_number: "MA", doc_type: "mortgage", recording_date: "2015-01-01", amount: 400000, parties: { borrower: "OWNER", lender: "Bank A", assignor: null, assignee: null } }),
+    base({ doc_number: "MB", doc_type: "mortgage", recording_date: "2021-01-01", amount: 752500, parties: { borrower: "OWNER", lender: "Bank B", assignor: null, assignee: null } }),
+  ];
+  const s = resolveState(reconcile(docs, "2026-08-12"), docs, null, null, "2026-08-12");
+  assert.equal(s.active[0].refi_suspect, true, "older flagged refi_suspect");
+  const newer = s.active[1];
+  assert.equal(newer.cashOutSuspect, true, "2C: newer.effective_amount (752500) > older (400000) * 1.05 => cashOutSuspect");
+  assert.equal(newer.recordedDelta, 752500 - 400000, "2C: recordedDelta = newer - older");
+}
+
+// ── 2C. No cashOutSuspect when increase is <= 5% ──
+{
+  const docs = [
+    base({ doc_number: "MA", doc_type: "mortgage", recording_date: "2015-01-01", amount: 400000, parties: { borrower: "OWNER", lender: "Bank A", assignor: null, assignee: null } }),
+    base({ doc_number: "MB", doc_type: "mortgage", recording_date: "2021-01-01", amount: 415000, parties: { borrower: "OWNER", lender: "Bank B", assignor: null, assignee: null } }),
+  ];
+  const s = resolveState(reconcile(docs, "2026-08-12"), docs, null, null, "2026-08-12");
+  assert.equal(s.active[0].refi_suspect, true, "refi_suspect set (415k >= 90% of 400k)");
+  assert.ok(!s.active[1].cashOutSuspect, "2C: 415k <= 400k * 1.05 => no cashOutSuspect");
+}
+
+// ── 2A/2B/2C. Explicitly released blanket mortgage remains in the refi chain ──
+{
+  const pinA = "17091230010000";
+  const pinB = "17091230020000";
+  const docs = [
+    base({
+      doc_number: "MOLD",
+      doc_type: "mortgage",
+      recording_date: "2015-01-01",
+      amount: 500000,
+      pins: [pinA, pinB],
+      parties: { borrower: "OWNER", lender: "Old Bank", assignor: null, assignee: null },
+    }),
+    base({
+      doc_number: "REL1",
+      doc_type: "release",
+      recording_date: "2020-01-05",
+      references_docs: ["MOLD"],
+    }),
+    base({
+      doc_number: "MNEW",
+      doc_type: "mortgage",
+      recording_date: "2020-01-02",
+      amount: 650000,
+      pins: [pinA],
+      parties: { borrower: "OWNER", lender: "New Bank", assignor: null, assignee: null },
+    }),
+  ];
+  const s = resolveState(reconcile(docs, "2026-08-12"), docs, { pin: pinA }, null, "2026-08-12");
+  assert.equal(s.satisfied.length, 1, "released mortgage is retained in resolved history");
+  assert.deepEqual(s.satisfied[0].blanket_pins, [pinB], "released mortgage receives blanket PIN annotation");
+  assert.equal(s.scopeChanges.length, 1, "released blanket-to-single-PIN refinance creates one scope change");
+  assert.deepEqual(s.scopeChanges[0].droppedPins, [pinB], "scope change records the dropped companion PIN");
+  assert.equal(s.active[0].cashOutSuspect, true, "new replacement loan receives the recorded-principal increase signal");
+  assert.equal(s.active[0].recordedDelta, 150000, "replacement delta compares original recorded principals");
+}
+
 console.log("ALL STAGE 2.5 TESTS PASSED");
 process.exit(0);

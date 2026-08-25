@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--navy:#232d6e;--good:#2f7d3f;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:34px}
+  .wrap{max-width:1080px;margin:0 auto}
+  .sh{display:flex;align-items:center;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--line);margin-bottom:18px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border-radius:6px;padding:3px 9px}
+  .sh .ca{margin-left:auto;color:var(--muted)}
+
+  .inputs{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:16px}
+  .igrid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  .gl{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .f{margin-bottom:12px}.f:last-child{margin-bottom:0}
+  .fl{font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px}
+  .inp{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--paper)}
+  .inp .pre{font-size:12.5px;color:var(--muted)}.inp .suf{font-size:12.5px;color:var(--muted);margin-left:auto}
+  .inp .v{font-size:14px;font-weight:600;color:var(--ink)}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:6px}
+  .presetlbl{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .caps{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .cap{background:#f1f0ec;border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+  .cap .cn{font-size:13px;font-weight:700;color:var(--ink)}
+  .cap .cs{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .cap .clk{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:5px;margin-bottom:6px}
+
+  .results{background:var(--navy);border-radius:14px;padding:18px 22px;color:#fff}
+  .rh{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#aab0d8;margin-bottom:14px}
+  .proj{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .pcol{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:15px 16px}
+  .phd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:3px}
+  .phd .pn{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#9aa0cc}
+  .phd .pk{font-size:12px;font-weight:600;color:#dcdfef}
+  .psub{font-size:10.5px;color:#8f95c0;margin-bottom:13px}
+  .prow{display:flex;align-items:flex-end;justify-content:space-between;padding:10px 0;border-top:1px solid rgba(255,255,255,.1)}
+  .prow .ol{font-size:11px;color:#aab0d8;font-weight:600}
+  .prow .ol small{display:block;color:#7f85b0;font-weight:400;font-size:9.5px;margin-top:2px}
+  .prow .cf{text-align:right}
+  .prow .cf .m{font-family:var(--disp);font-size:26px;line-height:1;color:#7ee0a0}
+  .prow .cf .y{font-size:10.5px;color:#9aa0cc;margin-top:3px}
+  .verdict{display:flex;align-items:center;gap:9px;margin-top:15px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);font-size:12px;color:#dcdfef}
+  .verdict .dot{width:8px;height:8px;border-radius:50%;background:#7ee0a0;flex:none}
+  .foot{font-size:10.5px;color:var(--muted);margin-top:13px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sh"><span class="sq"></span><span class="t">Quick Cashflow Calculator</span><span class="tag">Day Care</span><span class="ca">▾</span></div>
+
+  <!-- INPUTS -->
+  <div class="inputs">
+    <div class="igrid">
+      <div>
+        <div class="gl">Revenue &amp; Costs</div>
+        <div class="f"><div class="fl">Monthly Revenue per Child</div><div class="inp"><span class="pre">$</span><span class="v">2,275</span></div><div class="hint">Chicago avg · $2,275/mo</div></div>
+        <div class="f"><div class="fl">Operating Expenses (% of revenue)</div><div class="inp"><span class="v">75</span><span class="suf">%</span></div><div class="hint">Industry avg · 75%</div></div>
+      </div>
+      <div>
+        <div class="presetlbl">Site Capacity · from square footage</div>
+        <div class="caps">
+          <div class="cap"><div class="clk">🔒 Efficient</div><div class="cn">133 children</div><div class="cs">75 sq ft / child</div></div>
+          <div class="cap"><div class="clk">🔒 Comfortable</div><div class="cn">111 children</div><div class="cs">90 sq ft / child</div></div>
+        </div>
+        <div class="hint">Derived from the parcel's usable area — not editable.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results">
+    <div class="rh">Cashflow Projection</div>
+    <div class="proj">
+      <div class="pcol">
+        <div class="phd"><span class="pn">Efficient Capacity</span><span class="pk">133 children</span></div>
+        <div class="psub">Revenue $302,575/mo · Expenses −$226,931/mo</div>
+        <div class="prow"><div class="ol">100% occupancy<small>fully enrolled</small></div><div class="cf"><div class="m">$75,644</div><div class="y">/mo · $907,725/yr</div></div></div>
+        <div class="prow"><div class="ol">75% occupancy<small>realistic ramp</small></div><div class="cf"><div class="m">$56,733</div><div class="y">/mo · $680,794/yr</div></div></div>
+      </div>
+      <div class="pcol">
+        <div class="phd"><span class="pn">Comfortable Capacity</span><span class="pk">111 children</span></div>
+        <div class="psub">Revenue $252,525/mo · Expenses −$189,394/mo</div>
+        <div class="prow"><div class="ol">100% occupancy<small>fully enrolled</small></div><div class="cf"><div class="m">$63,131</div><div class="y">/mo · $757,575/yr</div></div></div>
+        <div class="prow"><div class="ol">75% occupancy<small>realistic ramp</small></div><div class="cf"><div class="m">$47,348</div><div class="y">/mo · $568,181/yr</div></div></div>
+      </div>
+    </div>
+    <div class="verdict"><span class="dot"></span>Cash-flow positive in every scenario — $568K to $908K annually depending on capacity and occupancy.</div>
+  </div>
+  <div class="foot">* Projections based on site-specific capacity. Revenue uses a weighted Chicago childcare average. Adjust the values above to match your business plan.</div>
+</div>
+</body>
+</html>

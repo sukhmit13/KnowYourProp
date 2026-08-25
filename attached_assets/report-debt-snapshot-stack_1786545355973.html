@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;--cautionSoft:#fdf8f0;--bad:#c0392b;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04);margin-bottom:20px}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 9px;background:var(--card);border:1px solid #cfd6ef;color:var(--indigo)}
+  .sh .badge .d{width:7px;height:7px;border-radius:50%;background:var(--indigo)}
+
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.55;color:var(--ink2);margin-bottom:9px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+  .cn.g .dt{background:var(--good)}.cn.c .dt{background:var(--caution)}.cn.n .dt{background:#9aa1b0}
+  .cn b{color:var(--ink);font-weight:600}
+  .cn .chip{margin-left:6px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:5px;vertical-align:1px}
+  .cn .chip.c{color:var(--cautionText);background:var(--cautionSoft);border:1px solid #e6cfa0}
+
+  .sum{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink2);margin-bottom:12px}
+  .sum b{color:var(--ink);font-weight:700}
+  .sum .pill{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid #dfe3f7;border-radius:6px;padding:3px 9px}
+
+  .lien{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;background:var(--card)}
+  .lien.first{border-color:#dfe3f7}
+  .lienh{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .posbadge{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid #dfe3f7;border-radius:6px;padding:4px 9px}
+  .posbadge.jr{color:var(--cautionText);background:var(--cautionSoft);border-color:#e6cfa0}
+  .lienh .lname{font-size:15px;font-weight:700;color:var(--ink)}
+  .lienh .jrtag{font-size:10.5px;font-weight:600;color:var(--cautionText);background:var(--cautionSoft);border:1px solid #e6cfa0;border-radius:5px;padding:2px 8px}
+  .lienh .lrec{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .dt2{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .dt2 .l{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .dt2 .v{font-size:14px;font-weight:600;color:var(--ink);line-height:1.2}
+  .dt2 .v.mut{color:var(--muted);font-weight:500}
+  .dt2 .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .jrnote{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--ink2);line-height:1.5;margin-top:11px;padding:10px 12px;background:var(--cautionSoft);border:1px solid #e6cfa0;border-radius:9px}
+  .jrnote svg{width:13px;height:13px;stroke:var(--cautionText);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;margin-top:1px}
+  .jrnote b{color:var(--cautionText);font-weight:700}
+
+  .anchor{display:flex;gap:11px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:12px}
+  .anchor .ic{width:30px;height:30px;border-radius:8px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex:none}
+  .anchor .ic svg{width:15px;height:15px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .anchor .bd{flex:1;font-size:12px;color:var(--ink2);line-height:1.55}
+  .anchor .bd b{color:var(--ink);font-weight:600}
+  .anchor .bd .h{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:3px}
+
+  .res{display:flex;align-items:center;gap:10px;background:var(--goodSoft);border:1px solid #cfe6d6;border-radius:11px;padding:12px 15px;margin-bottom:12px;font-size:12.5px;color:var(--ink)}
+  .res svg{width:17px;height:17px;stroke:var(--good);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .res b{font-weight:600}
+  .res .cl{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--good)}
+
+  .dcaveat{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--ink2);line-height:1.5;padding:11px 14px;background:var(--card);border:1px solid #e6cfa0;border-left:3px solid var(--caution);border-radius:10px}
+  .dcaveat svg{width:14px;height:14px;stroke:var(--cautionText);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;margin-top:1px}
+  .dcaveat b{color:var(--cautionText);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- SECTION: takeaway -->
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Debt &amp; Title</span><span class="badge"><span class="d"></span>2 active · ~$910K</span></div>
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>The Takeaway</div>
+      <div class="taket">Two live mortgages totaling about $910K — a large 2021 first and a smaller 2025 second that adds to it rather than replacing it.</div>
+      <div class="cn c"><span class="dt"></span><span><b>Two active liens, ~$910,500 recorded.</b> A <b>2021 first</b> of <b>$712,500</b> (United Wholesale Mortgage) and a <b>2025 second</b> of <b>$198,000</b> (Huntington). The second is <b>smaller and later with no release</b> — a junior lien that <b>adds</b> to the debt, not a refinance that replaces the first.<span class="chip c">Verify balances</span></span></div>
+      <div class="cn g"><span class="dt"></span><span><b>Clean chain before 2013.</b> Everything recorded before the <b>2013 acquisition</b> cleared at that sale. Debt is read only from 2013 forward.</span></div>
+      <div class="cn g"><span class="dt"></span><span><b>No active distress.</b> The 2019 lis pendens was <b>dismissed in 2021</b> (court order + release on record) — not a live cloud on title.</span></div>
+      <div class="cn n"><span class="dt"></span><span>The <b>2021 quit-claim</b> removed a co-owner (two names → one) — an ownership change, <b>not a sale</b>, so it cleared nothing. Owner: <b>Sukhmit Kalsi</b>.</span></div>
+    </div>
+  </div>
+
+  <!-- SECTION: Debt Snapshot -->
+  <div class="cardbox">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span class="t">Debt Snapshot</span></div>
+
+    <div class="sum"><span class="pill">2 active mortgages</span><span>Debt read from the <b>2013 sale</b> forward · <b>$910,500</b> recorded across both liens (first + junior second) · positions by recording order</span></div>
+
+    <!-- lien 1 -->
+    <div class="lien first">
+      <div class="lienh"><span class="posbadge">1st position</span><span class="lname">United Wholesale Mortgage</span><span class="lrec">recorded 5/17/2021 · exec 4/7/2021 · doc 2113708089</span></div>
+      <div class="g4">
+        <div class="dt2"><div class="l">Lender</div><div class="v">United Wholesale Mtg</div><div class="s">LLC (via MERS)</div></div>
+        <div class="dt2"><div class="l">Amount</div><div class="v">$712,500</div><div class="s">recorded loan</div></div>
+        <div class="dt2"><div class="l">Maturity</div><div class="v mut">~2051</div><div class="s">est. · 30-yr (residential)</div></div>
+        <div class="dt2"><div class="l">Recorded</div><div class="v">5/17/2021</div><div class="s">after 2013 sale</div></div>
+      </div>
+    </div>
+
+    <!-- lien 2 -->
+    <div class="lien">
+      <div class="lienh"><span class="posbadge jr">2nd position</span><span class="lname">Huntington Natl Bk</span><span class="jrtag">Junior lien</span><span class="lrec">recorded 8/28/2025 · doc 2524011012</span></div>
+      <div class="g4">
+        <div class="dt2"><div class="l">Lender</div><div class="v">Huntington Natl Bk</div></div>
+        <div class="dt2"><div class="l">Amount</div><div class="v">$198,000</div><div class="s">recorded loan</div></div>
+        <div class="dt2"><div class="l">Maturity</div><div class="v mut">~2055</div><div class="s">est. · 30-yr</div></div>
+        <div class="dt2"><div class="l">Recorded</div><div class="v">8/28/2025</div><div class="s">most recent</div></div>
+      </div>
+      <div class="jrnote"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span><b>A junior lien, not a refinance.</b> Recorded 4 years after the first and roughly a quarter its size, with no release of the 2021 loan — so it <b>adds</b> to the debt (a home-equity / second mortgage) rather than replacing it. Combined recorded debt: <b>$910,500</b>.</span></div>
+    </div>
+
+    <!-- ownership anchor -->
+    <div class="anchor">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg></div>
+      <div class="bd"><div class="h">Read from the 2013 sale forward</div>Ownership anchor is the <b>most recent real sale</b> from the Sales section — the <b>2013</b> acquisition. Liens before it cleared at closing. The <b>2021 quit-claim</b> (co-owner removed, two names → one) is an ownership change, <b>not a sale</b> — the Sales section doesn't count it, so it resets nothing and clears nothing. That's why the 2021 mortgage remains live with no release.</div>
+    </div>
+
+    <!-- resolved distress -->
+    <div class="res"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span><b>2019 lis pendens — resolved.</b> Dismissed 2021 (court docs 2/22/2021 + release 4/22/2021). No active foreclosure or litigation on title.</span><span class="cl">Resolved</span></div>
+
+    <div class="dcaveat"><svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span><b>Verify before relying on this.</b> Amounts are <b>recorded loans</b>, not current balances — the combined $910,500 is what was borrowed, and paydown since isn't on record. Both mortgages are unreleased; the second adds to the first rather than replacing it. Debt is interpreted from the 2013 sale forward; the 2021 quit-claim is a title transfer, not a sale.</span></div>
+  </div>
+
+</div>
+</body>
+</html>

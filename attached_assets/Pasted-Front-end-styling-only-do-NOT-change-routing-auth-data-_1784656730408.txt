@@ -1,0 +1,41 @@
+Front-end / styling only — do NOT change routing, auth, data, or business logic.
+
+I'm replacing our logo. The old mark is the four-square color grid; the new mark is five wavy colored "river" lines. Do this thoroughly across the whole site:
+
+1. Make one reusable Logo component. If a shared logo/brand component already exists, edit it. If the logo SVG is copy-pasted in multiple places, create a single <Logo /> component and use it everywhere, so there's one source of truth going forward.
+
+2. Put this SVG inside that component (the mark that sits next to the "KnowYourProp" wordmark, ~24px tall in the nav):
+
+html
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round">
+  <path d="M1.5 5 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0" stroke="#2b3a9e"/>
+  <path d="M1.5 8.5 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0" stroke="#f3b31f"/>
+  <path d="M1.5 12 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0" stroke="#2f7d3f"/>
+  <path d="M1.5 15.5 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0" stroke="#0e8fa6"/>
+  <path d="M1.5 19 q2.625 -2.4 5.25 0 t5.25 0 t5.25 0 t5.25 0" stroke="#d13b26"/>
+</svg>
+
+3. Search the entire codebase for every remaining instance of the old four-square logo and replace each with the new component/SVG. Check all of these places specifically:
+
+the app top nav and the marketing homepage nav
+the sign-in and sign-up modals (if they show a logo)
+the Compare Properties view header
+any loading / splash screen
+the footer
+the PDF / "Print / Save PDF" report header (if the logo appears on the generated report)
+
+4. Update the browser favicon / tab icon to this tiled version:
+
+html
+<svg width="32" height="32" viewBox="0 0 24 24">
+  <rect x="0.5" y="0.5" width="23" height="23" rx="6" fill="#1e2a6e"/>
+  <g fill="none" stroke-width="1.4" stroke-linecap="round">
+    <path d="M4 7 q2 -1.9 4 0 t4 0 t4 0" stroke="#aeb9ee"/>
+    <path d="M4 10 q2 -1.9 4 0 t4 0 t4 0" stroke="#f3b31f"/>
+    <path d="M4 13 q2 -1.9 4 0 t4 0 t4 0" stroke="#7fce93"/>
+    <path d="M4 16 q2 -1.9 4 0 t4 0 t4 0" stroke="#5fd0e0"/>
+    <path d="M4 19 q2 -1.9 4 0 t4 0 t4 0" stroke="#ef8272"/>
+  </g>
+</svg>
+
+Acceptance: the four-square logo no longer appears anywhere on the site, the new river mark is in the nav on every page and in the browser tab, and it all comes from one shared component. Front-end only.

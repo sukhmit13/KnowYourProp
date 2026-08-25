@@ -1,0 +1,225 @@
+I need to add corridor detection that's location-aware to my property intelligence platform.
+
+STEP 1: Update news_monitor.py
+
+Add a new dict called CORRIDOR_KEYWORDS after the NEIGHBORHOOD_FEED_MAP dict. Each corridor should include geographic bounds:
+
+CORRIDOR_KEYWORDS = {
+    'chicago_avenue': {
+        'names': ['chicago avenue', 'chicago ave', 'w chicago ave', 'west chicago avenue'],
+        'tier': 1,
+        'description': 'Major West Town dining corridor',
+        'lat_min': 41.89, 'lat_max': 41.90, 'lng_min': -87.70, 'lng_max': -87.64
+    },
+    'milwaukee_avenue': {
+        'names': ['milwaukee avenue', 'milwaukee ave', 'n milwaukee ave', 'north milwaukee avenue'],
+        'tier': 1,
+        'description': 'Wicker Park/Logan Square main artery',
+        'lat_min': 41.88, 'lat_max': 41.93, 'lng_min': -87.70, 'lng_max': -87.66
+    },
+    'randolph_street': {
+        'names': ['randolph street', 'randolph st', 'w randolph st', 'west randolph'],
+        'tier': 1,
+        'description': 'West Loop/Fulton Market corridor',
+        'lat_min': 41.88, 'lat_max': 41.89, 'lng_min': -87.66, 'lng_max': -87.63
+    },
+    'division_street': {
+        'names': ['division street', 'division st', 'w division st', 'west division'],
+        'tier': 1,
+        'description': 'Wicker Park nightlife corridor',
+        'lat_min': 41.90, 'lat_max': 41.91, 'lng_min': -87.68, 'lng_max': -87.66
+    },
+    'armitage_avenue': {
+        'names': ['armitage avenue', 'armitage ave', 'w armitage ave'],
+        'tier': 1,
+        'description': 'Lincoln Park corridor',
+        'lat_min': 41.91, 'lat_max': 41.92, 'lng_min': -87.66, 'lng_max': -87.63
+    },
+    'halsted_street': {
+        'names': ['halsted street', 'halsted st', 'n halsted st'],
+        'tier': 1,
+        'description': 'Lincoln Park/Lakeview corridor',
+        'lat_min': 41.91, 'lat_max': 41.95, 'lng_min': -87.65, 'lng_max': -87.64
+    },
+    'california_avenue': {
+        'names': ['california avenue', 'california ave', 'n california ave', 'south california avenue', 's california ave'],
+        'tier': 2,
+        'description': 'North-south commercial corridor through Humboldt Park and Logan Square',
+        'lat_min': 41.88, 'lat_max': 41.93, 'lng_min': -87.70, 'lng_max': -87.69
+    },
+    'grand_avenue': {
+        'names': ['grand avenue', 'grand ave', 'w grand ave'],
+        'tier': 2,
+        'description': 'Emerging West Town corridor',
+        'lat_min': 41.89, 'lat_max': 41.92, 'lng_min': -87.68, 'lng_max': -87.65
+    },
+    '18th_street': {
+        'names': ['18th street', '18th st', 'west 18th', 'w 18th st'],
+        'tier': 2,
+        'description': 'Pilsen cultural corridor',
+        'lat_min': 41.85, 'lat_max': 41.86, 'lng_min': -87.68, 'lng_max': -87.64
+    },
+    'damen_avenue': {
+        'names': ['damen avenue', 'damen ave', 'n damen ave'],
+        'tier': 2,
+        'description': 'Wicker Park/Bucktown corridor',
+        'lat_min': 41.90, 'lat_max': 41.93, 'lng_min': -87.68, 'lng_max': -87.67
+    },
+    '53rd_street': {
+        'names': ['53rd street', '53rd st', 'east 53rd', 'e 53rd st'],
+        'tier': 1,
+        'description': 'Hyde Park commercial corridor',
+        'lat_min': 41.79, 'lat_max': 41.80, 'lng_min': -87.61, 'lng_max': -87.58
+    },
+    '57th_street': {
+        'names': ['57th street', '57th st', 'east 57th', 'e 57th st'],
+        'tier': 1,
+        'description': 'Hyde Park shopping and dining corridor',
+        'lat_min': 41.79, 'lat_max': 41.80, 'lng_min': -87.61, 'lng_max': -87.58
+    },
+    'cottage_grove': {
+        'names': ['cottage grove', 'cottage grove avenue', 'cottage grove ave', 's cottage grove'],
+        'tier': 2,
+        'description': 'South Side corridor through Bronzeville and Woodlawn',
+        'lat_min': 41.80, 'lat_max': 41.85, 'lng_min': -87.61, 'lng_max': -87.60
+    },
+}
+
+Add a helper function to check if a location is within corridor bounds:
+
+def _is_in_corridor_bounds(latitude, longitude, corridor_key):
+    """Check if coordinates fall within corridor's geographic bounds."""
+    corridor = CORRIDOR_KEYWORDS.get(corridor_key, {})
+    if not all(k in corridor for k in ['lat_min', 'lat_max', 'lng_min', 'lng_max']):
+        return False
+    
+    return (corridor['lat_min'] <= latitude <= corridor['lat_max'] and
+            corridor['lng_min'] <= longitude <= corridor['lng_max'])
+
+Add a helper function after the existing filter functions:
+
+def _article_mentions_corridor(article, corridor_key):
+    """Return True if article mentions any name variant for this corridor."""
+    combined = (article.get("title", "") + " " + article.get("summary", "")).lower()
+    corridor = CORRIDOR_KEYWORDS.get(corridor_key, {})
+    return any(name in combined for name in corridor.get('names', []))
+
+Update find_corridor_articles to accept latitude/longitude and only search if property is actually on that corridor:
+
+def find_corridor_articles(corridor_key, latitude, longitude, days=90):
+    """
+    Find articles mentioning a specific corridor ONLY if the property is actually on it.
+    
+    Args:
+        corridor_key: Key from CORRIDOR_KEYWORDS (e.g., 'chicago_avenue')
+        latitude: Property latitude
+        longitude: Property longitude
+        days: Look back this many days
+    
+    Returns:
+        List of article dicts, or empty list if property not on corridor
+    """
+    if corridor_key not in CORRIDOR_KEYWORDS:
+        return []
+    
+    # Only search for corridor news if property is actually on this corridor
+    if not _is_in_corridor_bounds(latitude, longitude, corridor_key):
+        return []
+    
+    # Fetch from ALL feeds to catch corridor stories
+    all_feeds = [
+        "eater_chicago",
+        "what_now_chicago",
+        "chicago_yimby",
+        "crains_restaurants",
+        "block_club_citywide",
+    ]
+    
+    articles = fetch_all_feeds(all_feeds)
+    
+    results = []
+    for art in articles:
+        if not _within_days(art, days):
+            continue
+        if not _article_mentions_corridor(art, corridor_key):
+            continue
+        results.append(art)
+    
+    # Deduplicate by URL
+    seen = set()
+    unique = []
+    for art in results:
+        if art["url"] not in seen:
+            seen.add(art["url"])
+            unique.append(art)
+    
+    unique.sort(key=lambda a: a.get("published", ""), reverse=True)
+    return unique[:10]
+
+STEP 2: Add to app.py
+
+Add a new helper function to detect corridors from both address AND coordinates:
+
+def extract_corridor_from_address(address, latitude, longitude):
+    """
+    Determine which corridor (if any) a property is on.
+    Uses BOTH address string matching AND geographic bounds verification.
+    Returns dict with corridor info or None.
+    """
+    from news_monitor import CORRIDOR_KEYWORDS, _is_in_corridor_bounds
+    
+    address_lower = address.lower()
+    
+    for corridor_key, info in CORRIDOR_KEYWORDS.items():
+        # Check if address string mentions the corridor
+        for name in info['names']:
+            if name in address_lower:
+                # Verify the property is actually within corridor geographic bounds
+                if _is_in_corridor_bounds(latitude, longitude, corridor_key):
+                    return {
+                        'corridor_key': corridor_key,
+                        'corridor_name': name.title(),
+                        'tier': info['tier'],
+                        'description': info['description']
+                    }
+    
+    return None
+
+In my existing property report route, after assembling property_data, add:
+
+    from news_monitor import find_corridor_articles
+    
+    # Get property coordinates
+    latitude = property_data.get('latitude')
+    longitude = property_data.get('longitude')
+    
+    # Check if property is on a major corridor (verified by location)
+    corridor = extract_corridor_from_address(
+        property_data.get('address', ''),
+        latitude,
+        longitude
+    )
+    
+    if corridor:
+        # Get corridor-specific news coverage
+        corridor_news = find_corridor_articles(
+            corridor['corridor_key'],
+            latitude,
+            longitude,
+            days=90
+        )
+        
+        property_data['corridor'] = {
+            'name': corridor['corridor_name'],
+            'tier': corridor['tier'],
+            'description': corridor['description'],
+            'news_count': len(corridor_news),
+            'news_articles': corridor_news[:5],
+            'is_major_corridor': True
+        }
+    else:
+        property_data['corridor'] = {
+            'is_major_corridor': False
+        }
+
+IMPORTANT: Show me exactly which files you modified and which line numbers you changed. The key improvement here is that corridor detection now requires BOTH the street name in the address AND the property coordinates to fall within the corridor's geographic bounds. This prevents false matches like "Chicago Avenue" appearing in an article about a property nowhere near that corridor.

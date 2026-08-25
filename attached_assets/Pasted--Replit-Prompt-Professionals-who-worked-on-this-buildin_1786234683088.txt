@@ -1,0 +1,106 @@
+# Replit Prompt — "Professionals who worked on this building" card — build to spec
+
+Replace the current professionals list (inside the Permit History / DOB section) with this design. It's the same data — every architect/contractor grouped from the building's permits — but redesigned: **role icons in indigo badges**, **high-contrast labels**, **no permit work-scope text**, and **sorted most-recent-work-first**. Implement CSS/HTML **verbatim**; check every CRITICAL DETAIL.
+
+Key changes from the old version: (1) drop the permit scope/description line entirely, (2) replace the pale grey role pills with an indigo icon badge + indigo role label, (3) the firm NAME is the largest element in the row, (4) sort by most-recent permit, (5) all icons/labels are indigo — no per-role or design-vs-trade coloring.
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+Everything in this card is Inter (names) or JetBrains Mono (labels, role, stats). No Instrument Serif here.
+
+## CSS (verbatim)
+```css
+.procard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px 20px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+.proh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.proh svg{width:14px;height:14px;stroke:var(--ink2);fill:none}
+.proh .sortnote{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.03em;color:var(--muted)}
+
+.pro2{display:flex;align-items:flex-start;gap:13px;padding:15px 0;border-top:1px solid var(--line)}
+.pro2:first-of-type{border-top:none}
+.pic{width:38px;height:38px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--indigoSoft)}
+.pic svg{width:19px;height:19px;fill:none;stroke:var(--indigo);stroke-width:1.9}
+
+.pmain{flex:1;min-width:0}
+.prole{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;color:var(--indigo)}
+.pnm{font-size:15px;font-weight:600;color:var(--ink);line-height:1.2}
+.pstat{font-family:var(--mono);font-size:11px;color:var(--ink);margin-top:8px}
+.pstat .lab{font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-right:7px}
+.pstat b{color:var(--ink);font-weight:600}
+.pstat .dim{color:var(--muted)}
+.pcite{font-family:var(--mono);font-size:10.5px;color:var(--ink2);margin-top:7px;padding-top:8px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pcite .cw{font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.pcite b{color:var(--ink);font-weight:600}
+.pcite .vp{margin-left:auto;color:var(--indigo);text-decoration:none;font-weight:600;white-space:nowrap}
+.pcite.nomatch{color:var(--muted);border-top-color:transparent;padding-top:2px}
+
+.pera{flex:none;padding-top:2px}
+.era{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;border-radius:7px;padding:3px 8px}
+.era .d{width:6px;height:6px;border-radius:50%;flex:none}
+.era.cur{color:var(--indigo);background:var(--indigoSoft)}.era.cur .d{background:var(--indigo)}
+.era.prior{color:var(--ink2);background:var(--paper);border:1px solid var(--line)}.era.prior .d{background:#9aa1b0}
+
+.profind{font-size:11px;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);line-height:1.5}
+.profind b{color:var(--ink2)}
+```
+
+## HTML (verbatim structure; loop one `.pro2` per firm)
+```html
+<div class="procard">
+  <div class="proh">
+    <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Professionals who worked on this building<span class="sortnote">Most recent work first</span>
+  </div>
+
+  <!-- repeat per firm, most-recent-first -->
+  <div class="pro2">
+    <div class="pic">{ROLE_ICON_SVG}</div>
+    <div class="pmain">
+      <div class="prole">{ROLE_LABEL}</div>
+      <div class="pnm">{FIRM_NAME}</div>
+      <div class="pstat"><span class="lab">Here</span><b>{N} permit(s)</b> <span class="dim">·</span> {VALUE} <span class="dim">·</span> latest {YEAR}</div>
+      <!-- matched: -->
+      <div class="pcite"><span class="cw">Citywide · 5 yr</span> <b>{CW_PERMITS} permits</b> <span class="dim">· last active {CW_YEAR} · {CW_MIX}</span> <a class="vp" href="{PROFILE_URL}">View profile →</a></div>
+      <!-- OR not matched: -->
+      <div class="pcite nomatch">No confident citywide match — showing this property's record only.</div>
+    </div>
+    <div class="pera"><span class="era {cur|prior}"><span class="d"></span>{Current owner|Prior owner}</span></div>
+  </div>
+
+  <div class="profind">Every professional on the building's permits is listed — a starting point, not a recommendation. Citywide figures are <b>permit activity, not a quality rating</b>; matches are made by license number, and where we can't match confidently only this property's record is shown. Verify licensing and references before relying on any firm.</div>
+</div>
+```
+
+## Role icon lookup (all render inside the indigo `.pic` badge)
+Map the permit's contractor/role type → one SVG. Paste the matching inner SVG as `{ROLE_ICON_SVG}` (each is `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">…</svg>` — the CSS sets stroke/size). Fall back to the generic tool icon for any role not in the map so every row still gets a clean indigo badge.
+
+- **Architect / Engineer / Designer:** `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="16.5 7.5 13.7 13.7 7.5 16.5 10.3 10.3"/></svg>`
+- **General contractor:** `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg>`
+- **Electrical contractor:** `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>`
+- **Masonry contractor:** `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9.3h18"/><path d="M3 14.6h18"/><path d="M9 4v5.3"/><path d="M15 9.3v5.3"/><path d="M9 14.6V20"/></svg>`
+- **Sign contractor:** `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="10" rx="1.5"/><path d="M12 14v6"/><path d="M8 20h8"/><path d="M7 9h10"/></svg>`
+- **Permit expediter:** `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1z"/><path d="M8.5 12h7"/><path d="M8.5 16h4.5"/></svg>`
+- **Plumbing contractor** (if present): a droplet — `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7S6 9 6 14a6 6 0 0 0 12 0c0-5-6-11.3-6-11.3z"/></svg>`
+- **Fallback (any other role):** wrench/tool — `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/></svg>`
+
+## LOGIC
+1. **Sort = each firm's most-recent permit year on this property, DESCENDING.** Tie-break by permit count (then declared value) descending — that's why a firm with 2 permits in 2019 outranks one with 1 permit in 2019. (Do NOT sort by value alone or by role.)
+2. **No scope text.** Never render the permit description / work-scope string in this card. The row is: role, name, "Here" record, citywide line (or no-match). That's it.
+3. **One row per firm**, deduped by license number (fallback normalized name) across all the building's permits — aggregate permit count, summed declared value, most-recent year. (Same dedup as the rest of the professionals logic — this card just renders the result.)
+4. **Role label + icon** come from the permit's contractor-type field via the lookup above; unknown role → the wrench fallback icon + the raw role text as the label.
+5. **Era chip** = era of the firm's most-recent permit here (current vs prior owner, from the last-sale-date split). Neutral/categorical — indigo `cur`, grey `prior`, never favorability.
+6. **Citywide line** is conditional on a confident license-number match (unchanged from existing logic): matched → the `.pcite` stats + View profile; not matched → the `.pcite.nomatch` line. Firms always render their "Here" line regardless.
+
+## CRITICAL DETAILS (check ALL)
+1. **All icons and role labels are indigo** — one indigo badge style for every role (`.pic` = `--indigoSoft` bg, `--indigo` stroke; `.prole` = `--indigo`). No design-vs-trade color split, no grey pills.
+2. **Role icon varies by trade** via the lookup (compass/hard-hat/bolt/brick/sign/clipboard/…), wrench fallback for unmapped roles — so every row has a clean indigo badge and the list is scannable by trade.
+3. **Firm NAME is the largest element** in the row (15px, weight 600). Role is a small indigo mono eyebrow above it; the "Here" stat is quiet mono below.
+4. **No permit work-scope text anywhere** in this card.
+5. **Sorted most-recent-work-first**, tie-break by permit count desc; header carries the "Most recent work first" note.
+6. **`.pcite.nomatch`** for unmatched firms (muted, no dashed top border); matched firms get the full citywide line + "View profile →".
+7. **Era chips neutral** (indigo current / grey prior), never red/green.
+8. Rows separated by a 1px top border (`.pro2` + `:first-of-type` removes it on the first); footer note is the fixed `.profind` copy.
+```

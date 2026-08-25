@@ -1,0 +1,50 @@
+name,address,city,state,zip,full_address,rating,cuisine,price,neighborhood
+Smyth,177 N. Ada St.,Chicago,IL,60607,"177 N. Ada St., Chicago, IL 60607",3 Stars,Contemporary,$$$$,West Loop
+Alinea,1723 N. Halsted St.,Chicago,IL,60614,"1723 N. Halsted St., Chicago, IL 60614",2 Stars,Contemporary,$$$$,Lincoln Park
+Topolobampo,445 N. Clark St.,Chicago,IL,60654,"445 N. Clark St., Chicago, IL 60654",1 Star,Mexican,$$$$,River North
+Sepia,123 N. Jefferson St.,Chicago,IL,60661,"123 N. Jefferson St., Chicago, IL 60661",1 Star,American,$$$$,West Loop
+Oriole,661 W. Walnut St.,Chicago,IL,60661,"661 W. Walnut St., Chicago, IL 60661",1 Star,Contemporary,$$$$,West Loop
+Mako,731 W. Lake St.,Chicago,IL,60661,"731 W. Lake St., Chicago, IL 60661",1 Star,Japanese,$$$$,West Loop
+Indienne,217 W. Huron St.,Chicago,IL,60654,"217 W. Huron St., Chicago, IL 60654",1 Star,Indian,$$$$,River North
+Next,953 W. Fulton Market,Chicago,IL,60607,"953 W. Fulton Market, Chicago, IL 60607",1 Star,Contemporary,$$$$,West Loop
+Ever,1340 W. Fulton St.,Chicago,IL,60607,"1340 W. Fulton St., Chicago, IL 60607",1 Star,Creative,$$$$,West Loop
+Elske,1350 W. Randolph St.,Chicago,IL,60607,"1350 W. Randolph St., Chicago, IL 60607",1 Star,Contemporary,$$$$,West Loop
+Girl & The Goat,809 W. Randolph St.,Chicago,IL,60607,"809 W. Randolph St., Chicago, IL 60607",Bib Gourmand,Contemporary,$$$,West Loop
+Gilt Bar,230 W. Kinzie St.,Chicago,IL,60654,"230 W. Kinzie St., Chicago, IL 60654",Bib Gourmand,Gastropub,$$,River North
+Ciccio Mio,226 W. Kinzie St.,Chicago,IL,60654,"226 W. Kinzie St., Chicago, IL 60654",Bib Gourmand,Italian,$$,River North
+Frontera Grill,445 N. Clark St.,Chicago,IL,60654,"445 N. Clark St., Chicago, IL 60654",Bib Gourmand,Mexican,$$,River North
+Proxi,565 W. Randolph St.,Chicago,IL,60661,"565 W. Randolph St., Chicago, IL 60661",Bib Gourmand,International,$$,West Loop
+Perilla,1132 W. Madison St.,Chicago,IL,60607,"1132 W. Madison St., Chicago, IL 60607",Bib Gourmand,Korean,$$,West Loop
+Sifr,932 W. Randolph St.,Chicago,IL,60607,"932 W. Randolph St., Chicago, IL 60607",Bib Gourmand,Middle Eastern,$$,West Loop
+Taqueria Chingón,852 N. Ashland Ave.,Chicago,IL,60622,"852 N. Ashland Ave., Chicago, IL 60622",Bib Gourmand,Mexican,$,West Town
+HaiSous,1800 S. Carpenter St.,Chicago,IL,60608,"1800 S. Carpenter St., Chicago, IL 60608",Bib Gourmand,Vietnamese,$$,Pilsen
+Prime & Provisions,222 N. LaSalle St.,Chicago,IL,60601,"222 N. LaSalle St., Chicago, IL 60601",Selected Restaurant,Steakhouse,$$$,Loop
+Chicago Cut,300 N. LaSalle St.,Chicago,IL,60654,"300 N. LaSalle St., Chicago, IL 60654",Selected Restaurant,Steakhouse,$$$,River North
+RPM Steak,66 W. Kinzie St.,Chicago,IL,60654,"66 W. Kinzie St., Chicago, IL 60654",Selected Restaurant,Steakhouse,$$$$,River North
+Bavette's Bar & Boeuf,218 W. Kinzie St.,Chicago,IL,60654,"218 W. Kinzie St., Chicago, IL 60654",Selected Restaurant,Steakhouse,$$$$,River North
+Alla Vita,124 N. Green St.,Chicago,IL,60607,"124 N. Green St., Chicago, IL 60607",Selected Restaurant,Italian,$$$,West Loop
+avec,615 W. Randolph St.,Chicago,IL,60661,"615 W. Randolph St., Chicago, IL 60661",Selected Restaurant,Mediterranean,$$,West Loop
+Lou Mitchell's,565 W. Jackson Blvd.,Chicago,IL,60661,"565 W. Jackson Blvd., Chicago, IL 60661",Selected Restaurant,American,$$,West Loop
+Kumiko,630 W. Lake St.,Chicago,IL,60661,"630 W. Lake St., Chicago, IL 60661",Selected Restaurant,Japanese,$$$$,West Loop
+Omakase Yume,3005 W. Fullerton Ave.,Chicago,IL,60647,"3005 W. Fullerton Ave., Chicago, IL 60647",Selected Restaurant,Japanese,$$$$,Logan Square
+ROOP Chicago,67 E. Madison St.,Chicago,IL,60602,"67 E. Madison St., Chicago, IL 60602",Selected Restaurant,Indian,$$$,Loop
+Beity,213 E. Grand Ave.,Chicago,IL,60611,"213 E. Grand Ave., Chicago, IL 60611",Selected Restaurant,Lebanese,$$$$,Streeterville
+Momotaro,820 W. Lake St.,Chicago,IL,60607,"820 W. Lake St., Chicago, IL 60607",Selected Restaurant,Japanese,$$$,West Loop
+Tzuco,720 N. State St.,Chicago,IL,60654,"720 N. State St., Chicago, IL 60654",Selected Restaurant,Mexican,$$,River North
+Obélix,325 N. Wells St.,Chicago,IL,60654,"325 N. Wells St., Chicago, IL 60654",Selected Restaurant,French,$$$,River North
+Rose Mary,800 W. Fulton Market,Chicago,IL,60607,"800 W. Fulton Market, Chicago, IL 60607",Selected Restaurant,Croatian,$$$,West Loop
+Gaijin,950 W. Lake St.,Chicago,IL,60607,"950 W. Lake St., Chicago, IL 60607",Selected Restaurant,Japanese,$$,West Loop
+Swift & Sons,1000 W. Fulton Market,Chicago,IL,60607,"1000 W. Fulton Market, Chicago, IL 60607",Selected Restaurant,Steakhouse,$$$$,West Loop
+Monteverde,1020 W. Madison St.,Chicago,IL,60607,"1020 W. Madison St., Chicago, IL 60607",Selected Restaurant,Italian,$$$,West Loop
+Hugo's Frog Bar & Fish House,1024 N. Rush St.,Chicago,IL,60611,"1024 N. Rush St., Chicago, IL 60611",Selected Restaurant,American,$$$,Gold Coast
+Maple & Ash,8 W. Maple St.,Chicago,IL,60610,"8 W. Maple St., Chicago, IL 60610",Selected Restaurant,Steakhouse,$$$$,Gold Coast
+Elina's,2152 N. Halsted St.,Chicago,IL,60614,"2152 N. Halsted St., Chicago, IL 60614",Selected Restaurant,Italian-American,$$$,Lincoln Park
+Creepies,1324 W. Randolph St.,Chicago,IL,60607,"1324 W. Randolph St., Chicago, IL 60607",Selected Restaurant,French,$$$,West Loop
+Chez Joël,1119 W. Taylor St.,Chicago,IL,60607,"1119 W. Taylor St., Chicago, IL 60607",Selected Restaurant,French,$$,Little Italy
+Coalfire,1321 W. Grand Ave.,Chicago,IL,60642,"1321 W. Grand Ave., Chicago, IL 60642",Selected Restaurant,Pizza,$$,West Town
+Astor Club: Chef's Table,1301 W. Washington Blvd.,Chicago,IL,60607,"1301 W. Washington Blvd., Chicago, IL 60607",Selected Restaurant,American Contemporary,$$$$,West Loop
+Maxwells Trading,112 N. Green St.,Chicago,IL,60607,"112 N. Green St., Chicago, IL 60607",Selected Restaurant,Contemporary,$$$,West Loop
+Oliver's,405 N. Wells St.,Chicago,IL,60654,"405 N. Wells St., Chicago, IL 60654",Selected Restaurant,Contemporary,$$$,River North
+Azul Mariscos + Muelle,2913 N. Broadway,Chicago,IL,60657,"2913 N. Broadway, Chicago, IL 60657",Selected Restaurant,Seafood,$$$,Lakeview
+Jeong,2507 N. Milwaukee Ave.,Chicago,IL,60647,"2507 N. Milwaukee Ave., Chicago, IL 60647",Selected Restaurant,Korean,$$$$,Logan Square
+Provaré,1142 W. Madison St.,Chicago,IL,60607,"1142 W. Madison St., Chicago, IL 60607",Selected Restaurant,Fusion,$$$,West Loop

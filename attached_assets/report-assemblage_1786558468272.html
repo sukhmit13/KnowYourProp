@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;--cautionSoft:#fdf8f0;--bad:#c0392b;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04);margin-bottom:20px}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .scope{margin-left:auto;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid #dfe3f7;border-radius:999px;padding:4px 11px}
+  .caption{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 2px}
+
+  /* debt-snapshot cross-ref chip */
+  .xref{display:flex;gap:10px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:12px 15px}
+  .xref .ic{width:16px;height:16px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .xref .tx{font-size:12px;color:var(--ink2);line-height:1.5}
+  .xref .tx b{color:var(--ink);font-weight:600}
+  .xref .go{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--indigo);white-space:nowrap}
+
+  /* takeaway */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px;margin-bottom:16px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.55;color:var(--ink2);margin-bottom:9px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+  .cn.g .dt{background:var(--good)}.cn.c .dt{background:var(--caution)}.cn.n .dt{background:#9aa1b0}
+  .cn b{color:var(--ink);font-weight:600}
+  .cn .chip{margin-left:6px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:5px;vertical-align:1px;color:var(--cautionText);background:var(--cautionSoft);border:1px solid #e6cfa0}
+
+  /* lot diagram */
+  .lots{margin-bottom:16px}
+  .lotsrow{display:flex;gap:8px;margin-bottom:8px}
+  .lot{flex:1;border-radius:10px;padding:14px;min-height:104px;display:flex;flex-direction:column;position:relative;border:1px solid var(--line);background:var(--paper)}
+  .lot.self{background:var(--indigoSoft);border-color:#cfd6ef}
+  .lot .tag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .lot.self .tag{color:var(--indigo)}
+  .lot .addr{font-size:15px;font-weight:700;color:var(--ink);line-height:1.15}
+  .lot .pin{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px}
+  .lot .own{margin-top:auto;font-size:11.5px;color:var(--ink2);line-height:1.4}
+  .lot .own b{color:var(--ink);font-weight:600}
+  .lot .ent{display:inline-block;margin-top:5px;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:5px;padding:2px 7px}
+  .lot .ent.personal{color:var(--indigo);background:#fff;border:1px solid #cfd6ef}
+  .lot .ent.llc{color:var(--cautionText);background:#fff;border:1px solid #e6cfa0}
+  .frontage{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--muted);justify-content:center}
+  .frontage .bar{flex:1;height:1px;background:var(--line)}
+  .frontage b{color:var(--ink2);font-weight:600}
+
+  /* common control + history */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+  .panel .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .cc{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--ink2);line-height:1.5}
+  .cc svg{width:14px;height:14px;stroke:var(--cautionText);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;margin-top:1px}
+  .cc b{color:var(--ink);font-weight:600}
+  .cc .confirm{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--cautionText);background:var(--cautionSoft);border:1px solid #e6cfa0;border-radius:5px;padding:2px 8px}
+  .tl{list-style:none}
+  .tl li{display:flex;gap:10px;font-size:11.5px;color:var(--ink2);line-height:1.4;padding:5px 0}
+  .tl .yr{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--indigo);min-width:34px}
+  .tl b{color:var(--ink);font-weight:600}
+
+  /* optionality */
+  .opt{display:flex;gap:11px;align-items:flex-start;background:var(--goodSoft);border:1px solid #cfe6d6;border-radius:11px;padding:13px 15px;margin-bottom:12px}
+  .opt svg{width:16px;height:16px;stroke:var(--good);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;margin-top:1px}
+  .opt .bd{flex:1;font-size:12px;color:var(--ink2);line-height:1.55}
+  .opt .bd .h{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:3px}
+  .opt .bd b{color:var(--ink);font-weight:600}
+
+  .foot{font-size:10.5px;color:var(--muted);line-height:1.5}
+  .foot b{color:var(--ink2);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 1. how it appears on the Debt Snapshot (cross-ref chip only) -->
+  <div class="caption">▸ On the Debt Snapshot — a one-line cross-reference (debt stays PIN-scoped)</div>
+  <div class="cardbox" style="margin-bottom:26px">
+    <div class="xref">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><path d="M8 12h8"/></svg>
+      <span class="tx"><b>Part of a historically combined double lot</b> with 520 N Claremont. The debt shown here is for <b>this PIN only</b>; the companion parcel is separately owned and financed.</span>
+      <span class="go">See Companion Parcel ↓</span>
+    </div>
+  </div>
+
+  <!-- 2. the full Companion Parcel / Assemblage callout (co-parcel section) -->
+  <div class="caption">▸ In the Co-Parcel section — where the analysis lives</div>
+  <div class="cardbox">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M13 21v-6h4v6"/></svg><span class="t">Companion Parcel</span><span class="scope">Assemblage · likely common control</span></div>
+
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>The Takeaway</div>
+      <div class="taket">This lot is one half of a double-wide assemblage — acquired with its neighbor in 2013, split into separate ownership in 2021, but almost certainly still one hand.</div>
+      <div class="cn g"><span class="dt"></span><span><b>Two adjacent lots, bought together.</b> 522 and 520 N Claremont were acquired in the <b>same 2013 conveyance</b> — a ~50-ft combined frontage on a block of 25-ft lots.</span></div>
+      <div class="cn c"><span class="dt"></span><span><b>Separated in 2021, likely same owner.</b> Contemporaneous quit-claims split them — this parcel to <b>Sukhmit Kalsi</b> personally, the neighbor to an <b>LLC</b>. Recorder data can't prove the LLC's control, so treat common ownership as strongly indicated, not certain.<span class="chip">Confirm</span></span></div>
+      <div class="cn n"><span class="dt"></span><span>Each lot now carries its <b>own single-PIN debt</b> — no cross-collateralization between them. This parcel's Debt Snapshot is complete on its own.</span></div>
+    </div>
+
+    <div class="lots">
+      <div class="lotsrow">
+        <div class="lot">
+          <div class="tag">Companion</div>
+          <div class="addr">520 N Claremont</div>
+          <div class="pin">PIN 17-07-117-025-0000</div>
+          <div class="own">Held by <b>520 Claremont LLC*</b><br><span class="ent llc">LLC · separately financed</span></div>
+        </div>
+        <div class="lot self">
+          <div class="tag">This parcel</div>
+          <div class="addr">522 N Claremont</div>
+          <div class="pin">PIN 17-07-117-024-0000</div>
+          <div class="own">Held by <b>Sukhmit Kalsi</b><br><span class="ent personal">Personal · UWM $712,500 + 2nd</span></div>
+        </div>
+      </div>
+      <div class="frontage"><span class="bar"></span><span>combined frontage <b>~50 ft</b> · two standard 25-ft Chicago lots · <b>RT-4</b></span><span class="bar"></span></div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="l">Common control</div>
+        <div class="cc"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Same buyer took both in 2013; the 2021 split moved one to an LLC. <b>Likely one beneficial owner</b> — but LLC membership isn't in the public record.<span class="confirm">Confirm identity</span></span></div>
+      </div>
+      <div class="panel">
+        <div class="l">Ownership history</div>
+        <ul class="tl">
+          <li><span class="yr">2013</span><span><b>Acquired together</b> — one deed, both parcels ($475K)</span></li>
+          <li><span class="yr">2021</span><span><b>Separated</b> — quit-claims split the lots into personal + LLC</span></li>
+          <li><span class="yr">Now</span><span>Adjacent, likely common control, <b>separately financed</b></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="opt">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <div class="bd"><div class="h">Assemblage optionality</div>Under common control, the two lots read as a <b>~50-ft development or resale parcel</b>, not two isolated 25-ft lots — combinable frontage that can be built or sold as one. In RT-4, a double lot materially changes the buildable envelope. Worth weighing alongside each parcel's standalone value.</div>
+    </div>
+
+    <div class="foot">*Companion owner/entity shown here is illustrative pending extraction. The link is anchored on the <b>shared 2013 acquisition</b> (not a bare owner-name match) and the contemporaneous 2021 split; common control across the personal/LLC line is <b>inferred, not asserted</b>.</div>
+  </div>
+
+</div>
+</body>
+</html>

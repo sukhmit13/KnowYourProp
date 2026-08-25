@@ -77,6 +77,31 @@ export const SPECIALTY_DISPLAY_NAMES: Record<string, string> = {
   'general': 'General Renovation'
 };
 
+export const WORK_TYPE_KEYWORDS: Record<string, string[]> = {
+  bathroom: ['bathroom', 'bath', 'toilet', 'shower', 'tub', 'bathtub', 'vanity', 'powder room'],
+  tile: ['tile', 'tiles', 'tiling'],
+  kitchen: ['kitchen', 'kitch', 'cabinet', 'countertop', 'backsplash', 'island', 'pantry'],
+  flooring: ['flooring', 'floor', 'hardwood', 'laminate', 'carpet', 'vinyl plank'],
+  roofing: ['roof', 'roofing', 'reroof', 'shingle', 'gutter', 'soffit', 'fascia', 'flashing'],
+  hvac: ['hvac', 'furnace', 'boiler', 'air conditioning', 'heating', 'cooling', 'ductwork', 'thermostat'],
+  electrical: ['electrical', 'electric', 'wiring', 'rewire', 'panel', 'circuit', 'outlet'],
+  plumbing: ['plumbing', 'plumb', 'water heater', 'pipe', 'drain', 'sewer', 'water line', 'gas line'],
+  windows: ['window', 'windows', 'door', 'doors', 'sliding door', 'entry door', 'patio door'],
+  deck: ['deck', 'porch', 'patio', 'pergola', 'gazebo']
+};
+
+export function classifyPermitWorkTypes(permit: {
+  work_description?: string;
+  permit_type?: string;
+  workDescription?: string;
+  permitType?: string;
+}): string[] {
+  const text = `${permit.work_description || permit.workDescription || ''} ${permit.permit_type || permit.permitType || ''}`.toLowerCase();
+  return Object.entries(WORK_TYPE_KEYWORDS)
+    .filter(([, keywords]) => keywords.some(keyword => text.includes(keyword)))
+    .map(([workType]) => workType);
+}
+
 export interface SpecialtyClassification {
   primary: string;
   all: string[];

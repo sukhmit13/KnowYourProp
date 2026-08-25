@@ -1,0 +1,28 @@
+# Shared Rule — Report-Data-First (applies to EVERY takeaway generation prompt)
+
+Paste (or reference) this block at the top of every section's takeaway-generation prompt. It is the single governing rule for where a takeaway's facts come from. It generalizes what we already do ad hoc (reuse the valuation calculator's rate in HMDA; reuse the deduped business licenses) into one policy.
+
+## The rule
+
+1. **Report data is the only factual source.** A takeaway is generated from values the report has already computed and shows the user. Do **not** state a fact from the model's own world-knowledge, and do **not** trigger a fresh external lookup for a value the report already has. If the report shows it, use it; if the report doesn't show it, you don't know it.
+
+2. **Single source of truth — reuse, never re-derive.** When a value already exists elsewhere in the report (a rate, a count, a license, a date, a status), bind that exact value. Never recompute or re-fetch a parallel version that could disagree with what the reader already sees. Two parts of one report must never contradict each other.
+
+3. **Default = section-independent.** A section's takeaway draws on **that section's own data only.** Most sections stand alone and must not reach into sibling sections. Keep them self-contained unless this prompt explicitly sets `cross_reference_allowed: true`.
+
+4. **Cross-reference — allowed only where a prompt says so.** Some sections (currently the **News / Editorial** section) MAY read *other* sections' already-displayed data to verify or update a claim. When cross-reference is allowed:
+   - Use the sibling section's value **as-is** (report-data-first still applies — you're reusing, not re-deriving).
+   - Make it **traceable**: name the section and link/anchor to it so the reader can click through to the underlying data.
+   - **Never let an outside claim override the report's own data.** The report's records win.
+   - Follow a **priority order** of report sources (the prompt defines it) and stop at the first that answers.
+
+5. **Traceability.** Any figure a takeaway cites must be findable elsewhere in the report — in this section or (when cross-reference is allowed) a named sibling section. If a claim can't be traced to report data the reader can see, it does not belong in the takeaway.
+
+6. **Silence over invention.** If the report's own data is silent on a point, the takeaway stays silent or explicitly "unverified" on it. Do not fill the gap from outside knowledge or a guess.
+
+## Per-prompt switch
+Each section's prompt sets one flag:
+```
+cross_reference_allowed: false   // default — section-independent (HMDA, Commercial Lending, Transaction Trends, etc.)
+cross_reference_allowed: true    // News / Editorial only — may verify against other sections, per priority order + traceability
+```

@@ -1,0 +1,62 @@
+# LLM Generation Prompt — Area Crime Statistics takeaway
+
+Production prompt the backend sends the model to write the **Area Crime Statistics** takeaway. Returns structured JSON the renderer maps into the Standard Takeaway component. Crime is a sensitive category — the guardrails are non-negotiable.
+
+## 🔴 GOVERNING RULE — Report-Data-First
+`cross_reference_allowed: false`. Every figure comes from this section's own CPD/Chicago-Data-Portal data (the input below). No world knowledge, no external lookups, no other sections.
+
+## 🔴 CRIME-SENSITIVITY GUARDRAILS (like the HMDA firewall)
+1. **Report the data; never characterize people or the neighborhood's residents.** Speak only to incident counts, rates, rankings, trend, and crime-type mix. **Never** describe an area as "dangerous," "sketchy," "bad," or "good"/"safe neighborhood" in a way that judges the people there; use the **percentile/ranking framing the data supports** ("safer than X% of Chicago community areas"). No demographic, socioeconomic, or characterizing language of any kind.
+2. **Factual, not alarmist — in both directions.** Favorable data (high safer-than percentile, falling trend) may be stated plainly and colored `good`. Unfavorable data (low percentile, rising trend, high counts) must ALSO be stated plainly and neutrally — colored `caution`, never sensationalized, never `bad`/red, never with fear language. The same calm, factual register regardless of what the numbers say.
+3. **Percentile + per-capita framing, not raw fear.** Lead with the ranking ("safer than X%") and rates per 1,000, which are comparative and fair. A raw count alone ("278 incidents") without its radius and context is not a valid takeaway line.
+4. **Distinguish violent vs. property honestly.** Give the violent share (it's usually the smaller part); don't let a big theft number read as violent danger.
+5. **Commercial framing when applicable.** For a commercial subject, name the *actionable* exposure (theft / burglary / criminal damage) as security-planning context — not a verdict on the location. Never imply the location is unsuitable.
+6. **Word the trend as CRIME rising/falling, never as "safety trending up/down."** Phrases like "safety trending down" are ambiguous (reads as safety worsening). Always attach the direction to *crime*: "crime is falling," "incidents fell 9%," "reported crime rose." Direction words modify the thing measured (crime), never the goal (safety).
+
+## INPUT (this section's own data; computed in code)
+```json
+{
+  "percentile_violent_safer": 75, "percentile_property_safer": 61,
+  "trend_yoy_pct": -9, "trend_since_base_pct": -2, "base_year": 2023,
+  "incidents_by_year": {"2023": 2224, "2024": 2417, "2025": 2190},
+  "radius_block_count": 34, "radius_block_label": "250 ft",
+  "radius_quarter_mile_count": 278,
+  "breakdown": [ {"type":"Theft","count":87,"class":"property"}, {"type":"Battery","count":28,"class":"violent"}, {"type":"Assault","count":21,"class":"violent"} ],
+  "violent_count": 49, "violent_share_pct": 18,
+  "per_capita": {"violent_rate": 14.1, "property_rate": 46.2, "per": 1000},
+  "community_area": "Avondale",
+  "subject_is_commercial": true
+}
+```
+
+## OUTPUT — return JSON only (Standard Takeaway shape)
+```json
+{
+  "title": "…one factual sentence…",
+  "rows": [
+    { "tone":"good|insight|caution", "html":"…", "chip": null }
+  ]
+}
+```
+Aim for **3 bullets**. Suggested (adapt to what the data actually says):
+1. `good` **only if the data is favorable** (high safer-than percentile AND/OR falling trend): ranking percentiles + YoY trend, with the year figures. If the data is unfavorable, this becomes a `caution` bullet stated plainly.
+2. `insight` — **violent vs. property mix**: the violent share (`violent_share_pct`) and the leading type (`Theft`), framed as the *character* of local crime (property-dominated = typical of a busy corridor), not a danger level.
+3. `insight` — **radius contrast + commercial exposure**: block count vs. quarter-mile count; for a commercial subject, name theft/burglary/criminal-damage as security-planning context (render the commercial clause only when `subject_is_commercial == true`).
+
+### Headline
+One factual sentence capturing the ranking + the property-vs-violent character. Favorable example register: "Safer than most of Chicago and improving — local exposure skews to property crime, mostly theft, not violence." If unfavorable, mirror it plainly ("Higher reported crime than most of the city, concentrated in property offenses") — same calm register, no alarm.
+
+### Coloring
+- `good` — genuinely favorable safety facts (high percentile, improving trend). 
+- `caution` — genuinely unfavorable facts (low percentile, rising trend), stated calmly.
+- `insight` — mix/context/radius (neutral). 
+- **Never `bad`/red, never fear language, never a verdict on residents or the neighborhood's character.**
+
+### Self-check before returning
+1. Zero characterizing/demographic language; ranking-and-rate framing only? (Guardrail 1)
+2. Same calm factual register whether the data is good or bad; no alarm, no red? (Guardrail 2)
+3. Violent share stated so a big theft count isn't read as violence? (Guardrail 4)
+4. Every number from the input; nothing invented; `cross_reference_allowed:false` respected?
+5. Commercial clause only when `subject_is_commercial == true`.
+6. Valid JSON, ≤3 rows.
+```

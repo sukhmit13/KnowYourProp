@@ -1,0 +1,70 @@
+# Task for Replit Agent — Insight Report: button → checklist → in-section report
+
+## Scope
+Build the **container and interaction** for the Property Insight Report. The report's **content, design, and prompt already exist** — do NOT rebuild them. This task adds: a trigger **button**, a pre-generate **checklist modal**, and a **collapsible section** that renders the existing one-pager, with progress and export. Visual target: **report-insight-button.html** (render it). Reuse the app's existing card CSS.
+
+## Placement
+Insert in the report flow **directly below the Ward & Alderperson / Zoning Details row and directly above "Check Your Project Type."** This one slot holds the button and, after generation, the section (it's the same slot, swapped).
+
+## The four states (one slot, swapped in place)
+
+### 1. Resting — a section-width button
+A full-width button styled like a section placeholder (see mockup): icon, **"Generate Insight Report,"** subtext "A one-page synthesis, tailored to your plan," and a right-aligned "Generate →." Not a small toolbar button — it fills the section slot.
+- The existing toolbar **"Insight Report"** button scrolls to and triggers this same control (one behavior, two entry points).
+
+### 2. Click → checklist modal (pop-up)
+A centered modal over a dimmed backdrop. Lists three inputs, each with completion state and an action:
+| Input | If incomplete | If complete |
+|---|---|---|
+| Project Type / intended use | "Complete →" link | ✓ Done |
+| Project Context | "Complete →" link | ✓ Done |
+| Valuation Calculator | "Complete →" link | ✓ Done |
+- Footer: **"Skip & generate as-is"** (ghost) and **"Generate"** (primary).
+- **"Complete →"** closes the modal, scrolls to that section, and leaves the button in place to reopen the modal when they're done (don't dead-end them).
+- **🔴 Auto-skip:** if all three inputs are already complete when the button is clicked, **do NOT show the modal** — go straight to State 3 (generate, tailored). The modal appears only when at least one input is incomplete.
+
+### 3. Generate → the button becomes the section (State B — generating)
+On Generate (tailored or as-is), replace the button with the section in a **collapsed** state:
+- Header: icon + "Property Insight Report" + a status chip showing **"Generating · {use}"** (or "Generating · Public record" for as-is) + collapse chevron.
+- Under the header: a **live progress bar** + "**N of M** prioritized sections synthesized · ~1–2 min · runs in background."
+- A line naming what's prioritized for the use (e.g. "Prioritized for Restaurant: Zoning use-fit, Licensing, Incentives, Corridor, Transit").
+- **Non-blocking:** generation runs in the background; the rest of the report stays interactive. "Keep scrolling" copy.
+
+### 4. Complete → State C (ready)
+When generation finishes, **auto-expand** the section:
+- Header gains **Export / Print PDF** and **Regenerate** links + the collapse chevron; chip → "Ready · {date}."
+- Body renders the **existing one-pager** (Replit's current design + prompt) inside the section. Include the **"Tailored for: {use}"** badge (or "Public record" for as-is).
+- **Regenerate reopens the checklist modal** (so the use can be changed), then regenerates.
+- **Export / Print PDF** reuses the existing PDF/print path for the one-pager.
+- Section stays **collapsible** (chevron); persist collapsed/expanded + the generated result per run so re-opening the report doesn't regenerate.
+
+## 🔴 Progress must be real (not a timer)
+The synthesized set is **prioritized by the selected use** — pass the use into the existing insight generation, which already tailors/prioritizes. Drive the bar from **actual section-completion events**: `N of M` where M = the prioritized sections for this use, incrementing as each finishes. The slow feeders (Debt/records OCR, Valuation) are the honest bottleneck — reflect them, don't fake a countdown.
+
+## Inputs to pass into the (existing) generator
+- `intended_use` (from Project Type) — drives prioritization + the tailored badge.
+- `project_context` — user goals/constraints.
+- `valuation` (deal terms/DSCR from the calculator).
+- `mode`: `"tailored"` when any inputs present, `"as_is"` when skipped (public-record only; no user-deal flags).
+Everything else the one-pager already reads from the sections' resolved state — unchanged.
+
+## Do NOT
+- Do not rebuild the one-pager's layout, content, or prompt — render the existing one inside the section.
+- No new browser tab, no separate route/page, no modal for *viewing* — the report lives in the section. (The only pop-up is the pre-generate checklist.)
+
+## 🔴 Tests
+```
+assert the trigger sits in the slot below Ward/Zoning and above Check Your Project Type
+assert resting state is a section-width "Generate Insight Report" button
+assert clicking with ANY input incomplete opens the checklist modal; "Complete →" scrolls to that section
+assert clicking with ALL three inputs complete SKIPS the modal → goes straight to generating (tailored)
+assert "Skip & generate as-is" generates a public-record report labeled "Public record" (no user-deal flags)
+assert generating state is collapsed with a live bar reading "N of M prioritized sections" tied to real completion
+assert the section auto-expands to State C when done; report is the existing one-pager, badged with the use
+assert Export/Print PDF and Regenerate live in the section header; Regenerate reopens the checklist
+assert the section is collapsible and its result persists per run (re-opening doesn't regenerate)
+assert generation is non-blocking — other sections stay interactive while it runs
+```
+
+## Done when
+In the slot above Check Your Project Type: a "Generate Insight Report" button → checklist modal (or auto-skip if inputs are done) → the button becomes a collapsible section showing live prioritized progress → auto-opens with the existing one-pager embedded, tailored-for badge, and in-section Export. No new tab, no separate page, content unchanged.

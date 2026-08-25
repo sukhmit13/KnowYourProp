@@ -1,0 +1,73 @@
+# Distress resolution patch — a real sale clears prior lis pendens / foreclosure (sales-section anchored)
+
+Fixes the Liens takeaway calling a **historical** lis pendens an active title cloud. Applies the sale-anchor principle to distress (lis pendens / foreclosure / notice of default), and — critically — makes the **summary, chip, and KPI all reflect resolved state**, not just the engine.
+
+## The bug (1122 W Bryn Mawr)
+- Lis pendens recorded **2000**. A **warranty-deed sale recorded 2018** sits well after it.
+- Current output: headline "pending litigation clouds the title," red "Lis pendens" chip, red "LIS PENDENS 2" KPI — all treating a 25-year-old, sale-cleared filing as live.
+- Correct: the 2018 sale cleared it → **resolved, historical, not a current issue.**
+
+## 🔴 The rule
+A distress filing recorded **before the most recent genuine SALE** is **resolved** — a real sale after the filing clears prior litigation from title (99% of the time). "Genuine sale" comes from the **Sales section**, NOT from any deed in the recorder:
+- A **warranty deed / arms-length sale** the Sales section recognizes = a real sale → clears prior distress.
+- A **quit-claim / nominal / intra-owner transfer** is NOT a sale → does NOT clear prior distress on its own (the taker takes subject to it).
+- If the recorder is ambiguous about whether a transfer happened, **the Sales section is the source of truth** (it already classifies real sales vs. nominal transfers).
+
+## Logic (extends the Stage 2.5 sale-anchor distress block)
+```js
+const saleAnchor = salesSection?.most_recent_sale_date;   // most-recent GENUINE sale (quit-claims excluded)
+
+for (const d of distress) {                                // lis_pendens | foreclosure | notice_default
+  d.state = "active";
+  // (1) a real sale AFTER the filing clears it — the main resolver
+  if (saleAnchor && d.recording_date && d.recording_date < saleAnchor) {
+    d.state = "resolved"; d.resolved_by = "sale"; d.resolved_year = yearOf(saleAnchor);
+  }
+  // (2) explicit dismissal / release referencing the case
+  if (docs.some(x => (x.references_docs||[]).includes(d.doc_number)
+      && ["release","satisfaction","dismissal"].includes(x.doc_type))) {
+    d.state = "resolved"; d.resolved_by = "dismissal";
+  }
+  // (3) current owner financed after the filing (can't get a mortgage through active litigation)
+  if (docs.some(x => x.doc_type==="mortgage" && x.recording_date > d.recording_date
+      && sameEntity(x.parties?.borrower, currentOwner))) {
+    d.state = "resolved"; d.resolved_by = "refinanced";
+  }
+}
+const distress_active   = distress.filter(d => d.state === "active");
+const distress_resolved = distress.filter(d => d.state === "resolved");
+const foreclosure_active = distress_active.some(d => ["foreclosure","lis_pendens"].includes(d.doc_type));
+```
+Note: a quit-claim-only transfer after a filing does **not** set `resolved_by:"sale"` — `saleAnchor` is the sales section's real-sale date, so a nominal transfer never triggers resolution on its own.
+
+## 🔴 Summary / takeaway must change too (headline ↔ chip ↔ KPI consistency)
+When distress is **resolved**, none of these may imply it's active:
+- **Headline:** NOT "pending litigation clouds the title." Instead: *"Clean title today — the only distress on record, a {year} lis pendens, was cleared by the {sale_year} sale."*
+- **Row:** `good`/green — "No active distress. A {year} lis pendens predates the {sale_year} sale, which clears prior litigation from title — historical, not current."
+- **Never** `bad`/red for a resolved filing. Red is only for `distress_active`.
+Phrase it as **"lis pendens per the property's history, not currently present"** — exactly the distinction you drew.
+
+## 🔴 Chip + KPI (render)
+- **Section header chip:** red "Lis pendens" ONLY when `distress_active.length > 0`. Resolved-only → green "Clear title" (or neutral "No active liens").
+- **KPI tile:** the headline number is **active** distress. Show resolved as a muted sub-label, not a red alarm:
+  - `LIS PENDENS — 0 active` (green/neutral), with `· 2 historical (resolved by 2018 sale)` beneath in muted text.
+  - Never render a resolved count in the red/alarm treatment.
+
+## Guardrail 0 (unchanged, reinforced)
+Resolve STATE, never react to presence. A filing's mere existence is not a live issue. The takeaway, the chip, and the KPI all read from the **same resolved distress state** — they cannot disagree.
+
+## 🔴 Tests
+```
+// 1122 regression:
+assert lis_pendens (2000) with a warranty-deed sale (2018) after it => state "resolved", resolved_by "sale"
+assert headline does NOT say "pending"/"clouds title"; row is green "no active distress"
+assert section chip is NOT red; KPI shows active=0 with a muted "historical (resolved by 2018 sale)" sub-label
+assert foreclosure_active == false
+// discipline:
+assert a quit-claim-only transfer after a filing does NOT resolve it (saleAnchor unchanged; still evaluate dismissal)
+assert a genuinely active lis pendens (no later sale, no dismissal, no refi) stays red "clouds title"
+assert the recorder being ambiguous falls back to the Sales section's real-sale date
+```
+
+## Done when
+1122 W Bryn Mawr reads: clean title, no active distress, the 2000 lis pendens shown as **resolved by the 2018 sale** (historical) — with the headline, the header chip, and the LIS PENDENS KPI all agreeing it's not a current issue. A truly active filing still reads red.

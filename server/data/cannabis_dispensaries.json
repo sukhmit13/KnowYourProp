@@ -1,0 +1,163 @@
+{
+  "totalCount": 31,
+  "lastUpdated": "2026-01-02",
+  "source": "Illinois IDFPR via public.data.illinois.gov",
+  "byZip": {
+    "60647": {
+      "count": 3,
+      "locations": [
+        { "name": "Ascend Moca Logan Square", "address": "2367 N Milwaukee Ave" },
+        { "name": "Grasshopper Club Logan Square", "address": "2551 N. Milwaukee Ave." },
+        { "name": "Ivy Hall - Logan Square", "address": "3115 W Armitage Ave" }
+      ]
+    },
+    "60654": {
+      "count": 2,
+      "locations": [
+        { "name": "Ascend Moca River North", "address": "216 W. Ohio St." },
+        { "name": "Green Rose - Chicago", "address": "612 N. Wells St." }
+      ]
+    },
+    "60630": {
+      "count": 1,
+      "locations": [
+        { "name": "Cannabist - Chicago", "address": "4758 N Milwaukee Ave" }
+      ]
+    },
+    "60618": {
+      "count": 2,
+      "locations": [
+        { "name": "BLOC Dispensary Kedzie", "address": "3545 N Kedzie Ave" },
+        { "name": "Bud and Ritas Chicago", "address": "3425 W Belmont Ave" }
+      ]
+    },
+    "60631": {
+      "count": 1,
+      "locations": [
+        { "name": "Consume Chicago", "address": "6428 N Milwaukee Ave" }
+      ]
+    },
+    "60661": {
+      "count": 1,
+      "locations": [
+        { "name": "Cookies - Chicago", "address": "215 N Clinton St" }
+      ]
+    },
+    "60642": {
+      "count": 2,
+      "locations": [
+        { "name": "Curaleaf Lincoln Park", "address": "923 W. Weed St." },
+        { "name": "Karma Club", "address": "1590 N Clybourn Ave" }
+      ]
+    },
+    "60614": {
+      "count": 2,
+      "locations": [
+        { "name": "Curaleaf Lincoln Park", "address": "1413 West North Ave." },
+        { "name": "Dr Greenthumbs Chicago", "address": "2200 N Ashland Ave" }
+      ]
+    },
+    "60602": {
+      "count": 1,
+      "locations": [
+        { "name": "Curaleaf Northbrook", "address": "755 Skokie Blvd." }
+      ]
+    },
+    "60640": {
+      "count": 1,
+      "locations": [
+        { "name": "Dispensary 33", "address": "5001 N Clark St" }
+      ]
+    },
+    "60607": {
+      "count": 1,
+      "locations": [
+        { "name": "Dispensary 33 - Fulton Market", "address": "1152 W. Randolph" }
+      ]
+    },
+    "60605": {
+      "count": 1,
+      "locations": [
+        { "name": "Grasshopper Club - South Loop", "address": "58 E Roosevelt Rd Fl 1" }
+      ]
+    },
+    "60706": {
+      "count": 1,
+      "locations": [
+        { "name": "Green Rose - Harwood Heights", "address": "4660 N Harlem Ave" }
+      ]
+    },
+    "60712": {
+      "count": 1,
+      "locations": [
+        { "name": "Green Rose - Lincolnwood", "address": "4656 W Touhy Ave" }
+      ]
+    },
+    "60611": {
+      "count": 1,
+      "locations": [
+        { "name": "Guaranteed Dispensary", "address": "620 N Fairbanks Ct" }
+      ]
+    },
+    "60415": {
+      "count": 1,
+      "locations": [
+        { "name": "Ascend Chicago Ridge", "address": "9820 Ridgeland Ave" }
+      ]
+    },
+    "60477": {
+      "count": 1,
+      "locations": [
+        { "name": "Ascend by Homecoming", "address": "16200 Harlem Ave." }
+      ]
+    },
+    "60164": {
+      "count": 1,
+      "locations": [
+        { "name": "Ascend Cannabis Outlet by InLabs", "address": "39 W North Ave." }
+      ]
+    },
+    "60406": {
+      "count": 1,
+      "locations": [
+        { "name": "Be Blue Island", "address": "12720 Western Ave" }
+      ]
+    },
+    "60452": {
+      "count": 1,
+      "locations": [
+        { "name": "Be. - Oak Forest", "address": "5940 159th St" }
+      ]
+    },
+    "60428": {
+      "count": 1,
+      "locations": [
+        { "name": "BaM Body and Mind", "address": "3063 W 159th St." }
+      ]
+    },
+    "60714": {
+      "count": 1,
+      "locations": [
+        { "name": "Bud and Ritas - Niles", "address": "5960 W Touhy Ave" }
+      ]
+    },
+    "60053": {
+      "count": 1,
+      "locations": [
+        { "name": "Dutchess Cannabis Morton Grove", "address": "6761 Dempster St" }
+      ]
+    },
+    "60546": {
+      "count": 1,
+      "locations": [
+        { "name": "Dutchess Cannabis N. Riverside", "address": "8380 W Cermak Rd" }
+      ]
+    },
+    "60301": {
+      "count": 1,
+      "locations": [
+        { "name": "Dutchess Cannabis Oak Park", "address": "1132 Lake St" }
+      ]
+    }
+  }
+}

@@ -1,0 +1,214 @@
+/* ============================================================
+   KYP — THE shared component sheet. ONE definition of every
+   token, type level, and primitive. Every section @imports this
+   and adds ZERO css of its own. If two sections ever look
+   different, it's because someone wrote css outside this file —
+   don't. Add the value here once, use the class everywhere.
+   ============================================================ */
+
+:root{
+  --kyp-paper:#faf9f6; --kyp-card:#fff; --kyp-wash:#f4f2ec;
+  --kyp-ink:#141414; --kyp-ink2:#565651; --kyp-muted:#8b8a84; --kyp-line:#e7e5df;
+  --kyp-indigo:#2b3a9e; --kyp-indigoL:#3f51cf; --kyp-indigoSoft:#eef0fb;
+  --kyp-green:#2f7d3f; --kyp-orange:#e07a2e; --kyp-bad:#c0392b; --kyp-slate:#3a3a36;
+  --kyp-disp:'Instrument Serif'; --kyp-mono:'JetBrains Mono'; --kyp-sans:'Inter';
+}
+
+/* ========== TYPE RAMP — six levels, three fonts ========== */
+.kyp-eyebrow{display:flex;align-items:center;gap:8px;font-family:var(--kyp-mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--kyp-indigo);margin-bottom:12px}
+.kyp-eyebrow .dot{width:9px;height:9px;border-radius:2px;background:currentColor;flex:none}
+.kyp-eyebrow.fam-green{color:var(--kyp-green)} .kyp-eyebrow.fam-orange{color:var(--kyp-orange)}
+.kyp-eyebrow.fam-slate{color:var(--kyp-slate)} .kyp-eyebrow.fam-indigo{color:var(--kyp-indigo)}
+
+.kyp-headline{font-family:var(--kyp-sans);font-weight:600;font-size:clamp(21px,2.3vw,26px);line-height:1.28;letter-spacing:-.01em;color:var(--kyp-ink);margin-bottom:16px;max-width:52ch}
+.kyp-headline em{font-family:var(--kyp-disp);font-style:italic;font-weight:400;font-size:1.08em;color:var(--kyp-indigo)}
+.kyp-headline em.att{color:var(--kyp-orange)} .kyp-headline em.grn{color:var(--kyp-green)}
+
+.kyp-title{font-family:var(--kyp-sans);font-weight:700;font-size:17px;letter-spacing:-.01em;color:var(--kyp-ink);margin-bottom:12px}
+.kyp-title .qual{font-weight:400;color:var(--kyp-ink2);font-size:.82em}
+
+.kyp-stat{font-family:var(--kyp-disp);font-size:clamp(28px,3vw,38px);line-height:1;color:var(--kyp-ink)}
+.kyp-label{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-ink2)}
+.kyp-src{font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-muted);line-height:1.45;margin-top:12px;border-top:1px solid var(--kyp-line);padding-top:9px}
+.kyp-body{font-family:var(--kyp-sans);font-size:14px;line-height:1.5;color:var(--kyp-ink2)}
+.kyp-charttitle{font-family:var(--kyp-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--kyp-ink2);font-weight:700;margin:8px 0 6px}
+
+/* ========== PILLS ========== */
+.kyp-pill{display:inline-flex;align-items:center;gap:5px;font-family:var(--kyp-mono);font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;border-radius:7px;padding:3px 9px}
+.kyp-pill.good{background:var(--kyp-green)} .kyp-pill.att{background:var(--kyp-orange)}
+.kyp-pill.bad{background:var(--kyp-bad)} .kyp-pill.ctx{background:var(--kyp-slate)}
+.kyp-linepill{display:inline-block;border-radius:5px;padding:1px 7px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;color:#fff}
+.kyp-trend{font-family:var(--kyp-mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;color:#fff}
+.kyp-trend.up{background:var(--kyp-green)} .kyp-trend.down{background:var(--kyp-bad)}
+.kyp-rank{font-family:var(--kyp-mono);font-size:11px;font-weight:700;color:#fff;background:var(--kyp-slate);border-radius:6px;padding:2px 8px}
+
+/* ========== CARD SHELL ========== */
+.kyp-card{background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:16px;padding:22px 24px}
+
+/* ========== SECTION INDENT (universal rule) ==========
+   The section's DOT/bullet hangs alone in a left gutter. The eyebrow TEXT,
+   the headline, the verdict pill, and ALL content align to ONE text column
+   past the bullet — exactly like the collapsed row (number badge in the
+   gutter, title + takeaway tabbed past it). Nothing sits flush with the
+   bullet. Put the whole section in .kyp-sec. Gutter = dot(9) + gap(8) = 17. */
+.kyp-sec{padding-left:17px}
+.kyp-sec > .kyp-eyebrow .dot{margin-left:-17px}
+.kyp-content{padding-left:0}
+
+/* ========== LIST ROWS (accent bar) ========== */
+.kyp-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--kyp-line)}
+.kyp-row:last-child{border-bottom:none}
+.kyp-rbar{width:4px;height:30px;border-radius:2px;flex:none;background:var(--kyp-indigo)}
+.kyp-rn{font-size:14.5px;font-weight:600;flex:1}
+.kyp-rd{font-family:var(--kyp-mono);font-size:12px;color:var(--kyp-ink2);font-weight:600}
+
+/* ========== STATION / ROUTE HEADER ========== */
+.kyp-rhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.kyp-rname{font-size:16px;font-weight:700}
+
+/* ========== FILLED STAT BLOCK ========== */
+.kyp-blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.kyp-block{border-radius:12px;padding:16px;color:#fff;min-height:132px;display:flex;flex-direction:column;justify-content:space-between}
+.kyp-block.ind{background:var(--kyp-indigoL)} .kyp-block.grn{background:var(--kyp-green)}
+.kyp-block.dark{background:#16171b} .kyp-block.slate{background:var(--kyp-slate)}
+.kyp-block .bv{font-family:var(--kyp-disp);font-size:36px;line-height:.95}
+.kyp-block .bl{font-family:var(--kyp-mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;opacity:.92}
+.kyp-block .bd{font-size:10.5px;opacity:.85;margin-top:2px;line-height:1.3}
+.kyp-block .chip{align-self:flex-start;font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;background:rgba(255,255,255,.2);border-radius:6px;padding:3px 8px}
+.kyp-block .dots{display:flex;gap:5px}
+.kyp-block .dots i{width:11px;height:11px;border-radius:3px;background:rgba(255,255,255,.35)}
+.kyp-block .dots i.on{background:rgba(255,255,255,.95)}
+
+/* ========== DAY-TYPE BOX ========== */
+.kyp-daybox{background:var(--kyp-wash);border-radius:12px;padding:15px 16px;margin-bottom:14px}
+.kyp-daytop{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px}
+.kyp-dbig{font-family:var(--kyp-disp);font-size:34px;line-height:.9}
+.kyp-dbl{font-family:var(--kyp-mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--kyp-ink2);font-weight:700;margin-top:4px}
+.kyp-dtri{display:flex;gap:18px}
+.kyp-dcell{text-align:right}
+.kyp-dcell .dv{font-family:var(--kyp-disp);font-size:20px;line-height:1}
+.kyp-dcell .dl{font-family:var(--kyp-mono);font-size:9px;text-transform:uppercase;color:var(--kyp-muted);font-weight:700;margin-top:2px}
+.kyp-daybars{display:flex;align-items:flex-end;gap:6px;height:40px}
+.kyp-daybars i{flex:1;border-radius:5px 5px 0 0;background:var(--kyp-indigoL)}
+.kyp-daybars i.sat{background:#9aa6e6} .kyp-daybars i.sun{background:#c3cbf1}
+.kyp-dlab{display:flex;gap:6px;margin-top:5px}
+.kyp-dlab span{flex:1;text-align:center;font-family:var(--kyp-mono);font-size:9px;color:var(--kyp-muted);font-weight:700;text-transform:uppercase}
+
+/* ========== COMPARISON BAR ========== */
+.kyp-cmp{margin:14px 0 4px}
+.kyp-cmptop{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.kyp-cmplab{font-family:var(--kyp-mono);font-size:10px;text-transform:uppercase;color:var(--kyp-ink2);font-weight:700}
+.kyp-track{position:relative;height:14px;background:var(--kyp-wash);border-radius:8px}
+.kyp-track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:var(--kyp-indigoL)}
+.kyp-track .tick{position:absolute;top:-3px;width:2px;height:20px;background:var(--kyp-ink2);opacity:.5}
+.kyp-track .tlab{position:absolute;top:20px;font-family:var(--kyp-mono);font-size:8.5px;color:var(--kyp-muted);transform:translateX(-50%);white-space:nowrap;font-weight:700}
+.kyp-cap{font-size:12px;color:var(--kyp-ink2);margin-top:26px;line-height:1.4}
+
+/* ========== MODE TILES ========== */
+.kyp-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kyp-mtile{border:1px solid var(--kyp-line);border-radius:12px;padding:13px}
+.kyp-mth{font-family:var(--kyp-mono);font-size:9.5px;text-transform:uppercase;color:var(--kyp-muted);font-weight:700;margin-bottom:7px}
+.kyp-mtn{font-size:14px;font-weight:700;margin-bottom:5px}
+.kyp-mtw{font-family:var(--kyp-disp);font-size:19px}
+.kyp-mtw span{font-size:11px;font-family:var(--kyp-sans);color:var(--kyp-ink2)}
+.kyp-mts{font-size:11px;color:var(--kyp-ink2);margin-top:5px;line-height:1.35}
+
+/* ========== METRA CARD ========== */
+.kyp-mcard{border:1px solid var(--kyp-line);border-radius:11px;padding:13px;margin-bottom:10px}
+.kyp-mctop{display:flex;align-items:center;gap:9px;margin-bottom:9px;flex-wrap:wrap}
+.kyp-mline{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--kyp-line);font-size:13px}
+.kyp-mline:last-child{border-bottom:none}
+.kyp-zone{font-size:12px;color:var(--kyp-ink2);font-style:italic;margin-top:10px;line-height:1.45;background:var(--kyp-wash);padding:10px 12px;border-radius:9px}
+.kyp-zb{display:inline-block;font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;color:var(--kyp-ink2);border:1px solid var(--kyp-line);border-radius:5px;padding:1px 7px}
+
+/* ========== CHART LEGEND ========== */
+.kyp-leg{display:flex;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.kyp-lg{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.kyp-lg .ln{width:14px;height:3px;border-radius:2px}
+svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
+.kyp-axc{font-family:var(--kyp-mono);font-size:9px;fill:var(--kyp-muted)}
+
+/* ========== GROUP DIVIDER (count badge + label + rule) ========== */
+.kyp-group{display:flex;align-items:center;gap:11px;margin:22px 0 14px}
+.kyp-gcount{font-family:var(--kyp-mono);font-size:12px;font-weight:700;color:#fff;border-radius:7px;padding:3px 9px;min-width:28px;text-align:center}
+.kyp-glabel{font-family:var(--kyp-mono);font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.kyp-grule{flex:1;height:1px;background:var(--kyp-line)}
+.kyp-group.on .kyp-gcount{background:var(--kyp-green)} .kyp-group.on .kyp-glabel{color:var(--kyp-ink)}
+.kyp-group.off .kyp-gcount{background:var(--kyp-slate);opacity:.72} .kyp-group.off .kyp-glabel{color:var(--kyp-muted)}
+
+/* ========== COLLAPSED SCAN ROW (the report ToC) ========== */
+.kyp-scan{display:flex;flex-direction:column;gap:10px}
+@keyframes kypIn{to{opacity:1;transform:none}}
+.kyp-scanrow{display:flex;align-items:stretch;background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:13px;overflow:visible;
+  opacity:0;transform:translateY(10px);animation:kypIn .5s cubic-bezier(.2,.7,.2,1) forwards;
+  transition:box-shadow .16s ease,transform .16s ease,background .16s ease,border-color .16s ease}
+.kyp-scanrow:hover{transform:translateX(3px);box-shadow:0 7px 22px rgba(20,20,20,.09);border-color:#d9d6cd;z-index:2}
+.kyp-scanrow.drag{opacity:.35}
+.kyp-scanrow.over{box-shadow:0 0 0 2px var(--kyp-indigo) inset}
+.kyp-scanrow .accent{width:5px;flex:none;border-radius:13px 0 0 13px;transition:width .16s ease}
+.kyp-scanrow:hover .accent{width:9px}
+.kyp-fam-indigo .accent{background:var(--kyp-indigo)} .kyp-fam-green .accent{background:var(--kyp-green)}
+.kyp-fam-orange .accent{background:var(--kyp-orange)} .kyp-fam-slate .accent{background:var(--kyp-slate)}
+.kyp-fam-indigo:hover{background:#f7f8fd} .kyp-fam-green:hover{background:#f6faf7}
+.kyp-fam-orange:hover{background:#fdf8f2} .kyp-fam-slate:hover{background:#f8f8f6}
+.kyp-drag{display:flex;align-items:center;padding:0 6px 0 11px;color:#c9c6bd;cursor:grab;font-size:14px;line-height:1;user-select:none;transition:color .15s}
+.kyp-scanrow:hover .kyp-drag{color:var(--kyp-ink2)}
+.kyp-drag:active{cursor:grabbing}
+/* number badge — the gutter that title + takeaway both align past */
+.kyp-numb{align-self:center;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--kyp-mono);font-size:13px;font-weight:700;flex:none;font-variant-numeric:tabular-nums;margin-right:13px;transition:transform .16s ease}
+.kyp-scanrow:hover .kyp-numb{transform:scale(1.07)}
+.kyp-fam-indigo .kyp-numb{background:#eef0fb;color:var(--kyp-indigo)} .kyp-fam-green .kyp-numb{background:#e9f4ec;color:var(--kyp-green)}
+.kyp-fam-orange .kyp-numb{background:#fbeede;color:#c0651e} .kyp-fam-slate .kyp-numb{background:#ecece9;color:var(--kyp-slate)}
+.kyp-scanmain{flex:1;min-width:0;padding:12px 8px 12px 0;display:flex;flex-direction:column;gap:3px;justify-content:center;cursor:pointer}
+.kyp-scankick{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.kyp-fam-indigo .kyp-scankick{color:var(--kyp-indigo)} .kyp-fam-green .kyp-scankick{color:var(--kyp-green)}
+.kyp-fam-orange .kyp-scankick{color:#c0651e} .kyp-fam-slate .kyp-scankick{color:var(--kyp-slate)}
+/* SCAN colored by VERDICT — ONE color system (use .kyp-v-good/att/ctx on the row).
+   accent + number badge + kicker + takeaway-emphasis + pill all share the verdict
+   tone, so a row reads as its verdict from either side. green=good, orange=attention,
+   slate=context. (Family colors are for expanded-section theming, not the scan.) */
+.kyp-v-good .accent{background:var(--kyp-green)} .kyp-v-att .accent{background:var(--kyp-orange)} .kyp-v-ctx .accent{background:var(--kyp-slate)}
+.kyp-v-good .kyp-numb{background:#e9f4ec;color:var(--kyp-green)} .kyp-v-att .kyp-numb{background:#fbeede;color:#c0651e} .kyp-v-ctx .kyp-numb{background:#ecece9;color:var(--kyp-slate)}
+.kyp-v-good .kyp-scankick{color:var(--kyp-green)} .kyp-v-att .kyp-scankick{color:#c0651e} .kyp-v-ctx .kyp-scankick{color:var(--kyp-slate)}
+.kyp-v-good:hover{background:#f6faf7} .kyp-v-att:hover{background:#fdf8f2} .kyp-v-ctx:hover{background:#f8f8f6}
+.kyp-scantake{font-size:15px;font-weight:600;color:var(--kyp-ink);line-height:1.3;letter-spacing:-.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kyp-scantake em{font-family:var(--kyp-disp);font-style:italic;font-weight:400;font-size:1.08em;letter-spacing:0}
+.kyp-v-good .kyp-scantake em{color:var(--kyp-green)} .kyp-v-att .kyp-scantake em{color:#c0651e} .kyp-v-ctx .kyp-scantake em{color:var(--kyp-slate)}
+.kyp-scanright{display:flex;align-items:center;gap:12px;padding-right:14px;flex:none}
+.kyp-hero{text-align:right;line-height:1}
+.kyp-hero .hv{font-family:var(--kyp-disp);font-size:25px;color:var(--kyp-ink);line-height:.95}
+.kyp-hero .hl{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted);margin-top:3px}
+.kyp-info{position:relative;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--kyp-line);color:var(--kyp-muted);display:flex;align-items:center;justify-content:center;font-family:var(--kyp-disp);font-size:12px;font-style:italic;cursor:help;flex:none;transition:border-color .15s,color .15s}
+.kyp-info:hover{border-color:var(--kyp-indigo);color:var(--kyp-indigo)}
+.kyp-tip{display:none;position:fixed;width:256px;z-index:60;background:#16171b;color:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 14px 38px rgba(0,0,0,.26);text-align:left;cursor:default;font-family:var(--kyp-sans);font-style:normal}
+.kyp-tip li,.kyp-tip .tt{font-style:normal}
+.kyp-tip.show{display:block;animation:kypIn .14s ease forwards}
+.kyp-tip .tt{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#aab2e4;margin-bottom:9px}
+.kyp-tip ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.kyp-tip li{font-size:11.5px;line-height:1.35;color:#e8e8ec;padding-left:13px;position:relative}
+.kyp-tip li::before{content:'';position:absolute;left:0;top:6px;width:4px;height:4px;border-radius:50%;background:#6b78c9}
+.kyp-tip .arw{position:absolute;top:-5px;right:12px;width:11px;height:11px;background:#16171b;transform:rotate(45deg)}
+.kyp-chev{width:16px;height:16px;stroke:var(--kyp-muted);fill:none;stroke-width:2.4;flex:none;transition:transform .2s ease}
+.kyp-scanrow.open .kyp-chev{transform:rotate(180deg)}
+.kyp-eye{width:30px;display:flex;align-items:center;justify-content:center;color:var(--kyp-muted);cursor:pointer;flex:none;transition:color .15s}
+.kyp-eye:hover{color:var(--kyp-ink)}
+.kyp-eye svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.kyp-scanrow.off{opacity:.5;background:var(--kyp-wash)}
+.kyp-scanrow.off .accent{background:var(--kyp-muted)!important}
+.kyp-scanrow.off .kyp-numb{background:#ecece9!important;color:var(--kyp-muted)!important}
+.kyp-scanrow.off .kyp-scankick{color:var(--kyp-muted)!important}
+.kyp-preview{display:none;padding:4px 16px 15px 0;margin-top:9px;border-top:1px solid var(--kyp-line)}
+.kyp-scanrow.open .kyp-preview{display:block}
+.kyp-pvrow{display:flex;gap:9px;font-size:13px;color:var(--kyp-ink2);margin-top:10px;line-height:1.45}
+.kyp-pvrow .sq{width:7px;height:7px;border-radius:2px;flex:none;margin-top:5px}
+.kyp-jump{margin-top:13px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--kyp-indigo);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+
+/* ========== INCENTIVE CARD ========== */
+.kyp-inc{border:1px solid var(--kyp-line);border-left:4px solid var(--kyp-green);border-radius:12px;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px;background:var(--kyp-card);transition:transform .12s ease,box-shadow .12s ease}
+.kyp-inc:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,20,20,.07)}
+.kyp-inc .in{font-size:15.5px;font-weight:700}
+.kyp-inc .id{font-size:12.5px;color:var(--kyp-ink2);margin-top:3px;line-height:1.4}
+.kyp-incgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kyp-inc.na{border-left-color:var(--kyp-slate);opacity:.62;background:transparent;border-style:dashed}
+.kyp-inc.na:hover{transform:none;box-shadow:none}
+.kyp-inc.na .in{color:var(--kyp-ink2)}

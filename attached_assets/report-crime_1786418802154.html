@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--takeBorder:#dde1f6;--takeDivider:#e3e5f4;
+    --good:#2f7d3f;--goodSoft:#e9f4ec;--bad:#d13b26;--caution:#f0a41c;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+    --take-label:11px;--take-title:21px;--take-body:13px;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:var(--sans);color:var(--ink);padding:34px 40px}
+  .wrap{max-width:1140px;margin:0 auto}
+
+  .secthead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:14px}
+  .secthead .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .statchips{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .statchip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.01em;text-transform:none;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 10px;white-space:nowrap}
+  .statchip .d{width:6px;height:6px;border-radius:50%;flex:none;background:#9aa1b0}
+  .statchip.good{color:var(--good)} .statchip.good .d{background:var(--good)}
+
+  .seccard{border:1px solid var(--line);border-radius:16px;padding:24px 26px;box-shadow:0 1px 3px rgba(20,20,20,.03)}
+
+  .take{background:var(--indigoSoft);border-radius:12px;padding:18px 20px 19px}
+  .take-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .take-label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:var(--take-label);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo)}
+  .take-label svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+  .take-title{font-family:var(--disp);font-size:var(--take-title);line-height:1.28;color:var(--ink);margin-bottom:14px}
+  .take-row{display:flex;align-items:flex-start;gap:11px;padding:10px 0}
+  .take-row + .take-row{border-top:1px solid var(--takeDivider)}
+  .take-row .dot{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .take-row.good .dot{background:var(--good)}
+  .take-row.caution .dot{background:var(--caution)}
+  .take-row.insight .dot{background:var(--indigo)}
+  .take-row .body{flex:1;font-size:var(--take-body);line-height:1.5;color:var(--ink2)}
+  .take-row .body b{color:var(--ink);font-weight:600}
+
+  .datalabel{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin:22px 0 12px}
+  .datalabel svg{width:13px;height:13px;stroke:var(--indigo);fill:none}
+  .datalabel .hint{color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0}
+  .prox{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .proxc{border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between}
+  .proxc.sel{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo) inset}
+  .proxc .t{font-size:14px;font-weight:600;color:var(--ink)}
+  .proxc .s{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .proxc .s.link{color:var(--indigo);font-weight:600}
+  .proxc .n{font-family:var(--disp);font-size:34px;color:var(--ink);line-height:1}
+  .datahint{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="secthead"><span class="sq"></span>Area Crime Statistics
+    <span class="statchips">
+      <span class="statchip good"><span class="d"></span>Violent · safer than 75%</span>
+      <span class="statchip"><span class="d"></span>Property · safer than 61%</span>
+      <span class="statchip good"><span class="d"></span>Trend ↓ 9% YoY</span>
+    </span>
+  </div>
+
+  <div class="seccard">
+    <div class="take">
+      <div class="take-head"><span class="take-label"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Takeaway</span></div>
+      <div class="take-title">Safer than most of Chicago and improving — local exposure skews to property crime, mostly theft, not violence.</div>
+
+      <div class="take-row good"><span class="dot"></span><span class="body"><b>Top quartile for safety, and crime is falling.</b> Avondale ranks safer than <b>75%</b> of Chicago community areas on violent crime and <b>61%</b> on property crime, and total reported incidents fell <b>9% year-over-year</b> (2,190 in 2025 vs. 2,417 in 2024).</span></div>
+
+      <div class="take-row insight"><span class="dot"></span><span class="body"><b>Property crime, not violence.</b> Within a quarter-mile, violent types (battery + assault) are just <b>49 of 278</b> incidents (~18%); theft alone is 87. That's the typical footprint of a busy retail corridor — foot traffic drives theft, not a violent-crime concentration.</span></div>
+
+      <div class="take-row insight"><span class="dot"></span><span class="body"><b>The block itself is quieter than the radius.</b> Only <b>34</b> incidents fell within 250 ft of the address in the last year, versus 278 within a quarter-mile. For a commercial use, the exposure to plan for is theft, burglary and criminal damage — standard-security territory, not a location red flag.</span></div>
+    </div>
+
+    <div class="datalabel"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Around this address<span class="hint">· trailing 12 months</span></div>
+    <div class="prox">
+      <div class="proxc"><div><div class="t">Within 250 ft — my block</div><div class="s">Click to see breakdown</div></div><div class="n">34</div></div>
+      <div class="proxc sel"><div><div class="t">Within ¼ mile</div><div class="s link">Showing breakdown below</div></div><div class="n">278</div></div>
+    </div>
+    <div class="datahint">↓ Breakdown by type · community-area ranking · full-year trend</div>
+  </div>
+
+</div>
+</body>
+</html>

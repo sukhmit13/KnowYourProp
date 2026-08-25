@@ -1,0 +1,71 @@
+# Debt Snapshot performance — only OCR documents in the post-sale window
+
+The debt picture is read from the most recent genuine sale forward (everything before it is cleared). So we don't need to download/OCR the whole document history — only the window around and after the sale. The sale date comes from the **Sales section**, which is already computed and needs **no OCR**, so the cutoff is free.
+
+## The idea
+1. Get `saleAnchor` = most-recent genuine sale date from the **Sales section** (not from OCR'ing deeds).
+2. Only download + OCR documents recorded **on/after `saleAnchor − BUFFER`.**
+3. Pre-window documents: use the **recorder index only** (doc number, type, date) — count them, mark them historical/resolved-by-sale, **never OCR them.**
+
+That turns a 40-document parcel into (typically) a handful of post-sale docs to OCR.
+
+## 🔴 The trap: the purchase-money mortgage records AROUND the sale, not strictly after
+The current first mortgage is taken at closing and can record **days-to-weeks before the deed**, or with a recording lag after it. A strict "after the sale date" cutoff would **drop the current primary lien** — a disaster. So the window reaches **backward** from the sale:
+```
+BUFFER = 6 months            // tunable; protects closing/acquisition docs that record around the sale
+readWindowStart = saleAnchor − BUFFER
+ingest ONLY docs where recording_date >= readWindowStart
+```
+Cook County recording lags the transaction (your "same year / within ~6 months" observation) — 6 months backward safely catches the purchase-money mortgage and closing package. Err generous here: one extra OCR is cheap; a missing first lien is not. (Consider 12 months if you ever see a miss.)
+
+## Pre-window docs — index-only, not skipped
+Still surface them from the index (no OCR):
+- **Count + type + date** → drives "N historical documents" and "2 historical lis pendens — resolved by {year} sale."
+- Mark `resolved_by:"sale"` / `historical:true` so they flow to the summary/chip/KPI exactly as the distress patch expects.
+The resolved-history display is unchanged — it never needed the document body, only the index.
+
+## 🔴 Exceptions — pre-window docs that must still be read
+Not everything clears at a sale. Before skipping OCR on a pre-window doc, check its **index type**:
+- **Tax liens (and other in-rem liens that run with the land)** survive a sale. If a pre-window doc is a `tax_lien` (or federal tax lien / special assessment), still surface it — flag "pre-sale, may survive — verify," and OCR it if you need the amount (these are rare, so the cost is negligible).
+- Everything else pre-window (mortgages, lis pendens, foreclosures, releases, judgments against the prior owner) is cleared by the sale → index-only is fine.
+
+## 🔴 Scope — this is a DEBT-engine optimization, NOT a global OCR gate
+The window narrows what the **debt/lien engine** reads. It must NOT become a blanket "never OCR anything older" rule, because other sections legitimately need older documents:
+- **Companion Parcel / assemblage** may need the **joint-acquisition deed** (grantor/grantee/consideration/both-PIN legal description) and the **separation deed**, which can predate the debt window.
+- **Ownership history** may need older deeds.
+
+Make document ingest **demand-driven (union of needs, deduped by doc number, cached):**
+```
+docsToOCR = union(
+  debtEngine.window(saleAnchor − BUFFER),      // post-sale window (this spec)
+  companionParcel.needs(),                     // joint-acquisition deed + separation deed, if assemblage
+  ownershipHistory.needs(),                    // any older deeds it renders
+  ...
+)                                              // dedupe by doc_number; cache forever
+```
+Each consumer requests the *specific* docs it needs; the ingester OCRs the union once. The debt window shrinks the debt contribution — it never prevents another section from requesting a document.
+- **Note:** in the common assemblage case the acquisition deed is already *inside* the debt window anyway — a preserved assemblage means ownership passed by quit-claim/nominal transfers (not sales), so `saleAnchor` stays at the joint acquisition and the deed is in-window. The union rule just guarantees correctness when it isn't.
+
+## 🔴 Fallback — no genuine sale, no cutoff
+If the Sales section shows **no genuine sale** (never sold / most-recent transfer is a quit-claim or nominal), there is **no valid anchor** — do NOT cut off. Ingest the full history (current behavior). The window is an optimization that only applies when a real sale gives a safe cutoff. (Consistent with the distress/clearing rules: a quit-claim is not a sale.)
+
+## Secondary speedup (independent of the window)
+Replit notes documents **download one at a time (~2s each)**. Parallelize the downloads with the same small concurrency cap already used for OCR (4–5), not just the OCR step — on a first build that alone cuts the serial download time substantially. The window reduces *how many* docs; concurrency reduces *how long each batch takes*.
+
+## 🔴 Tests
+```
+assert saleAnchor is read from the Sales section WITHOUT triggering any document OCR
+assert only docs with recording_date >= (saleAnchor − 6mo) are downloaded/OCR'd
+assert a purchase-money mortgage recorded shortly BEFORE the deed is still ingested (backward buffer)
+assert pre-window docs still appear in counts + "historical, resolved by sale" via the INDEX (no OCR)
+assert a pre-window TAX lien is still surfaced ("may survive — verify"), not silently dropped
+assert no genuine sale anchor => full history ingested (no cutoff)
+assert the window does NOT block another section from requesting a pre-window doc (demand-driven union; deduped/cached)
+assert an assemblage's joint-acquisition deed is OCR'd when the companion section needs it, even if pre-window
+// regression on known parcels:
+assert 3014 (sale 2014) skips OCR on the 1987/2001 lis pendens, 2012 foreclosure, 1999/2005 mortgages — index-only
+assert 3014 still OCRs the 2016 mortgage + 2021 modification (post-window) and shows the historical distress as resolved
+```
+
+## Expected impact
+First-build time drops roughly in proportion to how much of the history predates the sale — on long-history parcels that's the majority of the documents. Repeat views are already fast (cached). No change to correctness: the debt picture already ignores pre-sale documents; this just stops paying to read them.

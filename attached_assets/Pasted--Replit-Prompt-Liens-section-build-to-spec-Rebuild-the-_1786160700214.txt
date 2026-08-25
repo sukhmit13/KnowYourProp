@@ -1,0 +1,174 @@
+# Replit Prompt — Liens section — build to spec
+
+Rebuild the **Liens** section to match this spec exactly. Front-end / CSS + markup, PLUS the derived logic in the LOGIC section (lien position, active-vs-total, leverage, runway — all computed from the recorder data you already have). Bind shown values to real data; strings are placeholders. Implement CSS/HTML **verbatim** and check every CRITICAL DETAIL. Do not approximate.
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f; --goodSoft:#e9f4ec; --caution:#f0a41c; --cautionText:#96600a; --bad:#d13b26;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+
+## Structure (4 stacked cards)
+1. **Liens** (parent) — indigo SQUARE header + green **"Clear title"** badge + takeaway (jump-link-ready).
+2. **Debt Snapshot** (subsection, indigo credit-card icon) — 8 tiles incl. **Lien Position** + a verification caveat + the loan-lifecycle runway bar.
+3. **Property Records** (subsection, indigo file icon) — Clear/Refresh controls + 4 KPI tiles + document table + "view all on Recorder" link.
+4. **Owner Liens** (subsection, indigo building icon) — clean result banner + Recorder links + last-searched.
+
+## Shared CSS (verbatim)
+```css
+.cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04);margin-bottom:20px}
+.sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+.sh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+.sh .badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 9px;background:var(--card);border:1px solid #bcdcc4;color:var(--good)}
+.sh .badge .d{width:7px;height:7px;border-radius:50%;background:var(--good)}
+.sh .ctrls{margin-left:auto;display:flex;gap:8px}
+.ctrl{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:600;color:var(--ink2);cursor:pointer}
+.ctrl.clear{color:var(--good);border-color:#bcdcc4;background:var(--goodSoft)}
+.ctrl svg{width:12px;height:12px;fill:none;stroke:currentColor}
+/* takeaway */
+.take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px}
+.takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+.takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+.taket{font-family:var(--disp);font-size:20px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+.cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:8px}
+.cn:last-child{margin-bottom:0}
+.cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+.cn.g .dt{background:var(--good)} .cn.n .dt{background:#9aa1b0}
+.cn b{color:var(--ink);font-weight:600}
+```
+
+## Debt Snapshot CSS (verbatim)
+```css
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.dt2{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+.dt2 .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.dt2 .v{font-size:15px;font-weight:600;color:var(--ink);line-height:1.2;display:flex;align-items:center;gap:6px}
+.dt2 .v.ok{color:var(--good)}
+.dt2 .v svg{width:13px;height:13px;stroke:var(--good);fill:none;flex:none}
+.dt2 .s{font-size:10.5px;color:var(--muted);margin-top:3px}
+.dt2.pos{background:var(--indigoSoft);border-color:#dfe3f7}      /* Lien Position tile = highlighted */
+.dt2.pos .l{color:var(--indigo)}
+.dcaveat{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--ink2);line-height:1.5;margin-bottom:16px;padding:11px 14px;background:var(--card);border:1px solid #ecd49a;border-left:3px solid #e0a92e;border-radius:10px}
+.dcaveat svg{width:14px;height:14px;stroke:var(--cautionText);fill:none;flex:none;margin-top:1px}
+.dcaveat b{color:var(--cautionText);font-weight:700}
+.life{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+.lifeh{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:28px}   /* 28px clears the "Now" label above the bar */
+.runway{position:relative;height:8px;border-radius:999px;background:#e6e4dd;margin-bottom:8px}
+.runway .fill{position:absolute;left:0;top:0;height:100%;border-radius:999px;background:var(--indigo)}
+.runway .now{position:absolute;top:-4px;width:3px;height:16px;background:var(--ink);border-radius:2px}
+.runway .nowlab{position:absolute;top:-22px;transform:translateX(-50%);font-size:10px;font-weight:700;color:var(--indigo)}
+.lifeends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-bottom:12px} .lifeends b{color:var(--ink2)}
+.lifesum{font-size:12px;color:var(--ink2);line-height:1.5;padding-top:12px;border-top:1px solid var(--line)} .lifesum b{color:var(--ink);font-weight:600} .lifesum .gd{color:var(--good);font-weight:700}
+```
+
+## Property Records + Owner Liens CSS (verbatim)
+```css
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 16px;text-align:center}
+.kpi.ok{background:var(--goodSoft);border-color:#cfe6d6}     /* 0 active-liens / 0 lis-pendens = good */
+.kpi .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.kpi .n{font-family:var(--disp);font-size:30px;line-height:1;color:var(--ink)}
+.kpi.ok .n{color:var(--good)}
+.dtable{width:100%;border-collapse:collapse;font-size:12.5px}
+.dtable thead td{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:0 0 10px}
+.dtable thead td:last-child{text-align:right}
+.dtable tbody tr{border-top:1px solid var(--line)}
+.dtable td{padding:11px 0;vertical-align:middle}
+.dtable .doc a{font-family:var(--mono);font-size:12px;color:var(--indigo);text-decoration:none;font-weight:500}
+.dtable .badge2{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:4px 9px}
+.dtable .rel{margin-left:8px;font-size:10px;font-weight:600;color:var(--good)}
+.dtable .rec{text-align:right;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.dtable tr.released .doc a{color:var(--muted);text-decoration:line-through}
+.dtable tr.released td{opacity:.75}
+.allrec{display:block;text-align:center;margin-top:14px;font-size:12.5px;font-weight:600;color:var(--indigo);text-decoration:none}
+.clean{display:flex;align-items:center;gap:10px;background:var(--goodSoft);border:1px solid #cfe6d6;border-radius:11px;padding:13px 16px;margin-bottom:12px}
+.clean svg{width:18px;height:18px;stroke:var(--good);fill:none;flex:none}
+.clean .x{font-size:13px;font-weight:600;color:var(--ink)}
+.olinks{display:flex;flex-direction:column;gap:7px;font-size:12px}
+.olinks a{color:var(--indigo);text-decoration:none;display:inline-flex;align-items:center;gap:7px} .olinks a svg{width:12px;height:12px;stroke:var(--indigo);fill:none}
+.olinks .chip{font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:2px 7px}
+.olast{font-size:10.5px;color:var(--muted);margin-top:10px}
+```
+
+## HTML (verbatim; bind placeholders). Debt Snapshot tile order matters:
+```html
+<!-- LIENS parent -->
+<div class="cardbox"><div class="sh"><span class="sq"></span><span class="t">Liens</span><span class="badge"><span class="d"></span>{TITLE_STATUS}</span></div>
+  <div class="take"><div class="takeh"><svg …lightbulb…></svg>The Takeaway</div>
+    <div class="taket">{HEADLINE}</div>
+    <div class="cn g"><span class="dt"></span><span><b>Low leverage.</b> …$277,000 (First Eagle Bank, 2023) — roughly a quarter of estimated value. Refinancing risk Low, ~27 years runway.</span></div>
+    <div class="cn g"><span class="dt"></span><span><b>No distress.</b> Zero active liens, no foreclosure, no mechanics liens, no lis pendens.</span></div>
+    <div class="cn g"><span class="dt"></span><span><b>Owner LLC is clean.</b> No personal liens found against {OWNER_LLC}.</span></div>
+    <div class="cn n"><span class="dt"></span><span>{N_DOCS} recorded documents — {N_MTG} mortgages (older released) and {N_MOD} modifications.</span></div>
+  </div>
+</div>
+
+<!-- DEBT SNAPSHOT -->
+<div class="cardbox"><div class="sh"><svg class="hic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span class="t">Debt Snapshot</span></div>
+  <div class="g4">
+    <div class="dt2"><div class="l">Lender</div><div class="v">{LENDER}</div></div>
+    <div class="dt2"><div class="l">Original Amount</div><div class="v">{AMOUNT}</div><div class="s">recorded — not current balance</div></div>
+    <div class="dt2 pos"><div class="l">Lien Position</div><div class="v">{POSITION}</div><div class="s">derived from record order</div></div>
+    <div class="dt2"><div class="l">Recorded</div><div class="v">{REC_DATE}</div></div>
+    <div class="dt2"><div class="l">Maturity</div><div class="v">{MATURITY}</div><div class="s">est. · 30-yr (residential)</div></div>
+    <div class="dt2"><div class="l">Foreclosure</div><div class="v ok"><svg …check…></svg>None on record</div></div>
+    <div class="dt2"><div class="l">Mechanics Liens</div><div class="v ok"><svg …check…></svg>None on record</div></div>
+    <div class="dt2"><div class="l">Refinancing Risk</div><div class="v ok">{REFI_RISK}</div><div class="s">{YRS_LEFT} yrs remaining</div></div>
+  </div>
+  <div class="dcaveat"><svg …alert-triangle…></svg><span><b>Verify before relying on this.</b> The amount shown is the <b>original recorded loan</b>, not the current balance. <b>Lien position</b> is inferred from the recording order of unreleased liens — confirm the payoff amount and priority (and any undrawn credit lines) for a true equity picture.</span></div>
+  <div class="life"><div class="lifeh">Loan lifecycle · refinancing runway</div>
+    <div class="runway"><span class="fill" style="width:{ELAPSED_PCT}%"></span><span class="now" style="left:{ELAPSED_PCT}%"></span><span class="nowlab" style="left:{ELAPSED_PCT}%">Now</span></div>
+    <div class="lifeends"><span>Recorded <b>{REC_MONTH_YR}</b></span><span>Est. maturity <b>{MATURITY}</b></span></div>
+    <div class="lifesum">~{ELAPSED_YRS} yrs elapsed · <b>{YRS_LEFT} yrs remaining</b> on a 30-yr term · refinancing risk <span class="gd">{REFI_RISK}</span> · {N_MOD} modifications recorded.</div>
+  </div>
+</div>
+
+<!-- PROPERTY RECORDS -->
+<div class="cardbox"><div class="sh"><svg class="hic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="t">Property Records</span>
+    <div class="ctrls"><button class="ctrl clear"><svg …check…></svg>Clear</button><button class="ctrl"><svg …refresh…></svg>Refresh</button></div></div>
+  <div class="kpis">
+    <div class="kpi"><div class="l">Total Docs</div><div class="n">{N_DOCS}</div></div>
+    <div class="kpi"><div class="l">Mortgages</div><div class="n">{N_MTG}</div></div>
+    <div class="kpi ok"><div class="l">Active Liens</div><div class="n">{N_ACTIVE_LIENS}</div></div>
+    <div class="kpi ok"><div class="l">Lis Pendens</div><div class="n">{N_LIS_PENDENS}</div></div>
+  </div>
+  <table class="dtable"><thead><tr><td>Doc #</td><td>Type</td><td>Recorded</td></tr></thead><tbody>
+    <tr><td class="doc"><a href="{URL}">{DOC#}</a></td><td><span class="badge2">{TYPE}</span></td><td class="rec">{DATE}</td></tr>
+    <!-- released docs get class="released" on the <tr> and a <span class="rel">✓ Released</span> after the badge -->
+  </tbody></table>
+  <a class="allrec" href="{RECORDER_URL}">View all {N_DOCS} documents on Cook County Recorder ↗</a>
+</div>
+
+<!-- OWNER LIENS -->
+<div class="cardbox"><div class="sh"><svg class="hic" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg><span class="t">Owner Liens · {OWNER_LLC}</span></div>
+  <div class="clean"><svg …check-circle…></svg><span class="x">No personal liens found against {OWNER_LLC}</span></div>
+  <div class="olinks"><a href="#"><svg …external…></svg>View all property documents on Recorder</a>
+    <a href="#"><svg …external…></svg>View owner name search results <span class="chip">{OWNER_LLC}</span></a></div>
+  <div class="olast">Last searched {SEARCH_DATE}</div>
+</div>
+```
+(Fill the `<svg …>` placeholders with the icons noted; check icon = `M20 6 9 17l-5-5`, refresh = `M23 4v6h-6 / M20.49 15a9 9 0 1 1-2.12-9.36L23 10`, external = `M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6 / M15 3h6v6 / M10 14 21 3`, check-circle = `M22 11.08V12a10 10 0 1 1-5.93-9.14 / polyline 22 4 12 14.01 9 11.01`, alert-triangle = `M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z / M12 9v4 / M12 17h.01`.)
+
+## LOGIC (derived — compute in the backend, do not hardcode)
+1. **Released-doc matching.** Match each mortgage to its release/satisfaction. A mortgage with a recorded release is discharged → mark its table row `released` (strike-through + "✓ Released") and EXCLUDE it from active-debt math.
+2. **Lien Position `{POSITION}`.** Among **unreleased** mortgages, order by record date. Earliest unreleased = 1st, next = 2nd, etc. If exactly one unreleased mortgage → `"1st · sole active"`. If several → show this one's ordinal + count (e.g. `"2nd of 2"`). **If it can't be determined, render `"Undetermined"` — never default to "1st".**
+3. **Active vs total.** `{N_MTG}` in the KPI is the lifetime count; the takeaway's leverage claim must use **total active (unreleased) secured debt**, i.e. the SUM of unreleased mortgage amounts — not just the one shown. If more than one active mortgage exists, the takeaway must NOT say "single mortgage."
+4. **Leverage / "~a quarter".** LTV = total active recorded debt ÷ estimated market value (from the parcel/assessment data). This is an estimate off original recorded amounts — hedge the wording ("roughly," "estimated"). If estimated value isn't available, drop the fraction and just state the amount.
+5. **Refinancing runway.** `{ELAPSED_PCT}` = (today − recorded) ÷ term × 100; `{ELAPSED_YRS}`, `{YRS_LEFT}` from the 30-yr term. Refi-risk tier is your existing rule (Low when many years remain).
+6. **Title status badge `{TITLE_STATUS}`.** Green "Clear title" only when active liens = 0 AND lis pendens = 0 AND no foreclosure. Otherwise reflect the real state (e.g. amber "Liens on file" / red "Lis pendens") — do not hardcode "Clear title."
+7. The **verify caveat always shows** in Debt Snapshot (recorded amount vs current balance is always a real limitation).
+
+## CRITICAL DETAILS (check ALL)
+1. **Lien Position tile is the indigo-highlighted one** (`.dt2.pos`, indigoSoft bg, indigo label) — it's the derived field, visually distinct from the neutral paper tiles.
+2. **"Original Amount"** label + "recorded — not current balance" sub — NOT just "Amount".
+3. **Foreclosure / Mechanics Liens "None on record" show a green check + green text** (`.v.ok`); Refinancing Risk "Low" is green text. All other tile values are neutral ink.
+4. **Active Liens (0) and Lis Pendens (0) KPIs use the green-tinted `.kpi.ok` box**; Total Docs and Mortgages are neutral.
+5. **Released mortgage rows** are struck-through, greyed, with a green "✓ Released" tag after the type badge.
+6. **The lifecycle "Now" label needs 28px header clearance** (`.lifeh margin-bottom:28px`) so it doesn't collide with the title.
+7. **Header hierarchy:** Liens = filled indigo SQUARE; Debt Snapshot / Property Records / Owner Liens = indigo outline ICONS (credit-card, file, building).
+8. **The amber caveat is the only amber**; the single green run (title badge, check tiles, 0-KPIs, released tag, clean banner) is all `--good`. Nothing red unless the data is genuinely bad (see logic #6).
+9. **Serif (`--disp`) only on:** the takeaway headline, the KPI numbers, and the maturity/amount are NOT serif (tile values are Inter). KPI big numbers ARE serif.
+10. **"Clear" control:** confirm what it does before shipping — if it's a reset/clear-cache action, style it neutral like Refresh (not green). Green currently implies "all-clear status," which may be the wrong signal for a button.

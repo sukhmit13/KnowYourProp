@@ -1,0 +1,661 @@
+═══════════════════════════════════════════════════════════════════════════
+STEP 2: CREATE CACHING UTILITY
+═══════════════════════════════════════════════════════════════════════════
+
+Create /server/utils/cache.js:
+
+This utility handles all caching operations. Cache files are stored in 
+/server/data/cache/{category}/{key}.json
+
+Key functions:
+- checkCache(key): Returns cached data if valid, null if expired/missing
+- saveCache(key, data, daysValid): Saves data with expiration
+- isExpired(cached, daysValid): Checks if cache is still valid
+- hashAddress(address): Creates consistent hash from address string
+
+Cache durations:
+- Property tax: 30 days (changes slowly)
+- Foreclosure: 14 days (legal processes are slow)
+- Liens: 7 days (can be filed anytime)
+- Water bill: 30 days (monthly billing)
+
+Example cache file structure:
+{
+  "data": { /* actual data */ },
+  "cached": "2026-01-28T10:00:00Z",
+  "expiresIn": 30,
+  "expiresAt": "2026-02-27T10:00:00Z"
+}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 3: CREATE SCRAPING SERVICES
+═══════════════════════════════════════════════════════════════════════════
+
+Create /server/services/preTitleService.js
+
+This file contains all scraping functions. Use Puppeteer for sites that require
+JavaScript rendering, or axios + cheerio for simpler sites.
+
+IMPORTANT SCRAPING RULES:
+- Always check cache FIRST before scraping
+- Use try/catch and return graceful failures
+- Add 1-2 second delays between requests to avoid blocking
+- Log all scraping errors for monitoring
+- Provide manual check URLs in case scraping fails
+
+─────────────────────────────────────────────────────────────────────────────
+SERVICE 1: getPropertyTaxStatus(pin)
+─────────────────────────────────────────────────────────────────────────────
+
+URL: https://www.cookcountytreasurer.com/search/
+Input: PIN (Property Index Number)
+Cache: 30 days
+Method: Puppeteer (site uses JavaScript)
+
+Steps:
+1. Check cache for `property_tax/${pin}.json`
+2. If cached and valid, return cached data
+3. Launch headless browser
+4. Navigate to treasurer site
+5. Enter PIN in search field
+6. Click search button
+7. Wait for results to load
+8. Extract data:
+   - Current year 1st installment status (PAID/UNPAID)
+   - Current year 2nd installment status (PAID/UNPAID)
+   - Prior year status (PAID/UNPAID)
+   - Total amount owed (dollar amount)
+   - Tax sale status (Yes/No/Pending)
+9. Save to cache
+10. Return data
+
+Data structure to return:
+{
+  pin: string,
+  currentYear1st: { status: 'PAID'|'UNPAID', amount: number },
+  currentYear2nd: { status: 'PAID'|'UNPAID', amount: number },
+  priorYear: { status: 'PAID'|'UNPAID', amount: number },
+  totalOwed: number,
+  taxSaleStatus: 'None'|'Pending'|'Sold',
+  lastChecked: timestamp
+}
+
+Error handling:
+If scraping fails, return:
+{
+  error: true,
+  message: 'Unable to verify property tax status',
+  manualCheckUrl: 'https://www.cookcountytreasurer.com/search/',
+  lastChecked: timestamp
+}
+
+─────────────────────────────────────────────────────────────────────────────
+SERVICE 2: getForeclosureStatus(address)
+─────────────────────────────────────────────────────────────────────────────
+
+URL: https://www.cookcountyclerkofcourt.org/
+Input: Street address
+Cache: 14 days
+Method: Puppeteer (court site uses JavaScript)
+
+Steps:
+1. Check cache for `foreclosure/${hashAddress(address)}.json`
+2. If cached and valid, return cached data
+3. Launch headless browser
+4. Navigate to circuit court case search
+5. Select "Address Search" option
+6. Enter address
+7. Select case type "CH" (Chancery - includes foreclosures)
+8. Set date range to last 5 years
+9. Click search
+10. Wait for results
+11. Extract all foreclosure cases:
+    - Case number
+    - Filed date
+    - Status (PENDING/ACTIVE/CLOSED/DISMISSED)
+    - Plaintiff (usually the lender)
+12. Categorize cases:
+    - activeCases: status includes PENDING or ACTIVE
+    - closedCases: status includes CLOSED or DISMISSED
+13. Save to cache
+14. Return data
+
+Data structure to return:
+{
+  hasForeclosure: boolean,
+  activeCases: [
+    { caseNumber, filedDate, status, plaintiff }
+  ],
+  closedCases: [
+    { caseNumber, filedDate, status, plaintiff }
+  ],
+  totalCases: number,
+  lastChecked: timestamp
+}
+
+Error handling:
+If scraping fails or no results found, return:
+{
+  hasForeclosure: false,
+  activeCases: [],
+  closedCases: [],
+  totalCases: 0,
+  note: 'Unable to verify or no cases found',
+  manualCheckUrl: 'https://www.cookcountyclerkofcourt.org/',
+  lastChecked: timestamp
+}
+
+─────────────────────────────────────────────────────────────────────────────
+SERVICE 3: getRecentLiens(pin)
+─────────────────────────────────────────────────────────────────────────────
+
+URL: https://www.cookcountyil.gov/service/records-search
+Input: PIN (Property Index Number)
+Cache: 7 days
+Method: Puppeteer (recorder site uses JavaScript)
+
+Steps:
+1. Check cache for `liens/${pin}.json`
+2. If cached and valid, return cached data
+3. Launch headless browser
+4. Navigate to recorder of deeds search
+5. Select "PIN Search"
+6. Enter PIN
+7. Set date range: 10 years ago to today
+8. Click search
+9. Wait for document results
+10. Extract all documents and categorize:
+    - MORTGAGES: doc type includes "MORTGAGE" or "DEED OF TRUST"
+    - LIENS: doc type includes "LIEN" (but not "RELEASE")
+    - RELEASES: doc type includes "RELEASE"
+    - DEEDS: doc type includes "DEED" (but not "TRUST" or "MORTGAGE")
+11. For each document, extract:
+    - Document type
+    - Recorded date
+    - Document number
+    - Grantor (who is giving)
+    - Grantee (who is receiving)
+    - Amount (if available)
+12. Determine active liens:
+    - A lien is active if no corresponding release exists
+    - Match by document number or date proximity
+13. Classify each active lien:
+    - JUDGMENT LIEN: severity HIGH, must be paid at closing
+    - MECHANIC'S LIEN: severity HIGH, contractor dispute
+    - IRS/TAX LIEN: severity CRITICAL, not financeable
+    - HOA LIEN: severity MEDIUM, must be paid at closing
+14. Analyze ownership transfers:
+    - Count total transfers in 10 years
+    - Check for quick flips (multiple sales in <24 months)
+    - Check for foreclosure indicators (bank ownership, trustee deeds)
+    - Check for quit claim deeds (less protection)
+15. Save to cache
+16. Return data
+
+Data structure to return:
+{
+  mortgages: [
+    { docType, recordedDate, amount, lender }
+  ],
+  liens: [
+    { docType, recordedDate, amount, creditor, severity, category }
+  ],
+  activeLiens: [
+    { docType, recordedDate, amount, creditor, severity, impact }
+  ],
+  releases: [
+    { docType, recordedDate }
+  ],
+  ownership: {
+    transfers: number,
+    currentOwner: string,
+    currentOwnerSince: date,
+    previousOwners: [ { owner, dateSold } ],
+    redFlags: [
+      { flag: string, detail: string, impact: string }
+    ]
+  },
+  lastChecked: timestamp
+}
+
+Lien classification logic:
+- If docType includes 'JUDGMENT': category='judgment', severity='high'
+- If docType includes 'MECHANIC': category='mechanic', severity='high'
+- If docType includes 'IRS' or 'TAX': category='tax', severity='critical'
+- If docType includes 'HOA' or 'ASSOCIATION': category='hoa', severity='medium'
+- Otherwise: category='other', severity='medium'
+
+Ownership red flags to detect:
+- 3+ transfers in <24 months → "Frequent transfers - possible flip"
+- Grantee includes 'BANK' or 'REO' → "Bank-owned (REO) - former foreclosure"
+- DocType includes 'TRUSTEE' → "Trustee's deed - foreclosure transfer"
+- DocType includes 'QUIT CLAIM' → "Quit claim deed - less protection"
+
+Error handling:
+If scraping fails, return:
+{
+  error: true,
+  message: 'Unable to verify lien status',
+  manualCheckUrl: 'https://www.cookcountyil.gov/service/records-search',
+  lastChecked: timestamp
+}
+
+─────────────────────────────────────────────────────────────────────────────
+SERVICE 4: getWaterBillStatus(address)
+─────────────────────────────────────────────────────────────────────────────
+
+URL: https://www.cityofchicago.org/city/en/depts/fin/provdrs/water.html
+Input: Street address
+Cache: 30 days
+Method: Puppeteer (city site uses JavaScript)
+
+Steps:
+1. Check cache for `water/${hashAddress(address)}.json`
+2. If cached and valid, return cached data
+3. Launch headless browser
+4. Navigate to city water department site
+5. Click "Check Your Balance" or similar link
+6. Enter address in search field
+7. Click search
+8. Wait for results OR "no account found" message
+9. If account found, extract:
+   - Account number
+   - Current balance
+   - Last bill date
+   - Account status
+10. Parse balance as number (remove $, commas)
+11. Determine if delinquent (balance > $500 = concerning)
+12. Save to cache
+13. Return data
+
+Data structure to return:
+{
+  found: boolean,
+  accountNumber: string,
+  balance: number,
+  balanceFormatted: string (e.g., "$2,400.00"),
+  lastBillDate: string,
+  status: string,
+  isDelinquent: boolean (balance > $500),
+  lastChecked: timestamp
+}
+
+If account not found:
+{
+  found: false,
+  message: 'No water account found for this address',
+  note: 'Property may not have city water service',
+  lastChecked: timestamp
+}
+
+Error handling:
+If scraping fails, return:
+{
+  found: false,
+  error: true,
+  message: 'Unable to verify water bill status',
+  manualCheckUrl: 'https://www.cityofchicago.org/city/en/depts/fin/provdrs/water.html',
+  note: 'In Chicago, water bills transfer with property and must be paid at closing',
+  lastChecked: timestamp
+}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 4: CREATE MAIN ENDPOINT
+═══════════════════════════════════════════════════════════════════════════
+
+Create /server/routes/preTitleCheck.js
+
+This is the main API endpoint that orchestrates all checks and returns results.
+
+ENDPOINT: POST /api/pre-title-check
+
+REQUEST BODY:
+{
+  pin: "14-08-203-018-0000",
+  address: "1542 N Western Ave, Chicago, IL",
+  propertyClass: "211" (from Cook County Assessor data you already have)
+}
+
+PROCESS:
+1. Validate inputs (PIN and address required)
+2. Run all services in parallel using Promise.allSettled():
+   - getPropertyTaxStatus(pin)
+   - getForeclosureStatus(address)
+   - getRecentLiens(pin)
+   - getWaterBillStatus(address)
+   - Get building violations (use your existing code)
+3. Wait for all to complete (even if some fail)
+4. Calculate overall verdict based on results
+5. Return comprehensive response
+
+VERDICT CALCULATION LOGIC:
+
+Start with score = 100, then subtract points for issues:
+
+Property Tax:
+- Total owed > $5,000: -50 points, CRITICAL, "NOT FINANCEABLE until paid"
+- Total owed $1-$5,000: -20 points, WARNING, "Must be paid at closing"
+- Tax sale pending: -50 points, CRITICAL, "NOT FINANCEABLE"
+
+Foreclosure:
+- Active case exists: -50 points, CRITICAL, "NOT FINANCEABLE until resolved"
+- Recent closed case (within 2 years): -20 points, WARNING, "Verify title clear"
+
+Liens:
+- IRS/Tax lien: -50 points, CRITICAL, "NOT FINANCEABLE until cleared"
+- Judgment lien: -30 points, HIGH, "Must be paid at closing"
+- Mechanic's lien: -30 points, HIGH, "Must be resolved"
+- HOA lien: -20 points, MEDIUM, "Must be paid at closing"
+
+Building Violations (use your existing code):
+- Open structural violation: -50 points, CRITICAL, "NOT FINANCEABLE"
+- Open fire safety violation: -50 points, CRITICAL, "NOT FINANCEABLE"
+- Open minor violation: -10 points, INFO, "Verify with DOB"
+
+Water Bill:
+- Balance > $1,000: -10 points, INFO, "Add to closing costs"
+
+Ownership Red Flags:
+- Quick flip (<6 months): -15 points, WARNING, "Inspect carefully"
+- Recent foreclosure: -10 points, INFO, "Review title carefully"
+
+FINAL VERDICT:
+- Score >= 80: ✅ LIKELY FINANCEABLE (green)
+- Score 50-79: ⚠️ FINANCING MAY BE DIFFICULT (yellow)
+- Score < 50: 🚩 NOT FINANCEABLE (red)
+
+RESPONSE STRUCTURE:
+{
+  success: true,
+  verdict: {
+    status: 'financeable' | 'difficult' | 'not-financeable',
+    icon: '✅' | '⚠️' | '🚩',
+    title: 'LIKELY FINANCEABLE',
+    color: 'green' | 'yellow' | 'red',
+    score: 85,
+    message: 'Public records look good. Proceed with professional title search.',
+    issues: [
+      {
+        severity: 'critical' | 'high' | 'medium' | 'info',
+        category: 'Property Tax' | 'Foreclosure' | 'Lien' | etc,
+        message: 'Description of issue',
+        impact: 'What this means for financing'
+      }
+    ]
+  },
+  details: {
+    propertyTax: { /* from service */ },
+    foreclosure: { /* from service */ },
+    liens: { /* from service */ },
+    waterBill: { /* from service */ },
+    violations: { /* from your existing code */ }
+  },
+  disclaimers: [
+    'This is a preliminary check using publicly available records only.',
+    'Does NOT replace professional title search.',
+    'Checks last 10 years of public records - not full chain of title.',
+    'Order professional title search ($300-500) before closing.'
+  ],
+  checkedItems: [
+    '✓ Property tax status (last 5 years)',
+    '✓ Foreclosure history (last 10 years)',
+    '✓ Liens & mortgages (last 10 years)',
+    '✓ Water bill status',
+    '✓ Building violations',
+    '✓ Ownership transfers (last 10 years)'
+  ],
+  notChecked: [
+    '✗ Full chain of title (40-60 years)',
+    '✗ Ancient liens or claims',
+    '✗ Off-record issues (probate, divorce, bankruptcy)',
+    '✗ Boundary disputes or survey issues',
+    '✗ Hidden easements or restrictions'
+  ],
+  nextSteps: [
+    {
+      action: 'Order Professional Title Search',
+      priority: 'Required before closing',
+      cost: '$300-500',
+      timeline: '3-10 business days'
+    },
+    {
+      action: 'Get Pre-Approved for Financing',
+      priority: 'Recommended if verdict is positive',
+      link: '/dscr-calculator' // Your lead gen opportunity
+    }
+  ],
+  lastUpdated: timestamp
+}
+
+ERROR HANDLING:
+If ALL services fail, return:
+{
+  success: false,
+  error: 'Unable to complete pre-title check',
+  message: 'Please try again later or check records manually',
+  manualCheckLinks: {
+    propertyTax: 'https://www.cookcountytreasurer.com/search/',
+    foreclosure: 'https://www.cookcountyclerkofcourt.org/',
+    liens: 'https://www.cookcountyil.gov/service/records-search',
+    waterBill: 'https://www.cityofchicago.org/city/en/depts/fin/provdrs/water.html'
+  }
+}
+
+If SOME services fail, include partial results with notes about what couldn't be checked.
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 5: CREATE FRONTEND DISPLAY
+═══════════════════════════════════════════════════════════════════════════
+
+Add to property report page (where you show zoning, demographics, etc.)
+
+SECTION TITLE: "💰 Can I Finance This Property?"
+
+DISPLAY LAYOUT:
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 💰 CAN I FINANCE THIS PROPERTY?                                        │
+│                                                                         │
+│ [Large verdict badge - color coded]                                    │
+│ ✅ LIKELY FINANCEABLE                                                  │
+│ Based on publicly available records                                    │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Public Record Checks:
+─────────────────────
+
+✅ Property Taxes: CURRENT
+   └─ All taxes paid through 2024
+   └─ No delinquencies
+
+✅ Building Violations: NO OPEN VIOLATIONS
+   └─ Last inspection: Passed (March 2024)
+
+✅ Foreclosure Status: CLEAR
+   └─ No foreclosure history (last 10 years)
+
+✅ Recent Liens: CLEAN
+   └─ 1 mortgage: $280,000 (current)
+   └─ No judgment liens
+
+✅ Water Bill: CURRENT
+   └─ No outstanding balance
+
+✅ Ownership: STABLE
+   └─ Current owner since 2020
+   └─ 2 transfers in 10 years (normal)
+
+[View Detailed Breakdown ▼] (collapsible section with full details)
+
+─────────────────────────────────────────────────────────────────────────
+
+⚠️ Important Disclaimer
+
+This is a PRELIMINARY check using publicly available records only.
+It does NOT replace a professional title search.
+
+What we checked:
+✓ Property tax status (last 5 years)
+✓ Building violations (last 10 years)
+✓ Foreclosure history (last 10 years)
+✓ Recent liens & mortgages (last 10 years)
+✓ Water bill status
+✓ Ownership transfers (last 10 years)
+
+What we CANNOT check:
+✗ Full chain of title (40-60 years)
+✗ Ancient liens or claims
+✗ Off-record issues (probate, divorce, bankruptcy)
+✗ Boundary disputes
+✗ Hidden easements or restrictions
+
+─────────────────────────────────────────────────────────────────────────
+
+Next Steps:
+
+1. ✅ Public records look good - proceed with confidence
+
+2. 📋 Order Professional Title Search
+   Recommended before making offer or going to closing
+   Cost: $300-500 | Timeline: 3-10 business days
+
+3. 💰 Calculate Investment Returns
+   [Open DSCR Calculator →] (link to your calculator/lead gen)
+
+─────────────────────────────────────────────────────────────────────────
+
+STYLING:
+- Use color coding (green/yellow/red) for verdict badge
+- Use icons (✅ ⚠️ 🚩) for visual clarity
+- Make disclaimer prominent but not scary
+- Use collapsible sections for details to avoid overwhelming user
+- Show "Loading..." state while checks run (first time)
+- Show "From cache - updated X days ago" for cached results
+
+PROGRESSIVE LOADING:
+If cache exists, show it immediately with note "Updating..."
+Then replace with fresh data when scraping completes (2-15 seconds later)
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 6: ERROR HANDLING & MONITORING
+═══════════════════════════════════════════════════════════════════════════
+
+Create /server/utils/monitoring.js
+
+Log all scraping errors:
+- Timestamp
+- Service name (which scraper failed)
+- Error message
+- Stack trace
+- Frequency
+
+Write to /server/logs/scraping_errors.log
+
+If failure rate exceeds threshold (e.g., >25% of requests fail), log alert:
+"HIGH FAILURE RATE: [Service] failing X% of requests"
+
+This helps you identify when a site changes and breaks your scraper.
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 7: TESTING
+═══════════════════════════════════════════════════════════════════════════
+
+Test with real Chicago addresses:
+
+TEST CASES:
+1. Clean property (no issues) - should return ✅ FINANCEABLE
+2. Delinquent taxes - should return 🚩 NOT FINANCEABLE
+3. Active foreclosure - should return 🚩 NOT FINANCEABLE
+4. Open structural violation - should return 🚩 NOT FINANCEABLE
+5. Recent foreclosure (closed) - should return ⚠️ DIFFICULT
+6. Judgment lien - should return ⚠️ DIFFICULT
+
+For each test:
+- Verify data accuracy against manual check
+- Verify cache is working (second query is instant)
+- Verify verdict matches expected result
+- Verify error handling (test with invalid PIN/address)
+
+═══════════════════════════════════════════════════════════════════════════
+PERFORMANCE TARGETS
+═══════════════════════════════════════════════════════════════════════════
+
+FIRST QUERY (no cache):
+- Total time: 10-15 seconds max
+- All services run in parallel
+- Show progressive loading to user
+
+CACHED QUERY:
+- Total time: <100ms
+- No external requests
+- Instant results
+
+CACHE HIT RATE (goal):
+- >80% of queries should hit cache
+- Most users check same properties within cache window
+
+RELIABILITY:
+- At least 3 out of 5 services should succeed
+- If all fail, provide manual check links
+- Never block user from seeing partial results
+
+═══════════════════════════════════════════════════════════════════════════
+FILE STRUCTURE SUMMARY
+═══════════════════════════════════════════════════════════════════════════
+
+/server
+  /data
+    /cache
+      /property_tax
+        {PIN}.json
+      /foreclosure
+        {ADDRESS_HASH}.json
+      /liens
+        {PIN}.json
+      /water
+        {ADDRESS_HASH}.json
+  /services
+    preTitleService.js (all scraping functions)
+  /routes
+    preTitleCheck.js (main API endpoint)
+  /utils
+    cache.js (caching utilities)
+    monitoring.js (error logging)
+  /logs
+    scraping_errors.log
+
+/client
+  /components
+    PreTitleCheck.jsx (UI component for property page)
+
+═══════════════════════════════════════════════════════════════════════════
+COST & MAINTENANCE
+═══════════════════════════════════════════════════════════════════════════
+
+COSTS:
+- Data: $0 (all public sources)
+- Hosting: Standard Replit costs (no additional)
+- Total per query: $0
+
+MAINTENANCE:
+- Monitor scraping_errors.log weekly
+- If scrapers break due to site redesigns, update selectors
+- Review cache durations quarterly (adjust if needed)
+- Update disclaimer text if legal requirements change
+
+SCALABILITY:
+- With aggressive caching, can handle 1000s of queries/day
+- Most queries hit cache (no scraping needed)
+- Rate limiting prevents overwhelming source sites
+- If volume grows significantly, consider paid data APIs
+
+═══════════════════════════════════════════════════════════════════════════
+END OF INSTRUCTIONS
+═══════════════════════════════════════════════════════════════════════════
+
+PRIORITY REMINDERS:
+1. Implement caching FIRST - critical for speed and reliability
+2. Use Promise.allSettled() for parallel execution
+3. Always return graceful failures - never block user
+4. Make disclaimer prominent - this is preliminary check only
+5. Link to DSCR calculator for lead generation opportunity

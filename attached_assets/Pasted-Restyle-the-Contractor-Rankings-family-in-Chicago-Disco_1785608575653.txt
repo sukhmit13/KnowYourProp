@@ -1,0 +1,32 @@
+Restyle the "Contractor Rankings" family in Chicago Discovery — Top General Contractors, Top Permit Expeditors, and Minority Contractor Directory — to match our report design system. These three views share one ranked-list component; make the changes at the shared-component level so all three update together. Front-end / styling only — do NOT change the ranking logic, the permit-activity data, the certification data, search behavior, routing, or auth.
+
+Design tokens (use existing CSS variables; add any missing):
+
+JetBrains Mono for section titles + rank numbers; Inter for body; Instrument Serif for the big numbers in expanded stat tiles
+--indigo:#2b3a9e, --indigoSoft:#ecedf9, --ink:#141414, --ink2:#565651, --muted:#8b8a84, --line:#eae8e2, --paper:#faf9f6
+
+Global fix — no black anywhere. Every active/selected filter pill, and the search button, must be --indigo with white text, never black. This applies to all of these currently-black controls: the "Total" metric pill (Contractors & Expeditors), and in the Minority Directory the "All Certs" pill, the "All Ethnicities" pill, the "Permits" sort pill, and the "Search" button. Inactive pills stay white with a --line border and --ink2 text.
+
+Filter pills: rounded-full, 1px --line border, white background, --ink2 text, ~7px×13px padding, optional small leading icon. Active state = solid --indigo background, white text, indigo border (icon turns white too). One active pill per filter group.
+
+Section header: a single indigo icon + mono uppercase title (e.g. "TOP CHICAGO GENERAL CONTRACTORS", "TOP CHICAGO PERMIT EXPEDITORS", "MINORITY CONTRACTOR DIRECTORY") — one icon only, no bullet beside it — with a muted subtitle line beneath (source + timeframe).
+
+Ranked row (shared across all three):
+
+Rank in indigo JetBrains Mono (#1, #2…), fixed ~34px width — not black.
+Name in bold --ink. In the Minority Directory, append the cert badge (e.g. "MBE") as a small --indigoSoft-background / indigo-text chip, followed by the ethnicity label in neutral --ink2 text — never colored by ethnicity or cert type.
+Optional muted "Last permit: [date]" sub-line.
+Right side: the metric as a neutral grey count pill (
+#f1efe9 background, --ink text, rounded-full, small leading icon) — e.g. "1,154" or "195 permits" — with a "▾ More" / "▴ Less" expander beneath it in indigo.
+Thin --line divider between rows.
+
+Expanded detail (the "More" state — same for all three):
+
+A 4-up grid of stat tiles (--paper background, --line border, rounded 9px, centered): Total Permits, Reported Value, New Construction, Renovation — each a small mono uppercase label above an Instrument Serif number. (Reuse the exact stat-tile component from the architect cards.)
+A "CAPABILITIES" mono-uppercase label followed by the NAICS code + description in a small --paper chip.
+Contact lines (address, phone, email), each with a small indigo leading icon.
+A right-aligned "↗ View permits" link in indigo.
+
+Search bar (Minority Directory only): full-width input with --paper background and --line border, rounded 10px, paired with a solid --indigo "Search" button (white text) — not black.
+
+Keep it factual: ranking is by permit activity only. Do not add star ratings, quality scores, "best contractor" language, or any coloring of the cert/ethnicity categories. Those come from the City of Chicago certified directory and stay neutral.

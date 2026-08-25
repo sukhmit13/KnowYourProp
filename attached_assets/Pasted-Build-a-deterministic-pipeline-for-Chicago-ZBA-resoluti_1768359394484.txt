@@ -1,0 +1,90 @@
+Build a deterministic pipeline for Chicago ZBA resolutions with ward-filtered attorney rollups.
+
+ADMIN INPUT (bulk-friendly):
+- A textbox that accepts many ZBA resolution PDF URLs (one per line).
+- Optional: meeting_date (YYYY-MM-DD); otherwise derive decision_date from filename when possible.
+
+INGEST:
+For each resolution PDF URL:
+1) Download the PDF.
+2) Extract text (pdf text extraction; no LLM for parsing).
+3) Parse each case into a row with:
+   - case_id
+   - applicant_name
+   - appearance_for (string; may be "Same as Applicant")
+   - outcome (APPROVED / DENIED / CONTINUED / WITHDRAWN / UNKNOWN)
+   - decision_date (derive from filename e.g., Resolutions_31JAN2025.pdf; fallback NULL)
+   - address (if present; else NULL)
+   - source_resolution_url
+   - applicant_snippet, appearance_snippet, outcome_snippet (for audit)
+
+STORE:
+zoning_actions(
+  case_id TEXT,
+  decision_date DATE,
+  applicant_name TEXT,
+  appearance_for TEXT,
+  outcome TEXT,
+  address TEXT,
+  ward INT NULL,              -- MUST be derived after parsing
+  representative_type TEXT,   -- SELF_REP / THIRD_PARTY
+  is_verified_attorney_il BOOLEAN NULL,
+  ardc_number TEXT NULL,
+  ardc_status TEXT NULL,
+  verification_date DATE NULL,
+  source_resolution_url TEXT,
+  applicant_snippet TEXT,
+  appearance_snippet TEXT,
+  outcome_snippet TEXT,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  UNIQUE(case_id, decision_date)
+)
+
+REPRESENTATION TYPE (deterministic):
+- If appearance_for is NULL OR equals "Same as Applicant" OR equals applicant_name (case-insensitive, normalized):
+    representative_type = SELF_REP
+  else:
+    representative_type = THIRD_PARTY
+
+WARD DERIVATION (REQUIRED):
+- If address is present, compute ward using our existing Chicago address->ward resolver (the same one used in the main zoning lookup).
+- Save ward on the zoning_actions row.
+- If address missing/unresolvable, ward stays NULL.
+- This is REQUIRED so rollups can be ward-specific.
+
+ATTORNEY VERIFICATION (Illinois ARDC) — DO NOT ASSUME:
+- Only for THIRD_PARTY names.
+- Verify attorney status using Illinois ARDC Lawyer Search as source of truth.
+- Implement name normalization + cautious matching:
+    - If exactly one confident match and status indicates authorized/active => is_verified_attorney_il=true and store ardc_number/status/date.
+    - If no match or ambiguous => is_verified_attorney_il=false (or NULL + needs_review flag; choose one approach and keep consistent).
+- Cache verification results by normalized_full_name to avoid repeated lookups.
+- Rate-limit ARDC queries and queue overflow.
+
+AGGREGATION (PER REPRESENTATIVE) — MUST BUILD BOTH:
+A) Ward-specific rollup (PRIMARY VIEW):
+- Filter to last 5 years (rolling window).
+- Group by (ward, normalized_representative_name, firm if available).
+- Compute:
+    cases_observed
+    approved_count
+    denied_count
+    continued_count
+    most_recent_case_date = MAX(decision_date)
+    first_observed_case_date = MIN(decision_date)
+
+B) Citywide rollup (FALLBACK VIEW):
+- Same metrics, but group by (normalized_representative_name, firm if available) with no ward filter.
+
+UI RULES:
+- When user searches an address, determine ward from the address.
+- Show Ward-specific rollup first for that ward.
+- If ward-specific cases_observed < 2 (configurable threshold), show Citywide rollup below as “Citywide context.”
+- Always show “Most recent observed case” as a recency signal only.
+- Never show success rates/percentages or rankings; counts only.
+- Always link each case to its source_resolution_url.
+
+ADMIN + AUTOMATION:
+- Admin page to paste PDF URLs and trigger ingest.
+- Monthly cron job to ingest any queued new PDFs.

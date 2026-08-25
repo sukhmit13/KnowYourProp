@@ -1,0 +1,267 @@
+ADD POLITICAL VOTING DATA TO PROPERTY PAGES
+
+Add presidential election results, mayoral election results, and 
+referendum results to property analysis pages. Display by community 
+area (to match existing demographic data).
+
+═══════════════════════════════════════════════════════════════════════════
+PART 1: DOWNLOAD ELECTION DATA
+═══════════════════════════════════════════════════════════════════════════
+
+Manually download these datasets from Chicago Data Portal or Chicago 
+Board of Elections:
+
+SEARCH CHICAGO DATA PORTAL:
+https://data.cityofchicago.org/browse?q=election
+
+Look for datasets:
+1. Presidential Election Results 2024 (by ward or precinct)
+2. Presidential Election Results 2020 (by ward or precinct)
+3. Presidential Election Results 2016 (by ward or precinct)
+4. Mayoral Election Results 2023 (by ward or precinct)
+5. Mayoral Election Results 2019 (by ward or precinct)
+6. Recent Referendum Results (by ward or precinct)
+
+If available by precinct with community area, use that.
+If only available by ward, we'll map wards to community areas.
+
+Download and save to: /server/data/elections/raw/
+
+═══════════════════════════════════════════════════════════════════════════
+PART 2: CONVERT TO JSON FORMAT
+═══════════════════════════════════════════════════════════════════════════
+
+Process the downloaded data into this JSON structure:
+
+CREATE: /server/data/elections/community_area_elections.json
+
+{
+  "last_updated": "2024-01-29",
+  "community_areas": {
+    "7": {
+      "community_area": 7,
+      "name": "Lincoln Park",
+      
+      "presidential": {
+        "2024": {
+          "democratic_pct": 79.1,
+          "republican_pct": 18.2,
+          "other_pct": 2.7,
+          "margin": "D+60.9",
+          "total_votes": 28450
+        },
+        "2020": {
+          "democratic_pct": 78.5,
+          "republican_pct": 19.1,
+          "other_pct": 2.4,
+          "margin": "D+59.4",
+          "total_votes": 27800
+        },
+        "2016": {
+          "democratic_pct": 75.8,
+          "republican_pct": 20.5,
+          "other_pct": 3.7,
+          "margin": "D+55.3",
+          "total_votes": 26200
+        }
+      },
+      
+      "mayoral": {
+        "2023": {
+          "candidate1": "Brandon Johnson",
+          "candidate1_label": "Progressive",
+          "candidate1_pct": 67.2,
+          "candidate2": "Paul Vallas",
+          "candidate2_label": "Moderate",
+          "candidate2_pct": 32.8,
+          "margin": "Johnson +34.4"
+        },
+        "2019": {
+          "candidate1": "Lori Lightfoot",
+          "candidate1_label": "Reform",
+          "candidate1_pct": 71.3,
+          "candidate2": "Toni Preckwinkle",
+          "candidate2_label": "Establishment",
+          "candidate2_pct": 28.7,
+          "margin": "Lightfoot +42.6"
+        }
+      },
+      
+      "referendums": [
+        {
+          "question": "Elected School Board",
+          "year": 2024,
+          "yes_pct": 74.5,
+          "no_pct": 25.5,
+          "passed": true
+        },
+        {
+          "question": "Casino Proposal",
+          "year": 2020,
+          "yes_pct": 68.2,
+          "no_pct": 31.8,
+          "passed": true
+        }
+      ],
+      
+      "classification": "Strongly Democratic",
+      "indicator": "🔵🔵🔵🔵🔵",
+      "avg_dem_margin": 58.5,
+      "trend": "Stable Democratic"
+    },
+    
+    "22": {
+      "community_area": 22,
+      "name": "Logan Square",
+      // ... same structure
+    }
+    
+    // ... continue for all 77 community areas
+  }
+}
+
+NOTE: If data is only available by ward:
+1. First create ward-level JSON with same structure
+2. Then map wards to community areas and aggregate
+3. You already show both ward and community area per address,
+   so you can cross-reference them
+
+═══════════════════════════════════════════════════════════════════════════
+PART 3: ADD DISPLAY TO PROPERTY PAGES
+═══════════════════════════════════════════════════════════════════════════
+
+On property analysis pages, add new section after demographics:
+
+Load election data:
+const electionData = require('../data/elections/community_area_elections.json');
+
+Get political profile:
+const communityArea = propertyData.community_area; // You already have this
+const politicalProfile = electionData.community_areas[communityArea];
+
+Display format:
+──────────────
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 🗳️ POLITICAL PROFILE - {communityAreaName}                     │
+└─────────────────────────────────────────────────────────────────┘
+
+{indicator} {classification}
+
+Presidential Voting Pattern:
+────────────────────────────
+
+2024: 🔵 Democratic {dem_pct}% | 🔴 Republican {rep_pct}% 
+      Margin: {margin}
+
+2020: 🔵 Democratic {dem_pct}% | 🔴 Republican {rep_pct}%
+      Margin: {margin}
+
+2016: 🔵 Democratic {dem_pct}% | 🔴 Republican {rep_pct}%
+      Margin: {margin}
+
+Trend: {trend}
+
+Mayoral Elections:
+──────────────────
+
+2023: {candidate1_name} ({label}) {pct}%
+      vs. {candidate2_name} ({label}) {pct}%
+      Winner: {candidate1_name} by {margin}
+
+2019: {candidate1_name} ({label}) {pct}%
+      vs. {candidate2_name} ({label}) {pct}%
+      Winner: {candidate1_name} by {margin}
+
+Recent Referendums:
+───────────────────
+
+{FOR EACH referendum}
+{question} ({year})
+{passed ? '✅ PASSED' : '❌ FAILED'}: YES {yes_pct}% | NO {no_pct}%
+
+[Collapsible section - hide by default, "Show More ▼" to expand]
+
+Visual indicators:
+- 🔵🔵🔵🔵🔵 = Strongly Democratic (D+40 or more)
+- 🔵🔵🔵 = Moderately Democratic (D+15 to D+39)
+- 🟣 = Swing Area (D+14 to R+14)
+- 🔴🔴🔴 = Moderately Republican (R+15 to R+39)
+- 🔴🔴🔴🔴🔴 = Strongly Republican (R+40 or more)
+
+═══════════════════════════════════════════════════════════════════════════
+PART 4: CALCULATE CLASSIFICATION & INDICATORS
+═══════════════════════════════════════════════════════════════════════════
+
+When processing the data, calculate:
+
+1. Average Democratic margin across 3 presidential elections
+2. Classify based on average margin:
+   - D+40 or more: "Strongly Democratic", 🔵🔵🔵🔵🔵
+   - D+15 to D+39: "Moderately Democratic", 🔵🔵🔵
+   - D+14 to R+14: "Swing Area", 🟣
+   - R+15 to R+39: "Moderately Republican", 🔴🔴🔴
+   - R+40 or more: "Strongly Republican", 🔴🔴🔴🔴🔴
+
+3. Determine trend:
+   - Compare 2024 margin to 2016 margin
+   - If difference < 3 points: "Stable"
+   - If margin increased (more D): "Trending more Democratic"
+   - If margin decreased (more R): "Trending more Republican"
+
+═══════════════════════════════════════════════════════════════════════════
+PART 5: OPTIONAL - BUSINESS CONTEXT
+═══════════════════════════════════════════════════════════════════════════
+
+Optionally add business implications based on voting patterns:
+
+IF classification is "Strongly Democratic":
+  "This area leans progressive. Consider: Community-oriented businesses,
+   sustainable/eco-friendly brands, progressive values alignment can
+   resonate well here."
+
+IF classification is "Strongly Republican":
+  "This area leans conservative. Consider: Traditional businesses,
+   family-oriented services, emphasis on community tradition."
+
+IF classification is "Swing Area":
+  "This area is politically diverse. Consider: Broad appeal, avoid
+   overtly political messaging, focus on quality and service."
+
+═══════════════════════════════════════════════════════════════════════════
+IMPLEMENTATION NOTES
+═══════════════════════════════════════════════════════════════════════════
+
+DATA SOURCES (in order of preference):
+1. Chicago Data Portal - search for election results datasets
+2. Chicago Board of Elections website - download results
+3. Cook County Clerk - for county-wide results
+
+FILE STRUCTURE:
+- Store raw downloads in: /server/data/elections/raw/
+- Store processed JSON in: /server/data/elections/community_area_elections.json
+- Single file with all election data (presidential, mayoral, referendums)
+
+UPDATE FREQUENCY:
+- Presidential: Every 4 years (next: 2028)
+- Mayoral: Every 4 years (next: 2027)
+- Referendums: As they occur (check after each major election)
+
+PERFORMANCE:
+- JSON file will be ~100-200 KB (all 77 community areas)
+- Load once at server startup
+- Lookups are instant (simple object access)
+- No API calls needed
+
+ERROR HANDLING:
+- If community area not found in election data, show:
+  "Political data not available for this area"
+- Don't break the page, just hide the section
+
+STYLING:
+- Collapsible by default (keeps page clean)
+- "Show Political Profile ▼" button to expand
+- Color code: Blue for Democratic, Red for Republican, Purple for swing
+- Keep formatting consistent with rest of site
+
+═══════════════════════════════════════════════════════════════════════════

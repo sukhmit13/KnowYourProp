@@ -1,0 +1,48 @@
+# Step 5 — verify before you call it done
+
+Apply the Step 5 spec on a branch, open **two real runs** (one with a project type set, one without),
+and confirm every line. If any fails, fix before merging — this replaces the live report page.
+
+## Structure & order
+- [ ] Page renders top→bottom: address header → meta strip → map → alderman + zoning cards →
+      "Shape your report" setup zone → instructional bar + legend → accordion of all sections →
+      "Generate your Insight Report" at the very bottom.
+- [ ] Header no longer has "Project Context" or "Insight Report" buttons. Share / Print / Collapse All remain.
+
+## The accordion
+- [ ] On load, **every section is expanded** and shows its full content inline.
+- [ ] Each collapsed row is ONE line: `NN · TITLE — takeaway`, title readable (not tiny), color-coded
+      left edge by verdict (green / orange / slate).
+- [ ] Clicking a row collapses/expands it in place. **No "Open Full Section" link, no jump/scroll** to
+      another part of the page.
+- [ ] Drag-to-reorder works and persists; the eye hides a section; ⓘ shows the section's description.
+- [ ] Reset order restores the default.
+
+## Nothing lost / nothing flagged
+- [ ] Converted sections (Crime, News, Incentives, Transit, + any done) show the NEW design in their body.
+- [ ] Every un-converted section shows its CURRENT content fully, inline — nothing missing, nothing blank.
+- [ ] Visiting the plain URL (no `?scan`, no `?hybrid`) shows the new page. Adding `?scan=1` or
+      `?hybrid=1` changes nothing (flags removed).
+- [ ] `data-testid`s, `section-*` / `print-section-*` anchors, and deep links still resolve.
+
+## Setup zone (reuses existing components — no new inputs)
+- [ ] Step One opens the existing project-type picker; once a use is set it shows the use + the zoning
+      verdict chip. Run WITHOUT a type set shows the empty/invite state.
+- [ ] Step Two opens the existing Project Context funnel (`FunnelModal`). If context was filled earlier,
+      the step shows a summary of the saved answers + "Edit", not a blank ask.
+- [ ] Step Three opens the existing valuation calculator.
+- [ ] The meter reads `n of 3 · tailored` and matches which steps are actually complete.
+
+## Insight report / exports
+- [ ] "Generate Insight Report" at the bottom still generates (tailored vs as-is logic unchanged) —
+      only its position moved.
+- [ ] Print / Save PDF still includes all sections and respects show/hide.
+- [ ] Compare view (if it shares section logic) still renders.
+
+## Regression sweep
+- [ ] No console errors on load or on expand/collapse.
+- [ ] Mobile / narrow width: rows stack cleanly, setup steps wrap, nothing overflows.
+- [ ] A section that has no takeaway falls back to its summary string (no empty dash, no crash).
+
+**Report back**: paste a screenshot of one opened run (top of page through 2–3 sections) plus the
+console, and list anything that failed above rather than silently skipping it.

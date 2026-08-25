@@ -1,0 +1,29 @@
+Restyle the "Recently Sold Comps" section to match report-comps.html. Front-end / styling only — do NOT change the comp data, the value/median math, the confidence or match scoring, routing, or auth.
+
+Header: single indigo icon + "RECENTLY SOLD COMPS" in mono uppercase with a bottom rule. One icon, no bullet.
+
+Summary card (white --card, rounded): top row = a color-coded confidence badge left + a neutral "N comps" pill right. Confidence is a verdict: High = green (
+#2f7d3f on 
+#e9f4ec), Medium = amber, Low = amber (
+#8f6a08 on 
+#fdf3d4) — a caution, not an alarm; do not use red here. Below: three stats (Indicated Value, Median Sale Price, Median $/Sqft), each a --ink2 label over an Instrument Serif number. Then a muted range line. Keep the "Informational only — not a certified appraisal" disclaimer in a --paper note box with an indigo info icon.
+
+Comp rows (each a bordered --card):
+
+Top row, vertically centered: indigo mono rank; address in Inter bold with a muted meta line (distance + sale date, each with a small indigo icon); sale price in Instrument Serif with $/sqft muted beneath; and a single indigo › expand chevron on the far right (this is the expand affordance — replaces the old inline "More" link; the whole card is the target).
+Bottom row (indented, top-bordered): specs (sqft / bd / ba) with small indigo icons left; on the right a "MATCH" mono label + a thin progress bar (width = score) + the score number.
+
+Match bar — color-tiered by score (this is a verdict, so it gets color):
+
+Strong → green (
+#2f7d3f bar, 
+#2f7d3f number)
+Mid → amber (
+#d9a520 bar, 
+#8f6a08 number)
+Weak → red (
+#d13b26 bar, 
+#b3311f number)
+Set the tier thresholds from your actual match-scoring model — do NOT hardcode my placeholders. Placeholder bands used in the mockup were green ≥ 60, amber 30–59, red < 30; replace 60 and 30 with whatever score genuinely means "strong comp" vs "weak comp" in your scoring. Keep red reserved for genuinely weak comps so it stays meaningful.
+
+No black anywhere; keep it factual — comp data, not an appraisal.

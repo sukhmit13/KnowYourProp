@@ -1,0 +1,168 @@
+# Replit Prompt — Schools & Day Care — build to spec
+
+Rebuild the **Schools & Day Care** section. The key structural change: the **takeaway moves to the TOP of the section** (above Day Care) and now **covers day care + elementary + high school together**. Below it: Day Care gauge → Schools at a glance → Elementary list → High School list. Implement CSS/HTML **verbatim**; bind placeholders; check every CRITICAL DETAIL.
+
+Replit usually gets ~80%; the missing 20% here is: (a) leaving the takeaway below Day Care (the whole point is it goes first), (b) the 4-segment gauge fills losing color/shape, (c) favorability colors on the wrong things (daycare should be caution, good schools green, lottery-access a caveat not a failure).
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f; --goodSoft:#e9f4ec; --bad:#d13b26;
+--caution:#f0a41c; --cautionText:#96600a;
+--sans:"Inter"; --disp:"Instrument Serif"; --mono:"JetBrains Mono";
+```
+Font roles: **Instrument Serif** ONLY on the takeaway headline, the daycare ratio number (`.dhead b`), and the glance-card counts (`.glnum .n`). Everything else Inter; labels/ranges/grades/distances Mono.
+
+## CSS (verbatim — copy all of it)
+```css
+.cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+.cardbox[id],.subwrap[id]{scroll-margin-top:90px}
+.sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+.sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+.sh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+.take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px 17px;margin-bottom:20px}
+.takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+.takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+.taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:13px}
+.cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:9px}
+.cn:last-child{margin-bottom:0}
+.cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.cn.g .dt{background:var(--good)} .cn.c .dt{background:var(--caution)} .cn.i .dt{background:var(--indigo)}
+.cn b{color:var(--ink);font-weight:600}
+.cn .tx{flex:1}
+.jump{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:9.5px;font-weight:600;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid #dde1f6;border-radius:6px;padding:2px 7px;margin-left:7px;white-space:nowrap;vertical-align:middle}
+.jump svg{width:10px;height:10px;stroke:var(--indigo);fill:none}
+.subwrap{margin-top:22px}
+.ssh{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+.ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.ssh .sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto}
+.toggle{display:inline-flex;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:4px;gap:4px;margin-bottom:12px}
+.toggle .tg{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink2);padding:7px 15px;border-radius:7px;cursor:pointer}
+.toggle .tg svg{width:13px;height:13px;stroke:currentColor;fill:none}
+.toggle .tg.on{background:var(--indigo);color:#fff}
+.scopeline{font-size:11.5px;color:var(--muted);margin-bottom:14px}
+.scopeline b{color:var(--ink2);font-weight:600}
+.dcard{border:1px solid var(--line);border-radius:12px;padding:17px 19px;background:var(--card)}
+.dctop{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.dpill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--cautionText);background:#fdf3df;border:1px solid #f0d79a;border-radius:999px;padding:5px 12px;flex:none}
+.dpill .d{width:7px;height:7px;border-radius:50%;background:var(--caution)}
+.dhead{font-size:13px;color:var(--ink2)}
+.dhead b{font-family:var(--disp);font-size:26px;color:var(--ink);font-weight:400;margin-right:4px;vertical-align:-2px}
+.gauge{display:flex;gap:5px;margin-bottom:9px}
+.gs{flex:1;height:9px;border-radius:5px;background:#eceae3}
+.gs.on{background:var(--caution)}
+.glabels{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:16px}
+.gl{text-align:center}
+.gl .n{font-size:11px;font-weight:600;color:var(--muted)}
+.gl .r{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:1px}
+.gl.on .n{color:var(--cautionText)} .gl.on .r{color:var(--cautionText)}
+.dstats{font-size:12px;color:var(--ink2);line-height:1.5;padding-top:13px;border-top:1px solid var(--line)}
+.dstats b{color:var(--ink);font-weight:600}
+.dsrc{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+.glancehd{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:13px}
+.glancehd span{color:var(--muted);font-weight:400}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+.glance{border:1px solid var(--line);border-radius:12px;padding:15px 16px;background:var(--card)}
+.gltop{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.glic{width:26px;height:26px;border-radius:7px;background:var(--indigoSoft);display:flex;align-items:center;justify-content:center;flex:none}
+.glic svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+.gllab{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+.glrate{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--good);background:var(--goodSoft);border-radius:999px;padding:4px 10px}
+.glrate .d{width:6px;height:6px;border-radius:50%;background:var(--good)}
+.glnum{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.glnum .n{font-family:var(--disp);font-size:30px;color:var(--ink);line-height:.9}
+.glnum .u{font-size:12px;color:var(--ink2)}
+.glclose{font-size:12px;color:var(--ink2);line-height:1.4}
+.glclose b{color:var(--ink);font-weight:600}
+.glassign{margin-top:11px;padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:9px}
+.glassign .k{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.glassign .nm{font-size:13px;font-weight:600;color:var(--ink)}
+.glassign .lv{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2);margin-top:4px}
+.glassign .lv .d{width:6px;height:6px;border-radius:50%;background:var(--good)}
+.glnote{margin-top:11px;font-size:11px;color:var(--cautionText);background:#fdf3df;border:1px solid #f0d79a;border-radius:8px;padding:8px 11px;line-height:1.45}
+.srow{padding:13px 0;border-top:1px solid var(--line)}
+.srow:first-of-type{border-top:none}
+.stop{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.snm{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.snm .name{font-size:14px;font-weight:600;color:var(--ink)}
+.lvl{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.02em;color:var(--good);background:var(--goodSoft);border-radius:6px;padding:3px 8px}
+.acc{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.02em;border-radius:6px;padding:3px 8px}
+.acc.boundary{color:var(--indigo);background:var(--indigoSoft)}
+.acc.enroll{color:var(--ink2);background:var(--paper);border:1px solid var(--line)}
+.assigned{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);display:inline-flex;align-items:center;gap:4px}
+.assigned svg{width:11px;height:11px;fill:var(--indigo);stroke:none}
+.sdist{font-family:var(--mono);font-size:10.5px;color:var(--ink2);white-space:nowrap}
+.sgrades{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:5px}
+.src{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:16px;line-height:1.5}
+```
+
+## HTML structure (verbatim; the reference file `report-schools.html` is the source of truth)
+Order inside the single `.cardbox`, TOP to BOTTOM:
+1. `.sh` header — square + "Schools & Day Care" + count chip `{E} elementary · {H} high · within 1.5 mi`
+2. **`.take` takeaway — FIRST.** Headline + 3 bullets (see LOGIC 1). Bullets jump to `#daycare`, `#elementary`, `#highschools`.
+3. `#daycare` subsection — `.ssh` (child icon) + scope `.toggle` (By ZIP / By Neighborhood) + `.scopeline` + `.dcard` gauge.
+4. Schools-at-a-glance — `.glancehd` + `.g2` (two `.glance` cards: Elementary, High School).
+5. `#elementary` subsection — `.ssh` + `.srow` list.
+6. `#highschools` subsection — `.ssh` + `.srow` list + `.src` footer.
+
+**Daycare gauge** (`.dcard`) — 4 segments, the active one carries `on`:
+```html
+<div class="gauge"><div class="gs"></div><div class="gs on"></div><div class="gs"></div><div class="gs"></div></div>
+<div class="glabels">
+  <div class="gl"><div class="n">Childcare desert</div><div class="r">&gt; 3.0</div></div>
+  <div class="gl on"><div class="n">Underserved</div><div class="r">1.5 – 3.0</div></div>
+  <div class="gl"><div class="n">Adequate</div><div class="r">1.0 – 1.5</div></div>
+  <div class="gl"><div class="n">Plentiful</div><div class="r">&lt; 1.0</div></div>
+</div>
+```
+**School row:**
+```html
+<div class="srow">
+  <div class="stop"><div class="snm">
+    <span class="name">{SCHOOL}</span>
+    <span class="lvl">{Level 1+|Level 1|Level 2|...}</span>
+    <span class="acc {boundary|enroll}">{Boundary|Open Enrollment}</span>
+    <!-- assigned school only: --><span class="assigned"><svg viewBox="0 0 24 24"><path d="m12 2 3 6.5 7 .8-5.2 4.8 1.4 7L12 17.8 5.4 21l1.4-7L1.6 9.3l7-.8z"/></svg>Assigned</span>
+  </div><span class="sdist">{DIST} mi</span></div>
+  <div class="sgrades">Grades {RANGE}{ · application / lottery}</div>
+</div>
+```
+
+## LOGIC (derived; compute in code)
+
+### 1. Takeaway (moved to top, covers all three) — DERIVED, not free-form
+Three bullets, each with a favorability dot class and a jump chip:
+- **Bullet 1 — Day care (`.cn.c` caution when desert/underserved; `.cn.g` when adequate/plentiful).** State the tier word, the ratio, and the slot gap. Jump `#daycare`. The dot color follows the tier: desert/underserved → caution; adequate → neutral/`.i`; plentiful → good.
+- **Bullet 2 — Elementary (`.cn.g` when the assigned school is Level 1/1+ and nearby schools are strong; downgrade to `.cn.i`/`.cn.c` if ratings are weak).** Name the assigned school + rating + distance, and the count within 1.5 mi. Jump `#elementary`.
+- **Bullet 3 — High school (`.cn.i`).** If NO assigned high school, say so and note all N nearby are application/lottery with the closest; frame as "strong options, plan for the choice process." If there IS an assigned HS, mirror the elementary framing instead. Jump `#highschools`.
+- Headline = one-line synthesis of the two-sided read (e.g. strong schools vs. tight daycare). Recompute per property — never hardcode "daycare is the weak spot"; if daycare is adequate/plentiful, the headline flips.
+
+### 2. Day-care tier (drives the gauge + bullet 1)
+- `ratio = children_under_5 / licensed_slots`. Tier by ratio: **> 3.0 Childcare desert**, **1.5–3.0 Underserved**, **1.0–1.5 Adequate**, **< 1.0 Plentiful**.
+- The matching `.gs` segment and `.gl` label get `on`. Pill text + color: desert/underserved → caution styling (`.dpill`); adequate/plentiful → swap to a green pill (good) — the `on` fill and label colors follow suit (green, not marigold).
+- `slot_gap` = slots needed to reach the Adequate threshold (ratio 1.5) − current slots, when underserved/desert; omit when already adequate+.
+- Scope toggle re-scopes all daycare numbers (ZIP vs Neighborhood); keep the `.scopeline` "boundaries differ" note.
+
+### 3. School ratings & favorability
+- CPS SQRP levels: **Level 1+** (highest), **Level 1**, then Level 2/2+/3. **Level 1/1+ → green `.lvl`.** Level 2 → neutral; Level 3 → caution/red. Color the rating by quality; the `.lvl` chip in the reference is green because these are all 1/1+.
+- **Access is categorical, not favorability:** `Boundary` → indigo `.acc.boundary`; `Open Enrollment` → neutral `.acc.enroll`. Never green/red — boundary vs lottery is a *type*, not good/bad.
+- **Glance-card rating pill** (`.glrate`, green "Strong") reflects the *quality* of nearby schools. When a level has NO assigned school (high school here), keep the quality pill honest but ALSO render the amber `.glnote` "No assigned … all lottery." Don't let a green "Strong" imply guaranteed access.
+
+### 4. Sort & the assigned school
+- Both lists sort by **rating descending (1+ → 1 → 2 …), then distance ascending** within a rating.
+- The **assigned (boundary) school** gets the `.assigned` star tag inline wherever it lands in the sort, AND is surfaced in the Elementary glance card's `.glassign` box. (Optional, if you prefer: pin the assigned school to the top of its list regardless of rating — pick one behavior and keep it consistent.)
+- Grades: show the CPS grade range; append " · application / lottery" only for Open-Enrollment schools.
+
+## CRITICAL DETAILS (check ALL)
+1. **Takeaway is the FIRST thing in the section, above Day Care**, and covers day care + elementary + high school (three bullets, three jump chips). This is the whole reason for the rebuild.
+2. **Takeaway is derived** (LOGIC 1) — dot colors follow the daycare tier and school ratings; the headline flips if daycare isn't the weak spot. Not hardcoded.
+3. **Day-care gauge**: 4 flex segments, the tier-matched one gets `on` (caution fill when underserved/desert, green when adequate/plentiful); matching label gets `on`. Pill color matches.
+4. **Level 1/1+ ratings are green; access (Boundary/Open Enrollment) is categorical (indigo/neutral), never favorability-colored.**
+5. **Assigned school** carries the star `.assigned` tag and appears in the Elementary glance `.glassign` box.
+6. **High-school glance card**: green quality pill AND the amber "no assigned / all lottery" note when there's no boundary HS — quality and access shown separately.
+7. **Sort = rating desc, then distance asc** for both lists.
+8. **Header = filled indigo SQUARE** (top-level section); the Day Care / Elementary / High Schools sub-blocks use the 17px outline `.ssh .hic` icons.
+9. **Serif only** on takeaway headline, `.dhead b` (the ratio), and `.glnum .n` (glance counts). Everything else Inter; labels/ranges/grades/distances Mono.
+10. Jump chips target `#daycare` / `#elementary` / `#highschools`; those wrappers carry the id + `scroll-margin-top:90px`.

@@ -85,7 +85,7 @@ export function zoningMeaningBullets(z: ZoningInfoLike): { bold: string; text: s
 
   bullets.push({
     bold: "Confirm it fits your plan.",
-    text: "Check the Project Type and Development Potential sections to confirm this zoning is compatible with what you want to build.",
+    text: "Check the Project Use and Development Potential sections to confirm this zoning is compatible with what you want to build.",
   });
 
   return bullets;

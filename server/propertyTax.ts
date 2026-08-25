@@ -96,6 +96,26 @@ interface TreasurerData {
   mailingOwnerName: string | null;
 }
 
+function hasUsableTreasurerData(data: TreasurerData | null | undefined): data is TreasurerData {
+  if (!data) return false;
+  return data.paymentStatus !== 'unknown'
+    || data.totalAnnualTaxAmount !== null
+    || data.taxYears.length > 0;
+}
+
+function getCachedTreasurerData(cached: any): TreasurerData | null {
+  if (!cached?.paymentStatus) return null;
+  const taxYears = (cached.taxYearsJson as TaxYearEntry[] | null) ?? [];
+  return {
+    totalAnnualTaxAmount: cached.totalAnnualTaxAmount
+      ? parseFloat(String(cached.totalAnnualTaxAmount))
+      : null,
+    paymentStatus: cached.paymentStatus as TreasurerData['paymentStatus'],
+    taxYears,
+    mailingOwnerName: cached.ownerName ?? null,
+  };
+}
+
 function extractMailingOwnerName(_bodyText: string): string | null {
   // The Cook County Treasurer page shows only the mailing address (street + city),
   // not the taxpayer/owner name. Attempting to parse a name from this page
@@ -165,6 +185,12 @@ async function scrapeTreasurerData(pin: string): Promise<TreasurerData> {
       resolve({ totalAnnualTaxAmount: null, paymentStatus: 'unknown', taxYears: [], mailingOwnerName: null });
     });
   });
+}
+
+// Used by Market Discovery only. This deliberately bypasses the individual
+// property-tax cache so a pilot scan cannot overwrite or refresh report data.
+export async function scrapeTreasurerDataUncached(pin: string): Promise<TreasurerData> {
+  return scrapeTreasurerData(pin);
 }
 
 // Derive paymentStatus from taxYears — used by both the parser and cache-read path
@@ -510,7 +536,10 @@ async function updateCache(
     .where(eq(propertyTaxCache.pin, normalizedPin))
     .limit(1);
 
-  const treasurerFields = treasurerData
+  const existingTreasurer = getCachedTreasurerData(existing[0]);
+  const shouldWriteTreasurer = !!treasurerData
+    && (!hasUsableTreasurerData(existingTreasurer) || hasUsableTreasurerData(treasurerData));
+  const treasurerFields = shouldWriteTreasurer && treasurerData
     ? {
         totalAnnualTaxAmount: treasurerData.totalAnnualTaxAmount !== null
           ? String(treasurerData.totalAnnualTaxAmount)
@@ -521,6 +550,10 @@ async function updateCache(
         ...(treasurerData.mailingOwnerName ? { ownerName: treasurerData.mailingOwnerName } : {}),
       }
     : {};
+
+  if (treasurerData && !shouldWriteTreasurer) {
+    console.warn(`[TREASURER] Ignoring empty refresh for ${normalizedPin}; preserving the last verified tax bill.`);
+  }
 
   if (existing.length > 0) {
     await db.update(propertyTaxCache)
@@ -543,7 +576,7 @@ async function updateCache(
   }
 }
 
-function isTreasurerCacheStale(cached: any): boolean {
+export function isTreasurerCacheStale(cached: any): boolean {
   if (!cached?.treasurerScrapedAt) return true;
   const scraped = new Date(cached.treasurerScrapedAt);
   const msSinceScraped = Date.now() - scraped.getTime();
@@ -607,6 +640,7 @@ export async function getPropertyTax(pin: string, options: { forceRefresh?: bool
   }
 
   let finalTreasurer: TreasurerData | null = null;
+  let treasurerDataToCache: TreasurerData | undefined;
   let isStaleResult = false;
 
   // For any non-forced scrape (stale cache OR first-time lookup), return immediately and
@@ -616,14 +650,14 @@ export async function getPropertyTax(pin: string, options: { forceRefresh?: bool
 
   if (shouldBackgroundScrape) {
     // Use whatever treasurer data we already have in cache (may be null for first-time lookups)
-    if (cachedData?.paymentStatus) {
-      const cachedPaymentStatus = cachedData.paymentStatus as TreasurerData['paymentStatus'];
-      const cachedTaxYears = (cachedData.taxYearsJson as TaxYearEntry[] | null) ?? [];
+    const cachedTreasurer = getCachedTreasurerData(cachedData);
+    if (cachedTreasurer) {
       finalTreasurer = {
-        totalAnnualTaxAmount: cachedData.totalAnnualTaxAmount ? parseFloat(String(cachedData.totalAnnualTaxAmount)) : null,
-        paymentStatus: derivePaymentStatus(cachedTaxYears, cachedPaymentStatus === 'sold'),
-        taxYears: cachedTaxYears,
-        mailingOwnerName: cachedData.ownerName ?? null,
+        ...cachedTreasurer,
+        paymentStatus: derivePaymentStatus(
+          cachedTreasurer.taxYears,
+          cachedTreasurer.paymentStatus === 'sold',
+        ),
       };
       isStaleResult = true;
     }
@@ -648,34 +682,40 @@ export async function getPropertyTax(pin: string, options: { forceRefresh?: bool
       console.error('Treasurer scrape failed:', err.message);
       return null;
     });
-    finalTreasurer = scraped;
+    const cachedTreasurer = getCachedTreasurerData(cachedData);
+    treasurerDataToCache = scraped ?? undefined;
 
-    // Fall back to cached treasurer data if scrape failed
-    if (!finalTreasurer && cachedData?.paymentStatus) {
-      const cachedPaymentStatus = cachedData.paymentStatus as TreasurerData['paymentStatus'];
-      const cachedTaxYears = (cachedData.taxYearsJson as TaxYearEntry[] | null) ?? [];
+    if (hasUsableTreasurerData(scraped)) {
+      finalTreasurer = scraped;
+    } else if (cachedTreasurer) {
       finalTreasurer = {
-        totalAnnualTaxAmount: cachedData.totalAnnualTaxAmount ? parseFloat(String(cachedData.totalAnnualTaxAmount)) : null,
-        paymentStatus: derivePaymentStatus(cachedTaxYears, cachedPaymentStatus === 'sold'),
-        taxYears: cachedTaxYears,
-        mailingOwnerName: cachedData.ownerName ?? null,
+        ...cachedTreasurer,
+        paymentStatus: derivePaymentStatus(
+          cachedTreasurer.taxYears,
+          cachedTreasurer.paymentStatus === 'sold',
+        ),
       };
+      isStaleResult = true;
+    } else {
+      finalTreasurer = scraped;
     }
   } else {
     // Cache is fresh — use it directly
-    if (cachedData?.paymentStatus) {
-      const cachedPaymentStatus = cachedData.paymentStatus as TreasurerData['paymentStatus'];
-      const cachedTaxYears = (cachedData.taxYearsJson as TaxYearEntry[] | null) ?? [];
+    const cachedTreasurer = getCachedTreasurerData(cachedData);
+    if (cachedTreasurer) {
       finalTreasurer = {
-        totalAnnualTaxAmount: cachedData.totalAnnualTaxAmount ? parseFloat(String(cachedData.totalAnnualTaxAmount)) : null,
-        paymentStatus: derivePaymentStatus(cachedTaxYears, cachedPaymentStatus === 'sold'),
-        taxYears: cachedTaxYears,
-        mailingOwnerName: cachedData.ownerName ?? null,
+        ...cachedTreasurer,
+        paymentStatus: derivePaymentStatus(
+          cachedTreasurer.taxYears,
+          cachedTreasurer.paymentStatus === 'sold',
+        ),
       };
     }
   }
 
-  await updateCache(normalizedPin, assessorData, finalTreasurer ?? undefined);
+  // Only a newly fetched Treasurer result may update Treasurer fields. Cached data
+  // is returned as-is so ordinary page loads cannot reset its verification timestamp.
+  await updateCache(normalizedPin, assessorData, treasurerDataToCache);
 
   let apartmentsDisplay = assessorData.apartments;
   if (assessorData.isMultiCard && assessorData.numCards > 1) {

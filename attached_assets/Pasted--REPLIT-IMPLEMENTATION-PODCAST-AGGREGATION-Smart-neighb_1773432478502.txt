@@ -1,0 +1,567 @@
+# REPLIT IMPLEMENTATION: PODCAST AGGREGATION
+# Smart neighborhood-level filtering for property reports
+
+"""
+INSTALLATION (Replit Shell):
+pip install feedparser beautifulsoup4 requests
+
+SETUP:
+1. Copy this code to your Replit project
+2. Add to your main report generation function
+3. Podcasts will auto-populate in reports
+"""
+
+import feedparser
+import requests
+from datetime import datetime, timedelta
+import re
+from collections import defaultdict
+
+## ============================================
+## PODCAST FEED CONFIGURATION
+## ============================================
+
+PODCAST_FEEDS = {
+    
+    # === TIER 1: ALWAYS SCRAPE (Daily Chicago News) ===
+    
+    'crains_gist': {
+        'name': "Crain's Chicago Daily Gist",
+        'rss': 'https://feeds.megaphone.fm/crainschicagobusiness',
+        'category': 'business_development',
+        'tier': 1,
+        'track': 'real_estate'
+    },
+    
+    'reset_wbez': {
+        'name': 'Reset (WBEZ)',
+        'rss': 'https://feeds.feedburner.com/WBEZReset',
+        'category': 'news_politics',
+        'tier': 1,
+        'track': 'real_estate'
+    },
+    
+    # === TIER 2: SCRAPE & FILTER ===
+    
+    'chicago_tonight': {
+        'name': 'Chicago Tonight (WTTW)',
+        'rss': 'https://news.wttw.com/rss.xml',
+        'category': 'news_development',
+        'tier': 2,
+        'track': 'real_estate'
+    },
+    
+    'eater_digest': {
+        'name': "Eater's The Digest",
+        'rss': 'https://www.eater.com/rss/the-eater-podcast.xml',
+        'category': 'food_dining',
+        'tier': 2,
+        'track': 'hospitality'
+    },
+    
+    'good_beer_hunting': {
+        'name': 'Good Beer Hunting',
+        'rss': 'https://www.goodbeerhunting.com/blog?format=rss',
+        'category': 'bars_nightlife',
+        'tier': 2,
+        'track': 'hospitality'
+    }
+}
+
+
+## ============================================
+## NEIGHBORHOOD KEYWORD MAPPING
+## ============================================
+
+NEIGHBORHOOD_KEYWORDS = {
+    'wicker park': [
+        'wicker park', 'wicker pk',
+        'milwaukee ave', 'milwaukee avenue', 'milwaukee corridor',
+        'division street', 'division st',
+        'damen avenue', 'damen ave',
+        'north avenue', 'north ave',
+        'bucktown border'  # Often mentioned together
+    ],
+    
+    'logan square': [
+        'logan square', 'logan sq',
+        'milwaukee ave', 'milwaukee avenue',
+        'kedzie avenue', 'kedzie blvd',
+        'logan boulevard', 'logan blvd',
+        'armitage avenue'
+    ],
+    
+    'pilsen': [
+        'pilsen',
+        '18th street', '18th st',
+        'ashland avenue', 'ashland ave',
+        'halsted street', 'halsted st',
+        'lower west side'
+    ],
+    
+    'west loop': [
+        'west loop',
+        'fulton market', 'fulton market district',
+        'randolph street', 'randolph st',
+        'madison street', 'madison st',
+        'restaurant row'
+    ],
+    
+    'lincoln park': [
+        'lincoln park',
+        'armitage avenue', 'armitage ave',
+        'halsted street', 'halsted st',
+        'clark street', 'clark st',
+        'diversey parkway'
+    ],
+    
+    'ukrainian village': [
+        'ukrainian village', 'ukranian village',
+        'chicago avenue', 'chicago ave',
+        'division street',
+        'western avenue'
+    ],
+    
+    'west town': [
+        'west town',
+        'chicago avenue',
+        'grand avenue',
+        'noble square',
+        'east ukrainian village'
+    ],
+    
+    'hyde park': [
+        'hyde park',
+        '53rd street', '53rd st',
+        '55th street', '55th st',
+        'university of chicago',
+        'lake park avenue'
+    ],
+    
+    'south loop': [
+        'south loop',
+        'roosevelt road', 'roosevelt',
+        'michigan avenue',
+        'state street',
+        'printer\'s row',
+        'museum campus'
+    ],
+    
+    'river north': [
+        'river north',
+        'ontario street',
+        'huron street',
+        'gallery district'
+    ],
+    
+    'lakeview': [
+        'lakeview', 'lake view',
+        'belmont avenue', 'belmont ave',
+        'clark street',
+        'southport avenue',
+        'boys town', 'boystown'
+    ],
+    
+    'uptown': [
+        'uptown',
+        'broadway', 'broadway street',
+        'argyle street', 'argyle st',
+        'wilson avenue'
+    ],
+    
+    'andersonville': [
+        'andersonville',
+        'clark street',
+        'foster avenue',
+        'swedish neighborhood'
+    ],
+    
+    'edgewater': [
+        'edgewater',
+        'broadway',
+        'devon avenue',
+        'sheridan road'
+    ],
+    
+    'bronzeville': [
+        'bronzeville',
+        'king drive', 'dr martin luther king drive',
+        '35th street', '35th st',
+        '47th street', '47th st'
+    ],
+    
+    'chinatown': [
+        'chinatown',
+        'cermak road', 'cermak',
+        'wentworth avenue',
+        'south side chinatown'
+    ],
+    
+    'bridgeport': [
+        'bridgeport',
+        '35th street',
+        'halsted street',
+        'sox park', 'guaranteed rate field'
+    ],
+    
+    'humboldt park': [
+        'humboldt park',
+        'division street',
+        'north avenue',
+        'california avenue'
+    ],
+    
+    'bucktown': [
+        'bucktown',
+        'damen avenue',
+        'armitage avenue',
+        'milwaukee avenue'
+    ]
+}
+
+
+## ============================================
+## MAIN SCRAPING FUNCTION
+## ============================================
+
+def get_podcast_content_for_property(neighborhood, property_type='residential', days_back=60):
+    """
+    Main function: Get relevant podcast episodes for a property
+    
+    Parameters:
+    - neighborhood: "Wicker Park", "Logan Square", etc.
+    - property_type: 'residential', 'commercial', 'restaurant', etc.
+    - days_back: How many days of episodes to check
+    
+    Returns:
+    - Dictionary with relevant episodes by track
+    """
+    
+    print(f"\n🎙️ Searching podcasts for {neighborhood}...")
+    
+    # Determine which feeds to check based on property type
+    feeds_to_check = get_relevant_feeds(property_type)
+    
+    # Scrape all feeds
+    all_episodes = []
+    for feed_id in feeds_to_check:
+        feed_info = PODCAST_FEEDS[feed_id]
+        print(f"  → Checking {feed_info['name']}...")
+        
+        episodes = scrape_podcast_feed(
+            feed_info['rss'],
+            feed_info['name'],
+            days_back
+        )
+        
+        # Add metadata
+        for ep in episodes:
+            ep['feed_id'] = feed_id
+            ep['category'] = feed_info['category']
+            ep['track'] = feed_info['track']
+        
+        all_episodes.extend(episodes)
+    
+    print(f"  → Found {len(all_episodes)} total episodes")
+    
+    # Filter for neighborhood relevance
+    relevant_episodes = filter_by_neighborhood(all_episodes, neighborhood)
+    
+    print(f"  → {len(relevant_episodes)} relevant to {neighborhood}")
+    
+    # Organize by track
+    organized = {
+        'hospitality': [],
+        'real_estate': []
+    }
+    
+    for ep in relevant_episodes:
+        organized[ep['track']].append(ep)
+    
+    return organized
+
+
+## ============================================
+## FEED SELECTION BY PROPERTY TYPE
+## ============================================
+
+def get_relevant_feeds(property_type):
+    """
+    Determine which podcast feeds to check based on property type
+    """
+    # Always check Tier 1 (daily news)
+    feeds = ['crains_gist', 'reset_wbez']
+    
+    # Add category-specific feeds
+    if property_type in ['restaurant', 'bar', 'hospitality']:
+        feeds.extend(['eater_digest', 'good_beer_hunting'])
+    
+    elif property_type in ['residential', 'condo', 'apartment']:
+        feeds.extend(['chicago_tonight'])
+    
+    elif property_type in ['commercial', 'office', 'retail', 'mixed_use']:
+        feeds.extend(['chicago_tonight'])
+    
+    else:
+        # Default: check all
+        feeds = list(PODCAST_FEEDS.keys())
+    
+    return feeds
+
+
+## ============================================
+## RSS FEED SCRAPER
+## ============================================
+
+def scrape_podcast_feed(rss_url, podcast_name, days_back=60):
+    """
+    Scrape podcast RSS feed
+    """
+    try:
+        feed = feedparser.parse(rss_url)
+        episodes = []
+        cutoff_date = datetime.now() - timedelta(days=days_back)
+        
+        for entry in feed.entries:
+            # Parse date
+            if hasattr(entry, 'published_parsed'):
+                try:
+                    pub_date = datetime(*entry.published_parsed[:6])
+                except:
+                    continue
+            else:
+                continue
+            
+            # Skip if too old
+            if pub_date < cutoff_date:
+                continue
+            
+            # Extract episode info
+            episode = {
+                'title': entry.get('title', ''),
+                'description': entry.get('summary', ''),
+                'link': entry.get('link', ''),
+                'published': pub_date.strftime('%B %d, %Y'),
+                'pub_date_obj': pub_date,
+                'podcast_name': podcast_name,
+                'duration': entry.get('itunes_duration', 'Unknown')
+            }
+            
+            episodes.append(episode)
+        
+        return episodes
+    
+    except Exception as e:
+        print(f"    Error scraping {podcast_name}: {e}")
+        return []
+
+
+## ============================================
+## NEIGHBORHOOD FILTERING (THE KEY PART!)
+## ============================================
+
+def filter_by_neighborhood(episodes, neighborhood):
+    """
+    Filter episodes for neighborhood relevance
+    
+    Strategy:
+    - Look for neighborhood name OR major streets in that neighborhood
+    - Use fuzzy matching (lowercase, strip punctuation)
+    - Score each episode, keep ones above threshold
+    """
+    
+    # Normalize neighborhood name
+    neighborhood_normalized = neighborhood.lower().strip()
+    
+    # Get keyword list for this neighborhood
+    keywords = NEIGHBORHOOD_KEYWORDS.get(neighborhood_normalized, [neighborhood_normalized])
+    
+    relevant_episodes = []
+    
+    for episode in episodes:
+        # Combine title and description for searching
+        text = f"{episode['title']} {episode['description']}".lower()
+        
+        # Check if any keyword appears
+        score = 0
+        matched_keywords = []
+        
+        for keyword in keywords:
+            if keyword in text:
+                score += 10
+                matched_keywords.append(keyword)
+        
+        # Bonus points for contextual keywords
+        context_keywords = [
+            'development', 'construction', 'building', 'project',
+            'opening', 'closing', 'new', 'restaurant', 'bar',
+            'zoning', 'approved', 'proposed', 'retail',
+            'apartment', 'condo', 'commercial', 'deal'
+        ]
+        
+        for context in context_keywords:
+            if context in text:
+                score += 2
+        
+        # Include if score is high enough
+        if score >= 10:  # At least one neighborhood keyword
+            episode['relevance_score'] = score
+            episode['matched_keywords'] = matched_keywords
+            relevant_episodes.append(episode)
+    
+    # Sort by relevance score (highest first)
+    relevant_episodes.sort(key=lambda x: x['relevance_score'], reverse=True)
+    
+    return relevant_episodes
+
+
+## ============================================
+## GENERATE REPORT SECTION
+## ============================================
+
+def generate_podcast_section_for_report(neighborhood, property_type='residential'):
+    """
+    Generate the complete podcast section for property report
+    """
+    
+    # Get podcast content
+    content = get_podcast_content_for_property(neighborhood, property_type, days_back=60)
+    
+    # If no content found
+    if not content['hospitality'] and not content['real_estate']:
+        return f"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RECENT PODCAST COVERAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+No recent podcast coverage found for {neighborhood} in the past 60 days.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
+    
+    # Build report section
+    report = f"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RECENT PODCAST COVERAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Recent podcast episodes covering {neighborhood}:
+
+"""
+    
+    # Add Real Estate episodes first (for most property types)
+    if content['real_estate']:
+        report += "\n🏗️ REAL ESTATE & DEVELOPMENT\n\n"
+        
+        for episode in content['real_estate'][:5]:  # Max 5 episodes
+            report += format_episode(episode)
+    
+    # Add Hospitality episodes
+    if content['hospitality']:
+        report += "\n🍴 HOSPITALITY & CULTURE\n\n"
+        
+        for episode in content['hospitality'][:3]:  # Max 3 episodes
+            report += format_episode(episode)
+    
+    report += """
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
+    
+    return report
+
+
+def format_episode(episode):
+    """
+    Format a single episode for display
+    """
+    # Truncate description
+    description = episode['description']
+    if len(description) > 200:
+        description = description[:200] + "..."
+    
+    return f"""
+📻 "{episode['title']}"
+   {episode['podcast_name']} • {episode['published']}
+   
+   {description}
+   
+   🎧 Listen ({episode['duration']}): {episode['link']}
+
+"""
+
+
+## ============================================
+## INTEGRATION WITH YOUR REPORT GENERATOR
+## ============================================
+
+def add_to_property_report(property_data):
+    """
+    Add podcast section to your existing property report
+    
+    Call this from your main report generation function
+    
+    Example:
+    report = generate_property_report(pin, address)
+    report += add_to_property_report({
+        'neighborhood': 'Wicker Park',
+        'property_type': 'residential'
+    })
+    """
+    
+    podcast_section = generate_podcast_section_for_report(
+        neighborhood=property_data['neighborhood'],
+        property_type=property_data.get('property_type', 'residential')
+    )
+    
+    return podcast_section
+
+
+## ============================================
+## TESTING / USAGE EXAMPLE
+## ============================================
+
+if __name__ == '__main__':
+    
+    # Test different neighborhoods
+    test_cases = [
+        {'neighborhood': 'Wicker Park', 'property_type': 'restaurant'},
+        {'neighborhood': 'Logan Square', 'property_type': 'residential'},
+        {'neighborhood': 'West Loop', 'property_type': 'commercial'},
+    ]
+    
+    for test in test_cases:
+        print("\n" + "="*60)
+        print(f"TEST: {test['neighborhood']} ({test['property_type']})")
+        print("="*60)
+        
+        report = generate_podcast_section_for_report(
+            test['neighborhood'],
+            test['property_type']
+        )
+        
+        print(report)
+
+
+## ============================================
+## REPLIT ENVIRONMENT SETUP
+## ============================================
+
+"""
+ADD TO YOUR requirements.txt:
+feedparser==6.0.10
+beautifulsoup4==4.12.2
+requests==2.31.0
+
+ADD TO YOUR main.py:
+from podcast_aggregator import generate_podcast_section_for_report
+
+# In your report generation function:
+neighborhood = get_neighborhood_from_address(address)
+podcast_section = generate_podcast_section_for_report(
+    neighborhood=neighborhood,
+    property_type=property_type
+)
+
+# Add to report
+full_report += podcast_section
+"""

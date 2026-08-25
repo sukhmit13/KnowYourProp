@@ -1,0 +1,28 @@
+Front-end / styling only — do NOT change routing, auth, data, or business logic.
+
+Redesign the Proximity Information and City-Owned Lots sections to match the attached report-proximity.html, using the existing design tokens (Instrument Serif display, Inter body, JetBrains Mono labels, deep indigo 
+#2b3a9e, indigo-soft 
+#ecedf9, cream, hairline 
+#eae8e2) and the indigo-icon header rule.
+
+1. Compact fact tiles (both sections). Tighten the tiles — reduce padding to ~14px and remove any fixed min-height so each tile sizes to its content (this fixes the current excess negative space). Tile layout:
+
+A top row with the icon + label, vertically center-aligned (display:flex; align-items:center; gap:9px). The icon is a small flex:none indigo-soft chip (
+#ecedf9 bg, indigo glyph); the label is JetBrains Mono uppercase in dark ink (
+#565651).
+Below that row, the value and qualifier are indented by the icon width + gap (~29px margin-left) so they line up under the label text, not under the icon.
+Value in mixed-case Inter 600 (
+#141414) — not ALL-CAPS mono; qualifier in muted gray (
+#8b8a84).
+Proximity is a 3-column grid; the City-Owned Lots KPI row is a 4-column grid.
+
+2. City-Owned Lots — individual lot rows. Below the KPI tiles, render each lot as a directory row: the address in ink weight 600 with a status badge inline (Application Closed / Unknown = neutral gray 
+#f1efe9/
+#565651; Available = green 
+#edf6ef/
+#2f7d3f), the "distance · zoning · sq-ft" meta beneath in muted gray, and on the right the "City est. $X" value with an indigo "↗ Apply" link when applicable. Group the rows under mono-caps distance labels ("Within ¼ mile", "¼–½ mile") each with a count pill.
+
+3. Label legibility. Labels and metric names in dark ink (
+#565651); muted reserved for qualifiers and source lines.
+
+Match spacing, radii, and borders to the mockup. Apply this same fact-tile layout (icon+label centered on top, value/qualifier indented beneath) to any other icon fact tile in the report so they all match.

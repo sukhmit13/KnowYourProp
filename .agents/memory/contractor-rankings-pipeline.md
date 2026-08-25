@@ -10,5 +10,6 @@ Rules established (July 2026):
 - **Compute active/inactive live from lastPermitDate** (≤30d Active, ≤90d Recent, else Inactive) — never trust the build-time `isActive` flag, which freezes at index-build time and disagrees with badges once data ages.
 - **Rebuilds must fail hard, never publish partial data:** the build script throws on any fetch failure, sanity-checks size (≥100k permits, ≥1k contractors), and writes atomically (tmp + rename). **Why:** it previously `break`-ed on errors and wrote whatever it had.
 - rankings.json refreshes monthly via the unified dataRefresh scheduler (30-day mtime check, async exec of the build script; included in startup/hot-reload stale checks).
+- **Project-work searches rank by matching permit descriptions, not global totals.** Bathroom and tile are explicit work-type evidence, with tile separate from general flooring. **Why:** broad permit totals cannot answer who has performed a requested kind of work. **How to apply:** rebuild the permit index whenever work-type logic changes and use its local search data if a live ranking feed times out.
 
 **How to apply:** any new permit-derived ranking (architects, expeditors, etc.) should follow the same pattern — trade-specific sorting, live activity, fail-hard atomic rebuilds.

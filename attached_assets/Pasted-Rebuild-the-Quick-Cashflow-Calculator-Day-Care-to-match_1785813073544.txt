@@ -1,0 +1,41 @@
+Rebuild the Quick Cashflow Calculator (Day Care) to match the attached report-cashflow-final.html. Front-end / styling only — do NOT change the cashflow math, capacity logic, revenue/occupancy assumptions, routing, or auth. Same computations; this restyles the layout to match the Valuation Calculator's design.
+
+Overall — two stacked full-width blocks (same pattern as the Valuation Calculator):
+
+1. Inputs card (top). White --card, rounded 14px. Two columns:
+
+Left, group "Revenue & Costs" (mono-uppercase label + bottom rule): Monthly Revenue per Child ($ prefix, value 2,275, hint "Chicago avg · $2,275/mo") and Operating Expenses (% of revenue) (value 75, % suffix, hint "Industry avg · 75%"). These two are the only editable inputs.
+Right, label "Site Capacity · from square footage": two read-only locked context tiles (muted 
+#f1f0ec fill, --line border, lock glyph) — "🔒 Efficient · 133 children · 75 sq ft/child" and "🔒 Comfortable · 111 children · 90 sq ft/child" — with the hint "Derived from the parcel's usable area — not editable." (Same locked-preset pattern used for Conventional-loan terms in the valuation calc: capacity is site-derived, not user input.)
+
+2. Cashflow Projection band (below). Full-width dark 
+#232d6e panel, mono-uppercase "CASHFLOW PROJECTION" label. Inside, two columns (translucent-white sub-cards) — Efficient (133 children) and Comfortable (111 children). Each sub-card:
+
+Header: mono capacity name + child count.
+A muted sub-line: "Revenue 
+𝑋
+/
+𝑚
+𝑜
+⋅
+𝐸
+𝑥
+𝑝
+𝑒
+𝑛
+𝑠
+𝑒
+𝑠
+−
+X/mo⋅Expenses−Y/mo".
+Two occupancy rows (each a top-bordered flex row): 100% occupancy ("fully enrolled") and 75% occupancy ("realistic ramp"). Each row shows the monthly cashflow in Instrument Serif green (
+#7ee0a0, ~26px) right-aligned, with "/mo · $[annual]/yr" as a muted sub-line.
+Show both occupancy rows at once — no toggle.
+A bottom verdict line (green dot + text): "Cash-flow positive in every scenario — $568K to $908K annually…".
+Footnote below the panel in muted text ("* Projections based on site-specific capacity…").
+
+Color rule: cashflow figures are green when positive; if expenses ever exceed revenue and a scenario goes negative, that figure turns red — same discipline as DSCR/cash-flow on the Valuation Calculator. Never color the capacity or revenue/expense context lines.
+
+Remove the black "100% Occupancy" / "75% Occupancy" pills entirely — occupancy is now a labeled row inside the dark band, not a standalone black chip.
+
+Mobile: the two input columns stack; the two capacity sub-cards stack.

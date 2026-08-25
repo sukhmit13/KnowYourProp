@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--c1:#3f51c5;--track:#efeee9;--amberSoft:#fdf5e2;--amber:#946200;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:34px}
+  .wrap{max-width:1080px;margin:0 auto}
+  .h1{font-family:var(--disp);font-size:34px;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .h1 .pin{color:var(--indigo);font-size:26px}
+  .lede{font-size:15px;color:var(--ink2);margin-bottom:18px}
+  .controls{display:flex;gap:12px;margin-bottom:22px}
+  .sel{display:flex;align-items:center;gap:9px;background:var(--card);border:1.5px solid var(--indigo);border-radius:11px;padding:11px 16px;font-size:14px;font-weight:600;color:var(--ink)}
+  .sel .ic{color:var(--indigo)}
+  .btn{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px 16px;font-size:14px;font-weight:600;color:var(--ink2)}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .ch{display:flex;align-items:center;gap:9px;margin-bottom:3px}
+  .ch .ic{color:var(--indigo);font-size:15px}
+  .ch .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+  .csub{font-size:12px;color:var(--muted);margin-bottom:12px}
+
+  /* ranked row — the reusable Discovery list item */
+  .rr{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+  .rr:first-of-type{border-top:0}
+  .rr .rk{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--muted);width:24px;flex:none}
+  .rr .bd{flex:1;min-width:0}
+  .rr .nm{font-size:14px;font-weight:600;color:var(--ink)}
+  .rr .sub{font-size:11.5px;color:var(--muted);margin-top:1px}
+  .rr .bar{height:6px;background:var(--track);border-radius:3px;margin-top:6px;overflow:hidden}
+  .rr .bar span{display:block;height:100%;background:var(--c1);border-radius:3px}
+  .rr .val{flex:none;font-size:12.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;background:#f1efe9;border-radius:6px;padding:4px 9px}
+  .rr .badge{flex:none;font-size:10px;font-weight:700;border-radius:5px;padding:3px 8px;text-transform:uppercase}
+  .rr .badge.desert{background:var(--amberSoft);color:var(--amber)}
+  .rr .chev{color:var(--muted);flex:none}
+  .rr .right{display:flex;align-items:center;gap:9px;flex:none}
+
+  /* estimator tiles */
+  .estwrap{margin-top:18px}
+  .estcols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .est{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+  .et{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 13px;text-align:center}
+  .et .l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin-bottom:5px}
+  .et .n{font-family:var(--disp);font-size:23px;color:var(--ink)}
+  .needed{background:var(--indigo);color:#fff;border-radius:10px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
+  .needed .l{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+  .needed .n{font-family:var(--disp);font-size:28px}
+  .frm{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="h1"><span class="pin">◎</span>Chicago Discovery</div>
+  <div class="lede">Explore Chicago areas by various metrics. Click any area for detailed eligibility information.</div>
+  <div class="controls"><span class="sel"><span class="ic">▾</span>Gas Stations</span><span class="btn">⚒ Contractor Rankings</span></div>
+
+  <!-- METRIC A: simple ranked list (Gas Stations) -->
+  <div class="two">
+    <div class="card">
+      <div class="ch"><span class="ic">◎</span><span class="t">Top 10 ZIP Codes</span></div>
+      <div class="csub">By gas stations</div>
+      <div class="rr"><span class="rk">1</span><div class="bd"><div class="nm">60609</div><div class="bar"><span style="width:100%"></span></div></div><div class="right"><span class="val">32</span><span class="chev">›</span></div></div>
+      <div class="rr"><span class="rk">2</span><div class="bd"><div class="nm">60618</div><div class="bar"><span style="width:100%"></span></div></div><div class="right"><span class="val">32</span><span class="chev">›</span></div></div>
+      <div class="rr"><span class="rk">3</span><div class="bd"><div class="nm">60619</div><div class="bar"><span style="width:97%"></span></div></div><div class="right"><span class="val">31</span><span class="chev">›</span></div></div>
+      <div class="rr"><span class="rk">4</span><div class="bd"><div class="nm">60632</div><div class="bar"><span style="width:87%"></span></div></div><div class="right"><span class="val">28</span><span class="chev">›</span></div></div>
+      <div class="rr"><span class="rk">5</span><div class="bd"><div class="nm">60639</div><div class="bar"><span style="width:84%"></span></div></div><div class="right"><span class="val">27</span><span class="chev">›</span></div></div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ic">▤</span><span class="t">Top 10 Community Areas</span></div>
+      <div class="csub">By gas stations</div>
+      <div class="rr"><span class="rk">1</span><div class="bd"><div class="nm">Austin</div><div class="bar"><span style="width:100%"></span></div></div><div class="right"><span class="val">25</span><span class="chev">›</span></div></div>
+      <div class="rr"><span class="rk">2</span><div class="bd"><div class="nm">Greater Grand Crossing</div><div class="bar"><span style="width:80%"></span></div></div><div class="right"><span class="val">20</span><span class="chev">›</span></div></div>
+      <div class="rr"><span class="rk">3</span><div class="bd"><div class="nm">West Town</div><div class="bar"><span style="width:76%"></span></div></div><div class="right"><span class="val">19</span><span class="chev">›</span></div></div>
+      <div class="rr"><span class="rk">4</span><div class="bd"><div class="nm">Belmont Cragin</div><div class="bar"><span style="width:68%"></span></div></div><div class="right"><span class="val">17</span><span class="chev">›</span></div></div>
+      <div class="rr"><span class="rk">5</span><div class="bd"><div class="nm">Near West Side</div><div class="bar"><span style="width:68%"></span></div></div><div class="right"><span class="val">17</span><span class="chev">›</span></div></div>
+    </div>
+  </div>
+
+  <!-- METRIC B: rich ranked list (Childcare) — same component, more sub-data -->
+  <div style="height:18px"></div>
+  <div class="two">
+    <div class="card">
+      <div class="ch"><span class="ic">▤</span><span class="t">Community Areas · Childcare Shortage</span></div>
+      <div class="csub">More children than slots (ratio &gt; 1:1) · higher = bigger opportunity</div>
+      <div class="rr"><span class="rk">1</span><div class="bd"><div class="nm">Mount Greenwood</div><div class="sub">1,276 children · 68 slots</div><div class="bar"><span style="width:100%"></span></div></div><div class="right"><span class="badge desert">Desert · 18.8/slot</span><span class="chev">›</span></div></div>
+      <div class="rr"><span class="rk">2</span><div class="bd"><div class="nm">O'Hare</div><div class="sub">926 children · 59 slots</div><div class="bar"><span style="width:83%"></span></div></div><div class="right"><span class="badge desert">Desert · 15.7/slot</span><span class="chev">›</span></div></div>
+      <div class="rr"><span class="rk">3</span><div class="bd"><div class="nm">Norwood Park</div><div class="sub">2,570 children · 214 slots</div><div class="bar"><span style="width:64%"></span></div></div><div class="right"><span class="badge desert">Desert · 12.0/slot</span><span class="chev">›</span></div></div>
+      <div class="rr"><span class="rk">4</span><div class="bd"><div class="nm">Douglas</div><div class="sub">1,186 children · 114 slots</div><div class="bar"><span style="width:55%"></span></div></div><div class="right"><span class="badge desert">Desert · 10.4/slot</span><span class="chev">›</span></div></div>
+    </div>
+    <div class="card estwrap" style="margin-top:0">
+      <div class="ch"><span class="ic">▦</span><span class="t">Day Care Needs Estimator</span></div>
+      <div class="csub">New daycares needed to reach a 1:1 child-to-slot ratio</div>
+      <div class="est">
+        <div class="et"><div class="l">Children</div><div class="n">143,385</div></div>
+        <div class="et"><div class="l">Slots</div><div class="n">62,415</div></div>
+        <div class="et"><div class="l">Gap</div><div class="n">−80,970</div></div>
+      </div>
+      <div class="needed"><span class="l">Daycares Needed</span><span class="n">1,039</span></div>
+      <div class="frm">Formula: (children under 5 − total slots) ÷ 78 = estimated daycares needed. 78 = average daycare capacity in Chicago. Top-10 shortage areas only.</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

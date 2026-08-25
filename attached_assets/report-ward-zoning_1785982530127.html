@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--navy:#232d6e;--good:#2f7d3f;--goodSoft:#e9f4ec;--gold:#f3b31f;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:34px}
+  .grid{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:17px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+
+  /* ===== ALDERPERSON ===== */
+  .ward{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border-radius:6px;padding:4px 10px;display:inline-block;margin-bottom:10px}
+  .name{font-family:var(--disp);font-size:30px;line-height:1.05;color:var(--ink);margin-bottom:15px}
+  .contact{display:flex;flex-direction:column;gap:9px;padding:14px 0 4px;margin-bottom:14px;border-top:1px solid var(--line)}
+  .crow{display:flex;align-items:flex-start;gap:9px;font-size:13px}
+  .crow svg{width:14px;height:14px;flex:none;margin-top:2px}
+  .crow a{color:var(--indigo);text-decoration:none;font-weight:500}
+  .crow .addr{color:var(--ink2);line-height:1.4}
+  .akpis{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+  .akpi{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:11px 12px;text-align:center}
+  .akpi .l{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;line-height:1.3}
+  .akpi .n{font-family:var(--disp);font-size:30px;line-height:1;color:var(--ink)}
+  .akpi .s{font-size:9.5px;color:var(--muted);margin-top:6px}
+  .cta{display:flex;align-items:center;gap:11px;background:var(--indigoSoft);border:1px solid #dfe3f7;border-radius:11px;padding:12px 14px;text-decoration:none}
+  .cta .ic{width:28px;height:28px;border-radius:8px;background:var(--indigo);display:flex;align-items:center;justify-content:center;flex:none}
+  .cta .ic svg{width:14px;height:14px}
+  .cta .body{flex:1}
+  .cta .h{display:block;font-size:12.5px;font-weight:600;color:var(--indigo);line-height:1.3}
+  .cta .sub{display:block;font-size:10.5px;color:var(--muted);margin-top:2px}
+  .cta .arr{color:var(--indigo);font-size:14px;flex:none}
+  .wtm{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+  .wtmh{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink);margin-bottom:12px}
+  .b{display:flex;gap:9px;margin-bottom:10px;font-size:12.5px;line-height:1.5}
+  .b:last-child{margin-bottom:0}
+  .b .dot{width:5px;height:5px;border-radius:50%;background:var(--indigo);flex:none;margin-top:6px}
+  .b .txt{color:var(--ink2)}
+  .b .txt b{color:var(--ink);font-weight:600}
+
+  /* ===== ZONING ===== */
+  .ztitle{font-size:17px;font-weight:600;color:var(--ink);margin-bottom:5px}
+  .zdesc{font-size:12.5px;color:var(--ink2);line-height:1.45;margin-bottom:14px}
+  .cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .cat{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600}
+  .cat .cd{width:7px;height:7px;border-radius:50%;flex:none}
+  .cat.on{color:var(--ink);background:var(--goodSoft);border-color:#cfe6d6}
+  .cat.on .cd{background:var(--good)}
+  .cat.off{color:var(--muted);background:var(--paper)}
+  .cat.off .cd{background:#c4c3bd}
+  .cat .mk{font-size:11px}
+  .cat.on .mk{color:var(--good)}
+  .cat.off .mk{color:var(--muted)}
+  .zmet{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px}
+  .zm{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:11px 12px;text-align:center}
+  .zm .l{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;line-height:1.3}
+  .zm .n{font-family:var(--disp);font-size:30px;line-height:1;color:var(--ink)}
+  .zm .s{font-size:9.5px;color:var(--muted);margin-top:6px;line-height:1.3}
+  .zlbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+  .uses{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .use{font-size:12px;font-weight:500;color:var(--indigo);background:var(--indigoSoft);border-radius:8px;padding:6px 11px}
+  .zfoot{border-top:1px solid var(--line);padding-top:13px;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .zfoot a{color:var(--indigo);text-decoration:none;font-weight:500}
+  .parcel{font-family:var(--mono);font-size:10.5px;background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:2px 7px;color:var(--ink2)}
+  .zlink{display:inline-flex;align-items:center;gap:7px;margin-top:11px;font-size:12.5px;font-weight:500;color:var(--indigo);text-decoration:none}
+  .zlink svg{width:13px;height:13px}
+</style>
+</head>
+<body>
+<div class="grid">
+
+  <!-- ================= WARD & ALDERPERSON ================= -->
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Ward &amp; Alderperson</span></div>
+    <span class="ward">Ward 33</span>
+    <div class="name">Rossana Rodriguez Sanchez</div>
+    <div class="contact">
+      <div class="crow"><svg viewBox="0 0 24 24" fill="none" stroke="#2b3a9e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><a href="#">(773) 840-7880</a></div>
+      <div class="crow"><svg viewBox="0 0 24 24" fill="none" stroke="#2b3a9e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg><a href="#">Ward33@cityofchicago.org</a></div>
+      <div class="crow"><svg viewBox="0 0 24 24" fill="none" stroke="#8b8a84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="addr">4747 North Sawyer Avenue, Chicago, IL 60625</span></div>
+    </div>
+    <div class="akpis">
+      <div class="akpi"><div class="l">Years in Office</div><div class="n">7</div><div class="s">since 2019</div></div>
+      <div class="akpi"><div class="l">Attendance</div><div class="n">87%</div><div class="s">this council session</div></div>
+    </div>
+    <a class="cta" href="#">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+      <span class="body"><span class="h">Learn more about your alderperson's legislation &amp; donors</span><span class="sub">Voting record &amp; campaign finance · via Councilmatic</span></span>
+      <span class="arr">↗</span>
+    </a>
+    <div class="wtm">
+      <div class="wtmh">Why This Matters</div>
+      <div class="b"><span class="dot"></span><span class="txt"><b>Zoning changes start here.</b> Your alderperson introduces the rezoning or Planned Development ordinance, and City Council almost always follows their lead — a custom known as aldermanic prerogative.</span></div>
+      <div class="b"><span class="dot"></span><span class="txt"><b>Local permits need their support.</b> Special-use permits, liquor licenses, signs, sidewalk cafés, and curb cuts.</span></div>
+      <div class="b"><span class="dot"></span><span class="txt"><b>They control $1.5M a year</b> in discretionary ward funds for streets, lighting, and sidewalks.</span></div>
+      <div class="b"><span class="dot"></span><span class="txt"><b>It's custom, not law.</b> By-right projects don't need their approval — DPD, the Zoning Board of Appeals, and the Plan Commission make the official decisions.</span></div>
+    </div>
+  </div>
+
+  <!-- ================= ZONING DETAILS ================= -->
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Zoning Details · B3-1</span></div>
+    <div class="ztitle">Community Shopping</div>
+    <div class="zdesc">Shopping centers and large stores along major streets.</div>
+    <div class="cats">
+      <span class="cat on"><span class="cd"></span>Residential<span class="mk">✓</span></span>
+      <span class="cat on"><span class="cd"></span>Commercial<span class="mk">✓</span></span>
+      <span class="cat off"><span class="cd"></span>Industrial<span class="mk">✕</span></span>
+    </div>
+    <div class="zmet">
+      <div class="zm"><div class="l">Max FAR</div><div class="n">1.2</div><div class="s">floor-area ratio</div></div>
+      <div class="zm"><div class="l">Max Height</div><div class="n">38 ft</div><div class="s">≈ 3 stories</div></div>
+      <div class="zm"><div class="l">Parking</div><div class="n">1</div><div class="s">space / unit (residential)</div></div>
+      <div class="zm"><div class="l">Min Lot Area</div><div class="n">1,000</div><div class="s">sq ft per unit</div></div>
+    </div>
+    <div class="zlbl">Allowed Uses — As of Right</div>
+    <div class="uses">
+      <span class="use">Shopping centers</span>
+      <span class="use">Large retail stores</span>
+      <span class="use">Liquor stores</span>
+      <span class="use">Auto repair (indoor)</span>
+      <span class="use">Warehouses</span>
+      <span class="use">Offices</span>
+      <span class="use">Residential above ground floor</span>
+    </div>
+    <div class="wtm">
+      <div class="wtmh">What This Zoning Means</div>
+      <div class="b"><span class="dot"></span><span class="txt"><b>Retail, office &amp; mixed-use are by right.</b> A shopping center, retail store, or offices can be built outright — no special approval needed.</span></div>
+      <div class="b"><span class="dot"></span><span class="txt"><b>Residential is allowed, but not at street level.</b> Apartments are permitted above the ground floor; the ground floor stays commercial to keep the street active.</span></div>
+      <div class="b"><span class="dot"></span><span class="txt"><b>Confirm it fits your plan.</b> Check the <b>Project Type</b> and <b>Development Potential</b> sections below to confirm this zoning is compatible with what you want to build.</span></div>
+    </div>
+    <div class="zfoot">
+      Data may not reflect recent rezonings. <a href="#">Verify on the official map</a> — search by <span class="parcel">13-13-327-027-0000</span>
+      <a class="zlink" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="#2b3a9e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>Chicago Zoning Code — Use Standards &amp; Regulations</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

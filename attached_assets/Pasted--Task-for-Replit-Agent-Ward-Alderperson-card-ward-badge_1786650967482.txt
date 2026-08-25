@@ -1,0 +1,43 @@
+# Task for Replit Agent — Ward & Alderperson card: ward badge beside the name
+
+## Goal
+Small header tweak to the **Ward & Alderperson** card. Move the ward number from a small chip *above* the alderperson's name to a **larger badge to the right of the name**, on the same row. Nothing else in the card changes. Visual target: **report-alderman-head.html**. Reuse existing card CSS/tokens.
+
+## The change
+Restructure the name area into a single **flex row**: alderperson name on the left, a `WARD {n}` badge on the right, vertically centered, with `justify-content: space-between`.
+
+- **Remove** the small "WARD 1" chip that currently sits above the name.
+- **Name** stays the display/serif treatment (large). Optional: a small muted subline under it ("Alderperson · since {year}") to balance the row — keep or drop per preference.
+- **Ward badge** = a **stacked tile** in the indigo-soft style:
+  - a mono, uppercase, letter-spaced **"WARD"** label on top, and
+  - a **large display number** below it (the ward number — this is the prominent element).
+  - indigo-soft background, subtle indigo border, rounded (~12px), centered contents.
+
+## Reference styles (adapt to existing tokens)
+```css
+.namerow{ display:flex; align-items:center; gap:16px; }         /* name left, badge right */
+.name{ flex:1; font-family:var(--disp); font-size:34px; line-height:1.02; }
+.name .sub{ font-family:var(--sans); font-size:11.5px; color:var(--muted); margin-top:4px; }
+.ward{ flex:none; display:flex; flex-direction:column; align-items:center; justify-content:center;
+       background:var(--indigoSoft); border:1px solid #dfe3f7; border-radius:12px; padding:9px 18px; min-width:74px; }
+.ward .l{ font-family:var(--mono); font-size:8.5px; font-weight:700; letter-spacing:.10em; text-transform:uppercase; color:var(--indigo); }
+.ward .n{ font-family:var(--disp); font-size:38px; line-height:1; color:var(--indigo); }
+```
+```html
+<div class="namerow">
+  <div class="name">{alderperson_name}<div class="sub">Alderperson · since {year}</div></div>
+  <div class="ward"><span class="l">Ward</span><span class="n">{ward_number}</span></div>
+</div>
+```
+The contact rows (phone, email, address) and the "legislation & donors" link stay exactly as they are, below this row.
+
+## Tests
+```
+assert the ward number renders as a stacked "WARD / {n}" badge to the RIGHT of the name on the same row (not above it)
+assert the ward number uses the large display type (it's the prominent element)
+assert the old ward chip above the name is removed
+assert phone / email / address and the Councilmatic link are unchanged
+```
+
+## Done when
+The Ward & Alderperson card shows the alderperson name on the left and a larger stacked "WARD {n}" badge on the right of the same row, matching report-alderman-head.html. No other content changes.

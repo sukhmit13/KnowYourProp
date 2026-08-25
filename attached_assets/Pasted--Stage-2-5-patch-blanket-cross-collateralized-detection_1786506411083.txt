@@ -1,0 +1,75 @@
+# Stage 2.5 patch — blanket / cross-collateralized detection (loan-scoped pool)
+
+Replaces the placeholder blanket block (section C) in the already-built `resolveState()`. Nothing else in 2.5 changes. The key principle: **the collateral pool is defined by the LOAN, not the owner** — a blanket mortgage encumbers the specific PINs it names / is indexed under, NOT every parcel the LLC happens to hold.
+
+## What this adds
+1. **Cross-index detection (strongest signal, free):** the same doc number indexed under more than one PIN ⇒ blanket. From the recorder INDEX — no OCR, no fetch. Catches the case where body-text PIN extraction missed a parcel.
+2. **Loan-scoped pool:** the encumbered set = PINs in the doc body (`pins[]`) ∪ PINs the doc is indexed under. Never the owner's whole portfolio.
+3. **Pool LTV:** the only meaningful leverage on a blanket loan — total loan ÷ combined value of the pooled parcels. Per-parcel LTV stays suppressed.
+4. **Dedup rule:** one blanket loan = one obligation keyed on doc number across the pool (never summed per parcel).
+
+## Two new inputs to `resolveState(...)`
+- `indexByPin` — `{ PIN: [ {docNumber, type, recorded} ] }` for the owner's OTHER parcels, from the **PIN + owner-name search you already run**. Index rows only — do NOT fetch/OCR sibling docs to detect blanket.
+- `valueOf(pin)` — returns the report's estimated value for a PIN (you already value parcels). Used only to compute pool LTV; siblings you can't value ⇒ `pool_ltv=null` with a note.
+
+Both optional: absent ⇒ falls back to body-`pins[]` + the value heuristic, exactly as before.
+
+## Code — replaces section (C)
+```js
+function detectBlanket(active, docs, parcel, indexByPin, valueOf) {
+  // docNumber -> set of PINs it is indexed under (recorder INDEX only; no OCR, no fetch)
+  const docPins = new Map();
+  const addPin = (dn, pin) => { if(!docPins.has(dn)) docPins.set(dn, new Set()); docPins.get(dn).add(pin); };
+  for (const d of docs) (d.pins||[]).forEach(p => addPin(d.doc_number, p));
+  if (indexByPin) for (const [pin, rows] of Object.entries(indexByPin))
+    for (const r of rows) addPin(r.docNumber, pin);
+
+  const thisPin = parcel?.pin;
+  for (const m of active) {
+    const pool = new Set([...(m.pins||[]), ...(docPins.get(m.doc_number)||[]), thisPin].filter(Boolean));
+    const otherPins = [...pool].filter(p => p !== thisPin);
+
+    // SIGNAL 1 (strong, free): loan names / is indexed under >1 PIN
+    let blanket = m.is_blanket || pool.size > 1;
+    // SIGNAL 2 (soft fallback): amount >> this parcel's value AND owner holds another parcel
+    if (!blanket && m.effective_amount && parcel?.value
+        && m.effective_amount > parcel.value * BLANKET_VALUE_MULT && otherPins.length > 0)
+      blanket = true;   // "likely" — suppress LTV, flag to confirm
+
+    m.blanket = blanket;
+    m.blanket_pins = blanket ? otherPins : [];
+    if (blanket) {
+      m.suppress_ltv = true;
+      m.note = otherPins.length
+        ? `cross-collateralized — this loan also encumbers ${otherPins.join(", ")}; per-parcel leverage not meaningful`
+        : "blanket / cross-collateralized — spans multiple properties; per-parcel leverage not meaningful";
+      const poolValue = [...pool].reduce((s,p) => s + (valueOf?.(p) ?? 0), 0) || null;
+      m.pool_value = poolValue;
+      m.pool_ltv   = poolValue ? +(m.effective_amount / poolValue).toFixed(2) : null;
+      m.pool_ltv_note = poolValue ? null : "pool value incomplete — combined leverage not computed";
+    }
+  }
+}
+// call inside resolveState in place of the old (C) loop:
+detectBlanket(active, docs, parcel, indexByPin, valueOf);
+```
+
+## New fields on each active mortgage (feed Stage 3 + the takeaway)
+`blanket` (bool) · `blanket_pins` ([PIN,…]) · `suppress_ltv` (bool) · `pool_value` (number|null) · `pool_ltv` (number|null) · `pool_ltv_note` (string|null)
+
+## 🔴 Dedup rule (where a combined/multi-parcel view exists)
+A blanket loan is **one** obligation. If the app ever aggregates debt across the owner's parcels (or renders a co-parcel combined view), the loan is counted **once**, keyed on its doc number — never the full amount charged against each parcel. Within a single parcel's snapshot there's no double-count; this rule guards the co-parcel merge layer only.
+
+## 🔴 Ship these as tests
+```
+assert a doc indexed under 2 PINs sets blanket=true even when its body pins[] listed only one   // cross-index signal
+assert blanket pool = union(body pins, index pins) and NEVER includes an owner parcel the loan doesn't touch
+assert blanket==true sets suppress_ltv==true and no per-parcel LTV is emitted
+assert pool_ltv == loan_amount / sum(valueOf(pool pins)); pool_ltv==null with a note when any pool pin can't be valued
+assert a non-blanket single-PIN loan (e.g. 3014 Albany) has blanket==false, blanket_pins==[]   // no false positive
+// 2821/2825 regression:
+assert the $2.95M loan on 2821 is blanket, blanket_pins includes 2825, suppress_ltv true, NO "high leverage" flag
+```
+
+## Cost note
+Detection is index-only, so it runs on every report cheaply. The *pooled valuation* (valueOf on siblings) only fires when a blanket loan is actually detected — most parcels aren't blanket, so most reports never pay for it. Do **not** run the full extract/OCR pipeline on sibling parcels to detect blanket — the index cross-check already answers it.

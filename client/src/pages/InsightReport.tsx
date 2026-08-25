@@ -36,7 +36,7 @@ export default function InsightReport() {
       const html = data?.html || data?.content?.html;
       const generatedAt = data?.generatedAt;
       // generatedForProjectType: undefined = legacy report (unknown, no banner);
-      // null = generated with no project type selected; string = generated for that type
+      // null = generated with no project use selected; string = generated for that type
       const src = data?.content && typeof data.content === "object" ? data.content : data;
       const generatedForProjectType =
         src && typeof src === "object" && "generatedForProjectType" in src
@@ -88,9 +88,9 @@ export default function InsightReport() {
     generateMutation.mutate();
   }, [runId, canAccess, loadingCached, cached, html]);
 
-  // Stale flag: the run's project type changed since this report was generated.
+  // Stale flag: the run's project use changed since this report was generated.
   // Legacy reports (generatedFor === undefined) never show the banner.
-  // As-is (public record) reports intentionally have no project type — never stale.
+  // As-is (public record) reports intentionally have no project use — never stale.
   const currentProjectType = (run as any)?.lastProjectType ?? null;
   const isStaleProjectType = !!html && reportMode !== "as_is" && generatedFor !== undefined && generatedFor !== currentProjectType;
 
@@ -158,13 +158,13 @@ export default function InsightReport() {
         </div>
       </div>
 
-      {/* Stale project type banner */}
+      {/* Stale project use banner */}
       {html && !isGenerating && isStaleProjectType && (
         <div className="bg-secondary border-b border-border px-4 py-2 flex items-center gap-2 font-mono text-xs" data-testid="banner-stale-report">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>
-            This report was generated {generatedFor ? `for "${generatedFor}"` : "before a project type was selected"}
-            {" — "}the project type is now {currentProjectType ? `"${currentProjectType}"` : "unset"}. Regenerate to reflect the current project type.
+            This report was generated {generatedFor ? `for "${generatedFor}"` : "before a project use was selected"}
+            {" — "}the project use is now {currentProjectType ? `"${currentProjectType}"` : "unset"}. Regenerate to reflect the current project use.
           </span>
         </div>
       )}

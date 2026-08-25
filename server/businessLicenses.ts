@@ -1,4 +1,10 @@
 import * as turf from '@turf/turf';
+import {
+  groupLicenseEstablishments,
+  type LicenseCategory,
+  type NearbyLicense,
+  type NearbyLicensesResponse,
+} from '@shared/businessLicenses';
 
 interface RawLicense {
   id: string;
@@ -18,23 +24,7 @@ interface RawLicense {
   business_activity: string;
 }
 
-export interface NearbyLicense {
-  businessName: string;
-  address: string;
-  licenseType: string;
-  licenseCategory: 'liquor' | 'food' | 'entertainment' | 'manufacturing' | 'hotel' | 'gallery' | 'other';
-  startDate: string;
-  distanceMiles: number;
-  latitude: number;
-  longitude: number;
-}
-
-export interface NearbyLicensesResponse {
-  licenses: NearbyLicense[];
-  totalCount: number;
-  radiusMiles: number;
-  periodMonths: number;
-}
+export type { NearbyLicense, NearbyLicensesResponse } from '@shared/businessLicenses';
 
 let cachedLicenses: RawLicense[] | null = null;
 let cacheTimestamp = 0;
@@ -52,7 +42,7 @@ const LICENSE_TYPES = [
   'Outdoor Patio',
 ];
 
-function categorizeLicense(desc: string, activity?: string): 'liquor' | 'food' | 'entertainment' | 'manufacturing' | 'hotel' | 'gallery' | 'other' {
+function categorizeLicense(desc: string, activity?: string): LicenseCategory {
   const upper = desc.toUpperCase();
   const actUpper = (activity || '').toUpperCase();
   if (actUpper.includes('SALE OF ART')) {
@@ -82,7 +72,7 @@ async function fetchRecentLicenses(): Promise<RawLicense[]> {
   }
 
   const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - 12);
+  cutoff.setMonth(cutoff.getMonth() - 24);
   const startDate = cutoff.toISOString().split('T')[0];
 
   const licenseFilter = LICENSE_TYPES.map(t => `license_description='${t}'`).join(' OR ');
@@ -127,7 +117,7 @@ async function fetchRecentLicenses(): Promise<RawLicense[]> {
         }
       } catch (err) {
         console.error(`[BUSINESS LICENSES] Error fetching ${q.label}:`, (err as Error).message);
-        hasMore = false;
+        throw new Error(`Could not load complete business license data (${q.label})`);
       }
     }
   }
@@ -142,16 +132,19 @@ async function fetchRecentLicenses(): Promise<RawLicense[]> {
   }
   const deduped = Array.from(seen.values());
 
-  console.log(`[BUSINESS LICENSES] Fetched ${allLicenses.length} raw, deduplicated to ${deduped.length} (last 6 months)`);
+  console.log(`[BUSINESS LICENSES] Fetched ${allLicenses.length} raw, deduplicated to ${deduped.length} (last 24 months)`);
   cachedLicenses = deduped;
   cacheTimestamp = Date.now();
   return deduped;
 }
 
-export async function getNearbyBusinessLicenses(lat: number, lng: number, radiusMiles = 0.5): Promise<NearbyLicensesResponse> {
+export async function getNearbyBusinessLicenses(lat: number, lng: number, radiusMiles = 1): Promise<NearbyLicensesResponse> {
   const licenses = await fetchRecentLicenses();
   const fromPoint = turf.point([lng, lat]);
   const nearby: NearbyLicense[] = [];
+  const currentCutoff = new Date();
+  currentCutoff.setMonth(currentCutoff.getMonth() - 12);
+  const currentDate = currentCutoff.toISOString().slice(0, 10);
 
   for (const l of licenses) {
     const pLat = parseFloat(l.latitude);
@@ -174,25 +167,23 @@ export async function getNearbyBusinessLicenses(lat: number, lng: number, radius
     }
   }
 
-  const dedupedNearby: NearbyLicense[] = [];
-  const seenKeys = new Set<string>();
-  for (const n of nearby) {
-    const key = `${n.businessName}|${n.address}|${n.licenseType}`;
-    if (!seenKeys.has(key)) {
-      seenKeys.add(key);
-      dedupedNearby.push(n);
-    }
-  }
+  const currentLicenses = nearby.filter((license) => license.startDate >= currentDate);
+  const priorLicenses = nearby.filter((license) => license.startDate < currentDate);
 
-  dedupedNearby.sort((a, b) => {
+  currentLicenses.sort((a, b) => {
     const distDiff = a.distanceMiles - b.distanceMiles;
     if (distDiff !== 0) return distDiff;
     return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
   });
 
   return {
-    licenses: dedupedNearby,
-    totalCount: dedupedNearby.length,
+    licenses: currentLicenses,
+    totalCount: groupLicenseEstablishments(currentLicenses).length,
+    licenseCount: currentLicenses.length,
+    priorPeriodCount: groupLicenseEstablishments(priorLicenses).length,
+    changePct: groupLicenseEstablishments(priorLicenses).length === 0
+      ? null
+      : Math.round(((groupLicenseEstablishments(currentLicenses).length - groupLicenseEstablishments(priorLicenses).length) / groupLicenseEstablishments(priorLicenses).length) * 1000) / 10,
     radiusMiles,
     periodMonths: 12,
   };

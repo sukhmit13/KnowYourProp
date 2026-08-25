@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--caution:#f0a41c;--cautionText:#96600a;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:820px;margin:0 auto}
+
+  .procard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px 20px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .proh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:6px}
+  .proh svg{width:14px;height:14px;stroke:var(--ink2);fill:none}
+  .proh .sortnote{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.03em;color:var(--muted)}
+
+  /* professional row */
+  .pro2{display:flex;align-items:flex-start;gap:13px;padding:15px 0;border-top:1px solid var(--line)}
+  .pro2:first-of-type{border-top:none}
+  .pic{width:38px;height:38px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--indigoSoft)}
+  .pic svg{width:19px;height:19px;fill:none;stroke:var(--indigo);stroke-width:1.9}
+
+  .pmain{flex:1;min-width:0}
+  .prole{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;color:var(--indigo)}
+  .pnm{font-size:15px;font-weight:600;color:var(--ink);line-height:1.2}
+  .pstat{font-family:var(--mono);font-size:11px;color:var(--ink);margin-top:8px}
+  .pstat .lab{font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-right:7px}
+  .pstat b{color:var(--ink);font-weight:600}
+  .pstat .dim{color:var(--muted)}
+  .pcite{font-family:var(--mono);font-size:10.5px;color:var(--ink2);margin-top:7px;padding-top:8px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .pcite .cw{font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .pcite b{color:var(--ink);font-weight:600}
+  .pcite .vp{margin-left:auto;color:var(--indigo);text-decoration:none;font-weight:600;white-space:nowrap}
+  .pcite.nomatch{color:var(--muted);border-top-color:transparent;padding-top:2px}
+
+  .pera{flex:none;padding-top:2px}
+  .era{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;border-radius:7px;padding:3px 8px}
+  .era .d{width:6px;height:6px;border-radius:50%;flex:none}
+  .era.cur{color:var(--indigo);background:var(--indigoSoft)}.era.cur .d{background:var(--indigo)}
+  .era.prior{color:var(--ink2);background:var(--paper);border:1px solid var(--line)}.era.prior .d{background:#9aa1b0}
+
+  .profind{font-size:11px;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);line-height:1.5}
+  .profind b{color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="procard">
+    <div class="proh"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Professionals who worked on this building<span class="sortnote">Most recent work first</span></div>
+
+    <!-- Sign contractor · 2019 -->
+    <div class="pro2">
+      <div class="pic"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="10" rx="1.5"/><path d="M12 14v6"/><path d="M8 20h8"/><path d="M7 9h10"/></svg></div>
+      <div class="pmain">
+        <div class="prole">Sign contractor</div>
+        <div class="pnm">Vital Signs &amp; Graphix Inc.</div>
+        <div class="pstat"><span class="lab">Here</span><b>2 permits</b> <span class="dim">·</span> $900 <span class="dim">·</span> latest 2019</div>
+        <div class="pcite nomatch">No confident citywide match — showing this property's record only.</div>
+      </div>
+      <div class="pera"><span class="era prior"><span class="d"></span>Prior owner</span></div>
+    </div>
+
+    <!-- Electrical contractor · 2019 -->
+    <div class="pro2">
+      <div class="pic"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <div class="pmain">
+        <div class="prole">Electrical contractor</div>
+        <div class="pnm">Arrow Sign Company, Inc.</div>
+        <div class="pstat"><span class="lab">Here</span><b>1 permit</b> <span class="dim">·</span> $500 <span class="dim">·</span> latest 2019</div>
+        <div class="pcite nomatch">No confident citywide match — showing this property's record only.</div>
+      </div>
+      <div class="pera"><span class="era prior"><span class="d"></span>Prior owner</span></div>
+    </div>
+
+    <!-- Architect · 2017 -->
+    <div class="pro2">
+      <div class="pic"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="16.5 7.5 13.7 13.7 7.5 16.5 10.3 10.3"/></svg></div>
+      <div class="pmain">
+        <div class="prole">Architect</div>
+        <div class="pnm">Martinez, Luis A.</div>
+        <div class="pstat"><span class="lab">Here</span><b>2 permits</b> <span class="dim">·</span> $57.6K <span class="dim">·</span> latest 2017</div>
+        <div class="pcite"><span class="cw">Citywide · 5 yr</span> <b>63 permits</b> <span class="dim">· last active 2026 · mostly renovations</span> <a class="vp" href="#">View profile →</a></div>
+      </div>
+      <div class="pera"><span class="era cur"><span class="d"></span>Current owner</span></div>
+    </div>
+
+    <!-- General contractor · 2017 -->
+    <div class="pro2">
+      <div class="pic"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg></div>
+      <div class="pmain">
+        <div class="prole">General contractor</div>
+        <div class="pnm">A Kats Construction Inc.</div>
+        <div class="pstat"><span class="lab">Here</span><b>2 permits</b> <span class="dim">·</span> $57.6K <span class="dim">·</span> latest 2017</div>
+        <div class="pcite"><span class="cw">Citywide · 5 yr</span> <b>128 permits</b> <span class="dim">· last active 2025 · mostly residential</span> <a class="vp" href="#">View profile →</a></div>
+      </div>
+      <div class="pera"><span class="era cur"><span class="d"></span>Current owner</span></div>
+    </div>
+
+    <!-- Masonry contractor · 2016 -->
+    <div class="pro2">
+      <div class="pic"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9.3h18"/><path d="M3 14.6h18"/><path d="M9 4v5.3"/><path d="M15 9.3v5.3"/><path d="M9 14.6V20"/></svg></div>
+      <div class="pmain">
+        <div class="prole">Masonry contractor</div>
+        <div class="pnm">Exterior Renovation Experts</div>
+        <div class="pstat"><span class="lab">Here</span><b>1 permit</b> <span class="dim">·</span> $4,850 <span class="dim">·</span> latest 2016</div>
+        <div class="pcite nomatch">No confident citywide match — showing this property's record only.</div>
+      </div>
+      <div class="pera"><span class="era prior"><span class="d"></span>Prior owner</span></div>
+    </div>
+
+    <!-- Permit expediter · 2016 -->
+    <div class="pro2">
+      <div class="pic"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1z"/><path d="M8.5 12h7"/><path d="M8.5 16h4.5"/></svg></div>
+      <div class="pmain">
+        <div class="prole">Permit expediter</div>
+        <div class="pnm">Chicago Permit Services</div>
+        <div class="pstat"><span class="lab">Here</span><b>1 permit</b> <span class="dim">·</span> $4,850 <span class="dim">·</span> latest 2016</div>
+        <div class="pcite nomatch">No confident citywide match — showing this property's record only.</div>
+      </div>
+      <div class="pera"><span class="era prior"><span class="d"></span>Prior owner</span></div>
+    </div>
+
+    <div class="profind">Every professional on the building's permits is listed — a starting point, not a recommendation. Citywide figures are <b>permit activity, not a quality rating</b>; matches are made by license number, and where we can't match confidently only this property's record is shown. Verify licensing and references before relying on any firm.</div>
+  </div>
+</div>
+</body>
+</html>

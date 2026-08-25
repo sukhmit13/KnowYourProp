@@ -1,0 +1,59 @@
+# Task for Replit Agent — redesign "Check Your Project Type"
+
+## Goal
+Elevate the existing **Check Your Project Type** section from a plain dropdown + banner into a polished verdict card, **without duplicating the Zoning Details card above it**. The data/logic largely exists (use → zoning check); this is a structure + visual upgrade plus a smarter concept field. Visual target: **report-projecttype.html** (render it). Reuse the app's existing card CSS — do not copy the mockup's style block.
+
+## 🔴 The one rule: no duplication with Zoning Details
+The **Zoning Details** card (above) owns: the district description, the **Allowed Uses — As-Of-Right** list, and FAR / height / parking / lot dimensions. **Do NOT repeat any of that here.** (The current build's "B3-1 also permits" strip was the duplication — remove it.) This section owns exactly four things and nothing else:
+1. the **use-specific verdict** (is *your* use allowed),
+2. the **path** when it isn't,
+3. the **concept competition scan**,
+4. the **tailoring hook** (this selection drives the Insight Report + valuation).
+
+## 1. Input row (two fields + Update)
+- **Intended use** — the existing use selector (icon + label + chevron).
+- **"Get specific — your concept"** (rename from "Additional detail (optional)"). Prompt for specificity with a **use-aware placeholder** and a one-line hint.
+  - 🔴 **Use-aware placeholder map** (swap examples by selected use):
+    - Restaurant → `Thai · Neapolitan pizza · taquería · steakhouse…`
+    - Café / Coffee → `specialty coffee · boba · bakery café…`
+    - Daycare → `bilingual · Montessori · infant/toddler…`
+    - Cannabis → `recreational · medical…`
+    - Retail → `boutique apparel · hardware · grocery…`
+    - (fallback) → `name your specific concept…`
+  - Hint under the field: "The more specific, the sharper the competition scan and tailoring. Restaurant → cuisine · daycare → program/language · café → format · retail → category."
+
+## 2. Verdict card — three states, keyed on the zoning check
+Render ONE, based on the selected use's zoning status. Each: a status **badge**, a `Zoning check` eyebrow, a serif verdict headline, and a plain-English line.
+
+| State | Color | Headline | Body |
+|---|---|---|---|
+| **Allowed by right** | green | "Allowed by right" | "…permitted as-of-right in {zone} — no special-use approval or variance." + **condition chips** (business license ✓, no zoning relief ✓, and any use-specific license as a marigold "verify" chip, e.g. retail food + liquor) |
+| **Special Use required** | **red** | "Special Use approval required" | "…not by-right in {zone} — needs Special Use approval. A defined, winnable path, not a denial." + **"The path"** steps + cross-link (below) |
+| **Not permitted** | **red** | "Not permitted as-of-right — rezoning required" | "…not an allowed use in {zone}; it would require a Map Amendment (rezoning)." + a rezoning-path variant + same cross-link |
+
+- 🔴 **Special Use and Not-permitted are BOTH red** (per product decision), distinguished by **label + path**, not color. Green = by-right only.
+- **"The path" steps** (numbered, red-tinted) for the discretionary states — e.g. Special Use: (1) public hearing before the ZBA, (2) aldermanic support (Ward {n}) typically decisive, (3) engage a zoning attorney. Not-permitted swaps in the rezoning/Map-Amendment path.
+
+## 3. Cross-link (don't duplicate the attorney list)
+On the discretionary (red) states, render a cross-reference chip that scrolls to the existing **Zoning Change History & Representation** section: "Zoning attorneys who've filed in Ward {n} are listed below → ". Do NOT list attorneys here — link to where they live.
+
+## 4. Concept scan
+A small card: the nearby-competition count **sharpened by the specific concept** — "N {concept} within ½ mile" (e.g. "3 Thai restaurants," not "restaurants" broadly). Wire N to live data; until then label it "illustrative." One-line source note.
+
+## 5. Tailoring hook
+An indigo note: "This use selection also tailors your Insight Report and sets the valuation calculator's mode." (This is the same intended-use signal that feeds those sections — one source.)
+
+## 🔴 Tests
+```
+assert this section does NOT render the B3-1 allowed-use list or FAR/height/parking (those stay in Zoning Details)
+assert the concept field label is "Get specific — your concept" with a use-aware placeholder that changes with the selected use
+assert an as-of-right use renders the GREEN "Allowed by right" verdict + condition chips
+assert a Special-Use use renders a RED verdict + numbered "the path" steps + the cross-link to Zoning Change History
+assert a not-permitted use renders a RED verdict labeled "rezoning required" with the map-amendment path
+assert the discretionary states link to the attorney section rather than listing attorneys inline
+assert the concept scan text reflects the specific concept entered ("Thai restaurants"), not the broad use
+assert the tailoring note references the Insight Report + valuation mode
+```
+
+## Done when
+The section matches **report-projecttype.html**: input row with a specificity-prompting concept field, one verdict card (green by-right / red special-use / red not-permitted) with condition chips or a numbered path, a cross-link to the attorney section for the red states, the concept-sharpened competition scan, and the tailoring hook — and it never repeats what Zoning Details already shows.

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--c1:#3f51c5;--c2:#0e8fa6;--c3:#e0a615;--track:#efeee9;
+    --good:#2f7d3f;--goodSoft:#edf6ef;--goodBd:#cfe6d4;--red:#d13b26;--redSoft:#fbecea;--redBd:#f2c9c2;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .col{max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .ichead{display:flex;align-items:center;gap:10px;padding-bottom:13px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+  .ichead .ic{color:var(--indigo);font-size:16px;flex:none;width:18px;text-align:center}
+  .ichead .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+  .lbl{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);margin:2px 0 12px}
+
+  /* tax bill */
+  .billhd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+  .billhd .big{font-family:var(--disp);font-size:30px;color:var(--ink);line-height:1}
+  .billhd .big small{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink2)}
+  .statustag{font-size:11px;font-weight:700;border-radius:999px;padding:4px 11px;display:inline-flex;align-items:center;gap:5px;flex:none}
+  .statustag.cur{background:var(--goodSoft);color:var(--good)}
+  .statustag.del{background:var(--redSoft);color:var(--red)}
+  .billnote{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .yr{display:grid;grid-template-columns:110px 1fr 74px;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);font-size:13px}
+  .yr .y{font-weight:600;color:var(--ink)}
+  .yr .amt{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .yr .amt b{font-weight:700}
+  .yr .amt .yoy{color:var(--muted);font-size:11.5px;margin-right:8px}
+  .badge{font-size:10px;font-weight:700;border-radius:5px;padding:3px 8px;text-transform:uppercase;text-align:center}
+  .badge.paid{background:var(--goodSoft);color:var(--good)}
+  .badge.due{background:var(--red);color:#fff}
+  .badge.inst{background:#f1efe9;color:var(--ink2)}
+  .link{font-size:12.5px;color:var(--indigo);font-weight:600;margin-top:10px;display:inline-block}
+
+  /* assessed value */
+  .facts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+  .fact{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 15px}
+  .fact .l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin-bottom:7px}
+  .fact .v{font-size:17px;font-weight:600;color:var(--ink)}
+  .fact .q{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+  .chartcap{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
+  #chart{width:100%;height:auto;display:block}
+  .grid{stroke:var(--line);stroke-width:1}
+  .axis{font-family:var(--mono);font-size:9px;fill:var(--muted)}
+  .legend{display:flex;gap:20px;justify-content:center;margin-top:8px}
+  .lg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)}
+  .lg .d{width:14px;height:3px;border-radius:2px}
+
+  /* appeal cards */
+  .appeal{border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:12px}
+  .appeal .ah{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .appeal .ay{font-size:14px;font-weight:700;color:var(--ink)}
+  .appeal .reason{font-size:12px;color:var(--muted)}
+  .outc{font-size:10px;font-weight:700;border-radius:5px;padding:2px 8px;text-transform:uppercase}
+  .outc.dec{background:var(--goodSoft);color:var(--good)}
+  .outc.inc{background:var(--redSoft);color:var(--red)}
+  .outc.no{background:#f1efe9;color:var(--ink2)}
+  .avr{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .avr .l{font-size:11px;color:var(--muted);margin-bottom:2px}
+  .avr .v{font-size:15px;font-weight:700;color:var(--ink)}
+  .avr .v .cut{color:var(--good);font-size:12px;font-weight:600;margin-left:5px}
+  .avr .sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .appeal .who{font-size:11.5px;color:var(--ink2);border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+
+  /* exemptions */
+  .exgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .ex{border:1px solid var(--line);border-radius:11px;padding:13px 15px;display:flex;justify-content:space-between;gap:10px}
+  .ex .nm{font-size:13px;font-weight:600;color:var(--ink)}
+  .ex .eav{font-size:12px;color:var(--indigo);font-weight:600;margin:2px 0 3px}
+  .ex .cri{font-size:11.5px;color:var(--muted);line-height:1.35}
+  .ex .st{font-size:10px;font-weight:700;border-radius:5px;padding:3px 8px;height:fit-content;flex:none;text-transform:uppercase;background:#f1efe9;color:var(--ink2)}
+  .src{font-size:11.5px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="col">
+
+  <!-- TAX BILL -->
+  <div class="card">
+    <div class="ichead"><span class="ic">$</span><span class="t">Property Tax · Primary · 2821 N Milwaukee</span></div>
+    <div class="billhd">
+      <div class="big">$28,577.27 <small>· Tax Year 2025 · 1st installment only</small></div>
+      <span class="statustag cur">✓ Taxes current</span>
+    </div>
+    <div class="billnote">2nd installment not yet billed — full-year total will be higher.</div>
+    <div class="yr"><span class="y">2025 <span class="badge inst">1st Inst.</span></span><span class="amt"><span class="yoy">+36.1% vs prior 1st</span><b>$28,577.27</b></span><span class="badge paid">Paid</span></div>
+    <div class="yr"><span class="y">2024</span><span class="amt"><span class="yoy">$21,003 + $30,955</span><b>$51,958.61</b></span><span class="badge paid">Paid</span></div>
+    <div class="yr"><span class="y">2023</span><span class="amt"><span class="yoy">$20,472 + $17,716</span><b>$38,187.68</b></span><span class="badge paid">Paid</span></div>
+    <a class="link">↗ Full details at Cook County Treasurer</a>
+
+    <div class="lbl" style="margin-top:20px">Co-parcel · 2825 N Milwaukee</div>
+    <div class="billhd">
+      <div class="big" style="font-size:24px">$5,987.11 <small>· TY2025 · 1st inst.</small></div>
+      <span class="statustag del">⚠ Delinquent</span>
+    </div>
+    <div class="yr"><span class="y">2024</span><span class="amt"><b>$10,885.61</b></span><span class="badge due">$6,872 Due</span></div>
+  </div>
+
+  <!-- ASSESSED VALUE + TREND -->
+  <div class="card">
+    <div class="ichead"><span class="ic">$</span><span class="t">2025 Assessed Value</span></div>
+    <div class="facts">
+      <div class="fact"><div class="l">Assessed Total</div><div class="v">$257,751</div><div class="q">assessed at 10% of market</div></div>
+      <div class="fact"><div class="l">Est. Market Value</div><div class="v">$2,577,510</div></div>
+      <div class="fact"><div class="l">Breakdown</div><div class="v" style="font-size:14px">Land $52,903</div><div class="q">Building $204,848</div></div>
+    </div>
+    <div class="chartcap">Assessment value trend · last 20 years</div>
+    <svg id="chart" viewBox="0 0 720 250" preserveAspectRatio="none"></svg>
+    <div class="legend">
+      <span class="lg"><span class="d" style="background:var(--c1)"></span>Total assessed</span>
+      <span class="lg"><span class="d" style="background:var(--c2)"></span>Land</span>
+      <span class="lg"><span class="d" style="background:var(--c3)"></span>Building</span>
+    </div>
+    <div class="src">Values shown are final assessed amounts (after Board of Review adjustments if applicable).</div>
+  </div>
+
+  <!-- APPEAL HISTORY -->
+  <div class="card">
+    <div class="ichead"><span class="ic">⚖</span><span class="t">Appeal History</span></div>
+    <div class="appeal">
+      <div class="ah"><span class="ay">Tax Year 2025</span><span class="outc no">No change</span><span class="reason">Overvaluation</span></div>
+      <div class="avr">
+        <div><div class="l">Assessor value</div><div class="v">$257,751</div><div class="sub">Land $52,903 · Bldg $204,848</div></div>
+        <div><div class="l">Board of Review value</div><div class="v">$257,751</div><div class="sub">no reduction granted</div></div>
+      </div>
+      <div class="who">Appellant: Don Deal 5, LLC · Attorney: Abby L. Strauss (Schiller Strauss &amp; Lavin PC)</div>
+    </div>
+    <div class="appeal">
+      <div class="ah"><span class="ay">Tax Year 2023</span><span class="outc dec">Decrease</span><span class="reason">Overvaluation</span></div>
+      <div class="avr">
+        <div><div class="l">Assessor value</div><div class="v">$209,664</div></div>
+        <div><div class="l">Board of Review value</div><div class="v">$180,348 <span class="cut">−$29,316</span></div><div class="sub">appeal succeeded</div></div>
+      </div>
+      <div class="who">Appellant: Don Deal 5, LLC · Attorney: Abby L. Strauss (Schiller Strauss &amp; Lavin PC)</div>
+    </div>
+  </div>
+
+  <!-- EXEMPTIONS -->
+  <div class="card">
+    <div class="ichead"><span class="ic">$</span><span class="t">Exemption Eligibility</span></div>
+    <div class="exgrid">
+      <div class="ex"><div><div class="nm">Homeowner Exemption</div><div class="eav">~$10,000 EAV reduction</div><div class="cri">Owner-occupied primary residence</div></div><span class="st">Not on file</span></div>
+      <div class="ex"><div><div class="nm">Senior Citizen</div><div class="eav">~$8,000 EAV reduction</div><div class="cri">Age 65+, primary residence</div></div><span class="st">Not on file</span></div>
+      <div class="ex"><div><div class="nm">Senior Assessment Freeze</div><div class="eav">Freezes assessed value</div><div class="cri">Age 65+, household income ≤ $65,000</div></div><span class="st">Not on file</span></div>
+      <div class="ex"><div><div class="nm">Persons with Disabilities</div><div class="eav">~$2,000 EAV reduction</div><div class="cri">Documented disability, primary residence</div></div><span class="st">Not on file</span></div>
+      <div class="ex"><div><div class="nm">Disabled Veterans</div><div class="eav">$2,500–$250,000 EAV reduction</div><div class="cri">VA disability rating 30%+, primary residence</div></div><span class="st">Not on file</span></div>
+      <div class="ex"><div><div class="nm">Home Improvement</div><div class="eav">Up to $75,000 EAV, 4 years</div><div class="cri">Qualifying improvements in last 4 years</div></div><span class="st">Not on file</span></div>
+    </div>
+    <div class="src">No exemptions on file — expected for a non-owner-occupied commercial parcel. Apply at cookcountyassessor.com; deadlines are typically late winter / early spring.</div>
+  </div>
+
+</div>
+<script>
+  const total=[310,310,310,265,150,110,215,218,220,190,188,188,185,185,80,320,180,180,255,258];
+  const bldg =[286,286,286,241,140,100,190,194,195,166,164,164,160,160,55,300,155,155,205,205];
+  const land =[24,24,24,24,24,24,24,24,25,24,24,24,25,25,25,20,25,25,45,53];
+  const years=Array.from({length:20},(_,i)=>2006+i);
+  const X0=48,X1=706,Y0=14,Y1=196,MAX=320;
+  const px=i=>X0+(X1-X0)*i/(total.length-1);
+  const py=v=>Y1-(Y1-Y0)*v/MAX;
+  const svg=document.getElementById('chart');
+  const NS='http://www.w3.org/2000/svg';
+  [0,80,160,240,320].forEach(v=>{
+    const y=py(v);
+    const l=document.createElementNS(NS,'line');l.setAttribute('x1',X0);l.setAttribute('x2',X1);l.setAttribute('y1',y);l.setAttribute('y2',y);l.setAttribute('class','grid');svg.appendChild(l);
+    const t=document.createElementNS(NS,'text');t.setAttribute('x',6);t.setAttribute('y',y+3);t.setAttribute('class','axis');t.textContent='$'+v+'k';svg.appendChild(t);
+  });
+  years.forEach((yr,i)=>{ if(i%3===0||i===years.length-1){const t=document.createElementNS(NS,'text');t.setAttribute('x',px(i)-8);t.setAttribute('y',214);t.setAttribute('class','axis');t.textContent=yr;svg.appendChild(t);} });
+  function line(data,color,dash){
+    const pts=data.map((v,i)=>px(i)+','+py(v)).join(' ');
+    const p=document.createElementNS(NS,'polyline');p.setAttribute('points',pts);p.setAttribute('fill','none');p.setAttribute('stroke',color);p.setAttribute('stroke-width','2.2');p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');if(dash)p.setAttribute('stroke-dasharray','5 4');svg.appendChild(p);
+    data.forEach((v,i)=>{const c=document.createElementNS(NS,'circle');c.setAttribute('cx',px(i));c.setAttribute('cy',py(v));c.setAttribute('r','2.4');c.setAttribute('fill',color);svg.appendChild(c);});
+  }
+  line(land,getComputedStyle(document.documentElement).getPropertyValue('--c2').trim(),true);
+  line(bldg,getComputedStyle(document.documentElement).getPropertyValue('--c3').trim(),false);
+  line(total,getComputedStyle(document.documentElement).getPropertyValue('--c1').trim(),false);
+</script>
+</body>
+</html>

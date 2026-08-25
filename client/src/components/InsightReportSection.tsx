@@ -1,7 +1,7 @@
 // Property Insight Report — button → checklist modal → in-section report.
 // The one slot below Ward/Zoning holds all four states, swapped in place:
 //   A resting: section-width "Generate Insight Report" button
-//   modal: pre-generate checklist (Project Type / Project Context / Valuation)
+//   modal: pre-generate checklist (Project Use / Project Context / Valuation)
 //   B generating: collapsed section with a REAL progress bar (streamed finding
 //     completions from /progress — never a timer)
 //   C ready: collapsible section embedding the EXISTING one-pager (unchanged
@@ -132,7 +132,7 @@ export default function InsightReportSection(props: Props) {
 
   // ---- checklist -----------------------------------------------------------
   const items: ChecklistItem[] = [
-    { key: "project_type", title: "Project Type / intended use", subtitle: "Sets which sections get prioritized", complete: props.projectTypeComplete, onComplete: props.onCompleteProjectType },
+    { key: "project_type", title: "Project Use / intended use", subtitle: "Sets which sections get prioritized", complete: props.projectTypeComplete, onComplete: props.onCompleteProjectType },
     { key: "project_context", title: "Project Context", subtitle: "Your goals & constraints for this deal", complete: props.contextComplete, onComplete: props.onCompleteContext },
     { key: "valuation", title: "Valuation Calculator", subtitle: props.valuationComplete ? "Deal terms & DSCR — already completed" : "Deal terms & DSCR", complete: props.valuationComplete, onComplete: props.onCompleteValuation },
   ];

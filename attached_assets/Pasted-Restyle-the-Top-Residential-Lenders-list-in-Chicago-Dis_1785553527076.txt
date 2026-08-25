@@ -1,0 +1,34 @@
+Restyle the "Top Residential Lenders" list in Chicago Discovery to match our report design system. Front-end / styling only — do NOT change the ranking logic, the HMDA query, routing, or auth. Same data, same tabs, same order (see the separate note below about the sort bug — handle that on its own).
+
+Design tokens (use existing CSS variables; add any missing):
+
+Fonts: JetBrains Mono for the section title, tab labels, and rank numbers; Inter for body; Instrument Serif for the big value numbers
+--indigo:#2b3a9e, --indigoSoft:#ecedf9, --c1:#3f51c5 (bar fill)
+--paper:#faf9f6, --card:#fff, --ink:#141414, --ink2:#565651, --muted:#8b8a84, --line:#eae8e2, --track:#efeee9
+
+Remove the medal emojis (🥇🥈🥉) entirely. Every rank — including the top three — displays as an indigo JetBrains Mono label: #1, #2, #3, #4… No medals, no gold/silver/bronze, no emoji. This matches how rank is shown everywhere else in the report.
+
+Remove the green from all the progress bars. Every bar fill becomes solid --c1 indigo. These percentages (approval rate, FHA share, HELOC share) are neutral descriptive facts, not good/bad outcomes, so they must not be colored green.
+
+Rebuild each list item as our standard ranked row (same component as the Gas Stations / Childcare Discovery lists):
+
+Left: rank in indigo mono, fixed ~30px width.
+Middle (flex): lender name in bold --ink; a muted sub-line beneath it with the context stat (e.g. "11,057 total apps · 48% approval"); then a thin indigo magnitude bar (6px tall, rounded, --track background, --c1 fill), max-width ~340px, whose width = this lender's primary metric ÷ the top lender's metric (so #1 = 100% and the bar visibly shrinks down the list).
+Right: the primary value as a large Instrument Serif number with a small muted unit word (e.g. "5,271 closed"), right-aligned, then a muted "›" chevron.
+Thin --line divider between rows.
+
+Per-tab specifics:
+
+Most Closed Loans → value = closed count; sub-line = total apps + approval %; bar = closed volume relative to #1.
+Most FHA Closed → value = FHA closed count; sub-line = "X% of all closed loans"; bar = FHA volume relative to #1.
+Most HELOC / Equity → value = subordinate count; sub-line = "X% of closed are HELOC/equity"; bar = subordinate volume relative to #1.
+Lowest Avg Rate → no magnitude bar (a longer bar would falsely read as "better" when a lower rate is what's good); value = the rate (e.g. "5.839%") with "first-lien avg" as the unit label; sub-line = loans-rated + total-closed counts.
+
+Tab bar: four tabs (Most Closed Loans, Most FHA Closed, Most HELOC/Equity, Lowest Avg Rate) with a small leading icon each. Inactive labels muted; the active tab has --ink text, an indigo icon, and a 2px indigo bottom border. Not black.
+
+Year toggle (on the Lowest Avg Rate tab): segmented pill control — 
+#f3f2ec track, --line border, rounded; the active segment (2024 / 2023 / 2023+2024) is solid --indigo with white text. Keep the "min 50 loans" caption in muted text beside it.
+
+Source tag ("FFIEC HMDA"): small mono uppercase pill, --line border, muted text, top-right of the section. Keep it subtle.
+
+Do not add stars, ratings, "best lender" language, or any endorsement framing. This stays a factual, volume/rate-based ranking.

@@ -8,6 +8,7 @@ export interface DebtSnapLike {
   ownership_acquired: string | null;
   acquired_via: string;
   active: any[];
+  satisfied?: any[];
   cleared_by_sale: any[];
   distress: any[];
   foreclosure_active: boolean;

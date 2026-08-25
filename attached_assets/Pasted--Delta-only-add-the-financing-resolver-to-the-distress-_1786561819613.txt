@@ -1,0 +1,40 @@
+# Delta only — add the financing resolver to the distress logic you already sent
+
+You already have the sale-anchored distress resolution (sale before filing → resolved) and the summary/chip/KPI changes. This adds ONE more resolver: **new financing after a filing also resolves it**, because a lender/title company clears the litigation to close — same logic as a sale. Everything else stays as sent.
+
+## Add this helper
+```js
+function newFinancingAfter(d, docs) {                       // any new mortgage / refi / HELOC after the filing
+  return docs.some(x =>
+    (x.doc_type === "mortgage" || x.is_credit_line) &&      // a new origination or a HELOC / line of credit
+    x.recording_date && d.recording_date && x.recording_date > d.recording_date &&
+    !x.is_modification && x.doc_type !== "assignment" &&    // NOT a mod/assignment of a pre-filing loan
+    sharesPin(x, d));                                       // secured by this parcel
+}
+```
+
+## Add one branch to the distress loop (owner-agnostic)
+In the `for (const d of distress)` loop you already have, add this **after the sale-clears branch and before the dismissal branch**:
+```js
+  // NEW: financing after the filing — lender required clean title to originate
+  else if (newFinancingAfter(d, docs)) {
+    d.state = "resolved"; d.resolved_by = "financing";
+  }
+```
+
+## Guards (why the helper is written that way)
+- **New origination only** — a `modification` or `assignment` of a loan that predates the filing does NOT count (no fresh title clearance).
+- **Owner-agnostic** — whoever borrowed needed clean title; don't require the current owner.
+- **After the filing** — financing recorded before the filing proves nothing.
+- **Confidence:** softer than a recorded dismissal — display `resolved_by:"financing"` as **"resolved (refinanced/HELOC after filing — clean title implied), verify,"** not a hard dismissal.
+
+## Add these tests
+```
+assert a lis pendens with ANY new mortgage/refi/HELOC recorded after it => resolved, resolved_by "financing"
+assert a MODIFICATION or ASSIGNMENT of a pre-filing loan does NOT resolve it
+assert financing recorded BEFORE the filing does not resolve it
+assert the resolved distress still flows to the summary/chip/KPI as historical (not active) — same as the sale case
+```
+
+## Done when
+A lis pendens followed by a later mortgage, cash-out refi, or HELOC reads **resolved (financing implies clean title)** and flows to the summary/chip/KPI as historical — same handling as the sale-cleared case you already built.

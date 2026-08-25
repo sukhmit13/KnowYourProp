@@ -1,0 +1,29 @@
+Revised plan — supersedes my earlier instructions. Work in this order.
+
+First, a correction: ignore my earlier point about the evidence-to-instruction ratio. That was the wrong diagnosis. What matters is evidence completeness and determinism, not evidence size relative to prompt size.
+
+1. Fix the geo-null silent skip — in the prod code path, highest priority.
+When geocode is missing or null, the builder silently skips zoning, FAR, permitted uses, transit, demographics, childcare, and rental with no markers. Copying a geocode row into dev masked this; it's still live. Fix the code: emit a top-level [EXTRACTION FAILED — no geocode resolved] plus per-section markers for each affected section. Do the same for the rental block when no cached market row exists for the ZIP — its absence currently produces no marker at all. Silent absence is the bug class we've been chasing all week.
+
+2. Regenerate runs 402, 447, 474, and 478 now, before Step D.
+A3 already fixed the underlying data, so these can be corrected today — three of them affirmatively told buyers a distressed property has clean title. Yes, we'll regenerate again after Step D; do it now anyway because it's a customer-facing correction.
+Then answer: were any of the five reports delivered to paying customers? Does the app retain a prior version a customer may have already downloaded? Is there any way to notify or flag an affected user?
+
+3. Replicate runs 480 and 453 into dev so the 2×2 test set (distressed/clean × use-selected/none) is ready before Step D. Validating a clean-asset change against only distressed runs would miss the regression it targets.
+
+4. Step D — apply only patches #1, #3, #5, #6, and #8.
+Defer #2 (USE ECONOMICS) and #4 (CALCULATOR RULES): I checked the evidence dump and their inputs aren't present — no site-specific capacity, no outdoor square footage, no licensing ratios, no comps, no appeal history, and calculator inputs only partially sent. Applying them now would push the model to invent inputs. #7 stays deferred as previously agreed.
+Modify #1 before applying: replace "REQUIRED: before finalizing, identify and compute at least THREE cross-section combinations" with "Compute cross-section combinations wherever every input is explicitly present. If fewer than three are supportable by the evidence, that is the correct outcome — never manufacture inputs to reach a count."
+CRITICAL: do not rewrite, reformat, condense, or regenerate the prompt. Only replace the DERIVED METRIC RULES section with #1, insert the new sections at their specified locations, and make the two text replacements in #8. Every other line must remain byte-identical. Show me a diff and confirm no existing sections were removed or reworded.
+
+5. Build the report-grade evidence builder — the evidence contract is its core requirement.
+Every report attempts the same fixed section list, and every section resolves to exactly one of three states: data, [no records found in source], or [EXTRACTION FAILED — reason]. Never silent absence. That determinism is the point — a report may be incomplete, but it must be incomplete the same way every time, visibly to both me and the model.
+Fixed section list: address/parcel · zoning + FAR + permitted uses · physical property data · deed/sale history (full ledger with amounts, not collapsed to counts) · liens and foreclosures · property tax + appeal history + exemptions · permits · violations · comps · rental market (fetched on demand, not cache-only) · incentives (TIF, SSA, OZ, NMTC, SBIF, enterprise zone, industrial corridor) · transit · demographics · use-specific analysis (gated per Step C) · all calculator inputs inline.
+Priority order for the missing categories: appeal history → permits → violations → comps → full calculator inputs → incentives. Keep the chat context builder separate and unchanged.
+Once these land, we apply patches #2 and #4.
+
+6. Add a consistency test to the 4-run set. For all four runs, assert that every section in the fixed list appears in the evidence with one of the three states. Any silent omission fails the test. Run it after every change from here on.
+
+7. Question, unrelated to size: how much of the 38k-char master prompt is design/formatting instruction versus analytical rules? I'm asking about rule clarity and conflicts — if styling rules are interleaved with analytical ones, they may be competing for adherence and the analytical layer would benefit from separation.
+
+Stop after step 4 and send me the four regenerated reports plus the console output before starting step 5.

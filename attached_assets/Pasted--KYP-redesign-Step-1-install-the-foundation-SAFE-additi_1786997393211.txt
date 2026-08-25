@@ -1,0 +1,83 @@
+# KYP redesign — Step 1: install the foundation (SAFE, additive, ship-able)
+
+**Goal of this step:** land the shared design foundation — the one stylesheet plus two
+atomic components — **without changing how any existing section looks.** Nothing users
+see changes yet. This is the prerequisite that makes every later step consistent and
+drift-proof. It is safe to deploy while testers are on the site.
+
+**Do NOT** restyle, refactor, or "improve" any existing section, page, or component in
+this step. If you feel the urge to touch `RunDetail.tsx` or any `*View.tsx`, stop — that
+is Step 2+. This step only ADDS files.
+
+---
+
+## 1. Add the stylesheet
+
+Create **`client/src/kyp-base.css`** with the exact contents of the attached
+`kyp-base.css` (paste it verbatim — do not edit values). It defines:
+
+- namespaced tokens on `:root` (every custom property is prefixed `--kyp-…`, so it
+  **cannot collide** with the existing `:root` / `.incwrap` / `.cop` tokens), and
+- all `.kyp-*` component classes (type ramp, pills, stat blocks, list rows, section
+  header + indent, collapsed scan row, etc.).
+
+It contains **no** global reset and **no** `body` rule, so it cannot affect any other
+page. Fonts it uses (Instrument Serif, Inter, JetBrains Mono) are already loaded.
+
+Import it once, AFTER the existing stylesheet, in **`client/src/main.tsx`**:
+
+```ts
+import "./index.css";
+import "./kyp-base.css";   // <-- add this line, nothing else
+```
+
+## 2. Add the two atomic components
+
+Create these two files exactly as attached — no changes:
+
+- **`client/src/components/VerdictPill.tsx`**
+- **`client/src/components/StatBlock.tsx`**
+
+Both are pure presentational wrappers over the `.kyp-*` classes. They import nothing
+from the app and are not yet used anywhere.
+
+## 3. Verify (temporary scratch render, then remove)
+
+To confirm the foundation renders, drop this block onto any existing dev route/page
+temporarily, view it, then delete it:
+
+```tsx
+import VerdictPill from "@/components/VerdictPill";
+import StatBlock from "@/components/StatBlock";
+
+<div style={{ display: "flex", gap: 12, padding: 24, flexWrap: "wrap" }}>
+  <VerdictPill tone="good" label="Pencils" />
+  <VerdictPill tone="attention" label="Confirm identity" />
+  <VerdictPill tone="context" label="Context" />
+  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, width: 560 }}>
+    <StatBlock color="green"  value="6.2%" label="Cap rate" detail="stabilized, at ask" />
+    <StatBlock color="indigo" value="1.28" label="DSCR" detail="clears 1.20 floor" />
+    <StatBlock color="dark"   value="OZ"   label="Opportunity Zone" detail="headline benefit" />
+  </div>
+</div>
+```
+
+Expected: three solid pills (green / orange / slate, white mono-uppercase text) and three
+filled color blocks with big Instrument-Serif numbers. If the numbers are NOT serif or the
+pills are NOT solid, the stylesheet didn't load — fix the import before continuing.
+
+## ✅ Done-when checklist
+
+- [ ] `client/src/kyp-base.css` exists, pasted verbatim.
+- [ ] `main.tsx` imports it after `index.css`.
+- [ ] `VerdictPill.tsx` and `StatBlock.tsx` exist.
+- [ ] The scratch block renders solid pills + serif-number blocks, then is removed.
+- [ ] **No existing section changed.** `git diff` touches only: `main.tsx` (one import
+      line), plus the 3 new files. Nothing else.
+
+## What's next (do NOT do now)
+
+- **Step 2:** extend `Takeaway` to the hybrid + convert the **Incentives** section to
+  compose these primitives — the first visible change for testers, one contained section.
+- **Step 3:** `CollapsibleSection` + the collapsed scan / reorder page.
+- **Step 4+:** convert remaining sections, one per PR, each net-removing bespoke CSS.

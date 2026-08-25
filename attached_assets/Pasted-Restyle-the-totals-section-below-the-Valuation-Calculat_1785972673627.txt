@@ -1,0 +1,19 @@
+Restyle the totals section below the Valuation Calculator inputs to match report-valuation-FINAL.html. Front-end / styling + copy only — do NOT change the calculations, routing, or auth. Establish a top-to-bottom hierarchy: verdict → coverage check → reference math, each tier visually lighter than the one above.
+
+1. Deal at a Glance (dark navy band) — the four KPI tiles stay (Cap Rate, Cash-on-Cash, Monthly Cash Flow, DSCR), Instrument Serif values. Two copy changes:
+
+The DSCR sub-label reflects margin over the lender minimum, not an absolute "well-covered" claim: ≥ ~1.40 → "✓ Well-covered" (green); 1.25–1.40 → "✓ Clears 1.25× min" (green); 1.0–1.25 → "! Below 1.25× lender min" (amber); < 1.0 → "✗ Doesn't cover debt" (red). (1.26 shows "✓ Clears 1.25× min".) Set the exact bands from your model.
+The verdict line holds both truths in one sentence so the glance and the coverage check never contradict: e.g. "Positive cash flow, and NOI covers your debt payment with a wide cushion. But DSCR (1.26) sits right at the 1.25× lender minimum — the deal qualifies, with little financing buffer if income dips."
+
+2. NOI vs. Coverage Requirements (white card). Mono label + a one-line sub: "Measured against two bars: what your debt actually costs, and the bank's approval rule." Inside: a header row ("Your NOI" left, NOI in Instrument Serif right), then two rows that name each benchmark plainly:
+
+"Your debt payment" (small: "Breakeven · 1.0× DSCR") — needs $X/yr — solid green chip "✓ +$X cushion".
+"Lender minimum" (small: "Bank rule · 1.25× DSCR") — needs $X/yr — solid gold 
+#f3b31f chip (dark text 
+#3a2a00) "+$X over the floor" when the cushion is small; solid green when comfortably above.
+A read-out line below: "You clear your actual debt payment by a wide margin — operationally the deal is well-covered. The tight spot is only against the bank's 1.25× approval floor, which matters mainly for getting financing or holding a DSCR covenant, not day-to-day cash flow."
+Chips are solid-fill (green / logo-gold / red) — never pale/soft amber. The "thin margin → gold" threshold comes from your model (e.g. cushion < ~2% of the required NOI).
+
+3. How It's Calculated (light --paper reference block). Groups the mechanics + formula as clearly-secondary reference. Three --card tiles inside — Loan Amount (sub: down payment), Monthly Debt Service (sub: $/yr), Annual Cash Flow (sub: $/mo), each mono label + Instrument Serif value. NOI is NOT repeated here (it lives in the coverage card as the benchmark). Below the tiles, the formula line in muted monospace: "DSCR = NOI ÷ Annual Debt Service · Cap Rate = NOI ÷ Purchase Price · ROI = Cash Flow ÷ Down Payment".
+
+No black anywhere; solid-fill status chips; keep it factual.

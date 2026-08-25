@@ -1,0 +1,67 @@
+# Replit Prompt — Transit Access & Ridership takeaway — build to spec
+
+Fix the **Transit Access & Ridership** takeaway. The bug: on a bullet whose text wraps to two lines, the "Closest Stops" chip stretches to the full row height, so it's taller than the others. Fix = the chip keeps ONE fixed size and centers vertically. Also: the headline is the **standard 21px** takeaway size (not 24px). Implement CSS/HTML **verbatim**; check the CRITICAL DETAILS.
+
+## The core fix (this is the whole ask)
+The bullet row is a flex row; by default `align-items:stretch` makes the chip grow to the row height. Two rules fix it:
+```css
+.cn  { display:flex; align-items:flex-start; gap:12px; }  /* dot + text stay top-aligned to line 1 */
+.jbtn{ flex:none; align-self:center; }                    /* chip keeps its own size, centers vertically */
+```
+`flex:none` stops the chip growing/shrinking; `align-self:center` overrides the row's alignment for just the chip so it sits centered against a 1- or 2-line bullet. Dot and text keep `flex-start` so they align to the first line.
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f;
+--sans:"Inter"; --disp:"Instrument Serif"; --mono:"JetBrains Mono";
+```
+
+## CSS (verbatim)
+```css
+.take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:14px;padding:20px 22px 22px}
+.taketop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo)}
+.takeh svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+.ratepill{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--good);background:var(--card);border:1px solid #cfe6d3;border-radius:999px;padding:6px 13px}
+.ratepill .d{width:8px;height:8px;border-radius:50%;background:var(--good)}
+/* Standard takeaway headline size — 21px everywhere; do NOT bump to 24px */
+.taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:16px}
+
+.cn{display:flex;align-items:flex-start;gap:12px;padding:9px 0}
+.cn + .cn{border-top:1px solid #e3e5f4}
+.cn .dt{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.cn.g .dt{background:var(--good)}
+.cn.i .dt{background:var(--indigo)}
+.cn .tx{flex:1;font-size:13.5px;line-height:1.5;color:var(--ink2)}
+.cn .tx b{color:var(--ink);font-weight:700}
+.jbtn{flex:none;align-self:center;display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--card);border:1px solid #dde1f6;border-radius:8px;padding:7px 12px;white-space:nowrap;text-decoration:none}
+.jbtn svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+```
+
+## HTML (verbatim; loop per bullet)
+```html
+<div class="take">
+  <div class="taketop">
+    <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2"/><path d="M12 19v2"/><path d="m5 5 1.5 1.5"/><path d="m17.5 17.5 1.5 1.5"/><path d="M3 12h2"/><path d="M19 12h2"/><path d="m5 19 1.5-1.5"/><path d="m17.5 6.5 1.5-1.5"/><circle cx="12" cy="12" r="4"/></svg>Takeaway</div>
+    <span class="ratepill"><span class="d"></span>{RATING_LABEL}</span>
+  </div>
+  <div class="taket">{HEADLINE}</div>
+
+  <!-- one .cn per bullet; dot class g/i/neutral by favorability -->
+  <div class="cn {g|i|}">
+    <span class="dt"></span>
+    <span class="tx">{BULLET_HTML}</span>
+    <a class="jbtn" href="#{SECTION_ID}">Closest stops <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a>
+  </div>
+</div>
+```
+
+## CRITICAL DETAILS
+1. **`.cn` row is `align-items:flex-start`; `.jbtn` is `flex:none; align-self:center`.** This is the fix — the chip never stretches, and it centers vertically whether the bullet is one line or two. Verify by shrinking the container so a bullet wraps: all chips stay identical height.
+2. **All "Closest stops" chips are identical size** — same padding/font/border regardless of bullet length. One `.jbtn` class, no per-row overrides.
+3. **Headline (`.taket`) = 21px** — the standard takeaway-headline size used across every section. Do NOT set 24px. Ideally this is ONE shared token/class so it can't drift per section.
+4. **Serif (`--disp`) only** on `.taket`. Chips, labels, bullet text, rating pill are Mono/Inter.
+5. **Dot color = favorability** (`.g` green / `.i` indigo / neutral grey), never red here unless a genuinely poor-access finding; the rating pill mirrors the overall tier.
+6. Each chip's `href` targets its subsection anchor (`#cta-l`, `#cta-bus`, `#metra`, `#closest-mode`); those wrappers carry the id + `scroll-margin-top:90px`.
+```

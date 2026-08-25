@@ -1,0 +1,200 @@
+# Replit Prompt — Sale History — build to spec
+
+Rebuild the **Sale History** section to match this spec exactly. Front-end / CSS + markup, PLUS derived rules (price-journey, freshness flag, arm's-length flags, value-add note — see LOGIC). Bind values to real data; strings are placeholders. Implement CSS/HTML **verbatim** and check every CRITICAL DETAIL.
+
+Replit usually gets ~80% of a mockup; the missing 20% here is: (a) the price-journey connecting line (an absolutely-positioned pseudo-element that must sit BEHIND the dots), (b) derived flags done in an LLM instead of code, (c) amber applied to the wrong thing. Follow the exact pixel values below and none of that happens.
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f; --goodSoft:#e9f4ec; --bad:#d13b26;
+--caution:#f0a41c; --cautionText:#96600a;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+Font roles: **Instrument Serif** ONLY on the takeaway headline, the journey prices (`.jn .p`), and each sale price (`.sprice`). Everything else Inter. All small caps / labels / dates / doc numbers are JetBrains Mono.
+
+## CSS (verbatim — copy every line, every value)
+```css
+.cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+.cardbox[id]{scroll-margin-top:90px}
+
+/* header */
+.sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+.sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+.sh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+
+/* takeaway */
+.take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px 17px;margin-bottom:18px}
+.takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+.takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+.taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:13px}
+.cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:9px}
+.cn:last-child{margin-bottom:0}
+.cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.cn.g .dt{background:var(--good)}
+.cn.c .dt{background:var(--caution)}
+.cn.i .dt{background:var(--indigo)}
+.cn b{color:var(--ink);font-weight:600}
+.cn .tx{flex:1}
+.jump{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:9.5px;font-weight:600;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid #dde1f6;border-radius:6px;padding:2px 7px;margin-left:7px;white-space:nowrap;vertical-align:middle}
+.jump svg{width:10px;height:10px;stroke:var(--indigo);fill:none}
+
+/* price journey strip */
+.jwrap{border:1px solid var(--line);border-radius:12px;padding:16px 18px 13px;margin-bottom:20px;background:var(--paper)}
+.jlabel{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.journey{position:relative;display:flex;justify-content:space-between}
+.journey::before{content:"";position:absolute;left:14px;right:14px;top:31px;height:2px;background:var(--line)}
+.jn{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:9px;flex:1}
+.jn .p{font-family:var(--disp);font-size:16px;color:var(--ink);line-height:1}
+.jn .dot{width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid #c4c3bd}
+.jn .yr{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.jn.now .p{color:var(--indigo)}
+.jn.now .dot{border-color:var(--indigo);background:var(--indigo)}
+.jn.now .yr{color:var(--indigo);font-weight:700}
+.jnote{display:flex;gap:8px;align-items:flex-start;margin-top:15px;padding-top:13px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--ink2);line-height:1.5}
+.jnote svg{width:14px;height:14px;stroke:var(--indigo);fill:none;flex:none;margin-top:1px}
+.jnote b{color:var(--ink);font-weight:600}
+.jnote a{color:var(--indigo);text-decoration:none;font-weight:600;white-space:nowrap}
+
+/* section divider label */
+.divl{display:flex;align-items:center;gap:11px;margin:4px 0 12px}
+.divl .lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+.divl .ln{flex:1;height:1px;background:var(--line)}
+
+/* sale cards */
+.sale{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--card)}
+.sale.recent{border-color:#cdd2ef;border-left:3px solid var(--indigo);background:#fbfbfe}
+.srow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.sleft{display:flex;flex-direction:column;gap:3px}
+.schip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border-radius:6px;padding:3px 8px;width:fit-content;margin-bottom:5px}
+.schip .d{width:5px;height:5px;border-radius:50%;background:var(--indigo)}
+.sprice{font-family:var(--disp);font-size:24px;color:var(--ink);line-height:1}
+.sdate{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.sparties{text-align:right;font-size:12px;color:var(--ink);line-height:1.5;max-width:330px}
+.sparties .row{margin-bottom:2px}
+.sparties .lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-right:5px}
+.smeta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+.deed{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+.deed.trust{color:var(--cautionText);background:#fdf3df;border-color:#f0d79a}
+.docn{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.docn a{color:var(--indigo);text-decoration:none}
+.naflag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--cautionText);margin-left:auto}
+.naflag svg{width:12px;height:12px;stroke:var(--cautionText);fill:none}
+
+.caveat{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--ink2);line-height:1.5;margin-top:12px;padding:11px 14px;background:var(--card);border:1px solid #ecd49a;border-left:3px solid #e0a92e;border-radius:10px}
+.caveat svg{width:14px;height:14px;stroke:var(--cautionText);fill:none;flex:none;margin-top:1px}
+.caveat b{color:var(--cautionText);font-weight:700}
+.caveat.mt{margin-top:16px}
+```
+
+## HTML (verbatim structure; bind placeholders, loop the repeated blocks)
+
+Order inside the single `.cardbox`: header → takeaway → price journey → "Most recent" divider + recent card + freshness caveat → "Earlier transfers" divider + prior sale cards (loop) → arm's-length caveat.
+
+**Header:** `<span class="count">{TOTAL} recorded sales · {FIRST_YEAR}–{LAST_YEAR}</span>` — plain, no color.
+
+**Takeaway** — headline + up to 3 bullets. Dot classes: `.c` = caution (marigold), `.i` = indigo (derived insight), `.g` = good (only if a genuinely positive fact). Bullet 1 (freshness) only renders if the most recent sale came from the Recorder-of-Deeds fallback (see LOGIC 2); it carries a `.jump` to `#recent`. Bullet 2 (value-add, `.i`) only renders if there is permitted work between sales; it carries a `.jump` to `#permits`. Bullet 3 (`.c`) only renders if the most recent grantee looks institutional/non-profit (see LOGIC 5).
+
+**Price journey** (loop one `.jn` per sale, oldest→newest left→right; add `now` class to the single newest node):
+```html
+<div class="jwrap">
+  <div class="jlabel">Price by transaction · chronological, not to time-scale</div>
+  <div class="journey">
+    <div class="jn"><span class="p">{PRICE_SHORT}</span><span class="dot"></span><span class="yr">{YEAR}</span></div>
+    <!-- … one per sale … -->
+    <div class="jn now"><span class="p">{PRICE_SHORT}</span><span class="dot"></span><span class="yr">{YEAR}</span></div>
+  </div>
+  <!-- .jnote renders ONLY if permitted work exists between sales -->
+  <div class="jnote"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/></svg><span><b>Not all of this is the market.</b> Between these sales, roughly {TOTAL_PERMIT_VALUE} of permitted work was done — {WORK_SUMMARY} — so part of the climb is value added, not appreciation. <a href="#permits">See Permit History →</a></span></div>
+</div>
+```
+
+**Most recent card** (`.sale.recent`, plus `id="recent"` on the divider above it):
+```html
+<div class="divl" id="recent"><span class="lbl">Most recent transfer</span><span class="ln"></span></div>
+<div class="sale recent">
+  <div class="srow">
+    <div class="sleft">
+      <span class="schip"><span class="d"></span>Most recent · {SOURCE}</span>
+      <span class="sprice">{PRICE}</span>
+      <span class="sdate">{DATE}</span>
+    </div>
+    <div class="sparties">
+      <div class="row"><span class="lbl">From</span>{GRANTOR}</div>
+      <div class="row"><span class="lbl">To</span>{GRANTEE}</div>
+    </div>
+  </div>
+  <div class="smeta"><span class="deed{ trust}">{DEED_TYPE}</span><span class="docn">Doc <a href="{DEED_URL}">#{DOC_NO} ↗</a></span>{NAFLAG}</div>
+</div>
+```
+
+**Freshness caveat** (renders ONLY when the recent sale is a Recorder-of-Deeds fallback — LOGIC 2). Note the icon is an **info circle**, not the triangle:
+```html
+<div class="caveat"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span><b>Found directly in the Recorder of Deeds.</b> The Cook County Assessor's dataset updates monthly with a typical 6–12 week lag, so this {MONTH YEAR} sale may not yet appear in Assessor-based figures elsewhere in this report. Verify the deed before relying on it.</span></div>
+```
+
+**Prior sale card** (loop, newest→oldest, under the "Earlier transfers" divider):
+```html
+<div class="sale">
+  <div class="srow">
+    <div class="sleft"><span class="sprice">{PRICE}</span><span class="sdate">{DATE_OR_APPROX}</span></div>
+    <div class="sparties">
+      <div class="row"><span class="lbl">From</span>{GRANTOR}</div>
+      <div class="row"><span class="lbl">To</span>{GRANTEE}</div>
+    </div>
+  </div>
+  <div class="smeta">
+    <span class="deed{ trust}">{DEED_TYPE}</span>
+    <span class="docn">Doc <a href="{DEED_URL}">#{DOC_NO} ↗</a></span>
+    <!-- .naflag only when a non-arm's-length signal fires (LOGIC 4) -->
+    <span class="naflag"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>{NAFLAG_REASON}</span>
+  </div>
+</div>
+```
+When a grantor/grantee isn't in the data, render `<div class="row"><span class="lbl">Parties</span>Not recorded in this dataset</div>` instead of the From/To rows.
+
+**Arm's-length caveat** (bottom, `.caveat.mt`, triangle icon) — renders when ANY prior transfer tripped a non-arm's-length signal OR any date is approximate. Copy from the reference `report-salehistory.html`.
+
+## LOGIC (derived — compute in code, NOT the takeaway/LLM engine)
+
+### 1. Ordering & the journey
+- Journey strip: **oldest → newest, left → right**. The single newest node gets `class="jn now"` (indigo). `{PRICE_SHORT}` = abbreviated ($350K, $1.19M).
+- Card lists: **newest → oldest**. The newest sale is pulled OUT into the `.sale.recent` block; all others render as `.sale` under "Earlier transfers."
+
+### 2. Recorder-of-Deeds freshness flag
+- If the most recent sale was found via the **Recorder of Deeds** (not yet in the Assessor dataset), set `{SOURCE}`="Recorder of Deeds", render the takeaway freshness bullet, and render the info-circle freshness caveat under the recent card. If the newest sale IS already in the Assessor data, set `{SOURCE}` accordingly and OMIT both the freshness bullet and that caveat.
+
+### 3. Approximate dates
+- If a record only has month/year precision (day missing or defaulted to the 1st), render `{DATE_OR_APPROX}` = "{YEAR} · month approx." Full dates render normally ("Nov 9, 2016"). Any approximate date present → include the "some older dates are recorded only to the month or year" clause in the bottom caveat.
+
+### 4. Non-arm's-length signals (drive the `.naflag` and the `.deed.trust` styling) — **compute in code from record fields, do not free-form with an LLM**
+Fire a `.naflag` on a transfer when ANY of:
+- **Deed type is a Trustee's Deed / trust conveyance** → also add class `trust` to its `.deed` chip; reason: "Trust conveyance — may not be an open-market sale."
+- **Grantee (or grantor) is a land-trust/bank-trust entity** (name contains "Trust", "Bank & Trust", "as trustee", "land trust") → reason: "Into a land trust — likely a title transfer, not a sale."
+- **Price is non-monotonic vs. an adjacent later sale** (this sale's price > a later sale's price, unusual) → reason: "Higher than the {later year} price — possible non-market transfer."
+- **Grantor and grantee are related entities** (normalized names share the parcel token, e.g. both contain "2540") → reason: "Transfer between related entities."
+Only the FIRST matching reason needs to show per card (keep it to one `.naflag`). Never use red for these — `--cautionText` amber only. A flagged sale is "interpret carefully," not "bad."
+
+### 5. Institutional / non-profit buyer note
+- If the most recent grantee name matches institutional/public/non-profit patterns (contains "Program", "Authority", "City of", "Corporation" + "not-for-profit", "Church", "Foundation", "Health", "Housing Authority", etc.), render the takeaway bullet 3. Frame it as **"can change use/tax status — confirm in Property Tax,"** never as a definite tax outcome. If the buyer is an ordinary person/LLC, omit this bullet.
+
+### 6. Value-add note (ties Sale History to Permit History) — **the fix for "the timeline looks like pure appreciation"**
+- Query the same permit dataset used by the DOB section. If total permitted declared value between the first and last sale exceeds a threshold (e.g. ≥ $50K), render BOTH the takeaway `.i` bullet and the `.jnote` under the journey.
+- `{TOTAL_PERMIT_VALUE}` = summed declared value; `{WORK_SUMMARY}` = the 1–2 biggest jobs in plain words (e.g., "a 2012 gut rehab plus 2016–17 porch & electrical"). Both link to `#permits`.
+- If there's no meaningful permitted work, OMIT the value-add bullet and the `.jnote`, and the journey may read as market movement — but STILL keep the arm's-length caveat.
+- **Never present the price climb as clean appreciation when permitted work exists.** This is the whole point of the note.
+
+## CRITICAL DETAILS (check ALL)
+1. **Journey connecting line is `.journey::before`** — absolutely positioned, `left:14px; right:14px; top:31px; height:2px`, behind the dots. The `.jn` items are `position:relative; z-index:1` so dots sit ON the line; each dot has a white/paper fill so the line doesn't show through. Do NOT draw the line with borders on the nodes.
+2. **Journey = oldest→newest (left→right); only the newest node has `now`** (indigo price, filled indigo dot, bold indigo year). Cards = newest→oldest.
+3. **`.jnote` value-add note renders whenever permitted work exists between sales** — it's what stops the strip from reading as pure appreciation. Wrench icon, links to `#permits`.
+4. **Serif (`--disp`) only** on takeaway headline, `.jn .p` prices, and `.sprice`. Everything else Inter; labels/dates/doc#/deed chips are Mono.
+5. **The most recent sale is a separate `.sale.recent` card** with indigo left border (`border-left:3px solid var(--indigo)`), `#fbfbfe` bg, and the `.schip` "Most recent" pill. It sits under the `id="recent"` divider (jump target).
+6. **Freshness = info-circle caveat, NOT the triangle**, and it renders ONLY for a Recorder-of-Deeds fallback sale. Amber styling, but it's the standard `.caveat` — do NOT tint the whole recent card amber.
+7. **Non-arm's-length flags are DERIVED in code** (deed type, trust/entity names, non-monotonic price, related-entity match) — see LOGIC 4. One `.naflag` per card max, amber (`--cautionText`), never red. Trustee's deeds also get the `.deed.trust` amber chip.
+8. **Institutional-buyer bullet is conditional** on grantee name pattern, and framed as "can change… confirm," never a definite tax claim.
+9. **Approximate dates** show "{YEAR} · month approx." and trigger the date clause in the bottom caveat.
+10. **Header uses the filled indigo SQUARE** (top-level section). No subsection icons here — Sale History is a single-level section (dividers, not `.ssh` headers).
+11. **Bottom `.caveat.mt` (triangle)** summarizes the data-quality picture (land trusts / trustee's deed / related entities / approximate dates) and renders when any of those conditions exist.
+12. **All prices right-aligned parties** (`.sparties`, `text-align:right`, `max-width:330px`) so long entity/program names wrap cleanly against the right edge.

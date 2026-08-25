@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--c1:#3f51c5;--track:#efeee9;
+    --red:#d13b26;--redBar:#c34a39;--redSoft:#fbecea;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .col{max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .chead{display:flex;align-items:center;gap:9px;padding-bottom:13px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+  .chead .sq{width:10px;height:10px;border-radius:2px;background:var(--indigo);flex:none}
+  .chead .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+  .chead .badge{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);font-size:11.5px;font-weight:700;color:var(--red);background:var(--redSoft);border:1px solid #f2c9c2;border-radius:999px;padding:3px 10px;text-transform:none;letter-spacing:0}
+  .sum{font-size:13.5px;color:var(--ink2);line-height:1.6;margin-bottom:16px}
+  .sum b{color:var(--ink);font-weight:600}
+
+  .barlbl{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  /* ranked bars */
+  .rb{display:grid;grid-template-columns:150px 1fr 34px;align-items:center;gap:12px;margin-bottom:9px}
+  .rb .nm{font-size:12.5px;color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rb .trk{height:14px;background:var(--track);border-radius:4px;overflow:hidden}
+  .rb .trk span{display:block;height:100%;border-radius:4px}
+  .rb.blue .trk span{background:var(--c1)}
+  .rb.red .trk span{background:var(--redBar)}
+  .rb .v{font-size:12.5px;font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+
+  /* recent openings list */
+  .rolbl{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px}
+  .ro{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-top:1px solid var(--line)}
+  .ro .dot{width:8px;height:8px;border-radius:2px;background:var(--c1);flex:none;margin-top:5px}
+  .ro .body{flex:1;min-width:0}
+  .ro .nm{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .ro .meta{font-size:12px;color:var(--muted);margin-top:1px}
+  .ro .dist{font-family:var(--mono);font-size:11px;color:var(--ink2);background:#f3f2ec;border-radius:5px;padding:2px 7px;flex:none}
+
+  /* crime stat tiles */
+  .ctiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+  .kpi{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .kpi .left{display:flex;flex-direction:column;gap:4px}
+  .kpi .cat{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .kpi .q{font-size:12.5px;color:var(--muted)}
+  .kpi .n{font-family:var(--disp);font-size:42px;line-height:.9;color:var(--ink)}
+  .src{font-size:11.5px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:12px;line-height:1.45}
+</style>
+</head>
+<body>
+<div class="col">
+
+  <!-- NEW BUSINESS LICENSES -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">New Business Licenses</span></div>
+    <div class="sum"><b>36 new licenses</b> within 1 mi (past 12 mo) — a food-and-drink corridor: retail food and liquor lead by a wide margin.</div>
+
+    <div class="barlbl">New licenses by type · within 1 mi</div>
+    <div class="rb blue"><span class="nm">Retail Food</span><div class="trk"><span style="width:100%"></span></div><span class="v">24</span></div>
+    <div class="rb blue"><span class="nm">Liquor / Tavern</span><div class="trk"><span style="width:37.5%"></span></div><span class="v">9</span></div>
+    <div class="rb blue"><span class="nm">Art Gallery</span><div class="trk"><span style="width:8.3%"></span></div><span class="v">2</span></div>
+    <div class="rb blue"><span class="nm">Entertainment</span><div class="trk"><span style="width:4.2%"></span></div><span class="v">1</span></div>
+
+    <div class="rolbl">Recent openings · nearest first</div>
+    <div class="ro"><span class="dot"></span><div class="body"><div class="nm">Sunrise Cafe</div><div class="meta">2012 W Chicago Ave · Retail Food · issued 2026-03-24</div></div><span class="dist">0.46 mi</span></div>
+    <div class="ro"><span class="dot"></span><div class="body"><div class="nm">Poke Burrito</div><div class="meta">1125 N Western Ave · Retail Food · issued 2025-11-21</div></div><span class="dist">0.49 mi</span></div>
+    <div class="ro"><span class="dot"></span><div class="body"><div class="nm">Linda Michoacana #2</div><div class="meta">1955 W Chicago Ave · Retail Food · issued 2026-05-29</div></div><span class="dist">0.50 mi</span></div>
+    <div class="ro"><span class="dot"></span><div class="body"><div class="nm">Drama Club</div><div class="meta">Entertainment venue · issued 2026-01-08</div></div><span class="dist">0.53 mi</span></div>
+    <div class="src">Source: Chicago Business Licenses — new issuances only, excludes renewals (last 12 months).</div>
+  </div>
+
+  <!-- AREA CRIME -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">Area Crime Statistics</span><span class="badge">⚠ High crime · safer than 6% of areas</span></div>
+    <div class="sum"><b>2 crimes</b> within 250 ft · <b>405</b> within ¼ mi over the last 12 months. Theft accounts for more than half of nearby incidents.</div>
+
+    <div class="ctiles">
+      <div class="kpi"><div class="left"><span class="cat">Within 250 ft</span><span class="q">Assault 1 · Theft 1</span></div><span class="n">2</span></div>
+      <div class="kpi"><div class="left"><span class="cat">Within ¼ mile</span><span class="q">Last 12 months</span></div><span class="n">405</span></div>
+    </div>
+
+    <div class="barlbl">Crime types · within ¼ mile</div>
+    <div class="rb red"><span class="nm">Theft</span><div class="trk"><span style="width:100%"></span></div><span class="v">235</span></div>
+    <div class="rb red"><span class="nm">Motor vehicle theft</span><div class="trk"><span style="width:15.3%"></span></div><span class="v">36</span></div>
+    <div class="rb red"><span class="nm">Deceptive practice</span><div class="trk"><span style="width:11.1%"></span></div><span class="v">26</span></div>
+    <div class="rb red"><span class="nm">Battery</span><div class="trk"><span style="width:9.8%"></span></div><span class="v">23</span></div>
+    <div class="rb red"><span class="nm">Criminal damage</span><div class="trk"><span style="width:8.5%"></span></div><span class="v">20</span></div>
+    <div class="rb red"><span class="nm">Burglary</span><div class="trk"><span style="width:6.4%"></span></div><span class="v">15</span></div>
+    <div class="src">Source: Chicago Data Portal — crimes reported to CPD (last 12 months).</div>
+  </div>
+
+</div>
+</body>
+</html>

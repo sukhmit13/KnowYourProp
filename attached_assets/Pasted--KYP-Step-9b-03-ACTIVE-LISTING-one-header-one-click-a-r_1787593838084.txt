@@ -1,0 +1,90 @@
+# KYP — Step 9b: `03 · ACTIVE LISTING` — one header, one click, a real takeaway
+
+🔴 **Scope:** this section only. Chrome removal and takeaway text. **Zero data changes** — no
+query, no calculation, no other section. If a change would alter a number on screen, it is out
+of scope.
+
+---
+
+## The bug
+
+Expanding row `03` reveals a **second card with a second "ACTIVE LISTING" header**, its own
+`● No listing found` pill, and its own `▼` chevron. The content sits one click further down.
+
+That is the old `listingSnapshot` `Collapsible` surviving *inside* the new accordion row — the
+wrapper is containing the old chrome instead of replacing it. Step 9 assumed the section had
+already been de-nested by Step 5a because it was already top-level. It was top-level; it had not
+been de-nested.
+
+---
+
+## 1. Delete the inner chrome
+
+1. Remove the inner `Collapsible` / `CollapsibleTrigger` / `CollapsibleContent` around the
+   Active Listing body. **The body renders open, always.**
+2. Remove the inner header row — the "🏢 ACTIVE LISTING" title, its icon, and its chevron.
+   One title exists: the accordion row's.
+3. Remove the outer card shell around the body (`Card`, `.lsnwrap` border / shadow / padding).
+   The accordion row is the card.
+4. Remove the `listingSnapshot` entry from `SectionStates` and its `isListingSnapshotOpen` /
+   `setIsListingSnapshotOpen` pair — the state has nothing left to control.
+
+**Keep** everything inside: `RE-CHECK NOW`, the `checked {date}` stamp, the `NO LISTING FOUND`
+provenance chip, the claims-vs-record rows, and every `data-testid`. That is content, not chrome.
+
+---
+
+## 2. Move the status pill to the row
+
+`● No listing found` is this section's badge. It belongs in the row header, in the same slot
+where `04` renders `CLEAR TITLE` and `09` renders `+14.3% FORMATION`. Row `03` currently shows no
+badge because its badge is trapped inside the card being deleted.
+
+| `listingSnapshot.status` | Row badge | Colour |
+|---|---|---|
+| none / not found | `UNLISTED` | indigo — a state, not a verdict |
+| active | `LISTED · {daysOnMarket}D` | per the DOM scale already specified in Step 9 §15 |
+| pending / under contract | `UNDER CONTRACT` | indigo |
+| withdrawn / expired | `WITHDRAWN` | indigo |
+
+---
+
+## 3. The takeaway states the listing status
+
+Today row `03` reads:
+
+> *"Live listing status for this address — price, status and terms."*
+
+That is a description of the section, and it is the same string on every address in Chicago. The
+takeaway is a finding about **this** property.
+
+| Status | Takeaway |
+|---|---|
+| **none / not found** | **`Unlisted — no active listing found for this address.`** |
+| active | `Listed at {price}, {n} days on market.` |
+| pending / under contract | `Under contract at {price} — listed {listDate}.` |
+| withdrawn / expired | `Withdrawn {date} — last asked {price}.` |
+| still checking | render the row's takeaway as a skeleton, **not** a sentence |
+
+**Rules:**
+- Never assert "unlisted" while the check is still running. `NO LISTING FOUND` is a resolved
+  result; a pending fetch is not. If the status has not resolved, the takeaway is a skeleton.
+- "Unlisted" is a statement about the **listing record**, not about the property. Do not imply
+  the owner will or will not sell.
+- If a re-check changes the status, the takeaway updates with it — it reads from the same
+  `listingSnapshot.status` the badge does, so the two can never disagree.
+
+---
+
+## ✅ Done-when
+
+- [ ] Expanding `03 · ACTIVE LISTING` shows the content immediately — one header, one chevron,
+      one click.
+- [ ] The status pill renders in the row header; nothing inside the body re-collapses the
+      section.
+- [ ] With no listing on file, the row reads
+      **`03 · ACTIVE LISTING — Unlisted — no active listing found for this address.`** with an
+      `UNLISTED` badge.
+- [ ] While the check is running, the takeaway is a skeleton — it does not say "unlisted".
+- [ ] `RE-CHECK NOW`, the checked-date stamp and every `data-testid` still work.
+- [ ] No number anywhere in the report changed.

@@ -1,0 +1,623 @@
+# Replit Instructions: Internal Analytics Tracking
+
+## OBJECTIVE
+Add simple internal analytics to track search patterns. Notify when we hit 500 unique reports.
+
+---
+
+## STEP 1: CREATE DATABASE TABLE
+
+Create a new migration file or add to your existing database schema:
+
+```sql
+-- Create analytics tracking table
+CREATE TABLE IF NOT EXISTS search_analytics (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  
+  -- Property info
+  address TEXT NOT NULL,
+  pin TEXT,
+  neighborhood TEXT,
+  zoning TEXT,
+  
+  -- Project details
+  project_type TEXT,              -- residential, commercial, daycare, restaurant, etc.
+  
+  -- Property financials
+  tax_assessed_value REAL,
+  annual_tax_bill REAL,
+  
+  -- Search metadata
+  searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  customer_email TEXT NOT NULL,
+  customer_type TEXT,             -- 'single' or 'subscriber'
+  report_id TEXT,
+  
+  -- Create indexes for fast queries
+  FOREIGN KEY (report_id) REFERENCES reports(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_analytics_address ON search_analytics(address);
+CREATE INDEX IF NOT EXISTS idx_analytics_project_type ON search_analytics(project_type);
+CREATE INDEX IF NOT EXISTS idx_analytics_customer_type ON search_analytics(customer_type);
+CREATE INDEX IF NOT EXISTS idx_analytics_searched_at ON search_analytics(searched_at);
+
+-- Create view for quick summary stats
+CREATE VIEW IF NOT EXISTS analytics_summary AS
+SELECT 
+  project_type,
+  customer_type,
+  COUNT(*) as total_searches,
+  COUNT(DISTINCT address) as unique_properties,
+  COUNT(DISTINCT customer_email) as unique_customers,
+  AVG(tax_assessed_value) as avg_assessed_value,
+  AVG(annual_tax_bill) as avg_tax_bill
+FROM search_analytics
+GROUP BY project_type, customer_type;
+```
+
+Run this migration in your Replit database.
+
+---
+
+## STEP 2: ADD TRACKING FUNCTION
+
+In your backend code (likely `backend/app.py` or wherever report generation happens):
+
+```python
+import sqlite3
+from datetime import datetime
+
+def track_search_analytics(address, customer_email, report_id, project_type=None):
+    """
+    Track search analytics internally
+    
+    Args:
+        address: Property address
+        customer_email: Customer's email
+        report_id: Generated report ID
+        project_type: Optional - residential, commercial, daycare, restaurant, etc.
+    """
+    try:
+        # Get database connection
+        conn = get_db_connection()  # Use your existing DB connection method
+        cursor = conn.cursor()
+        
+        # Get property data (use your existing functions)
+        property_data = get_property_data_from_cache_or_scrape(address)
+        
+        # Determine customer type
+        cursor.execute("SELECT COUNT(*) FROM subscribers WHERE email = ?", (customer_email,))
+        is_subscriber = cursor.fetchone()[0] > 0
+        customer_type = 'subscriber' if is_subscriber else 'single'
+        
+        # Extract key property metrics
+        pin = property_data.get('pin', '')
+        neighborhood = property_data.get('neighborhood', '')
+        zoning = property_data.get('zoning', '')
+        assessed_value = property_data.get('tax_assessed_value', 0)
+        annual_tax = property_data.get('annual_tax_bill', 0)
+        
+        # Insert analytics record
+        cursor.execute("""
+            INSERT INTO search_analytics 
+            (address, pin, neighborhood, zoning, project_type, 
+             tax_assessed_value, annual_tax_bill, 
+             customer_email, customer_type, report_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            address,
+            pin,
+            neighborhood,
+            zoning,
+            project_type,
+            assessed_value,
+            annual_tax,
+            customer_email,
+            customer_type,
+            report_id
+        ))
+        
+        conn.commit()
+        
+        # Check if we've hit 500 unique reports milestone
+        check_milestone(cursor)
+        
+        conn.close()
+        
+    except Exception as e:
+        print(f"Analytics tracking error: {e}")
+        # Don't let analytics tracking break the main flow
+        pass
+
+
+def check_milestone(cursor):
+    """
+    Check if we've hit 500 unique reports and notify
+    """
+    cursor.execute("SELECT COUNT(DISTINCT report_id) as total FROM search_analytics")
+    total_reports = cursor.fetchone()[0]
+    
+    # Check if we just crossed 500
+    if total_reports == 500:
+        send_milestone_notification(total_reports)
+    
+    # Also notify at other milestones (100, 250, 1000, etc.)
+    milestones = [100, 250, 500, 750, 1000, 2500, 5000, 10000]
+    if total_reports in milestones:
+        send_milestone_notification(total_reports)
+
+
+def send_milestone_notification(total_reports):
+    """
+    Send notification when milestone is reached
+    
+    You can implement this in multiple ways:
+    1. Print to console/logs
+    2. Send email
+    3. Send Slack notification
+    4. Write to a file
+    """
+    import os
+    from datetime import datetime
+    
+    message = f"""
+    🎉 MILESTONE REACHED! 🎉
+    
+    Total Unique Reports: {total_reports}
+    Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+    
+    {get_quick_stats()}
+    """
+    
+    # METHOD 1: Print to logs (Replit will show this)
+    print("=" * 60)
+    print(message)
+    print("=" * 60)
+    
+    # METHOD 2: Write to a milestone file
+    with open('MILESTONES.txt', 'a') as f:
+        f.write(f"\n{message}\n")
+    
+    # METHOD 3: Send email (optional - configure SMTP)
+    # send_email_notification(message)
+
+
+def get_quick_stats():
+    """
+    Get quick summary stats for milestone notification
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Get breakdown by project type
+    cursor.execute("""
+        SELECT 
+            project_type,
+            COUNT(*) as count,
+            ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM search_analytics), 1) as pct
+        FROM search_analytics
+        WHERE project_type IS NOT NULL
+        GROUP BY project_type
+        ORDER BY count DESC
+        LIMIT 5
+    """)
+    project_breakdown = cursor.fetchall()
+    
+    # Get breakdown by customer type
+    cursor.execute("""
+        SELECT 
+            customer_type,
+            COUNT(*) as count,
+            ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM search_analytics), 1) as pct
+        FROM search_analytics
+        GROUP BY customer_type
+    """)
+    customer_breakdown = cursor.fetchall()
+    
+    # Get top neighborhoods
+    cursor.execute("""
+        SELECT 
+            neighborhood,
+            COUNT(*) as count
+        FROM search_analytics
+        WHERE neighborhood IS NOT NULL AND neighborhood != ''
+        GROUP BY neighborhood
+        ORDER BY count DESC
+        LIMIT 5
+    """)
+    neighborhoods = cursor.fetchall()
+    
+    conn.close()
+    
+    stats = "\nQUICK STATS:\n\n"
+    
+    stats += "By Customer Type:\n"
+    for row in customer_breakdown:
+        stats += f"  {row[0]}: {row[1]} ({row[2]}%)\n"
+    
+    stats += "\nTop Project Types:\n"
+    for row in project_breakdown:
+        stats += f"  {row[0]}: {row[1]} ({row[2]}%)\n"
+    
+    stats += "\nTop Neighborhoods:\n"
+    for row in neighborhoods:
+        stats += f"  {row[0]}: {row[1]} searches\n"
+    
+    return stats
+```
+
+---
+
+## STEP 3: INTEGRATE INTO REPORT GENERATION
+
+Find where you generate reports (probably in your checkout/purchase flow) and add ONE line:
+
+```python
+# In your existing report generation function:
+
+def generate_property_report(address, customer_email, project_type=None):
+    """
+    Your existing report generation function
+    """
+    # ... your existing code to generate report ...
+    
+    report_id = create_unique_report_id()  # Your existing code
+    
+    # Generate report data
+    report_data = scrape_and_compile_report(address)  # Your existing code
+    
+    # Save report
+    save_report(report_id, address, customer_email, report_data)  # Your existing code
+    
+    # === ADD THIS LINE ===
+    track_search_analytics(address, customer_email, report_id, project_type)
+    
+    return report_id, report_data
+```
+
+---
+
+## STEP 4: COLLECT PROJECT TYPE FROM CHECKOUT
+
+Update your checkout form to ask about project type (optional but recommended):
+
+In your frontend HTML (probably `frontend/index.html` or checkout page):
+
+```html
+<!-- Add this to your checkout form -->
+<div class="form-group">
+  <label for="project_type">What will you use this property for? (Optional)</label>
+  <select name="project_type" id="project_type">
+    <option value="">Select...</option>
+    <option value="residential">Residential (Primary Home)</option>
+    <option value="residential_investment">Residential (Investment/Rental)</option>
+    <option value="commercial">Commercial</option>
+    <option value="daycare">Daycare/Childcare</option>
+    <option value="restaurant">Restaurant/Food Service</option>
+    <option value="retail">Retail Store</option>
+    <option value="office">Office Space</option>
+    <option value="multifamily">Multi-Family (2-4 units)</option>
+    <option value="multifamily_large">Multi-Family (5+ units)</option>
+    <option value="mixed_use">Mixed Use</option>
+    <option value="other">Other</option>
+  </select>
+  <small class="form-text text-muted">
+    Helps us provide more relevant information in your report
+  </small>
+</div>
+```
+
+Pass this value to your backend when processing the purchase.
+
+---
+
+## STEP 5: CREATE ADMIN VIEW (Optional but Useful)
+
+Create a simple admin route to view stats:
+
+```python
+from flask import render_template_string
+
+@app.route('/admin/analytics')
+def admin_analytics():
+    """
+    Simple admin view of analytics
+    Password protect this route in production!
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Total reports
+    cursor.execute("SELECT COUNT(DISTINCT report_id) as total FROM search_analytics")
+    total_reports = cursor.fetchone()[0]
+    
+    # Get summary data
+    cursor.execute("SELECT * FROM analytics_summary ORDER BY total_searches DESC")
+    summary_data = cursor.fetchall()
+    
+    # Recent searches
+    cursor.execute("""
+        SELECT address, project_type, customer_type, searched_at
+        FROM search_analytics
+        ORDER BY searched_at DESC
+        LIMIT 20
+    """)
+    recent_searches = cursor.fetchall()
+    
+    # Top neighborhoods
+    cursor.execute("""
+        SELECT neighborhood, COUNT(*) as searches
+        FROM search_analytics
+        WHERE neighborhood IS NOT NULL AND neighborhood != ''
+        GROUP BY neighborhood
+        ORDER BY searches DESC
+        LIMIT 10
+    """)
+    top_neighborhoods = cursor.fetchall()
+    
+    conn.close()
+    
+    # Simple HTML template
+    template = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Analytics Dashboard</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #4CAF50; color: white; }
+            .milestone { font-size: 24px; font-weight: bold; color: #4CAF50; }
+            .section { margin: 30px 0; }
+        </style>
+    </head>
+    <body>
+        <h1>Internal Analytics Dashboard</h1>
+        
+        <div class="section">
+            <p class="milestone">Total Unique Reports: {{ total_reports }}</p>
+            {% if total_reports >= 500 %}
+            <p style="color: green; font-weight: bold;">✅ 500 MILESTONE REACHED!</p>
+            {% else %}
+            <p>{{ 500 - total_reports }} reports until 500 milestone</p>
+            {% endif %}
+        </div>
+        
+        <div class="section">
+            <h2>Summary by Project Type & Customer Type</h2>
+            <table>
+                <tr>
+                    <th>Project Type</th>
+                    <th>Customer Type</th>
+                    <th>Searches</th>
+                    <th>Unique Properties</th>
+                    <th>Unique Customers</th>
+                    <th>Avg Property Value</th>
+                </tr>
+                {% for row in summary_data %}
+                <tr>
+                    <td>{{ row[0] or 'Not specified' }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                    <td>{{ row[4] }}</td>
+                    <td>${{ '{:,.0f}'.format(row[5] or 0) }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>Top Neighborhoods</h2>
+            <table>
+                <tr>
+                    <th>Neighborhood</th>
+                    <th>Searches</th>
+                </tr>
+                {% for row in top_neighborhoods %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>Recent Searches</h2>
+            <table>
+                <tr>
+                    <th>Address</th>
+                    <th>Project Type</th>
+                    <th>Customer Type</th>
+                    <th>Searched At</th>
+                </tr>
+                {% for row in recent_searches %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] or 'Not specified' }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return render_template_string(
+        template,
+        total_reports=total_reports,
+        summary_data=summary_data,
+        recent_searches=recent_searches,
+        top_neighborhoods=top_neighborhoods
+    )
+```
+
+Access at: `https://your-replit-url.replit.dev/admin/analytics`
+
+**IMPORTANT:** Password protect this route before going live!
+
+---
+
+## STEP 6: TESTING
+
+Test the analytics tracking:
+
+1. Generate a test report
+2. Check the database:
+   ```sql
+   SELECT * FROM search_analytics ORDER BY searched_at DESC LIMIT 5;
+   ```
+3. Verify data is being captured correctly
+4. Check admin view at `/admin/analytics`
+
+---
+
+## STEP 7: MILESTONE NOTIFICATION LOCATIONS
+
+When you hit 500 reports, you'll be notified in multiple places:
+
+1. **Replit Console/Logs** - Watch for the printed message
+2. **MILESTONES.txt file** - Check root directory for this file
+3. **Admin dashboard** - Visit `/admin/analytics` to see current count
+
+---
+
+## OPTIONAL: EMAIL NOTIFICATION
+
+If you want email notifications when hitting milestones, add this:
+
+```python
+import smtplib
+from email.mime.text import MIMEText
+import os
+
+def send_email_notification(message):
+    """
+    Send email notification (optional)
+    """
+    try:
+        # Set these as Replit Secrets
+        smtp_host = os.getenv('SMTP_HOST', 'smtp.gmail.com')
+        smtp_port = int(os.getenv('SMTP_PORT', '587'))
+        smtp_user = os.getenv('SMTP_USER')
+        smtp_pass = os.getenv('SMTP_PASS')
+        notification_email = os.getenv('NOTIFICATION_EMAIL')
+        
+        if not all([smtp_user, smtp_pass, notification_email]):
+            return  # Skip if not configured
+        
+        msg = MIMEText(message, 'plain')
+        msg['Subject'] = '🎉 Analytics Milestone Reached!'
+        msg['From'] = smtp_user
+        msg['To'] = notification_email
+        
+        with smtplib.SMTP(smtp_host, smtp_port) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
+            
+        print("Email notification sent!")
+        
+    except Exception as e:
+        print(f"Failed to send email notification: {e}")
+```
+
+Then add to Replit Secrets:
+- `SMTP_HOST` = smtp.gmail.com
+- `SMTP_PORT` = 587
+- `SMTP_USER` = your-email@gmail.com
+- `SMTP_PASS` = your-app-password
+- `NOTIFICATION_EMAIL` = where-to-send-alerts@email.com
+
+---
+
+## SUMMARY OF CHANGES
+
+**Files to create/modify:**
+
+1. ✅ Database migration (add `search_analytics` table)
+2. ✅ Backend tracking function (`track_search_analytics()`)
+3. ✅ Integrate into report generation (one line!)
+4. ✅ Optional: Update checkout form (collect project type)
+5. ✅ Optional: Create admin view (`/admin/analytics`)
+6. ✅ Optional: Email notifications
+
+**What gets tracked:**
+- Address
+- PIN
+- Neighborhood
+- Zoning
+- Project type (if provided)
+- Tax assessed value
+- Annual tax bill
+- Customer email
+- Customer type (single vs subscriber)
+- Report ID
+- Timestamp
+
+**Milestone notification triggers:**
+- 100 reports
+- 250 reports
+- 500 reports ← YOUR TARGET
+- 750 reports
+- 1,000 reports
+- And every major milestone after
+
+---
+
+## QUICK START CHECKLIST
+
+- [ ] Run database migration (create table)
+- [ ] Add `track_search_analytics()` function to backend
+- [ ] Add one line to report generation flow
+- [ ] Test with a sample report
+- [ ] Check `/admin/analytics` works
+- [ ] Verify MILESTONES.txt gets created
+- [ ] Optional: Add project type to checkout form
+- [ ] Optional: Set up email notifications
+
+---
+
+## WHEN YOU HIT 500 REPORTS
+
+You'll see this in your Replit logs:
+
+```
+============================================================
+    🎉 MILESTONE REACHED! 🎉
+    
+    Total Unique Reports: 500
+    Timestamp: 2026-04-15 14:32:18
+    
+    QUICK STATS:
+    
+    By Customer Type:
+      single: 421 (84.2%)
+      subscriber: 79 (15.8%)
+    
+    Top Project Types:
+      residential: 312 (62.4%)
+      commercial: 94 (18.8%)
+      daycare: 56 (11.2%)
+      restaurant: 23 (4.6%)
+      multifamily: 15 (3.0%)
+    
+    Top Neighborhoods:
+      Wicker Park: 87 searches
+      Logan Square: 64 searches
+      Ukrainian Village: 52 searches
+      West Town: 48 searches
+      Lincoln Park: 39 searches
+============================================================
+```
+
+**At this point, you can decide whether to add public heat features!**
+
+---
+
+That's it! Simple internal analytics that will give you valuable insights without over-engineering. 🎯

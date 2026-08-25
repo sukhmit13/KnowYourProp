@@ -1,0 +1,138 @@
+# Replit Prompt — Commercial Lending Activity (SBA 504 + 7(a)) — build to spec
+
+Redesign the **Commercial Lending Activity** section: a Standard Takeaway on top, KPI tiles, two subsections (**SBA 504** and **SBA 7(a)**) each with an outline-icon header + summary chip, clean loan rows, and indigo lender bars. The takeaway uses the shared **Standard Takeaway component** (Part B). Implement CSS/HTML **verbatim**; check CRITICAL DETAILS.
+
+## 🔴 Data-integrity rules (non-negotiable — these are why the section reads honestly)
+1. **504 loans are NOT address-linked.** The SBA FOIA 504 dataset gives borrower entity, industry, amount, and CDC lender — **not** the financed property address. Never imply a 504 loan is tied to the subject or any specific building. 504 activity is **ZIP-level** context only. This must appear as a `.caution` takeaway bullet AND the 504 subsection note.
+2. **7(a) records DO carry a borrower street address** + jobs supported — show them. This asymmetry (7a has address, 504 doesn't) is the point; don't flatten it.
+3. **Geography is ZIP (60618), not the census tract** used by the HMDA section. Label it ZIP everywhere (subtitle, KPI subs, source). Do not silently present it as tract-level or blend the two.
+4. **Activity level is NOT favorability.** High SBA volume → `.insight` (indigo), never green/`.good`. A busy corridor is directional market context, not a property-specific win. No red anywhere in this section.
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --takeBorder:#dde1f6; --takeDivider:#e3e5f4;
+--good:#2f7d3f; --caution:#f0a41c;
+--disp:"Instrument Serif"; --mono:"JetBrains Mono"; --sans:"Inter";
+--take-label:11px; --take-title:21px; --take-body:13px;
+```
+
+## Input contract (compute in code; pass to the generator + renderer)
+```json
+{
+  "zip": "60618", "period": "FY2020–present",
+  "total_deployed": "$118.0M",
+  "n_7a": 139, "amt_7a": "$76.7M",
+  "n_504": 72, "amt_504": "$41.2M",
+  "n_lenders": 9,
+
+  "loans_504": [   // owner-occupied CRE — NO address field exists
+    {"name":"Definition Dance Academy, LLC","industry":"Elementary & Secondary Schools","cdc":"Small Business Growth Corporation","amount":"$1.6M","date":"May 2026"}
+    // …72 total; display top N by amount, rest behind "+ {n_504 - N} more"
+  ],
+  "loans_7a": [    // small business — HAS address + jobs
+    {"name":"Clarke Professional Accounting, LLC","address":"2124 W Belmont Ave, Chicago","bank":"Monterey County Bank","amount":"$2.7M","jobs":9,"date":"Dec 2025"}
+    // …139 total; display top N by amount, rest behind "+ {n_7a - N} more"
+  ],
+  "lenders_504": [ {"name":"Small Business Growth Corporation","loans":36,"amount":"$23.2M"}, … ],  // CDCs, sorted by loans desc
+  "lenders_7a":  [ {"name":"The Huntington National Bank","loans":43,"amount":"$9.4M"}, … ],        // banks, sorted by loans desc
+
+  "subject_is_commercial": true   // drives the "counterpart to residential data" framing in the takeaway
+}
+```
+Bar width for each lender = `loans / max(loans in that list) * 100%`, computed in code.
+
+## 1) Section + subsection headers (verbatim)
+```css
+.secthead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:6px}
+.secthead .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}   /* SECTION = filled indigo square */
+.secsub{font-size:12.5px;color:var(--muted);margin-bottom:18px;padding-left:21px}
+
+.ssh{display:flex;align-items:center;gap:9px;margin:6px 0 4px}                                 /* SUBSECTION = outline icon */
+.ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+.ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+.ssh .tag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:6px;padding:3px 7px}
+.ssh .chip{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 10px}
+.ssnote{font-size:12px;color:var(--muted);line-height:1.5;margin:0 0 14px 26px}
+```
+```html
+<div class="secthead"><span class="sq"></span>Commercial Lending Activity</div>
+<div class="secsub">SBA-guaranteed business & commercial-real-estate loans in ZIP {zip} · {period}</div>
+```
+
+## 2) Takeaway — the STANDARD component (Part B)
+Copy the `.take` / `.take-head` / `.take-label` / `.take-title` / `.take-row` / `.take-chip` CSS from the takeaway-standard prompt verbatim. Content — **4 bullets**:
+1. `.insight` — **Commercial counterpart to the residential data.** SBA 504 funds owner-occupied CRE — the profile of this parcel; `{n_504}` loans (`{amt_504}`) in ZIP `{zip}` since FY2020; a buyer planning to occupy has a real, used financing path. Chip → `#sba504` ("504 loans"). *(Render the "counterpart to residential data / for a parcel like this" framing only when `subject_is_commercial == true`; for a residential subject, reframe to neutral neighborhood context.)*
+2. `.insight` — **Busy small-business corridor.** `{n_7a}` 7(a) loans (`{amt_7a}`) for working capital/expansion; name a couple of real borrowers; "economically active area" — directional context, not a rating. Chip → `#sba7a` ("7(a) loans").
+3. `.insight` — **Concrete lenders to approach.** 504 concentrated in the top 2 CDCs (~% of local 504 loans, computed); 7(a) led by the top bank. Chip → `#lenders` ("Lenders").
+4. `.caution` — **504 rows are ZIP-level, not address-linked.** FOIA 504 = borrower/industry/amount/CDC, no property address → neighborhood context, not proof a building traded; 7(a) does carry an address. (This bullet is **mandatory** — it's the honesty guardrail, not optional.)
+
+## 3) KPI tiles (verbatim)
+```css
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:18px 16px;text-align:center;background:var(--paper)}
+.kpi .n{font-family:var(--disp);font-size:34px;color:var(--ink);line-height:1}
+.kpi .l{font-size:12px;font-weight:600;color:var(--ink);margin-top:8px}
+.kpi .s{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:.02em}
+```
+Tiles: `{n_7a}` 7(a) Loans / `{amt_7a} total` · `{n_504}` 504·CRE / `{amt_504} total` · `{total_deployed}` Total Deployed / ZIP `{zip}` · `{n_lenders}` Active Lenders / in this ZIP. **Serif only on the `.kpi .n` hero numbers.**
+
+## 4) Loan rows (verbatim; 504 = industry, 7(a) = address + jobs)
+```css
+.loans{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.loan{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:11px;padding:13px 16px}
+.loan .main{flex:1;min-width:0}
+.loan .nm{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.3}
+.loan .meta{font-size:12px;color:var(--ink2);margin-top:2px}
+.loan .via{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:3px}
+.loan .right{text-align:right;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.loan .amt{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--ink)}
+.loan .aux{display:flex;align-items:center;gap:8px}
+.loan .jobs{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--indigo);background:var(--indigoSoft);border-radius:6px;padding:2px 7px}
+.loan .date{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.morelink{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--indigo);text-transform:uppercase;letter-spacing:.04em;margin:2px 0 20px 2px;display:inline-block}
+```
+- **504 row:** `.meta` = `{industry}` (NO address — it doesn't exist), `.via` = `via {cdc}`, right = `.amt` + `.date`. No jobs chip.
+- **7(a) row:** `.meta` = `{address}`, `.via` = `via {bank}`, right = `.amt` + `.aux`(`.jobs` `{jobs} jobs` + `.date`).
+- Show top ~4 by amount per program in the mockup; render more via the section's existing expand, or `<span class="morelink">+ {remaining} more {504|7(a)} loans →</span>`.
+
+## 5) Lender bars (verbatim; indigo, width bound in code)
+```css
+.lh{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin:4px 0 12px}
+.lbars{display:flex;flex-direction:column;gap:12px;margin-bottom:30px}
+.lb .lbtop{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+.lb .nm{font-size:13px;font-weight:600;color:var(--ink)}
+.lb .val{font-family:var(--mono);font-size:11.5px;color:var(--ink2)}
+.lb .val b{color:var(--ink);font-weight:700}
+.lb .track{height:8px;background:var(--paper);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.lb .track i{display:block;height:100%;background:var(--indigo);border-radius:5px 0 0 5px}
+```
+```html
+<div class="lb"><div class="lbtop"><span class="nm">{name}</span><span class="val"><b>{loans}</b> loans · {amount}</span></div><div class="track"><i style="width:{loans/max*100}%"></i></div></div>
+```
+- **Bar fill MUST be `<i>` with `display:block`** (per `.lb .track i`) — inline `<span>` collapses to zero height. Recurring bug; do not use a span.
+- Two lists: "Top 504 lenders (CDCs)" from `lenders_504`, "Top 7(a) lenders" from `lenders_7a`. Each list's `max` is its own top lender. Put `id="lenders"` on the 7(a) `.lh` so the takeaway chip lands there.
+
+## 6) Source line
+```css
+.src{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.03em;padding-top:14px;border-top:1px solid var(--line)}
+```
+`Source: SBA FOIA 7(a) & 504 loan data · {period} · ZIP {zip}`
+
+## LOGIC
+1. **504 has no property address — never fabricate or infer one.** Render industry in the `.meta` slot instead. The caution bullet + subsection note both state this.
+2. **7(a) address + jobs are real fields — display them.** The visual asymmetry between the two programs is intentional and honest.
+3. **Bar width = loans / max(list) in code**; each program list scales to its own leader. `<i> display:block`.
+4. **Sort:** loan rows by amount desc (show top, expand for rest); lender bars by loan count desc.
+5. **Activity = insight, never good/red.** Volume/deployment are directional context. The only non-neutral accent in the section is the single marigold caution bullet.
+6. **Percent claims computed in code** (e.g. "top 2 CDCs ≈ 96% of 504 loans" = `(36+33)/72`). Don't hardcode a stale percentage; recompute from the data.
+7. **Framing bullet is conditional** on `subject_is_commercial`.
+
+## CRITICAL DETAILS
+1. **Takeaway = shared Standard component** (11px label / 21px serif headline / 13px body / far-right centered chip). Not bespoke.
+2. **504 ≠ address-linked; 7(a) = address-linked** — mandatory caution bullet + note; show 7(a) addresses, never invent 504 ones.
+3. **ZIP-level geography** labeled everywhere; not conflated with the HMDA tract.
+4. **No favorability coloring** — activity is `.insight`; the lone `.caution` is the data caveat; **no green, no red** in this section.
+5. **Lender bars indigo, `<i> display:block`, width = loans/max**; `id="lenders"` on the 7(a) list for the chip.
+6. **Serif (`--disp`) ONLY** on the takeaway headline and the four `.kpi .n` numbers. Loan amounts, lender values, dates → Mono. Everything else Inter.
+7. **Percentages/derived figures recomputed from data**, not hardcoded.

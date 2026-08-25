@@ -1,0 +1,110 @@
+Restyle the Area Crime Statistics section to the site design language, and render a cached "Takeaway" at the top. Front-end + a small caching hook only — do not change the crime data pipeline, the ranking math, or the radius/geocoding logic. Values shown are placeholders bound to real data.
+
+Tokens (reuse existing if present)
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f; --caution:#f0a41c; --cautionText:#96600a;
+--bad:#d13b26;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+
+Two chart colors specific to this section: property/other crime = 
+#4457b8 (indigo), violent crime = --bad #d13b26 (true red). Red is reserved for violent — the genuinely serious category — so the eye goes straight to it.
+
+1. Header + favorability badges
+
+Badges are colored by whether the fact is good, neutral, or bad — NOT all red. "Safer than 77%" and a falling trend are GOOD (green). Do not put a warning icon on good news.
+
+css
+.sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:17px;flex-wrap:wrap}
+.sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo)}
+.sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+.sh .badges{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+.bdg{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;border-radius:999px;padding:4px 11px 4px 9px;background:var(--card);border:1px solid;white-space:nowrap}
+.bdg .d{width:7px;height:7px;border-radius:50%}
+.bdg.good{color:var(--good);border-color:#bcdcc4} .bdg.good .d{background:var(--good)}
+.bdg.neu{color:var(--ink2);border-color:var(--line)} .bdg.neu .d{background:#9aa1b0}
+.bdg.bad{color:#b3311f;border-color:#eab5ac} .bdg.bad .d{background:var(--bad)}
+
+Badge tier is driven by the ranking data: violent safer-than-77% → good; property safer-than-58% ("below average") → neu; trend down → good. Higher-crime properties would legitimately show bad here — the color follows the data.
+
+2. The Takeaway (reusable highlight component)
+
+Renders the cached takeaway (see Part B). Indigo-soft box, lightbulb label, serif headline, bullets whose dot color = each bullet's favorability.
+
+css
+.take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px;margin-bottom:18px}
+.takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+.takeh svg{width:13px;height:13px;stroke:var(--indigo)}   /* lightbulb */
+.taket{font-family:var(--disp);font-size:20px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+.conn{display:flex;flex-direction:column;gap:8px}
+.cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2)}
+.cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+.cn.g .dt{background:var(--good)} .cn.n .dt{background:#9aa1b0} .cn.b .dt{background:var(--bad)}
+.cn b{color:var(--ink);font-weight:600}
+
+Render: .taket = headline; each bullet = .cn with class g/n/b from its favorability, numbers bolded.
+
+3. Scope zones (the fix for the geography mismatch)
+
+The section mixes two geographies. Label each zone so the scale change (196 → 5,256) reads as intentional, not an error.
+
+css
+.zone{display:flex;align-items:center;gap:8px;margin:0 0 13px}
+.zone svg{width:14px;height:14px;stroke:var(--indigo);flex:none}
+.zone .zt{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+.zone .sc{font-size:11px;color:var(--muted)}
+Zone 1 (pin icon): "Around this address · trailing 12 months" — the toggle + breakdown.
+Zone 2 (map icon): "Logan Square community area · last full calendar year, per capita" — the ranks + trend. Each zone header states BOTH the geography and the time basis (local view is rolling 12-mo; community view is full-calendar-year). This is a general rule: any section mixing a local number with an area/citywide one must label the scope switch.
+4. Zone 1 — toggle + per-type breakdown
+css
+.toggle2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.tg{border:1px solid var(--line);border-radius:11px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;background:var(--card)}
+.tg.on{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo) inset}
+.tg .tl{font-size:12.5px;font-weight:600;color:var(--ink)} .tg .ts{font-size:10.5px;color:var(--muted);margin-top:3px} .tg.on .ts{color:var(--indigo);font-weight:600}
+.tg .tn{font-family:var(--disp);font-size:28px;line-height:1;color:var(--ink)}
+.bkhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.bkhead .l{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.key2{display:flex;gap:13px} .k2{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;color:var(--ink2);font-weight:500}
+.k2 .d{width:9px;height:9px;border-radius:3px} .k2 .d.prop{background:#4457b8} .k2 .d.viol{background:var(--bad)}
+.bkrow{display:grid;grid-template-columns:145px 1fr 30px;align-items:center;gap:12px;margin-bottom:8px}
+.bkrow .bl{font-size:12px;color:var(--ink)}
+.bkrow .bt{height:9px;background:#eceae4;border-radius:999px;overflow:hidden}
+.bkrow .bt i{display:block;height:100%;border-radius:999px}
+.bkrow .bt i.prop{background:#4457b8} .bkrow .bt i.viol{background:var(--bad)}
+.bkrow .bv{font-family:var(--mono);font-size:11.5px;color:var(--ink2);text-align:right}
+Two selectable tiles (250 ft / ¼ mile); active tile outlined indigo; clicking swaps the breakdown to that radius's counts.
+Each type bar is prop (indigo) or viol (red) based on whether it's a violent offense. Violent set = battery, assault, robbery, homicide, criminal sexual assault/sex offense. Drive this off a category field, not hardcoded per row.
+Bar width = count ÷ max count in the current view. Include the one-line summary ("violent types make up N of TOTAL — X%").
+Small key: "● Property/other ● Violent".
+5. Zone 2 — ranks + trend
+css
+.rlbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:11px}
+.ranks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.rank{border:1px solid var(--line);border-radius:12px;padding:15px 17px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.rank .cat{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.rank .rate{font-size:11.5px;color:var(--muted)}
+.rank .lab{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;margin-top:8px}
+.rank .lab .d{width:7px;height:7px;border-radius:50%}
+.rank.good .lab{color:var(--good)} .rank.good .lab .d{background:var(--good)}
+.rank.neu .lab{color:var(--ink2)} .rank.neu .lab .d{background:#9aa1b0}
+.rank.bad .lab{color:#b3311f} .rank.bad .lab .d{background:var(--bad)}
+.rank .big{font-family:var(--disp);font-size:34px;line-height:1;color:var(--ink);white-space:nowrap}
+.rank .big small{font-family:var(--sans);font-size:11px;color:var(--muted);font-weight:500;display:block;text-align:right;margin-top:5px}
+/* trend: 3 year bars, current year green when down (good) */
+.trend{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 17px}
+.trendtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.trendtop .l{font-size:12.5px;font-weight:600;color:var(--ink)}
+.trendtop .chg{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--good)} /* red if trend is UP */
+.bars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:end;height:78px}
+.tb{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.tb .bar{width:100%;max-width:120px;border-radius:6px 6px 0 0;background:#d7d5cd}
+.tb.cur .bar{background:var(--good)} .tb .yr{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:7px}
+.tb .val{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px} .tb.cur .val{color:var(--good)}
+Rank tile tier (good/neu/bad) and label ("Low crime"/"Below average"/"High crime") come from the percentile, not hardcoded.
+Trend: the change chip and current-year bar are GREEN when crime is falling, RED when rising. Down is good for crime.
+6. Caching hook (small, but required)
+
+The Takeaway text is produced by a Claude API call (Part B). Do not call the API on page render. Generate it once when a property's analysis runs, store the returned JSON on the report record (e.g. report.crime.takeaway), and the front-end just renders that stored object. Regenerate only when the crime data for the property is refreshed. This makes takeaways free on every view.
+
+Consistency
+Red = violent crime only (and genuinely-bad states). Green = good. Neutral grey = middling. Never blanket-red a section.
+Every accent is indigo / green / red / neutral per the tokens; nothing black; no beige fills.

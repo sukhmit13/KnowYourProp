@@ -1,0 +1,18 @@
+Restyle the "Commercial Lending Activity" (SBA) section to match the attached report-sba.html, consistent with the Local Mortgage Market Activity section. Front-end / styling only — do NOT change the SBA loan data, the aggregates, routing, or auth.
+
+Header: single indigo icon + "COMMERCIAL LENDING ACTIVITY" in mono uppercase with a bottom rule. One icon, no bullet.
+
+KPI tiles (4 across, top): 7(a) Loans / 504 (CRE) / Total Deployed / Active Lenders — each on a --paper tile with a --line border, center-aligned. The value in Instrument Serif (~33px) on top, the label (--ink2, ~12px) centered directly beneath, and a muted sub-line below ($38.1M total / $22.0M total / ZIP 60647 / in this ZIP). No top icon/label row — identical treatment to the mortgage section's All Applications / Originated / Denied tiles.
+
+Sub-section headers (SBA 504 and SBA 7(a)): a single indigo icon + mono-uppercase title, with the category badge ("CRE Financing" / "Business Financing") in indigo-soft (
+#eef0fb background, 
+#2b3a9e text) — not black or grey. A muted description line beneath each.
+
+Loan rows (each a bordered --card): left side = business name in Inter bold, then the industry (504) or address (7(a)) in --ink2, then "via [lender]" in muted; right side = loan amount in Instrument Serif, an optional "N jobs" line with a small indigo icon (7(a) only), and the date in muted mono.
+
+Top Lenders rankings ("TOP 504 LENDERS (CDCs)" / "TOP 7(a) LENDERS"): each row = lender name (Inter 600) with "N loans · $X" right-aligned, and a horizontal indigo 
+#3f51c5 bar beneath (replaces the current black bars). Keep these neutral — it's activity/volume data, no quality coloring. Bar width = loan count relative to the top lender (be intentional that bar length = number of loans, not dollars; if you'd rather rank by dollars deployed, point the width at the dollar field instead, and do it the same way on both lender lists).
+
+Source line: muted, top-bordered, at the bottom.
+
+No black anywhere — especially the lender bars, which are the main off-system element here. Keep it factual; no quality/rank coloring on lenders.

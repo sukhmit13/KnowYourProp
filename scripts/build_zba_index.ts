@@ -1,10 +1,14 @@
 import { db } from '../server/db';
-import { zbaCases, zbaIndexRuns } from '../shared/schema';
+import { zbaCases, zbaIndexRuns, type ZbaOutcome } from '../shared/schema';
 import { eq } from 'drizzle-orm';
 import * as cheerio from 'cheerio';
 
 const ZBA_RESOLUTIONS_URL = 'https://www.chicago.gov/city/en/depts/dcd/zoning-board-of-appeals/ZBA-resolutions.html';
-const YEARS_TO_FETCH = 5;
+// The table is used for two distinct products:
+// - attorney rankings, which intentionally query only the last five years
+// - property zoning history, which needs every dated resolution still linked
+//   by the City. Keep collection broad; consumers apply their own date window.
+const RANKING_YEARS = 5;
 
 async function downloadPdf(url: string): Promise<Buffer> {
   const response = await fetch(url);
@@ -48,8 +52,9 @@ function normalizeRepName(raw: string | null): string | null {
     .trim() || null;
 }
 
-function parseOutcome(text: string): 'APPROVED' | 'DENIED' | 'WITHDRAWN' | 'OTHER' {
+function parseOutcome(text: string): ZbaOutcome {
   const upper = text.toUpperCase();
+  if (upper.includes('CONTINUED')) return 'CONTINUED';
   if (upper.includes('GRANTED') || upper.includes('APPROVED')) return 'APPROVED';
   if (upper.includes('DENIED') || upper.includes('REJECTED')) return 'DENIED';
   if (upper.includes('WITHDRAWN')) return 'WITHDRAWN';
@@ -86,13 +91,10 @@ function parseDateFromFilename(url: string): Date | null {
   return null;
 }
 
-function isWithinYears(date: Date | null, years: number): boolean {
-  // Exclude if the date can't be parsed — undated cases are invisible to the
-  // 5-year ranking window anyway, and unparseable names are the old pre-2015
-  // archive. (Both known naming formats are handled above.)
+function isWithinRecentRankingWindow(date: Date | null): boolean {
   if (!date) return false;
   const cutoff = new Date();
-  cutoff.setFullYear(cutoff.getFullYear() - years);
+  cutoff.setFullYear(cutoff.getFullYear() - RANKING_YEARS);
   return date >= cutoff;
 }
 
@@ -103,7 +105,7 @@ interface ParsedCase {
   representativeNorm: string | null;
   propertyAddress: string | null;
   ward: number | null;
-  outcome: 'APPROVED' | 'DENIED' | 'WITHDRAWN' | 'OTHER';
+  outcome: ZbaOutcome;
   rawText: string;
 }
 
@@ -220,16 +222,33 @@ async function fetchPdfLinks(): Promise<string[]> {
     }
   });
   
-  const cutoffDate = new Date();
-  cutoffDate.setFullYear(cutoffDate.getFullYear() - YEARS_TO_FETCH);
-  
   const filteredLinks = pdfLinks.filter(url => {
     const date = parseDateFromFilename(url);
-    return isWithinYears(date, YEARS_TO_FETCH);
+    // A timeline cannot truthfully place an undated resolution. Keep every
+    // dated public record, including the older naming format above.
+    return date != null && date <= new Date();
   });
   
-  console.log(`Found ${filteredLinks.length} PDF links within last ${YEARS_TO_FETCH} years`);
+  console.log(`Found ${filteredLinks.length} dated ZBA resolution PDFs linked by the City`);
   return [...new Set(filteredLinks)];
+}
+
+async function mapWithConcurrency<T, R>(
+  values: T[],
+  limit: number,
+  worker: (value: T) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(values.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.min(limit, values.length) }, async () => {
+    while (true) {
+      const index = next++;
+      if (index >= values.length) return;
+      results[index] = await worker(values[index]);
+    }
+  });
+  await Promise.all(workers);
+  return results;
 }
 
 // Lightweight ward resolution: Census geocode -> point-in-polygon against the
@@ -307,42 +326,63 @@ async function buildZbaIndex(): Promise<void> {
     // Phase 1: collect all rows in memory — nothing touches the live table yet
     type NewRow = typeof zbaCases.$inferInsert;
     const rows: NewRow[] = [];
-    
-    for (const pdfUrl of pdfLinks) {
+
+    // The latest snapshot already has reliable current-ward assignments. Reuse
+    // them so expanding the historic timeline does not re-geocode thousands of
+    // recent cases; only genuinely new recent cases need a lookup.
+    const existingRows = await db.select({
+      caseId: zbaCases.caseId,
+      propertyAddress: zbaCases.propertyAddress,
+      ward: zbaCases.ward,
+    }).from(zbaCases);
+    const existingWards = new Map(
+      existingRows
+        .filter(row => row.caseId && row.propertyAddress && row.ward != null)
+        .map(row => [`${row.caseId}|${row.propertyAddress!.toUpperCase()}`, row.ward!] as const),
+    );
+
+    const parsedDocuments = await mapWithConcurrency(pdfLinks, 4, async (pdfUrl) => {
       try {
         console.log(`Processing: ${pdfUrl}`);
-        
         const pdfBuffer = await downloadPdf(pdfUrl);
         const text = await extractTextFromPdf(pdfBuffer);
-        
         const decisionDate = parseDateFromFilename(pdfUrl);
         const parsedCases = parseCasesFromText(text);
-        
         console.log(`  Found ${parsedCases.length} cases`);
-        
-        for (const parsed of parsedCases) {
-          let ward = parsed.ward;
-          if (!ward && parsed.propertyAddress) {
-            ward = await resolveWard(parsed.propertyAddress);
-          }
-          
-          rows.push({
-            decisionDate,
-            caseId: parsed.caseId,
-            ward,
-            propertyAddress: parsed.propertyAddress,
-            applicantName: parsed.applicantName,
-            representativeRaw: parsed.representativeRaw,
-            representativeNorm: parsed.representativeNorm,
-            outcome: parsed.outcome,
-            pdfUrl,
-            rawCaseText: parsed.rawText,
-          });
-        }
-        
-        pdfsProcessed++;
+        console.log(`  Found ${parsedCases.length} cases`);
+        return { pdfUrl, decisionDate, parsedCases };
       } catch (err) {
         console.error(`Error processing ${pdfUrl}:`, err);
+        return null;
+      }
+    });
+
+    for (const document of parsedDocuments) {
+      if (!document) continue;
+      pdfsProcessed++;
+      for (const parsed of document.parsedCases) {
+        const wardKey = parsed.caseId && parsed.propertyAddress
+          ? `${parsed.caseId}|${parsed.propertyAddress.toUpperCase()}`
+          : '';
+        let ward = parsed.ward ?? (wardKey ? existingWards.get(wardKey) ?? null : null);
+        // Historic timeline rows do not need a current-ward assignment.
+        // Restrict the expensive geocoding pass to genuinely new recent rows;
+        // ranking queries independently filter to this same date window.
+        if (!ward && parsed.propertyAddress && isWithinRecentRankingWindow(document.decisionDate)) {
+          ward = await resolveWard(parsed.propertyAddress);
+        }
+        rows.push({
+          decisionDate: document.decisionDate,
+          caseId: parsed.caseId,
+          ward,
+          propertyAddress: parsed.propertyAddress,
+          applicantName: parsed.applicantName,
+          representativeRaw: parsed.representativeRaw,
+          representativeNorm: parsed.representativeNorm,
+          outcome: parsed.outcome,
+          pdfUrl: document.pdfUrl,
+          rawCaseText: parsed.rawText,
+        });
       }
     }
     
@@ -353,13 +393,15 @@ async function buildZbaIndex(): Promise<void> {
       throw new Error(`Sanity check failed: only ${pdfsProcessed} PDFs / ${casesExtracted} cases parsed (need >= ${MIN_PDFS} PDFs and >= ${MIN_CASES} cases). Existing index left untouched.`);
     }
     
-    // Ward-coverage floor: a Census geocoder outage would leave wards null across
-    // the board — that index would be useless for ward-level rankings, so keep the old one.
-    const wardResolved = rows.filter(r => r.ward != null).length;
-    const wardRate = wardResolved / rows.length;
-    console.log(`Ward resolution: ${wardResolved}/${rows.length} (${Math.round(wardRate * 100)}%)`);
+    // Ward-coverage floor applies to the recent rows consumed by attorney
+    // rankings. Older timeline-only rows deliberately skip geocoding, so
+    // including them would make a healthy ranking rebuild look invalid.
+    const rankingRows = rows.filter(row => isWithinRecentRankingWindow(row.decisionDate ?? null));
+    const wardResolved = rankingRows.filter(row => row.ward != null).length;
+    const wardRate = rankingRows.length ? wardResolved / rankingRows.length : 0;
+    console.log(`Recent ranking ward resolution: ${wardResolved}/${rankingRows.length} (${Math.round(wardRate * 100)}%)`);
     if (wardRate < 0.7) {
-      throw new Error(`Ward resolution rate too low (${Math.round(wardRate * 100)}% < 70%) — likely a geocoder outage. Existing index left untouched.`);
+      throw new Error(`Recent ranking ward resolution rate too low (${Math.round(wardRate * 100)}% < 70%) — likely a geocoder outage. Existing index left untouched.`);
     }
     
     // Phase 2: atomic swap — delete old rows and insert new ones in one transaction

@@ -1,0 +1,54 @@
+Restyle the "Local Mortgage Market Activity" (HMDA) section to match the attached report-hmda.html. Front-end / styling only — do NOT change the HMDA data, the toggles' behavior, routing, or auth.
+
+Toggles: the "Logan Square / Census Tract" and "2025 / 2024" segmented controls use the indigo active state (
+#2b3a9e fill, white text) — not black.
+
+Numbers: the three KPI tiles (2,572 / 1,315 / 238) and the 6.397% avg rate render in Instrument Serif, on --paper tiles with --line borders.
+
+City Ranking arrows: ▲ improved rank = green 
+#2f7d3f, ▼ declined = red 
+#d13b26; prior-year column in muted grey.
+
+Donut charts — use the nine-color pie palette, with high-contrast per-chart pairings:
+Palette: 
+#4068d0 blue · 
+#e8b018 gold · 
+#f87058 coral · 
+#68c0b0 teal · 
+#38a850 green · 
+#f888b0 pink · 
+#a060f0 purple · 
+#90b8f0 light-blue · 
+#986848 brown.
+
+Loan Type → Conventional 
+#4068d0, FHA 
+#e8b018, VA 
+#f87058
+Occupancy → Principal Residence 
+#a060f0, Investment Property 
+#e8b018
+Loan Product → Conv First Lien 
+#38a850, Conv Subordinate 
+#f87058, FHA 
+#4068d0, VA 
+#e8b018
+Property Type → Single Family 
+#f87058, Multifamily 
+#4068d0
+
+Each donut is a thin ring (conic-gradient or SVG) with a legend beside it (colored square + label + bold % right-aligned). Rule for any pie/donut: give each chart its own lead color and choose slices far apart in hue (complementary where possible) with differing lightness; do not pair the pale light-blue 
+#90b8f0 or mid-teal 
+#68c0b0 as the two most-visible slices — they wash out on white. Legend dots match slices exactly. This palette is for pies/donuts only.
+
+Two metrics are bars, not donuts (deliberate — better for the data):
+
+Property Value → horizontal bars, sequential indigo ramp (
+#cdd3f0 lowest band → 
+#2b3a8c highest), because it's an ordered distribution.
+Denial Reasons → horizontal bars, ranked descending, red family (
+#d13b26 for the top reasons easing lighter down the list), because six tiny slices are unreadable.
+
+Active Lenders: neutral list — lender name, avg rate, an indigo volume bar, share/count. Keep neutral (activity data). "Show all N lenders" link in indigo.
+
+No black anywhere; keep it factual.

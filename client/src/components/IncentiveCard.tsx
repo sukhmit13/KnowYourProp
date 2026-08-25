@@ -25,7 +25,11 @@ export interface IncentiveCardProps {
   className?: string;
   children?: ReactNode;
   defaultOpen?: boolean;
+  variant?: "current" | "hybrid";
 }
+
+// map state -> verdict pill tone (hybrid variant)
+const PILL_TONE = { good: "good", caution: "att", na: "ctx" } as const;
 
 function StateIcon({ state }: { state: IncentiveState }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -41,8 +45,39 @@ function NoteIcon({ icon }: { icon: IncentiveNote["icon"] }) {
   return <Clock3 />;
 }
 
-export function IncentiveCard({ name, type, state, pill_label, verdict, verdict_sub, keyfacts, columns, note, links, source, style, order, id, className, children, defaultOpen = false }: IncentiveCardProps) {
+export function IncentiveCard({ name, type, state, pill_label, verdict, verdict_sub, keyfacts, columns, note, links, source, style, order, id, className, children, defaultOpen = false, variant = "current" }: IncentiveCardProps) {
   const [open, setOpen] = useState(defaultOpen);
+  if (variant === "hybrid") {
+    return (
+      <article id={id} className={`kyp-inccard ${state}${open ? " open" : ""}${className ? ` ${className}` : ""}`}
+        style={{ ...style, ...(order === undefined ? {} : { order }) }}>
+        <div className="kic-hd" role="button" tabIndex={0} aria-expanded={open}
+          onClick={() => setOpen(o => !o)}
+          onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen(o => !o); } }}>
+          <span className="kic-nm">{name}</span>
+          <span className="kic-tp">{type}</span>
+          <span className={`kyp-pill ${PILL_TONE[state]}`}>{pill_label}</span>
+          <svg className="kic-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+        </div>
+        <div className="kic-body">
+          <div className="kic-v">
+            <div className="kic-vt">{verdict}</div>
+            {verdict_sub && <div className="kic-vs">{verdict_sub}</div>}
+          </div>
+          {keyfacts?.length ? <div className="kic-kf">{keyfacts.map((f, i) =>
+            <div className="kic-kfc" key={i}><div className="kic-kl">{f.label}</div><div className="kic-kv">{f.value}</div>{f.detail && <div className="kic-kd">{f.detail}</div>}</div>)}</div> : null}
+          {columns?.length ? <div className="kic-cols">{columns.map((c, i) =>
+            <div key={i}><div className="kic-ch">{c.head}</div><ul>{c.items.map((it, j) => <li key={j}>{it}</li>)}</ul></div>)}</div> : null}
+          {note && <div className="kic-v" style={{ background: "var(--kyp-wash)" }}><div className="kic-vs">{note.text}</div></div>}
+          {children}
+          <div className="kic-ft">
+            {links?.map((l, i) => <a className="kic-lnk" key={i} href={l.href} target="_blank" rel="noopener noreferrer">{l.label} →</a>)}
+            <span className="kic-src">{source}</span>
+          </div>
+        </div>
+      </article>
+    );
+  }
   return (
     <article id={id} className={`inc ${state}${open ? " open" : ""}${className ? ` ${className}` : ""}`} style={{ ...style, ...(order === undefined ? {} : { order }) }}>
       <header

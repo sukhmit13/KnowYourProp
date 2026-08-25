@@ -1,0 +1,104 @@
+# KYP — Step 5a: De-nest sections inside the accordion (kill the old chrome)
+
+**Problem (visible on Transit Access, applies to every section):** the AccordionSection wrapper is
+wrapping each section's OLD card whole. Expanding a row reveals: (1) the old bordered
+section box with its OWN title bar and its OWN expand arrow, (2) the old lavender "Takeaway" box
+repeating the takeaway the row header already shows, and (3) old chip-summary sub-collapsibles
+("CTA RAIL STATIONS (2 MI) ▶") that need a THIRD click. That's three layers of chrome and two
+takeaways. The wrapper must REPLACE the old chrome, not contain it.
+
+## The rule (apply to every section in the accordion)
+
+When a section lives inside `<AccordionSection>`, its body may contain **content only**:
+
+1. **DELETE the old outer card/box** (`Card`, `.seccard`, `.tz-*` wrappers, borders, shadows,
+   padding shells). The accordion row *is* the card. Inside: no perimeter borders at all.
+2. **DELETE the old section title bar** (the "■ TRANSIT ACCESS & RIDERSHIP ▾" header, `chead`,
+   `CollapsibleTrigger`, chips-when-collapsed summary, and its expand arrow). One expand control
+   exists: the accordion row's chevron. Nothing inside the body collapses the whole section again.
+3. **DELETE the old takeaway box** (`.crm-take` / `take` lavender card — label, serif title, AND
+   its bullet rows). The takeaway lives in the row header, once. The visuals carry the detail.
+   (If a bullet contains data that exists nowhere else, keep the DATA by moving it into the
+   relevant subsection — but no lavender box, no bullet list at top.)
+4. **DE-COLLAPSE the sub-blocks.** Old inner collapsibles ("CTA Rail Stations", "L Ridership",
+   "Metra", "Bus Routes", "Street Traffic", etc.) render OPEN, always, with a `kyp-subhead`
+   divider instead of a clickable chip-row header:
+   `<div className="kyp-subhead fam-indigo"><span className="lbl">CTA Rail Stations</span><span className="ct">2 mi</span><span className="rule"/></div>`
+   Remove their ▶ toggles and their collapsed chip summaries (the chips' info — counts, nearest —
+   is already in the content). ONE collapse level per report: the section row. Nothing nested.
+5. **Indent, don't border.** The body uses the accordion's established indent
+   (`.kyp-accbody` padding + the section's colored left rail) as the only structure. No inner
+   boxes-in-boxes; subsections separated by `kyp-subhead` rules and whitespace.
+6. Keep ALL data, charts, testids, ids. This is chrome removal only — zero data changes.
+
+## Worked example — Transit Access (do this one first)
+
+Inside `AccordionSection` for Transit, the body becomes, top to bottom (all visible, no borders):
+- `kyp-subhead` "Closest Mode of Transport" → the three mode tiles (Bus / L / Metra walk-time
+  cards — these keep their own tile styling; they're content, not chrome)
+- `kyp-subhead` "CTA Rail Stations · 2 mi" → the station list
+- `kyp-subhead` "CTA L Ridership" → day-box + comparison track + the **36-month weekday trend
+  chart comparing the nearest stations, each colored by its CTA line** (keep the existing Recharts
+  chart + `getStationLineColor`; restyle only its title → `kyp-charttitle` and source → `kyp-src`)
+- `kyp-subhead` "Metra Stations & Ridership" → station card(s) + the **24-month monthly-riders
+  chart** (+ survey-year chart where present)
+- `kyp-subhead` "CTA Bus Routes · 0.5 mi" → route list
+- `kyp-subhead` "CTA Bus Ridership" → per-route day-boxes + tracks + the **36-month weekday trend
+  chart (#49 vs X49)**
+- `kyp-subhead` "Street Traffic Volume" → the traffic stat blocks + citywide track + AADT chart
+- single `kyp-src` source line at the end
+
+Also DELETED for Transit specifically: the "TRANSIT ACCESS & RIDERSHIP" inner header + arrow, the
+lavender Takeaway card (headline + 3 bullets + "closest stops ↓" jump chips — the jump chips die
+with it; everything is visible on expand so there's nothing to jump to).
+
+## Header-row layout fix (applies to every accordion row)
+The current header breaks on long takeaways: title and takeaway are separate flex items, so the
+sentence wraps as a dropped block ("— …" starting a new line under the title) and the right-side
+stat gets vertically centered INTO the sentence ("…bus route at 5 RAIL STOPS the door"). Fix:
+
+```css
+.kyp-acchd{align-items:flex-start}
+.kyp-acchd .drag{margin-top:6px}
+/* title + takeaway = ONE inline sentence that wraps naturally under itself */
+.kyp-acchd .mid{flex:1;min-width:0;line-height:1.5;padding-top:3px;display:block}
+.kyp-acchd .eb{display:inline;white-space:normal}
+.kyp-acchd .tk{display:inline}
+.kyp-acchd .tk::before{content:"— ";color:var(--kyp-muted);margin:0 4px 0 8px;font-weight:400}
+/* right cluster pins to the FIRST line, never mid-sentence */
+.kyp-acchd .badge,.kyp-acchd .ico{margin-top:2px}
+```
+(i.e. `.mid` is a normal text block with the eyebrow and takeaway as inline spans — the em-dash
+comes from `.tk::before`, so takeaway strings must NOT start with their own dash.)
+
+**REMOVE the floating stat from header rows entirely** (the "5 / RAIL STOPS", "6.2% / CAP",
+"12 / COMPS" mini-blocks). It's redundant — the takeaway sentence carries the key number and the
+badge carries the verdict — and it's what causes the mid-sentence collisions. Header anatomy is
+exactly: **number · TITLE — takeaway · verdict badge · ⓘ · eye · chevron.** Nothing else. Delete
+the `stat` prop/markup from the AccordionSection header and from the section metadata. If a
+section's key number isn't in its takeaway sentence, write it into the sentence.
+
+Also keep header takeaways SHORT — one clause, ~90 characters max. Transit's becomes:
+**"Strong access, with Metra a *3-minute walk* and a top-10 bus route at the door."**
+If a section's takeaway runs long, trim it for the header; the detail lives in the body.
+
+## Copy fix
+Rename **"Closest by mode" → "Closest Mode of Transport"**.
+
+## Then sweep the other converted sections
+Crime, News, Incentives (and any others already converted) — same five deletions. For any
+still-unconverted section, at minimum apply #1–#3 (outer card, duplicate header, duplicate
+takeaway box) so nothing shows two headers or two takeaways, even in old styling.
+
+## ✅ Done-when
+- [ ] Expanding Transit shows content immediately — takeaway appears ONCE (row header), zero inner
+      boxes/borders, zero inner expand arrows, all sub-blocks open under kyp-subhead dividers.
+- [ ] "Closest Mode of Transport" label in place.
+- [ ] Header rows read as one flowing sentence ("NN TITLE — takeaway…") that wraps under itself;
+      badge/icons sit on the first line, never inside the sentence. Long takeaways trimmed.
+- [ ] No floating stat blocks in any header row — key numbers live inside the takeaway sentence.
+- [ ] Same for Crime / News / Incentives: one header, one takeaway, no nested collapsibles.
+- [ ] No `.crm-take`/`take` lavender boxes anywhere inside accordion bodies.
+- [ ] All three transit trend charts still render: L 36-month station comparison (line-colored),
+      Metra 24-month, bus 36-month (#49 vs X49) — plus the traffic AADT chart.
+- [ ] All data, charts, testids intact (chrome-only diff).

@@ -22,6 +22,12 @@ export interface ListingSnapshot {
   disclosures: string[];
   /** Extra notable facts from the listing (beds/baths/sqft claims, taxes quoted, HOA, etc.) */
   keyFacts: string[];
+  /** Machine-checkable assertions extracted from the listing. Prose remains in keyFacts. */
+  claims: Array<{
+    field: 'unitCount' | 'yearBuilt' | 'lotSizeSf' | 'annualTaxes' | 'renovationYear' | 'grossAnnualIncome';
+    value: number;
+    raw: string;
+  }>;
   /** For off_market/not_found: one sentence of currency EVIDENCE (why this reads as historical) — dated MLS record, no newer listing found, current occupant, etc. */
   whyHistorical: string | null;
   /** Number of units the LISTING states (not tax records) */
@@ -76,6 +82,7 @@ Then respond with ONLY a JSON object (no markdown fences, no commentary) matchin
   "remarksSummary": "2-5 sentence neutral summary of what the listing description claims" | null,
   "disclosures": ["each issue the listing itself discloses: as-is sale, known violations, tenant occupancy, estate/short sale, cash only, etc."],
   "keyFacts": ["EVERY concrete fact the listing states, one string each — see rules"],
+   "claims": [{"field": "unitCount" | "yearBuilt" | "lotSizeSf" | "annualTaxes" | "renovationYear" | "grossAnnualIncome", "value": number, "raw": "the exact listing sentence containing this claim"}],
   "whyHistorical": "ONLY when status is off_market or not_found: 1-2 sentences of EVIDENCE for why no active listing exists — e.g. 'the MLS record is dated 2017; no newer active listing could be verified on Zillow, Redfin, LoopNet or Crexi; the address currently appears occupied by a business'. This is currency evidence, NOT a listing claim — do not repeat it in keyFacts." | null,
   "unitCount": number | null,
   "rentRoll": [{"unit": "unit label like '1F' or 'Unit 2'" | null, "beds": number | null, "baths": number | null, "monthlyRent": number | null}],
@@ -87,6 +94,7 @@ Rules:
 - "active" = currently for sale; "pending" = under contract/contingent; "off_market" = you found a recent listing but it is sold or delisted (fill in what you found, including soldDate/soldPrice if shown); "not_found" = no listing for this address surfaced at all.
 - Once you locate the listing, OPEN AND READ the actual listing page itself (and its facts/details table) — do not answer from search-result snippets alone. If a commercial listing exists on LoopNet or Crexi, prefer it and read its full "Property Facts" / financial section.
 - keyFacts must be COMPREHENSIVE: include every concrete claim the listing makes, e.g. price per SF, cap rate, GRM, NOI or gross income, number of units and unit mix (beds/baths per unit), current rents, building sqft, lot size, year built / renovated, number of stories, stated zoning, parking, quoted taxes, HOA, occupancy/tenancy, utilities/mechanicals, and the listing brokerage/agent name. One short string per fact.
+- claims is a separate machine-checkable list. For every listing fact about unit count, year built, lot size in square feet, annual taxes, renovation year, or gross annual income, ALSO include a claims entry. raw MUST quote the listing sentence verbatim. Never infer or manufacture a claim; leave claims empty when the listing is silent. Keep the same fact in keyFacts.
 - unitCount / rentRoll / grossAnnualIncome / statedNoi: fill ONLY from what the LISTING states (not tax records or third-party estimates). rentRoll: one entry per unit if the listing shows per-unit beds/baths/rents (current or projected rents count — note "projected" in keyFacts if so). If the listing states annual gross income or NOI, put the numbers in grossAnnualIncome / statedNoi. Use null / [] when not published.
 - Do NOT report "off_market"/delisted based on search-result snippets, cached previews, or aggregator pages — those are often stale. Only call a listing delisted/off-market if the CURRENT listing page itself (or the source site's own status banner on that page) confirms it. If you cannot open the listing page to confirm, and a recent listing exists, prefer "active" with a note in keyFacts that the status could not be re-verified.
 - Report only what listings actually say. Do NOT infer, estimate, or fill gaps — use null / empty arrays when the information is not shown.
@@ -123,6 +131,7 @@ Rules:
   if (!parsed || typeof parsed !== 'object') throw new Error('Listing snapshot output contained no parseable JSON object');
 
   const statuses = ['active', 'pending', 'off_market', 'not_found'];
+  const claimFields = ['unitCount', 'yearBuilt', 'lotSizeSf', 'annualTaxes', 'renovationYear', 'grossAnnualIncome'];
   if (!statuses.includes(parsed.status)) throw new Error(`Listing snapshot returned invalid status: ${parsed.status}`);
 
   return {
@@ -138,6 +147,16 @@ Rules:
     remarksSummary: parsed.remarksSummary ?? null,
     disclosures: Array.isArray(parsed.disclosures) ? parsed.disclosures.filter((d: unknown) => typeof d === 'string') : [],
     keyFacts: Array.isArray(parsed.keyFacts) ? parsed.keyFacts.filter((d: unknown) => typeof d === 'string') : [],
+    claims: Array.isArray(parsed.claims)
+      ? parsed.claims
+          .filter((claim: any) => claim && claimFields.includes(claim.field) && Number.isFinite(claim.value))
+          .map((claim: any) => ({
+            field: claim.field,
+            value: claim.value,
+            raw: typeof claim.raw === 'string' && claim.raw.trim() ? claim.raw.trim() : '',
+          }))
+          .filter((claim: any) => claim.raw.length > 0)
+      : [],
     whyHistorical: typeof parsed.whyHistorical === 'string' && parsed.whyHistorical.trim() ? parsed.whyHistorical.trim() : null,
     unitCount: Number.isFinite(parsed.unitCount) && parsed.unitCount > 0 && parsed.unitCount <= 1000 ? Math.round(parsed.unitCount) : null,
     rentRoll: Array.isArray(parsed.rentRoll)

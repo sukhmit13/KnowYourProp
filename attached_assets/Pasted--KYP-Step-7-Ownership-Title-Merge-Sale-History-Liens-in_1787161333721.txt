@@ -1,0 +1,335 @@
+# KYP — Step 7: Ownership & Title
+### Merge Sale History + Liens into one top-level section, hybrid, with a gated timeline
+
+This replaces **two** nested subsections with **one** top-level section:
+
+| Removed | Lines today | Fate |
+|---|---|---|
+| `section-sale-history` | `RunDetail.tsx:10747–11421` | merged in |
+| `section-liens` | `RunDetail.tsx:11426–12473` | merged in |
+| Co-parcel liens block | `RunDetail.tsx:12287–12469` | **deleted** (see §8) |
+| Owner Liens card | `RunDetail.tsx:12122–12282` | **moves to Pre-Title Check** |
+
+Follow the **universal section contract** from Step 5D. No `?flag` — this replaces the live sections.
+
+---
+
+## 0. Why these two merge
+
+They are one dataset rendered by two owners, and the seams are shipping bugs:
+
+- Sale History already renders lien data — it takes `lienData.deeds`, picks the newest, and unshifts it into the sales list as a synthetic row (`10846–10863`).
+- Liens already renders sales data — `lienDistress` resolves against `pinLookupData.saleHistory` (`1808–1817`).
+- The server can't compute debt without sales — `debtReadWindow.ts` keys the OCR window to the most recent genuine sale.
+- Three separate join implementations exist because each section keeps reconciling the other's data (`10760`, `10778–10795`, `10841`).
+
+---
+
+## 1. CSS — append to `kyp-base.css` (namespaced)
+
+```css
+/* palette: ONE new categorical hue. Borrowed money is not a verdict. */
+:root{ --kyp-debt:#0a93b8; --kyp-debtSoft:#e6f5f9; --kyp-debtLine:#b9e2ee; }
+.kyp-block.debt{background:var(--kyp-debt)}
+
+/* owner strip */
+.kyp-owner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--kyp-indigoSoft);border-radius:12px;padding:13px 16px;margin-bottom:14px}
+.kyp-owner .olab{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo);background:#fff;border-radius:5px;padding:3px 8px;flex:none}
+.kyp-owner .onm{font-size:16.5px;font-weight:700;color:var(--kyp-ink)}
+.kyp-owner .oent{font-family:var(--kyp-mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--kyp-ink2);background:#fff;border:1px solid var(--kyp-line);border-radius:5px;padding:3px 7px}
+.kyp-owner .osince{margin-left:auto;font-size:12.5px;color:var(--kyp-ink2)}
+.kyp-owner .osince b{color:var(--kyp-ink);font-weight:600}
+
+/* money-type tag — the rule that keeps units apart */
+.kyp-mt{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:3px 7px;flex:none}
+.kyp-mt.paid{color:#fff;background:var(--kyp-indigo)}
+.kyp-mt.borrowed{color:#fff;background:var(--kyp-debt)}
+.kyp-mt.claimed{color:#fff;background:var(--kyp-bad)}
+.kyp-mt.consid{color:var(--kyp-ink2);background:var(--kyp-wash);border:1px solid var(--kyp-line)}
+
+/* breakdown rows inside a filled block */
+.kyp-block .bbreak{border-top:1px solid rgba(255,255,255,.28);padding-top:9px;margin-top:9px;display:flex;flex-direction:column;gap:5px}
+.kyp-block .br{font-size:10.5px;opacity:.9;line-height:1.35;display:flex;gap:7px}
+.kyp-block .br b{font-weight:700;opacity:1;flex:none;font-variant-numeric:tabular-nums}
+
+/* instrument cards */
+.kyp-xact{border:1px solid var(--kyp-line);border-left:5px solid var(--kyp-indigo);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--kyp-card)}
+.kyp-xact.loan{border-left-color:var(--kyp-debt)}
+.kyp-xact.loan.cleared{border-left-color:var(--kyp-muted)}
+.kyp-xact.claim{border-left-color:var(--kyp-bad)}
+.kyp-xact .xtop{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:9px}
+.kyp-xact .xttl{font-size:15.5px;font-weight:700;color:var(--kyp-ink);line-height:1.35}
+.kyp-xact .xamt{font-family:var(--kyp-disp);font-size:27px;line-height:1;color:var(--kyp-ink);margin-left:auto}
+.kyp-xact .xtags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.kyp-xact .xtag{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-ink2);background:var(--kyp-wash);border:1px solid var(--kyp-line);border-radius:5px;padding:3px 7px}
+.kyp-xact .xtag.era{background:var(--kyp-slate);color:#fff;border-color:var(--kyp-slate)}
+.kyp-xact .xtag.ok{background:var(--kyp-green);color:#fff;border-color:var(--kyp-green)}
+.kyp-xact .xtag.att{background:var(--kyp-orange);color:#fff;border-color:var(--kyp-orange)}
+.kyp-xact .xgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px 22px;padding-top:10px;border-top:1px dashed var(--kyp-line)}
+.kyp-xact .xf .k{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted);display:block;margin-bottom:2px}
+.kyp-xact .xf .v{font-size:13.5px;color:var(--kyp-ink);font-weight:600}
+.kyp-xact .xf .v.na{color:var(--kyp-muted);font-weight:400}
+.kyp-xact .xflag{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:var(--kyp-orange);margin-top:9px;line-height:1.45}
+
+/* loan terms */
+.kyp-terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 22px;margin-top:11px;padding-top:11px;border-top:1px dashed var(--kyp-line)}
+.kyp-terms .tk{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted);display:block;margin-bottom:3px}
+.kyp-terms .tv{display:block;font-family:var(--kyp-disp);font-size:22px;line-height:1;color:var(--kyp-ink)}
+.kyp-terms .tv.sm{font-family:var(--kyp-sans);font-size:13.5px;font-weight:600;line-height:1.25}
+.kyp-terms .tv.na{font-family:var(--kyp-sans);font-size:13px;font-weight:400;color:var(--kyp-muted);line-height:1.25}
+.kyp-terms .ts{display:block;font-size:10.5px;color:var(--kyp-muted);margin-top:3px;line-height:1.3}
+
+/* inline runway */
+.kyp-rw{margin-top:12px;padding-top:11px;border-top:1px dashed var(--kyp-line)}
+.kyp-rwbar{position:relative;height:6px;border-radius:999px;background:#e9e7e0;overflow:hidden}
+.kyp-rwbar i{position:absolute;left:0;top:0;height:100%;border-radius:999px;background:var(--kyp-debt);display:block}
+.kyp-rwlab{display:flex;justify-content:space-between;font-family:var(--kyp-mono);font-size:9px;color:var(--kyp-muted);margin-top:6px}
+.kyp-rwlab b{color:var(--kyp-ink2);font-weight:700}
+.kyp-rwnote{font-size:11.5px;color:var(--kyp-ink2);margin-top:7px}
+.kyp-rwnote b{color:var(--kyp-ink);font-weight:600}
+
+/* the ONE document reference treatment */
+.kyp-docref{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:1px dashed var(--kyp-line);font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-ink2)}
+.kyp-docref .k{font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted)}
+.kyp-docref .v{color:var(--kyp-ink2);font-weight:600}
+.kyp-docref .sep{color:#c8c6bd}
+.kyp-docref a{color:var(--kyp-indigo);text-decoration:none;font-weight:700}
+.kyp-docref a:hover{text-decoration:underline}
+.kyp-docref .approx{color:var(--kyp-muted);font-weight:400}
+
+/* before-you-close callout */
+.kyp-loc{display:flex;gap:11px;align-items:flex-start;background:#fdf8f0;border:1px solid #e6cfa0;border-left:4px solid var(--kyp-orange);border-radius:11px;padding:12px 15px;margin-top:12px}
+.kyp-loc .ic{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--kyp-orange);border-radius:5px;padding:4px 8px;flex:none}
+.kyp-loc .tx{font-size:12.5px;color:var(--kyp-ink2);line-height:1.5}
+.kyp-loc .tx b{color:var(--kyp-ink);font-weight:700}
+
+/* timeline */
+.kyp-otl{margin-top:10px}
+.kyp-otlplot{width:100%;height:auto;display:block}
+.kyp-otlnote{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted);margin-top:7px;line-height:1.5}
+.kyp-tlnode{cursor:pointer}
+.kyp-tlnode circle,.kyp-tlnode rect{transition:transform .12s ease}
+.kyp-tlnode:hover circle,.kyp-tlnode:hover rect{transform-box:fill-box;transform-origin:center;transform:scale(1.35)}
+.kyp-tlnode:focus-visible{outline:2px solid var(--kyp-indigo);outline-offset:2px}
+```
+
+**Delete** these dead rules from `index.css` while you're in there: `.liens-tl`, `.liens-tl-cap`, `.liens-tl-track`, `.liens-tl-fill`, `.liens-tl-now`, `.liens-tl-now-lb`, `.liens-tl-ends`, `.liens-tl-note` (`index.css:705–715`) — zero `.tsx` references, superseded by `.lns-life` which this step also retires.
+
+---
+
+## 2. Server changes — three, all small
+
+### 2A. Hoist the blanket/PIN derivation off `active` — **required for the timeline**
+`server/debtResolveState.ts:319` runs `for (const m of active)`. A **released** loan therefore never gets `blanket` / `blanket_pins` computed. Without the old loan's PIN set you cannot detect that the debt's parcel scope narrowed.
+
+Change the loop to run over **every reconciled mortgage** (active + cleared + satisfied), not just `active`. Nothing else in that block depends on liveness. Keep the PIN normalization exactly as written (`normPin`, 10→14 digit padding) — it is correct and load-bearing.
+
+### 2B. NEW — parcel scope change
+After 2A, walk the first-position chain oldest → newest. Where consecutive loans have different PIN sets, emit:
+
+```ts
+scopeChanges: Array<{
+  atDocNumber: string;      // the loan that narrowed/widened
+  recordingDate: string;
+  droppedPins: string[];    // in the older loan, not the newer
+  addedPins: string[];
+}>
+```
+
+Emit **nothing** when PIN sets are equal, or when either side's set is empty/unknown. An empty set is missing data, not a release.
+
+### 2C. NEW — cash-out classification
+The code already classifies refi-vs-junior (`debtResolveState.ts:249–262`). Add, on the **newer** loan of a refi pair:
+
+```ts
+cashOutSuspect: boolean;   // newer.effective_amount > older.effective_amount * 1.05
+recordedDelta: number;     // newer - older, only when both are known
+```
+
+**`cashOutSuspect` never asserts cash taken out.** Recorded amounts are original principal; the older loan had amortized, so the true extraction is *larger* than `recordedDelta` and unknowable from public record. Copy must say "recorded amount rose by $X," never "took out $X." The caveat in §4 is mandatory whenever this renders.
+
+---
+
+## 3. Promote to a top-level section
+
+- Section id `ownership`, rendered at **04** in the accordion (Permits & Violations is 03).
+- Openable without `propertyDetails`. Register in `SectionStates`, `jumpTargets`, and `PRINT_SECTIONS` — today **neither** `saleHistory` nor `liens` has a print entry (`RunDetail.tsx:334–411`); add one for `ownership`.
+- Row header per the section contract: `04 · OWNERSHIP & TITLE — <takeaway ≤70 chars> · <badge> · ⓘ · 👁 · ⌃`
+- Retire the `saleHistory` and `liens` section keys. `PreTitleCheck.onScrollToSection('liens' | 'saleHistory')` (`18209–18220`) must repoint to `'ownership'`.
+
+**Badge cascade — fix the ordering bug.** Today `11445–11451` checks `activeLienCount` *before* lis pendens, so a property with both shows the amber lien chip and never the red one. Correct order:
+
+```
+foreclosure active            → "Foreclosure"   (red)
+lis pendens active            → "Lis pendens"   (red)
+activeLienCount > 0           → "{n} liens"     (orange)
+otherwise                     → "Clear title"   (green)
+```
+
+An unreleased junior mortgage does **not** downgrade the badge — it is owner debt, not an adverse lien. It surfaces via the callout in §4.
+
+---
+
+## 4. Body layout — in this order
+
+Body starts immediately with content. No section title, no `.crm-take`, no outer card.
+
+1. **Co-parcel banner** — `{coParcelAddress && …}`. Scope only: "Shown for X (subject) and Y (co-parcel)." Source explanation belongs in the footnotes, not here.
+2. **Owner strip** (`kyp-owner`) — `derivedOwnerName`, entity chip when the name matches `/LLC|L\.L\.C|TRUST|INC|LP\b/i`, and "Held since {acquisition month/year}". Nothing else — deed type is on the sale card.
+3. **Three blocks** (`kyp-blocks`), always three, never four:
+   - `ind` — **Paid**, most recent arm's-length `sale_price`. Sub: date + "both lots on one deed" when the deed covers >1 PIN.
+   - `debt` — **Borrowed**, `combined_recorded_debt`. Breakdown rows per §6.5.
+   - `grn`/`bad` — **Claimed**, `activeLienCount`. Green at 0, `bad` above 0.
+4. **Before-you-close callout** (`kyp-loc`) — gated, §6.4.
+5. **Timeline** — gated, §6.1.
+6. **Cash-out caveat** — gated, §6.3. Mandatory whenever the cash-out annotation renders.
+7. **Chain of title** (`kyp-subhead`) — one `kyp-xact` per sale, newest first, from the existing `saleVM`. Do **not** change the derivation.
+8. **Debt on title** (`kyp-subhead` + "current owner · N unreleased · M released") — active loans first, then released. Prior-owner debt line per §6.9.
+9. **Title status** (`kyp-subhead`) — statement, then a `kyp-xact.claim` per lien/filing.
+10. Caveat + `kyp-src`.
+
+---
+
+## 5. The document reference — kills five formats
+
+A recorded document number renders **five different ways** today:
+
+| Where | Renders as | Linked |
+|---|---|---|
+| `RunDetail.tsx:10934` | `Doc #1307145022 ↗` | yes |
+| `RunDetail.tsx:12051` | `2116922041` | yes |
+| `RunDetail.tsx:12217` | same, **builds its own URL inline** | yes |
+| `shared/debtCardModel.ts:200` | `mortgage 2116922041` | **no** |
+| `shared/debtCardModel.ts:302` | `recorded 8/28/2025 · doc 2524011012` | **no** |
+
+Replace all five with one helper. Document number and recording date come from the same index row and always render together, in this order, always linked:
+
+```jsx
+function DocRef({ documentNumber, viewLink, recordedDate, dateIsApprox, releasedBy }) {
+  const url = viewLink || `https://crs.cookcountyclerkil.gov/Search/ResultByDocNum?id1=${documentNumber}`;
+  return (
+    <div className="kyp-docref">
+      <span className="k">Document</span>
+      <a href={url} target="_blank" rel="noopener noreferrer">#{documentNumber} ↗</a>
+      <span className="sep">·</span>
+      <span className="k">Recorded</span>
+      <span className="v">{recordedDate}</span>
+      {dateIsApprox && <span className="approx">· day not recorded</span>}
+      {releasedBy && <>
+        <span className="sep">·</span><span className="k">Released by</span>
+        <a href={releasedBy.url} target="_blank" rel="noopener noreferrer">#{releasedBy.documentNumber} ↗</a>
+      </>}
+    </div>
+  );
+}
+```
+
+Rules: **never** plain text, **never** a hand-built URL outside this helper, **never** a per-section format. It is the footer of every `kyp-xact` — both sales, all loans, every lien and filing. A release reference gets the identical treatment because a release *is* a recorded document.
+
+Consequence: pull `Recorded` out of the loan terms grid (it lives in the footer now), leaving three clean terms — rate, maturity, position.
+
+---
+
+## 6. 🔒 Gated logic — render only when the condition holds
+
+### 6.1 Timeline
+Render **only** when any of:
+- `timelineEvents.length >= 3`, **or**
+- any loan has `refi_suspect` or is the newer half of a refi pair, **or**
+- `scopeChanges.length > 0`.
+
+Otherwise omit the chart *and* its title entirely. A single sale plus a single mortgage is two dots and a straight line — decoration. Most single-parcel properties will not render it, and that is correct.
+
+### 6.2 Parcel coverage band (inside the timeline)
+Render **only** when at least one instrument in the chain names a PIN other than the subject (`blanket_pins.length > 0` on any loan, post-2A). Otherwise the timeline is spine-only and shorter. Never render a one-row band.
+
+Row per PIN, subject first. A row is cyan where that PIN is named by an unreleased loan, green from the recording date of the instrument that dropped it (from `scopeChanges.droppedPins`), otherwise empty track.
+
+### 6.3 Cash-out annotation + caveat
+Render the `+$X recorded` step **only** when `cashOutSuspect === true` **and** both amounts are known. Whenever it renders, the caveat below the chart is **mandatory and not dismissable**:
+
+> The 2021 loan is $352,500 larger than the one it replaced — but that is not the cash taken out. The older loan had been amortizing, so its payoff balance was below its original amount, and the true cash-out is larger than the gap shown. Recorded amounts are the only figures Cook County publishes.
+
+If the caveat is ever suppressed, suppress the annotation too. They ship together.
+
+### 6.4 Before-you-close callout
+Render **only** when an unreleased junior lien or unreleased revolving line exists — `active.some(m => (m.lien_kind === 'junior' || m.revolving) && !m.satisfied)`. Never for a released one. It carries the **consequence**, never a restatement of the amount (the block already has that).
+
+### 6.5 Borrowed-block breakdown rows
+- `active.length <= 1` → no breakdown; sub-line is that loan's terms (`3.125% · matures 2051`).
+- `active.length` 2–3 → one row per loan: amount + kind + key terms.
+- `active.length > 3` → top 3 by amount, then `+{n} more` — and `log`/render that count, never silently truncate.
+
+### 6.6 Runway bar
+Render **only** when the loan is active **and** `!revolving` **and** `effective_maturity_date` is known **and** `maturity_source !== 'estimated'`. A revolving line never gets one — `debtMaturityEstimate.ts` already refuses to assign a maturity when `is_credit_line`, and there is a test asserting it. Do not work around that.
+
+### 6.7 Rate & maturity by extraction confidence — **my call, override if you disagree**
+`extraction_confidence` is `high | medium | low`, and `recorderDocIngest.ts:197` defines low as "OCR text is garbled/sparse."
+
+| Confidence | Render |
+|---|---|
+| `high` | value plainly |
+| `medium` | value + sub-line "· read from a scanned image" |
+| `low` | **suppress the value.** Show `Not legible on the recorded document` in `.tv.na` |
+
+Rationale: a garbled rate is worse than no rate — someone will underwrite off it. Medium is worth showing hedged.
+
+### 6.8 Blanket flag on a loan card
+Render the `Blanket · {pins}` chip and the explanatory `xflag` **only** when `blanket === true && blanket_pins.length > 0`. When `blanket` is true from the **soft** value heuristic (`debtResolveState.ts:331–333`, amount >> parcel value) with no other PIN, say "may be cross-collateralized — confirm", not "blanket."
+
+### 6.9 Prior-owner debt line
+Render **only** when `cleared_by_sale.length > 0`. Copy: "N mortgages recorded against {prior owner} before {date} are treated as resolved at the {year} closing. They are not counted in the totals above." This exists so the reader knows debt was *excluded*, not missed.
+
+### 6.10 Chain-of-title arm's-length flag
+Keep the existing `naflag` heuristics. Render the flag per sale, not once per section.
+
+### 6.11 Title status
+- `activeLienCount === 0 && no active filings` → the green statement sentence, then any **historical** filing as a muted `kyp-xact.claim` with a "Resolved by the {year} sale" tag.
+- otherwise → one card per active lien, `bad` rail, no statement sentence.
+
+---
+
+## 7. Guardrails
+
+- **Never put two kinds of money in one column.** Purchase price is `PAID`, mortgage is `BORROWED`, lien is `CLAIMED`. Sale prices are MyDec/PTAX-203 declared transfer amounts from the **Assessor**; loan amounts come from the **Recorder**. They are different records and must never be summed, compared as like-for-like, or share a visual treatment.
+- **Cyan is a category, not a verdict.** `--kyp-debt` never appears on a verdict pill, never gets an orange/red counterpart, never means "bad." Debt is not a judgment. Validated at normal ΔE 18.5 vs indigo and 17.2 vs verdict green, deutan 15.6 — do not re-step it by eye.
+- **Never render an amount as a balance.** Every loan figure is original recorded principal. Cook County does not publish balances. A revolving line's amount is *maximum indebtedness*, not what is drawn — label it as such every time.
+- **Do not change** `saleVM`, the `professionals` aggregation, `resolveDistress`, or the reconcile/resolve pipeline beyond §2. Those are correct.
+- Three blocks. Always three. Not four, not two.
+- One title, one ~70-char takeaway, one badge — all in the row header.
+
+---
+
+## 8. Bugs found while mapping — fix these, they are cheap
+
+1. **Foreclosure banner and chip disagree.** Banner (`11490`) uses `lienData.hasForeclosure` (server heuristic); chip (`11447`) uses `lienDistress.hasForeclosureActive` (resolved against sale history). A property with a CCAO sale after the filing renders "Active foreclosure — title is clouded" and "Clear title" simultaneously. `shared/lienDistress.ts:11-13` claims they cannot disagree — the banner was never migrated. **Use `lienDistress` everywhere.**
+2. **"Most recent deed" picked three ways.** `8467` takes first-in-array, `10749` sorts descending, `11328` is a third path. Header badge, takeaway bullet, and sale card can quote different deeds. **One derivation, sorted by `recordedDate` desc.**
+3. **Two arm's-length definitions.** Client `naflag` (`10865–10872`, four heuristics) vs server `debtSnapshot.ts:129` (`price > 1000 && !quitclaim`). **Server should consume the client rule**, or both should call one shared helper.
+4. **Co-parcel Lis Pendens KPI is a different formula** — `12338` computes `foreclosures.length + (activeListPendensCount ?? litigation?.length ?? 0)`, counting foreclosures as lis pendens and including released filings; the primary card uses `lienDistress.lis.activeCount`. Moot once the block is deleted, but do not carry the formula forward.
+5. **Scrape failure is indistinguishable from clean title.** `routes.ts:6398–6421` returns a stub on 500 with `overallStatus:'unknown'`, which renders **no badge at all**, and `12110` says "No mortgages, liens, or other encumbrances found." **Add an explicit error state** — absence of scrape is not absence of encumbrance.
+6. **Pooled LTV is permanently unreachable.** `1855–1857` builds `coParcels` with no `estimatedValue`, but `buildDebtSnap` requires it (`debtSnapshot.ts:161`), so `pool_ltv` is always null and the cell always renders "—". Either populate the value or drop the cell — do not ship a feature that can never fire.
+7. **Optimistic cache write never lands.** `use-runs.ts:1746` writes a 3-element query key; `useLienSearch` registers a 4-element key (`:1676`). Harmless but dead.
+8. **Five client/server type mismatches** absent from `shared/schema.ts` but produced by the server and read by the client: `isProbablyCleared`, `isWaterDept`, `maturityDate`, `activeListPendensCount`, `waterDeptLienCount` (the last is never read at all). Add them to `LienDocument`/`LienResult` so `PreTitleCheck.tsx:31` can stop typing the whole prop `any`.
+9. **Delete the co-parcel liens block** (`12287–12469`) — a near-complete Tailwind duplicate of the primary card with **no testids anywhere** and its own divergent KPI math. The co-parcel is covered by the parcel coverage band and the blanket chips.
+
+---
+
+## 9. Not in scope
+
+`OwnerIntelligenceCard` (disabled at `11423`), HMDA / SBA / Area Transaction Trends (stay under Pre-Title Check), `LienResult.releases` / `.other` (never rendered), true lot subdivision — plats are **explicitly excluded** from ingest (`recorderDocIngest.ts:63`), so the report cannot see a real subdivision and must not imply one.
+
+---
+
+## ✅ Done-when
+
+- [ ] One top-level section at 04, openable without Property Details; `saleHistory` and `liens` keys retired; `PreTitleCheck` deep links repoint.
+- [ ] Row header: one title, one ≤70-char takeaway, one badge. Badge cascade puts lis pendens **above** liens.
+- [ ] Three blocks, always three. Borrowed block breaks down when >1 active loan, caps at 3 + "+N more".
+- [ ] Every recorded document renders through `DocRef` — no plain-text doc numbers, no inline URL construction, five old formats gone.
+- [ ] Timeline renders only under §6.1; coverage band only under §6.2; cash-out annotation and its caveat ship together or not at all.
+- [ ] Timeline nodes are hoverable (full record) and clickable (scroll to that card).
+- [ ] Rate/maturity respect `extraction_confidence`; revolving lines show no maturity and no runway bar.
+- [ ] Prior-owner debt line states what was excluded.
+- [ ] Owner Liens card moved to Pre-Title Check; co-parcel liens block deleted; dead `.liens-tl*` CSS deleted.
+- [ ] Bugs 1–4 fixed; 5–9 fixed or logged with a reason.
+- [ ] Print entry exists for `ownership`; all testids resolve.

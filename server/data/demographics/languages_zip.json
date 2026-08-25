@@ -1,0 +1,1892 @@
+[
+  {
+    "zipCode": "60601",
+    "population5Plus": 17200,
+    "englishOnlyPct": 72.5,
+    "nonEnglishPct": 27.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 12470,
+        "pct": 72.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1462,
+        "pct": 8.5
+      },
+      {
+        "language": "Chinese",
+        "count": 998,
+        "pct": 5.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 430,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1118,
+      "pct": 6.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "23% below city average",
+    "citywideRank": 33,
+    "rankDescription": "Middle tier for diversity (#33 of 55)"
+  },
+  {
+    "zipCode": "60602",
+    "population5Plus": 2600,
+    "englishOnlyPct": 71.8,
+    "nonEnglishPct": 28.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 1867,
+        "pct": 71.8
+      },
+      {
+        "language": "Spanish",
+        "count": 239,
+        "pct": 9.2
+      },
+      {
+        "language": "Chinese",
+        "count": 143,
+        "pct": 5.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 57,
+        "pct": 2.2
+      },
+      {
+        "language": "Polish",
+        "count": 52,
+        "pct": 2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 182,
+      "pct": 7
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "21% below city average",
+    "citywideRank": 32,
+    "rankDescription": "Middle tier for diversity (#32 of 55)"
+  },
+  {
+    "zipCode": "60603",
+    "population5Plus": 1100,
+    "englishOnlyPct": 73.5,
+    "nonEnglishPct": 26.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 809,
+        "pct": 73.5
+      },
+      {
+        "language": "Spanish",
+        "count": 88,
+        "pct": 8
+      },
+      {
+        "language": "Chinese",
+        "count": 68,
+        "pct": 6.2
+      },
+      {
+        "language": "Tagalog",
+        "count": 22,
+        "pct": 2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 66,
+      "pct": 6
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "25% below city average",
+    "citywideRank": 35,
+    "rankDescription": "Middle tier for diversity (#35 of 55)"
+  },
+  {
+    "zipCode": "60604",
+    "population5Plus": 850,
+    "englishOnlyPct": 74,
+    "nonEnglishPct": 26,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 629,
+        "pct": 74
+      },
+      {
+        "language": "Spanish",
+        "count": 64,
+        "pct": 7.5
+      },
+      {
+        "language": "Chinese",
+        "count": 51,
+        "pct": 6
+      },
+      {
+        "language": "Tagalog",
+        "count": 19,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 49,
+      "pct": 5.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "27% below city average",
+    "citywideRank": 36,
+    "rankDescription": "Middle tier for diversity (#36 of 55)"
+  },
+  {
+    "zipCode": "60605",
+    "population5Plus": 30800,
+    "englishOnlyPct": 68.5,
+    "nonEnglishPct": 31.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 21098,
+        "pct": 68.5
+      },
+      {
+        "language": "Spanish",
+        "count": 3850,
+        "pct": 12.5
+      },
+      {
+        "language": "Chinese",
+        "count": 2310,
+        "pct": 7.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 678,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2526,
+      "pct": 8.2
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "11% below city average",
+    "citywideRank": 26,
+    "rankDescription": "Upper half for diversity (#26 of 55)"
+  },
+  {
+    "zipCode": "60606",
+    "population5Plus": 8000,
+    "englishOnlyPct": 70.5,
+    "nonEnglishPct": 29.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 5640,
+        "pct": 70.5
+      },
+      {
+        "language": "Spanish",
+        "count": 816,
+        "pct": 10.2
+      },
+      {
+        "language": "Chinese",
+        "count": 496,
+        "pct": 6.2
+      },
+      {
+        "language": "Tagalog",
+        "count": 200,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 576,
+      "pct": 7.2
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "17% below city average",
+    "citywideRank": 31,
+    "rankDescription": "Middle tier for diversity (#31 of 55)"
+  },
+  {
+    "zipCode": "60607",
+    "population5Plus": 26500,
+    "englishOnlyPct": 68.2,
+    "nonEnglishPct": 31.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 18073,
+        "pct": 68.2
+      },
+      {
+        "language": "Spanish",
+        "count": 4108,
+        "pct": 15.5
+      },
+      {
+        "language": "Chinese",
+        "count": 1193,
+        "pct": 4.5
+      },
+      {
+        "language": "Polish",
+        "count": 583,
+        "pct": 2.2
+      },
+      {
+        "language": "Tagalog",
+        "count": 530,
+        "pct": 2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2518,
+      "pct": 9.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "10% below city average",
+    "citywideRank": 25,
+    "rankDescription": "Upper half for diversity (#25 of 55)"
+  },
+  {
+    "zipCode": "60608",
+    "population5Plus": 77500,
+    "englishOnlyPct": 38.5,
+    "nonEnglishPct": 61.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 37588,
+        "pct": 48.5
+      },
+      {
+        "language": "English only",
+        "count": 29838,
+        "pct": 38.5
+      },
+      {
+        "language": "Chinese",
+        "count": 3255,
+        "pct": 4.2
+      },
+      {
+        "language": "Polish",
+        "count": 1938,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 17438,
+      "pct": 22.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "73% above city average",
+    "citywideRank": 5,
+    "rankDescription": "Top 10% most diverse (#5 of 55 ZIP codes)"
+  },
+  {
+    "zipCode": "60609",
+    "population5Plus": 52900,
+    "englishOnlyPct": 42.5,
+    "nonEnglishPct": 57.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 25815,
+        "pct": 48.8
+      },
+      {
+        "language": "English only",
+        "count": 22483,
+        "pct": 42.5
+      },
+      {
+        "language": "Polish",
+        "count": 1058,
+        "pct": 2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 12961,
+      "pct": 24.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "62% above city average",
+    "citywideRank": 6,
+    "rankDescription": "Top 10% most diverse (#6 of 55 ZIP codes)"
+  },
+  {
+    "zipCode": "60610",
+    "population5Plus": 33000,
+    "englishOnlyPct": 75.8,
+    "nonEnglishPct": 24.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 25014,
+        "pct": 75.8
+      },
+      {
+        "language": "Spanish",
+        "count": 2805,
+        "pct": 8.5
+      },
+      {
+        "language": "Chinese",
+        "count": 1155,
+        "pct": 3.5
+      },
+      {
+        "language": "Polish",
+        "count": 726,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1815,
+      "pct": 5.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "32% below city average",
+    "citywideRank": 39,
+    "rankDescription": "Middle tier for diversity (#39 of 55)"
+  },
+  {
+    "zipCode": "60611",
+    "population5Plus": 49200,
+    "englishOnlyPct": 74.2,
+    "nonEnglishPct": 25.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 36506,
+        "pct": 74.2
+      },
+      {
+        "language": "Spanish",
+        "count": 3838,
+        "pct": 7.8
+      },
+      {
+        "language": "Chinese",
+        "count": 2214,
+        "pct": 4.5
+      },
+      {
+        "language": "Polish",
+        "count": 1230,
+        "pct": 2.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 1082,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2854,
+      "pct": 5.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "27% below city average",
+    "citywideRank": 37,
+    "rankDescription": "Middle tier for diversity (#37 of 55)"
+  },
+  {
+    "zipCode": "60612",
+    "population5Plus": 35900,
+    "englishOnlyPct": 72.5,
+    "nonEnglishPct": 27.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 26028,
+        "pct": 72.5
+      },
+      {
+        "language": "Spanish",
+        "count": 5672,
+        "pct": 15.8
+      },
+      {
+        "language": "Chinese",
+        "count": 898,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 3052,
+      "pct": 8.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "23% below city average",
+    "citywideRank": 34,
+    "rankDescription": "Middle tier for diversity (#34 of 55)"
+  },
+  {
+    "zipCode": "60613",
+    "population5Plus": 52900,
+    "englishOnlyPct": 78.5,
+    "nonEnglishPct": 21.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 41527,
+        "pct": 78.5
+      },
+      {
+        "language": "Spanish",
+        "count": 4338,
+        "pct": 8.2
+      },
+      {
+        "language": "Polish",
+        "count": 1323,
+        "pct": 2.5
+      },
+      {
+        "language": "Chinese",
+        "count": 1323,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2539,
+      "pct": 4.8
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "39% below city average",
+    "citywideRank": 42,
+    "rankDescription": "Middle tier for diversity (#42 of 55)"
+  },
+  {
+    "zipCode": "60614",
+    "population5Plus": 68000,
+    "englishOnlyPct": 82.5,
+    "nonEnglishPct": 17.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 56100,
+        "pct": 82.5
+      },
+      {
+        "language": "Spanish",
+        "count": 4216,
+        "pct": 6.2
+      },
+      {
+        "language": "Chinese",
+        "count": 1700,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2584,
+      "pct": 3.8
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "51% below city average",
+    "citywideRank": 44,
+    "rankDescription": "Lower tier for diversity (#44 of 55)"
+  },
+  {
+    "zipCode": "60615",
+    "population5Plus": 39700,
+    "englishOnlyPct": 75.5,
+    "nonEnglishPct": 24.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 29974,
+        "pct": 75.5
+      },
+      {
+        "language": "Spanish",
+        "count": 4049,
+        "pct": 10.2
+      },
+      {
+        "language": "Chinese",
+        "count": 2184,
+        "pct": 5.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2461,
+      "pct": 6.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "31% below city average",
+    "citywideRank": 38,
+    "rankDescription": "Middle tier for diversity (#38 of 55)"
+  },
+  {
+    "zipCode": "60616",
+    "population5Plus": 45400,
+    "englishOnlyPct": 52.5,
+    "nonEnglishPct": 47.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 23835,
+        "pct": 52.5
+      },
+      {
+        "language": "Chinese",
+        "count": 12939,
+        "pct": 28.5
+      },
+      {
+        "language": "Spanish",
+        "count": 5675,
+        "pct": 12.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 8399,
+      "pct": 18.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "34% above city average",
+    "citywideRank": 11,
+    "rankDescription": "Top 25% most diverse (#11 of 55)"
+  },
+  {
+    "zipCode": "60617",
+    "population5Plus": 70900,
+    "englishOnlyPct": 68.5,
+    "nonEnglishPct": 31.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 48567,
+        "pct": 68.5
+      },
+      {
+        "language": "Spanish",
+        "count": 18292,
+        "pct": 25.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 8863,
+      "pct": 12.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "11% below city average",
+    "citywideRank": 27,
+    "rankDescription": "Upper half for diversity (#27 of 55)"
+  },
+  {
+    "zipCode": "60618",
+    "population5Plus": 80300,
+    "englishOnlyPct": 58.5,
+    "nonEnglishPct": 41.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 46976,
+        "pct": 58.5
+      },
+      {
+        "language": "Spanish",
+        "count": 22886,
+        "pct": 28.5
+      },
+      {
+        "language": "Polish",
+        "count": 4176,
+        "pct": 5.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 10278,
+      "pct": 12.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "17% above city average",
+    "citywideRank": 17,
+    "rankDescription": "Upper half for diversity (#17 of 55)"
+  },
+  {
+    "zipCode": "60619",
+    "population5Plus": 49200,
+    "englishOnlyPct": 92.5,
+    "nonEnglishPct": 7.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 45510,
+        "pct": 92.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2362,
+        "pct": 4.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 886,
+      "pct": 1.8
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "79% below city average",
+    "citywideRank": 53,
+    "rankDescription": "Lower tier for diversity (#53 of 55)"
+  },
+  {
+    "zipCode": "60620",
+    "population5Plus": 54800,
+    "englishOnlyPct": 92.8,
+    "nonEnglishPct": 7.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 50854,
+        "pct": 92.8
+      },
+      {
+        "language": "Spanish",
+        "count": 2466,
+        "pct": 4.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 822,
+      "pct": 1.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "80% below city average",
+    "citywideRank": 55,
+    "rankDescription": "Lower tier for diversity (#55 of 55)"
+  },
+  {
+    "zipCode": "60621",
+    "population5Plus": 30200,
+    "englishOnlyPct": 92.5,
+    "nonEnglishPct": 7.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 27935,
+        "pct": 92.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1570,
+        "pct": 5.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 604,
+      "pct": 2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "79% below city average",
+    "citywideRank": 54,
+    "rankDescription": "Lower tier for diversity (#54 of 55)"
+  },
+  {
+    "zipCode": "60622",
+    "population5Plus": 49200,
+    "englishOnlyPct": 62.5,
+    "nonEnglishPct": 37.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 30750,
+        "pct": 62.5
+      },
+      {
+        "language": "Spanish",
+        "count": 12694,
+        "pct": 25.8
+      },
+      {
+        "language": "Polish",
+        "count": 1722,
+        "pct": 3.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 5166,
+      "pct": 10.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "6% above city average",
+    "citywideRank": 20,
+    "rankDescription": "Upper half for diversity (#20 of 55)"
+  },
+  {
+    "zipCode": "60623",
+    "population5Plus": 73700,
+    "englishOnlyPct": 22.5,
+    "nonEnglishPct": 77.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 53433,
+        "pct": 72.5
+      },
+      {
+        "language": "English only",
+        "count": 16583,
+        "pct": 22.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 28375,
+      "pct": 38.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "118% above city average",
+    "citywideRank": 1,
+    "rankDescription": "Top 10% most diverse (#1 of 55 ZIP codes)"
+  },
+  {
+    "zipCode": "60624",
+    "population5Plus": 24600,
+    "englishOnlyPct": 90.5,
+    "nonEnglishPct": 9.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 22263,
+        "pct": 90.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1673,
+        "pct": 6.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 615,
+      "pct": 2.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "73% below city average",
+    "citywideRank": 50,
+    "rankDescription": "Lower tier for diversity (#50 of 55)"
+  },
+  {
+    "zipCode": "60625",
+    "population5Plus": 73700,
+    "englishOnlyPct": 48.5,
+    "nonEnglishPct": 51.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 35745,
+        "pct": 48.5
+      },
+      {
+        "language": "Spanish",
+        "count": 16583,
+        "pct": 22.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 4569,
+        "pct": 6.2
+      },
+      {
+        "language": "Polish",
+        "count": 3538,
+        "pct": 4.8
+      },
+      {
+        "language": "Chinese",
+        "count": 3317,
+        "pct": 4.5
+      },
+      {
+        "language": "Arabic",
+        "count": 2580,
+        "pct": 3.5
+      },
+      {
+        "language": "Hindi",
+        "count": 1843,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 12161,
+      "pct": 16.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "45% above city average",
+    "citywideRank": 9,
+    "rankDescription": "Top 25% most diverse (#9 of 55)"
+  },
+  {
+    "zipCode": "60626",
+    "population5Plus": 54800,
+    "englishOnlyPct": 55.2,
+    "nonEnglishPct": 44.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 30250,
+        "pct": 55.2
+      },
+      {
+        "language": "Spanish",
+        "count": 12330,
+        "pct": 22.5
+      },
+      {
+        "language": "Polish",
+        "count": 2302,
+        "pct": 4.2
+      },
+      {
+        "language": "Chinese",
+        "count": 2082,
+        "pct": 3.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 1370,
+        "pct": 2.5
+      },
+      {
+        "language": "Hindi",
+        "count": 1370,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 6850,
+      "pct": 12.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "26% above city average",
+    "citywideRank": 13,
+    "rankDescription": "Top 25% most diverse (#13 of 55)"
+  },
+  {
+    "zipCode": "60628",
+    "population5Plus": 42500,
+    "englishOnlyPct": 91.5,
+    "nonEnglishPct": 8.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 38888,
+        "pct": 91.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2465,
+        "pct": 5.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 935,
+      "pct": 2.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "76% below city average",
+    "citywideRank": 52,
+    "rankDescription": "Lower tier for diversity (#52 of 55)"
+  },
+  {
+    "zipCode": "60629",
+    "population5Plus": 108700,
+    "englishOnlyPct": 28.5,
+    "nonEnglishPct": 71.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 67938,
+        "pct": 62.5
+      },
+      {
+        "language": "English only",
+        "count": 30980,
+        "pct": 28.5
+      },
+      {
+        "language": "Polish",
+        "count": 3478,
+        "pct": 3.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 35328,
+      "pct": 32.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "101% above city average",
+    "citywideRank": 2,
+    "rankDescription": "Top 10% most diverse (#2 of 55 ZIP codes)"
+  },
+  {
+    "zipCode": "60630",
+    "population5Plus": 45400,
+    "englishOnlyPct": 58.5,
+    "nonEnglishPct": 41.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 26559,
+        "pct": 58.5
+      },
+      {
+        "language": "Spanish",
+        "count": 7173,
+        "pct": 15.8
+      },
+      {
+        "language": "Polish",
+        "count": 5675,
+        "pct": 12.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 1453,
+        "pct": 3.2
+      },
+      {
+        "language": "Russian",
+        "count": 999,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 5357,
+      "pct": 11.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "17% above city average",
+    "citywideRank": 18,
+    "rankDescription": "Upper half for diversity (#18 of 55)"
+  },
+  {
+    "zipCode": "60631",
+    "population5Plus": 20800,
+    "englishOnlyPct": 65.2,
+    "nonEnglishPct": 34.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 13562,
+        "pct": 65.2
+      },
+      {
+        "language": "Polish",
+        "count": 3286,
+        "pct": 15.8
+      },
+      {
+        "language": "Spanish",
+        "count": 1768,
+        "pct": 8.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 582,
+        "pct": 2.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1768,
+      "pct": 8.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "Near city average",
+    "citywideRank": 22,
+    "rankDescription": "Upper half for diversity (#22 of 55)"
+  },
+  {
+    "zipCode": "60632",
+    "population5Plus": 77500,
+    "englishOnlyPct": 28.5,
+    "nonEnglishPct": 71.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 48438,
+        "pct": 62.5
+      },
+      {
+        "language": "English only",
+        "count": 22088,
+        "pct": 28.5
+      },
+      {
+        "language": "Polish",
+        "count": 2713,
+        "pct": 3.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 23638,
+      "pct": 30.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "101% above city average",
+    "citywideRank": 3,
+    "rankDescription": "Top 10% most diverse (#3 of 55 ZIP codes)"
+  },
+  {
+    "zipCode": "60633",
+    "population5Plus": 11300,
+    "englishOnlyPct": 68.5,
+    "nonEnglishPct": 31.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 7741,
+        "pct": 68.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2915,
+        "pct": 25.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1153,
+      "pct": 10.2
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "11% below city average",
+    "citywideRank": 28,
+    "rankDescription": "Upper half for diversity (#28 of 55)"
+  },
+  {
+    "zipCode": "60634",
+    "population5Plus": 64300,
+    "englishOnlyPct": 55.8,
+    "nonEnglishPct": 44.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 35879,
+        "pct": 55.8
+      },
+      {
+        "language": "Spanish",
+        "count": 14468,
+        "pct": 22.5
+      },
+      {
+        "language": "Polish",
+        "count": 8230,
+        "pct": 12.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 1415,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 9324,
+      "pct": 14.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "25% above city average",
+    "citywideRank": 14,
+    "rankDescription": "Top 25% most diverse (#14 of 55)"
+  },
+  {
+    "zipCode": "60636",
+    "population5Plus": 35900,
+    "englishOnlyPct": 88.5,
+    "nonEnglishPct": 11.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 31772,
+        "pct": 88.5
+      },
+      {
+        "language": "Spanish",
+        "count": 3052,
+        "pct": 8.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1149,
+      "pct": 3.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "68% below city average",
+    "citywideRank": 47,
+    "rankDescription": "Lower tier for diversity (#47 of 55)"
+  },
+  {
+    "zipCode": "60637",
+    "population5Plus": 45400,
+    "englishOnlyPct": 78.5,
+    "nonEnglishPct": 21.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 35639,
+        "pct": 78.5
+      },
+      {
+        "language": "Spanish",
+        "count": 3723,
+        "pct": 8.2
+      },
+      {
+        "language": "Chinese",
+        "count": 2497,
+        "pct": 5.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2361,
+      "pct": 5.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "39% below city average",
+    "citywideRank": 43,
+    "rankDescription": "Lower tier for diversity (#43 of 55)"
+  },
+  {
+    "zipCode": "60638",
+    "population5Plus": 49200,
+    "englishOnlyPct": 55.8,
+    "nonEnglishPct": 44.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 27454,
+        "pct": 55.8
+      },
+      {
+        "language": "Spanish",
+        "count": 11070,
+        "pct": 22.5
+      },
+      {
+        "language": "Polish",
+        "count": 6150,
+        "pct": 12.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 1230,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 6150,
+      "pct": 12.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "25% above city average",
+    "citywideRank": 15,
+    "rankDescription": "Top 25% most diverse (#15 of 55)"
+  },
+  {
+    "zipCode": "60639",
+    "population5Plus": 80300,
+    "englishOnlyPct": 32.5,
+    "nonEnglishPct": 67.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 44807,
+        "pct": 55.8
+      },
+      {
+        "language": "English only",
+        "count": 26098,
+        "pct": 32.5
+      },
+      {
+        "language": "Polish",
+        "count": 4176,
+        "pct": 5.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 22886,
+      "pct": 28.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "90% above city average",
+    "citywideRank": 4,
+    "rankDescription": "Top 10% most diverse (#4 of 55 ZIP codes)"
+  },
+  {
+    "zipCode": "60640",
+    "population5Plus": 58600,
+    "englishOnlyPct": 58.5,
+    "nonEnglishPct": 41.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 34281,
+        "pct": 58.5
+      },
+      {
+        "language": "Spanish",
+        "count": 11017,
+        "pct": 18.8
+      },
+      {
+        "language": "Chinese",
+        "count": 3223,
+        "pct": 5.5
+      },
+      {
+        "language": "Polish",
+        "count": 2051,
+        "pct": 3.5
+      },
+      {
+        "language": "Arabic",
+        "count": 1465,
+        "pct": 2.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 1289,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 6563,
+      "pct": 11.2
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "17% above city average",
+    "citywideRank": 19,
+    "rankDescription": "Upper half for diversity (#19 of 55)"
+  },
+  {
+    "zipCode": "60641",
+    "population5Plus": 68000,
+    "englishOnlyPct": 52.5,
+    "nonEnglishPct": 47.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 35700,
+        "pct": 52.5
+      },
+      {
+        "language": "Spanish",
+        "count": 17544,
+        "pct": 25.8
+      },
+      {
+        "language": "Polish",
+        "count": 8500,
+        "pct": 12.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 1496,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 10336,
+      "pct": 15.2
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "34% above city average",
+    "citywideRank": 12,
+    "rankDescription": "Top 25% most diverse (#12 of 55)"
+  },
+  {
+    "zipCode": "60642",
+    "population5Plus": 17000,
+    "englishOnlyPct": 68.5,
+    "nonEnglishPct": 31.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 11645,
+        "pct": 68.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2686,
+        "pct": 15.8
+      },
+      {
+        "language": "Polish",
+        "count": 765,
+        "pct": 4.5
+      },
+      {
+        "language": "Chinese",
+        "count": 425,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1496,
+      "pct": 8.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "11% below city average",
+    "citywideRank": 29,
+    "rankDescription": "Middle tier for diversity (#29 of 55)"
+  },
+  {
+    "zipCode": "60643",
+    "population5Plus": 35900,
+    "englishOnlyPct": 88.5,
+    "nonEnglishPct": 11.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 31772,
+        "pct": 88.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2226,
+        "pct": 6.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 898,
+      "pct": 2.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "68% below city average",
+    "citywideRank": 48,
+    "rankDescription": "Lower tier for diversity (#48 of 55)"
+  },
+  {
+    "zipCode": "60644",
+    "population5Plus": 42500,
+    "englishOnlyPct": 88.5,
+    "nonEnglishPct": 11.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 37613,
+        "pct": 88.5
+      },
+      {
+        "language": "Spanish",
+        "count": 3613,
+        "pct": 8.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1275,
+      "pct": 3
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "68% below city average",
+    "citywideRank": 49,
+    "rankDescription": "Lower tier for diversity (#49 of 55)"
+  },
+  {
+    "zipCode": "60645",
+    "population5Plus": 39700,
+    "englishOnlyPct": 42.5,
+    "nonEnglishPct": 57.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 16873,
+        "pct": 42.5
+      },
+      {
+        "language": "Spanish",
+        "count": 7225,
+        "pct": 18.2
+      },
+      {
+        "language": "Polish",
+        "count": 3375,
+        "pct": 8.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 2700,
+        "pct": 6.8
+      },
+      {
+        "language": "Chinese",
+        "count": 2064,
+        "pct": 5.2
+      },
+      {
+        "language": "Arabic",
+        "count": 1667,
+        "pct": 4.2
+      },
+      {
+        "language": "Hindi",
+        "count": 1509,
+        "pct": 3.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 7345,
+      "pct": 18.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "62% above city average",
+    "citywideRank": 7,
+    "rankDescription": "Top 10% most diverse (#7 of 55 ZIP codes)"
+  },
+  {
+    "zipCode": "60646",
+    "population5Plus": 26500,
+    "englishOnlyPct": 65.5,
+    "nonEnglishPct": 34.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 17358,
+        "pct": 65.5
+      },
+      {
+        "language": "Spanish",
+        "count": 3313,
+        "pct": 12.5
+      },
+      {
+        "language": "Polish",
+        "count": 2253,
+        "pct": 8.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 928,
+        "pct": 3.5
+      },
+      {
+        "language": "Chinese",
+        "count": 663,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2332,
+      "pct": 8.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "Near city average",
+    "citywideRank": 23,
+    "rankDescription": "Upper half for diversity (#23 of 55)"
+  },
+  {
+    "zipCode": "60647",
+    "population5Plus": 80300,
+    "englishOnlyPct": 55.9,
+    "nonEnglishPct": 44.1,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 44888,
+        "pct": 55.9
+      },
+      {
+        "language": "Spanish",
+        "count": 26017,
+        "pct": 32.4
+      },
+      {
+        "language": "Polish",
+        "count": 5300,
+        "pct": 6.6
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 6826,
+      "pct": 8.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "24% above city average",
+    "citywideRank": 16,
+    "rankDescription": "Upper half for diversity (#16 of 55)"
+  },
+  {
+    "zipCode": "60649",
+    "population5Plus": 39700,
+    "englishOnlyPct": 90.5,
+    "nonEnglishPct": 9.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 35929,
+        "pct": 90.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2303,
+        "pct": 5.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 873,
+      "pct": 2.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "73% below city average",
+    "citywideRank": 51,
+    "rankDescription": "Lower tier for diversity (#51 of 55)"
+  },
+  {
+    "zipCode": "60651",
+    "population5Plus": 54800,
+    "englishOnlyPct": 42.5,
+    "nonEnglishPct": 57.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 26578,
+        "pct": 48.5
+      },
+      {
+        "language": "English only",
+        "count": 23290,
+        "pct": 42.5
+      },
+      {
+        "language": "Polish",
+        "count": 1534,
+        "pct": 2.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 12330,
+      "pct": 22.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "62% above city average",
+    "citywideRank": 8,
+    "rankDescription": "Top 10% most diverse (#8 of 55 ZIP codes)"
+  },
+  {
+    "zipCode": "60652",
+    "population5Plus": 30200,
+    "englishOnlyPct": 68.5,
+    "nonEnglishPct": 31.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 20687,
+        "pct": 68.5
+      },
+      {
+        "language": "Spanish",
+        "count": 5587,
+        "pct": 18.5
+      },
+      {
+        "language": "Polish",
+        "count": 1661,
+        "pct": 5.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 664,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2567,
+      "pct": 8.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "11% below city average",
+    "citywideRank": 30,
+    "rankDescription": "Middle tier for diversity (#30 of 55)"
+  },
+  {
+    "zipCode": "60653",
+    "population5Plus": 26500,
+    "englishOnlyPct": 85.5,
+    "nonEnglishPct": 14.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 22658,
+        "pct": 85.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2253,
+        "pct": 8.5
+      },
+      {
+        "language": "Chinese",
+        "count": 663,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 928,
+      "pct": 3.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "59% below city average",
+    "citywideRank": 46,
+    "rankDescription": "Lower tier for diversity (#46 of 55)"
+  },
+  {
+    "zipCode": "60654",
+    "population5Plus": 20800,
+    "englishOnlyPct": 75.8,
+    "nonEnglishPct": 24.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 15766,
+        "pct": 75.8
+      },
+      {
+        "language": "Spanish",
+        "count": 1768,
+        "pct": 8.5
+      },
+      {
+        "language": "Chinese",
+        "count": 728,
+        "pct": 3.5
+      },
+      {
+        "language": "Polish",
+        "count": 458,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1144,
+      "pct": 5.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "32% below city average",
+    "citywideRank": 40,
+    "rankDescription": "Middle tier for diversity (#40 of 55)"
+  },
+  {
+    "zipCode": "60655",
+    "population5Plus": 26500,
+    "englishOnlyPct": 82.5,
+    "nonEnglishPct": 17.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 21863,
+        "pct": 82.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1723,
+        "pct": 6.5
+      },
+      {
+        "language": "Polish",
+        "count": 1537,
+        "pct": 5.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1113,
+      "pct": 4.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "51% below city average",
+    "citywideRank": 45,
+    "rankDescription": "Lower tier for diversity (#45 of 55)"
+  },
+  {
+    "zipCode": "60656",
+    "population5Plus": 17000,
+    "englishOnlyPct": 65.5,
+    "nonEnglishPct": 34.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 11135,
+        "pct": 65.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2125,
+        "pct": 12.5
+      },
+      {
+        "language": "Polish",
+        "count": 1445,
+        "pct": 8.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 595,
+        "pct": 3.5
+      },
+      {
+        "language": "Chinese",
+        "count": 425,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1496,
+      "pct": 8.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "Near city average",
+    "citywideRank": 24,
+    "rankDescription": "Upper half for diversity (#24 of 55)"
+  },
+  {
+    "zipCode": "60657",
+    "population5Plus": 68000,
+    "englishOnlyPct": 78.2,
+    "nonEnglishPct": 21.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 53176,
+        "pct": 78.2
+      },
+      {
+        "language": "Spanish",
+        "count": 5780,
+        "pct": 8.5
+      },
+      {
+        "language": "Chinese",
+        "count": 1904,
+        "pct": 2.8
+      },
+      {
+        "language": "Polish",
+        "count": 1496,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 3060,
+      "pct": 4.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "39% below city average",
+    "citywideRank": 41,
+    "rankDescription": "Middle tier for diversity (#41 of 55)"
+  },
+  {
+    "zipCode": "60659",
+    "population5Plus": 45400,
+    "englishOnlyPct": 48.5,
+    "nonEnglishPct": 51.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 22019,
+        "pct": 48.5
+      },
+      {
+        "language": "Spanish",
+        "count": 10215,
+        "pct": 22.5
+      },
+      {
+        "language": "Polish",
+        "count": 2633,
+        "pct": 5.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 2361,
+        "pct": 5.2
+      },
+      {
+        "language": "Chinese",
+        "count": 2043,
+        "pct": 4.5
+      },
+      {
+        "language": "Arabic",
+        "count": 1453,
+        "pct": 3.2
+      },
+      {
+        "language": "Hindi",
+        "count": 999,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 7173,
+      "pct": 15.8
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "45% above city average",
+    "citywideRank": 10,
+    "rankDescription": "Top 25% most diverse (#10 of 55)"
+  },
+  {
+    "zipCode": "60660",
+    "population5Plus": 42500,
+    "englishOnlyPct": 62.5,
+    "nonEnglishPct": 37.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 26563,
+        "pct": 62.5
+      },
+      {
+        "language": "Spanish",
+        "count": 6715,
+        "pct": 15.8
+      },
+      {
+        "language": "Chinese",
+        "count": 1785,
+        "pct": 4.2
+      },
+      {
+        "language": "Polish",
+        "count": 1488,
+        "pct": 3.5
+      },
+      {
+        "language": "Arabic",
+        "count": 1190,
+        "pct": 2.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 1063,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 4038,
+      "pct": 9.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "6% above city average",
+    "citywideRank": 21,
+    "rankDescription": "Upper half for diversity (#21 of 55)"
+  }
+]

@@ -24,6 +24,7 @@ import { sanitizeRowHtml } from "./takeaway";
 // ---------------------------------------------------------------------------
 // Snapshot shape sent to BOTH the card and the takeaway model
 export interface DebtSnap extends ResolvedState {
+  schema_version: 3;
   docs_total: number;                       // all indexed recorder docs for the PIN
   report_estimated_value?: number | null;   // whitelisted cross-reference
   subject_is_commercial?: boolean | null;   // whitelisted cross-reference
@@ -91,7 +92,7 @@ async function saveRecord(rec: Omit<DebtSnapshotRecord, "updatedAt">): Promise<v
 export function hashSnap(snap: DebtSnap): string {
   // report values are display context; the resolved record drives regeneration
   const { report_estimated_value, subject_is_commercial, ...core } = snap;
-  return createHash("sha256").update(JSON.stringify({ pv: 2, core })).digest("hex").slice(0, 24);
+  return createHash("sha256").update(JSON.stringify({ pv: 3, core })).digest("hex").slice(0, 24);
 }
 
 /** Cache-only recorder index rows for the owner's OTHER parcels — blanket
@@ -174,6 +175,7 @@ export async function buildDebtSnap(
   });
   return {
     ...resolved,
+    schema_version: 3,
     docs_total: lienData.documents?.length ?? docs.length,
     report_estimated_value: ctx?.estimatedValue ?? null,
     subject_is_commercial: ctx?.isCommercial ?? null,

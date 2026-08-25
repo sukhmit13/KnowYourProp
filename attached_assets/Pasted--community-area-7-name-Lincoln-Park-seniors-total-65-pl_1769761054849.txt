@@ -1,0 +1,316 @@
+{
+  "community_area": 7,
+  "name": "Lincoln Park",
+  
+  "seniors": {
+    "total_65_plus": 8500,
+    "pct_65_plus": 12.3,
+    
+    "living_arrangements": {
+      "living_alone": 2800,
+      "living_with_spouse": 3200,
+      "living_with_children": 1500,
+      "living_with_others": 1000
+    },
+    
+    "pct_living_alone": 32.9,
+    "pct_living_with_others": 67.1
+  },
+  
+  "age_breakdown_65_plus": {
+    "age_65_74": 4500,
+    "age_75_84": 2800,
+    "age_85_plus": 1200
+  }
+}
+```
+
+---
+
+## Replit Instructions
+```
+ADD SENIORS LIVING ALONE DATA TO PROPERTY PAGES
+
+Show data about population 65+ and seniors living alone for senior care 
+facility, aging-in-place services, or elder care business analysis.
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 1: FIND SENIORS LIVING ALONE DATA
+═══════════════════════════════════════════════════════════════════════════
+
+Search Chicago Data Portal for:
+https://data.cityofchicago.org/browse?q=census+age
+
+OR
+
+https://data.cityofchicago.org/browse?q=american+community+survey
+
+Look for datasets with:
+- Population by age
+- Household composition
+- Living arrangements
+- By community area
+
+Check existing demographic datasets - may already include:
+- population_65_plus
+- seniors_living_alone
+- pct_seniors_living_alone
+
+IF NOT FOUND on Chicago Data Portal:
+
+Use Census Bureau API directly:
+https://api.census.gov/data/2022/acs/acs5
+
+Key tables:
+- B09020: Relationship by household type for population 65+
+- B01001: Sex by age (for total 65+ population)
+- B11007: Households by presence of people 65+
+
+Download data by census tract for Cook County, then aggregate to 
+community areas.
+
+Save to: /server/data/demographics/seniors_living_alone.json
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 2: DATA STRUCTURE
+═══════════════════════════════════════════════════════════════════════════
+
+Structure data by community area:
+
+{
+  "7": {
+    "community_area": 7,
+    "name": "Lincoln Park",
+    
+    "population_total": 69000,
+    "population_65_plus": 8500,
+    "pct_65_plus": 12.3,
+    
+    "seniors_living_alone": 2800,
+    "pct_seniors_living_alone": 32.9,
+    
+    "age_breakdown": {
+      "65_to_74": 4500,
+      "75_to_84": 2800,
+      "85_plus": 1200
+    },
+    
+    "living_arrangements": {
+      "alone": 2800,
+      "with_spouse": 3200,
+      "with_children": 1500,
+      "with_others": 1000
+    }
+  },
+  
+  "22": {
+    // Logan Square data...
+  }
+  
+  // ... all 77 community areas
+}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 3: ADD TO PROPERTY PAGE DISPLAY
+═══════════════════════════════════════════════════════════════════════════
+
+Show seniors data in demographics section or when project type is 
+senior-related.
+
+const seniorsData = require('./data/demographics/seniors_living_alone.json');
+
+function getSeniorsData(communityArea) {
+  return seniorsData[communityArea] || null;
+}
+
+// On property page:
+const ca = propertyData.community_area;
+const seniors = getSeniorsData(ca);
+
+DISPLAY FORMAT (General):
+────────────────────────
+
+Senior Population:
+──────────────────
+
+Population 65+: {total_65_plus} ({pct_65_plus}% of area)
+
+Age Breakdown:
+- 65-74 years: {age_65_74}
+- 75-84 years: {age_75_84}
+- 85+ years: {age_85_plus}
+
+Living Arrangements (65+):
+- Living alone: {seniors_living_alone} ({pct_seniors_living_alone}%)
+- Living with spouse: {pct_with_spouse}%
+- Living with children: {pct_with_children}%
+- Living with others: {pct_with_others}%
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 4: PROJECT-SPECIFIC INSIGHTS
+═══════════════════════════════════════════════════════════════════════════
+
+For senior care facilities, add market analysis:
+
+IF project_type === "senior_care" OR "assisted_living" OR "nursing_home":
+
+  Market Analysis for Senior Care Facility:
+  ─────────────────────────────────────────
+  
+  Target Population:
+  • Population 65+: {total_65_plus}
+  • Seniors living alone: {seniors_living_alone} ({pct_seniors_living_alone}%)
+  • Population 85+: {age_85_plus} (highest care needs)
+  
+  {IF pct_seniors_living_alone > 35}
+    ✅ STRONG DEMAND
+    • High percentage of seniors living alone ({pct_seniors_living_alone}%)
+    • Above national average (~30%)
+    • Strong market for senior living and care services
+  
+  {ELSE IF pct_seniors_living_alone > 25}
+    ⚠️ MODERATE DEMAND
+    • Average percentage living alone
+    • Moderate market potential
+  
+  {ELSE}
+    🚩 LIMITED DEMAND
+    • Low percentage living alone ({pct_seniors_living_alone}%)
+    • Most seniors living with family
+    • May face lower demand
+  {END IF}
+  
+  Market Size:
+  • Seniors living alone: {seniors_living_alone}
+  • Population 75+: {age_75_84 + age_85_plus} (likely care recipients)
+  • Population 85+: {age_85_plus} (highest need segment)
+  
+  {IF age_85_plus > 500}
+    Strong base of oldest-old residents
+  {END IF}
+
+IF project_type === "home_health" OR "aging_in_place":
+
+  Market Analysis for Home Health Services:
+  ─────────────────────────────────────────
+  
+  Target Population:
+  • Seniors living alone: {seniors_living_alone}
+  • Percentage: {pct_seniors_living_alone}%
+  
+  {IF pct_seniors_living_alone > 30}
+    ✅ EXCELLENT MARKET
+    • High number of seniors living independently
+    • Strong need for home health support
+    • {seniors_living_alone} potential clients
+  
+  {ELSE}
+    ⚠️ MODERATE MARKET
+    • Many seniors living with family (built-in caregivers)
+    • May reduce demand for paid services
+  {END IF}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 5: COMPARISON TO CHICAGO AVERAGE
+═══════════════════════════════════════════════════════════════════════════
+
+Calculate and show comparison to citywide average:
+
+Chicago citywide average: ~30% of seniors live alone
+
+{IF pct_seniors_living_alone > city_avg}
+  This area has {((pct_seniors - city_avg) / city_avg × 100)}% more
+  seniors living alone than Chicago average.
+  
+  → Higher demand for senior services
+{ELSE}
+  This area has {((city_avg - pct_seniors) / city_avg × 100)}% fewer
+  seniors living alone than Chicago average.
+  
+  → More family-based senior care
+{END IF}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 6: COMBINE WITH OTHER SENIOR-RELEVANT DATA
+═══════════════════════════════════════════════════════════════════════════
+
+For comprehensive senior care analysis, also show:
+
+Income Data (for 65+ if available):
+- Median income for seniors: $XX,XXX
+- % seniors below poverty line: X%
+- Ability to pay for services
+
+Health Insurance:
+- Medicare coverage: XX%
+- Medicaid eligibility: XX%
+
+Languages Spoken (for culturally appropriate care):
+- English only: XX%
+- Spanish: XX%
+- Polish: XX%
+- Other: XX%
+
+This data may already be in your demographics dataset.
+
+═══════════════════════════════════════════════════════════════════════════
+DATA NOTES
+═══════════════════════════════════════════════════════════════════════════
+
+SOURCE: U.S. Census Bureau, American Community Survey (ACS)
+- Table B09020: Relationship by household type for population 65+
+- Table B01001: Sex by age
+- 5-year estimates (most stable)
+- By community area (or aggregate from census tracts)
+
+NATIONAL CONTEXT:
+- ~28-30% of seniors in U.S. live alone
+- Higher in urban areas
+- Women more likely to live alone than men (due to longer lifespan)
+- Percentage increases with age (more 85+ live alone than 65-74)
+
+UPDATE FREQUENCY:
+- Download new ACS data annually when released
+- Typically released in December for previous year
+
+═══════════════════════════════════════════════════════════════════════════
+```
+
+---
+
+## Quick Example Output
+```
+Senior Population Analysis - Lincoln Park
+──────────────────────────────────────────
+
+Population 65+: 8,500 (12.3% of area)
+
+Age Breakdown:
+- 65-74 years: 4,500 (53%)
+- 75-84 years: 2,800 (33%)
+- 85+ years: 1,200 (14%)
+
+Living Arrangements (65+):
+- Living alone: 2,800 (32.9%)
+- Living with spouse: 3,200 (37.6%)
+- Living with children: 1,500 (17.6%)
+- Living with others: 1,000 (11.8%)
+
+─────────────────────────────────────────
+
+Market Analysis for Senior Care Facility:
+
+✅ STRONG DEMAND
+
+- 2,800 seniors living alone (32.9%)
+- Above Chicago average (30%)
+- 1,200 residents 85+ (highest care needs)
+
+Target Market:
+- Primary: 2,800 living alone
+- Secondary: 1,200 age 85+ (regardless of living arrangement)
+- Total addressable market: ~3,500 potential residents
+
+Recommendation:
+Strong market for senior living, assisted living, and 
+home health services.

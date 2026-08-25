@@ -1,0 +1,77 @@
+# Task for Replit Agent — Fold "Companion Parcel" into the existing Sales History section
+
+## Goal
+The report tells the co-parcel/assemblage story **twice**: once in **Sales History** (which already flags "N parcels sold together in one deed, combined consideration") and again in the standalone **Companion Parcel** section (adjacent lots, acquired together, common control, per-PIN debt). Same facts, two formats. **Fold Companion Parcel into the existing Sales History section** and **retire the standalone section.** Visual target: **report-sales-merged.html** (render it). Reuse the app's existing card CSS — do not copy the mockup's style block.
+
+## 🔴 The core change — additive, two edits only
+The Sales History section stays as it is. There are exactly **two additions**, nothing more:
+1. **Combine the assemblage takeaway INTO the existing sales takeaway** — one takeaway, not two. Do NOT add a second takeaway box. Keep the existing sales rows and append the assemblage rows (acquired-together / split-common-control / single-PIN-debt) to the same `.take` component; update the headline to lead with the sale then note the double-lot framing.
+2. **Add the "double lot · who owns what" panel BELOW the co-parcel row** in the sales timeline — the panel attaches directly beneath the existing "sold together in one deed" transaction (only when `is_assemblage`). This is the relocated Companion Parcel content: this/companion cards, common-control note, optionality note, trigger footnote.
+
+Then **remove the standalone Companion Parcel section.**
+
+## 🔴 Do NOT touch the sales transactions — different dataset, and they're already fine
+The **sales/deed transaction rows are pulled from the deed/sales dataset**, which is **separate from the recorded-liens dataset** that feeds the Debt Snapshot. The sales timeline is fine as-is:
+- **Do not reformat, reorder, re-derive, or re-title the sales timeline.** Leave it exactly as it renders today.
+- **Do not inject lien/debt figures into the sales rows.** Loan amounts, lenders, lien positions live in the Debt Snapshot (liens dataset) and must not be pulled into the sales section. Keep the two data sources cleanly separated.
+- The co-parcel marker the sales section **already surfaces** (the "sold together in one deed / combined consideration" flag) stays as it is — don't rebuild it.
+- **Do not rename the section.** It stays "Sales History." (The mockup's "SALES / ASSEMBLAGE" tags on the takeaway rows are annotation to show provenance — **do not ship those tags**.)
+
+## Section structure (top to bottom)
+1. **Section header** — **unchanged** ("Sales History").
+2. **Takeaway** (`.take`, existing component) — the existing sales takeaway with the assemblage rows **combined in**. One box.
+3. **Sales timeline** — the **existing** rows from the deed/sales dataset, **unchanged**.
+4. **The double lot · who owns what** — nested panel (only when `is_assemblage`), directly below the co-parcel transaction row. Relocated Companion Parcel content. **New location.**
+
+## 🔴 Conditional rendering (unchanged trigger)
+The nested "double lot" panel **and the appended assemblage takeaway rows** render **only when `is_assemblage`** — same trigger as before: **shared acquisition (same deed/transaction) + adjacency (sequential PIN / adjacent address)**, NOT owner-name match. When there's no assemblage, Sales History renders exactly as it does today — its own takeaway, its own timeline, no panel, no appended rows. Reuse the existing `assemblage` resolved object — don't recompute.
+
+## Content mapping (to report-sales-merged.html)
+| Element | Source | Notes |
+|---|---|---|
+| Combined takeaway | existing sales takeaway + `assemblage` rows (deterministic) | one `.take` box: keep the existing sales row(s), append acquired-together (good) / split-common-control (caution) / single-PIN-debt (neutral); headline leads with the sale, then the double-lot framing |
+| Sales timeline | existing sales/deed dataset | **unchanged** — do not restructure or add lien data |
+| This / Companion cards | `assemblage.members` | subject highlighted (indigo left-rule); address, PIN, owner, entity chip. **Debt = a pointer only** ("own single-PIN financing · see Debt Snapshot"), never the loan figures |
+| Common control note (marigold) | `common_control`, `confidence_note` | "likely — confirm identity"; never asserted across a personal↔LLC line |
+| Optionality note (green) | `combined_frontage_ft`, `zoning` | combinable frontage + buildable-envelope flag; "weigh alongside standalone value" — flag only, no combined valuation |
+| Trigger footnote | resolved object | shared acquisition + adjacency; common control inferred; debt per-PIN, never aggregated |
+
+## Combined takeaway — keep the assemblage rows DETERMINISTIC (not LLM)
+The assemblage rows carry safety-critical confidence language, so template **those rows** in code — don't hand them to the LLM. Fold them into the existing sales takeaway:
+- **Headline** (updated to carry both): "{subject} and {companion} were bought together in {year} for ${price}, then split into separate names in {separated_year} — likely still one owner." (When not separated, drop the split clause: "{subject} and {companion} were bought together in {year} for ${price}, still under one owner.")
+- **Keep the existing sales row(s)** (price history / hold period / last-arms-length) as they are.
+- **Append (good):** acquired together {month year} — the ${price} was combined consideration for both {subject} and {companion} in one deed.
+- **Append (caution, if separated):** split into {entities}; common control likely but not provable — **confirm identity**.
+- **Append (neutral):** each lot carries its own single-PIN financing; no cross-collateralization; this parcel's Debt Snapshot is complete on its own.
+
+When `is_assemblage` is false, the sales takeaway renders exactly as today — no appended rows, headline unchanged.
+
+## 🔴 Cross-reference updates (retire the old target)
+Every cross-ref that used to point at "Companion Parcel" now points at **Sales & Ownership History**.
+- **Liens / Debt Snapshot** — keep the PIN-only chip, but re-target: "Part of a historically combined double lot with {companion}; debt shown is for this PIN only — **see Sales & Ownership History**." Debt stays PIN-scoped, never aggregated.
+- **Any map / transaction-trend co-parcel mention** — link to Sales & Ownership History.
+- **Remove** the old standalone Companion Parcel anchor/section and any nav entry for it.
+
+## 🔴 Confidence discipline (carry over verbatim)
+- Common control across an entity line (personal ↔ LLC) is **inferred, never asserted** — "likely — confirm." Only identical named owner on both may drop the hedge.
+- **False-assemblage guard:** never trigger on owner-name match alone. Shared acquisition + adjacency is the gate.
+- **Debt is the inverse of blanket:** separate single-PIN loans are NOT aggregated. State "own single-PIN debt, no cross-collateralization."
+
+## 🔴 Tests
+```
+assert the standalone Companion Parcel section no longer renders anywhere
+assert the section title is still "Sales History" (NOT renamed)
+assert there is exactly ONE takeaway box — the assemblage rows are appended into the existing sales takeaway, not a second box
+assert the "SALES"/"ASSEMBLAGE" provenance tags from the mockup are NOT shipped
+assert the existing sales timeline is unchanged — same rows, same order, no reformatting, no lien/debt figures injected into any sales row
+assert the "double lot" panel renders ONLY when is_assemblage, and sits directly BELOW the co-parcel transaction row; a normal single parcel shows just the existing timeline + existing takeaway
+assert the this/companion cards show a "see Debt Snapshot" pointer, NOT loan amounts (debt figures stay in the liens-dataset Debt Snapshot)
+assert common_control across a personal↔LLC split renders "likely — confirm", never "certain"
+assert the Debt Snapshot PIN-only chip now links to "Sales & Ownership History", not "Companion Parcel", and does NOT aggregate the companion's debt
+assert no co-parcel mention anywhere still links to the removed Companion Parcel section
+// 522/520 regression:
+assert 522 renders one merged section: 2013 joint deed ($411k, both PINs), 2021 split, this/companion cards, common_control "likely", green optionality
+```
+
+## Done when
+On 522 N Claremont, the **Sales History** section (same title, same timeline) carries **one** takeaway that combines the sales history with the double-lot story, and the "double lot · who owns what" panel sits directly below the co-parcel transaction row (this/companion cards + common-control + optionality). The standalone Companion Parcel section is gone, the Debt Snapshot chip points to Sales History, no lien figures have leaked into the sales rows, and the co-parcel story appears exactly once. On a normal single parcel, Sales History renders exactly as it does today — no combined rows, no panel.

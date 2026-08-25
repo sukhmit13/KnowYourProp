@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:34px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+
+  /* header with segmented view toggle on the right */
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .views{margin-left:auto;display:flex;gap:8px}
+  .vbtn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--card);border-radius:9px;padding:7px 13px;font-size:12px;font-weight:600;color:var(--ink2);text-decoration:none}
+  .vbtn svg{width:14px;height:14px;stroke:var(--indigo);flex:none}
+  .vbtn:hover{background:var(--paper)}
+
+  /* map */
+  .map{position:relative;height:380px;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    background:#eef1ec}
+  .streets{position:absolute;inset:0;
+    background-image:
+      repeating-linear-gradient(90deg,transparent 0 62px,#e2e5df 62px 64px),
+      repeating-linear-gradient(0deg,transparent 0 54px,#e2e5df 54px 56px);
+    opacity:.7}
+  .diag{position:absolute;top:-10%;left:34%;width:3px;height:120%;background:#f2c98a;transform:rotate(24deg);opacity:.8}
+  .diag2{position:absolute;top:-10%;left:54%;width:3px;height:120%;background:#f2c98a;transform:rotate(-14deg);opacity:.8}
+  .water{position:absolute;top:0;right:0;width:26%;height:100%;background:#cfe4f0}
+  .park{position:absolute;border-radius:40% 55% 50% 45%;background:#d6e6c8;opacity:.9}
+  .p1{width:120px;height:90px;top:16%;left:12%}
+  .p2{width:90px;height:70px;bottom:14%;left:40%}
+  .zoom{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .zoom span{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--ink2)}
+  .zoom span:first-child{border-bottom:1px solid var(--line)}
+  .pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%)}
+  .pin svg{width:34px;height:34px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25))}
+  .attr{position:absolute;bottom:8px;left:12px;font-size:9px;color:#8a8f88;background:rgba(255,255,255,.7);padding:2px 7px;border-radius:5px}
+  .attr2{position:absolute;bottom:8px;right:12px;font-size:9px;color:#8a8f88;background:rgba(255,255,255,.7);padding:2px 7px;border-radius:5px}
+
+  /* legend */
+  .legwrap{margin-top:14px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 16px}
+  .legh{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+  .leg{display:flex;flex-wrap:nowrap;align-items:center;gap:6px 17px}
+  .lgi{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);white-space:nowrap}
+  .lgi .sw{width:18px;height:11px;border-radius:999px;flex:none;border:2px solid}
+  .lgi .dot{width:10px;height:10px;border-radius:50%;flex:none}
+  .lgi b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+    <div class="sh">
+      <span class="sq"></span><span class="t">Location Map</span>
+      <div class="views">
+        <a class="vbtn" href="#"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Street View</a>
+        <a class="vbtn" href="#"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Google Earth</a>
+      </div>
+    </div>
+
+    <div class="map">
+      <div class="streets"></div>
+      <div class="water"></div>
+      <div class="park p1"></div>
+      <div class="park p2"></div>
+      <div class="diag"></div>
+      <div class="diag2"></div>
+      <div class="zoom"><span>+</span><span>−</span></div>
+      <div class="pin"><svg viewBox="0 0 24 24" fill="#2b3a9e" stroke="#fff" stroke-width="1.5"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5" fill="#fff" stroke="none"/></svg></div>
+      <div class="attr">© Mapbox  © OpenStreetMap</div>
+      <div class="attr2">Improve this map</div>
+    </div>
+
+    <div class="legwrap">
+      <div class="legh">Map Legend</div>
+      <div class="leg">
+        <span class="lgi"><span class="sw" style="border-color:#e2483d"></span>ZIP <b>60647</b></span>
+        <span class="lgi"><span class="sw" style="border-color:#5b8def"></span>Community <b>Logan Square</b></span>
+        <span class="lgi"><span class="sw" style="border-color:#2f9e6a"></span>Neighborhood <b>Bucktown</b></span>
+        <span class="lgi"><span class="sw" style="border-color:#9a67d4"></span>Ward <b>32</b></span>
+        <span class="lgi"><span class="sw" style="border-color:#3a3a3a"></span>Census Tract <b>832200</b></span>
+        <span class="lgi"><span class="dot" style="background:#2b3a9e"></span><b>Property</b></span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

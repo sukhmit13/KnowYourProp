@@ -1,0 +1,137 @@
+# KYP — Step 5d: The universal section contract + promote Crime to a top-level section
+
+Two things. **Part A is a rule that applies to EVERY section** — it keeps getting fixed one section
+at a time (Transit in 5a, News in 5b, now Crime) because it was never stated as a global contract.
+Apply it as a sweep across all 14 sections, not just Crime. **Part B** promotes Safety & Crime out
+of Proximity and makes it a top-level section.
+
+---
+
+# PART A — The section contract (apply to ALL sections)
+
+## The row header is the ONLY title and the ONLY takeaway
+
+Anatomy, exactly:
+
+```
+NN · SECTION TITLE — takeaway sentence · [verdict badge] · ⓘ · 👁 · ⌃
+```
+
+- **One title.** It lives in the row header. The body must NOT render a section title, eyebrow,
+  `chead`, `.kyp-eyebrow`, old collapsible trigger, or any repeat of the section name.
+- **One takeaway.** It lives in the row header, as body text at **15px** (`.kyp-acchd .tk`), one
+  clause, ~90 characters. The body must NOT render a takeaway headline, a takeaway card, or a
+  bullet list of takeaway rows.
+- **One badge.** The single verdict badge in the row header. The body must NOT render a badge/pill
+  row (the old collapsed-summary chips).
+- The body starts **immediately with content** — the first thing after the header divider is a
+  `kyp-subhead` or a data element.
+
+## ❌ Never in a section body
+1. A section title / eyebrow / `chead` / old `CollapsibleTrigger` (any repeat of the section name)
+2. A large takeaway headline (any `font-size` above the 15px header takeaway)
+3. A takeaway card (`.crm-take` / `take` lavender box) or its bullet rows
+4. A status/badge chip row that duplicates the header badge
+5. An outer card, border, or shadow wrapping the whole section
+6. A nested collapsible that re-collapses the whole section
+
+## Font sizes — locked, identical in every section
+| Element | Size | Where |
+|---|---|---|
+| Section title | 13.5px mono, uppercase | row header only |
+| **Takeaway** | **15px, weight 500** | **row header only** |
+| Subsection label (`kyp-subhead .lbl`) | 11px mono, uppercase | body |
+| Body copy | 13–14px | body |
+
+There is **no 20px+ headline inside any section body.** If a section renders its takeaway as a
+large serif/sans headline in the body, that is the bug — move the text to the header and delete the
+body copy.
+
+## Takeaway length — must fit ONE line at desktop
+The header takeaway shares its line with the section title, badge and three icons, so the practical
+limit is **~70 characters**, not 90. A takeaway that wraps leaves an awkward orphan line — trim it
+to the lead clause. Crime's generated headline ("Below-average crime for both violent and property
+offenses, with reported crime trending down after a rise in 2024 — local incidents skew toward
+property crime, led by theft.") becomes:
+
+> **"Below-average on both counts, *trending down* after a 2024 rise."**
+
+Apply the same trim wherever a section's generated takeaway is long. The full sentence stays
+available to the Insight Report; only the header copy is shortened.
+
+## Vertical rhythm — spacing above chart titles
+`.kyp-charttitle` currently has only `8px` of top margin, so a chart title crowds whatever block
+sits above it (visible where "Breakdown by type" jams against the crime count blocks), while
+`.kyp-subhead` gets `26px`. Make the rhythm consistent:
+
+```css
+.kyp-charttitle{margin:24px 0 8px}   /* was 8px 0 6px */
+```
+This applies globally — every chart title in every section gets the same breathing room as a
+subsection label.
+
+## Sweep
+Audit all 14 sections against the four "never" rules. Sections known to still violate: **Crime**
+(below), and re-verify **News**, **Incentives**, **Transit** after their earlier fixes.
+
+---
+
+# PART B — Crime: fix the body + promote to a top-level section
+
+## B1. Current state (from the live build)
+The Crime body currently renders, before any content:
+1. `AREA CRIME STATISTICS` — the old section title
+2. A row of three green pills — `VIOLENT · SAFER THAN 58%` / `PROPERTY · SAFER THAN 62%` /
+   `TREND ▼ 16% YOY` (the old `crm-badges` from the collapsed trigger)
+3. `■ SAFETY & CRIME` — a second title/eyebrow
+4. The takeaway as a **~34px headline** ("Below-average crime for both violent and property
+   offenses…")
+
+All four violate Part A. Delete all four from the body.
+
+## B2. What Crime's row header becomes
+```
+08 · SAFETY & CRIME — Below-average crime, trending down after a 2024 rise. · [LOWER CRIME] · ⓘ 👁 ⌃
+```
+- Takeaway: `crimeTakeaway.headline`, trimmed to one clause at 15px. (The full generated sentence is
+  too long for the header — trim to the lead clause; the detail is visible in the body.)
+- Badge: one verdict badge from `crimeTier(violent.saferThanPercent)` — green ≥50 / orange 30–49 /
+  red <30. The three old pills are **not** restored anywhere; their numbers already appear in the
+  percentile tracks and trend chart in the body.
+
+## B3. Crime body — first element is content
+Straight into `kyp-subhead` "Around this address · trailing 12 mo", then the existing Step 4c
+content unchanged: count blocks → breakdown bars → community-area subhead → percentile tracks →
+year trend → source line. Nothing else added or removed.
+
+## B4. Promote Crime to a top-level section
+Crime is currently a **subsection of Proximity Details** — `RunDetail.tsx:3220` shows
+`setSectionOpen('proximityDetails', true); setSectionOpen('crime', true)`, i.e. the parent must be
+open to reach it. In the new architecture Safety & Crime is a **top-level section (08)**.
+
+- Move the `#section-crime` block out of the Proximity Details parent so it is its own
+  `<AccordionSection>` in the main sections list, at position 08 in the default order.
+- It no longer depends on `proximityDetails` being open. Remove that coupling from the jump/menu
+  action at `RunDetail.tsx:3220` (it should just open `crime`).
+- Keep `id="section-crime"`, `id="crime-breakdown"`, `id="crime-area-ranking"`, and all
+  `data-testid`s (`crime-status-badge-*`, `crime-radius-250ft`, `crime-radius-quarter`,
+  `crime-area-ranking`, `crime-takeaway`) so deep links and print still resolve.
+- Update `PRINT_SECTIONS` so crime is a top-level entry (not `level: 1` under Proximity) and it
+  appears in the print list in its own right.
+- Proximity & Amenities keeps its remaining subsections; it simply no longer contains crime.
+
+---
+
+## ✅ Done-when
+- [ ] Crime body starts with content. No "AREA CRIME STATISTICS", no "SAFETY & CRIME" eyebrow, no
+      three-pill badge row, no large takeaway headline.
+- [ ] Crime's takeaway appears once, in the row header, at 15px — the same size as every other
+      section's takeaway.
+- [ ] Crime is its own top-level section at 08, openable without expanding Proximity; deep links,
+      print entries, and testids still work.
+- [ ] Sweeping all 14 sections: none render a duplicate title, a body takeaway headline, a badge
+      row, an outer card, or a nested whole-section collapsible.
+- [ ] Compare any two expanded sections side by side — title, takeaway, and subsection labels are
+      the same sizes in both.
+- [ ] Every header takeaway fits on ONE line at desktop width (~70 chars); none wrap to an orphan.
+- [ ] `.kyp-charttitle` has 24px top margin — chart titles no longer crowd the block above them.

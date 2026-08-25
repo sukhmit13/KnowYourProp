@@ -1,0 +1,39 @@
+# Task for Replit Agent — "Closest by Mode" transit cards: fix Metra multi-line, unify all three
+
+## Goal
+Redesign the **Closest by Mode** cards (CTA Bus · CTA L · Metra) so a stop with **more than one line** (e.g. Metra Clybourn = Union Pacific North + Union Pacific Northwest) no longer breaks the layout — and make all three cards share **one row structure**. Visual target: **report-transit-modes.html**. Reuse existing card CSS/tokens.
+
+## The bug
+When a station has 2+ long line names, the line badges wrap and **push the walk time out of alignment**. Root cause: badges live on the same row as the station name + walk time.
+
+## 🔴 The fix — one shared "stop row" structure
+Every card uses the same skeleton:
+```
+[ station / route name        walk time ]   ← top row: name left, walk time right, TOP-aligned
+[ line badges … wrap freely … ]              ← separate row BENEATH; badges never sit on the top row
+```
+- The name/walk row is `display:flex; justify-content:space-between; align-items:flex-start`. The walk time is `flex:none; white-space:nowrap` so it **pins to the top-right and never moves**, no matter how many badges.
+- Line badges are a **separate wrapping row** (`display:flex; flex-wrap:wrap; gap`) under the name. Any count/length of lines just stacks — it can't affect the top row.
+
+## Per-card content (same skeleton, different payload)
+- **CTA Bus** — a list of route rows; each row: route number + a direction chip (`↔ E–W` / `↕ N–S`) on the left, walk time right. Footer: "Covers both N–S & E–W travel." (No line-badge row needed.)
+- **CTA L** — station name + walk time (top row); a **line-badge row** beneath (e.g. `Blue Line`). Footer: "{dist} mi · nearest of {n} stations within 2 mi".
+- **Metra** — identical to CTA L: station name + walk time (top row); the line-badge row beneath holds **all** lines (1..N) which wrap. Footer: same "{dist} mi · nearest of {n} …" pattern.
+
+## Consistency rules (apply to all three)
+- **Line badges are a uniform pill** — same size, radius, weight; **colored per line** (CTA Blue = blue, Metra UP-North = green, UP-Northwest = amber; map each line to its color, fallback neutral).
+- **Walk time** uses the same treatment everywhere — display-serif number + muted "min walk", right-aligned, top of the row.
+- Header (mode icon tile + mono mode label + divider) identical across the three.
+- Footer distance/among-N note identical pattern.
+
+## 🔴 Tests
+```
+assert badges render on a SEPARATE row beneath the station name, never on the name/walk row
+assert the walk time stays top-right aligned when a station has 2+ line badges (Metra Clybourn: UP-N + UP-NW)
+assert a 1-line station (CTA L Division · Blue) and a 3+-line station both align identically
+assert all three cards share the same header / stop-row / footer structure and the same walk-time styling
+assert line badges are uniform pills colored per line
+```
+
+## Done when
+The Metra card with multiple long lines matches report-transit-modes.html — station name + walk time on the top row, line badges wrapping beneath — and CTA Bus, CTA L, and Metra all read as one consistent component with the walk-time column aligned across cards.

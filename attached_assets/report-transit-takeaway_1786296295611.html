@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:var(--sans);color:var(--ink);padding:34px 40px}
+  .wrap{max-width:1180px;margin:0 auto}
+
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:14px;padding:20px 22px 22px}
+  .taketop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo)}
+  .takeh svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+  .ratepill{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--good);background:var(--card);border:1px solid #cfe6d3;border-radius:999px;padding:6px 13px}
+  .ratepill .d{width:8px;height:8px;border-radius:50%;background:var(--good)}
+  .taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:16px}
+
+  /* bullet row — chip stays fixed size, centered vertically */
+  .cn{display:flex;align-items:flex-start;gap:12px;padding:9px 0}
+  .cn + .cn{border-top:1px solid #e3e5f4}
+  .cn .dt{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .cn.g .dt{background:var(--good)}
+  .cn.i .dt{background:var(--indigo)}
+  .cn .tx{flex:1;font-size:13.5px;line-height:1.5;color:var(--ink2)}
+  .cn .tx b{color:var(--ink);font-weight:700}
+  .jbtn{flex:none;align-self:center;display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--card);border:1px solid #dde1f6;border-radius:8px;padding:7px 12px;white-space:nowrap;text-decoration:none}
+  .jbtn svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="take">
+    <div class="taketop">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2"/><path d="M12 19v2"/><path d="m5 5 1.5 1.5"/><path d="m17.5 17.5 1.5 1.5"/><path d="M3 12h2"/><path d="M19 12h2"/><path d="m5 19 1.5-1.5"/><path d="m17.5 6.5 1.5-1.5"/><circle cx="12" cy="12" r="4"/></svg>Takeaway</div>
+      <span class="ratepill"><span class="d"></span>Strong access</span>
+    </div>
+    <div class="taket">Strong access: Blue Line station 6 minutes away ranks #21 of 143 stations</div>
+
+    <div class="cn g"><span class="dt"></span><span class="tx">The Logan Square Blue Line stop is a <b>6-min</b> walk (<b>0.31 mi</b>) and ranks <b>#21 of 143</b> stations, busier than <b>85%</b> of the system.</span><a class="jbtn" href="#cta-l">Closest stops <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+
+    <div class="cn g"><span class="dt"></span><span class="tx">Two bus routes sit within a <b>1-min</b> walk, including the <b>82 Kimball/Homan</b>, ranked <b>#11 of 127</b> and busier than <b>91%</b> of routes, with service in both directions.</span><a class="jbtn" href="#cta-bus">Closest stops <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+
+    <div class="cn"><span class="dt"></span><span class="tx">Metra's Healy station on the <b>Milwaukee North</b> line is a <b>19-min</b> walk (<b>0.93 mi</b>) away.</span><a class="jbtn" href="#metra">Closest stops <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+
+    <div class="cn g"><span class="dt"></span><span class="tx">Overall transit access is rated <b>Strong access</b> for this location.</span><a class="jbtn" href="#closest-mode">Closest stops <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+  </div>
+</div>
+</body>
+</html>

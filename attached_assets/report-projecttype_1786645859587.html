@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--wash:#f4f2ec;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;--cautionSoft:#fdf8f0;--bad:#c0392b;--badSoft:#fbeeee;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cap{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8a897f;margin:16px 0 8px 2px}
+  .cap:first-child{margin-top:0}.cap .n{color:var(--indigo)}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .chip{margin-left:auto;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid #dfe3f7;border-radius:999px;padding:4px 11px}
+  .intro{font-size:12.5px;color:var(--ink2);margin-bottom:14px}
+
+  .inbar{display:grid;grid-template-columns:1.1fr 1.5fr auto;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px;align-items:start}
+  .fldhint{font-size:10px;color:var(--muted);line-height:1.4;margin-top:6px}
+  .fldhint b{color:var(--ink2);font-weight:600}
+  .upd.al{margin-top:19px}
+  .fld .l{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .selbtn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13px;font-weight:600;color:var(--ink)}
+  .selbtn .ic{width:22px;height:22px;border-radius:6px;background:var(--indigoSoft);display:flex;align-items:center;justify-content:center;flex:none}
+  .selbtn .ic svg{width:13px;height:13px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .selbtn .cv{margin-left:auto;width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:2}
+  .txt{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--ink)}
+  .txt .ph{color:var(--muted)}
+  .upd{background:var(--indigo);color:#fff;border:1px solid var(--indigo);border-radius:9px;padding:10px 18px;font-size:12.5px;font-weight:600;height:fit-content}
+
+  /* verdict */
+  .verdict{border-radius:13px;padding:18px 20px;display:flex;gap:15px;align-items:flex-start}
+  .verdict.ok{background:var(--goodSoft);border:1px solid #cfe6d6}
+  .verdict.warn{background:var(--cautionSoft);border:1px solid #e6cfa0}
+  .verdict.bad{background:var(--badSoft);border:1px solid #ecc9c4}
+  .verdict .badge{width:44px;height:44px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff}
+  .verdict.ok .badge{border:1px solid #cfe6d6}.verdict.warn .badge{border:1px solid #e6cfa0}.verdict.bad .badge{border:1px solid #ecc9c4}
+  .verdict .badge svg{width:24px;height:24px;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .verdict.ok .badge svg{stroke:var(--good)}.verdict.warn .badge svg{stroke:var(--cautionText)}.verdict.bad .badge svg{stroke:var(--bad)}
+  .verdict .bd{flex:1}
+  .verdict .k{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+  .verdict.ok .k{color:var(--good)}.verdict.warn .k{color:var(--cautionText)}.verdict.bad .k{color:var(--bad)}
+  .verdict .h{font-family:var(--disp);font-size:24px;color:var(--ink);line-height:1.05;margin-bottom:7px}
+  .verdict .p{font-size:12.5px;color:var(--ink2);line-height:1.55}
+  .verdict .p b{color:var(--ink);font-weight:600}
+  .conds{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .cond{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:7px;padding:5px 10px}
+  .cond svg{width:11px;height:11px;stroke:var(--good);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .cond.info svg{stroke:var(--indigo)}
+  .cond.watch{color:var(--cautionText);background:#fff;border-color:#e6cfa0}.cond.watch svg{stroke:var(--cautionText)}
+
+  /* process steps (special use) */
+  .steps{margin-top:13px;background:#fff;border:1px solid #ecc9c4;border-radius:10px;padding:12px 14px}
+  .steps .sl{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--bad);margin-bottom:9px}
+  .stp{display:flex;gap:10px;font-size:12px;color:var(--ink2);line-height:1.45;padding:5px 0}
+  .stp .no{width:17px;height:17px;border-radius:5px;background:var(--badSoft);border:1px solid #ecc9c4;color:var(--bad);font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+  .stp b{color:var(--ink);font-weight:600}
+  .xref{display:flex;align-items:center;gap:9px;margin-top:11px;background:var(--indigoSoft);border:1px solid #dfe3f7;border-radius:9px;padding:10px 13px;font-size:11.5px;color:var(--ink2);line-height:1.4}
+  .xref svg{width:15px;height:15px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .xref a{color:var(--indigo);font-weight:600}
+  .xref .go{margin-left:auto;color:var(--indigo);font-weight:600;white-space:nowrap}
+
+  /* shared: scan + tie */
+  .scan{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:13px;margin-top:14px}
+  .scan .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .scan .l svg{width:12px;height:12px;stroke:var(--indigo);fill:none;stroke-width:2}
+  .scan .big{font-family:var(--disp);font-size:34px;color:var(--indigo);line-height:1;flex:none}
+  .scan .st{font-size:11.5px;color:var(--ink2);line-height:1.45}.scan .st b{color:var(--ink);font-weight:600}
+  .scan .hint{font-size:9.5px;color:var(--muted);margin-top:4px}
+  .tie{display:flex;align-items:center;gap:9px;background:var(--indigoSoft);border:1px solid #dfe3f7;border-radius:10px;padding:11px 14px;font-size:11.5px;color:var(--ink2);line-height:1.45;margin-top:12px}
+  .tie svg{width:15px;height:15px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .tie b{color:var(--ink);font-weight:600}
+  .nodup{font-size:10.5px;color:var(--muted);margin-top:10px;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Check Your Project Type</span><span class="chip">Is your use allowed?</span></div>
+    <div class="intro">Pick your intended use to see whether <b>this specific use</b> is permitted here, and what the path is if it isn't. (The full B3-1 use list and dimensions live in <b>Zoning Details</b> above — not repeated here.)</div>
+
+    <div class="inbar">
+      <div class="fld"><div class="l">Intended use</div>
+        <div class="selbtn"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2M5 2v20M11 2v20M11 8s0-6 4-6 4 6 0 6"/></svg></span>Restaurant<svg class="cv" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+      </div>
+      <div class="fld"><div class="l">Get specific — your concept</div>
+        <div class="txt"><span class="ph">Thai · Neapolitan pizza · taquería · steakhouse…</span></div>
+        <div class="fldhint">The more specific, the sharper the <b>competition scan</b> and <b>tailoring</b>. Restaurant → cuisine · daycare → program / language · café → format · retail → category.</div>
+      </div>
+      <button class="upd al">Update</button>
+    </div>
+
+    <div class="cap"><span class="n">State A — Allowed by right</span> (Restaurant · “Thai”) → verdict + conditions only, no use-list repeat</div>
+    <div class="verdict ok">
+      <span class="badge"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
+      <div class="bd">
+        <div class="k">Zoning check</div>
+        <div class="h">Allowed by right</div>
+        <div class="p">A <b>Restaurant</b> is permitted <b>as-of-right</b> in B3-1 — no special-use approval or variance. Pursue it through standard permitting.</div>
+        <div class="conds">
+          <span class="cond"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Standard business license</span>
+          <span class="cond info"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>No zoning relief needed</span>
+          <span class="cond watch"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Retail food + liquor license · verify build-out</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cap"><span class="n">State B — Special Use required</span> (Cannabis Dispensary) → red obstacle + the path, cross-linked (not duplicated)</div>
+    <div class="verdict bad">
+      <span class="badge"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>
+      <div class="bd">
+        <div class="k">Zoning check</div>
+        <div class="h">Special Use approval required</div>
+        <div class="p">A <b>Cannabis Dispensary</b> is <b>not by-right</b> in B3-1 — it needs Special Use approval. That's a defined, winnable path, not a denial.</div>
+        <div class="steps">
+          <div class="sl">The path</div>
+          <div class="stp"><span class="no">1</span><span><b>Public hearing before the Zoning Board of Appeals (ZBA)</b> — the Special Use is granted or denied here.</span></div>
+          <div class="stp"><span class="no">2</span><span><b>Aldermanic support (Ward 1)</b> is typically decisive — line it up early.</span></div>
+          <div class="stp"><span class="no">3</span><span><b>Engage a zoning attorney</b> to file and represent you at the hearing.</span></div>
+        </div>
+        <div class="xref"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span>Zoning attorneys who've filed in <b>Ward 1</b> are listed below.</span><span class="go">Zoning Change History &amp; Representation ↓</span></div>
+      </div>
+    </div>
+
+    <div class="scan">
+      <span class="big">3</span>
+      <div><div class="l"><svg viewBox="0 0 24 24"><path d="M21 21l-4.3-4.3"/><circle cx="11" cy="11" r="8"/></svg>Concept scan · “Thai”</div><span class="st"><b>Thai restaurants</b> within ½ mile — the specific concept, not just “restaurants” broadly.</span><div class="hint">Nearby-competition scan · sharpened by your concept · illustrative pending live count</div></div>
+    </div>
+
+    <div class="tie"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span>This use selection also <b>tailors your Insight Report</b> and sets the <b>valuation calculator's mode</b>.</span></div>
+
+    <div class="nodup">No duplication: the allowed-use list and FAR/height/parking live in Zoning Details; this section adds only the use-specific verdict, the approval path, competition, and the tailoring hook.</div>
+  </div>
+</div>
+</body>
+</html>

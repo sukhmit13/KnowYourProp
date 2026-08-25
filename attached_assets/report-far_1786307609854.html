@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--bad:#d13b26;
+    --caution:#f0a41c;--cautionText:#96600a;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:var(--sans);color:var(--ink);padding:34px 40px}
+  .wrap{max-width:1180px;margin:0 auto}
+
+  .secthead{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:16px}
+  .secthead svg{width:16px;height:16px;stroke:var(--indigo);fill:none}
+
+  .verdict{display:flex;gap:13px;align-items:flex-start;border:1px solid #cfe6d3;border-left:4px solid var(--good);background:var(--goodSoft);border-radius:12px;padding:15px 18px;margin-bottom:22px}
+  .verdict .ic{width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid #cfe6d3;display:flex;align-items:center;justify-content:center;flex:none}
+  .verdict .ic svg{width:18px;height:18px;stroke:var(--good);fill:none}
+  .verdict .h{font-size:15px;font-weight:700;color:var(--good);margin-bottom:3px}
+  .verdict .t{font-size:12.5px;color:var(--ink2);line-height:1.5}
+
+  .utilhead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:11px}
+  .utilhead .l{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+  .utilhead .pct{font-family:var(--disp);font-size:30px;color:var(--ink);line-height:1}
+
+  /* the corrected bar: built (indigo) + available headroom (green) */
+  .bar{display:flex;height:20px;border-radius:6px;overflow:hidden;background:#eceae3;gap:2px}
+  .bar i{display:block;height:100%}
+  .bar .built{background:var(--indigo);border-radius:6px 0 0 6px}
+  .bar .head{background:#5aa15f;border-radius:0 6px 6px 0}
+  .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px}
+  .scale .mid{color:var(--ink2)}
+  .legend{display:flex;gap:18px;margin-top:12px}
+  .legend .lg{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2)}
+  .legend .lg .sw{width:11px;height:11px;border-radius:3px;flex:none}
+  .legend .lg b{color:var(--ink);font-weight:600}
+
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+  .tile{border:1px solid var(--line);border-radius:12px;padding:15px 17px;text-align:center}
+  .tile.hi{background:var(--goodSoft);border-color:#cfe6d3}
+  .tile .k{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .tile .v{font-family:var(--disp);font-size:28px;color:var(--ink);line-height:1}
+  .tile.hi .v{color:var(--good)}
+  .tile .v .u{font-family:var(--sans);font-size:12px;color:var(--muted);font-weight:400}
+
+  .note{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+  .note b{color:var(--ink);font-weight:600}
+
+  /* overbuilt example */
+  .exhead{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:26px 0 9px}
+  .bar .over{background:var(--caution);border-radius:0 6px 6px 0}
+  .exnote{font-size:11.5px;color:var(--cautionText);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="secthead"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>FAR Analysis</div>
+
+  <div class="verdict">
+    <span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg></span>
+    <div><div class="h">Under-Built — Development Potential Available</div><div class="t">This property uses 50% of its allowed floor area. There's room to expand or build additional square footage under current zoning.</div></div>
+  </div>
+
+  <div class="utilhead"><span class="l">FAR Utilization</span><span class="pct">49.6%</span></div>
+  <div class="bar">
+    <i class="built" style="width:49.6%"></i>
+    <i class="head" style="width:50.4%"></i>
+  </div>
+  <div class="scale"><span>0</span><span class="mid">Built · FAR 1.09</span><span>Zoning limit · FAR 2.2</span></div>
+  <div class="legend">
+    <span class="lg"><span class="sw" style="background:var(--indigo)"></span>Built <b>FAR 1.09</b></span>
+    <span class="lg"><span class="sw" style="background:#5aa15f"></span>Available headroom <b>+1.11 FAR · +10,176 sq ft</b></span>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><div class="k">Current FAR</div><div class="v">1.09</div></div>
+    <div class="tile"><div class="k">Max Allowed FAR</div><div class="v">2.2</div></div>
+    <div class="tile"><div class="k">Existing Building</div><div class="v">10,000<span class="u"> sq ft</span></div></div>
+    <div class="tile hi"><div class="k">Additional Buildable</div><div class="v">+10,176<span class="u"> sq ft</span></div></div>
+  </div>
+
+  <div class="note"><b>Why not a red-to-green gradient?</b> FAR utilization has no universal "good" end — under-built means development upside, fully-built means the envelope is maximized (more income now). So the bar shows what's <b>built</b> (indigo) and how much <b>headroom</b> remains (green = the buildable opportunity). More green = more upside. The favorability lives in the green headroom and the verdict, not in a position gradient.</div>
+
+  <!-- OVERBUILT VARIANT -->
+  <div class="exhead">The one case red/amber applies — overbuilt (>100%)</div>
+  <div class="bar" style="background:#eceae3">
+    <i class="built" style="width:78%"></i>
+    <i class="over" style="width:22%"></i>
+  </div>
+  <div class="scale"><span>0</span><span class="mid">Zoning limit · FAR 2.2</span><span>Built · FAR 2.8</span></div>
+  <div class="exnote">When a building <b>exceeds</b> the zoning limit, the over-limit portion is flagged amber — a genuine caveat (legal non-conformity: can't be rebuilt this large), often paired with a green note on grandfathered density. That's the only place a warning color is earned.</div>
+</div>
+</body>
+</html>

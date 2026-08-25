@@ -1,0 +1,98 @@
+# Stage 2.5 patch — anchor lien-clearing to the SALES section, not to raw deeds
+
+Refines the clearing logic in the already-built `resolveState()`. **A transfer clears prior liens only if the report's Sales section counts it as a genuine SALE.** A quit-claim / nominal / intra-owner transfer (e.g. removing a co-owner from title) is NOT a sale — it never clears debt and never resets the ownership anchor. This is the single-source-of-truth version of the arms-length gate: instead of the debt engine re-deciding what a sale is, it **binds to the Sales section**, which already classifies transfers (arms-length vs. trust/nominal).
+
+## Why (the 522 N Claremont bug)
+- Records: 2013 trustee's deed (acquisition) → 2019 lis pendens → 2021 court docs + release (dismissal) → **2021 quit-claim (co-owner removed — NOT a sale)** → 2021 mortgage → 2025 mortgage.
+- The 2021 quit-claim was mis-treated as an ownership transfer, which is why the 2021 mortgage looked cleared / dropped. But it's not a sale — no closing paid the 2021 loan off, which is exactly why no release was ever recorded.
+- Correct reading: anchor = **2013** (the most recent real sale the Sales section recognizes). Everything after 2013 is current-owner debt → the 2021 AND 2025 mortgages are **both active** (two liens). The lis pendens is post-2013 but dismissed in 2021 → resolved.
+
+## New input to `resolveState(...)` — cross-reference the Sales section
+```js
+salesSection = {
+  most_recent_sale_date: "2013-11-22" | null,   // the report's own most-recent GENUINE sale/acquisition
+  sales: [ { date, price, doc_number, is_arms_length } ]  // as the Sales section already classifies them
+}
+```
+This is a **narrow, allowed cross-reference** (single source of truth — reuse, don't re-derive). If `salesSection` is absent, fall back to the old deed-derived anchor.
+
+## Code — replaces the anchor + clearing in sections (A)/(B)
+```js
+function ownershipAnchor(salesSection, deeds) {
+  // PRIMARY: bind to the Sales section's answer — it already excludes quit-claims / nominal transfers
+  if (salesSection?.most_recent_sale_date)
+    return { date: salesSection.most_recent_sale_date, source: "sales-section" };
+  // FALLBACK (no Sales section): derive from deeds as before (arms-length OR judicial)
+  const d = [...deeds].reverse().find(isClearingTransfer);
+  return d ? { date: d.recording_date, source: "deed-derived" } : { date: null, source: "none" };
+}
+
+const anchor = ownershipAnchor(salesSection, deeds);   // e.g. {date:"2013-11-22", source:"sales-section"}
+
+// (B) clear owner-specific liens recorded BEFORE the anchor sale
+const clearedBySale = [];
+for (const m of stack.active) {
+  if (m.purchase_money) continue;                                   // never clear the acquisition loan
+  const priorToSale = anchor.date && m.recording_date && m.recording_date < anchor.date;
+  const notCurrentOwnerDebt = currentOwner && m.borrower && !sameEntity(m.borrower, currentOwner);
+  if (priorToSale && (notCurrentOwnerDebt || m.borrower == null)) {
+    m.resolved_by_sale = true;
+    m.status = `resolved at the ${anchor.date} sale — presumed paid at closing`;
+    clearedBySale.push(m);
+  }
+}
+// EVERYTHING at/after the anchor stays active — a later quit-claim / non-sale transfer changes NOTHING here.
+const active = stack.active.filter(m => !m.resolved_by_sale)
+  .sort((a,b) => (a.recording_date||"").localeCompare(b.recording_date||""));
+active.forEach((m,i) => m.position = i + 1);                        // 1st, 2nd, ... in recording order
+
+// classify multiple active liens by AMOUNT — refi (replaces) vs junior lien (adds). Never assume a payoff.
+for (let i = 0; i < active.length - 1; i++) {
+  const older = active[i], newer = active[i + 1];
+  if (!newer.effective_amount || !older.effective_amount) continue;
+  if (newer.effective_amount >= older.effective_amount * 0.9) {
+    // later loan is similar-or-larger AND the older is unreleased => POSSIBLY an unrecorded refinance
+    older.refi_suspect = true;
+    older.note = "a later loan of similar-or-greater size is recorded with no release — may be a refinance; confirm payoff";
+  } else {
+    // later loan is materially smaller => a JUNIOR / second lien (home-equity, HELOC, piggyback). Both live; it ADDS.
+    newer.lien_kind = "junior";
+    newer.note = "smaller loan recorded after the first with no release — a junior/second lien, not a refinance; it adds to the debt";
+  }
+}
+const combinedRecordedDebt = active.reduce((s, m) => s + (m.effective_amount || 0), 0);   // e.g. 522: 712500 + 198000 = 910500
+```
+
+## Distress uses the same anchor
+```js
+for (const d of distress) {
+  d.state = "active";
+  if (anchor.date && d.recording_date && d.recording_date < anchor.date) d.state = "resolved"; // predates acquisition
+  if (docs.some(x => (x.references_docs||[]).includes(d.doc_number)
+      && ["release","satisfaction","dismissal"].includes(x.doc_type)))  d.state = "resolved";  // 522: 2021 dismissal
+  if (docs.some(x => x.doc_type==="mortgage" && x.recording_date > d.recording_date
+      && sameEntity(x.parties?.borrower, currentOwner)))                 d.state = "resolved";  // financed after
+}
+```
+
+## 🔴 The rule in one line
+**Clear/keep is decided by the most recent SALE (from the Sales section), never by a deed the Sales section doesn't count as a sale.** Quit-claims, trust distributions, and nominal intra-owner transfers do not clear liens and do not reset the anchor.
+
+## 🔴 Ship these as tests
+```
+// 522 N Claremont regression (the bug):
+assert ownershipAnchor uses the Sales section's most_recent_sale_date (2013), NOT the 2021 quit-claim date
+assert the 2021 quit-claim deed is treated as NON-clearing (not a sale) — it clears nothing, resets nothing
+assert BOTH the 2021 and 2025 mortgages are in `active` (two liens), positions 1 and 2
+assert the 2019 lis pendens has state=="resolved" (dismissed 2021), foreclosure_active==false
+assert the 2025 lien (198k) is classified lien_kind=="junior" (smaller than the 712.5k first) — NOT refi_suspect
+assert combinedRecordedDebt == 910500 (712500 + 198000); the two liens are ADDED, not treated as one
+assert a hypothetical later loan >= 0.9× the first, older unreleased, sets refi_suspect on the older (refi path)
+// 3014 still passes (a real sale IS the anchor):
+assert 3014 anchor == the 2014 receiver's sale (Sales section), 1999/2005 cleared, Albany active — unchanged
+// guard:
+assert when salesSection is absent, it falls back to the deed-derived anchor without crashing
+```
+
+## Done when
+522 N Claremont shows **two active mortgages** (2021 first, 2025 second) anchored to the 2013 sale, the 2019 lis pendens resolved, and the older lien flagged "no release recorded — confirm payoff." The quit-claim no longer masquerades as a sale.

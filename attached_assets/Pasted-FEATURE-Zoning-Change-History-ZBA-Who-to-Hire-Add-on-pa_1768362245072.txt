@@ -1,0 +1,113 @@
+FEATURE: “Zoning Change History (ZBA) + Who to Hire” (Add-on panel; do NOT replace existing app)
+
+NON-NEGOTIABLE
+- Do NOT modify or refactor existing address intake, geocoding, zoning, SBIF/TIF, childcare, demographics, PIN/taxes logic.
+- This is an additional module that runs AFTER address is resolved and only when user indicates zoning relief is needed.
+
+WHEN TO SHOW
+- After user submits address and selects project type.
+- Show ONLY if:
+  (a) project is NOT as-of-right (user toggles “Requires zoning relief”), OR
+  (b) your zoning logic flags “Relief likely needed.”
+- Otherwise hide/collapse the entire section.
+
+DATA SOURCE
+- Crawl City of Chicago ZBA Resolutions page for PDFs:
+  https://www.chicago.gov/city/en/depts/dcd/zoning-board-of-appeals/ZBA-resolutions.html
+- Target last 5 years of resolutions.
+
+BUILD PIPELINE (OFFLINE / ADMIN ACTION, NOT PER USER)
+1) Create a script/job: scripts/build_zba_index
+   - Fetch the ZBA resolutions page HTML.
+   - Extract all PDF links.
+   - Keep only PDFs within last 5 years (use date in filename/URL or linked page context; if uncertain, download and read first page for date).
+2) For each PDF:
+   - Download and extract text (pdf-parse or similar).
+   - Split into individual case entries (best-effort; store raw chunk).
+   - Parse the following fields (best-effort, allow nulls):
+     - decision_date (from header/page text)
+     - case_id or application number (if present)
+     - ward (if present)
+     - property_address (if present)
+     - applicant_name (if present)
+     - appearance_line / representative name (often “Appearance:”)
+     - outcome (normalize to: APPROVED, DENIED/REJECTED, WITHDRAWN, OTHER/UNKNOWN)
+     - pdf_url
+     - raw_case_text (store for debugging)
+3) Store results in a local DB table (SQLite is fine for MVP):
+   TABLE zba_cases(
+     id,
+     decision_date,
+     ward,
+     property_address,
+     applicant_name,
+     representative_raw,
+     representative_norm,
+     outcome,
+     pdf_url,
+     raw_case_text
+   )
+4) Add a “Refresh ZBA index” admin command/button that re-runs this job (monthly is enough).
+
+NORMALIZATION
+- representative_norm: trim, uppercase, remove “ESQ”, “ATTORNEY”, punctuation; keep first/last if possible.
+- outcome mapping: detect keywords like GRANTED/APPROVED, DENIED/REJECTED, WITHDRAWN; else OTHER.
+
+WARD LINKING (IMPORTANT)
+- If ward is missing in case text:
+  - If property_address exists: geocode it and compute ward using your existing ward boundary logic.
+  - Else leave ward null (case still counts for citywide aggregates).
+
+RUNTIME API (FAST QUERIES)
+Create endpoints:
+- GET /api/zba/ward-summary?ward={wardNumber}&years=5
+- GET /api/zba/city-summary?years=5
+
+Each returns:
+- representative_norm
+- totals: total_cases
+- counts: approved_count, denied_count, withdrawn_count, other_count
+- approval_rate (only if total_cases >= 5; else return null)
+
+UI PANEL (RESULTS PAGE)
+Add a collapsible section:
+“Zoning Change History & Representation (Last 5 Years)”
+Inside:
+1) Ward summary table (top 10 representatives by total_cases)
+   Columns:
+   - Representative (name + verification status)
+   - Total
+   - Approved
+   - Denied
+   - Withdrawn
+   - Approval rate (if >=5 cases)
+2) Citywide summary (same table) shown if ward has fewer than 10 total cases or fewer than 3 representatives.
+
+ATTORNEY VERIFICATION (DO NOT SCRAPE IARDC)
+- Do NOT programmatically query or scrape:
+  https://www.iardc.org/Lawyer/Search
+- Next to each representative show:
+  - “Verify” link that opens the IARDC search page in a new tab (manual user action).
+  - A dropdown/tag the user can set:
+    Verified Attorney / Not Attorney / Unknown
+- Store user labels locally:
+  TABLE rep_verifications(
+    representative_norm PRIMARY KEY,
+    status ENUM('verified_attorney','not_attorney','unknown'),
+    updated_at
+  )
+- Display status badge in the table.
+
+HEURISTICS (OPTIONAL, UNVERIFIED ONLY)
+- If representative_norm equals applicant_name_norm, set status suggestion “Likely not attorney (unverified)”
+- If representative_raw contains “ATTORNEY”, “ESQ”, “LAW”, suggest “Likely attorney (unverified)”
+- Do NOT auto-mark as verified.
+
+PERFORMANCE / SAFETY
+- Never parse PDFs during a user request.
+- Cache ward/city summaries in memory for 24 hours (they change only when index refresh runs).
+- If ZBA index not built yet, show message:
+  “ZBA history index not built yet—run Refresh ZBA index.”
+
+DELIVERABLE
+- Implement scripts/build_zba_index, DB tables, API endpoints, and the UI panel without touching existing screening logic.

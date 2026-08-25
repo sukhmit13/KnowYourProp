@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--bad:#d13b26;
+    --caution:#f0a41c;--cautionText:#96600a;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+
+  /* subsection header */
+  .ssh{display:flex;align-items:center;gap:9px;margin-bottom:16px}
+  .ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+  .ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+  .ssh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+
+  /* takeaway */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px 17px;margin-bottom:18px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+  .taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:13px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:9px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .cn.c .dt{background:var(--caution)}
+  .cn.i .dt{background:var(--indigo)}
+  .cn b{color:var(--ink);font-weight:600}
+  .cn .tx{flex:1}
+
+  /* license-mix breakdown */
+  .mixhead{display:flex;align-items:baseline;gap:8px;margin-bottom:13px}
+  .mixhead .h{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+  .mixhead .hint{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
+  .mixrow{display:grid;grid-template-columns:238px 1fr 26px;align-items:center;gap:13px;margin-bottom:7px;padding:4px 6px;border-radius:8px;cursor:pointer}
+  .mixrow:hover{background:#f6f5ff}
+  .mixtags{display:flex;flex-wrap:wrap;gap:4px}
+  .mixtag{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.02em;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:2px 6px;white-space:nowrap}
+  .mixtag.lead{color:var(--indigo);background:var(--indigoSoft);border-color:#dde1f6}
+  .mixtrack{height:15px;background:var(--paper);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .mixtrack i{display:block;height:100%;background:var(--indigo);border-radius:6px}
+  .mixcount{font-family:var(--disp);font-size:16px;color:var(--ink);text-align:right;line-height:1}
+
+  /* divider */
+  .divl{display:flex;align-items:center;gap:11px;margin:20px 0 6px}
+  .divl .lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+  .divl .ln{flex:1;height:1px;background:var(--line)}
+
+  /* nearby list */
+  .biz{padding:13px 0;border-top:1px solid var(--line)}
+  .biz:first-of-type{border-top:none}
+  .biztop{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .biznm{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink)}
+  .biznm .d{width:6px;height:6px;border-radius:50%;background:var(--indigo);flex:none}
+  .bizdist{font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 8px;white-space:nowrap}
+  .bizaddr{font-size:12px;color:var(--muted);margin:3px 0 0 14px}
+  .bizmeta{font-family:var(--mono);font-size:10.5px;color:var(--ink2);margin:6px 0 0 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .bizmeta .lic{color:var(--indigo)}
+  .bizmeta .dot{color:var(--muted)}
+  .bizmeta .n2{color:var(--cautionText);background:#fdf3df;border:1px solid #f0d79a;border-radius:5px;padding:2px 6px;font-size:9px;font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+  .more{font-size:11.5px;color:var(--indigo);text-decoration:none;font-weight:600;display:inline-block;margin-top:13px}
+
+  .src{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:16px;line-height:1.5}
+  .src b{color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+    <div class="ssh">
+      <svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M2 13h20"/></svg>
+      <span class="t">New Business Licenses</span>
+      <span class="count">54 businesses · 1 mi · 12 mo</span></div>
+
+    <!-- TAKEAWAY -->
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>What's opening nearby</div>
+      <div class="taket">54 new businesses opened within a mile of this property in the past year — a dining scene with a nightlife layer, not a bar district.</div>
+      <div class="cn i"><span class="dt"></span><span class="tx"><b>Food first, drinks second.</b> 49 of the 54 serve food — 36 food-only, plus 13 that pair food with a liquor or entertainment license. Just <b>2</b> are standalone bars. So it's restaurants and cafés leading, with alcohol as an add-on: amenity value and foot traffic, and only a light late-night footprint.</span></div>
+      <div class="cn i"><span class="dt"></span><span class="tx"><b>The closest are steps away.</b> Digos Tacos (0.1 mi), So Gong Dong (0.18 mi) and Familia Cafe (0.3 mi) all opened in the last year within a few blocks of the property.</span></div>
+      <div class="cn i"><span class="dt"></span><span class="tx"><b>Counted as real businesses, not raw licenses.</b> The 71 licenses on file were grouped by establishment — a restaurant holding food + liquor + entertainment is one business. <b>54</b> is the true count of new openings.</span></div>
+    </div>
+
+    <!-- LICENSE-MIX BREAKDOWN -->
+    <div class="mixhead"><span class="h">Businesses by license mix</span><span class="hint">· click a row to filter the list</span></div>
+
+    <div class="mixrow"><div class="mixtags"><span class="mixtag lead">Retail Food</span></div><div class="mixtrack"><i style="width:100%"></i></div><span class="mixcount">36</span></div>
+    <div class="mixrow"><div class="mixtags"><span class="mixtag lead">Retail Food</span><span class="mixtag">Liquor / Tavern</span></div><div class="mixtrack"><i style="width:30.6%"></i></div><span class="mixcount">11</span></div>
+    <div class="mixrow"><div class="mixtags"><span class="mixtag">Liquor / Tavern</span></div><div class="mixtrack"><i style="width:5.6%"></i></div><span class="mixcount">2</span></div>
+    <div class="mixrow"><div class="mixtags"><span class="mixtag lead">Retail Food</span><span class="mixtag">Liquor / Tavern</span><span class="mixtag">Entertainment</span></div><div class="mixtrack"><i style="width:5.6%"></i></div><span class="mixcount">2</span></div>
+    <div class="mixrow"><div class="mixtags"><span class="mixtag">Art Gallery</span></div><div class="mixtrack"><i style="width:2.8%"></i></div><span class="mixcount">1</span></div>
+    <div class="mixrow"><div class="mixtags"><span class="mixtag">Entertainment</span></div><div class="mixtrack"><i style="width:2.8%"></i></div><span class="mixcount">1</span></div>
+    <div class="mixrow"><div class="mixtags"><span class="mixtag">Liquor / Tavern</span><span class="mixtag">Entertainment</span></div><div class="mixtrack"><i style="width:2.8%"></i></div><span class="mixcount">1</span></div>
+
+    <!-- NEARBY LIST -->
+    <div class="divl"><span class="lbl">54 businesses · nearest first</span><span class="ln"></span></div>
+
+    <div class="biz">
+      <div class="biztop"><span class="biznm"><span class="d"></span>Digos Tacos</span><span class="bizdist">0.1 mi</span></div>
+      <div class="bizaddr">2624 W North Ave, 1st</div>
+      <div class="bizmeta"><span class="lic">Consumption on Premises — Incidental</span><span class="dot">·</span>Oct 2025</div>
+    </div>
+    <div class="biz">
+      <div class="biztop"><span class="biznm"><span class="d"></span>SGD So Gong Dong Wicker Park</span><span class="bizdist">0.18 mi</span></div>
+      <div class="bizaddr">2411 W North Ave, 1</div>
+      <div class="bizmeta"><span class="lic">Retail Food Establishment</span><span class="dot">·</span>Apr 2026</div>
+    </div>
+    <div class="biz">
+      <div class="biztop"><span class="biznm"><span class="d"></span>Familia Cafe</span><span class="bizdist">0.3 mi</span></div>
+      <div class="bizaddr">2800 W North Ave, 1</div>
+      <div class="bizmeta"><span class="lic">Retail Food Establishment</span><span class="dot">·</span>Oct 2025</div>
+    </div>
+    <div class="biz">
+      <div class="biztop"><span class="biznm"><span class="d"></span>Jomon Sushi</span><span class="bizdist">0.42 mi</span></div>
+      <div class="bizaddr">1858 N Western Ave, 1</div>
+      <div class="bizmeta"><span class="lic">Retail Food</span><span class="dot">·</span><span class="lic">Consumption on Premises</span><span class="dot">·</span>Apr 2026<span class="n2">2 licenses</span></div>
+    </div>
+    <div class="biz">
+      <div class="biztop"><span class="biznm"><span class="d"></span>The Origin Restaurant &amp; Lounge</span><span class="bizdist">0.85 mi</span></div>
+      <div class="bizaddr">2010–2012 W Armitage Ave, 1st Fl &amp; Mezzanine</div>
+      <div class="bizmeta"><span class="lic">Retail Food</span><span class="dot">·</span><span class="lic">Consumption on Premises</span><span class="dot">·</span>Apr 2026<span class="n2">2 licenses</span></div>
+    </div>
+    <div class="biz">
+      <div class="biztop"><span class="biznm"><span class="d"></span>Deliz Italian Steakhouse</span><span class="bizdist">0.87 mi</span></div>
+      <div class="bizaddr">1840–1842 W North Ave, 1+2</div>
+      <div class="bizmeta"><span class="lic">Retail Food</span> <span class="dot">(Mar)</span><span class="dot">·</span><span class="lic">Consumption on Premises</span> <span class="dot">(Apr 2026)</span><span class="n2">2 licenses</span></div>
+    </div>
+
+    <a class="more" href="#">Show all 54 businesses within 1 mile →</a>
+
+    <div class="src">Source: Chicago Business Licenses — new issuances only, excludes renewals (past 12 months). <b>54 distinct businesses grouped from 71 licenses</b> by establishment (name + address), so a spot holding food + liquor + entertainment counts once. Covers liquor/tavern, retail food, entertainment, late-hour and manufacturing establishments.</div>
+
+  </div>
+</div>
+</body>
+</html>

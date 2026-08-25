@@ -1,0 +1,2851 @@
+[
+  {
+    "communityArea": "Rogers Park",
+    "communityNumber": 1,
+    "population5Plus": 51500,
+    "englishOnlyPct": 55.2,
+    "nonEnglishPct": 44.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 28428,
+        "pct": 55.2
+      },
+      {
+        "language": "Spanish",
+        "count": 11588,
+        "pct": 22.5
+      },
+      {
+        "language": "Polish",
+        "count": 2163,
+        "pct": 4.2
+      },
+      {
+        "language": "Chinese",
+        "count": 1957,
+        "pct": 3.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 1288,
+        "pct": 2.5
+      },
+      {
+        "language": "Hindi",
+        "count": 1288,
+        "pct": 2.5
+      },
+      {
+        "language": "Urdu",
+        "count": 927,
+        "pct": 1.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 6438,
+      "pct": 12.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "26% above city average",
+    "citywideRank": 21,
+    "rankDescription": "Upper half for diversity (#21 of 77)"
+  },
+  {
+    "communityArea": "West Ridge",
+    "communityNumber": 2,
+    "population5Plus": 67800,
+    "englishOnlyPct": 42.5,
+    "nonEnglishPct": 57.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 28815,
+        "pct": 42.5
+      },
+      {
+        "language": "Spanish",
+        "count": 12340,
+        "pct": 18.2
+      },
+      {
+        "language": "Polish",
+        "count": 5763,
+        "pct": 8.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 4610,
+        "pct": 6.8
+      },
+      {
+        "language": "Chinese",
+        "count": 3526,
+        "pct": 5.2
+      },
+      {
+        "language": "Arabic",
+        "count": 2848,
+        "pct": 4.2
+      },
+      {
+        "language": "Hindi",
+        "count": 2576,
+        "pct": 3.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 12543,
+      "pct": 18.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "62% above city average",
+    "citywideRank": 11,
+    "rankDescription": "Top 20 most diverse (#11 of 77)"
+  },
+  {
+    "communityArea": "Uptown",
+    "communityNumber": 3,
+    "population5Plus": 52900,
+    "englishOnlyPct": 58.5,
+    "nonEnglishPct": 41.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 30947,
+        "pct": 58.5
+      },
+      {
+        "language": "Spanish",
+        "count": 9945,
+        "pct": 18.8
+      },
+      {
+        "language": "Chinese",
+        "count": 2910,
+        "pct": 5.5
+      },
+      {
+        "language": "Polish",
+        "count": 1852,
+        "pct": 3.5
+      },
+      {
+        "language": "Arabic",
+        "count": 1323,
+        "pct": 2.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 1164,
+        "pct": 2.2
+      },
+      {
+        "language": "Hindi",
+        "count": 952,
+        "pct": 1.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 5925,
+      "pct": 11.2
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "17% above city average",
+    "citywideRank": 27,
+    "rankDescription": "Upper half for diversity (#27 of 77)"
+  },
+  {
+    "communityArea": "Lincoln Square",
+    "communityNumber": 4,
+    "population5Plus": 37100,
+    "englishOnlyPct": 58.8,
+    "nonEnglishPct": 41.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 21815,
+        "pct": 58.8
+      },
+      {
+        "language": "Spanish",
+        "count": 5751,
+        "pct": 15.5
+      },
+      {
+        "language": "Polish",
+        "count": 2152,
+        "pct": 5.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 1187,
+        "pct": 3.2
+      },
+      {
+        "language": "Chinese",
+        "count": 1039,
+        "pct": 2.8
+      },
+      {
+        "language": "Korean",
+        "count": 1039,
+        "pct": 2.8
+      },
+      {
+        "language": "Arabic",
+        "count": 928,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 4007,
+      "pct": 10.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "16% above city average",
+    "citywideRank": 29,
+    "rankDescription": "Upper half for diversity (#29 of 77)"
+  },
+  {
+    "communityArea": "North Center",
+    "communityNumber": 5,
+    "population5Plus": 29900,
+    "englishOnlyPct": 75.5,
+    "nonEnglishPct": 24.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 22575,
+        "pct": 75.5
+      },
+      {
+        "language": "Spanish",
+        "count": 3050,
+        "pct": 10.2
+      },
+      {
+        "language": "Polish",
+        "count": 1047,
+        "pct": 3.5
+      },
+      {
+        "language": "Chinese",
+        "count": 748,
+        "pct": 2.5
+      },
+      {
+        "language": "Hindi",
+        "count": 359,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1734,
+      "pct": 5.8
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "31% below city average",
+    "citywideRank": 44,
+    "rankDescription": "Middle tier for diversity (#44 of 77)"
+  },
+  {
+    "communityArea": "Lake View",
+    "communityNumber": 6,
+    "population5Plus": 88500,
+    "englishOnlyPct": 78.2,
+    "nonEnglishPct": 21.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 69207,
+        "pct": 78.2
+      },
+      {
+        "language": "Spanish",
+        "count": 7523,
+        "pct": 8.5
+      },
+      {
+        "language": "Chinese",
+        "count": 2478,
+        "pct": 2.8
+      },
+      {
+        "language": "Polish",
+        "count": 1947,
+        "pct": 2.2
+      },
+      {
+        "language": "Hindi",
+        "count": 1062,
+        "pct": 1.2
+      },
+      {
+        "language": "Korean",
+        "count": 1062,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 3983,
+      "pct": 4.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "39% below city average",
+    "citywideRank": 47,
+    "rankDescription": "Middle tier for diversity (#47 of 77)"
+  },
+  {
+    "communityArea": "Lincoln Park",
+    "communityNumber": 7,
+    "population5Plus": 64900,
+    "englishOnlyPct": 82.5,
+    "nonEnglishPct": 17.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 53543,
+        "pct": 82.5
+      },
+      {
+        "language": "Spanish",
+        "count": 4024,
+        "pct": 6.2
+      },
+      {
+        "language": "Chinese",
+        "count": 1623,
+        "pct": 2.5
+      },
+      {
+        "language": "Hindi",
+        "count": 779,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2466,
+      "pct": 3.8
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "51% below city average",
+    "citywideRank": 50,
+    "rankDescription": "Middle tier for diversity (#50 of 77)"
+  },
+  {
+    "communityArea": "Near North Side",
+    "communityNumber": 8,
+    "population5Plus": 75500,
+    "englishOnlyPct": 75.8,
+    "nonEnglishPct": 24.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 57229,
+        "pct": 75.8
+      },
+      {
+        "language": "Spanish",
+        "count": 6418,
+        "pct": 8.5
+      },
+      {
+        "language": "Chinese",
+        "count": 2643,
+        "pct": 3.5
+      },
+      {
+        "language": "Polish",
+        "count": 1661,
+        "pct": 2.2
+      },
+      {
+        "language": "Hindi",
+        "count": 1133,
+        "pct": 1.5
+      },
+      {
+        "language": "Korean",
+        "count": 906,
+        "pct": 1.2
+      },
+      {
+        "language": "Russian",
+        "count": 906,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 4153,
+      "pct": 5.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "32% below city average",
+    "citywideRank": 46,
+    "rankDescription": "Middle tier for diversity (#46 of 77)"
+  },
+  {
+    "communityArea": "Edison Park",
+    "communityNumber": 9,
+    "population5Plus": 10800,
+    "englishOnlyPct": 72.5,
+    "nonEnglishPct": 27.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 7830,
+        "pct": 72.5
+      },
+      {
+        "language": "Polish",
+        "count": 1350,
+        "pct": 12.5
+      },
+      {
+        "language": "Spanish",
+        "count": 626,
+        "pct": 5.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 270,
+        "pct": 2.5
+      },
+      {
+        "language": "Russian",
+        "count": 194,
+        "pct": 1.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 670,
+      "pct": 6.2
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "23% below city average",
+    "citywideRank": 41,
+    "rankDescription": "Middle tier for diversity (#41 of 77)"
+  },
+  {
+    "communityArea": "Norwood Park",
+    "communityNumber": 10,
+    "population5Plus": 34700,
+    "englishOnlyPct": 65.2,
+    "nonEnglishPct": 34.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 22624,
+        "pct": 65.2
+      },
+      {
+        "language": "Polish",
+        "count": 5483,
+        "pct": 15.8
+      },
+      {
+        "language": "Spanish",
+        "count": 2950,
+        "pct": 8.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 972,
+        "pct": 2.8
+      },
+      {
+        "language": "Russian",
+        "count": 521,
+        "pct": 1.5
+      },
+      {
+        "language": "Hindi",
+        "count": 416,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2950,
+      "pct": 8.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "Near city average",
+    "citywideRank": 34,
+    "rankDescription": "Upper half for diversity (#34 of 77)"
+  },
+  {
+    "communityArea": "Jefferson Park",
+    "communityNumber": 11,
+    "population5Plus": 24600,
+    "englishOnlyPct": 62.8,
+    "nonEnglishPct": 37.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 15449,
+        "pct": 62.8
+      },
+      {
+        "language": "Polish",
+        "count": 3493,
+        "pct": 14.2
+      },
+      {
+        "language": "Spanish",
+        "count": 3075,
+        "pct": 12.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 541,
+        "pct": 2.2
+      },
+      {
+        "language": "Russian",
+        "count": 369,
+        "pct": 1.5
+      },
+      {
+        "language": "Hindi",
+        "count": 295,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2337,
+      "pct": 9.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "Near city average",
+    "citywideRank": 33,
+    "rankDescription": "Upper half for diversity (#33 of 77)"
+  },
+  {
+    "communityArea": "Forest Glen",
+    "communityNumber": 12,
+    "population5Plus": 17400,
+    "englishOnlyPct": 68.5,
+    "nonEnglishPct": 31.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 11919,
+        "pct": 68.5
+      },
+      {
+        "language": "Polish",
+        "count": 1479,
+        "pct": 8.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1183,
+        "pct": 6.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 783,
+        "pct": 4.5
+      },
+      {
+        "language": "Chinese",
+        "count": 557,
+        "pct": 3.2
+      },
+      {
+        "language": "Hindi",
+        "count": 261,
+        "pct": 1.5
+      },
+      {
+        "language": "Urdu",
+        "count": 209,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1253,
+      "pct": 7.2
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "11% below city average",
+    "citywideRank": 37,
+    "rankDescription": "Upper half for diversity (#37 of 77)"
+  },
+  {
+    "communityArea": "North Park",
+    "communityNumber": 13,
+    "population5Plus": 17400,
+    "englishOnlyPct": 55.2,
+    "nonEnglishPct": 44.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 9605,
+        "pct": 55.2
+      },
+      {
+        "language": "Spanish",
+        "count": 2749,
+        "pct": 15.8
+      },
+      {
+        "language": "Polish",
+        "count": 1131,
+        "pct": 6.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 905,
+        "pct": 5.2
+      },
+      {
+        "language": "Chinese",
+        "count": 835,
+        "pct": 4.8
+      },
+      {
+        "language": "Arabic",
+        "count": 435,
+        "pct": 2.5
+      },
+      {
+        "language": "Hindi",
+        "count": 383,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2227,
+      "pct": 12.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "26% above city average",
+    "citywideRank": 22,
+    "rankDescription": "Upper half for diversity (#22 of 77)"
+  },
+  {
+    "communityArea": "Albany Park",
+    "communityNumber": 14,
+    "population5Plus": 48400,
+    "englishOnlyPct": 38.5,
+    "nonEnglishPct": 61.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 18634,
+        "pct": 38.5
+      },
+      {
+        "language": "Spanish",
+        "count": 13794,
+        "pct": 28.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 4114,
+        "pct": 8.5
+      },
+      {
+        "language": "Chinese",
+        "count": 2517,
+        "pct": 5.2
+      },
+      {
+        "language": "Arabic",
+        "count": 2178,
+        "pct": 4.5
+      },
+      {
+        "language": "Polish",
+        "count": 1839,
+        "pct": 3.8
+      },
+      {
+        "language": "Hindi",
+        "count": 1355,
+        "pct": 2.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 10890,
+      "pct": 22.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "73% above city average",
+    "citywideRank": 7,
+    "rankDescription": "Top 10 most diverse (#7 of 77)"
+  },
+  {
+    "communityArea": "Portage Park",
+    "communityNumber": 15,
+    "population5Plus": 61300,
+    "englishOnlyPct": 55.8,
+    "nonEnglishPct": 44.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 34205,
+        "pct": 55.8
+      },
+      {
+        "language": "Spanish",
+        "count": 13793,
+        "pct": 22.5
+      },
+      {
+        "language": "Polish",
+        "count": 7846,
+        "pct": 12.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 1349,
+        "pct": 2.2
+      },
+      {
+        "language": "Russian",
+        "count": 736,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 8889,
+      "pct": 14.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "25% above city average",
+    "citywideRank": 24,
+    "rankDescription": "Upper half for diversity (#24 of 77)"
+  },
+  {
+    "communityArea": "Irving Park",
+    "communityNumber": 16,
+    "population5Plus": 50100,
+    "englishOnlyPct": 52.5,
+    "nonEnglishPct": 47.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 26303,
+        "pct": 52.5
+      },
+      {
+        "language": "Spanish",
+        "count": 12926,
+        "pct": 25.8
+      },
+      {
+        "language": "Polish",
+        "count": 4259,
+        "pct": 8.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 1603,
+        "pct": 3.2
+      },
+      {
+        "language": "Chinese",
+        "count": 1403,
+        "pct": 2.8
+      },
+      {
+        "language": "Russian",
+        "count": 752,
+        "pct": 1.5
+      },
+      {
+        "language": "Hindi",
+        "count": 601,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 7615,
+      "pct": 15.2
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "34% above city average",
+    "citywideRank": 19,
+    "rankDescription": "Top 20 most diverse (#19 of 77)"
+  },
+  {
+    "communityArea": "Dunning",
+    "communityNumber": 17,
+    "population5Plus": 39500,
+    "englishOnlyPct": 62.5,
+    "nonEnglishPct": 37.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 24688,
+        "pct": 62.5
+      },
+      {
+        "language": "Spanish",
+        "count": 6004,
+        "pct": 15.2
+      },
+      {
+        "language": "Polish",
+        "count": 4938,
+        "pct": 12.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 988,
+        "pct": 2.5
+      },
+      {
+        "language": "Russian",
+        "count": 474,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 4148,
+      "pct": 10.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "6% above city average",
+    "citywideRank": 30,
+    "rankDescription": "Upper half for diversity (#30 of 77)"
+  },
+  {
+    "communityArea": "Montclare",
+    "communityNumber": 18,
+    "population5Plus": 12900,
+    "englishOnlyPct": 48.5,
+    "nonEnglishPct": 51.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 6257,
+        "pct": 48.5
+      },
+      {
+        "language": "Spanish",
+        "count": 3677,
+        "pct": 28.5
+      },
+      {
+        "language": "Polish",
+        "count": 1393,
+        "pct": 10.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 413,
+        "pct": 3.2
+      },
+      {
+        "language": "Russian",
+        "count": 284,
+        "pct": 2.2
+      },
+      {
+        "language": "Hindi",
+        "count": 155,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2167,
+      "pct": 16.8
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "45% above city average",
+    "citywideRank": 17,
+    "rankDescription": "Top 20 most diverse (#17 of 77)"
+  },
+  {
+    "communityArea": "Belmont Cragin",
+    "communityNumber": 19,
+    "population5Plus": 73300,
+    "englishOnlyPct": 32.5,
+    "nonEnglishPct": 67.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 40901,
+        "pct": 55.8
+      },
+      {
+        "language": "English only",
+        "count": 23823,
+        "pct": 32.5
+      },
+      {
+        "language": "Polish",
+        "count": 3812,
+        "pct": 5.2
+      },
+      {
+        "language": "Russian",
+        "count": 880,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 20891,
+      "pct": 28.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "90% above city average",
+    "citywideRank": 5,
+    "rankDescription": "Top 10 most diverse (#5 of 77)"
+  },
+  {
+    "communityArea": "Hermosa",
+    "communityNumber": 20,
+    "population5Plus": 22500,
+    "englishOnlyPct": 35.8,
+    "nonEnglishPct": 64.2,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 11813,
+        "pct": 52.5
+      },
+      {
+        "language": "English only",
+        "count": 8055,
+        "pct": 35.8
+      },
+      {
+        "language": "Polish",
+        "count": 1080,
+        "pct": 4.8
+      },
+      {
+        "language": "Russian",
+        "count": 338,
+        "pct": 1.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 5895,
+      "pct": 26.2
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "81% above city average",
+    "citywideRank": 6,
+    "rankDescription": "Top 10 most diverse (#6 of 77)"
+  },
+  {
+    "communityArea": "Avondale",
+    "communityNumber": 21,
+    "population5Plus": 37500,
+    "englishOnlyPct": 42.5,
+    "nonEnglishPct": 57.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 16050,
+        "pct": 42.8
+      },
+      {
+        "language": "English only",
+        "count": 15938,
+        "pct": 42.5
+      },
+      {
+        "language": "Polish",
+        "count": 1950,
+        "pct": 5.2
+      },
+      {
+        "language": "Tagalog",
+        "count": 825,
+        "pct": 2.2
+      },
+      {
+        "language": "Russian",
+        "count": 563,
+        "pct": 1.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 8550,
+      "pct": 22.8
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "62% above city average",
+    "citywideRank": 12,
+    "rankDescription": "Top 20 most diverse (#12 of 77)"
+  },
+  {
+    "communityArea": "Logan Square",
+    "communityNumber": 22,
+    "population5Plus": 68000,
+    "englishOnlyPct": 55.9,
+    "nonEnglishPct": 44.1,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 38012,
+        "pct": 55.9
+      },
+      {
+        "language": "Spanish",
+        "count": 22032,
+        "pct": 32.4
+      },
+      {
+        "language": "Polish",
+        "count": 4488,
+        "pct": 6.6
+      },
+      {
+        "language": "Russian",
+        "count": 816,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 5780,
+      "pct": 8.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "24% above city average",
+    "citywideRank": 26,
+    "rankDescription": "Upper half for diversity (#26 of 77)"
+  },
+  {
+    "communityArea": "Humboldt Park",
+    "communityNumber": 23,
+    "population5Plus": 50800,
+    "englishOnlyPct": 38.5,
+    "nonEnglishPct": 61.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 26822,
+        "pct": 52.8
+      },
+      {
+        "language": "English only",
+        "count": 19558,
+        "pct": 38.5
+      },
+      {
+        "language": "Polish",
+        "count": 1270,
+        "pct": 2.5
+      },
+      {
+        "language": "Russian",
+        "count": 762,
+        "pct": 1.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 12446,
+      "pct": 24.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "73% above city average",
+    "citywideRank": 8,
+    "rankDescription": "Top 10 most diverse (#8 of 77)"
+  },
+  {
+    "communityArea": "West Town",
+    "communityNumber": 24,
+    "population5Plus": 72200,
+    "englishOnlyPct": 62.5,
+    "nonEnglishPct": 37.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 45125,
+        "pct": 62.5
+      },
+      {
+        "language": "Spanish",
+        "count": 16462,
+        "pct": 22.8
+      },
+      {
+        "language": "Polish",
+        "count": 3249,
+        "pct": 4.5
+      },
+      {
+        "language": "Chinese",
+        "count": 1805,
+        "pct": 2.5
+      },
+      {
+        "language": "Hindi",
+        "count": 866,
+        "pct": 1.2
+      },
+      {
+        "language": "Russian",
+        "count": 866,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 7364,
+      "pct": 10.2
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "6% above city average",
+    "citywideRank": 31,
+    "rankDescription": "Upper half for diversity (#31 of 77)"
+  },
+  {
+    "communityArea": "Austin",
+    "communityNumber": 25,
+    "population5Plus": 91000,
+    "englishOnlyPct": 85.2,
+    "nonEnglishPct": 14.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 77532,
+        "pct": 85.2
+      },
+      {
+        "language": "Spanish",
+        "count": 9555,
+        "pct": 10.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 3185,
+      "pct": 3.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "58% below city average",
+    "citywideRank": 53,
+    "rankDescription": "Middle tier for diversity (#53 of 77)"
+  },
+  {
+    "communityArea": "West Garfield Park",
+    "communityNumber": 26,
+    "population5Plus": 16400,
+    "englishOnlyPct": 92.5,
+    "nonEnglishPct": 7.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 15170,
+        "pct": 92.5
+      },
+      {
+        "language": "Spanish",
+        "count": 902,
+        "pct": 5.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 361,
+      "pct": 2.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "79% below city average",
+    "citywideRank": 65,
+    "rankDescription": "Lower tier for diversity (#65 of 77)"
+  },
+  {
+    "communityArea": "East Garfield Park",
+    "communityNumber": 27,
+    "population5Plus": 18900,
+    "englishOnlyPct": 90.8,
+    "nonEnglishPct": 9.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 17161,
+        "pct": 90.8
+      },
+      {
+        "language": "Spanish",
+        "count": 1229,
+        "pct": 6.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 473,
+      "pct": 2.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "74% below city average",
+    "citywideRank": 63,
+    "rankDescription": "Lower tier for diversity (#63 of 77)"
+  },
+  {
+    "communityArea": "Near West Side",
+    "communityNumber": 28,
+    "population5Plus": 63700,
+    "englishOnlyPct": 68.5,
+    "nonEnglishPct": 31.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 43635,
+        "pct": 68.5
+      },
+      {
+        "language": "Spanish",
+        "count": 10065,
+        "pct": 15.8
+      },
+      {
+        "language": "Chinese",
+        "count": 2867,
+        "pct": 4.5
+      },
+      {
+        "language": "Polish",
+        "count": 1593,
+        "pct": 2.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 1401,
+        "pct": 2.2
+      },
+      {
+        "language": "Hindi",
+        "count": 764,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 5606,
+      "pct": 8.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "11% below city average",
+    "citywideRank": 38,
+    "rankDescription": "Upper half for diversity (#38 of 77)"
+  },
+  {
+    "communityArea": "North Lawndale",
+    "communityNumber": 29,
+    "population5Plus": 32600,
+    "englishOnlyPct": 88.5,
+    "nonEnglishPct": 11.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 28851,
+        "pct": 88.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2771,
+        "pct": 8.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1043,
+      "pct": 3.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "68% below city average",
+    "citywideRank": 56,
+    "rankDescription": "Middle tier for diversity (#56 of 77)"
+  },
+  {
+    "communityArea": "South Lawndale",
+    "communityNumber": 30,
+    "population5Plus": 69000,
+    "englishOnlyPct": 22.5,
+    "nonEnglishPct": 77.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 50025,
+        "pct": 72.5
+      },
+      {
+        "language": "English only",
+        "count": 15525,
+        "pct": 22.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 26565,
+      "pct": 38.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "118% above city average",
+    "citywideRank": 1,
+    "rankDescription": "Top 10 most diverse (#1 of 77)"
+  },
+  {
+    "communityArea": "Lower West Side",
+    "communityNumber": 31,
+    "population5Plus": 33500,
+    "englishOnlyPct": 28.5,
+    "nonEnglishPct": 71.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 22043,
+        "pct": 65.8
+      },
+      {
+        "language": "English only",
+        "count": 9548,
+        "pct": 28.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 10888,
+      "pct": 32.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "101% above city average",
+    "citywideRank": 2,
+    "rankDescription": "Top 10 most diverse (#2 of 77)"
+  },
+  {
+    "communityArea": "Loop",
+    "communityNumber": 32,
+    "population5Plus": 39700,
+    "englishOnlyPct": 72.5,
+    "nonEnglishPct": 27.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 28783,
+        "pct": 72.5
+      },
+      {
+        "language": "Spanish",
+        "count": 3375,
+        "pct": 8.5
+      },
+      {
+        "language": "Chinese",
+        "count": 2303,
+        "pct": 5.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 993,
+        "pct": 2.5
+      },
+      {
+        "language": "Hindi",
+        "count": 596,
+        "pct": 1.5
+      },
+      {
+        "language": "Korean",
+        "count": 476,
+        "pct": 1.2
+      },
+      {
+        "language": "Russian",
+        "count": 476,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2581,
+      "pct": 6.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "23% below city average",
+    "citywideRank": 42,
+    "rankDescription": "Middle tier for diversity (#42 of 77)"
+  },
+  {
+    "communityArea": "Near South Side",
+    "communityNumber": 33,
+    "population5Plus": 27000,
+    "englishOnlyPct": 65.8,
+    "nonEnglishPct": 34.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 17766,
+        "pct": 65.8
+      },
+      {
+        "language": "Spanish",
+        "count": 3375,
+        "pct": 12.5
+      },
+      {
+        "language": "Chinese",
+        "count": 2295,
+        "pct": 8.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 756,
+        "pct": 2.8
+      },
+      {
+        "language": "Hindi",
+        "count": 405,
+        "pct": 1.5
+      },
+      {
+        "language": "Korean",
+        "count": 324,
+        "pct": 1.2
+      },
+      {
+        "language": "Russian",
+        "count": 324,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2214,
+      "pct": 8.2
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "Near city average",
+    "citywideRank": 36,
+    "rankDescription": "Upper half for diversity (#36 of 77)"
+  },
+  {
+    "communityArea": "Armour Square",
+    "communityNumber": 34,
+    "population5Plus": 12700,
+    "englishOnlyPct": 42.5,
+    "nonEnglishPct": 57.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 5398,
+        "pct": 42.5
+      },
+      {
+        "language": "Chinese",
+        "count": 4890,
+        "pct": 38.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1080,
+        "pct": 8.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 318,
+        "pct": 2.5
+      },
+      {
+        "language": "Vietnamese",
+        "count": 229,
+        "pct": 1.8
+      },
+      {
+        "language": "Korean",
+        "count": 191,
+        "pct": 1.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2858,
+      "pct": 22.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "62% above city average",
+    "citywideRank": 13,
+    "rankDescription": "Top 20 most diverse (#13 of 77)"
+  },
+  {
+    "communityArea": "Douglas",
+    "communityNumber": 35,
+    "population5Plus": 17100,
+    "englishOnlyPct": 78.5,
+    "nonEnglishPct": 21.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 13424,
+        "pct": 78.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1796,
+        "pct": 10.5
+      },
+      {
+        "language": "Chinese",
+        "count": 718,
+        "pct": 4.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 941,
+      "pct": 5.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "39% below city average",
+    "citywideRank": 48,
+    "rankDescription": "Middle tier for diversity (#48 of 77)"
+  },
+  {
+    "communityArea": "Oakland",
+    "communityNumber": 36,
+    "population5Plus": 5500,
+    "englishOnlyPct": 88.2,
+    "nonEnglishPct": 11.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 4851,
+        "pct": 88.2
+      },
+      {
+        "language": "Spanish",
+        "count": 358,
+        "pct": 6.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 176,
+      "pct": 3.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "67% below city average",
+    "citywideRank": 55,
+    "rankDescription": "Middle tier for diversity (#55 of 77)"
+  },
+  {
+    "communityArea": "Fuller Park",
+    "communityNumber": 37,
+    "population5Plus": 2400,
+    "englishOnlyPct": 92.5,
+    "nonEnglishPct": 7.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 2220,
+        "pct": 92.5
+      },
+      {
+        "language": "Spanish",
+        "count": 125,
+        "pct": 5.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 48,
+      "pct": 2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "79% below city average",
+    "citywideRank": 66,
+    "rankDescription": "Lower tier for diversity (#66 of 77)"
+  },
+  {
+    "communityArea": "Grand Boulevard",
+    "communityNumber": 38,
+    "population5Plus": 20500,
+    "englishOnlyPct": 85.5,
+    "nonEnglishPct": 14.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 17528,
+        "pct": 85.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1743,
+        "pct": 8.5
+      },
+      {
+        "language": "Chinese",
+        "count": 513,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 718,
+      "pct": 3.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "59% below city average",
+    "citywideRank": 54,
+    "rankDescription": "Middle tier for diversity (#54 of 77)"
+  },
+  {
+    "communityArea": "Kenwood",
+    "communityNumber": 39,
+    "population5Plus": 16700,
+    "englishOnlyPct": 78.5,
+    "nonEnglishPct": 21.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 13110,
+        "pct": 78.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1369,
+        "pct": 8.2
+      },
+      {
+        "language": "Chinese",
+        "count": 919,
+        "pct": 5.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 868,
+      "pct": 5.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "39% below city average",
+    "citywideRank": 49,
+    "rankDescription": "Middle tier for diversity (#49 of 77)"
+  },
+  {
+    "communityArea": "Washington Park",
+    "communityNumber": 40,
+    "population5Plus": 11000,
+    "englishOnlyPct": 92.8,
+    "nonEnglishPct": 7.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 10208,
+        "pct": 92.8
+      },
+      {
+        "language": "Spanish",
+        "count": 495,
+        "pct": 4.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 198,
+      "pct": 1.8
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "80% below city average",
+    "citywideRank": 71,
+    "rankDescription": "Lower tier for diversity (#71 of 77)"
+  },
+  {
+    "communityArea": "Hyde Park",
+    "communityNumber": 41,
+    "population5Plus": 27600,
+    "englishOnlyPct": 72.5,
+    "nonEnglishPct": 27.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 20010,
+        "pct": 72.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2346,
+        "pct": 8.5
+      },
+      {
+        "language": "Chinese",
+        "count": 1794,
+        "pct": 6.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 690,
+        "pct": 2.5
+      },
+      {
+        "language": "Arabic",
+        "count": 607,
+        "pct": 2.2
+      },
+      {
+        "language": "Hindi",
+        "count": 414,
+        "pct": 1.5
+      },
+      {
+        "language": "Korean",
+        "count": 331,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1877,
+      "pct": 6.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "23% below city average",
+    "citywideRank": 43,
+    "rankDescription": "Middle tier for diversity (#43 of 77)"
+  },
+  {
+    "communityArea": "Woodlawn",
+    "communityNumber": 42,
+    "population5Plus": 25400,
+    "englishOnlyPct": 88.5,
+    "nonEnglishPct": 11.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 22479,
+        "pct": 88.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1727,
+        "pct": 6.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 711,
+      "pct": 2.8
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "68% below city average",
+    "citywideRank": 57,
+    "rankDescription": "Middle tier for diversity (#57 of 77)"
+  },
+  {
+    "communityArea": "South Shore",
+    "communityNumber": 43,
+    "population5Plus": 50600,
+    "englishOnlyPct": 90.5,
+    "nonEnglishPct": 9.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 45793,
+        "pct": 90.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2935,
+        "pct": 5.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1113,
+      "pct": 2.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "73% below city average",
+    "citywideRank": 61,
+    "rankDescription": "Lower tier for diversity (#61 of 77)"
+  },
+  {
+    "communityArea": "Chatham",
+    "communityNumber": 44,
+    "population5Plus": 29700,
+    "englishOnlyPct": 95.2,
+    "nonEnglishPct": 4.8,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 28274,
+        "pct": 95.2
+      },
+      {
+        "language": "Spanish",
+        "count": 832,
+        "pct": 2.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 356,
+      "pct": 1.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "86% below city average",
+    "citywideRank": 77,
+    "rankDescription": "Lower tier for diversity (#77 of 77)"
+  },
+  {
+    "communityArea": "Avalon Park",
+    "communityNumber": 45,
+    "population5Plus": 8900,
+    "englishOnlyPct": 94.5,
+    "nonEnglishPct": 5.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 8411,
+        "pct": 94.5
+      },
+      {
+        "language": "Spanish",
+        "count": 285,
+        "pct": 3.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 134,
+      "pct": 1.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "85% below city average",
+    "citywideRank": 75,
+    "rankDescription": "Lower tier for diversity (#75 of 77)"
+  },
+  {
+    "communityArea": "South Chicago",
+    "communityNumber": 46,
+    "population5Plus": 26300,
+    "englishOnlyPct": 75.5,
+    "nonEnglishPct": 24.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 19857,
+        "pct": 75.5
+      },
+      {
+        "language": "Spanish",
+        "count": 4866,
+        "pct": 18.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2236,
+      "pct": 8.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "31% below city average",
+    "citywideRank": 45,
+    "rankDescription": "Middle tier for diversity (#45 of 77)"
+  },
+  {
+    "communityArea": "Burnside",
+    "communityNumber": 47,
+    "population5Plus": 2400,
+    "englishOnlyPct": 94.8,
+    "nonEnglishPct": 5.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 2275,
+        "pct": 94.8
+      },
+      {
+        "language": "Spanish",
+        "count": 77,
+        "pct": 3.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 29,
+      "pct": 1.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "85% below city average",
+    "citywideRank": 76,
+    "rankDescription": "Lower tier for diversity (#76 of 77)"
+  },
+  {
+    "communityArea": "Calumet Heights",
+    "communityNumber": 48,
+    "population5Plus": 12300,
+    "englishOnlyPct": 92.8,
+    "nonEnglishPct": 7.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 11414,
+        "pct": 92.8
+      },
+      {
+        "language": "Spanish",
+        "count": 554,
+        "pct": 4.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 221,
+      "pct": 1.8
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "80% below city average",
+    "citywideRank": 72,
+    "rankDescription": "Lower tier for diversity (#72 of 77)"
+  },
+  {
+    "communityArea": "Roseland",
+    "communityNumber": 49,
+    "population5Plus": 40700,
+    "englishOnlyPct": 92.5,
+    "nonEnglishPct": 7.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 37648,
+        "pct": 92.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2116,
+        "pct": 5.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 814,
+      "pct": 2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "79% below city average",
+    "citywideRank": 67,
+    "rankDescription": "Lower tier for diversity (#67 of 77)"
+  },
+  {
+    "communityArea": "Pullman",
+    "communityNumber": 50,
+    "population5Plus": 6800,
+    "englishOnlyPct": 91.5,
+    "nonEnglishPct": 8.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 6222,
+        "pct": 91.5
+      },
+      {
+        "language": "Spanish",
+        "count": 394,
+        "pct": 5.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 150,
+      "pct": 2.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "76% below city average",
+    "citywideRank": 64,
+    "rankDescription": "Lower tier for diversity (#64 of 77)"
+  },
+  {
+    "communityArea": "South Deering",
+    "communityNumber": 51,
+    "population5Plus": 14200,
+    "englishOnlyPct": 82.5,
+    "nonEnglishPct": 17.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 11715,
+        "pct": 82.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1818,
+        "pct": 12.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 781,
+      "pct": 5.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "51% below city average",
+    "citywideRank": 51,
+    "rankDescription": "Middle tier for diversity (#51 of 77)"
+  },
+  {
+    "communityArea": "East Side",
+    "communityNumber": 52,
+    "population5Plus": 21600,
+    "englishOnlyPct": 52.5,
+    "nonEnglishPct": 47.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 11340,
+        "pct": 52.5
+      },
+      {
+        "language": "Spanish",
+        "count": 9180,
+        "pct": 42.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 3996,
+      "pct": 18.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "34% above city average",
+    "citywideRank": 20,
+    "rankDescription": "Top 20 most diverse (#20 of 77)"
+  },
+  {
+    "communityArea": "West Pullman",
+    "communityNumber": 53,
+    "population5Plus": 27800,
+    "englishOnlyPct": 88.5,
+    "nonEnglishPct": 11.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 24603,
+        "pct": 88.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2280,
+        "pct": 8.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 890,
+      "pct": 3.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "68% below city average",
+    "citywideRank": 58,
+    "rankDescription": "Middle tier for diversity (#58 of 77)"
+  },
+  {
+    "communityArea": "Riverdale",
+    "communityNumber": 54,
+    "population5Plus": 6100,
+    "englishOnlyPct": 92.5,
+    "nonEnglishPct": 7.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 5643,
+        "pct": 92.5
+      },
+      {
+        "language": "Spanish",
+        "count": 317,
+        "pct": 5.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 122,
+      "pct": 2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "79% below city average",
+    "citywideRank": 68,
+    "rankDescription": "Lower tier for diversity (#68 of 77)"
+  },
+  {
+    "communityArea": "Hegewisch",
+    "communityNumber": 55,
+    "population5Plus": 9400,
+    "englishOnlyPct": 68.5,
+    "nonEnglishPct": 31.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 6439,
+        "pct": 68.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2425,
+        "pct": 25.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 959,
+      "pct": 10.2
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "11% below city average",
+    "citywideRank": 39,
+    "rankDescription": "Middle tier for diversity (#39 of 77)"
+  },
+  {
+    "communityArea": "Garfield Ridge",
+    "communityNumber": 56,
+    "population5Plus": 33600,
+    "englishOnlyPct": 55.8,
+    "nonEnglishPct": 44.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 18749,
+        "pct": 55.8
+      },
+      {
+        "language": "Spanish",
+        "count": 7560,
+        "pct": 22.5
+      },
+      {
+        "language": "Polish",
+        "count": 4200,
+        "pct": 12.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 941,
+        "pct": 2.8
+      },
+      {
+        "language": "Russian",
+        "count": 403,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 4200,
+      "pct": 12.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "25% above city average",
+    "citywideRank": 25,
+    "rankDescription": "Upper half for diversity (#25 of 77)"
+  },
+  {
+    "communityArea": "Archer Heights",
+    "communityNumber": 57,
+    "population5Plus": 13300,
+    "englishOnlyPct": 38.5,
+    "nonEnglishPct": 61.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 5653,
+        "pct": 42.5
+      },
+      {
+        "language": "English only",
+        "count": 5121,
+        "pct": 38.5
+      },
+      {
+        "language": "Polish",
+        "count": 1397,
+        "pct": 10.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 293,
+        "pct": 2.2
+      },
+      {
+        "language": "Russian",
+        "count": 200,
+        "pct": 1.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2993,
+      "pct": 22.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "73% above city average",
+    "citywideRank": 9,
+    "rankDescription": "Top 10 most diverse (#9 of 77)"
+  },
+  {
+    "communityArea": "Brighton Park",
+    "communityNumber": 58,
+    "population5Plus": 42300,
+    "englishOnlyPct": 28.5,
+    "nonEnglishPct": 71.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 26438,
+        "pct": 62.5
+      },
+      {
+        "language": "English only",
+        "count": 12056,
+        "pct": 28.5
+      },
+      {
+        "language": "Polish",
+        "count": 1481,
+        "pct": 3.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 12902,
+      "pct": 30.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "101% above city average",
+    "citywideRank": 3,
+    "rankDescription": "Top 10 most diverse (#3 of 77)"
+  },
+  {
+    "communityArea": "McKinley Park",
+    "communityNumber": 59,
+    "population5Plus": 14900,
+    "englishOnlyPct": 42.5,
+    "nonEnglishPct": 57.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 6824,
+        "pct": 45.8
+      },
+      {
+        "language": "English only",
+        "count": 6333,
+        "pct": 42.5
+      },
+      {
+        "language": "Polish",
+        "count": 566,
+        "pct": 3.8
+      },
+      {
+        "language": "Chinese",
+        "count": 328,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 3055,
+      "pct": 20.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "62% above city average",
+    "citywideRank": 14,
+    "rankDescription": "Top 20 most diverse (#14 of 77)"
+  },
+  {
+    "communityArea": "Bridgeport",
+    "communityNumber": 60,
+    "population5Plus": 31600,
+    "englishOnlyPct": 48.5,
+    "nonEnglishPct": 51.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 15326,
+        "pct": 48.5
+      },
+      {
+        "language": "Spanish",
+        "count": 9006,
+        "pct": 28.5
+      },
+      {
+        "language": "Chinese",
+        "count": 3950,
+        "pct": 12.5
+      },
+      {
+        "language": "Polish",
+        "count": 885,
+        "pct": 2.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 695,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 5846,
+      "pct": 18.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "45% above city average",
+    "citywideRank": 18,
+    "rankDescription": "Top 20 most diverse (#18 of 77)"
+  },
+  {
+    "communityArea": "New City",
+    "communityNumber": 61,
+    "population5Plus": 40900,
+    "englishOnlyPct": 42.5,
+    "nonEnglishPct": 57.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 19837,
+        "pct": 48.5
+      },
+      {
+        "language": "English only",
+        "count": 17383,
+        "pct": 42.5
+      },
+      {
+        "language": "Polish",
+        "count": 1023,
+        "pct": 2.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 9325,
+      "pct": 22.8
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "62% above city average",
+    "citywideRank": 15,
+    "rankDescription": "Top 20 most diverse (#15 of 77)"
+  },
+  {
+    "communityArea": "West Elsdon",
+    "communityNumber": 62,
+    "population5Plus": 13100,
+    "englishOnlyPct": 45.5,
+    "nonEnglishPct": 54.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 5961,
+        "pct": 45.5
+      },
+      {
+        "language": "Spanish",
+        "count": 4690,
+        "pct": 35.8
+      },
+      {
+        "language": "Polish",
+        "count": 1376,
+        "pct": 10.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 288,
+        "pct": 2.2
+      },
+      {
+        "language": "Russian",
+        "count": 197,
+        "pct": 1.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2384,
+      "pct": 18.2
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "54% above city average",
+    "citywideRank": 16,
+    "rankDescription": "Top 20 most diverse (#16 of 77)"
+  },
+  {
+    "communityArea": "Gage Park",
+    "communityNumber": 63,
+    "population5Plus": 37400,
+    "englishOnlyPct": 28.5,
+    "nonEnglishPct": 71.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 23375,
+        "pct": 62.5
+      },
+      {
+        "language": "English only",
+        "count": 10659,
+        "pct": 28.5
+      },
+      {
+        "language": "Polish",
+        "count": 1197,
+        "pct": 3.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 12155,
+      "pct": 32.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "101% above city average",
+    "citywideRank": 4,
+    "rankDescription": "Top 10 most diverse (#4 of 77)"
+  },
+  {
+    "communityArea": "Clearing",
+    "communityNumber": 64,
+    "population5Plus": 23300,
+    "englishOnlyPct": 58.5,
+    "nonEnglishPct": 41.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 13631,
+        "pct": 58.5
+      },
+      {
+        "language": "Spanish",
+        "count": 5243,
+        "pct": 22.5
+      },
+      {
+        "language": "Polish",
+        "count": 2516,
+        "pct": 10.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 583,
+        "pct": 2.5
+      },
+      {
+        "language": "Russian",
+        "count": 280,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 2982,
+      "pct": 12.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "17% above city average",
+    "citywideRank": 28,
+    "rankDescription": "Upper half for diversity (#28 of 77)"
+  },
+  {
+    "communityArea": "West Lawn",
+    "communityNumber": 65,
+    "population5Plus": 31200,
+    "englishOnlyPct": 38.5,
+    "nonEnglishPct": 61.5,
+    "topLanguages": [
+      {
+        "language": "Spanish",
+        "count": 16380,
+        "pct": 52.5
+      },
+      {
+        "language": "English only",
+        "count": 12012,
+        "pct": 38.5
+      },
+      {
+        "language": "Polish",
+        "count": 874,
+        "pct": 2.8
+      },
+      {
+        "language": "Russian",
+        "count": 374,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 7956,
+      "pct": 25.5
+    },
+    "linguisticDiversity": "high",
+    "comparedToCityAvg": "73% above city average",
+    "citywideRank": 10,
+    "rankDescription": "Top 10 most diverse (#10 of 77)"
+  },
+  {
+    "communityArea": "Chicago Lawn",
+    "communityNumber": 66,
+    "population5Plus": 51800,
+    "englishOnlyPct": 55.5,
+    "nonEnglishPct": 44.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 28749,
+        "pct": 55.5
+      },
+      {
+        "language": "Spanish",
+        "count": 16835,
+        "pct": 32.5
+      },
+      {
+        "language": "Arabic",
+        "count": 1813,
+        "pct": 3.5
+      },
+      {
+        "language": "Polish",
+        "count": 1295,
+        "pct": 2.5
+      },
+      {
+        "language": "Russian",
+        "count": 622,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 8184,
+      "pct": 15.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "25% above city average",
+    "citywideRank": 23,
+    "rankDescription": "Upper half for diversity (#23 of 77)"
+  },
+  {
+    "communityArea": "West Englewood",
+    "communityNumber": 67,
+    "population5Plus": 27400,
+    "englishOnlyPct": 92.5,
+    "nonEnglishPct": 7.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 25345,
+        "pct": 92.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1425,
+        "pct": 5.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 548,
+      "pct": 2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "79% below city average",
+    "citywideRank": 69,
+    "rankDescription": "Lower tier for diversity (#69 of 77)"
+  },
+  {
+    "communityArea": "Englewood",
+    "communityNumber": 68,
+    "population5Plus": 22800,
+    "englishOnlyPct": 93.5,
+    "nonEnglishPct": 6.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 21318,
+        "pct": 93.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1026,
+        "pct": 4.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 410,
+      "pct": 1.8
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "82% below city average",
+    "citywideRank": 74,
+    "rankDescription": "Lower tier for diversity (#74 of 77)"
+  },
+  {
+    "communityArea": "Greater Grand Crossing",
+    "communityNumber": 69,
+    "population5Plus": 29500,
+    "englishOnlyPct": 92.8,
+    "nonEnglishPct": 7.2,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 27376,
+        "pct": 92.8
+      },
+      {
+        "language": "Spanish",
+        "count": 1416,
+        "pct": 4.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 531,
+      "pct": 1.8
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "80% below city average",
+    "citywideRank": 73,
+    "rankDescription": "Lower tier for diversity (#73 of 77)"
+  },
+  {
+    "communityArea": "Ashburn",
+    "communityNumber": 70,
+    "population5Plus": 38900,
+    "englishOnlyPct": 68.5,
+    "nonEnglishPct": 31.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 26647,
+        "pct": 68.5
+      },
+      {
+        "language": "Spanish",
+        "count": 7197,
+        "pct": 18.5
+      },
+      {
+        "language": "Polish",
+        "count": 2140,
+        "pct": 5.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 856,
+        "pct": 2.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 3307,
+      "pct": 8.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "11% below city average",
+    "citywideRank": 40,
+    "rankDescription": "Middle tier for diversity (#40 of 77)"
+  },
+  {
+    "communityArea": "Auburn Gresham",
+    "communityNumber": 71,
+    "population5Plus": 42400,
+    "englishOnlyPct": 92.5,
+    "nonEnglishPct": 7.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 39220,
+        "pct": 92.5
+      },
+      {
+        "language": "Spanish",
+        "count": 2205,
+        "pct": 5.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 848,
+      "pct": 2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "79% below city average",
+    "citywideRank": 70,
+    "rankDescription": "Lower tier for diversity (#70 of 77)"
+  },
+  {
+    "communityArea": "Beverly",
+    "communityNumber": 72,
+    "population5Plus": 20600,
+    "englishOnlyPct": 88.5,
+    "nonEnglishPct": 11.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 18231,
+        "pct": 88.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1133,
+        "pct": 5.5
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 515,
+      "pct": 2.5
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "68% below city average",
+    "citywideRank": 59,
+    "rankDescription": "Lower tier for diversity (#59 of 77)"
+  },
+  {
+    "communityArea": "Washington Heights",
+    "communityNumber": 73,
+    "population5Plus": 25900,
+    "englishOnlyPct": 90.5,
+    "nonEnglishPct": 9.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 23440,
+        "pct": 90.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1502,
+        "pct": 5.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 570,
+      "pct": 2.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "73% below city average",
+    "citywideRank": 62,
+    "rankDescription": "Lower tier for diversity (#62 of 77)"
+  },
+  {
+    "communityArea": "Mount Greenwood",
+    "communityNumber": 74,
+    "population5Plus": 17900,
+    "englishOnlyPct": 82.5,
+    "nonEnglishPct": 17.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 14768,
+        "pct": 82.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1164,
+        "pct": 6.5
+      },
+      {
+        "language": "Polish",
+        "count": 1038,
+        "pct": 5.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 752,
+      "pct": 4.2
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "51% below city average",
+    "citywideRank": 52,
+    "rankDescription": "Middle tier for diversity (#52 of 77)"
+  },
+  {
+    "communityArea": "Morgan Park",
+    "communityNumber": 75,
+    "population5Plus": 21100,
+    "englishOnlyPct": 88.5,
+    "nonEnglishPct": 11.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 18674,
+        "pct": 88.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1308,
+        "pct": 6.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 591,
+      "pct": 2.8
+    },
+    "linguisticDiversity": "low",
+    "comparedToCityAvg": "68% below city average",
+    "citywideRank": 60,
+    "rankDescription": "Lower tier for diversity (#60 of 77)"
+  },
+  {
+    "communityArea": "O'Hare",
+    "communityNumber": 76,
+    "population5Plus": 12000,
+    "englishOnlyPct": 65.5,
+    "nonEnglishPct": 34.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 7860,
+        "pct": 65.5
+      },
+      {
+        "language": "Spanish",
+        "count": 1500,
+        "pct": 12.5
+      },
+      {
+        "language": "Polish",
+        "count": 1020,
+        "pct": 8.5
+      },
+      {
+        "language": "Tagalog",
+        "count": 420,
+        "pct": 3.5
+      },
+      {
+        "language": "Chinese",
+        "count": 300,
+        "pct": 2.5
+      },
+      {
+        "language": "Hindi",
+        "count": 144,
+        "pct": 1.2
+      },
+      {
+        "language": "Russian",
+        "count": 144,
+        "pct": 1.2
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 1056,
+      "pct": 8.8
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "Near city average",
+    "citywideRank": 35,
+    "rankDescription": "Upper half for diversity (#35 of 77)"
+  },
+  {
+    "communityArea": "Edgewater",
+    "communityNumber": 77,
+    "population5Plus": 53000,
+    "englishOnlyPct": 62.5,
+    "nonEnglishPct": 37.5,
+    "topLanguages": [
+      {
+        "language": "English only",
+        "count": 33125,
+        "pct": 62.5
+      },
+      {
+        "language": "Spanish",
+        "count": 8374,
+        "pct": 15.8
+      },
+      {
+        "language": "Chinese",
+        "count": 2226,
+        "pct": 4.2
+      },
+      {
+        "language": "Polish",
+        "count": 1855,
+        "pct": 3.5
+      },
+      {
+        "language": "Arabic",
+        "count": 1484,
+        "pct": 2.8
+      },
+      {
+        "language": "Tagalog",
+        "count": 1325,
+        "pct": 2.5
+      },
+      {
+        "language": "Hindi",
+        "count": 954,
+        "pct": 1.8
+      }
+    ],
+    "limitedEnglishProficiency": {
+      "count": 5035,
+      "pct": 9.5
+    },
+    "linguisticDiversity": "moderate",
+    "comparedToCityAvg": "6% above city average",
+    "citywideRank": 32,
+    "rankDescription": "Upper half for diversity (#32 of 77)"
+  }
+]

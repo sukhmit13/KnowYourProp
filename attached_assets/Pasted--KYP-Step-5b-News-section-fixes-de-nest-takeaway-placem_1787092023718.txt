@@ -1,0 +1,73 @@
+# KYP — Step 5b: News section fixes (de-nest + takeaway placement + logo size)
+
+Follow-up to Step 5a. The News section still shows old chrome and a mis-placed takeaway. Four fixes.
+
+## 1. Delete the duplicate section title in the body
+The row header already reads **"14 · NEWS ON THIS PROPERTY — …"**. The body then renders another
+**"■ NEWS"** title bar. Delete it (Step 5a rule #2 — it wasn't applied to this section). One title
+per section, in the row header only.
+
+## 2. The takeaway belongs in the ROW HEADER, not the body
+Currently the header shows a generic description ("Any news coverage that names this specific
+property") while the real AI takeaway sits inside the body under the momentum cards, with its
+bullet rows.
+
+- **Header takeaway** = the actual generated takeaway, trimmed to one clause (~90 chars). For this
+  run: *"Edgewater's news cycle pairs a lively dining scene with steady development activity."*
+  Source it from `nnTakeaway.takeaway.title` / `newsTakeaway.section.title` (whichever scope leads),
+  falling back to the static description only when no takeaway exists.
+- **DELETE from the body**: the takeaway headline AND its bullet list (the "High momentum reading /
+  Pipeline taking shape / Permit records may lag the news / Culture and retail signal" rows) — this
+  is the `.crm-take` / `take` block that Step 5a rule #3 removes. The visuals + article rows carry it.
+- **KEEP** any hard datum that lived ONLY in a bullet by moving it into the relevant subsection
+  (e.g. the "permit records may lag the news / matched-once" caveat becomes a `kyp-src`-style note
+  under the Development list, not a bullet at the top).
+
+## 3. Logo tiles are too large
+`.kyp-archlogo` is ~112px (146px on lead rows) — it dominates one-line headlines. Reduce:
+
+```css
+.kyp-archlogo{width:72px;height:72px;padding:10px;border-radius:10px}
+.kyp-archrow.lead .kyp-archlogo{width:88px;height:88px}
+.kyp-archthumb{width:72px;height:72px;padding:9px 10px}      /* fallback plate matches */
+.kyp-archthumb .tsrc{font-size:14px}
+.kyp-archrow{padding:16px 0;gap:16px}                         /* tighten with the smaller tile */
+```
+The logo is a wayfinding accent, not the hero — the headline is.
+
+## 4. Restore the two labeled subsections (the merge from Step 4d)
+The body currently opens straight into Neighborhood-News content (momentum cards + its takeaway)
+with no subsection label, even though the section is "News on This Property". Restore the specced
+structure:
+
+- `kyp-subhead` **"Site-Specific Coverage"** + count → the parcel/adjacent archive rows (with the
+  record-check status dot).
+  **Empty state (important):** when there is no coverage naming this parcel, still render the
+  subhead — with the count as `0` — followed by exactly this line and nothing else:
+
+  ```tsx
+  <div className="kyp-empty">No news coverage names this property.</div>
+  ```
+  ```css
+  .kyp-empty{font-size:13.5px;color:var(--kyp-ink2);padding:14px 0 4px;line-height:1.5}
+  ```
+  Do NOT hide the subsection, do not substitute neighborhood articles, and do not leave it blank.
+  An explicit "none" is a real finding (clean record) — silence reads like a bug.
+  When Site-Specific is empty, the **row-header takeaway** falls through to the Neighborhood-News
+  takeaway (as in the current Edgewater example).
+- `kyp-subhead` **"Neighborhood News"** + `{communityArea} · 120 days` → the momentum + article-count
+  blocks, then the **Entertainment & Culture** and **Real Estate & Development** lists under
+  `kyp-cath` headers (stage tags + "counted once in Corridor" cross-link preserved).
+
+Momentum block colors stay: score ≥75 green, ≥50 orange, else red; article count = slate (a count,
+not a verdict).
+
+## ✅ Done-when
+- [ ] Body has NO "NEWS" title bar — the row header is the only title.
+- [ ] Row header carries the real takeaway (one clause); the body has no takeaway headline and no
+      bullet list. No `.crm-take`/lavender block anywhere.
+- [ ] Logo tiles ~72px (88px lead); headline reads as the dominant element in each row.
+- [ ] Two labeled subsections in order: Site-Specific Coverage, then Neighborhood News.
+- [ ] With no parcel coverage, Site-Specific still renders (count 0) with the line
+      "No news coverage names this property." — never hidden, never filled with neighborhood items.
+- [ ] All articles, dates, sources, stage tags, momentum KPIs, cross-links and source lines intact.

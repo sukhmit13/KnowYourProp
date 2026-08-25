@@ -1,0 +1,88 @@
+# Replit Prompt — CTA L Ridership station cards — build to spec
+
+Update the **CTA L Ridership** station blocks. Three changes from the current live version: (1) add the **line badge** next to each station name (reuse the exact badge from the CTA Rail Stations list), (2) station name to **18px** (matches the Metra section), (3) the KPI numbers (Avg Weekday / Saturday / Sun-Hol) to **27px** (down from the current oversized value). Implement CSS/HTML **verbatim**; bind placeholders; check the CRITICAL DETAILS.
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --good:#2f7d3f; --goodSoft:#e9f4ec;
+--sans:"Inter"; --disp:"Instrument Serif"; --mono:"JetBrains Mono";
+/* CTA line colors — reuse the SAME tokens the Rail Stations badges already use: */
+--ctaBlue:#00a1de; --ctaRed:#c60c30; --ctaBrown:#62361b; --ctaGreen:#009b3a;
+--ctaOrange:#f9461c; --ctaPink:#e27ea6; --ctaPurple:#522398; --ctaYellow:#f9e300;
+```
+
+## CSS (verbatim)
+```css
+.station{margin-top:26px}
+.sthead{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:15px}
+.stname{font-size:18px;font-weight:600;color:var(--ink)}   /* was ~21px — now matches Metra station names */
+
+/* line badge — the SAME component/classes as the CTA Rail Stations list */
+.lineb{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.02em;color:#fff;border-radius:7px;padding:4px 10px}
+.lineb.blue{background:var(--ctaBlue)}
+.lineb.red{background:var(--ctaRed)} .lineb.brown{background:var(--ctaBrown)} .lineb.green{background:var(--ctaGreen)}
+.lineb.orange{background:var(--ctaOrange)} .lineb.pink{background:var(--ctaPink)} .lineb.purple{background:var(--ctaPurple)}
+.lineb.yellow{background:var(--ctaYellow);color:var(--ink)}   /* yellow needs dark text for contrast */
+
+.rankchip{font-family:var(--mono);font-size:11px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:5px 11px}
+.trendchip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--good);background:var(--goodSoft);border-radius:999px;padding:5px 12px}
+.trendchip svg{width:13px;height:13px;stroke:var(--good);fill:none}
+
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.kpi .k{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.kpi .k .s{display:block;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;margin-top:3px}
+.kpi .v{font-family:var(--disp);font-size:27px;color:var(--ink);line-height:1}   /* was ~34px — reduced */
+
+.cmp{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 20px 15px}
+.cmptop{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.cmptop .lbl{font-size:13px;color:var(--ink2)}
+.cmptop .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--good);background:var(--goodSoft);border-radius:999px;padding:4px 11px}
+.cmptop .badge .d{width:7px;height:7px;border-radius:50%;background:var(--good)}
+.track{position:relative;height:10px;border-radius:6px;background:linear-gradient(90deg,#edece7 0%,#e3ead9 45%,#bcd9a6 72%,#5fa860 100%);margin-bottom:5px}
+.track .tick{position:absolute;top:-3px;width:2px;height:16px;background:#b9b7ae}
+.track .mark{position:absolute;top:-5px;width:3px;height:20px;background:var(--ink);border-radius:2px}
+.scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:12px}
+.cmpfoot{font-size:12.5px;color:var(--ink2)}
+.cmpfoot b{color:var(--ink);font-weight:700}
+```
+
+## HTML (verbatim; loop per station)
+```html
+<div class="station">
+  <div class="sthead">
+    <span class="stname">{STATION}</span>
+    <!-- one .lineb per line the station serves, in CTA line order -->
+    {LINE_BADGES}   <!-- e.g. <span class="lineb blue">Blue Line</span> -->
+    <span class="rankchip">#{RANK} of {TOTAL} stations</span>
+    <span class="trendchip"><svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>{TREND_SIGN}{TREND_PCT}% · 3-yr</span>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><span class="k">Avg Weekday<span class="s">entries/day</span></span><span class="v">{WEEKDAY}</span></div>
+    <div class="kpi"><span class="k">Avg Saturday<span class="s">entries/day</span></span><span class="v">{SAT}</span></div>
+    <div class="kpi"><span class="k">Avg Sun/Hol<span class="s">entries/day</span></span><span class="v">{SUNHOL}</span></div>
+  </div>
+  <div class="cmp">
+    <div class="cmptop"><span class="lbl">vs. all {TOTAL} L stations (weekday avg)</span><span class="badge"><span class="d"></span>{ACTIVITY_LABEL}</span></div>
+    <div class="track"><span class="tick" style="left:{MEDIAN_PCT}%"></span><span class="tick" style="left:{SYSAVG_PCT}%"></span><span class="mark" style="left:{STATION_PCT}%"></span></div>
+    <div class="scale"><span>0</span><span>{MAX}</span></div>
+    <div class="cmpfoot">This station <b>{WEEKDAY_INT}</b> · Median {MEDIAN} · System avg {SYSAVG} · busier than <b>{PERCENTILE}%</b> of stations</div>
+  </div>
+</div>
+```
+
+## LOGIC
+1. **Line badges are DATA-DRIVEN, one per line the station serves.** Loop the station's `lines[]` and render a `.lineb` per line in CTA order, each with the matching color class. Belmont-O'Hare / Logan Square are Blue-only here, but interchange stations (e.g. a Red+Brown+Purple stop) must show all their badges. **Reuse the exact `.lineb` component the CTA Rail Stations list already uses — do not fork a second badge.**
+2. `.track` marks (percent positions on the 0→`{MAX}` scale): `MEDIAN_PCT = median/MAX*100`, `SYSAVG_PCT = sysavg/MAX*100`, `STATION_PCT = station_weekday/MAX*100`. `MAX` = the busiest L station's weekday avg (system max). Two grey ticks (median, system avg), one ink marker (this station).
+3. `{PERCENTILE}` = this station's rank as "busier than X% of stations" = `(1 - rank/total)*100`, rounded.
+4. `{ACTIVITY_LABEL}` from the percentile tier (e.g. ≥75th "Strong station activity"). Keep it green when high; a low-activity station would use a neutral label — don't force green.
+
+## CRITICAL DETAILS
+1. **Line badge added next to the station name**, using the **same component + color tokens** as the CTA Rail Stations list (single source of truth for line colors). One badge per line served; loop `lines[]`.
+2. **Yellow Line badge uses dark text** (`.lineb.yellow{color:var(--ink)}`) — yellow-on-white with white text is unreadable; every other line is white text.
+3. **Station name = 18px** (`.stname`), matching the Metra section's station-name size. Ideally share ONE class/token with the Metra station names so they can't drift apart.
+4. **KPI value numbers = 27px** (`.kpi .v`), down from the oversized ~34px. Instrument Serif.
+5. **Serif (`--disp`) only** on the KPI numbers. Station name, chips, labels, footnote are Inter/Mono.
+6. Comparison-bar fills/marks are positioned by percent; the marker is a solid ink bar, ticks are grey.
+```

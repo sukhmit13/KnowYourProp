@@ -1,0 +1,179 @@
+# Replit Prompt — New Construction Activity — build to spec
+
+Rebuild the **New Construction Activity** section to match this spec exactly. Front-end / CSS + markup, PLUS derived rules (volume-proportional bars, YTD/pace handling, scope separation — see LOGIC). Bind values to real data; strings are placeholders. Implement CSS/HTML **verbatim** and check every CRITICAL DETAIL.
+
+Replit usually gets ~80% of a mockup; the missing 20% here is: (a) bars that aren't volume-proportional (the whole point of the chart), (b) stacked segment fills that ignore `flex`/`display:block`, (c) the wrong category colors (teal is banned; gold must be the vivid `--comm`, not the caution marigold). Follow the exact values and none of that happens.
+
+## Colors — READ THIS FIRST (validated, do not substitute)
+Three construction-type category colors, chosen with a colorblind-safety validator. **Do NOT use teal for Multifamily** (removed site-wide) and **do NOT reuse the caution marigold `#f0a41c` for Commercial** — Commercial is a separate, more vivid amber so it pops and stays distinct from warnings:
+```
+--sf:#2b3a9e;    /* Single Family  = indigo   */
+--mf:#7b5ea7;    /* Multifamily    = purple   */
+--comm:#f59e0b;  /* Commercial     = vivid amber (pops; NOT --caution) */
+```
+Legend is mandatory (3 series); segment identity is never color-alone. These three plus 2px inter-segment gaps + direct labels are the secondary encoding that makes the amber legible despite its low contrast on white — keep all three.
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f; --caution:#f0a41c; --cautionText:#96600a;
+--sf:#2b3a9e; --mf:#7b5ea7; --comm:#f59e0b;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+Font roles: **Instrument Serif** ONLY on the takeaway headline, the stat-card numbers (`.tcnum .n`), and the year totals (`.ybtot`). Everything else Inter; all labels/units/years/source are JetBrains Mono.
+
+**This is a SUBSECTION**, not a top-level section — use the 17px **outline hard-hat icon** in the header (`.ssh .hic`), NOT a filled indigo square. It nests under its parent area/neighborhood section.
+
+## CSS (verbatim — copy every value)
+```css
+.cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+
+/* subsection header (outline icon, NOT a top-level square) */
+.ssh{display:flex;align-items:center;gap:9px;margin-bottom:16px}
+.ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+.ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.ssh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+
+/* takeaway */
+.take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px 17px;margin-bottom:18px}
+.takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+.takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+.taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:13px}
+.cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:9px}
+.cn:last-child{margin-bottom:0}
+.cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.cn.c .dt{background:var(--caution)}
+.cn.i .dt{background:var(--indigo)}
+.cn b{color:var(--ink);font-weight:600}
+.cn .tx{flex:1}
+
+/* scope toggle */
+.toggle{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:4px;gap:4px;margin-bottom:16px}
+.toggle .tg{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink2);padding:8px 10px;border-radius:7px;cursor:pointer}
+.toggle .tg svg{width:13px;height:13px;stroke:currentColor;fill:none}
+.toggle .tg.on{background:var(--indigo);color:#fff}
+.scopelbl{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:13px}
+.scopelbl svg{width:13px;height:13px;stroke:var(--indigo);fill:none}
+
+/* type stat cards */
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:20px}
+.tcard{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 15px}
+.tchead{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.tchead .sw{width:9px;height:9px;border-radius:3px;flex:none}
+.tchead .nm{font-size:12.5px;font-weight:600;color:var(--ink)}
+.tcnum{display:flex;align-items:baseline;gap:8px}
+.tcnum .n{font-family:var(--disp);font-size:34px;color:var(--ink);line-height:.9}
+.tcnum .u{font-family:var(--mono);font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.tcavg{font-family:var(--mono);font-size:10.5px;color:var(--ink2);margin-top:7px}
+.tcavg b{color:var(--ink);font-weight:600}
+
+/* yearly breakdown */
+.ybhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ybtitle{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.legend{display:flex;gap:14px}
+.legend .lg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2)}
+.legend .lg .sw{width:9px;height:9px;border-radius:3px;flex:none}
+.ybrow{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:12px;margin-bottom:11px}
+.ybyear{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;line-height:1.25}
+.ybyear .yt{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.06em;color:var(--indigo)}
+.ybtrack{width:100%}
+.ybbar{display:flex;gap:2px;height:22px;border-radius:5px;overflow:hidden}
+.ybbar i{display:block;height:100%}
+.ybbar i:first-child{border-top-left-radius:5px;border-bottom-left-radius:5px}
+.ybbar i:last-child{border-top-right-radius:5px;border-bottom-right-radius:5px}
+.sfc{background:var(--sf)} .mfc{background:var(--mf)} .commc{background:var(--comm)}
+.ybend{display:flex;align-items:center;gap:8px;white-space:nowrap;justify-self:end}
+.ybtot{font-family:var(--disp);font-size:19px;color:var(--ink);line-height:1}
+.ybpace{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:6px;padding:3px 7px}
+
+/* trend + source */
+.trend{display:flex;align-items:flex-start;gap:9px;margin-top:16px;padding:12px 14px;background:var(--paper);border:1px solid var(--line);border-radius:10px}
+.trend .chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:7px;padding:5px 10px;flex:none}
+.trend .chip svg{width:14px;height:14px;stroke:var(--ink2);fill:none}
+.trend .tx{font-size:11.5px;color:var(--ink2);line-height:1.5}
+.trend .tx b{color:var(--ink);font-weight:600}
+.src{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:14px;line-height:1.5}
+```
+
+## HTML (verbatim structure; bind placeholders)
+Order inside the single `.cardbox`: header → takeaway → scope toggle → scope label → 3 type stat cards → yearly breakdown (head + rows) → trend → source. Copy the reference `report-construction.html` markup exactly; the bindings:
+
+**Subsection header** (outline hard-hat icon + title + count chip):
+```html
+<div class="ssh">
+  <svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg>
+  <span class="t">New Construction Activity</span>
+  <span class="count">{TOTAL_PERMITS} permits · since {START_YEAR}</span>
+</div>
+```
+Count chip = `{TOTAL_PERMITS} permits · since {START_YEAR}` (community-area, full range).
+
+**Takeaway** — headline + 3 bullets (all `.cn.i`), in THIS order (see LOGIC 5 for why): (1) the 1-mile active count, (2) the multi-year stability, (3) the type mix. The 1-mile bullet leads.
+
+**Type stat card** (loop 3, fixed order SF → MF → Commercial):
+```html
+<div class="tcard">
+  <div class="tchead"><span class="sw" style="background:var(--{sf|mf|comm})"></span><span class="nm">{TYPE}</span></div>
+  <div class="tcnum"><span class="n">{COUNT}</span><span class="u">permits</span></div>
+  <div class="tcavg">Avg value <b>{AVG}</b>{ SKEW}</div>
+</div>
+```
+`{ SKEW}` = ` <span style="color:var(--cautionText)">· skewed</span>` only when that type's average is skew-flagged (LOGIC 4).
+
+**Yearly row** (loop newest→oldest):
+```html
+<div class="ybrow">
+  <span class="ybyear">{YEAR}{<span class="yt">YTD</span>}</span>
+  <div class="ybtrack"><div class="ybbar" style="width:{BAR_PCT}%"><i class="sfc" style="flex:{SF_N}"></i><i class="mfc" style="flex:{MF_N}"></i><i class="commc" style="flex:{COMM_N}"></i></div></div>
+  <div class="ybend"><span class="ybtot">{YEAR_TOTAL}</span>{PACE_CHIP}</div>
+</div>
+```
+
+**Trend + source:** chip label = the computed trend word; text explains the basis. Source line carries the methodology + range, and flags YTD.
+
+## LOGIC (compute in code — NOT an LLM)
+
+### 1. Volume-proportional bars (the core of the chart)
+- `maxTotal` = the largest single-year total across shown years.
+- Each bar's outer width `{BAR_PCT}` = `round(yearTotal / maxTotal * 100, 2)`. This makes bar length = **volume** — the whole reason the chart exists. Do NOT normalize every bar to 100%.
+- Inside each bar, the three `<i>` segments carry `style="flex:{count}"` for SF / MF / Commercial **that year** — so segment widths are that year's type mix, and the bar's total length is that year's volume. (`flex:N` with `display:block` height:100% — inline spans would collapse; they must be block.)
+- 2px gap between segments (`.ybbar{gap:2px}`), 5px rounded ends only on the outer corners (already in CSS).
+
+### 2. Full years vs. YTD (partial current year)
+- Derive from the **actual max permit date** in the dataset, not a hardcoded year. The latest calendar year is YTD **iff** the dataset's max date is before Dec 31 of that year.
+- YTD year: add the `<span class="yt">YTD</span>` sublabel under the year, and render the `{PACE_CHIP}`:
+  `<span class="ybpace">Through {MONTH} · ~{PACE}/yr pace</span>`
+- Full years: no sublabel, no pace chip.
+- **Never mix partial and full in the trend claim without saying so** (see LOGIC 3).
+
+### 3. Pace + trend (the integrity fix)
+- `{PACE}` = `round(ytdCount / fractionOfYearElapsed)`, where `fractionOfYearElapsed = dayOfYear(maxDate) / 365`. Straight-line projection.
+- **Always caveat the pace as a straight-line projection** and note peak-season skew (Chicago building peaks spring–summer, so a Jan–Aug window over-projects). Copy the reference trend text.
+- Trend word (chip): compute over **full years only** (ignore the YTD year for the label). Flat/no-clear-direction → "Stable"; consistent multi-year rise → "Rising"; consistent fall → "Cooling". Don't call it a direction the full years don't support.
+
+### 4. Skew flag on averages
+- Flag a type's average as `· skewed` when its mean is dominated by outliers — e.g. mean ≫ median (ratio over ~2×), or a single permit is a large share of that type's total declared value. Commercial is the usual case (few permits, huge megaprojects). Compute from the permit values; don't hardcode.
+
+### 5. Two DIFFERENT scopes — keep them separate (do not conflate)
+The section mixes two scopes that are **not** subsets of each other:
+- **Community-area, since {START_YEAR}** → drives the header count, the 3 stat cards, and the yearly bars. State = permits *issued* in the range.
+- **1-mile radius, active now** → the `{ACTIVE_1MI}` number (132). State = permits *currently active*, radius around the parcel.
+These have different denominators AND different states (issued-in-range vs. active-now). **Never imply one is a subset of the other**, never add them, never say "of the 220, 132 are…". The takeaway leads with `{ACTIVE_1MI}` because it's the most decision-relevant read (current + proximate to the parcel); the community-area history is the backdrop that earns the stability claim. Keep them as two independently-bound values.
+- The scope toggle (By Community Area / By ZIP / Nearby 1 mi) re-scopes the stat cards + bars; the active-1mi number is its own datum shown regardless.
+
+### 6. Methodology note
+- Source line states the exclusions the backend applies (garages, stages & other accessory structures) and the exact date range, and flags the current year as YTD. Keep this — it's a data-quality signal that builds trust.
+
+## CRITICAL DETAILS (check ALL)
+1. **Bars are volume-proportional** — outer width = `yearTotal / maxTotal`, segments `flex:count`. NOT all-100%-normalized. This is the #1 thing the old version got wrong.
+2. **Segment fills are `<i>` with `display:block`, sized by `flex:{count}`** — inline spans collapse to zero height. 2px gaps between them; rounded outer ends only.
+3. **Category colors exactly:** SF `--sf` indigo, MF `--mf` purple, Commercial `--comm` vivid amber `#f59e0b`. **No teal anywhere. Commercial is NOT the caution marigold** (`--caution` `#f0a41c` stays reserved for warnings/skew text). Legend present (3 series).
+4. **YTD is derived from the real max permit date**, not hardcoded. YTD year gets the `YTD` sublabel + pace chip; full years get neither.
+5. **Pace is a labeled straight-line projection** with the peak-season caveat — never presented as a settled full-year number.
+6. **Trend word computed over full years only** — the YTD year never drives the label. Don't claim a direction the full years don't show.
+7. **The two scopes stay separate** (LOGIC 5): community-area/since-{year} vs. 1-mile/active-now. Never conflate, subset, or sum them.
+8. **Takeaway order = 1-mile active → multi-year stability → mix.** The proximate/current signal leads; the history is explicitly the backdrop that justifies "stable."
+9. **Skew tag** appears only on averages that are outlier-dominated (computed), not hardcoded to Commercial.
+10. **Header is a SUBSECTION** — 17px outline hard-hat icon (`.ssh .hic`), NOT a filled indigo square. This section nests under its parent area/neighborhood section.
+11. **Serif (`--disp`) only** on the takeaway headline, `.tcnum .n`, and `.ybtot`. Everything else Inter; labels/years/source Mono.
+12. **Source line** carries the exclusions + exact date range + YTD flag.

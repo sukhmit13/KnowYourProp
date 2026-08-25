@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoHi:#3446bd;--indigoSoft:#ecedf9;--good:#2f7d3f;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .col{max-width:900px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .ichead{display:flex;align-items:center;gap:10px;padding-bottom:13px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+  .ichead .ic{color:var(--indigo);font-size:16px;flex:none;width:18px;text-align:center}
+  .ichead .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+
+  .detected{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);margin-bottom:10px}
+  .detected .ck{color:var(--good)}
+  .pinrow{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+  .pin{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-family:var(--mono);font-size:14px;color:var(--ink);background:var(--card)}
+  .btn{border:0;border-radius:10px;padding:11px 20px;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer}
+  .btn.pri{background:var(--indigo);color:#fff}
+  .btn.out{background:var(--card);border:1px solid var(--line);color:var(--ink2);display:inline-flex;align-items:center;gap:7px}
+  .metaline{font-size:12px;color:var(--ink2);margin-bottom:18px}
+  .metaline b{color:var(--ink);font-weight:600}
+
+  .facts{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+  .fact{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+  .fact .l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin-bottom:7px}
+  .fact .v{font-size:15px;font-weight:600;color:var(--ink);line-height:1.2}
+  .fact .q{font-size:11px;color:var(--muted);margin-top:2px}
+
+  .callout{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+  .callout .h{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:3px}
+  .callout .s{font-size:12px;color:var(--ink2);margin-bottom:14px}
+  .mform{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .field .in{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink)}
+  .field .in.ph{color:var(--muted);font-weight:400}
+
+  .actions{display:flex;align-items:center;gap:16px;border-top:1px solid var(--line);padding-top:16px}
+  .actions .link{font-size:13.5px;color:var(--indigo);font-weight:600;display:inline-flex;align-items:center;gap:6px}
+  .disc{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.45}
+</style>
+</head>
+<body>
+<div class="col">
+  <div class="card">
+    <div class="ichead"><span class="ic">$</span><span class="t">Parcel Information · Cook County</span></div>
+
+    <div class="detected"><span class="ck">✓</span> PIN auto-detected from address</div>
+    <div class="pinrow">
+      <span class="pin">13-26-218-094-0000</span>
+      <button class="btn pri">Look Up</button>
+      <button class="btn out">↻ Refresh</button>
+    </div>
+    <div class="metaline">PIN <b>13-26-218-094-0000</b> · Tax year 2005 · Class 236 · Type Retail — Single Tenant</div>
+
+    <div class="facts">
+      <div class="fact"><div class="l">Property Type</div><div class="v">Retail — single tenant</div></div>
+      <div class="fact"><div class="l">Age</div><div class="v">115 yrs</div><div class="q">built 1911</div></div>
+      <div class="fact"><div class="l">Construction</div><div class="v">Average</div><div class="q">quality</div></div>
+      <div class="fact"><div class="l">Assessor Class</div><div class="v">236</div><div class="q">2005 characteristics</div></div>
+    </div>
+
+    <div class="callout">
+      <div class="h">ⓘ Some property details are unavailable</div>
+      <div class="s">Enter the square footage manually if you have it from a listing (LoopNet, Zillow, Redfin, etc.).</div>
+      <div class="mform">
+        <div class="field"><label>Building Sq Ft</label><div class="in">10,000</div></div>
+        <div class="field"><label>Land Sq Ft</label><div class="in">6,046</div></div>
+        <div class="field"><label>Stories</label><div class="in ph">e.g. 2</div></div>
+      </div>
+      <button class="btn pri">Save property data</button>
+    </div>
+
+    <div class="actions">
+      <button class="btn pri">↗ Verify on Assessor Site</button>
+      <a class="link">↗ View Tax Bill (Treasurer)</a>
+    </div>
+    <div class="disc">Data from the Open Data Portal may differ from the official Assessor website. Always verify details on the Assessor site for official records.</div>
+  </div>
+</div>
+</body>
+</html>

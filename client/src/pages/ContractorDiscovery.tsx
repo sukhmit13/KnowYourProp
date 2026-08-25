@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 import { 
   Hammer, 
   MapPin, 
@@ -19,7 +20,8 @@ import {
   Clock,
   Building2,
   ArrowLeft,
-  Menu
+  Menu,
+  Search
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Sidebar } from '@/components/Sidebar';
@@ -59,6 +61,8 @@ interface Contractor {
   avgProjectValue: number;
   permitsByYear: Record<string, number>;
   specialtyPermits?: number;
+  searchMatchCount?: number;
+  searchMatches?: string[];
   recentActivity: number;
   recentProjects: {
     address: string;
@@ -78,7 +82,7 @@ interface ContractorsResponse {
   message?: string;
 }
 
-function ContractorCard({ contractor, rank, selectedSpecialty }: { contractor: Contractor; rank: number; selectedSpecialty?: string }) {
+function ContractorCard({ contractor, rank, selectedSpecialty, search }: { contractor: Contractor; rank: number; selectedSpecialty?: string; search?: string }) {
   const [expanded, setExpanded] = useState(false);
   
   const lastPermitDate = new Date(contractor.lastPermitDate);
@@ -125,6 +129,15 @@ function ContractorCard({ contractor, rank, selectedSpecialty }: { contractor: C
                   <span className="text-muted-foreground/50">|</span>
                   <span>{Math.round(contractor.yearsActive)} years active</span>
                 </div>
+
+                {search && contractor.searchMatches && contractor.searchMatches.length > 0 && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Search className="w-4 h-4 flex-shrink-0" />
+                    <span>
+                      Match: <span className="text-foreground font-medium">{contractor.searchMatches.join(' · ')}</span>
+                    </span>
+                  </div>
+                )}
                 
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Target className="w-4 h-4 flex-shrink-0" />
@@ -213,15 +226,17 @@ export default function ContractorDiscovery() {
   const [neighborhood, setNeighborhood] = useState<string>('all');
   const [activeOnly, setActiveOnly] = useState(false);
   const [sortBy, setSortBy] = useState<string>('totalPermits');
+  const [search, setSearch] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const { data, isLoading, error } = useQuery<ContractorsResponse>({
-    queryKey: ['/api/contractors', specialty, neighborhood, activeOnly, sortBy],
+    queryKey: ['/api/contractors', specialty, neighborhood, activeOnly, sortBy, search],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (specialty !== 'all') params.set('specialty', specialty);
       if (neighborhood !== 'all') params.set('neighborhood', neighborhood);
       if (activeOnly) params.set('activeOnly', 'true');
+      if (search.trim()) params.set('search', search.trim());
       params.set('sortBy', sortBy);
       params.set('limit', '50');
       
@@ -231,6 +246,15 @@ export default function ContractorDiscovery() {
       return res.json();
     }
   });
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setSortBy(currentSort => {
+      if (value.trim() && currentSort === 'totalPermits') return 'searchMatch';
+      if (!value.trim() && currentSort === 'searchMatch') return 'totalPermits';
+      return currentSort;
+    });
+  };
   
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -282,6 +306,25 @@ export default function ContractorDiscovery() {
         
         <Card className="mb-6 border border-border">
           <CardContent className="p-4">
+            <div className="mb-4">
+              <Label htmlFor="contractor-search" className="text-xs text-muted-foreground mb-1 block">
+                Search by contractor or project work
+              </Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  id="contractor-search"
+                  value={search}
+                  onChange={(event) => handleSearchChange(event.target.value)}
+                  placeholder="Try bathroom, tile, kitchen, or a contractor name"
+                  className="pl-9"
+                  data-testid="input-contractor-search"
+                />
+              </div>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Results are ranked by matching permit work when you search a project type.
+              </p>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <Label className="text-xs text-muted-foreground mb-1 block">Specialty</Label>
@@ -327,6 +370,7 @@ export default function ContractorDiscovery() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="searchMatch">Best Match</SelectItem>
                     <SelectItem value="totalPermits">Most Permits</SelectItem>
                     <SelectItem value="recentActivity">Recent Activity</SelectItem>
                     <SelectItem value="avgProjectValue">Highest Avg Value</SelectItem>
@@ -389,8 +433,8 @@ export default function ContractorDiscovery() {
         ) : (
           <>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-sm font-bold uppercase tracking-wider">
-                Top Contractors
+                <h2 className="font-display text-sm font-bold uppercase tracking-wider">
+                 {search.trim() ? `Matches for “${search.trim()}”` : 'Top Contractors'}
                 <span className="text-muted-foreground font-normal ml-2">
                   ({data?.total.toLocaleString()} total)
                 </span>
@@ -404,6 +448,7 @@ export default function ContractorDiscovery() {
                   contractor={contractor} 
                   rank={index + 1}
                   selectedSpecialty={specialty}
+                   search={search.trim()}
                 />
               ))}
             </div>

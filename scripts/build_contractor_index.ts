@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { classifyPermitSpecialty, normalizeContractorName, generateContractorSlug, SPECIALTY_DISPLAY_NAMES } from '../server/utils/contractorClassification';
+import { classifyPermitSpecialty, classifyPermitWorkTypes, normalizeContractorName, generateContractorSlug, SPECIALTY_DISPLAY_NAMES } from '../server/utils/contractorClassification';
 
 const COMMUNITY_AREA_NAMES: Record<number, string> = {
   1: "Rogers Park", 2: "West Ridge", 3: "Uptown", 4: "Lincoln Square", 5: "North Center",
@@ -59,6 +59,7 @@ interface ContractorData {
   avgProjectValue: number;
   permitsByYear: Record<string, number>;
   recentActivity: number;
+  workTypeCounts: Record<string, number>;
   recentProjects: {
     address: string;
     date: string;
@@ -180,6 +181,7 @@ async function buildContractorIndex(): Promise<void> {
     let totalValue = 0;
     const costs: number[] = [];
     let recentCount = 0;
+    const workTypeCounts: Record<string, number> = {};
     
     const sortedPermits = [...permitList].sort((a, b) => 
       new Date(b.issue_date || 0).getTime() - new Date(a.issue_date || 0).getTime()
@@ -199,6 +201,9 @@ async function buildContractorIndex(): Promise<void> {
         work_description: permit.work_description,
         permit_type: permit.permit_type
       });
+      for (const workType of classifyPermitWorkTypes(permit)) {
+        workTypeCounts[workType] = (workTypeCounts[workType] || 0) + 1;
+      }
       for (const specialty of classification.all) {
         specialtyCount[specialty] = (specialtyCount[specialty] || 0) + 1;
       }
@@ -294,6 +299,7 @@ async function buildContractorIndex(): Promise<void> {
       avgProjectValue: avgValue,
       permitsByYear: yearCount,
       recentActivity: recentCount,
+      workTypeCounts,
       recentProjects
     });
   }

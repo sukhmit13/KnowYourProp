@@ -1,0 +1,177 @@
+ADD VEHICLE OWNERSHIP DATA TO PROPERTY PAGES
+
+Show vehicle ownership statistics for gas station, parking lot, 
+auto repair shop, or other auto-dependent business analysis.
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 1: FIND VEHICLE OWNERSHIP DATA
+═══════════════════════════════════════════════════════════════════════════
+
+Search Chicago Data Portal for:
+https://data.cityofchicago.org/browse?q=american+community+survey
+
+OR
+
+https://data.cityofchicago.org/browse?q=vehicles
+
+Look for datasets with:
+- "Vehicles available" or "Vehicle ownership"
+- By community area or census tract
+- From American Community Survey (ACS)
+
+Likely dataset:
+"Census Data - Selected socioeconomic indicators"
+
+Download and save to:
+/server/data/demographics/vehicle_ownership.json
+
+Data structure should include (by community area):
+{
+  "community_area": 22,
+  "name": "Logan Square",
+  "total_households": 35000,
+  "households_no_vehicle": 5250,
+  "households_1_vehicle": 14700,
+  "households_2_vehicles": 10500,
+  "households_3plus_vehicles": 4550,
+  "avg_vehicles_per_household": 1.62,
+  "pct_no_vehicle": 15.0,
+  "pct_with_vehicle": 85.0,
+  "commute_drive_alone_pct": 48.0,
+  "commute_transit_pct": 35.0,
+  "commute_walk_bike_pct": 12.0
+}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 2: ADD TO PROPERTY PAGE DISPLAY
+═══════════════════════════════════════════════════════════════════════════
+
+Show vehicle ownership data in demographics section or create new
+"Auto Dependency" section.
+
+const vehicleData = require('./data/demographics/vehicle_ownership.json');
+
+function getVehicleOwnership(communityArea) {
+  return vehicleData[communityArea] || null;
+}
+
+// On property page:
+const ca = propertyData.community_area;
+const vehicles = getVehicleOwnership(ca);
+
+DISPLAY FORMAT:
+──────────────
+
+Auto Dependency:
+────────────────
+
+Vehicle Ownership:
+- Average: {avg_vehicles_per_household} vehicles per household
+- No vehicle: {pct_no_vehicle}% of households
+- 1 vehicle: {pct_1_vehicle}% of households
+- 2+ vehicles: {pct_2plus_vehicle}% of households
+
+Commute Mode (to work):
+- Drive alone: {commute_drive_pct}%
+- Public transit: {commute_transit_pct}%
+- Walk/bike: {commute_walk_bike_pct}%
+
+Auto Dependency Level:
+{IF avg_vehicles > 1.5}
+  🚗🚗🚗 HIGH (above city average)
+{ELSE IF avg_vehicles > 1.0}
+  🚗🚗 MODERATE
+{ELSE}
+  🚗 LOW (transit-oriented area)
+{END IF}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 3: PROJECT-SPECIFIC INSIGHTS
+═══════════════════════════════════════════════════════════════════════════
+
+For certain project types, add auto dependency analysis:
+
+IF project_type === "gas_station":
+  Assessment for Gas Station:
+  
+  {IF avg_vehicles > 1.5 AND pct_drive > 50}
+    ✅ STRONG DEMAND
+    • High vehicle ownership ({avg_vehicles} per household)
+    • Majority drive to work ({pct_drive}%)
+    • Good market for fuel sales
+  
+  {ELSE IF avg_vehicles > 1.2}
+    ⚠️ MODERATE DEMAND
+    • Above-average vehicle ownership
+    • Mixed transit/auto usage
+    • Consistent but not peak demand
+  
+  {ELSE}
+    🚩 WEAK DEMAND
+    • Low vehicle ownership ({avg_vehicles} per household)
+    • High transit usage ({pct_transit}%)
+    • Limited market for fuel sales
+  {END IF}
+
+IF project_type === "parking_lot":
+  Assessment for Parking Facility:
+  
+  {IF pct_no_vehicle > 20}
+    ⚠️ Consider carefully
+    • {pct_no_vehicle}% of households have no vehicle
+    • High transit usage in area
+    • May face low utilization
+  
+  {ELSE IF avg_vehicles > 1.5}
+    ✅ Good potential
+    • High vehicle ownership
+    • Likely parking demand
+  {END IF}
+
+IF project_type === "auto_repair":
+  Assessment for Auto Repair Shop:
+  
+  Vehicle ownership: {avg_vehicles} per household
+  Total vehicles in area (est.): {total_households × avg_vehicles}
+  
+  {IF avg_vehicles > 1.3}
+    ✅ Good market
+  {ELSE}
+    ⚠️ Limited market
+  {END IF}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 4: COMPARE TO CITY AVERAGE
+═══════════════════════════════════════════════════════════════════════════
+
+Calculate and show comparison to Chicago citywide average:
+
+Chicago citywide average: ~1.20 vehicles per household
+
+{IF avg_vehicles > city_avg}
+  This area is {((avg_vehicles - city_avg) / city_avg × 100)}% more
+  auto-dependent than Chicago average
+{ELSE}
+  This area is {((city_avg - avg_vehicles) / city_avg × 100)}% less
+  auto-dependent than Chicago average
+{END IF}
+
+═══════════════════════════════════════════════════════════════════════════
+DATA NOTES
+═══════════════════════════════════════════════════════════════════════════
+
+SOURCE: U.S. Census Bureau, American Community Survey (ACS)
+- 5-year estimates (most stable)
+- By community area
+- Updated annually
+
+UPDATE FREQUENCY:
+- Download new ACS data annually when released
+- Typically released in December for previous year
+
+CALCULATIONS:
+- Avg vehicles per household = total vehicles / total households
+- Commute mode from ACS Table S0801 (Commuting Characteristics)
+- Vehicle availability from ACS Table B25044 or B08201
+
+═══════════════════════════════════════════════════════════════════════════

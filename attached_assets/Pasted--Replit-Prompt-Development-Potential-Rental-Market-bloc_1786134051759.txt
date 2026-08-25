@@ -1,0 +1,94 @@
+# Replit Prompt — Development Potential + Rental Market block
+
+Restyle the **Development Potential** section and its subsections (FAR Analysis, Fair Market Rent, Real-Time Rental Data, Short-Term Rental Market, Nearby Competitors) to the site design language. Front-end / CSS + markup only. **All takeaway numbers here are your existing hardcoded calculations — render them directly. Do NOT route this section through the Claude takeaway engine; FAR/zoning math must stay deterministic.** Values shown are placeholders bound to your real data.
+
+## Tokens (reuse existing)
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --good:#2f7d3f; --goodSoft:#e9f4ec;
+--caution:#f0a41c; --cautionText:#96600a; --bad:#d13b26; --badText:#b3311f;
+--sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+
+## Section headers — hierarchy rule (important)
+- **Top-level section** (Development Potential) header uses the filled indigo square marker:
+  `.sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo)}`
+- **Subsections** (FAR Analysis, Fair Market Rent, Real-Time Rental, Short-Term Rental, Competitors) use an **indigo outline ICON instead of the square** — this is the visual cue that they're nested under the parent:
+  `.sh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}`
+  Icons: FAR = bar-chart, Fair Market Rent = house, Real-Time Rental = trending-up line, Short-Term Rental = calendar, Competitors = map-pin.
+Shared header shell:
+```css
+.sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+.sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+.sh .pills{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+.sh .p{font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+```
+
+## 1. Development Potential — verdict takeaway (renders your hardcoded calcs)
+Lead with a neutral **"Legal non-conforming"** badge (grey — the situation is two-sided, not simply good or bad) and a takeaway that presents BOTH the constraint and the grandfathered-density upside.
+```css
+.badge{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 9px;background:var(--card);border:1px solid var(--line);color:var(--ink2)}
+.badge .d{width:7px;height:7px;border-radius:50%;background:#9aa1b0}
+.take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+.taket{font-family:var(--disp);font-size:20px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+.cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:8px}
+.cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+.cn.b .dt{background:var(--bad)} .cn.g .dt{background:var(--good)} .cn.c .dt{background:var(--caution)} .cn.n .dt{background:#9aa1b0}
+.cn b{color:var(--ink);font-weight:600}
+```
+Bullets are favorability-colored per point: the "exceeds zoning" fact is **red** (a real flag), the "grandfathered density is an asset" point is **green** (the upside), the "expansion needs a variance" point is **caution**. The over-built status is genuinely two-sided — do not collapse it into a single good/bad verdict.
+
+## 2. Rental Economics — Transit-glance-style cards
+Two cards (Long-Term Rental, Short-Term Rental) styled like the Transit "closest by mode" cards: indigo-square icon + mono label header, then rows (unit + value), then a muted footer. Label it "for reference · detail in Rental Market below" — these numbers belong to the rental sections; keep this a compact pointer, not a duplicate.
+```css
+.recard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column}
+.recard .top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.recard .ic{width:26px;height:26px;border-radius:7px;background:var(--indigoSoft);display:flex;align-items:center;justify-content:center}
+.recard .ic svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+.recard .ml{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.rerow{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)}
+.rerow:first-of-type{border-top:0;padding-top:2px}
+.rerow .u{font-size:13px;font-weight:600;color:var(--ink)} .rerow .u small{font-weight:400;color:var(--muted)}
+.rerow .val{font-family:var(--disp);font-size:18px;color:var(--ink)} .rerow .val small{font-family:var(--sans);font-size:10px;color:var(--muted)}
+.recard .extra{font-size:10.5px;color:var(--muted);margin-top:auto;padding-top:10px}
+```
+
+## 3. FAR Analysis — red flag on the raw overage
+Being over the FAR limit IS a red flag (the raw metric exceeds zoning), so the callout, the utilization bar's over-portion, and the Current FAR tile are **red**. (The nuance/upside lives in the Development Potential takeaway above; the FAR detail states the raw fact.)
+```css
+.callout{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid #eab5ac;border-left:3px solid var(--bad);border-radius:11px;padding:13px 15px;margin-bottom:16px}
+.callout .ic{width:30px;height:30px;border-radius:8px;background:#fbe9e6;display:flex;align-items:center;justify-content:center} .callout .ic svg{width:16px;height:16px;stroke:var(--badText)}
+.callout .h{font-size:13px;font-weight:700;color:var(--badText);margin-bottom:3px}
+.callout .s{font-size:11.5px;color:var(--ink2);line-height:1.45}
+/* utilization: in-limit portion neutral, over-limit portion red, with the zoning-limit marker */
+.ubar{position:relative;height:14px;border-radius:999px;background:#eceae4;overflow:hidden}
+.ubar .ok{position:absolute;left:0;top:0;height:100%;background:#cdd6ea}
+.ubar .over{position:absolute;top:0;height:100%;background:var(--bad)}
+.ubar .lim{position:absolute;top:-3px;width:3px;height:20px;background:var(--ink);border-radius:2px}
+```
+- Bar: `.ok` width = min(100, limit/current)·... — actually the limit marker sits at (maxFAR / currentFAR) of the bar; the in-limit fill runs 0→marker, the red over-fill runs marker→100%. Label the marker "Zoning limit · FAR {max}" and the right end "Built · FAR {current}."
+- Four centered KPI tiles (Current FAR, Max Allowed, Existing Building, Lot Size); Current FAR uses `.kpi.flag .n{color:var(--badText)}` since it's the over-limit value.
+- Keep the "What counts toward FAR" explainer (✕ = doesn't count muted, ✓ = counts green).
+
+## 4. Fair Market Rent — the ONE legitimate red→green bar
+Five KPI tiles (Efficiency…4BR). The "This ZIP vs Chicago" 2BR bar is a **red→green diverging bar** with the city-median tick and a this-ZIP marker. This is the single place red→green is correct on the site, because FMR is an **underwriting** metric — a higher rent floor genuinely means more downside protection, so above-median = green is honest. (Do NOT copy this to transit/traffic, where higher isn't inherently good.) Keep the green "+X% above city median" pill and the "why FMR matters" note.
+
+## 5. Real-Time Rental Data
+Two scope tiles (ZIP / 0.75mi listing counts). Market Overview + By-Bedroom tables with tabular-nums. The "vs FMR" column is green (above FMR = favorable for an investor — consistent with the underwriting frame). The **2-BR Quality Tier guide** is a **sequential indigo ramp** (Dated→Luxury, darker = higher tier) — NOT status colors; it's a magnitude scale, not a verdict.
+```css
+.tier .tt{height:9px;background:#eceae4;border-radius:999px;overflow:hidden}
+.tier .tf{display:block;height:100%;border-radius:999px}  /* MUST be display:block or the fill won't render */
+```
+Tier fills: light indigo → full indigo (`#aab4e0`, `#7d8ccf`, `#4f61bd`, `--indigo`).
+
+## 6. Short-Term Rental + Competitors
+- STR: type table with avg price, booked nights, and a small neutral **indigo** occupancy bar (`.occ i{display:block}`). Seasonal peak/slow line. Star on the highlighted row is neutral gold.
+- Competitors: three tiles (count, avg rating with gold star, searched-for) + a list of businesses (indigo name links, address, gold-star rating, distance). **Star ratings stay neutral gold** — these are factual third-party ratings, not something the report is grading.
+
+## Consistency checklist
+- Top-level section = indigo square; subsections = indigo outline icon.
+- Over-built: red on the raw FAR metric, two-sided (red + green + caution) in the takeaway, neutral badge.
+- FMR red→green is the one sanctioned diverging bar (underwriting frame); everything else follows the favorability rules.
+- Quality-tier + occupancy bar fills need `display:block`.
+- All takeaway/FAR numbers are your hardcoded calcs — deterministic, not model-generated.

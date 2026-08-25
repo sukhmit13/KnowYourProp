@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--bad:#d13b26;
+    --caution:#f0a41c;--cautionText:#96600a;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .cardbox[id]{scroll-margin-top:90px}
+
+  /* header */
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+
+  /* takeaway */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px 17px;margin-bottom:18px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+  .taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:13px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:9px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .cn.g .dt{background:var(--good)}
+  .cn.c .dt{background:var(--caution)}
+  .cn.i .dt{background:var(--indigo)}
+  .cn b{color:var(--ink);font-weight:600}
+  .cn .tx{flex:1}
+  .jump{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:9.5px;font-weight:600;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid #dde1f6;border-radius:6px;padding:2px 7px;margin-left:7px;white-space:nowrap;vertical-align:middle}
+  .jump svg{width:10px;height:10px;stroke:var(--indigo);fill:none}
+
+  /* price journey strip */
+  .jwrap{border:1px solid var(--line);border-radius:12px;padding:16px 18px 13px;margin-bottom:20px;background:var(--paper)}
+  .jlabel{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .journey{position:relative;display:flex;justify-content:space-between}
+  .journey::before{content:"";position:absolute;left:14px;right:14px;top:31px;height:2px;background:var(--line)}
+  .jn{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:9px;flex:1}
+  .jn .p{font-family:var(--disp);font-size:16px;color:var(--ink);line-height:1}
+  .jn .dot{width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid #c4c3bd}
+  .jn .yr{font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .jn.now .p{color:var(--indigo)}
+  .jn.now .dot{border-color:var(--indigo);background:var(--indigo)}
+  .jn.now .yr{color:var(--indigo);font-weight:700}
+  .jnote{display:flex;gap:8px;align-items:flex-start;margin-top:15px;padding-top:13px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--ink2);line-height:1.5}
+  .jnote svg{width:14px;height:14px;stroke:var(--indigo);fill:none;flex:none;margin-top:1px}
+  .jnote b{color:var(--ink);font-weight:600}
+  .jnote a{color:var(--indigo);text-decoration:none;font-weight:600;white-space:nowrap}
+
+  /* section divider label */
+  .divl{display:flex;align-items:center;gap:11px;margin:4px 0 12px}
+  .divl .lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+  .divl .ln{flex:1;height:1px;background:var(--line)}
+
+  /* sale cards */
+  .sale{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--card)}
+  .sale.recent{border-color:#cdd2ef;border-left:3px solid var(--indigo);background:#fbfbfe}
+  .srow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .sleft{display:flex;flex-direction:column;gap:3px}
+  .schip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border-radius:6px;padding:3px 8px;width:fit-content;margin-bottom:5px}
+  .schip .d{width:5px;height:5px;border-radius:50%;background:var(--indigo)}
+  .sprice{font-family:var(--disp);font-size:24px;color:var(--ink);line-height:1}
+  .sdate{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .sparties{text-align:right;font-size:12px;color:var(--ink);line-height:1.5;max-width:330px}
+  .sparties .row{margin-bottom:2px}
+  .sparties .lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-right:5px}
+  .smeta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+  .deed{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+  .deed.trust{color:var(--cautionText);background:#fdf3df;border-color:#f0d79a}
+  .docn{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  .docn a{color:var(--indigo);text-decoration:none}
+  .naflag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--cautionText);margin-left:auto}
+  .naflag svg{width:12px;height:12px;stroke:var(--cautionText);fill:none}
+
+  .caveat{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--ink2);line-height:1.5;margin-top:12px;padding:11px 14px;background:var(--card);border:1px solid #ecd49a;border-left:3px solid #e0a92e;border-radius:10px}
+  .caveat svg{width:14px;height:14px;stroke:var(--cautionText);fill:none;flex:none;margin-top:1px}
+  .caveat b{color:var(--cautionText);font-weight:700}
+  .caveat.mt{margin-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Sale History</span>
+      <span class="count">6 recorded sales · 2000–2026</span></div>
+
+    <!-- TAKEAWAY -->
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>What the sale record shows</div>
+      <div class="taket">The property has changed hands six times since 2000 and last sold in June 2026 for $1.19M — a brand-new record.</div>
+      <div class="cn c"><span class="dt"></span><span class="tx"><b>The 2026 sale is freshly recorded.</b> It was pulled straight from the Cook County Recorder of Deeds and may not appear in the Assessor's data yet (typical 6–12 week lag).<a class="jump" href="#recent"><svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Recent sale</a></span></div>
+      <div class="cn i"><span class="dt"></span><span class="tx"><b>The rise isn't just market appreciation.</b> Around $666K of permitted work — mainly the 2012 gut rehab — was invested between sales, so the climb from $350K (2000) to $1.19M (2026) blends the market, value-add improvements, and a few non-arm's-length transfers. Sale prices alone can't separate them.<a class="jump" href="#permits"><svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Permit History</a></span></div>
+      <div class="cn c"><span class="dt"></span><span class="tx"><b>The 2026 buyer is a public mental-health-services program.</b> Institutional / non-profit ownership can change the property's use and its tax status going forward — confirm current exemptions in the Property Tax section.</span></div>
+    </div>
+
+    <!-- PRICE JOURNEY -->
+    <div class="jwrap">
+      <div class="jlabel">Price by transaction · chronological, not to time-scale</div>
+      <div class="journey">
+        <div class="jn"><span class="p">$350K</span><span class="dot"></span><span class="yr">2000</span></div>
+        <div class="jn"><span class="p">$500K</span><span class="dot"></span><span class="yr">2004</span></div>
+        <div class="jn"><span class="p">$570K</span><span class="dot"></span><span class="yr">2004</span></div>
+        <div class="jn"><span class="p">$875K</span><span class="dot"></span><span class="yr">2007</span></div>
+        <div class="jn"><span class="p">$810K</span><span class="dot"></span><span class="yr">2016</span></div>
+        <div class="jn now"><span class="p">$1.19M</span><span class="dot"></span><span class="yr">2026</span></div>
+      </div>
+      <div class="jnote"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/></svg><span><b>Not all of this is the market.</b> Between these sales, roughly $666K of permitted work was done — a 2012 gut rehab plus 2016–17 porch &amp; electrical — so part of the climb is value added, not appreciation. <a href="#permits">See Permit History →</a></span></div>
+    </div>
+
+    <!-- MOST RECENT -->
+    <div class="divl" id="recent"><span class="lbl">Most recent transfer</span><span class="ln"></span></div>
+
+    <div class="sale recent">
+      <div class="srow">
+        <div class="sleft">
+          <span class="schip"><span class="d"></span>Most recent · Recorder of Deeds</span>
+          <span class="sprice">$1,191,500</span>
+          <span class="sdate">Jun 15, 2026</span>
+        </div>
+        <div class="sparties">
+          <div class="row"><span class="lbl">From</span>2540 W Natl Ave LLC</div>
+          <div class="row"><span class="lbl">To</span>West Town – Humboldt Pk Expanded Mental Health Services Program</div>
+        </div>
+      </div>
+      <div class="smeta">
+        <span class="deed">Warranty Deed</span>
+        <span class="docn">Doc <a href="#">#2616608141 ↗</a></span>
+      </div>
+    </div>
+
+    <div class="caveat"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span><b>Found directly in the Recorder of Deeds.</b> The Cook County Assessor's dataset updates monthly with a typical 6–12 week lag, so this June 2026 sale may not yet appear in Assessor-based figures elsewhere in this report. Verify the deed before relying on it.</span></div>
+
+    <!-- EARLIER -->
+    <div class="divl" style="margin-top:20px"><span class="lbl">Earlier transfers</span><span class="ln"></span></div>
+
+    <div class="sale">
+      <div class="srow">
+        <div class="sleft"><span class="sprice">$810,000</span><span class="sdate">Nov 9, 2016</span></div>
+        <div class="sparties">
+          <div class="row"><span class="lbl">From</span>Edgewater Uptown Building Corp. (IL not-for-profit)</div>
+          <div class="row"><span class="lbl">To</span>2540 W North Ave, LLC</div>
+        </div>
+      </div>
+      <div class="smeta">
+        <span class="deed">Warranty Deed</span>
+        <span class="docn">Doc <a href="#">#1632129074 ↗</a></span>
+      </div>
+    </div>
+
+    <div class="sale">
+      <div class="srow">
+        <div class="sleft"><span class="sprice">$875,000</span><span class="sdate">2007 · month approx.</span></div>
+        <div class="sparties">
+          <div class="row"><span class="lbl">From</span>2540 N Ave LLC</div>
+          <div class="row"><span class="lbl">To</span>Edgewater Uptown Building Corp.</div>
+        </div>
+      </div>
+      <div class="smeta">
+        <span class="deed">Warranty Deed</span>
+        <span class="docn">Doc <a href="#">#703733121 ↗</a></span>
+        <span class="naflag"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Higher than the 2016 price — possible non-market transfer</span>
+      </div>
+    </div>
+
+    <div class="sale">
+      <div class="srow">
+        <div class="sleft"><span class="sprice">$570,000</span><span class="sdate">2004 · month approx.</span></div>
+        <div class="sparties">
+          <div class="row"><span class="lbl">From</span>Michael Conover</div>
+          <div class="row"><span class="lbl">To</span>Daniel Halperin</div>
+        </div>
+      </div>
+      <div class="smeta">
+        <span class="deed trust">Trustee's Deed</span>
+        <span class="docn">Doc <a href="#">#502808001 ↗</a></span>
+        <span class="naflag"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Trust conveyance — may not be an open-market sale</span>
+      </div>
+    </div>
+
+    <div class="sale">
+      <div class="srow">
+        <div class="sleft"><span class="sprice">$500,000</span><span class="sdate">2004 · month approx.</span></div>
+        <div class="sparties">
+          <div class="row"><span class="lbl">From</span>Magan M. Patel</div>
+          <div class="row"><span class="lbl">To</span>Cosmopolitan Bank &amp; Trust (land trustee)</div>
+        </div>
+      </div>
+      <div class="smeta">
+        <span class="deed">Warranty Deed</span>
+        <span class="docn">Doc <a href="#">#406233103 ↗</a></span>
+        <span class="naflag"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Into a land trust — likely a title transfer, not a sale</span>
+      </div>
+    </div>
+
+    <div class="sale">
+      <div class="srow">
+        <div class="sleft"><span class="sprice">$350,000</span><span class="sdate">2000 · month approx.</span></div>
+        <div class="sparties">
+          <div class="row"><span class="lbl">Parties</span>Not recorded in this dataset</div>
+        </div>
+      </div>
+      <div class="smeta">
+        <span class="deed">Warranty Deed</span>
+        <span class="docn">Doc <a href="#">#535932 ↗</a></span>
+      </div>
+    </div>
+
+    <div class="caveat mt"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span><b>Not every recorded transfer is an arm's-length sale.</b> This chain of title runs through land trusts (Cosmopolitan Bank &amp; Trust), a trustee's deed, and several related "2540…" entities — these are often nominal title moves, not open-market prices. Some older dates are recorded only to the month or year. Treat the dollar figures as directional, and confirm any specific transaction against the deed.</span></div>
+
+  </div>
+</div>
+</body>
+</html>

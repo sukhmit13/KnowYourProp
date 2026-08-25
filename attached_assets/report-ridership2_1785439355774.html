@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--c1:#3f51c5;--c2:#0e8fa6;--track:#efeee9;
+    --up:#2f7d3f;--upSoft:#edf6ef;--down:#d13b26;--downSoft:#fbecea;
+    --gl:#00843d;--glLite:#37b06a;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .col{max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .chead{display:flex;align-items:center;gap:9px;padding-bottom:13px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+  .chead .sq{width:10px;height:10px;border-radius:2px;background:var(--indigo);flex:none}
+  .chead .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+  .barlbl{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);margin:2px 0 11px}
+
+  .rblock{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+  .rhead{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .rhead .name{font-size:14px;font-weight:700;color:var(--ink)}
+  .linepill{font-size:9.5px;font-weight:700;color:#fff;border-radius:5px;padding:2px 6px}
+  .linepill.green{background:var(--gl)}
+  .rhead .rank{font-family:var(--mono);font-size:10.5px;color:var(--ink2);background:#f3f2ec;border-radius:6px;padding:3px 8px}
+  .trend{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 9px}
+  .trend.up{color:var(--up);background:var(--upSoft)} .trend.down{color:var(--down);background:var(--downSoft)}
+
+  /* horizontal triple tiles — matches Daily Vehicles */
+  .triple{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+  .tcell{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .tcell .lt{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .tcell .l{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+  .tcell .u{font-size:11px;color:var(--ink2)}
+  .tcell .n{font-family:var(--disp);font-size:27px;line-height:.9;color:var(--ink);flex:none}
+
+  .bullet .lab{font-size:12px;color:var(--ink2);margin-bottom:7px}
+  .btrack{position:relative;height:12px;background:var(--track);border-radius:6px}
+  .bfill{position:absolute;left:0;top:0;bottom:0;background:var(--c1);border-radius:6px}
+  .btick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55}
+  .btick.dash{background:repeating-linear-gradient(var(--ink2),var(--ink2) 2px,transparent 2px,transparent 4px);opacity:.5}
+  .brow{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:7px}
+  .brow b{color:var(--ink);font-weight:600}
+
+  .chart svg{width:100%;height:auto;display:block}
+  .grid{stroke:var(--line);stroke-width:1}
+  .axis{font-family:var(--mono);font-size:9px;fill:var(--muted)}
+  .legend{display:flex;gap:20px;justify-content:center;margin-top:8px;align-items:center}
+  .lg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)}
+  .lg svg{display:block}
+  .src{font-size:11.5px;color:var(--muted);margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="col">
+
+  <!-- L RIDERSHIP — colored by train line (both Green: solid + dashed) -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">CTA L Ridership</span></div>
+    <div class="rblock">
+      <div class="rhead"><span class="name">Damen–Lake</span><span class="linepill green">Green</span><span class="rank">#104 of 143</span><span class="trend up">↗ +32.6% (3 yr)</span></div>
+      <div class="triple">
+        <div class="tcell"><div class="lt"><span class="l">Avg Weekday</span><span class="u">entries/day</span></div><span class="n">932.6</span></div>
+        <div class="tcell"><div class="lt"><span class="l">Avg Saturday</span><span class="u">entries/day</span></div><span class="n">571.4</span></div>
+        <div class="tcell"><div class="lt"><span class="l">Avg Sun/Hol</span><span class="u">entries/day</span></div><span class="n">435.7</span></div>
+      </div>
+      <div class="bullet">
+        <div class="lab">Weekday vs system</div>
+        <div class="btrack"><div class="bfill" style="width:23%"></div><div class="btick dash" style="left:50%"></div><div class="btick" style="left:67%"></div></div>
+        <div class="brow"><span><b>This station 932.6</b></span><span>Median 2,013</span><span>System avg 2,693</span></div>
+      </div>
+    </div>
+
+    <div class="barlbl">Weekday ridership trend · 36 months · Green Line</div>
+    <div class="chart">
+      <svg viewBox="0 0 700 180" preserveAspectRatio="none">
+        <line class="grid" x1="46" y1="20" x2="690" y2="20"/><line class="grid" x1="46" y1="65" x2="690" y2="65"/><line class="grid" x1="46" y1="110" x2="690" y2="110"/>
+        <text class="axis" x="8" y="24">1.4k</text><text class="axis" x="8" y="114">700</text>
+        <polyline points="46,72 100,66 154,74 208,60 262,66 316,54 370,58 424,44 478,36 532,50 586,40 640,52 690,46" fill="none" stroke="#00843d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <polyline points="46,120 100,110 154,116 208,108 262,112 316,100 370,104 424,92 478,86 532,98 586,90 640,100 690,94" fill="none" stroke="#37b06a" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round" stroke-linejoin="round"/>
+        <text class="axis" x="46" y="172">06/23</text><text class="axis" x="330" y="172">12/24</text><text class="axis" x="655" y="172">06/26</text>
+      </svg>
+      <div class="legend">
+        <span class="lg"><svg width="22" height="4"><line x1="0" y1="2" x2="22" y2="2" stroke="#00843d" stroke-width="2.5"/></svg>Damen–Lake</span>
+        <span class="lg"><svg width="22" height="4"><line x1="0" y1="2" x2="22" y2="2" stroke="#37b06a" stroke-width="2.5" stroke-dasharray="5 3"/></svg>California–Lake</span>
+      </div>
+    </div>
+    <div class="src">Source: CTA L Station Entries, City of Chicago Data Portal. Both stations on the Green Line.</div>
+  </div>
+
+  <!-- BUS RIDERSHIP — no line color → indigo/teal fallback -->
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">CTA Bus Ridership</span></div>
+    <div class="rblock">
+      <div class="rhead"><span class="name">66 Chicago</span><span class="rank">#4 of 127 routes</span><span class="trend up">↗ +7.2% (3 yr)</span></div>
+      <div class="triple">
+        <div class="tcell"><div class="lt"><span class="l">Avg Weekday</span><span class="u">riders/day</span></div><span class="n">17,325</span></div>
+        <div class="tcell"><div class="lt"><span class="l">Avg Saturday</span><span class="u">riders/day</span></div><span class="n">13,940</span></div>
+        <div class="tcell"><div class="lt"><span class="l">Avg Sun/Hol</span><span class="u">riders/day</span></div><span class="n">11,380</span></div>
+      </div>
+      <div class="bullet">
+        <div class="lab">Weekday vs system</div>
+        <div class="btrack"><div class="bfill" style="width:82%"></div><div class="btick dash" style="left:17%"></div><div class="btick" style="left:25%"></div></div>
+        <div class="brow"><span><b>This route 17,325</b></span><span>Median 3,533</span><span>System avg 5,297</span></div>
+      </div>
+    </div>
+
+    <div class="barlbl">Weekday ridership trend · 36 months</div>
+    <div class="chart">
+      <svg viewBox="0 0 700 180" preserveAspectRatio="none">
+        <line class="grid" x1="46" y1="20" x2="690" y2="20"/><line class="grid" x1="46" y1="65" x2="690" y2="65"/><line class="grid" x1="46" y1="110" x2="690" y2="110"/>
+        <text class="axis" x="8" y="24">20k</text><text class="axis" x="8" y="114">10k</text>
+        <polyline points="46,58 100,52 154,60 208,54 262,48 316,58 370,50 424,40 478,34 532,46 586,42 640,50 690,44" fill="none" stroke="#3f51c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <polyline points="46,96 100,88 154,94 208,90 262,84 316,94 370,86 424,78 478,72 532,84 586,80 640,88 690,82" fill="none" stroke="#0e8fa6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text class="axis" x="46" y="172">06/23</text><text class="axis" x="330" y="172">12/24</text><text class="axis" x="655" y="172">06/26</text>
+      </svg>
+      <div class="legend">
+        <span class="lg"><svg width="22" height="4"><line x1="0" y1="2" x2="22" y2="2" stroke="#3f51c5" stroke-width="2.5"/></svg>66 Chicago</span>
+        <span class="lg"><svg width="22" height="4"><line x1="0" y1="2" x2="22" y2="2" stroke="#0e8fa6" stroke-width="2.5"/></svg>49 Western</span>
+      </div>
+    </div>
+    <div class="src">Source: CTA Bus Ridership, City of Chicago Data Portal. Buses have no line color — standard chart palette.</div>
+  </div>
+
+</div>
+</body>
+</html>

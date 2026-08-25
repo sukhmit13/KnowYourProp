@@ -1,0 +1,24 @@
+# Stage 1 deed patch — the ONLY remaining Stage 1 change (needed before Stage 2.5)
+
+## What's already done vs. what this adds
+- ✅ **Already built & verified** (don't touch): loan amount from document body (not index consideration), `interest_rate`, `execution_date`, the `modifies` object. Confirmed on 3014.
+- 🔧 **This patch adds one thing:** deeds must capture the ownership transfer so Stage 2.5 can build the timeline. Nothing else in Stage 1 changes — same fetch, OCR, cache, concurrency.
+
+## The change — add this line to the EXTRACTION_PROMPT
+Insert after the MODIFICATION rule:
+
+> **DEED docs — put the GRANTOR (seller) in `parties.assignor`, the GRANTEE (new owner / buyer) in `parties.assignee`, and the stated consideration / transfer-tax value in `index_consideration_amount`.** The ownership timeline reads these to know who owned the property when, and to test whether a transfer was arms-length.
+
+That's the whole patch. No schema field is added — it reuses `parties.assignor`, `parties.assignee`, and `index_consideration_amount`, which already exist.
+
+## After pasting
+Bust the cache for the **deed** docs on any parcel you're testing (or clear `recorder_doc_cache`) so they re-extract with grantor/grantee populated. Mortgages, modifications, releases are unaffected — no need to re-run those.
+
+## Correct order end-to-end
+1. **(now)** Paste this deed line into the Stage 1 prompt → clear cached deeds → re-run `ingestParcel(3014)`.
+   - Verify: the 2016 deed comes back with `assignee` = HAPPY ARTS LLC, `assignor` = the prior owner, and a non-nominal `index_consideration_amount`.
+2. Deploy Stage 2.5 (`resolveState`) → its 3014 tests should now pass (Albany at position 1, 1999/2005 loans in `cleared_by_sale`, `active.length == 1`).
+3. Then Stage 3 (render) — the first stage that changes what you see on the card.
+
+## Sanity check that ties it together
+If step 1's deed shows a blank `assignee` or a null consideration, Stage 2.5 will *correctly* refuse to clear the old liens (unknown owner / unknown consideration ⇒ not arms-length), and you'll still see Albany at position 3. That's the guard working — it means the deed didn't extract, not that the logic is wrong. Fix the deed extraction first, then 2.5 resolves cleanly.

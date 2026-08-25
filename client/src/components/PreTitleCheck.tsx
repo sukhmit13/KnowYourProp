@@ -23,6 +23,8 @@ import {
   Scale
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { DocRef } from "@/components/report/OwnershipTitleSection";
+import { useOwnerLienSearch } from "@/hooks/use-runs";
 
 interface PreTitleCheckProps {
   pin: string | null;
@@ -30,7 +32,8 @@ interface PreTitleCheckProps {
   openViolationsCount?: number;
   lienData?: any;
   propertyTaxData?: any;
-  onScrollToSection?: (section: 'propertyTax' | 'liens' | 'saleHistory') => void;
+  city?: string | null;
+  onScrollToSection?: (section: 'propertyTax' | 'ownership') => void;
   isOpen?: boolean;
   onIsOpenChange?: (v: boolean) => void;
 }
@@ -69,12 +72,25 @@ interface PreTitleCheckResult {
   lastUpdated: string;
 }
 
-export function PreTitleCheck({ pin, address, openViolationsCount = 0, lienData, propertyTaxData, onScrollToSection, isOpen: isOpenProp, onIsOpenChange, children }: PreTitleCheckProps & { children?: React.ReactNode }) {
+export function PreTitleCheck({ pin, address, openViolationsCount = 0, lienData, propertyTaxData, city, onScrollToSection, isOpen: isOpenProp, onIsOpenChange, children }: PreTitleCheckProps & { children?: React.ReactNode }) {
   const [isSectionOpenLocal, setIsSectionOpenLocal] = useState(false);
   const isSectionOpen = isOpenProp !== undefined ? isOpenProp : isSectionOpenLocal;
   const setIsSectionOpen = (v: boolean) => { setIsSectionOpenLocal(v); onIsOpenChange?.(v); };
 
   const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(false);
+  const [isEditingOwnerName, setIsEditingOwnerName] = useState(false);
+  const [ownerNameInput, setOwnerNameInput] = useState("");
+  const ownerLienSearch = useOwnerLienSearch();
+  const recordedOwnerName = lienData?.ownerName || "";
+  const ownerLiens = lienData?.ownerLiens || [];
+  const ownerSearchComplete = !!lienData?.ownerLienScrapedAt && !lienData?.ownerLienIsStale;
+
+  const submitOwnerSearch = () => {
+    const ownerName = ownerNameInput.trim() || recordedOwnerName;
+    if (!pin || ownerName.length < 2 || ownerLienSearch.isPending) return;
+    ownerLienSearch.mutate({ pin, ownerName, city });
+    setIsEditingOwnerName(false);
+  };
 
   const { data, isLoading, error } = useQuery<PreTitleCheckResult>({
     queryKey: ['/api/pre-title-check', pin, address],
@@ -426,7 +442,7 @@ export function PreTitleCheck({ pin, address, openViolationsCount = 0, lienData,
                 label="Foreclosure"
                 status={foreclosureStatus}
                 detail={foreclosureDetail}
-                onScrollToSection={onScrollToSection ? () => onScrollToSection('liens') : undefined}
+                onScrollToSection={onScrollToSection ? () => onScrollToSection('ownership') : undefined}
                 externalLink={!onScrollToSection ? details.foreclosure?.manualCheckUrl : undefined}
               />
               <DetailRow
@@ -434,7 +450,7 @@ export function PreTitleCheck({ pin, address, openViolationsCount = 0, lienData,
                 label="Liens & Mortgages"
                 status={lienStatus}
                 detail={lienDetail}
-                onScrollToSection={onScrollToSection ? () => onScrollToSection('liens') : undefined}
+                onScrollToSection={onScrollToSection ? () => onScrollToSection('ownership') : undefined}
                 externalLink={!onScrollToSection ? details.liens?.manualCheckUrl : undefined}
               />
               <DetailRow
@@ -448,7 +464,7 @@ export function PreTitleCheck({ pin, address, openViolationsCount = 0, lienData,
                     : details.waterBill?.message || 'No outstanding balance'
                 }
                 externalLink={details.waterBill?.manualCheckUrl}
-                onScrollToSection={hasWaterDeptLien && onScrollToSection ? () => onScrollToSection('liens') : undefined}
+                   onScrollToSection={hasWaterDeptLien && onScrollToSection ? () => onScrollToSection('ownership') : undefined}
               />
               {lisPendensDetail && (
                 <DetailRow
@@ -456,7 +472,7 @@ export function PreTitleCheck({ pin, address, openViolationsCount = 0, lienData,
                   label="Lis Pendens"
                   status={activeListPendensCount > 0 ? 'warning' : 'good'}
                   detail={lisPendensDetail}
-                  onScrollToSection={onScrollToSection ? () => onScrollToSection('liens') : undefined}
+                   onScrollToSection={onScrollToSection ? () => onScrollToSection('ownership') : undefined}
                 />
               )}
               <DetailRow
@@ -464,10 +480,104 @@ export function PreTitleCheck({ pin, address, openViolationsCount = 0, lienData,
                 label="Ownership"
                 status={ownershipStatus}
                 detail={ownershipDetail}
-                onScrollToSection={onScrollToSection ? () => onScrollToSection('saleHistory') : undefined}
+                onScrollToSection={onScrollToSection ? () => onScrollToSection('ownership') : undefined}
                 externalLink={!onScrollToSection ? details.ownership?.manualCheckUrl : undefined}
               />
             </div>
+
+            {lienData && (
+              <div className="kyp-owner-liens" data-testid="owner-liens-card">
+                <div className="kyp-subhead">
+                  <span className="lbl">Owner liens</span>
+                  <span className="ct">Pre-title review · follows the owner, not this parcel</span>
+                  <span className="rule" />
+                </div>
+
+                <div className="kyp-owner-lien-tools">
+                  <div>
+                    <span className="tool-label">Name searched</span>
+                    <b>{recordedOwnerName || "Owner name unavailable"}</b>
+                  </div>
+                  <div className="kyp-owner-lien-actions no-print">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={!pin || (!recordedOwnerName && !isEditingOwnerName) || ownerLienSearch.isPending}
+                      onClick={() => {
+                        if (isEditingOwnerName) {
+                          submitOwnerSearch();
+                        } else if (recordedOwnerName) {
+                          ownerLienSearch.mutate({ pin: pin!, ownerName: recordedOwnerName, city });
+                        }
+                      }}
+                      data-testid="button-owner-lien-search"
+                    >
+                      {ownerLienSearch.isPending ? "Searching..." : ownerSearchComplete ? "Search again" : "Search owner liens"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setOwnerNameInput(recordedOwnerName);
+                        setIsEditingOwnerName((current) => !current);
+                      }}
+                      data-testid="button-owner-name-edit"
+                    >
+                      {isEditingOwnerName ? "Cancel" : "Use another name"}
+                    </Button>
+                  </div>
+                </div>
+
+                {isEditingOwnerName && (
+                  <div className="kyp-owner-lien-editor no-print">
+                    <input
+                      value={ownerNameInput}
+                      onChange={(event) => setOwnerNameInput(event.target.value.toUpperCase())}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") submitOwnerSearch();
+                        if (event.key === "Escape") setIsEditingOwnerName(false);
+                      }}
+                      placeholder="LAST, FIRST or COMPANY NAME"
+                      aria-label="Owner name for lien search"
+                      data-testid="input-owner-name-override"
+                    />
+                    <Button type="button" size="sm" disabled={ownerNameInput.trim().length < 2 || ownerLienSearch.isPending} onClick={submitOwnerSearch}>
+                      Search
+                    </Button>
+                  </div>
+                )}
+
+                {ownerLiens.length > 0 ? (
+                  <>
+                    <p className="kyp-owner-lien-summary">
+                      <b>{ownerLiens.length} personal lien record{ownerLiens.length === 1 ? "" : "s"} found.</b> Confirm identity, payoff, and release before using these records in a closing decision.
+                    </p>
+                    {ownerLiens.slice(0, 10).map((doc: any, index: number) => (
+                      <div className="kyp-xact claim" key={doc.documentNumber || index} data-testid={`row-owner-lien-${index}`}>
+                        <div className="xtop"><span className="xttl">{doc.documentType || doc.category || "Personal lien record"}</span></div>
+                        <div className="xgrid">
+                          <div className="xf"><span className="k">Against</span><span className="v">{recordedOwnerName || ownerNameInput || "Name not recorded"}</span></div>
+                          <div className="xf"><span className="k">Status</span><span className="v">Confirm identity and release</span></div>
+                        </div>
+                        <DocRef documentNumber={doc.documentNumber || doc.docNo} viewLink={doc.viewLink} recordedDate={doc.recordingDate || doc.recordedDate} />
+                      </div>
+                    ))}
+                  </>
+                ) : ownerLienSearch.isPending ? (
+                  <div className="kyp-status-empty unknown">Searching owner-name records...</div>
+                ) : ownerSearchComplete ? (
+                  <div className="kyp-status-empty clear">
+                    No personal lien record was found for <b>{recordedOwnerName || ownerNameInput}</b> in the last completed search.
+                  </div>
+                ) : (
+                  <div className="kyp-status-empty">
+                    Owner-name liens are a separate search. Run it before closing if the recorded owner is known.
+                  </div>
+                )}
+              </div>
+            )}
 
             <Separator />
 

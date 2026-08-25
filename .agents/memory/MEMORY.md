@@ -12,6 +12,7 @@
 - [Auth & run ownership](auth-run-ownership.md) — new run endpoints need cookie+bearer auth, case-insensitive email ownership, 404 for non-owned; paid calls need lock+cooldown.
 - [Incentives single hierarchy](incentives-hierarchy.md) — one availability→type hierarchy; counts/cards derive from one shared map; CSS order doesn't apply in print.
 - [ZBA attorney index rebuild](zba-attorney-index.md) — atomic swap + sanity floors (incl. 70% ward rate); monthly via scheduler; spawn not exec; lightweight ward geocoding.
+- [Historic ZBA timeline archive](historic-zba-timeline-archive.md) — index all dated City-linked resolutions for property history; apply ward-quality rules only to the recent rankings subset.
 - [ZBA PDF naming variants](zba-pdf-naming.md) — city mixes abbreviated/full month names in ZBA PDF URLs; always try both or the feed silently goes stale.
 - [AI takeaway guardrails](ai-takeaway-guardrails.md) — cached report takeaways: server-derived inputs only, number-tracing + metric/favor validators, fail closed to null.
 - [Linked takeaway chips](linked-takeaway-chips.md) — jump chips map AI bullets' `metric` to anchors client-side (no server change, works with cached takeaways); tacard = neutral professional-card template.
@@ -26,4 +27,9 @@
 - [Assemblage detection](assemblage-detection.md) — Companion Parcel gate = verified shared deed + adjacency, never owner-name match; hedged control + debt-scope-gated claims.
 - [Liens distress resolution](lien-distress-resolution.md) — genuine-sale anchor clears prior lis pendens; one shared resolver for chip/headline/KPI; impossible dates never resolve.
 - [Valuation NOI model](valuation-noi-model.md) — transparent NOI build-up; one NOI everywhere; dual DSCR (economic + rent÷PITIA); never rent−taxes−insurance.
+- [mapbox-gl v3 upgrade](mapbox-gl-v3.md) — v2.15 marker occlusion timer crashes after style teardown; stay on v3, never reinstall @types/mapbox-gl.
+- [Zoning history lookup](zoning-history-lookup.md) — ordinance titles use range addresses ("520-22"); search street-only + range-aware number match; Legistar API itself can be down.
 - [JSX comment placement](jsx-comment-placement.md) — a {/* comment */} directly inside a .map() arrow parenthesized return breaks the Babel build; put comments above the map call.
+- [Ownership & Title evidence](ownership-title-evidence.md) — debt is resolved-snapshot-only; failed recorder searches stay unknown; historical releases remain visible and hedged.
+- [Treasurer cache safety](treasurer-cache-safety.md) — empty Treasurer refreshes must never erase a previously verified bill or payment history.
+- [West Town pilot isolation](west-town-pilot-isolation.md) — Market Discovery scans are lazy, self-contained, and must never share individual report tax data.

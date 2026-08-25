@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--takeBorder:#dde1f6;--takeDivider:#e3e5f4;
+    --good:#2f7d3f;--goodSoft:#e9f4ec;--goodLine:#cfe6d5;--caution:#f0a41c;--cautionText:#b26c07;--cautionSoft:#fdf8f0;--cautionLine:#f3e2c2;
+    --bad:#c0392b;--badText:#b23c2f;--badSoft:#fbeceb;--badLine:#f0d0cb;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+    --take-label:11px;--take-title:21px;--take-body:13px;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:var(--sans);color:var(--ink);padding:34px 40px}
+  .wrap{max-width:1140px;margin:0 auto}
+
+  .secthead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:14px}
+  .secthead .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .secthead .scope{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;text-transform:none;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 11px}
+
+  .seccard{border:1px solid var(--line);border-radius:16px;padding:24px 26px;box-shadow:0 1px 3px rgba(20,20,20,.03)}
+
+  .take{background:var(--indigoSoft);border-radius:12px;padding:18px 20px 19px}
+  .take-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .take-label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:var(--take-label);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo)}
+  .take-label svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+  .take-title{font-family:var(--disp);font-size:var(--take-title);line-height:1.28;color:var(--ink);margin-bottom:14px}
+  .take-row{display:flex;align-items:flex-start;gap:11px;padding:10px 0}
+  .take-row + .take-row{border-top:1px solid var(--takeDivider)}
+  .take-row .dot{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .take-row.good .dot{background:var(--good)} .take-row.caution .dot{background:var(--caution)} .take-row.insight .dot{background:var(--indigo)}
+  .take-row .body{flex:1;font-size:var(--take-body);line-height:1.5;color:var(--ink2)}
+  .take-row .body b{color:var(--ink);font-weight:600}
+  .take-chip{flex:none;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid var(--takeBorder);border-radius:8px;padding:6px 11px;white-space:nowrap}
+
+  /* bucket summary */
+  .buckets{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0 6px}
+  .bkt{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:var(--paper)}
+  .bkt .bn{font-family:var(--disp);font-size:30px;line-height:1}
+  .bkt .bl{font-size:12px;font-weight:600;color:var(--ink)}
+  .bkt.good{background:var(--goodSoft);border-color:var(--goodLine)} .bkt.good .bn{color:var(--good)}
+  .bkt.caution{background:var(--cautionSoft);border-color:var(--cautionLine)} .bkt.caution .bn{color:var(--cautionText)}
+  .bkt.na{background:var(--badSoft);border-color:var(--badLine)} .bkt.na .bn{color:var(--badText)}
+
+  .grouph{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:24px 0 12px}
+  .grouph .gd{width:8px;height:8px;border-radius:50%}
+  .grouph.good .gd{background:var(--good)} .grouph.caution .gd{background:var(--caution)} .grouph.na .gd{background:var(--bad)}
+  /* collapsible status groups */
+  details.grp > summary{list-style:none;cursor:pointer;user-select:none}
+  details.grp > summary::-webkit-details-marker{display:none}
+  details.grp > summary .chev{margin-left:auto;width:14px;height:14px;stroke:var(--ink2);fill:none;transition:transform .15s ease}
+  details.grp[open] > summary .chev{transform:rotate(180deg)}
+  details.grp > summary:hover .chev{stroke:var(--ink)}
+  .grpbody{margin-bottom:6px}
+  .disc{font-size:12px;color:var(--muted);line-height:1.55;margin-top:24px;padding-top:16px;border-top:1px solid var(--line)}
+  .grouph .ct{color:var(--muted)}
+
+  /* ===== CANONICAL INCENTIVE CARD ===== */
+  .inc{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--card)}
+  .inc + .inc{margin-top:12px}
+  .inchd{display:flex;align-items:center;gap:10px;margin-bottom:13px;flex-wrap:wrap}
+  .inchd .sc{width:20px;height:20px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .inchd .sc svg{width:12px;height:12px;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+  .inchd .nm{font-size:14.5px;font-weight:700;color:var(--ink)}
+  .inchd .tp{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:3px 7px}
+  .inchd .pill{margin-left:auto;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:6px;padding:4px 9px;white-space:nowrap}
+  .inc.good .sc{background:var(--goodSoft)} .inc.good .sc svg{stroke:var(--good)} .inc.good .pill{color:var(--good);background:var(--goodSoft);border:1px solid var(--goodLine)}
+  .inc.caution .sc{background:var(--cautionSoft)} .inc.caution .sc svg{stroke:var(--cautionText)} .inc.caution .pill{color:var(--cautionText);background:var(--cautionSoft);border:1px solid var(--cautionLine)}
+  .inc.na .sc{background:var(--badSoft)} .inc.na .sc svg{stroke:var(--bad)} .inc.na .pill{color:var(--badText);background:var(--badSoft);border:1px solid var(--badLine)}
+
+  /* slot 1: verdict box (always) */
+  .inc-v{border-radius:9px;padding:13px 15px}
+  .inc.good .inc-v{background:var(--goodSoft);box-shadow:inset 3px 0 0 var(--good)} .inc.caution .inc-v{background:var(--cautionSoft);box-shadow:inset 3px 0 0 var(--caution)} .inc.na .inc-v{background:var(--badSoft);box-shadow:inset 3px 0 0 var(--bad)}
+  .inc-v .vt{font-size:13px;font-weight:600;color:var(--ink);line-height:1.5}
+  .inc-v .vs{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:5px}
+
+  /* slot 2/3: ONE unified key-facts component — used for flat facts AND schedules/tiers */
+  .kf{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .kfc{border:1px solid var(--line);border-radius:9px;padding:11px 14px;min-width:112px}
+  .kfc .kl{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .kfc .kv{font-family:var(--disp);font-size:22px;color:var(--ink);line-height:1}
+  .kfc .kd{font-size:11px;color:var(--ink2);margin-top:6px;line-height:1.4;max-width:150px}
+
+  /* slot 4: two-column requirements (optional) */
+  .inc-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:14px}
+  .inc-cols .ch{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
+  .inc-cols ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+  .inc-cols li{font-size:12px;color:var(--ink2);line-height:1.45;padding-left:13px;position:relative}
+  .inc-cols li::before{content:"";position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:var(--indigo)}
+
+  /* slot 5: note / deadline (optional) */
+  .inc-note{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:7px 11px;margin-top:12px}
+  .inc-note svg{width:12px;height:12px;stroke:var(--ink2);fill:none;flex:none}
+
+  /* footer: links + source (always) */
+  .inc-ft{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:13px;padding-top:12px;border-top:1px solid var(--line)}
+  .inclink{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none}
+  .inclink svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+  .incsrc{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="secthead"><span class="sq"></span>Location-Based Incentives<span class="scope">47 programs screened</span></div>
+
+  <div class="seccard">
+    <div class="take">
+      <div class="take-head"><span class="take-label"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Takeaway</span></div>
+      <div class="take-title">The TIF location unlocks the commercial incentives that actually matter for a parcel like this.</div>
+
+      <div class="take-row good"><span class="dot"></span><span class="body"><b>Being in the Fullerton/Milwaukee TIF is the key.</b> It makes the property potentially eligible for <b>Class 7</b> (12-yr commercial tax reduction), <b>SBIF</b> (authorized, TIF open), and all <b>CDG</b> grant tiers — the programs a commercial rehab or re-tenant would actually use.</span><a class="take-chip" href="#relevant">10 relevant <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a></div>
+
+      <div class="take-row insight"><span class="dot"></span><span class="body"><b>10 of 47 are likely relevant; 5 need a manual check.</b> The other 32 are residential or affordable-housing programs (LIHTC, historic credits, opportunity zone) that don't fit a commercially-zoned parcel.</span></div>
+
+      <div class="take-row caution"><span class="dot"></span><span class="body"><b>"Potentially eligible" is a starting point, not a guarantee.</b> Every program here requires application and approval — none is automatic. Confirm program requirements and current funding cycles before relying on any of them.</span></div>
+    </div>
+
+    <div class="buckets">
+      <div class="bkt good"><span class="bn">10</span><span class="bl">Likely relevant</span></div>
+      <div class="bkt caution"><span class="bn">5</span><span class="bl">Needs confirmation</span></div>
+      <div class="bkt na"><span class="bn">32</span><span class="bl">Not applicable</span></div>
+    </div>
+
+    <!-- LIKELY RELEVANT -->
+    <details class="grp" open id="relevant">
+    <summary class="grouph good"><span class="gd"></span>Likely relevant<span class="ct">· 10</span><svg class="chev" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+    <div class="grpbody">
+
+    <div class="inc good">
+      <div class="inchd"><span class="sc"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span class="nm">Cook County Class 7c (CURE)</span><span class="tp">Property Tax</span><span class="pill">Potentially Eligible</span></div>
+      <div class="inc-v"><div class="vt">Potentially eligible — Class 7c provides a 5-year reduced assessment (16% of market value) for commercial rehabilitation or re-occupancy. Easier to qualify than Class 7a/7b.</div><div class="vs">Requires a Cook County Assessor application. Review the program requirements and confirm project details before applying.</div></div>
+      <div class="kf"><div class="kfc"><div class="kl">Term</div><div class="kv">5 yrs</div></div><div class="kfc"><div class="kl">Assessment</div><div class="kv">16%</div><div class="kd">of market value</div></div><div class="kfc"><div class="kl">Applies via</div><div class="kv">CCAO</div></div></div>
+      <div class="inc-note"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Requires application / approval — not automatic.</div>
+      <div class="inc-ft"><a class="inclink" href="#">Program info <svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></a><span class="incsrc">Cook County Assessor</span></div>
+    </div>
+
+    <div class="inc good">
+      <div class="inchd"><span class="sc"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span class="nm">SBIF — Small Business Improvement Fund</span><span class="tp">Grant</span><span class="pill">Authorized · TIF Open</span></div>
+      <div class="inc-v"><div class="vt">SBIF is authorized in the Fullerton/Milwaukee TIF — it reimburses building improvements for commercial businesses on a grant basis.</div></div>
+      <div class="inc-cols">
+        <div><div class="ch">Who can apply</div><ul><li>Commercial businesses with up to $9M gross annual sales</li><li>Property owners with up to $9M net worth</li><li>Industrial businesses with up to 200 employees</li></ul></div>
+        <div><div class="ch">Eligible improvements</div><ul><li>Building renovations (windows, doors, roofing)</li><li>HVAC, electrical, plumbing upgrades</li><li>Interior remodeling & ADA improvements</li></ul></div>
+      </div>
+      <div class="inc-note"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>National chains, franchises, and certain business types are not eligible.</div>
+      <div class="inc-ft"><a class="inclink" href="#">Full eligibility <svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></a><a class="inclink" href="#">SomerCor calendar <svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></a><span class="incsrc">Chicago DPD · SomerCor</span></div>
+    </div>
+
+    </div></details>
+
+    <!-- NEEDS CONFIRMATION -->
+    <details class="grp" open>
+    <summary class="grouph caution"><span class="gd"></span>Needs confirmation<span class="ct">· 5</span><svg class="chev" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+    <div class="grpbody">
+
+    <div class="inc caution">
+      <div class="inchd"><span class="sc"><svg viewBox="0 0 24 24"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span><span class="nm">Class 7(a)/(b) Commercial Tax Incentive</span><span class="tp">Property Tax</span><span class="pill">In Qualifying Zone</span></div>
+      <div class="inc-v"><div class="vt">In a qualifying Class 7 zone (TIF: Fullerton/Milwaukee) — a 12-year real estate tax reduction for qualifying commercial projects.</div><div class="vs">Class 7 requires a commercial project in a Redevelopment Area (TIF), Federal Enterprise Zone, or Empowerment Zone.</div></div>
+      <div class="kf"><div class="kfc"><div class="kl">Years 1–10</div><div class="kv">10%</div><div class="kd">vs. standard 25%</div></div><div class="kfc"><div class="kl">Year 11</div><div class="kv">15%</div><div class="kd">step-up begins</div></div><div class="kfc"><div class="kl">Year 12</div><div class="kv">20%</div><div class="kd">before standard</div></div></div>
+      <div class="inc-note"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg>Class 7(a): projects under $2M · Class 7(b): over $2M — additional review + City Council approval.</div>
+      <div class="inc-ft"><a class="inclink" href="#">Program info <svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></a><span class="incsrc">Cook County · TIF: Fullerton/Milwaukee</span></div>
+    </div>
+
+    </div></details>
+
+    <!-- NOT APPLICABLE (collapsed by default) -->
+    <details class="grp">
+    <summary class="grouph na"><span class="gd"></span>Not applicable<span class="ct">· 32</span><svg class="chev" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+    <div class="grpbody">
+
+    <div class="inc na">
+      <div class="inchd"><span class="sc"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span><span class="nm">Federal Historic Rehabilitation Tax Credit (20%)</span><span class="tp">Tax Credit</span><span class="pill">Not Applicable</span></div>
+      <div class="inc-v"><div class="vt">Not applicable — requires a certified historic structure undergoing income-producing rehabilitation. No landmark designation detected.</div><div class="vs">The available location data does not establish eligibility for this program.</div></div>
+      <div class="inc-ft"><a class="inclink" href="#">Program info <svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></a><span class="incsrc">National Park Service</span></div>
+    </div>
+
+    </div></details>
+
+    <div class="disc">Informational only — not legal, tax, or financial advice. A geographic or zoning match means the parcel may be inside a program's footprint, which is necessary but usually not sufficient for eligibility. Confirm each program with the administering agency before taking action.</div>
+
+  </div>
+</div>
+</body>
+</html>

@@ -363,7 +363,7 @@ export class DatabaseStorage implements IStorage {
     });
     
     if (existingEntry) {
-      // Update existing entry with latest project types if provided
+      // Update existing entry with latest project uses if provided
       if (projectTypes) {
         const [updated] = await db.update(compareHistory)
           .set({ projectTypes, createdAt: new Date() })

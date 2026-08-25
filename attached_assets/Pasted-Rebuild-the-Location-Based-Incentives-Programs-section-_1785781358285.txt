@@ -1,0 +1,35 @@
+Rebuild the "Location-Based Incentives & Programs" section with a single organizing hierarchy: availability first, then incentive type. The attached report-incentives.html is the exact visual target. This changes how existing incentives are GROUPED and DISPLAYED — do NOT change the eligibility logic that decides whether a program is relevant/needs-confirmation/not-applicable, the program data, routing, or auth. Every program keeps the same eligibility result it has now; we're only giving it one consistent home.
+
+Remove the competing structures. Today this section renders programs in three overlapping ways: the "Eligibility at a Glance" buckets, the thematic type sections (Zoning & Development, Financing & Investor Credits, Property Tax Relief, Grants & Direct Funding), AND a separate availability list. Collapse all of that into ONE list so each program renders exactly once.
+
+Top-level order = availability (3 groups):
+
+Likely Relevant (green)
+Needs Confirmation (amber)
+Not Applicable (grey) — collapsed by default
+
+Within each availability group, subgroup by incentive type with a small mono-uppercase type label: Property Tax → Financing & Investor Credits → Grants & Direct Funding → Zoning & Development Rights. A program appears under its type inside its availability group (e.g. Class 7c, Class 8, Class C, Class 7(a)/(b) all under "Property Tax" within "Likely Relevant").
+
+Design tokens (use existing CSS variables): JetBrains Mono for the section title, group headers, and type labels; Inter for body; Instrument Serif for the glance-tile numbers. Status colors — three states only: green --good:#2f7d3f / bg 
+#edf6ef, amber --amber:#c98400 / --amberBd:#e6a70a / bg 
+#fdf6cf, and neutral grey --na:#8b8a84 / bg 
+#f2f1ec. Not-applicable is GREY, never red — a program that doesn't apply is not an error. Indigo 
+#2b3a9e for icons and links only.
+
+Glance tiles (top): three tiles in a row — Likely Relevant / Needs Confirmation / Not Applicable — each with its state marker, the count in Instrument Serif, and a label, tinted in its state color. The count on each tile must be computed as the actual number of cards in that group (e.g. likelyRelevant.length), never a separate hardcoded number, so the glance can never drift from the list.
+
+Group header: a small state-colored square + mono uppercase title + a muted "· N" count.
+
+Incentive card (collapsible):
+
+Collapsed row: state marker (green ✓ / amber ! / grey ×), program name in Inter bold, and on the right a status badge (soft-tinted in the state color) plus a ▾ chevron.
+Expanded: a top border, then the description paragraph, a two-column Who Can Apply / Eligibility Requirements (mono-uppercase labels over bulleted lists), the italic "requires application / approval — not automatic" note, and a bottom-bordered links row (Program info, Apply) with the source right-aligned. The expanded body aligns under the program name, not under the marker.
+Keep the existing expand/collapse behavior — this is the detail view users already have, just inside the new hierarchy.
+
+Not Applicable group: render collapsed as a single dashed "Show N programs that don't apply here — grouped by type" affordance. On expand, list those programs using the same type-subgroup + collapsible-card pattern, all in grey.
+
+Footer: the existing "informational only — not legal/tax/financial advice; geographic match is necessary but not sufficient" disclaimer, in muted text under a top rule.
+
+Status badges: keep them program-specific where they carry real meaning ("Potentially Eligible", "Authorized · TIF Open", "In Qualifying Zone", "Eligible by Zoning") — but if simpler is preferred, a single uniform per-state label is acceptable. Do not invent new eligibility conclusions; badges must reflect the same result the eligibility logic already produces.
+
+No black anywhere; keep it factual. Do not add scores or rankings.

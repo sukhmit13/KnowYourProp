@@ -1,0 +1,28 @@
+Front-end / styling only — do NOT change routing, auth, data, or business logic.
+
+Extend the report-view styling to the remaining sections, matching the attached report-view-reference.html and the existing design tokens (Instrument Serif display, Inter body, JetBrains Mono labels, deep indigo 
+#2b3a9e, indigo-soft 
+#ecedf9, cream 
+#faf9f6, hairline 
+#eae8e2). The Ward & Alderperson and Zoning cards are already done — use them as the reference for the header style; do not rebuild them.
+
+A. Section-card headers — apply the SAME header style already used on the Ward & Alderperson and Zoning cards to every other section card in the report (New Construction, Neighborhood People Profile, and all the rest): indigo square accent (10px) + JetBrains Mono uppercase ~12.5px weight 700 in ink 
+#141414 + a 1px hairline divider under the header. Any section still using the old gray/quiet header should adopt this.
+
+B. Shared stat-tile component — use for ALL stat tiles in the report.
+Horizontal layout (display:flex; justify-content:space-between; align-items:center). Left = label (with optional color dot) and qualifier stacked vertically at similar sizes (~13–13.5px; label ink weight 600, qualifier muted 
+#8b8a84). Right = the number as hero in Instrument Serif (~43px), vertically centered. Replace any tile that stacks everything vertically with lots of empty space.
+
+C. Charts — categorical palette (apply wherever these categories are colored, report-wide).
+Replace all grayscale category colors with this validated palette, assigned by entity and consistent everywhere: Single Family → 
+#3f51c5, Multifamily → 
+#0e8fa6, Commercial → 
+#e0a615. Never use these colors color-alone — always with a legend and/or direct labels.
+
+D. Charts — polish.
+Toggle pills: active segment deep indigo 
+#2b3a9e with white text (not black); inactive muted gray on a light track. Stacked bars: 2px gaps between segments, 4px rounded ends, light track (
+#efeee9), tabular-figure totals right-aligned, legend below, and a hover tooltip on each segment showing category + value. Language bars: single indigo series (
+#3f51c5), percentage labels, per-bar hover tooltip, no legend. Keep the "Moderate linguistic diversity" summary as an indigo-soft callout.
+
+Match spacing, radii, and borders to the reference. Apply A, B, and C consistently across the ENTIRE report so no section keeps the old header style, the old stacked-tile style, or grayscale charts.

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--bad:#d13b26;
+    --caution:#f0a41c;--cautionText:#96600a;
+    /* construction type categories (validated triad — no teal, vivid gold) */
+    --sf:#2b3a9e;--mf:#7b5ea7;--comm:#f59e0b;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+
+  /* subsection header (outline icon, not top-level square) */
+  .ssh{display:flex;align-items:center;gap:9px;margin-bottom:16px}
+  .ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+  .ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+  .ssh .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+
+  /* takeaway */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px 17px;margin-bottom:18px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+  .taket{font-family:var(--disp);font-size:21px;line-height:1.25;color:var(--ink);margin-bottom:13px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:9px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+  .cn.c .dt{background:var(--caution)}
+  .cn.i .dt{background:var(--indigo)}
+  .cn b{color:var(--ink);font-weight:600}
+  .cn .tx{flex:1}
+
+  /* scope toggle */
+  .toggle{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:4px;gap:4px;margin-bottom:16px}
+  .toggle .tg{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink2);padding:8px 10px;border-radius:7px;cursor:pointer}
+  .toggle .tg svg{width:13px;height:13px;stroke:currentColor;fill:none}
+  .toggle .tg.on{background:var(--indigo);color:#fff}
+
+  .scopelbl{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:13px}
+  .scopelbl svg{width:13px;height:13px;stroke:var(--indigo);fill:none}
+
+  /* type stat cards */
+  .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:20px}
+  .tcard{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 15px}
+  .tchead{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+  .tchead .sw{width:9px;height:9px;border-radius:3px;flex:none}
+  .tchead .nm{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .tcnum{display:flex;align-items:baseline;gap:8px}
+  .tcnum .n{font-family:var(--disp);font-size:34px;color:var(--ink);line-height:.9}
+  .tcnum .u{font-family:var(--mono);font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .tcavg{font-family:var(--mono);font-size:10.5px;color:var(--ink2);margin-top:7px}
+  .tcavg b{color:var(--ink);font-weight:600}
+
+  /* yearly breakdown */
+  .ybhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .ybtitle{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+  .legend{display:flex;gap:14px}
+  .legend .lg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2)}
+  .legend .lg .sw{width:9px;height:9px;border-radius:3px;flex:none}
+
+  .ybrow{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:12px;margin-bottom:11px}
+  .ybyear{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;line-height:1.25}
+  .ybyear .yt{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.06em;color:var(--indigo)}
+  .ybtrack{width:100%}
+  .ybbar{display:flex;gap:2px;height:22px;border-radius:5px;overflow:hidden}
+  .ybbar i{display:block;height:100%}
+  .ybbar i:first-child{border-top-left-radius:5px;border-bottom-left-radius:5px}
+  .ybbar i:last-child{border-top-right-radius:5px;border-bottom-right-radius:5px}
+  .sfc{background:var(--sf)} .mfc{background:var(--mf)} .commc{background:var(--comm)}
+  .ybend{display:flex;align-items:center;gap:8px;white-space:nowrap;justify-self:end}
+  .ybtot{font-family:var(--disp);font-size:19px;color:var(--ink);line-height:1}
+  .ybpace{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:6px;padding:3px 7px}
+
+  /* trend + note */
+  .trend{display:flex;align-items:flex-start;gap:9px;margin-top:16px;padding:12px 14px;background:var(--paper);border:1px solid var(--line);border-radius:10px}
+  .trend .chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:7px;padding:5px 10px;flex:none}
+  .trend .chip svg{width:14px;height:14px;stroke:var(--ink2);fill:none}
+  .trend .tx{font-size:11.5px;color:var(--ink2);line-height:1.5}
+  .trend .tx b{color:var(--ink);font-weight:600}
+
+  .src{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:14px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cardbox">
+    <div class="ssh">
+      <svg class="hic" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg>
+      <span class="t">New Construction Activity</span>
+      <span class="count">220 permits · since 2023</span></div>
+
+    <!-- TAKEAWAY -->
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>What the building pipeline shows</div>
+      <div class="taket">Right around this property, building is happening now — 132 permits active within a mile — against a West Town backdrop that's been developing steadily for years.</div>
+      <div class="cn i"><span class="dt"></span><span class="tx"><b>132 active permits within 1 mile — the closest read.</b> This is construction underway right now, next to the property. It signals demand and investment, but also means nearby building: noise, disruption, and new competing supply while it lasts.</span></div>
+      <div class="cn i"><span class="dt"></span><span class="tx"><b>Steady, not spiking.</b> Zoom out to all of West Town and full years run 56 → 65 → 54 (2026 on pace) — sustained development since 2023, no boom-or-bust. That multi-year record is what makes the trend read as stable rather than a one-year blip.</span></div>
+      <div class="cn i"><span class="dt"></span><span class="tx"><b>Mostly residential.</b> Multifamily (96) and single-family (86) lead by count; commercial is just 38 permits but a <b>$32.5M average</b> — a few very large developments, not the typical project.</span></div>
+    </div>
+
+    <!-- SCOPE TOGGLE -->
+    <div class="toggle">
+      <div class="tg on"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>By Community Area</div>
+      <div class="tg"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>By ZIP Code</div>
+      <div class="tg"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4z"/></svg>Nearby (1 mi)</div>
+    </div>
+
+    <div class="scopelbl"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>West Town · since 2023</div>
+
+    <!-- TYPE STAT CARDS -->
+    <div class="g3">
+      <div class="tcard">
+        <div class="tchead"><span class="sw" style="background:var(--sf)"></span><span class="nm">Single Family</span></div>
+        <div class="tcnum"><span class="n">86</span><span class="u">permits</span></div>
+        <div class="tcavg">Avg value <b>$723K</b></div>
+      </div>
+      <div class="tcard">
+        <div class="tchead"><span class="sw" style="background:var(--mf)"></span><span class="nm">Multifamily</span></div>
+        <div class="tcnum"><span class="n">96</span><span class="u">permits</span></div>
+        <div class="tcavg">Avg value <b>$2.9M</b></div>
+      </div>
+      <div class="tcard">
+        <div class="tchead"><span class="sw" style="background:var(--comm)"></span><span class="nm">Commercial</span></div>
+        <div class="tcnum"><span class="n">38</span><span class="u">permits</span></div>
+        <div class="tcavg">Avg value <b>$32.5M</b> <span style="color:var(--cautionText)">· skewed</span></div>
+      </div>
+    </div>
+
+    <!-- YEARLY BREAKDOWN -->
+    <div class="ybhead">
+      <span class="ybtitle">Permits by year · bar length = volume</span>
+      <div class="legend">
+        <span class="lg"><span class="sw" style="background:var(--sf)"></span>Single Family</span>
+        <span class="lg"><span class="sw" style="background:var(--mf)"></span>Multifamily</span>
+        <span class="lg"><span class="sw" style="background:var(--comm)"></span>Commercial</span>
+      </div>
+    </div>
+
+    <!-- 2026 YTD: 45 (69.23% of max 65) · SF17 MF19 Comm9 -->
+    <div class="ybrow">
+      <span class="ybyear">2026<span class="yt">YTD</span></span>
+      <div class="ybtrack"><div class="ybbar" style="width:69.23%"><i class="sfc" style="flex:17"></i><i class="mfc" style="flex:19"></i><i class="commc" style="flex:9"></i></div></div>
+      <div class="ybend"><span class="ybtot">45</span><span class="ybpace">Through Aug · ~75/yr pace</span></div>
+    </div>
+    <!-- 2025 full: 54 (83.08%) · SF21 MF24 Comm9 -->
+    <div class="ybrow">
+      <span class="ybyear">2025</span>
+      <div class="ybtrack"><div class="ybbar" style="width:83.08%"><i class="sfc" style="flex:21"></i><i class="mfc" style="flex:24"></i><i class="commc" style="flex:9"></i></div></div>
+      <div class="ybend"><span class="ybtot">54</span></div>
+    </div>
+    <!-- 2024 full: 65 (100%) · SF26 MF29 Comm10 -->
+    <div class="ybrow">
+      <span class="ybyear">2024</span>
+      <div class="ybtrack"><div class="ybbar" style="width:100%"><i class="sfc" style="flex:26"></i><i class="mfc" style="flex:29"></i><i class="commc" style="flex:10"></i></div></div>
+      <div class="ybend"><span class="ybtot">65</span></div>
+    </div>
+    <!-- 2023 full: 56 (86.15%) · SF22 MF24 Comm10 -->
+    <div class="ybrow">
+      <span class="ybyear">2023</span>
+      <div class="ybtrack"><div class="ybbar" style="width:86.15%"><i class="sfc" style="flex:22"></i><i class="mfc" style="flex:24"></i><i class="commc" style="flex:10"></i></div></div>
+      <div class="ybend"><span class="ybtot">56</span></div>
+    </div>
+
+    <!-- TREND -->
+    <div class="trend">
+      <span class="chip"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/></svg>Stable</span>
+      <span class="tx"><b>Three full years, then 2026 to date.</b> 56 · 65 · 54 shows no real trend, and 2026's 45 through August keeps pace. The ~75/yr figure is a straight-line projection — since spring–summer is peak building season, the true full-year total may land a little lower.</span>
+    </div>
+
+    <div class="src">Source: City of Chicago Building Permits · excludes garages, stages &amp; other accessory structures · Jan 1 2023 – Aug 8 2026 (2026 year-to-date)</div>
+
+  </div>
+</div>
+</body>
+</html>

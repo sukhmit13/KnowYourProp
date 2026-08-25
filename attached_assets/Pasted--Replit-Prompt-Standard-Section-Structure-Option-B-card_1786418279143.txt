@@ -1,0 +1,98 @@
+# Replit Prompt — Standard Section Structure (Option B, carded) — apply to EVERY section with a takeaway
+
+The canonical scaffold for every section. Each section is a **container card** with its title once (on the header above the card), an optional scope chip on that header row, and the takeaway + data living inside the card. This supersedes the earlier full-width version. Implement **verbatim**; check CRITICAL DETAILS.
+
+## The canonical structure
+```
+1. Section header   — filled indigo square + mono uppercase title, optional right-aligned scope chip   (ABOVE the card)
+2. Section card     — one bordered container that holds:
+      2a. Takeaway   — the shared Standard Takeaway component, tint-only (NO own border), at the top of the card
+      2b. Section data — charts / tables / cards, inside the same container
+```
+The card frames and indents the section's content. The header title appears **once** (step 1); it is never repeated inside the card.
+
+## 🔴 The rules that fix the current drift
+1. **One container card per section** — everything (takeaway + data) lives inside it. No section is left un-carded; no section double-wraps.
+2. **One title = the section header**, above the card. Never repeat the section name on a header inside the card.
+3. **The inner takeaway is tint-only (no border)** — inside the white card, a bordered+tinted takeaway is a frame-in-a-frame. Keep the indigoSoft fill, drop the border.
+4. **Scope/meta chip on the section-header row**, right-aligned (e.g. `33 businesses · 1 mi · 12 mo`); optional, omit when nothing to scope. Not inside the card, not on a duplicate title.
+5. **No divider line** between header and card. Spacing only.
+
+## CSS (verbatim)
+```css
+/* 1 — section header (above the card, single title) */
+.secthead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:14px}
+.secthead .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+.secthead .scope{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.01em;text-transform:none;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 11px;white-space:nowrap}
+
+/* 2 — section container card */
+.seccard{border:1px solid var(--line);border-radius:16px;padding:24px 26px;box-shadow:0 1px 3px rgba(20,20,20,.03)}
+
+/* 2a — takeaway INSIDE the card: tint-only, NO border */
+.take{background:var(--indigoSoft);border-radius:12px;padding:18px 20px 19px}
+.take-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.take-label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo)}
+.take-label svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+.take-title{font-family:var(--disp);font-size:21px;line-height:1.28;color:var(--ink);margin-bottom:14px}
+.take-row{display:flex;align-items:flex-start;gap:11px;padding:10px 0}
+.take-row + .take-row{border-top:1px solid var(--takeDivider)}
+.take-row .dot{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.take-row.good .dot{background:var(--good)} .take-row.caution .dot{background:var(--caution)} .take-row.insight .dot{background:var(--indigo)}
+.take-row .body{flex:1;font-size:13px;line-height:1.5;color:var(--ink2)}
+.take-row .body b{color:var(--ink);font-weight:600}
+.take-chip{flex:none;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid var(--takeBorder);border-radius:8px;padding:6px 11px;white-space:nowrap}
+.take-chip svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+
+/* 2b — data label inside the card (for sub-blocks under the takeaway) */
+.datalabel{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin:22px 0 12px}
+.datalabel .hint{color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-left:8px}
+```
+
+## HTML (verbatim skeleton for every section)
+```html
+<section>
+  <!-- 1 — header above the card (scope chip optional) -->
+  <div class="secthead">
+    <span class="sq"></span>{Section Title}
+    <span class="scope">{scope_chip}</span>   <!-- omit this span entirely if no scope -->
+  </div>
+
+  <!-- 2 — the section container card -->
+  <div class="seccard">
+    <!-- 2a — takeaway, tint-only, top of the card -->
+    <div class="take">
+      <div class="take-head"><span class="take-label"><svg …lightbulb…></svg>Takeaway</span></div>
+      <div class="take-title">{takeaway.title}</div>
+      <!-- one .take-row per bullet; tone ∈ good|caution|insight; optional far-right .take-chip -->
+    </div>
+
+    <!-- 2b — section data, inside the same card -->
+    <div class="datalabel">{Data Block Title}<span class="hint">· {optional note}</span></div>
+    …charts / tables / cards…
+  </div>
+</section>
+```
+
+## Spacing / rhythm
+- `.secthead` → card: **14px** (`.secthead margin-bottom`). No rule/line.
+- Inside the card: takeaway → first data label **22px** (`.datalabel margin-top`).
+- Between sections: existing page section gap (unchanged), applied to the whole header+card block.
+- No subtitle line by default (removed as redundant). If a section truly needs one, it's a single muted line between the header and the card, no divider.
+
+## Retrofit checklist (per existing section)
+- [ ] Wrap the section's takeaway + data in one `.seccard` container.
+- [ ] Keep the section title only on the `.secthead` above the card; delete any title repeated inside.
+- [ ] Make the inner takeaway **tint-only** (remove its border).
+- [ ] Move any scope/count chip to the `.secthead` row (`.scope`, right-aligned).
+- [ ] Remove any grey divider/`<hr>` between header and takeaway.
+- [ ] Confirm the takeaway is the shared component (11px label / 21px serif headline / 13px body / far-right centered chips) and dot tones use the shared favorability rule.
+
+## Note — pressure-test the heaviest section
+On a data-dense section (big chart + long table), confirm the card padding still looks right and doesn't feel bulky. If it does, the only change is a lighter card — drop `box-shadow`, keep the border — everything else identical. Do this globally, not per-section, so all cards stay consistent.
+
+## CRITICAL DETAILS
+1. **One container card per section**, title once (on the header above), scope chip on the header row, **inner takeaway tint-only (no border)**, no divider — these together are the standard.
+2. **Shared Standard Takeaway component** everywhere — identical label/headline/body sizes and far-right centered chips.
+3. **Serif (`--disp`) ONLY** on `.take-title` and the section's own big data numbers. Header, label, chips, data labels are Mono.
+4. **Layout only — zero LLM tokens.** The takeaway text still comes from the generator; this standardizes the frame around it.
+5. **Consistency is the point** — every section uses this exact scaffold; card weight (shadow vs none) is a single global choice, never per-section.

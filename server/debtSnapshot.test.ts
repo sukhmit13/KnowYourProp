@@ -19,6 +19,7 @@ const base = (o: Partial<ExtractedRecorderDoc>): ExtractedRecorderDoc => ({
 });
 const toSnap = (docs: ExtractedRecorderDoc[], today = "2026-08-12", extras: Partial<DebtSnap> = {}): DebtSnap => ({
   ...resolveState(reconcile(docs, today), docs, null, null, today),
+  schema_version: 3,
   docs_total: docs.length, report_estimated_value: null, subject_is_commercial: null, ...extras,
 });
 

@@ -5,7 +5,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CompareProvider } from "@/contexts/CompareContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import TeamLoginNotice from "@/components/TeamLoginNotice";
 import Home from "@/pages/Home";
 import RunDetail from "@/pages/RunDetail";
 import Discovery from "@/pages/Discovery";
@@ -69,6 +70,36 @@ function ScrollToTop() {
   return null;
 }
 
+// Temporary redesign gate: while the redesign is in progress, any signed-in
+// account other than the allowlisted one sees a hold message instead of the app.
+const REDESIGN_GATE_ALLOWED = ["test@test.com"];
+
+function RedesignGate({ children }: { children: ReactNode }) {
+  const { user, logout } = useAuth();
+  const blocked = !!user && !REDESIGN_GATE_ALLOWED.includes(user.email.trim().toLowerCase());
+  if (!blocked) return <>{children}</>;
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8f7f4", padding: "24px" }} data-testid="redesign-gate">
+      <div style={{ maxWidth: "460px", textAlign: "center", background: "#fff", border: "1px solid #e5e2db", borderRadius: "12px", padding: "40px 32px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+        <div style={{ fontSize: "34px", marginBottom: "16px" }}>🚧</div>
+        <p style={{ fontSize: "17px", lineHeight: 1.6, color: "#1a1a1a", fontWeight: 600, marginBottom: "10px" }}>
+          SUKHMIT has decided to redesign the site AGAIN.
+        </p>
+        <p style={{ fontSize: "15px", lineHeight: 1.6, color: "#555", marginBottom: "24px" }}>
+          He'll notify you when it's ready for your feedback.
+        </p>
+        <button
+          onClick={() => { logout().catch(() => {}); }}
+          style={{ padding: "9px 20px", fontSize: "13px", cursor: "pointer", border: "1px solid #ccc", borderRadius: "6px", background: "#fff", color: "#333" }}
+          data-testid="redesign-gate-logout"
+        >
+          Sign out
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Router() {
   return (
     <Switch>
@@ -105,7 +136,10 @@ function App() {
           <AuthProvider>
             <CompareProvider>
               <ScrollToTop />
-              <Router />
+              <RedesignGate>
+                <Router />
+              </RedesignGate>
+              <TeamLoginNotice />
               <Toaster />
             </CompareProvider>
           </AuthProvider>

@@ -1,0 +1,345 @@
+CREATE CITYWIDE CONTRACTOR DISCOVERY & INTEGRATION
+
+Build two features:
+1. A citywide "Contractor Discovery" page (similar to zoning attorneys)
+2. Enhanced contractor information under building permits on property pages
+
+═══════════════════════════════════════════════════════════════════════════
+PART 1: CONTRACTOR SPECIALTY CLASSIFICATION SYSTEM
+═══════════════════════════════════════════════════════════════════════════
+
+First, create a system to classify permits by specialty using the 
+work_description field from Chicago building permits data.
+
+CREATE: /server/utils/contractorClassification.js
+
+This file contains keyword mappings and classification logic.
+
+SPECIALTY KEYWORD MAPPING:
+─────────────────────────
+
+Define keywords for each specialty (case-insensitive matching):
+
+Kitchen:
+- Keywords: 'kitchen', 'kitch', 'cabinets', 'countertop', 'countertops',
+  'granite', 'quartz', 'backsplash', 'island', 'pantry'
+
+Bathroom:
+- Keywords: 'bathroom', 'bath', 'toilet', 'shower', 'tub', 'bathtub',
+  'vanity', 'fixture', 'master bath', 'powder room'
+
+Roofing:
+- Keywords: 'roof', 'roofing', 'reroof', 'shingle', 'shingles', 'gutter',
+  'gutters', 'soffit', 'fascia', 'flashing', 'skylight'
+
+HVAC/Mechanical:
+- Keywords: 'hvac', 'furnace', 'boiler', 'air conditioning', 'a/c', 'ac unit',
+  'heating', 'cooling', 'ductwork', 'thermostat', 'heat pump', 'mechanical'
+
+Electrical:
+- Keywords: 'electrical', 'electric', 'wiring', 'rewire', 'panel',
+  'circuit', 'outlet', 'service upgrade', 'amp upgrade'
+
+Plumbing:
+- Keywords: 'plumbing', 'plumb', 'water heater', 'pipe', 'pipes',
+  'drain', 'sewer', 'water line', 'gas line', 'sump pump'
+
+Deck/Porch:
+- Keywords: 'deck', 'porch', 'patio', 'pergola', 'gazebo', 'outdoor'
+
+Windows/Doors:
+- Keywords: 'window', 'windows', 'door', 'doors', 'sliding door',
+  'french door', 'entry door', 'patio door', 'storm door'
+
+Siding/Exterior:
+- Keywords: 'siding', 'vinyl siding', 'brick', 'stucco', 'hardie board',
+  'exterior', 'facade', 'cladding'
+
+Flooring:
+- Keywords: 'flooring', 'floor', 'hardwood', 'laminate', 'tile floor',
+  'carpet', 'refinish floor', 'sand floor', 'vinyl plank'
+
+Addition:
+- Keywords: 'addition', 'add', 'extend', 'extension', 'bump out',
+  'second floor', 'third floor', 'sunroom'
+
+Basement:
+- Keywords: 'basement', 'lower level', 'cellar', 'foundation',
+  'basement finish', 'egress window'
+
+Gut Rehab:
+- Keywords: 'gut rehab', 'gut renovation', 'complete renovation',
+  'full renovation', 'total renovation', 'gut remodel', 'entire interior'
+
+New Construction:
+- Keywords: 'new construction', 'new single family', 'new home',
+  'new building', 'new residential', 'new structure'
+- ALSO check if permit_type includes "NEW CONSTRUCTION"
+
+General Renovation:
+- Keywords: 'renovation', 'remodel', 'alteration', 'repair', 'improvement'
+- Use this as fallback if no specific specialty matches
+
+CLASSIFICATION FUNCTION:
+───────────────────────
+
+Create function: classifyPermitSpecialty(permit)
+
+Input: permit object with work_description and permit_type fields
+Output: { primary: 'kitchen', all: ['kitchen', 'flooring'], score: 1 }
+
+Logic:
+1. Convert work_description to lowercase
+2. Check for "new construction" first (check permit_type and description)
+3. Check for "gut rehab" second (distinct category)
+4. Check each specialty's keywords in order
+5. Track all matching specialties
+6. Return primary (first match) and all matches
+7. If no matches, return 'general'
+
+Score calculation:
+- score = 1 if only one specialty matches (highly specialized permit)
+- score = 0.5 if 2-3 specialties match (multi-specialty permit)
+- score = 0.3 if 4+ specialties match (general renovation)
+
+═══════════════════════════════════════════════════════════════════════════
+PART 2: BUILD CONTRACTOR DATABASE FROM PERMITS
+═══════════════════════════════════════════════════════════════════════════
+
+CREATE: /server/services/contractorAggregation.js
+
+This service processes all building permits and creates contractor rankings.
+
+PROCESS:
+───────
+
+1. Query ALL building permits from Chicago Data Portal (last 5 years)
+   URL: https://data.cityofchicago.org/resource/ydr8-5enu.json
+   
+   Note: API limits to 50,000 records per query
+   Use pagination: ?$limit=50000&$offset=0
+   Continue with $offset=50000, $offset=100000, etc. until no more results
+
+2. For each permit, extract:
+   - contractor_1_name (normalize: trim, uppercase, remove extra spaces)
+   - contractor_1_company_name
+   - work_description
+   - permit_type
+   - estimated_cost (convert to number)
+   - issue_date
+   - address fields (street_number, street_direction, street_name, suffix)
+   - community_area (for neighborhood mapping)
+   - ward
+
+3. Classify each permit's specialty using classifyPermitSpecialty()
+
+4. Group permits by contractor (use normalized contractor_1_name)
+
+5. For each contractor, calculate:
+   
+   BASIC METRICS:
+   - totalPermits: Total count of permits
+   - yearsActive: First permit date to last permit date
+   - lastPermitDate: Most recent permit
+   - firstPermitDate: Oldest permit in dataset
+   
+   SPECIALTY ANALYSIS:
+   - Count permits by specialty (primary specialty only)
+   - primarySpecialty: Specialty with highest count
+   - specializationScore: (primarySpecialtyCount / totalPermits) * 100
+   - secondarySpecialties: Other specialties with 10+ permits
+   
+   GEOGRAPHIC ANALYSIS:
+   - Count permits by community_area
+   - topNeighborhoods: Top 3 community areas by permit count
+   - Map community_area numbers to neighborhood names using Chicago's 
+     community area reference
+   
+   FINANCIAL METRICS:
+   - totalReportedValue: Sum of all estimated_cost values
+   - avgProjectValue: Mean of estimated_cost (exclude $0 values)
+   - Remove outliers (top/bottom 5%) before calculating average
+   
+   ACTIVITY METRICS:
+   - permitsByYear: Count of permits per year (2021, 2022, 2023, 2024, 2025)
+   - recentActivity: Count of permits in last 90 days
+   - isActive: true if last permit within 30 days
+   
+   PROJECT LIST:
+   - recentProjects: Array of last 20 permits with:
+     * address (formatted: "1234 N Main St")
+     * date (issue_date)
+     * specialty (primary)
+     * description (work_description, truncated to 100 chars)
+     * reportedValue (estimated_cost)
+
+6. Save aggregated data to: /server/data/contractors/rankings.json
+
+   Structure:
+   {
+     "contractors": [
+       {
+         "id": "abc-construction-inc",
+         "name": "ABC CONSTRUCTION INC",
+         "totalPermits": 1247,
+         "yearsActive": 15.3,
+         "firstPermitDate": "2010-03-15",
+         "lastPermitDate": "2026-01-25",
+         "isActive": true,
+         "primarySpecialty": "kitchen",
+         "specializationScore": 58.5,
+         "specialtyBreakdown": {
+           "kitchen": 729,
+           "bathroom": 312,
+           "flooring": 156,
+           "general": 50
+         },
+         "secondarySpecialties": ["bathroom", "flooring"],
+         "topNeighborhoods": [
+           { "name": "Lincoln Park", "communityArea": 7, "count": 342 },
+           { "name": "Lakeview", "communityArea": 6, "count": 289 },
+           { "name": "Logan Square", "communityArea": 22, "count": 178 }
+         ],
+         "totalReportedValue": 89500000,
+         "avgProjectValue": 71800,
+         "permitsByYear": {
+           "2025": 89,
+           "2024": 245,
+           "2023": 231,
+           "2022": 198,
+           "2021": 212
+         },
+         "recentActivity": 23,
+         "recentProjects": [
+           {
+             "address": "2346 N Western Ave",
+             "date": "2026-01-25",
+             "specialty": "kitchen",
+             "description": "Kitchen remodel with new cabinets and countertops",
+             "reportedValue": 45000
+           }
+           // ... 19 more
+         ]
+       }
+     ],
+     "specialtyIndexes": {
+       "kitchen": ["abc-construction-inc", "xyz-kitchens-llc", ...],
+       "bathroom": [...],
+       "roofing": [...]
+     },
+     "lastUpdated": "2026-01-29T00:00:00Z",
+     "totalContractors": 5432,
+     "totalPermits": 127891
+   }
+
+7. Create specialty indexes for fast filtering:
+   - For each specialty, create array of contractor IDs sorted by permit count
+   - This allows quick "top contractors in [specialty]" queries
+
+8. Update frequency: Run this aggregation monthly (or on-demand via admin trigger)
+
+═══════════════════════════════════════════════════════════════════════════
+PART 3: CONTRACTOR DISCOVERY PAGE
+═══════════════════════════════════════════════════════════════════════════
+
+CREATE: /client/pages/ContractorDiscovery.jsx
+
+URL: /contractors/discovery
+
+This page displays contractor rankings similar to the zoning attorney page.
+
+PAGE LAYOUT:
+───────────
+
+Header:
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 🔨 Chicago Contractor Discovery                                         │
+│                                                                         │
+│ Explore top contractors by specialty and neighborhood.                 │
+│ Rankings based on building permit data from the last 5 years.          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Filters:
+[Dropdown: Select Specialty ▼]
+- All Specialties
+- Kitchen Remodeling (2,341 contractors)
+- Bathroom Renovation (1,876 contractors)
+- Roofing (1,654 contractors)
+- HVAC/Mechanical (1,432 contractors)
+- Electrical (1,298 contractors)
+- Plumbing (1,156 contractors)
+- New Construction (987 contractors)
+- Gut Rehab (876 contractors)
+- Additions (765 contractors)
+- Deck/Porch (654 contractors)
+- Windows/Doors (543 contractors)
+- General Contracting (4,321 contractors)
+
+[Dropdown: Select Neighborhood ▼]
+- All Neighborhoods
+- Lincoln Park
+- Lakeview
+- Logan Square
+- Wicker Park
+- [etc. - all 77 community areas]
+
+[Toggle: Active Only] (show only contractors with permits in last 30 days)
+
+Sort by: [Dropdown ▼]
+- Most Permits (default)
+- Recent Activity
+- Highest Avg Project Value
+- Years in Business
+
+─────────────────────────────────────────────────────────────────────────
+
+TOP CITYWIDE CONTRACTORS
+─────────────────────────
+
+Display top 50 contractors (or filtered results) in list format:
+
+For each contractor:
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ #1  ABC CONSTRUCTION INC                                    🟢 Active   │
+│                                                                         │
+│ 📊 1,247 permits | 15 years active                                     │
+│ 🎯 Specializes in: Kitchen Remodeling (58% of work)                    │
+│ 📍 Most active in: Lincoln Park, Lakeview, Logan Square                │
+│ 💰 Avg project value: $71,800                                          │
+│ 📅 Last permit: 2 days ago                                             │
+│                                                                         │
+│ [View All Projects →]                                                  │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ #2  XYZ REMODELING LLC                                      🟡 Recent   │
+│                                                                         │
+│ 📊 892 permits | 12 years active                                       │
+│ 🎯 Specializes in: Gut Rehab (73% of work)                            │
+│ 📍 Most active in: Wicker Park, Bucktown, West Loop                    │
+│ 💰 Avg project value: $125,400                                         │
+│ 📅 Last permit: 15 days ago                                            │
+│                                                                         │
+│ [View All Projects →]                                                  │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Activity badges:
+- 🟢 Active (green) - last permit within 30 days
+- 🟡 Recent (yellow) - last permit 30-90 days ago
+- ⚪ Inactive (gray) - last permit >90 days ago
+
+Click "View All Projects" → navigate to /contractors/[contractor-slug]
+
+─────────────────────────────────────────────────────────────────────────
+
+ALTERNATE VIEW: TOP CONTRACTORS BY NEIGHBORHOOD
+───────────────────────────────────────────────
+
+When user views "All Neighborhoods", show grouped by neighborhood:
+
+📍 Lincoln Park (342 total permits)
+Top 3 Contractors:
+  #1 ABC Construction Inc - 89 permits (mostly kitchen)
+  #2 Premium Builders LLC - 67 permits (mostly new construction)
+  #3 XYZ Contracting - 45

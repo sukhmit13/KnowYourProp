@@ -69,7 +69,7 @@ interface AreaDetailData {
   nmtc: NMTCData | null;
 }
 
-// Project types that have childcare-related data
+// Project uses that have childcare-related data
 const CHILDCARE_PROJECT_TYPES = ['Day Care Center', 'School (Private)'];
 
 function useAreaDetail(type: 'zip' | 'community', id: string) {
@@ -108,7 +108,7 @@ export default function AreaDetail({ type }: AreaDetailPageProps) {
   const [selectedProjectType, setSelectedProjectType] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
-  // Parse query params to set default project type based on discovery page context
+  // Parse query params to set default project use based on discovery page context
   useEffect(() => {
     const searchParams = new URLSearchParams(searchString);
     const fromDiscovery = searchParams.get('from');
@@ -128,7 +128,7 @@ export default function AreaDetail({ type }: AreaDetailPageProps) {
   const { data, isLoading, error } = useAreaDetail(type, id || '');
   const { data: businessUsesData } = useBusinessUses();
 
-  // Determine which additional data to fetch based on project type
+  // Determine which additional data to fetch based on project use
   const isChildcare = selectedProjectType && CHILDCARE_PROJECT_TYPES.includes(selectedProjectType);
   const isDayCare = selectedProjectType === 'Day Care Center';
   const isGrocery = selectedProjectType === 'Grocery Store';
@@ -207,7 +207,7 @@ export default function AreaDetail({ type }: AreaDetailPageProps) {
     isLiquorStore && type === 'zip'
   );
 
-  // Day care centers by ZIP (for Day Care Center project type with business license data)
+  // Day care centers by ZIP (for Day Care Center project use with business license data)
   const { data: dayCareBusinessData, isLoading: isLoadingDayCareBusiness } = useDayCareByZip(
     !!isChildcare && type === 'zip' ? zipCode : undefined,
     !!isChildcare && type === 'zip'
@@ -387,7 +387,7 @@ export default function AreaDetail({ type }: AreaDetailPageProps) {
               </Card>
             </motion.div>
 
-            {/* Project Type Selector */}
+            {/* Project Use Selector */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -397,10 +397,10 @@ export default function AreaDetail({ type }: AreaDetailPageProps) {
                 <CardHeader className="pb-3">
                   <CardTitle className="font-jbmono text-xs font-bold uppercase tracking-[0.08em] flex items-center gap-2">
                     <Building className="w-5 h-5 text-foreground" />
-                    Project Type
+                    Project Use
                   </CardTitle>
                   <CardDescription>
-                    Select a project type to see additional relevant data
+                    Select a project use to see additional relevant data
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -409,7 +409,7 @@ export default function AreaDetail({ type }: AreaDetailPageProps) {
                     onValueChange={(val) => setSelectedProjectType(val)}
                   >
                     <SelectTrigger className="w-full max-w-md" data-testid="select-project-type">
-                      <SelectValue placeholder="Select a project type..." />
+                      <SelectValue placeholder="Select a project use..." />
                     </SelectTrigger>
                     <SelectContent>
                       {businessUsesData?.categories.map((category) => (
@@ -436,7 +436,7 @@ export default function AreaDetail({ type }: AreaDetailPageProps) {
               </Card>
             </motion.div>
 
-            {/* Childcare Section - Only shown when relevant project type selected */}
+            {/* Childcare Section - Only shown when relevant project use selected */}
             {isChildcare && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -523,7 +523,7 @@ export default function AreaDetail({ type }: AreaDetailPageProps) {
               </motion.div>
             )}
 
-            {/* Childcare Capacity Demographics - Only shown when relevant project type selected */}
+            {/* Childcare Capacity Demographics - Only shown when relevant project use selected */}
             {isChildcare && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

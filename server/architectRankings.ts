@@ -16,6 +16,8 @@ export interface ArchitectEntry {
   mixedUseCommercialCount: number;
   industrialCount: number;
   lastPermitDate: string | null;
+  searchMatchCount?: number;
+  searchMatches?: string[];
 }
 
 export interface ExpeditorEntry {

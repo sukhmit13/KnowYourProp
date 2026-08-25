@@ -1,0 +1,394 @@
+{
+  "60601": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60602": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60603": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60604": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60605": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60606": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60607": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60608": {
+    "efficiency": 1250,
+    "oneBed": 1330,
+    "twoBed": 1500,
+    "threeBed": 1930,
+    "fourBed": 2230
+  },
+  "60609": {
+    "efficiency": 1070,
+    "oneBed": 1140,
+    "twoBed": 1290,
+    "threeBed": 1660,
+    "fourBed": 1920
+  },
+  "60610": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60611": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60612": {
+    "efficiency": 1530,
+    "oneBed": 1630,
+    "twoBed": 1840,
+    "threeBed": 2370,
+    "fourBed": 2740
+  },
+  "60613": {
+    "efficiency": 2190,
+    "oneBed": 2340,
+    "twoBed": 2640,
+    "threeBed": 3400,
+    "fourBed": 3930
+  },
+  "60614": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60615": {
+    "efficiency": 1790,
+    "oneBed": 1920,
+    "twoBed": 2160,
+    "threeBed": 2780,
+    "fourBed": 3220
+  },
+  "60616": {
+    "efficiency": 1640,
+    "oneBed": 1750,
+    "twoBed": 1970,
+    "threeBed": 2540,
+    "fourBed": 2930
+  },
+  "60617": {
+    "efficiency": 1090,
+    "oneBed": 1160,
+    "twoBed": 1310,
+    "threeBed": 1690,
+    "fourBed": 1950
+  },
+  "60618": {
+    "efficiency": 1650,
+    "oneBed": 1770,
+    "twoBed": 1990,
+    "threeBed": 2560,
+    "fourBed": 2960
+  },
+  "60619": {
+    "efficiency": 1200,
+    "oneBed": 1290,
+    "twoBed": 1450,
+    "threeBed": 1870,
+    "fourBed": 2160
+  },
+  "60620": {
+    "efficiency": 1200,
+    "oneBed": 1290,
+    "twoBed": 1450,
+    "threeBed": 1870,
+    "fourBed": 2160
+  },
+  "60621": {
+    "efficiency": 1100,
+    "oneBed": 1180,
+    "twoBed": 1330,
+    "threeBed": 1710,
+    "fourBed": 1980
+  },
+  "60622": {
+    "efficiency": 2050,
+    "oneBed": 2190,
+    "twoBed": 2470,
+    "threeBed": 3180,
+    "fourBed": 3680
+  },
+  "60623": {
+    "efficiency": 1100,
+    "oneBed": 1170,
+    "twoBed": 1320,
+    "threeBed": 1700,
+    "fourBed": 1970
+  },
+  "60624": {
+    "efficiency": 1280,
+    "oneBed": 1370,
+    "twoBed": 1540,
+    "threeBed": 1980,
+    "fourBed": 2290
+  },
+  "60625": {
+    "efficiency": 1740,
+    "oneBed": 1860,
+    "twoBed": 2100,
+    "threeBed": 2700,
+    "fourBed": 3130
+  },
+  "60626": {
+    "efficiency": 1660,
+    "oneBed": 1780,
+    "twoBed": 2000,
+    "threeBed": 2580,
+    "fourBed": 2980
+  },
+  "60628": {
+    "efficiency": 1240,
+    "oneBed": 1320,
+    "twoBed": 1490,
+    "threeBed": 1920,
+    "fourBed": 2220
+  },
+  "60629": {
+    "efficiency": 1130,
+    "oneBed": 1210,
+    "twoBed": 1360,
+    "threeBed": 1750,
+    "fourBed": 2030
+  },
+  "60630": {
+    "efficiency": 1530,
+    "oneBed": 1630,
+    "twoBed": 1840,
+    "threeBed": 2370,
+    "fourBed": 2740
+  },
+  "60631": {
+    "efficiency": 1560,
+    "oneBed": 1670,
+    "twoBed": 1880,
+    "threeBed": 2420,
+    "fourBed": 2800
+  },
+  "60632": {
+    "efficiency": 1080,
+    "oneBed": 1150,
+    "twoBed": 1300,
+    "threeBed": 1670,
+    "fourBed": 1940
+  },
+  "60633": {
+    "efficiency": 1200,
+    "oneBed": 1290,
+    "twoBed": 1450,
+    "threeBed": 1870,
+    "fourBed": 2160
+  },
+  "60634": {
+    "efficiency": 1400,
+    "oneBed": 1490,
+    "twoBed": 1680,
+    "threeBed": 2160,
+    "fourBed": 2500
+  },
+  "60636": {
+    "efficiency": 1100,
+    "oneBed": 1170,
+    "twoBed": 1320,
+    "threeBed": 1700,
+    "fourBed": 1970
+  },
+  "60637": {
+    "efficiency": 1270,
+    "oneBed": 1360,
+    "twoBed": 1530,
+    "threeBed": 1970,
+    "fourBed": 2280
+  },
+  "60638": {
+    "efficiency": 1320,
+    "oneBed": 1410,
+    "twoBed": 1590,
+    "threeBed": 2050,
+    "fourBed": 2370
+  },
+  "60639": {
+    "efficiency": 1300,
+    "oneBed": 1380,
+    "twoBed": 1560,
+    "threeBed": 2010,
+    "fourBed": 2320
+  },
+  "60640": {
+    "efficiency": 1910,
+    "oneBed": 2040,
+    "twoBed": 2300,
+    "threeBed": 2960,
+    "fourBed": 3430
+  },
+  "60641": {
+    "efficiency": 1430,
+    "oneBed": 1530,
+    "twoBed": 1720,
+    "threeBed": 2210,
+    "fourBed": 2560
+  },
+  "60642": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60643": {
+    "efficiency": 1400,
+    "oneBed": 1490,
+    "twoBed": 1680,
+    "threeBed": 2160,
+    "fourBed": 2500
+  },
+  "60644": {
+    "efficiency": 1200,
+    "oneBed": 1290,
+    "twoBed": 1450,
+    "threeBed": 1870,
+    "fourBed": 2160
+  },
+  "60645": {
+    "efficiency": 1600,
+    "oneBed": 1710,
+    "twoBed": 1930,
+    "threeBed": 2490,
+    "fourBed": 2880
+  },
+  "60646": {
+    "efficiency": 1430,
+    "oneBed": 1530,
+    "twoBed": 1720,
+    "threeBed": 2210,
+    "fourBed": 2560
+  },
+  "60647": {
+    "efficiency": 1840,
+    "oneBed": 1970,
+    "twoBed": 2220,
+    "threeBed": 2860,
+    "fourBed": 3310
+  },
+  "60649": {
+    "efficiency": 1260,
+    "oneBed": 1350,
+    "twoBed": 1520,
+    "threeBed": 1960,
+    "fourBed": 2260
+  },
+  "60651": {
+    "efficiency": 1270,
+    "oneBed": 1360,
+    "twoBed": 1530,
+    "threeBed": 1970,
+    "fourBed": 2280
+  },
+  "60652": {
+    "efficiency": 1450,
+    "oneBed": 1540,
+    "twoBed": 1740,
+    "threeBed": 2240,
+    "fourBed": 2590
+  },
+  "60653": {
+    "efficiency": 1130,
+    "oneBed": 1210,
+    "twoBed": 1360,
+    "threeBed": 1750,
+    "fourBed": 2030
+  },
+  "60654": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60655": {
+    "efficiency": 1440,
+    "oneBed": 1540,
+    "twoBed": 1730,
+    "threeBed": 2230,
+    "fourBed": 2580
+  },
+  "60656": {
+    "efficiency": 1450,
+    "oneBed": 1550,
+    "twoBed": 1750,
+    "threeBed": 2250,
+    "fourBed": 2610
+  },
+  "60657": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  },
+  "60659": {
+    "efficiency": 1520,
+    "oneBed": 1620,
+    "twoBed": 1830,
+    "threeBed": 2360,
+    "fourBed": 2730
+  },
+  "60660": {
+    "efficiency": 1790,
+    "oneBed": 1910,
+    "twoBed": 2150,
+    "threeBed": 2770,
+    "fourBed": 3200
+  },
+  "60661": {
+    "efficiency": 2220,
+    "oneBed": 2370,
+    "twoBed": 2670,
+    "threeBed": 3440,
+    "fourBed": 3980
+  }
+}

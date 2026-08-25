@@ -1,0 +1,88 @@
+# Development Article Extraction + Dedup (Neighborhood News · Real Estate & Development)
+
+Two parts: **(A)** an LLM **read-and-extract** prompt that turns a fetched development article into structured fields (Stage 1, runs per article, Haiku-appropriate), and **(B)** the **code-side dedup** that uses the extracted address to match projects to permit records and to each other. This closes the gap where a headline like "City Council Approves Multi-Building Residential Development in Avondale" carries no address or unit count — the details live in the article *body*.
+
+---
+
+## A) LLM EXTRACTION PROMPT (Stage 1 — per development article)
+
+### SYSTEM / INSTRUCTION
+You read one local news article about real-estate development and extract structured facts. You are given the article's `title` and `body` (the fetched text). **Extract only from that text.** If a field is not stated, return `null` — never guess, never infer an address or a unit count that isn't written in the article.
+
+### 🔴 Rules
+1. **Grounded only in the given text.** No outside knowledge, no assumptions from the neighborhood or the source. Absent field → `null`.
+2. **The address is the priority field.** Development titles often omit it, but dev-tracking sources (YIMBY, The Real Deal, Crain's) almost always state it in the body — extract the specific street address if present. If the article gives only an intersection or block, capture that and set `address_confidence: "low"`.
+3. **Never fabricate an address or unit count.** A project with no stated address is `matchable: false` — that is a correct, useful result, not a failure.
+4. **Paraphrase** for `one_line` (own words, no verbatim quote).
+5. **Classify the stage from the article's own language** (see map), and capture the phrase that justifies it in `stage_evidence`.
+
+### Stage map (from the text)
+- proposed — "plans / proposed / filed / seeking approval / wants to build"
+- approved — "approved / Plan Commission approves / City Council approves / zoning approved / greenlit"
+- permitted — "permit issued / permitted / building permit"
+- under_construction — "breaks ground / under construction / topped out"
+- complete — "opens / opened / now open / completed"
+
+### INPUT
+```json
+{ "id": "a12", "title": "City Council Approves Multi-Building Residential Development In Avondale",
+  "body": "…fetched article text…", "source": "Chicago YIMBY", "date": "2026-06-20", "url": "https://…" }
+```
+
+### OUTPUT — return JSON only
+```json
+{
+  "id": "a12",
+  "is_development": true,
+  "address": "2400 N Milwaukee Ave" ,        // specific street address from the body, or null
+  "address_confidence": "high",              // high | low (low = intersection/block only)
+  "unit_count": 48,                          // residential units stated in the body, or null
+  "building_count": 3,                       // for multi-building, or null
+  "use": "residential",                      // residential | commercial | mixed-use | other
+  "developer": "…",                          // or null
+  "project_name": null,
+  "cost": null,
+  "stage": "approved",
+  "stage_evidence": "City Council approved the project on June 18",
+  "one_line": "A three-building residential project totaling 48 units won City Council approval.",
+  "matchable": true                          // true iff a usable street address was extracted
+}
+```
+- `matchable` = `true` only when `address` is a real street address (not null, not intersection-only). This flag decides whether the dedup can place it.
+- `is_development: false` → the article isn't actually a development/construction story (e.g. a restaurant review mis-routed); the pipeline drops it from this column.
+
+### Self-check
+1. Every field grounded in the body; nothing invented; absent → null?
+2. Address extracted if the body states one; `matchable` set accordingly?
+3. Stage from the article's language with `stage_evidence`?
+4. `one_line` paraphrased, no verbatim quote?
+
+---
+
+## B) CODE-SIDE DEDUP (Stage 1.5 — report-data-first join)
+
+The extracted `address` is the join key. Do this in code (single source of truth), before the takeaway or cards render.
+
+1. **Normalize every address** — extracted article addresses AND the permit/construction records from Corridor Intelligence — to one canonical form: uppercase, standardize suffixes (Ave/St/Blvd), strip unit/suite, normalize directionals (N/North). Match on the normalized string (+ optional fuzzy tolerance for typos).
+2. **Match articles ↔ permit records by normalized address.** A hit = the same physical project. Merge into one project entity:
+   - `sources`: the article(s) + the permit record
+   - `stage`: the **furthest-along** status across all sources (permit > approved > proposed) — a permit outranks a news approval
+   - `first_reported`: earliest article date (the leading signal); `permit_date`: from the permit record
+3. **Match articles ↔ articles by normalized address** too — an "approved" article and a later "permitted" article at the same address are one project, not two. Keep one entity, stage = furthest along.
+4. **Each unique project entity is counted once** in any development tally, and rendered once (the card shows the cross-ref chip when `sources` includes a permit record — "Same project in Corridor permit data").
+5. **`matchable: false` handling (no address):** render the article in the column, but tag it **"location not specified — not matched,"** exclude it from the dedup and from any project count, and never let it merge with or split an addressed project. It's a listed signal, not a counted project.
+6. **Feed the deduped project list to the takeaway generator**, which then quantifies only matched projects with known unit counts and describes unmatched ones generically ("plus additional approvals reported without a specific address").
+
+## Pipeline order
+```
+fetch dev article → (A) extract {address, units, stage, …}
+   → (B) normalize + match vs permit records + vs other articles → deduped project entities
+   → render dev cards (status + cross-ref chip)  +  feed takeaway generator (counts, quantified)
+```
+
+## CRITICAL DETAILS
+1. **Address is the join key** — extract it from the body (titles omit it); never fabricate it. No address → `matchable:false`, listed but never counted or merged.
+2. **Permit outranks news for stage**; news date is the *leading-signal* timestamp. A project in both surfaces is ONE entity, counted once, cross-ref chip shown.
+3. **Extraction is grounded, paraphrased, null-when-absent** — Haiku-appropriate, cheap, one call per dev article.
+4. **Dedup is code (report-data-first)**, matched against the report's own permit records — not the LLM. The takeaway only quantifies what the deduped, addressed projects support.
+5. Same two-stage read-and-extract pattern as site-specific news; this variant pulls development specifics and emits the address the dedup needs.

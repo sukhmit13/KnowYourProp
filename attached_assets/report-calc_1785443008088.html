@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--good:#2f7d3f;--goodSoft:#edf6ef;--caut:#d98c00;--cautSoft:#fdf5e2;--bad:#d13b26;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .col{max-width:900px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .chead{display:flex;align-items:center;gap:9px;padding-bottom:13px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+  .chead .sq{width:10px;height:10px;border-radius:2px;background:var(--indigo);flex:none}
+  .chead .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+  .chead .tab{margin-left:10px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border-radius:6px;padding:3px 9px}
+
+  /* inputs */
+  .inputs{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:20px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .field .ctl{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-family:var(--sans);font-size:15px;font-weight:600;color:var(--ink);display:flex;align-items:center;justify-content:space-between}
+  .field .ctl.focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(43,58,158,.12)}
+  .field .sub{font-size:10.5px;color:var(--muted)}
+  .field .car{color:var(--muted);font-size:10px}
+
+  /* results */
+  .rlbl{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);margin-bottom:12px}
+  .prim{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+  .mt{border:1px solid var(--line);border-radius:12px;padding:15px 16px}
+  .mt .l{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
+  .mt .n{font-family:var(--disp);font-size:34px;line-height:.9;color:var(--ink)}
+  .mt .tag{display:inline-block;margin-top:9px;font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 8px}
+  .mt.good .n{color:var(--good)} .mt.good .tag{background:var(--goodSoft);color:var(--good)}
+  .mt.caut .tag{background:var(--cautSoft);color:var(--caut)}
+  .mt .tag.neu{background:#f1efe9;color:var(--ink2)}
+  .sec{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+  .st{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
+  .st .l{font-size:12px;color:var(--ink2);font-weight:500}
+  .st .v{font-family:var(--disp);font-size:20px;color:var(--ink)}
+  .note{font-size:11.5px;color:var(--muted);margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="col">
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">Valuation Calculator</span><span class="tab">Investment Metrics</span></div>
+
+    <!-- INPUTS -->
+    <div class="inputs">
+      <div class="field"><label>Purchase Price</label><div class="ctl focus">$2,450,000</div><span class="sub">from listing or your offer</span></div>
+      <div class="field"><label>Net Operating Income</label><div class="ctl">$159,250 <span class="car">▾</span></div><span class="sub">Market rate · your pro forma</span></div>
+      <div class="field"><label>Financing</label><div class="ctl">20% down · 30 yr <span class="car">▾</span></div><span class="sub">Conventional</span></div>
+      <div class="field"><label>Interest Rate</label><div class="ctl">6.58% <span class="car">↕</span></div><span class="sub">Freddie Mac PMMS · Jul 23</span></div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="rlbl">Deal at a glance</div>
+    <div class="prim">
+      <div class="mt"><div class="l">Cap Rate</div><div class="n">6.5%</div><span class="tag neu">NOI ÷ price</span></div>
+      <div class="mt"><div class="l">Cash-on-Cash</div><div class="n">1.9%</div><span class="tag neu">yr-1 return</span></div>
+      <div class="mt good"><div class="l">Monthly Cash Flow</div><div class="n">+$778</div><span class="tag">Positive</span></div>
+      <div class="mt caut"><div class="l">DSCR</div><div class="n">1.06</div><span class="tag">Thin · lenders want 1.25+</span></div>
+    </div>
+    <div class="sec">
+      <div class="st"><span class="l">Down payment</span><span class="v">$490,000</span></div>
+      <div class="st"><span class="l">Loan amount</span><span class="v">$1.96M</span></div>
+      <div class="st"><span class="l">Monthly P&amp;I</span><span class="v">$12,493</span></div>
+      <div class="st"><span class="l">Annual debt service</span><span class="v">$149,916</span></div>
+    </div>
+
+    <div class="note">Taxes and insurance are excluded — NOI already accounts for them as operating expenses. Figures update live as you change any input. Illustrative example; enter your own price and NOI.</div>
+  </div>
+</div>
+</body>
+</html>

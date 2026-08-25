@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--indigoSoft:#ecedf9;--up:#2f7d3f;--down:#d13b26;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#eceae4;font-family:var(--sans);color:var(--ink);padding:34px}
+  .col{max-width:820px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+  .chead{display:flex;align-items:center;gap:9px;padding-bottom:13px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+  .chead .sq{width:10px;height:10px;border-radius:2px;background:var(--indigo);flex:none}
+  .chead .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+
+  /* two scope tiles */
+  .scopes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+  .scope{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
+  .scope .l{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+  .scope .c{font-size:12.5px;color:var(--ink2)}
+  .scope .c b{color:var(--ink);font-weight:700}
+
+  .barlbl{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);margin:4px 0 10px}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:8px}
+  thead th{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);text-align:right;padding:0 0 10px;border-bottom:1px solid var(--line)}
+  thead th:first-child{text-align:left}
+  tbody td{padding:11px 0;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+  tbody td:first-child{text-align:left;color:var(--ink2)}
+  tbody tr:last-child td{border-bottom:0}
+  .rm{font-weight:600;color:var(--ink)}
+  .pri{font-weight:700}
+  .up{color:var(--up);font-weight:700}
+  .down{color:var(--down);font-weight:700}
+  .sub{color:var(--muted)}
+  .gap{height:20px}
+  .src{font-size:11.5px;color:var(--muted);margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="col">
+  <div class="card">
+    <div class="chead"><span class="sq"></span><span class="t">Real-Time Rental Data</span></div>
+
+    <div class="scopes">
+      <div class="scope"><span class="l">ZIP 60612</span><span class="c"><b>272</b> active listings</span></div>
+      <div class="scope"><span class="l">Within 0.75 mi</span><span class="c"><b>77</b> active listings</span></div>
+    </div>
+
+    <div class="barlbl">Market overview</div>
+    <table>
+      <thead><tr><th>Metric</th><th>ZIP 60612</th><th>Within 0.75 mi</th></tr></thead>
+      <tbody>
+        <tr><td class="rm">Median rent</td><td class="pri">$2,430</td><td class="pri">$2,800</td></tr>
+        <tr><td class="rm">Average rent</td><td class="pri">$2,675</td><td class="pri">$3,218</td></tr>
+        <tr><td class="rm">Median days on market</td><td>31 <span class="sub">days</span></td><td>55 <span class="sub">days</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="gap"></div>
+    <div class="barlbl">Median rent by bedroom</div>
+    <table>
+      <thead><tr><th>Room type</th><th>ZIP</th><th>0.75 mi</th><th>vs FMR</th><th>Sq ft</th></tr></thead>
+      <tbody>
+        <tr><td class="rm">Studio</td><td class="pri">$2,278</td><td>$2,200</td><td class="up">+44%</td><td class="sub">800</td></tr>
+        <tr><td class="rm">1 Bedroom</td><td class="pri">$2,301</td><td>$1,980</td><td class="up">+21%</td><td class="sub">661</td></tr>
+        <tr><td class="rm">2 Bedrooms</td><td class="pri">$2,732</td><td>$2,645</td><td class="up">+44%</td><td class="sub">1,000</td></tr>
+        <tr><td class="rm">3 Bedrooms</td><td class="pri">$2,450</td><td>$3,850</td><td class="up">+62%</td><td class="sub">1,700</td></tr>
+        <tr><td class="rm">4 Bedrooms</td><td class="pri">$2,950</td><td>$3,995</td><td class="up">+46%</td><td class="sub">2,000</td></tr>
+      </tbody>
+    </table>
+    <div class="src">vs FMR = median market rent above/below the HUD Fair Market Rent baseline · Sq ft = median from 0.75-mi listings. Source: RentCast.</div>
+  </div>
+</div>
+</body>
+</html>

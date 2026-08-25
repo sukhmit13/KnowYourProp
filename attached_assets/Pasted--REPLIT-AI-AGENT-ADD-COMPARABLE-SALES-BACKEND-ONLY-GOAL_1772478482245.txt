@@ -1,0 +1,753 @@
+# REPLIT AI AGENT - ADD COMPARABLE SALES (BACKEND ONLY)
+
+---
+
+## GOAL
+
+Add a comparable sales feature to property reports. Find recent sales of similar properties within 0.5 miles, using the same property class identifier.
+
+**UI is already built. You just need the backend.**
+
+---
+
+## WHAT YOU'RE BUILDING
+
+A backend service that:
+1. Takes a subject property (PIN, property class, sqft, coords, bed/bath)
+2. Queries Cook County sales data
+3. Filters by property class + radius + time period
+4. Scores by similarity (appraiser-style)
+5. Returns top 5-10 comparables with market analysis
+
+---
+
+## FILE STRUCTURE
+
+```
+backend/
+└── comparable_sales.py    # NEW - Main comps finder
+
+# Uses existing:
+# - Cook County Assessor API (you already have access)
+# - Your geocoding functions
+# - Your distance calculation functions
+```
+
+---
+
+## FILE: `comparable_sales.py`
+
+```python
+"""
+Find comparable sales for property valuation
+Uses Cook County Assessor sales data
+"""
+
+import requests
+from datetime import datetime, timedelta
+import math
+
+
+class ComparableSalesFinder:
+    """
+    Find recent comparable sales like a real estate appraiser
+    """
+    
+    def __init__(self, cook_county_api_base=None):
+        """
+        Initialize with Cook County API endpoint
+        
+        Args:
+            cook_county_api_base: Base URL for Cook County data API
+                                  (Replit should already have this configured)
+        """
+        # Replit should have Cook County API already configured
+        # Use whatever endpoint you're already using for property data
+        self.api_base = cook_county_api_base or "https://datacook.cookcountyassessor.com"
+    
+    def get_comparables(
+        self,
+        subject_pin,
+        subject_property_class,
+        subject_sqft,
+        subject_lat,
+        subject_lng,
+        subject_bedrooms=None,
+        subject_bathrooms=None,
+        radius_miles=0.5,
+        months_back=6,
+        min_comps=3,
+        max_comps=10
+    ):
+        """
+        Get comparable sales for a property
+        
+        Args:
+            subject_pin: Property PIN (for logging/reference)
+            subject_property_class: Property class code (CRITICAL for matching)
+            subject_sqft: Square footage
+            subject_lat: Latitude
+            subject_lng: Longitude
+            subject_bedrooms: Number of bedrooms (optional)
+            subject_bathrooms: Number of bathrooms (optional)
+            radius_miles: Search radius (default 0.5 for urban)
+            months_back: How many months of sales history (default 6)
+            min_comps: Minimum number of comps to return
+            max_comps: Maximum number of comps to return
+            
+        Returns:
+            dict: {
+                'comparables': [...],
+                'market_analysis': {...}
+            }
+        """
+        print(f"[COMPS] Finding comparables for PIN {subject_pin}")
+        print(f"[COMPS] Property class: {subject_property_class}")
+        print(f"[COMPS] Search: {radius_miles} mi, last {months_back} months")
+        
+        # Step 1: Get recent sales in radius
+        sales = self._get_sales_in_radius(
+            subject_lat,
+            subject_lng,
+            radius_miles,
+            months_back
+        )
+        
+        print(f"[COMPS] Found {len(sales)} total sales in radius")
+        
+        # Step 2: Filter by property class (CRITICAL!)
+        same_class_sales = [
+            sale for sale in sales
+            if sale.get('property_class') == subject_property_class
+        ]
+        
+        print(f"[COMPS] Found {len(same_class_sales)} with matching class")
+        
+        # Step 3: Score by similarity
+        scored_comps = self._score_comparables(
+            subject_sqft,
+            subject_lat,
+            subject_lng,
+            subject_bedrooms,
+            subject_bathrooms,
+            same_class_sales
+        )
+        
+        # Step 4: Sort by score and take top N
+        scored_comps.sort(key=lambda x: x['similarity_score'], reverse=True)
+        top_comps = scored_comps[:max_comps]
+        
+        print(f"[COMPS] Returning {len(top_comps)} best comparables")
+        
+        # Step 5: Calculate market analysis
+        market_analysis = self._calculate_market_analysis(
+            subject_sqft,
+            top_comps
+        )
+        
+        return {
+            'comparables': top_comps,
+            'market_analysis': market_analysis,
+            'search_params': {
+                'radius_miles': radius_miles,
+                'months_back': months_back,
+                'property_class': subject_property_class
+            }
+        }
+    
+    def _get_sales_in_radius(self, lat, lng, radius_miles, months_back):
+        """
+        Query Cook County for recent sales
+        
+        NOTE: Adjust this to match your actual Cook County API structure
+        Replit should already have the right endpoint configured
+        """
+        # Calculate date range
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=months_back * 30)
+        
+        # Query sales data
+        # TODO: Use your existing Cook County API endpoint
+        # This is a template - adjust field names to match actual API
+        
+        try:
+            params = {
+                'latitude': lat,
+                'longitude': lng,
+                'radius_miles': radius_miles,
+                'sale_date_min': start_date.strftime('%Y-%m-%d'),
+                'sale_date_max': end_date.strftime('%Y-%m-%d'),
+                'limit': 100  # Get up to 100 sales
+            }
+            
+            # Use whatever endpoint Replit has for sales data
+            response = requests.get(f"{self.api_base}/sales", params=params)
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"[COMPS] API error: {response.status_code}")
+                return []
+                
+        except Exception as e:
+            print(f"[COMPS] Error fetching sales: {e}")
+            return []
+    
+    def _score_comparables(
+        self,
+        subject_sqft,
+        subject_lat,
+        subject_lng,
+        subject_bedrooms,
+        subject_bathrooms,
+        sales
+    ):
+        """
+        Score each sale by similarity to subject property
+        Uses appraiser methodology
+        """
+        scored = []
+        
+        for sale in sales:
+            score = 100  # Start at perfect score
+            
+            # 1. Distance penalty (closer is better)
+            distance = self._calculate_distance(
+                subject_lat, subject_lng,
+                sale.get('latitude', subject_lat),
+                sale.get('longitude', subject_lng)
+            )
+            score -= distance * 20  # -20 points per mile
+            
+            # 2. Square footage similarity (±20% is ideal)
+            if subject_sqft and sale.get('sqft'):
+                sqft_diff = abs(subject_sqft - sale['sqft'])
+                sqft_pct_diff = sqft_diff / subject_sqft
+                score -= sqft_pct_diff * 50  # Heavy penalty for size difference
+            
+            # 3. Bedroom match
+            if subject_bedrooms and sale.get('bedrooms'):
+                bed_diff = abs(subject_bedrooms - sale['bedrooms'])
+                score -= bed_diff * 8  # -8 points per bedroom difference
+            
+            # 4. Bathroom match
+            if subject_bathrooms and sale.get('bathrooms'):
+                bath_diff = abs(subject_bathrooms - sale['bathrooms'])
+                score -= bath_diff * 5  # -5 points per bathroom difference
+            
+            # 5. Age penalty (older sales less reliable)
+            sale_date = datetime.fromisoformat(sale.get('sale_date', datetime.now().isoformat()))
+            days_old = (datetime.now() - sale_date).days
+            months_old = days_old / 30
+            score -= months_old * 3  # -3 points per month old
+            
+            # Don't allow negative scores
+            score = max(0, score)
+            
+            # Add calculated fields to sale
+            sale['similarity_score'] = round(score, 1)
+            sale['distance_miles'] = round(distance, 2)
+            
+            if sale.get('sale_price') and sale.get('sqft'):
+                sale['price_per_sqft'] = round(sale['sale_price'] / sale['sqft'], 2)
+            
+            scored.append(sale)
+        
+        return scored
+    
+    def _calculate_distance(self, lat1, lng1, lat2, lng2):
+        """
+        Calculate distance between two coordinates in miles
+        Using Haversine formula
+        
+        NOTE: You probably already have this function in your codebase
+        If so, use that instead and delete this
+        """
+        R = 3959  # Earth radius in miles
+        
+        dlat = math.radians(lat2 - lat1)
+        dlng = math.radians(lng2 - lng1)
+        
+        a = (math.sin(dlat/2) ** 2 + 
+             math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * 
+             math.sin(dlng/2) ** 2)
+        
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        
+        return R * c
+    
+    def _calculate_market_analysis(self, subject_sqft, comparables):
+        """
+        Calculate market value estimate and statistics
+        """
+        if not comparables:
+            return {
+                'estimated_value': None,
+                'confidence': 'None',
+                'message': 'No comparable sales found'
+            }
+        
+        # Extract sale prices
+        sale_prices = [c['sale_price'] for c in comparables if c.get('sale_price')]
+        
+        if not sale_prices:
+            return {
+                'estimated_value': None,
+                'confidence': 'None',
+                'message': 'No valid sale prices in comparables'
+            }
+        
+        # Calculate price per square foot
+        price_per_sqft_list = [
+            c['price_per_sqft'] for c in comparables 
+            if c.get('price_per_sqft')
+        ]
+        
+        # Calculate median values
+        sale_prices.sort()
+        price_per_sqft_list.sort()
+        
+        median_price = sale_prices[len(sale_prices) // 2]
+        median_ppsf = price_per_sqft_list[len(price_per_sqft_list) // 2] if price_per_sqft_list else None
+        
+        # Estimate subject property value
+        estimated_value = None
+        if median_ppsf and subject_sqft:
+            estimated_value = round(median_ppsf * subject_sqft, -3)  # Round to nearest $1,000
+        
+        # Determine confidence level
+        num_comps = len(comparables)
+        avg_score = sum(c['similarity_score'] for c in comparables) / num_comps
+        
+        if num_comps >= 5 and avg_score >= 70:
+            confidence = 'High'
+        elif num_comps >= 3 and avg_score >= 60:
+            confidence = 'Medium'
+        else:
+            confidence = 'Low'
+        
+        return {
+            'estimated_value': estimated_value,
+            'median_sale_price': median_price,
+            'median_price_per_sqft': round(median_ppsf, 2) if median_ppsf else None,
+            'price_range': {
+                'low': min(sale_prices),
+                'high': max(sale_prices)
+            },
+            'based_on_comps': num_comps,
+            'confidence': confidence,
+            'avg_similarity_score': round(avg_score, 1)
+        }
+
+
+# Convenience function for easy integration
+def get_comparable_sales(property_data, radius_miles=0.5, months_back=6):
+    """
+    Convenience wrapper for getting comps
+    
+    Args:
+        property_data: Dict with property details:
+            - pin
+            - property_class
+            - sqft
+            - latitude
+            - longitude
+            - bedrooms (optional)
+            - bathrooms (optional)
+        radius_miles: Search radius
+        months_back: Months of sales history
+        
+    Returns:
+        dict: Comparables and market analysis
+    """
+    finder = ComparableSalesFinder()
+    
+    return finder.get_comparables(
+        subject_pin=property_data['pin'],
+        subject_property_class=property_data['property_class'],
+        subject_sqft=property_data['sqft'],
+        subject_lat=property_data['latitude'],
+        subject_lng=property_data['longitude'],
+        subject_bedrooms=property_data.get('bedrooms'),
+        subject_bathrooms=property_data.get('bathrooms'),
+        radius_miles=radius_miles,
+        months_back=months_back
+    )
+```
+
+---
+
+## INTEGRATION INSTRUCTIONS
+
+### **How to Add to Your Property Report Flow:**
+
+```python
+from comparable_sales import get_comparable_sales
+
+def generate_property_report(pin):
+    """
+    Your existing property report generation
+    """
+    
+    # Your existing code to get property data
+    property_data = get_property_data(pin)
+    tax_data = get_tax_data(pin)
+    lien_data = get_lien_data(pin)
+    # ... etc
+    
+    # NEW: Add comparable sales
+    try:
+        comps_data = get_comparable_sales(
+            property_data=property_data,
+            radius_miles=0.5,  # 0.5 miles for urban Chicago
+            months_back=6      # Last 6 months
+        )
+    except Exception as e:
+        print(f"Error getting comps: {e}")
+        comps_data = None
+    
+    # Add to report data
+    report = {
+        'property': property_data,
+        'taxes': tax_data,
+        'liens': lien_data,
+        'comparable_sales': comps_data,  # NEW
+        # ... rest of report
+    }
+    
+    return report
+```
+
+---
+
+## OUTPUT FORMAT
+
+### **What Gets Returned:**
+
+```json
+{
+  "comparables": [
+    {
+      "address": "2615 W NORTH AVE",
+      "pin": "14-33-416-026-0000",
+      "sale_price": 450000,
+      "sale_date": "2025-11-15",
+      "sqft": 1250,
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "property_class": "211",
+      "distance_miles": 0.15,
+      "similarity_score": 87.3,
+      "price_per_sqft": 360
+    },
+    {
+      "address": "2700 W ARMITAGE AVE",
+      "pin": "14-33-401-012-0000",
+      "sale_price": 425000,
+      "sale_date": "2025-10-28",
+      "sqft": 1180,
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "property_class": "211",
+      "distance_miles": 0.22,
+      "similarity_score": 85.1,
+      "price_per_sqft": 360
+    }
+  ],
+  
+  "market_analysis": {
+    "estimated_value": 432000,
+    "median_sale_price": 437500,
+    "median_price_per_sqft": 360,
+    "price_range": {
+      "low": 410000,
+      "high": 475000
+    },
+    "based_on_comps": 6,
+    "confidence": "High",
+    "avg_similarity_score": 83.5
+  },
+  
+  "search_params": {
+    "radius_miles": 0.5,
+    "months_back": 6,
+    "property_class": "211"
+  }
+}
+```
+
+---
+
+## CRITICAL IMPLEMENTATION NOTES
+
+### **1. Cook County API Endpoint**
+
+**You need to adjust this line:**
+
+```python
+response = requests.get(f"{self.api_base}/sales", params=params)
+```
+
+**To match whatever Cook County sales endpoint Replit is already using.**
+
+**Common possibilities:**
+- Cook County Data Portal API
+- Existing assessor API you're already using
+- Internal Replit dataset
+
+**Ask Replit:** "What API endpoint do we use for Cook County property sales data?"
+
+---
+
+### **2. Field Name Mapping**
+
+**The API response fields might have different names.**
+
+**Common variations:**
+- `sale_price` vs `sale_amount` vs `price`
+- `sale_date` vs `date_of_sale` vs `transfer_date`
+- `sqft` vs `square_feet` vs `building_sqft`
+- `property_class` vs `class_code` vs `prop_class`
+
+**Update the code to match actual field names.**
+
+---
+
+### **3. Distance Calculation**
+
+**If you already have a distance function, use it:**
+
+```python
+# Replace _calculate_distance() with your existing function
+from your_utils import calculate_distance_miles
+
+# Then in _score_comparables():
+distance = calculate_distance_miles(
+    subject_lat, subject_lng,
+    sale['latitude'], sale['longitude']
+)
+```
+
+---
+
+### **4. Error Handling**
+
+**The code includes basic error handling, but you may want to add:**
+
+```python
+# If no comps found, try expanding search
+if len(same_class_sales) < min_comps:
+    print(f"[COMPS] Only {len(same_class_sales)} found, expanding search...")
+    # Try 1 mile radius
+    sales = self._get_sales_in_radius(subject_lat, subject_lng, 1.0, months_back)
+    same_class_sales = [s for s in sales if s.get('property_class') == subject_property_class]
+```
+
+---
+
+## TESTING
+
+### **Test with a Known Property:**
+
+```python
+# Test script
+from comparable_sales import get_comparable_sales
+
+# Test property (use a real PIN from your database)
+test_property = {
+    'pin': '14-33-416-026-0000',
+    'property_class': '211',  # 2-6 unit residential
+    'sqft': 1200,
+    'latitude': 41.9103,
+    'longitude': -87.6928,
+    'bedrooms': 3,
+    'bathrooms': 2
+}
+
+# Get comps
+result = get_comparable_sales(test_property)
+
+# Print results
+print(f"\n{'='*60}")
+print(f"COMPARABLE SALES TEST")
+print(f"{'='*60}")
+
+print(f"\nFound {len(result['comparables'])} comparables:")
+
+for i, comp in enumerate(result['comparables'], 1):
+    print(f"\n{i}. {comp['address']}")
+    print(f"   Sale Price: ${comp['sale_price']:,}")
+    print(f"   Sale Date: {comp['sale_date']}")
+    print(f"   Sqft: {comp['sqft']}")
+    print(f"   Distance: {comp['distance_miles']} mi")
+    print(f"   Similarity: {comp['similarity_score']}/100")
+
+print(f"\n{'='*60}")
+print(f"MARKET ANALYSIS")
+print(f"{'='*60}")
+
+ma = result['market_analysis']
+print(f"Estimated Value: ${ma['estimated_value']:,}")
+print(f"Median Price/Sqft: ${ma['median_price_per_sqft']}")
+print(f"Confidence: {ma['confidence']}")
+print(f"Based on: {ma['based_on_comps']} comps")
+```
+
+---
+
+## CONFIGURATION OPTIONS
+
+### **Adjust These Based on Your Needs:**
+
+```python
+# Urban vs Suburban
+radius_miles = 0.5  # Urban Chicago (tight neighborhoods)
+radius_miles = 1.0  # Suburban areas (more spread out)
+
+# Time Period
+months_back = 6   # Standard for active market
+months_back = 12  # If market is slow, need more history
+
+# Number of Comps
+min_comps = 3   # Minimum acceptable for appraisal
+max_comps = 10  # Show top 10 matches
+
+# Similarity Scoring Weights
+distance_weight = 20     # Points per mile
+sqft_weight = 50        # Penalty for size difference
+bedroom_weight = 8      # Points per bedroom difference
+age_weight = 3          # Points per month old
+```
+
+---
+
+## EXPECTED RESULTS
+
+### **For Most Properties:**
+
+- Find 5-10 comparables
+- Confidence: Medium-High
+- Price range: ±10% of median
+
+### **For Unique Properties:**
+
+- Find 2-5 comparables
+- Confidence: Low-Medium
+- May need to expand radius
+
+### **For Very Common Properties:**
+
+- Find 10+ comparables
+- Confidence: High
+- Tight price range
+
+---
+
+## EDGE CASES TO HANDLE
+
+### **1. No Comps Found**
+
+```python
+if not comparables:
+    return {
+        'comparables': [],
+        'market_analysis': {
+            'estimated_value': None,
+            'confidence': 'None',
+            'message': 'No recent sales found in area with matching property class'
+        }
+    }
+```
+
+### **2. Very Few Comps (<3)**
+
+```python
+if len(comparables) < 3:
+    # Try expanding search radius to 1 mile
+    # OR try 12 months instead of 6
+```
+
+### **3. Wide Price Variance**
+
+```python
+price_stddev = calculate_std_dev(sale_prices)
+if price_stddev > median_price * 0.15:  # More than 15% variance
+    # Flag as "Wide price variance - market may be volatile"
+    confidence = 'Low'
+```
+
+---
+
+## PERFORMANCE
+
+### **Typical Response Time:**
+- API query: 200-500ms
+- Scoring: 10-50ms
+- Total: <1 second
+
+### **Caching Strategy:**
+
+```python
+# Cache comps for 24 hours
+# Same area comps can be reused for nearby properties
+
+def get_comparable_sales_cached(property_data):
+    cache_key = f"comps_{property_data['property_class']}_{property_data['latitude']:.3f}_{property_data['longitude']:.3f}"
+    
+    cached = get_from_cache(cache_key)
+    if cached and not is_expired(cached, hours=24):
+        return cached
+    
+    comps = get_comparable_sales(property_data)
+    save_to_cache(cache_key, comps)
+    return comps
+```
+
+---
+
+## TL;DR - REPLIT INSTRUCTIONS
+
+### **What to Do:**
+
+1. **Create** `backend/comparable_sales.py` with the code above
+
+2. **Adjust** the Cook County API endpoint to match your existing sales data source:
+   ```python
+   response = requests.get(f"{self.api_base}/sales", params=params)
+   ```
+
+3. **Integrate** into property report generation:
+   ```python
+   comps_data = get_comparable_sales(property_data)
+   report['comparable_sales'] = comps_data
+   ```
+
+4. **Test** with a known property PIN to verify it works
+
+### **What It Returns:**
+
+```json
+{
+  "comparables": [
+    {"address": "...", "sale_price": 450000, "similarity_score": 87.3},
+    {"address": "...", "sale_price": 425000, "similarity_score": 85.1}
+  ],
+  "market_analysis": {
+    "estimated_value": 432000,
+    "confidence": "High",
+    "based_on_comps": 6
+  }
+}
+```
+
+### **Key Parameters:**
+
+- **radius_miles:** 0.5 (urban) or 1.0 (suburban)
+- **months_back:** 6 (standard) or 12 (slow market)
+- **Property class match:** CRITICAL for accurate comps
+
+### **Frontend Integration:**
+
+You handle UI placement. Backend just returns the data structure above. Display wherever you want in your property report.
+
+**This gives you professional appraiser-grade comparable sales!** 🎯

@@ -1,0 +1,68 @@
+# Replit Prompt — Location Map section
+
+Paste everything below into Replit.
+
+---
+
+Restyle the **Location Map** section of the property report to match the site's design language. This is a **front-end / CSS + markup change only** — do NOT change the Mapbox integration, the map data, the boundary/overlay logic, or the view-link behavior. Keep the live Mapbox map exactly as-is; only restyle the frame, header, view links, and legend around it. Values shown are placeholders from the current record.
+
+## What's wrong now (goals)
+1. The **Street View / Google Earth links are oddly placed** — they float loosely under the title as plain text. Make them proper buttons in the section header.
+2. The **section header and legend don't match the rest of the site's cards.** Bring them into the design system.
+3. The **legend should sit on one line** (degrade gracefully to wrapping only if it truly can't fit).
+
+## Design tokens (reuse existing if present)
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --sans:"Inter",sans-serif; --disp:"Instrument Serif",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+```
+
+## 1. Section header with view buttons on the right
+Match the other cards: indigo square + mono uppercase "LOCATION MAP". Move **Street View** and **Google Earth** to the top-right of this header as outlined pill buttons (same style as the report's top toolbar buttons — Project Context / Expand All / Share). Keep whatever click behavior they already have.
+```css
+.sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo)}
+.sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+.views{margin-left:auto;display:flex;gap:8px}
+.vbtn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--card);border-radius:9px;padding:7px 13px;font-size:12px;font-weight:600;color:var(--ink2);text-decoration:none}
+.vbtn svg{width:14px;height:14px;stroke:var(--indigo)}
+.vbtn:hover{background:var(--paper)}
+```
+Street View → eye icon; Google Earth → globe icon.
+
+## 2. Map container
+Wrap the existing Mapbox map in a rounded, bordered container so it matches the card language. Do not change the map itself — just the frame.
+```css
+.map{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;height:380px}
+```
+- Keep Mapbox's zoom control and attribution, but let them sit cleanly inside the rounded frame (the `overflow:hidden` clips corners).
+- The property marker uses the brand indigo `#2b3a9e`. (If a default Mapbox-blue marker is easier to keep, that's acceptable — but indigo ties it to the system.)
+
+## 3. Legend — one line, clean swatches
+Replace the boxed legend with a single row of plain swatch + label items (no individual pill borders — those made it read as buttons and forced wrapping). Keep the whole legend inside one light paper strip.
+```css
+.legwrap{margin-top:14px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 16px}
+.legh{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+.leg{display:flex;flex-wrap:wrap;align-items:center;gap:6px 17px}   /* wrap allowed only as a fallback on very narrow screens */
+.lgi{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);white-space:nowrap}
+.lgi .sw{width:18px;height:11px;border-radius:999px;flex:none;border:2px solid}   /* boundary = rounded outline swatch */
+.lgi .dot{width:10px;height:10px;border-radius:50%;flex:none}                      /* property = filled dot */
+.lgi b{color:var(--ink);font-weight:600}
+```
+```html
+<div class="leg">
+  <span class="lgi"><span class="sw" style="border-color:#e2483d"></span>ZIP <b>60647</b></span>
+  <span class="lgi"><span class="sw" style="border-color:#5b8def"></span>Community <b>Logan Square</b></span>
+  <span class="lgi"><span class="sw" style="border-color:#2f9e6a"></span>Neighborhood <b>Bucktown</b></span>
+  <span class="lgi"><span class="sw" style="border-color:#9a67d4"></span>Ward <b>32</b></span>
+  <span class="lgi"><span class="sw" style="border-color:#3a3a3a"></span>Census Tract <b>832200</b></span>
+  <span class="lgi"><span class="dot" style="background:#2b3a9e"></span><b>Property</b></span>
+</div>
+```
+
+**Important — legend swatch colors must match the actual map overlay line colors.** Each swatch color should be driven by the same value the map uses to draw that boundary (ZIP red, Community blue, Neighborhood green, Ward purple, Census Tract black/dark, Property indigo dot). Don't hardcode a color that differs from what's drawn on the map — bind both to the same source so the legend and map always agree.
+
+## Consistency notes
+- The legend is intended to be one line at the section's normal full width; `flex-wrap:wrap` is left on only so it wraps instead of clipping on unusually narrow screens. Don't force `nowrap` (that would clip on mobile).
+- Everything is indigo / neutral grey except the legend swatches, which intentionally mirror the map's boundary colors.
+- Section header, card border, and radius match the other report cards (Ward & Alderperson, Zoning, Active Listing).

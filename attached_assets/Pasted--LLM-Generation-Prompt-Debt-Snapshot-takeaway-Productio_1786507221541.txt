@@ -1,0 +1,64 @@
+# LLM Generation Prompt — Debt Snapshot takeaway
+
+Production prompt the backend sends the model to write the **Debt Snapshot** takeaway. Returns structured JSON the renderer maps into the Standard Takeaway component. It runs on the **resolved snapshot** (`snap` from Stage 2.5) — the same object the card renders — so the headline and the card can never disagree.
+
+## 🔴 GOVERNING RULE — Report-Data-First
+`cross_reference_allowed: true` — **but narrowly**: the Debt Snapshot may reuse the report's own **estimated value** (for an LTV statement) and the property's **zoning/commercial flag** (for the maturity-term basis), because those already exist elsewhere in the report and the debt logic depends on them. Everything else comes from `snap` only. No world knowledge, no fresh lookups, no re-derivation. Every figure the takeaway cites must be a value already in `snap` (or the two whitelisted report values). If `snap` is silent, the takeaway is silent.
+
+## 🔴 DEBT-SENSITIVITY GUARDRAILS
+1. **Resolve state; never react to mere presence.** Speak to what `snap` already resolved. A `cleared_by_sale` loan is history — never call it active debt. A `resolved` foreclosure is NOT a live cloud — never imply active distress. If `foreclosure_active==false`, the takeaway must not say "foreclosure," "pending litigation," or "clouds title" as a current condition.
+2. **Recorded amounts are not balances.** Always frame `effective_amount` as the *recorded loan*, never "the owner owes X today." No equity or payoff claim beyond what `snap` states.
+3. **Position is derived, not certified.** Say "first position by recording order," not "guaranteed first lien." If `extraction_gap==true`, say so and soften the position claim — never a confident position beside a blank lender/amount.
+4. **Maturity uses the effective (modified) date.** Never call a loan "years past due" when a modification extended it. Use `maturity_status`: `at_maturity`/`past_maturity` = a real, calm watch-out (marigold); `current` = fine; `estimated` source = hedge ("est.").
+5. **Blanket loans: suppress per-parcel leverage AND surface the cross-collateral fact.** If `blanket`/`suppress_ltv`, never state a per-parcel LTV or "over-leveraged." Instead say the loan is **cross-collateralized** and, when `blanket_pins` is non-empty, that it **also encumbers** those parcels — this is a material condition (a buyer may not get a clean release of this parcel alone), not just a hidden number. Cite `pool_ltv` (combined loan-to-value across the pool) only if present; if `pool_ltv` is null, say combined leverage isn't computed rather than inventing one. Never sum a blanket loan as if it were separate debt per parcel.
+6. **Judicial clearing is by court order, no release recorded.** When `cleared_by_sale` loans exist, frame them as extinguished by the sale AND note no recorded release exists — a "confirm at title" nuance, not a clean guarantee.
+7. **Taxes belong elsewhere.** Never state property-tax liens here; the report handles taxes in its own section.
+
+## INPUT — the resolved snapshot (`snap`)
+```json
+{
+  "current_owner":"HAPPY ARTS LLC", "ownership_acquired":"2014-04-24", "acquired_via":"receiver's/judicial sale",
+  "active":[ {"doc_number":"1618022008","lender":"Albany Bank and Trust Company, N.A.","effective_amount":399000,
+     "original_amount":399000,"index_consideration_amount":798000,"effective_interest_rate":3.75,"original_interest_rate":4,
+     "effective_maturity_date":"2026-07-05","maturity_status":"at_maturity","maturity_source":"modification","position":1,
+     "purchase_money":false,"blanket":false,"blanket_pins":[],"pool_ltv":null,"suppress_ltv":false,"extraction_gap":false,
+     "modifications":[{"doc_number":"2121004479","new_amount":399000,"new_maturity_date":"2026-07-05","new_interest_rate":3.75,
+        "summary":"clarified loan amount, cut rate 4%→3.75%, extended maturity to 2026"}] } ],
+  "cleared_by_sale":[ {"doc_number":"...","lender":"Banco Popular","borrower":"L. Carrera","recording_date":"1999-..","status":"extinguished by court-ordered receiver's sale"},
+                      {"doc_number":"...","lender":"Greenpoint Mortgage","borrower":"M. Aguilar","recording_date":"2005-..","status":"extinguished by court-ordered receiver's sale"} ],
+  "distress":[ {"doc_type":"foreclosure","recording_date":"2012-..","state":"resolved"} ], "foreclosure_active":false,
+  "liens":[], "flags":["pre_sale_liens_cleared"], "docs_total":41,
+  "report_estimated_value": 1250000, "subject_is_commercial": true
+}
+```
+
+## OUTPUT — return JSON only (Standard Takeaway shape)
+```json
+{ "title": "…one factual sentence…",
+  "rows": [ { "tone":"good|caution|insight", "html":"…", "chip":"Verify"|null } ] }
+```
+Aim for **3–4 rows**, ordered by what matters to an investor. Adapt to what `snap` actually says:
+
+1. **The live watch-item first if there is one.** If `maturity_status` is `at_maturity`/`past_maturity` → a `caution` row with a `"Verify"` chip: lender + `effective_amount` + status + the modification's rate/maturity change + "no payoff/extension recorded" (only if none is). If `maturity_status=="current"`, this is instead a `good` or `insight` row stating the runway.
+2. **Position / priority** → `good` when clean first position (`position==1`, no `extraction_gap`); mention `cleared_by_sale` loans as *why* the record looks busy but title is clear. If `extraction_gap`, downgrade to `caution` and soften.
+3. **Distress** → `good` "no active distress" when `foreclosure_active==false` and no live liens; `caution`/`bad` only when genuinely active.
+4. **Context** (`insight`, neutral) → owner + `acquired`/`acquired_via` + `docs_total`. Optional LTV sentence ONLY if `position==1 && !suppress_ltv && report_estimated_value` present and meaningful — framed as recorded-loan-to-value, hedged.
+
+### Headline
+One factual sentence carrying the single most important fact. For 3014: the first-position clean priority AND the at-maturity watch-item together — e.g. "One mortgage in first position with clean priority — but it just reached maturity, so the live question is payoff or extension." If the loan were `current` and clean, the headline would be reassuring instead ("A single modest first-position mortgage, no distress, comfortable runway").
+
+### Coloring
+- `good` — clean first position, no active distress, extinguished/released prior liens.
+- `caution` — `at_maturity`/`past_maturity`, `inferred — verify` release, stale-but-live lien, `extraction_gap`. Calm, with a `"Verify"` chip where action is needed.
+- `bad`/red — only `foreclosure_active==true` or a live in-force judgment/mechanics lien.
+- `insight` — acquisition, counts, position derivation (neutral).
+
+### Self-check before returning
+1. Every figure traces to `snap` (or the two whitelisted report values); nothing invented? (Governing rule)
+2. No `cleared_by_sale` loan described as active; no `resolved` foreclosure implied live? (Guardrail 1)
+3. `effective_amount` framed as recorded loan, not current balance? (Guardrail 2)
+4. Maturity uses the effective/modified date and `maturity_status`; no false "years past due"? (Guardrail 4)
+5. Position softened if `extraction_gap`; no confident position beside a blank? (Guardrail 3)
+6. `at_maturity` colored marigold, never red; active foreclosure the only red? (Coloring)
+7. Valid JSON, ≤4 rows.
+```

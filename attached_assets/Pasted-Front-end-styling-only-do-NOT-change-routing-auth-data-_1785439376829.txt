@@ -1,0 +1,40 @@
+Front-end / styling only — do NOT change routing, auth, data, or business logic.
+
+Redesign the entire Transit Access & Ridership section — CTA Rail Stations, CTA L Ridership, Metra Stations, CTA Bus Routes, CTA Bus Ridership, and Street Traffic Volume — to match the attached report-transit.html (stations + traffic) and report-ridership2.html (ridership blocks), using the existing design tokens and the shared section-header + stat-tile components. Define each pattern below once and reuse it everywhere it applies: all three station lists share one pattern, and the L and Bus ridership blocks share one pattern.
+
+1. Station list rows (CTA Rail, Metra, CTA Bus Routes).
+Remove all full-row colored background tints. Neutral rows separated by hairlines: station/route name in ink weight 600; transit line identity shown as small labeled pills in the official line colors (Green 
+#00a651, Blue 
+#00a1de, Pink 
+#e27ea6, Orange 
+#f9461c, Purple 
+#522398; a station on two lines gets two pills); distance in a small mono pill on the right. These pills are the only place official transit colors appear in the lists.
+
+2. Ridership blocks (CTA L and CTA Bus).
+Header row: station/route name; for rail, a line-color pill after the name; a rank chip (#104 of 143); and a signed trend pill — green (
+#2f7d3f on 
+#edf6ef) for a positive trend, red (
+#d13b26 on 
+#fbecea) for negative, each with a directional arrow (↗ / ↘) and the %. Color strictly by the sign of the number — never by arbitrary magnitude thresholds.
+Then three horizontal stat tiles (Avg Weekday / Saturday / Sun-Holiday) in the shared tile layout: metric label + unit stacked on the left, the number as the hero on the right in Instrument Serif.
+Then a bullet comparison bar: light track with an indigo fill for this station/route's value, a dashed tick for the system median and a solid tick for the system average, labeled underneath.
+
+3. Trend line charts (L ridership, Bus ridership, Street Traffic).
+One consistent style: 2px rounded lines, recessive hairline gridlines, mono axis labels, a legend for 2+ series, and a crosshair + hover tooltip.
+
+Rail (L) series are colored by their train line's official color (Green 
+#00843d, Blue 
+#00a1de, etc.). When two stations share the same line, keep both in that line's color but render one as a dashed line, with a matching solid/dashed swatch in the legend.
+Bus charts and any mixed/other case use the standard palette: series 1 indigo 
+#3f51c5, series 2 teal 
+#0e8fa6.
+
+4. Percentile / comparison bars (Street Traffic "citywide comparison," and any system-comparison bar): indigo fill and marker on a light track — never black.
+
+5. Street Traffic Volume: three horizontal stat tiles (Daily Vehicles / City Rank / Percentile), the indigo percentile bar, and the indigo trend line.
+
+6. Label legibility (applies throughout this section). Stat-tile labels and units ("AVG WEEKDAY", "entries/day") and chart titles ("WEEKDAY RIDERSHIP TREND") use the darker secondary ink 
+#565651 at weight 600–700 — not the faint muted gray 
+#8b8a84. Reserve the faint muted tone only for genuinely secondary text like source citations and axis ticks.
+
+Match spacing, radii, and borders to the mockups. Apply patterns 1–4 and rule 6 consistently across the whole transit section so no block keeps row-tints, black bars, unsigned or amber trend badges, off-palette line charts, or faint hard-to-read labels.

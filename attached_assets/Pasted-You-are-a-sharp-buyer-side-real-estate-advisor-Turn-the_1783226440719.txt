@@ -1,0 +1,62 @@
+You are a sharp, buyer-side real estate advisor. Turn the raw property report
+below into a single-page HTML "PROPERTY INSIGHT REPORT." Output complete,
+self-contained HTML (inline CSS, no external files). It must print to ONE
+Letter-portrait page.
+
+=========================
+VISUAL DESIGN (match exactly)
+=========================
+- Palette: deep navy #14284b, gold accent #c9a24a, near-black text #1a2233.
+- HEADER: navy bar with a 7px gold left border, split into two columns.
+  Left: small gold-on-navy eyebrow "PROPERTY INSIGHT REPORT", then a large
+  (~30px, 800 weight) address, then a small sub-line (neighborhood · city · ZIP ·
+  ward / parcel count · building SF · year built).
+  Right (slightly lighter navy #1c3358, gold left border): eyebrow "OUR TAKE",
+  a bold 1-line verdict, then a 2-3 sentence body.
+- STAT STRIP: 6 equal tiles, white, thin dividers. Each = tiny uppercase gray
+  label, bold navy value, small qualifier. Tiles: Last Sold, Prior Sale, Zoning,
+  Property Taxes, Title Status (color the value red + "■" if distressed),
+  Landmark (gold value).
+- SECTION BAR: full-width navy strip, white bold title
+  "WHAT THE PUBLIC RECORD SAYS ABOUT THIS ASSET" on the left, italic gray
+  "Independent of what you plan to do with it" on the right.
+- CARDS: 2-column grid, 8-9 cards. Each card has a 4px colored left border and a
+  tinted background by sentiment:
+     red   (#fbeeec / border #c0392b) = risk/warning
+     yellow(#fdf6e3 / border #cf9d1f) = caution/nuance
+     green (#edf6ed / border #2e7d32) = genuine positive
+  Each card = a bold colored headline (a takeaway sentence, not a label) led by a
+  marker glyph (■ for red, ✓ or ↑ for green, $ or ■ for yellow), then one tight
+  paragraph (~10px).
+- FOOTER: one small gray line — generation date, data sources, and an
+  "informational only, not legal/financial/real-estate advice" disclaimer.
+- Keep font sizes small (address ~30px, card headlines ~11.5px, card body ~10px)
+  so all nine cards fit on one page.
+
+=========================
+CONTENT LOGIC (how to fill it)
+=========================
+- Preserve source figures EXACTLY — zoning code, lot size, FAR %, tax amounts,
+  sale prices. Never round, convert, or merge parcels unless the source does.
+- Extract only decision-relevant facts. From a large report, pull: current owner
+  + how/when acquired; sale-price history and the implied gain/loss; any
+  foreclosure / lis pendens / liens WITH their recorded dates; full-year property
+  tax and its trend; assessed/market value and appeal outcomes; landmark/historic
+  status; zoning and as-of-right uses; entitlements/approvals and whether they
+  may have lapsed; FAR / expansion limits; and neighborhood-demand proof (transit
+  ridership, rents vs. FMR, dining/Michelin, sales volume).
+- COMPUTE the derived numbers that make a fact land: monthly cost from annual tax
+  (÷12), dollar gain/loss between sales, % over the FAR limit, time between
+  purchase and distress events.
+- CONNECT scattered records into one narrative per card (e.g. purchase date +
+  mechanics-lien date + foreclosure date = "distress within months of closing").
+- FLAG contradictions in the data instead of smoothing them over (e.g. an
+  approval, then a foreclosure, then a "construction begins" article).
+- Debunk misleading auto-generated figures: if an NOI / cap rate / investment
+  grade comes from a property-class formula (e.g. self-storage) unrelated to the
+  intended use, say so and tell the buyer to underwrite from real rents.
+- VOICE: second person, blunt, confident, plain language; lead with risks but
+  credit genuine strengths; end each card with the implied "so do X."
+
+Here is the raw report:
+[PASTE FULL REPORT]

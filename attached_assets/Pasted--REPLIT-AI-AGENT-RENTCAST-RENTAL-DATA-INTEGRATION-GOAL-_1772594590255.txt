@@ -1,0 +1,939 @@
+# REPLIT AI AGENT - RENTCAST RENTAL DATA INTEGRATION
+
+---
+
+## GOAL
+
+Add rental market intelligence to your $25 Chicago property reports using RentCast API:
+- Get property-specific rent estimates
+- Pull 20 nearby rental comparables
+- Create quality tiers (Luxury, Nice, Average, Dated) using FMR baseline
+- Show rental upside potential
+
+---
+
+## API CREDENTIALS
+
+**RentCast API Key:** `83b88a99ee6644dbb973fc56611677c4`
+
+**Store in Environment Variables:**
+```python
+# In Replit Secrets or .env file
+RENTCAST_API_KEY = "83b88a99ee6644dbb973fc56611677c4"
+```
+
+**Important:** Keep this key secure! You have 50 free API calls/month.
+
+---
+
+## FILE STRUCTURE
+
+Create these files in your backend:
+
+```
+backend/
+├── rentcast_api.py          # RentCast API wrapper
+├── rental_quality_tiers.py  # Quality tier builder
+└── rental_estimator.py      # Main rental data aggregator
+```
+
+---
+
+## FILE 1: `backend/rentcast_api.py`
+
+**RentCast API wrapper - handles all API calls**
+
+```python
+"""
+RentCast API wrapper
+Handles rent estimates and rental comparables
+"""
+
+import requests
+import os
+from typing import Dict, List, Optional
+
+
+class RentCastAPI:
+    """
+    Wrapper for RentCast API
+    Docs: https://developers.rentcast.io/
+    """
+    
+    def __init__(self, api_key: str = None):
+        """
+        Initialize RentCast API client
+        
+        Args:
+            api_key: RentCast API key (defaults to env var)
+        """
+        self.api_key = api_key or os.getenv('RENTCAST_API_KEY')
+        
+        if not self.api_key:
+            raise ValueError("RentCast API key required")
+        
+        self.base_url = "https://api.rentcast.io/v1"
+        self.headers = {
+            'X-Api-Key': self.api_key,
+            'accept': 'application/json'
+        }
+    
+    def get_rent_estimate(
+        self,
+        address: str = None,
+        latitude: float = None,
+        longitude: float = None,
+        property_type: str = None,
+        bedrooms: int = None,
+        bathrooms: float = None,
+        square_footage: int = None,
+        comp_count: int = 20
+    ) -> Dict:
+        """
+        Get rent estimate and comparables for a property
+        
+        Args:
+            address: Full property address (preferred)
+            latitude/longitude: Alternative to address
+            property_type: "Single Family", "Condo", "Townhouse", "Multi Family"
+            bedrooms: Number of bedrooms
+            bathrooms: Number of bathrooms
+            square_footage: Square footage
+            comp_count: Number of comparables to return (max 20)
+        
+        Returns:
+            Dict with rent estimate, range, and comparables
+        """
+        
+        url = f"{self.base_url}/avm/rent/value"
+        
+        # Build parameters
+        params = {
+            'compCount': min(comp_count, 20)  # Max 20
+        }
+        
+        # Address or coordinates (address preferred)
+        if address:
+            params['address'] = address
+        elif latitude and longitude:
+            params['latitude'] = latitude
+            params['longitude'] = longitude
+        else:
+            raise ValueError("Must provide address or lat/lng")
+        
+        # Optional property characteristics
+        if property_type:
+            params['propertyType'] = property_type
+        if bedrooms:
+            params['bedrooms'] = bedrooms
+        if bathrooms:
+            params['bathrooms'] = bathrooms
+        if square_footage:
+            params['squareFootage'] = square_footage
+        
+        try:
+            print(f"[RENTCAST] Fetching rent estimate for {address or f'{latitude},{longitude}'}")
+            
+            response = requests.get(url, headers=self.headers, params=params)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                print(f"[RENTCAST] ✓ Estimate: ${data.get('rent', 'N/A'):,}")
+                print(f"[RENTCAST] ✓ Comparables: {len(data.get('comparables', []))}")
+                
+                return data
+            
+            elif response.status_code == 401:
+                print("[RENTCAST] ✗ API key invalid or expired")
+                return None
+            
+            elif response.status_code == 429:
+                print("[RENTCAST] ✗ Rate limit exceeded (50 free calls/month)")
+                return None
+            
+            else:
+                print(f"[RENTCAST] ✗ Error {response.status_code}: {response.text}")
+                return None
+                
+        except Exception as e:
+            print(f"[RENTCAST] ✗ Exception: {e}")
+            return None
+    
+    def get_property_records(self, address: str) -> Dict:
+        """
+        Get property records (costs 1 API call)
+        Includes year built, property characteristics
+        
+        Args:
+            address: Full property address
+        
+        Returns:
+            Property record data
+        """
+        url = f"{self.base_url}/properties"
+        
+        params = {'address': address}
+        
+        try:
+            response = requests.get(url, headers=self.headers, params=params)
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"[RENTCAST] Property records error: {response.status_code}")
+                return None
+                
+        except Exception as e:
+            print(f"[RENTCAST] Property records exception: {e}")
+            return None
+
+
+# Convenience function
+def get_rentcast_data(
+    address: str,
+    bedrooms: int = None,
+    bathrooms: float = None,
+    property_type: str = None
+) -> Dict:
+    """
+    Quick function to get RentCast data
+    
+    Args:
+        address: Property address
+        bedrooms: Number of bedrooms
+        bathrooms: Number of bathrooms
+        property_type: Property type
+    
+    Returns:
+        RentCast response with estimate and comps
+    """
+    api = RentCastAPI()
+    
+    return api.get_rent_estimate(
+        address=address,
+        bedrooms=bedrooms,
+        bathrooms=bathrooms,
+        property_type=property_type,
+        comp_count=20
+    )
+```
+
+---
+
+## FILE 2: `backend/rental_quality_tiers.py`
+
+**Build quality tiers using FMR + RentCast comps**
+
+```python
+"""
+Rental Quality Tier Builder
+Uses HUD Fair Market Rent as baseline to create quality tiers
+"""
+
+from statistics import median
+from typing import Dict, List
+
+
+class RentalQualityTiers:
+    """
+    Create rental quality tiers: Luxury, Nice, Average, Dated
+    Uses FMR as objective baseline
+    """
+    
+    def __init__(self, fmr: float):
+        """
+        Initialize with Fair Market Rent baseline
+        
+        Args:
+            fmr: HUD Fair Market Rent for area/bedrooms
+        """
+        self.fmr = fmr
+        self.tier_bounds = self._calculate_tier_bounds()
+    
+    def _calculate_tier_bounds(self) -> Dict:
+        """
+        Calculate tier boundaries based on FMR
+        
+        FMR = 40th percentile = Average quality
+        
+        Returns:
+            Dict with tier boundaries
+        """
+        return {
+            'dated': {
+                'min': round(self.fmr * 0.70),
+                'max': round(self.fmr * 0.85),
+                'description': 'Older units, basic finishes, may need updates',
+                'premium': '-15% to -30% below FMR'
+            },
+            'average': {
+                'min': round(self.fmr * 0.85),
+                'max': round(self.fmr * 1.15),
+                'fmr': self.fmr,
+                'description': 'Standard finishes, functional condition, decent quality',
+                'premium': '±15% of FMR (market baseline)'
+            },
+            'nice': {
+                'min': round(self.fmr * 1.15),
+                'max': round(self.fmr * 1.50),
+                'description': 'Updated units, modern finishes, in-unit W/D, central AC',
+                'premium': '+15% to +50% above FMR'
+            },
+            'luxury': {
+                'min': round(self.fmr * 1.50),
+                'max': None,
+                'description': 'New construction, premium finishes, high-end amenities',
+                'premium': '+50% or more above FMR'
+            }
+        }
+    
+    def classify_comparables(self, comparables: List[Dict]) -> Dict:
+        """
+        Classify rental comps into quality tiers
+        
+        Args:
+            comparables: List of rental comps from RentCast
+        
+        Returns:
+            Dict with comps sorted into tiers and tier stats
+        """
+        # Sort comps into tiers
+        tiered_comps = {
+            'dated': [],
+            'average': [],
+            'nice': [],
+            'luxury': []
+        }
+        
+        for comp in comparables:
+            price = comp.get('price')
+            
+            if not price:
+                continue
+            
+            # Classify based on FMR tier bounds
+            if price <= self.tier_bounds['dated']['max']:
+                tiered_comps['dated'].append(comp)
+            elif price <= self.tier_bounds['average']['max']:
+                tiered_comps['average'].append(comp)
+            elif price <= self.tier_bounds['nice']['max']:
+                tiered_comps['nice'].append(comp)
+            else:
+                tiered_comps['luxury'].append(comp)
+        
+        # Calculate tier statistics
+        tier_stats = {}
+        
+        for tier_name, comps in tiered_comps.items():
+            if comps:
+                prices = [c['price'] for c in comps]
+                
+                tier_stats[tier_name] = {
+                    'median_rent': int(median(prices)),
+                    'rent_range': {
+                        'low': min(prices),
+                        'high': max(prices)
+                    },
+                    'count': len(comps),
+                    'sample_comps': comps[:3],  # Top 3 examples
+                    'description': self.tier_bounds[tier_name]['description'],
+                    'premium': self.tier_bounds[tier_name]['premium']
+                }
+            else:
+                # No comps in this tier - estimate from FMR
+                bounds = self.tier_bounds[tier_name]
+                estimated_rent = (bounds['min'] + (bounds['max'] or bounds['min'] * 1.2)) / 2
+                
+                tier_stats[tier_name] = {
+                    'median_rent': int(estimated_rent),
+                    'rent_range': {
+                        'low': bounds['min'],
+                        'high': bounds['max'] or int(bounds['min'] * 1.3)
+                    },
+                    'count': 0,
+                    'estimated': True,
+                    'description': bounds['description'],
+                    'premium': bounds['premium']
+                }
+        
+        return tier_stats
+    
+    def calculate_upgrade_potential(
+        self,
+        current_tier: str,
+        tier_stats: Dict
+    ) -> Dict:
+        """
+        Calculate ROI for upgrading to higher tiers
+        
+        Args:
+            current_tier: Current property tier
+            tier_stats: Tier statistics from classify_comparables
+        
+        Returns:
+            Upgrade scenarios with ROI
+        """
+        tier_order = ['dated', 'average', 'nice', 'luxury']
+        current_index = tier_order.index(current_tier)
+        
+        current_rent = tier_stats[current_tier]['median_rent']
+        
+        upgrades = {}
+        
+        # Calculate upgrade to each higher tier
+        for i in range(current_index + 1, len(tier_order)):
+            target_tier = tier_order[i]
+            target_rent = tier_stats[target_tier]['median_rent']
+            
+            monthly_gain = target_rent - current_rent
+            annual_gain = monthly_gain * 12
+            
+            # Estimate renovation cost (rough approximation)
+            if target_tier == 'nice':
+                est_renovation = 15000  # Basic updates
+            elif target_tier == 'luxury':
+                est_renovation = 40000  # Full renovation
+            else:
+                est_renovation = 8000   # Minor updates
+            
+            roi = (annual_gain / est_renovation * 100) if est_renovation > 0 else 0
+            
+            upgrades[target_tier] = {
+                'monthly_gain': monthly_gain,
+                'annual_gain': annual_gain,
+                'estimated_renovation_cost': est_renovation,
+                'roi_percent': round(roi, 1),
+                'payback_months': round(est_renovation / monthly_gain, 1) if monthly_gain > 0 else None
+            }
+        
+        return upgrades
+
+
+# Convenience function
+def create_rental_tiers(comparables: List[Dict], fmr: float) -> Dict:
+    """
+    Quick function to create rental quality tiers
+    
+    Args:
+        comparables: RentCast comparables
+        fmr: Fair Market Rent baseline
+    
+    Returns:
+        Tier statistics
+    """
+    tier_builder = RentalQualityTiers(fmr)
+    return tier_builder.classify_comparables(comparables)
+```
+
+---
+
+## FILE 3: `backend/rental_estimator.py`
+
+**Main aggregator - combines everything**
+
+```python
+"""
+Rental Estimator
+Combines RentCast data with FMR to provide complete rental intelligence
+"""
+
+from rentcast_api import RentCastAPI
+from rental_quality_tiers import RentalQualityTiers
+from typing import Dict
+
+
+class RentalEstimator:
+    """
+    Complete rental market intelligence
+    Combines RentCast + FMR + quality tiers
+    """
+    
+    def __init__(self, rentcast_api_key: str = None):
+        """
+        Initialize estimator
+        
+        Args:
+            rentcast_api_key: RentCast API key
+        """
+        self.rentcast = RentCastAPI(rentcast_api_key)
+    
+    def get_rental_intelligence(
+        self,
+        address: str,
+        fmr: float,
+        bedrooms: int = None,
+        bathrooms: float = None,
+        property_type: str = None
+    ) -> Dict:
+        """
+        Get complete rental market intelligence
+        
+        Args:
+            address: Property address
+            fmr: Fair Market Rent for area/bedrooms
+            bedrooms: Number of bedrooms
+            bathrooms: Number of bathrooms
+            property_type: Property type
+        
+        Returns:
+            Complete rental intelligence report
+        """
+        
+        print("\n" + "="*60)
+        print("GENERATING RENTAL MARKET INTELLIGENCE")
+        print("="*60)
+        
+        # Step 1: Get RentCast data
+        print("\n[1/3] Fetching RentCast estimate and comparables...")
+        
+        rentcast_data = self.rentcast.get_rent_estimate(
+            address=address,
+            bedrooms=bedrooms,
+            bathrooms=bathrooms,
+            property_type=property_type,
+            comp_count=20
+        )
+        
+        if not rentcast_data:
+            print("[ERROR] Could not fetch RentCast data")
+            return None
+        
+        # Step 2: Build quality tiers
+        print(f"\n[2/3] Building quality tiers (FMR baseline: ${fmr:,})...")
+        
+        comparables = rentcast_data.get('comparables', [])
+        
+        if not comparables:
+            print("[WARNING] No comparables found")
+            tier_stats = None
+        else:
+            tier_builder = RentalQualityTiers(fmr)
+            tier_stats = tier_builder.classify_comparables(comparables)
+            
+            print(f"  Luxury:  ${tier_stats['luxury']['median_rent']:,}/mo ({tier_stats['luxury']['count']} comps)")
+            print(f"  Nice:    ${tier_stats['nice']['median_rent']:,}/mo ({tier_stats['nice']['count']} comps)")
+            print(f"  Average: ${tier_stats['average']['median_rent']:,}/mo ({tier_stats['average']['count']} comps)")
+            print(f"  Dated:   ${tier_stats['dated']['median_rent']:,}/mo ({tier_stats['dated']['count']} comps)")
+        
+        # Step 3: Determine property tier and upgrade potential
+        print("\n[3/3] Calculating upgrade potential...")
+        
+        property_estimate = rentcast_data.get('rent')
+        
+        if property_estimate and tier_stats:
+            # Determine which tier this property falls into
+            if property_estimate >= fmr * 1.5:
+                current_tier = 'luxury'
+            elif property_estimate >= fmr * 1.15:
+                current_tier = 'nice'
+            elif property_estimate >= fmr * 0.85:
+                current_tier = 'average'
+            else:
+                current_tier = 'dated'
+            
+            print(f"  Current tier: {current_tier.upper()}")
+            
+            # Calculate upgrade scenarios
+            tier_builder = RentalQualityTiers(fmr)
+            upgrade_scenarios = tier_builder.calculate_upgrade_potential(
+                current_tier,
+                tier_stats
+            )
+        else:
+            current_tier = None
+            upgrade_scenarios = None
+        
+        print("\n" + "="*60)
+        print("RENTAL INTELLIGENCE COMPLETE")
+        print("="*60 + "\n")
+        
+        # Compile results
+        return {
+            'rentcast_estimate': {
+                'rent': property_estimate,
+                'rent_range': {
+                    'low': rentcast_data.get('rentRangeLow'),
+                    'high': rentcast_data.get('rentRangeHigh')
+                },
+                'comparables_count': len(comparables)
+            },
+            'fmr_baseline': fmr,
+            'quality_tiers': tier_stats,
+            'property_tier': current_tier,
+            'upgrade_scenarios': upgrade_scenarios
+        }
+
+
+# Convenience function for integration
+def get_rental_data_for_property(
+    property_data: Dict,
+    fmr: float
+) -> Dict:
+    """
+    Get rental data for a property
+    Use this in your main report generation
+    
+    Args:
+        property_data: Dict with address, bedrooms, bathrooms
+        fmr: Fair Market Rent for this area/bedrooms
+    
+    Returns:
+        Complete rental intelligence
+    """
+    estimator = RentalEstimator()
+    
+    return estimator.get_rental_intelligence(
+        address=property_data.get('address'),
+        fmr=fmr,
+        bedrooms=property_data.get('bedrooms'),
+        bathrooms=property_data.get('bathrooms'),
+        property_type=property_data.get('property_type')
+    )
+```
+
+---
+
+## INTEGRATION WITH MAIN REPORT
+
+**In your main property report generation:**
+
+```python
+from rental_estimator import get_rental_data_for_property
+
+def generate_property_report(pin):
+    """
+    Your main report generation function
+    """
+    
+    # Your existing data pulls
+    property_data = get_property_data(pin)
+    tax_data = get_tax_data(pin)
+    lien_data = get_lien_data(pin)
+    fmr_data = get_fair_market_rent(pin)  # You already have this
+    
+    # NEW: Get rental market intelligence
+    rental_intelligence = get_rental_data_for_property(
+        property_data=property_data,
+        fmr=fmr_data['rent']  # Use HUD FMR as baseline
+    )
+    
+    # Build complete report
+    report = {
+        'property': property_data,
+        'taxes': tax_data,
+        'liens': lien_data,
+        'fmr': fmr_data,
+        'rental_intelligence': rental_intelligence,  # ← NEW!
+        # ... other sections
+    }
+    
+    return report
+```
+
+---
+
+## DISPLAY IN REPORT
+
+```python
+def format_rental_intelligence_section(rental_data):
+    """
+    Format rental intelligence for display
+    """
+    
+    if not rental_data:
+        return "Rental data unavailable"
+    
+    output = []
+    
+    output.append("━" * 60)
+    output.append("RENTAL MARKET INTELLIGENCE")
+    output.append(f"Market Baseline (HUD FMR): ${rental_data['fmr_baseline']:,}/month")
+    output.append("━" * 60)
+    output.append("")
+    
+    # RentCast estimate
+    est = rental_data['rentcast_estimate']
+    output.append(f"PROPERTY ESTIMATE: ${est['rent']:,}/month")
+    output.append(f"Range: ${est['rent_range']['low']:,} - ${est['rent_range']['high']:,}")
+    output.append(f"Based on: {est['comparables_count']} comparable rentals")
+    output.append("")
+    
+    # Quality tiers
+    output.append("RENTAL RATES BY QUALITY TIER:")
+    output.append("")
+    
+    tiers = rental_data['quality_tiers']
+    
+    for tier_name, emoji in [('luxury', '💎'), ('nice', '✨'), ('average', '🏠'), ('dated', '📅')]:
+        tier = tiers[tier_name]
+        output.append(f"{emoji} {tier_name.upper()}")
+        output.append(f"   Median Rent: ${tier['median_rent']:,}/month")
+        output.append(f"   Range: ${tier['rent_range']['low']:,} - ${tier['rent_range']['high']:,}")
+        output.append(f"   Market Share: {tier['count']} units")
+        output.append(f"   {tier['premium']}")
+        output.append("")
+    
+    # Property tier
+    current_tier = rental_data['property_tier']
+    if current_tier:
+        output.append(f"YOUR PROPERTY: {current_tier.upper()} tier")
+        output.append("")
+    
+    # Upgrade scenarios
+    upgrades = rental_data.get('upgrade_scenarios', {})
+    if upgrades:
+        output.append("RENOVATION ROI:")
+        for target_tier, scenario in upgrades.items():
+            output.append(f"  Upgrade to {target_tier.upper()}:")
+            output.append(f"    Monthly gain: +${scenario['monthly_gain']:,}/mo")
+            output.append(f"    Annual gain: +${scenario['annual_gain']:,}/year")
+            output.append(f"    Est. renovation: ${scenario['estimated_renovation_cost']:,}")
+            output.append(f"    ROI: {scenario['roi_percent']}%")
+            output.append("")
+    
+    output.append("━" * 60)
+    
+    return "\n".join(output)
+```
+
+---
+
+## TESTING
+
+**Test the integration:**
+
+```python
+# Test script
+if __name__ == '__main__':
+    # Test property
+    test_property = {
+        'address': '2540 W North Ave, Chicago, IL 60647',
+        'bedrooms': 2,
+        'bathrooms': 1,
+        'property_type': 'Single Family'
+    }
+    
+    # Test FMR (you already have this)
+    test_fmr = 1850  # 2BR in West Loop
+    
+    # Get rental intelligence
+    rental_data = get_rental_data_for_property(
+        property_data=test_property,
+        fmr=test_fmr
+    )
+    
+    # Display
+    print(format_rental_intelligence_section(rental_data))
+```
+
+---
+
+## API USAGE TRACKING
+
+**Monitor your API usage:**
+
+```python
+# Track API calls
+api_call_count = 0
+
+def track_rentcast_call():
+    global api_call_count
+    api_call_count += 1
+    
+    remaining = 50 - api_call_count  # Free tier limit
+    
+    if remaining <= 10:
+        print(f"[WARNING] Only {remaining} free RentCast calls remaining this month")
+    
+    if remaining <= 0:
+        print("[ERROR] Free tier limit reached! Upgrade to Starter plan ($49/mo)")
+
+# In RentCastAPI class, add after each successful call:
+track_rentcast_call()
+```
+
+---
+
+## COST MANAGEMENT
+
+**Current plan: FREE (50 calls/month)**
+
+### **When to upgrade:**
+
+**At 50 reports/month:**
+- Upgrade to Starter: $49/month (500 calls)
+- Cost per report: $0.098
+
+**At 500 reports/month:**
+- Upgrade to Growth: $99/month (2,000 calls)
+- Cost per report: $0.050
+
+**At $1,250/month revenue (50 reports @ $25):**
+- You're making $1,250
+- RentCast costs $49
+- **Totally worth it!**
+
+---
+
+## EXPECTED OUTPUT EXAMPLE
+
+```
+================================================================
+RENTAL MARKET INTELLIGENCE
+Market Baseline (HUD FMR): $1,850/month
+================================================================
+
+PROPERTY ESTIMATE: $2,100/month
+Range: $1,900 - $2,300
+Based on: 20 comparable rentals
+
+RENTAL RATES BY QUALITY TIER:
+
+💎 LUXURY
+   Median Rent: $3,200/month
+   Range: $2,800 - $3,600
+   Market Share: 3 units
+   +50% or more above FMR
+
+✨ NICE
+   Median Rent: $2,400/month
+   Range: $2,200 - $2,700
+   Market Share: 5 units
+   +15% to +50% above FMR
+
+🏠 AVERAGE
+   Median Rent: $1,850/month
+   Range: $1,600 - $2,100
+   Market Share: 8 units
+   ±15% of FMR (market baseline)
+
+📅 DATED
+   Median Rent: $1,450/month
+   Range: $1,200 - $1,550
+   Market Share: 4 units
+   -15% to -30% below FMR
+
+YOUR PROPERTY: NICE tier
+
+RENOVATION ROI:
+  Upgrade to LUXURY:
+    Monthly gain: +$800/mo
+    Annual gain: +$9,600/year
+    Est. renovation: $40,000
+    ROI: 24.0%
+
+================================================================
+```
+
+---
+
+## ERROR HANDLING
+
+**Handle API failures gracefully:**
+
+```python
+def get_rental_data_with_fallback(property_data, fmr):
+    """
+    Get rental data with fallback to FMR-only estimates
+    """
+    try:
+        # Try RentCast first
+        return get_rental_data_for_property(property_data, fmr)
+    
+    except Exception as e:
+        print(f"[WARNING] RentCast API failed: {e}")
+        print("[INFO] Falling back to FMR-based estimates")
+        
+        # Fallback: Use FMR multipliers only
+        return {
+            'rentcast_estimate': None,
+            'fmr_baseline': fmr,
+            'quality_tiers': {
+                'luxury': {'median_rent': int(fmr * 1.7), 'estimated': True},
+                'nice': {'median_rent': int(fmr * 1.3), 'estimated': True},
+                'average': {'median_rent': fmr, 'estimated': True},
+                'dated': {'median_rent': int(fmr * 0.75), 'estimated': True}
+            },
+            'property_tier': 'average',
+            'upgrade_scenarios': None,
+            'note': 'Estimates based on FMR only (RentCast unavailable)'
+        }
+```
+
+---
+
+## SECURITY BEST PRACTICES
+
+**Keep API key secure:**
+
+1. **Store in environment variables** (not in code)
+2. **Don't commit to GitHub** (add to .gitignore)
+3. **Monitor usage** (track API calls)
+4. **Rotate if exposed** (regenerate key)
+
+```python
+# .gitignore
+.env
+secrets/
+*.key
+```
+
+```python
+# Load from environment
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+RENTCAST_API_KEY = os.getenv('RENTCAST_API_KEY')
+```
+
+---
+
+## TL;DR - REPLIT AI AGENT INSTRUCTIONS
+
+**Create these 3 files:**
+
+1. **`backend/rentcast_api.py`** - RentCast API wrapper
+2. **`backend/rental_quality_tiers.py`** - Quality tier builder  
+3. **`backend/rental_estimator.py`** - Main aggregator
+
+**API Key:** `83b88a99ee6644dbb973fc56611677c4` (store in env vars)
+
+**Integration:**
+```python
+from rental_estimator import get_rental_data_for_property
+
+# In your report generation:
+rental_data = get_rental_data_for_property(
+    property_data=property_data,
+    fmr=fmr_data['rent']
+)
+
+report['rental_intelligence'] = rental_data
+```
+
+**What you get:**
+- Property rent estimate
+- 20 rental comparables
+- Quality tiers (Luxury, Nice, Average, Dated)
+- Upgrade ROI scenarios
+- All in 1 API call
+
+**Cost:**
+- FREE: 50 properties/month
+- $49: 500 properties/month (when you scale)
+
+**Output:**
+```
+💎 Luxury:  $3,200/mo
+✨ Nice:    $2,400/mo
+🏠 Average: $1,850/mo (FMR baseline)
+📅 Dated:   $1,450/mo
+
+Your property: NICE tier
+Upgrade to Luxury: +$800/mo = 24% ROI
+```
+
+**This adds MASSIVE value to your $25 reports!** 🎯

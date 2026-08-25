@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Historic Landmark Status — KnowYourProp</title>
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{
+    --paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#565651;--muted:#8b8a84;--line:#eae8e2;
+    --indigo:#2b3a9e;--track:#efeee9;
+    /* rating colors — official CHRS designation, NOT brand colors. Do not change to indigo. */
+    --orange:#d9660c;--red:#b23b2e;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:34px}
+  .wrap{max-width:960px;margin:0 auto}
+
+  /* section header — indigo icon + mono title, one icon, no bullet */
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:11px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .ic{color:var(--indigo);font-size:16px}
+  .sh .t{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .ca{margin-left:auto;color:var(--muted)}
+
+  /* resource card — flat, NO accent stripe (strict parity) */
+  .rc{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:12px}
+  .rchd{display:flex;align-items:center;gap:11px;margin-bottom:13px}
+  .rchd .ic{font-size:17px}
+  .rchd .lbl{font-size:15px;font-weight:700;color:var(--ink)}
+
+  /* tag + swatch — color is set by the rating value (see .rating-orange / .rating-red / .rating-none) */
+  .tag{font-size:11px;font-weight:700;letter-spacing:.02em;color:#fff;border-radius:999px;padding:4px 12px}
+  .swatch{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:baseline;margin-right:3px}
+  .rating-orange .tag,.rating-orange .swatch{background:var(--orange)}
+  .rating-orange .rchd .ic{color:var(--orange)}
+  .rating-orange .parcels li::before{color:var(--orange)}
+  .rating-red .tag,.rating-red .swatch{background:var(--red)}
+  .rating-red .rchd .ic{color:var(--red)}
+  .rating-red .parcels li::before{color:var(--red)}
+  .rating-none .tag,.rating-none .swatch{background:var(--muted)}
+  .rating-none .rchd .ic{color:var(--muted)}
+  .rating-none .parcels li::before{color:var(--muted)}
+
+  .kv{font-size:13.5px;color:var(--ink2);line-height:1.75}
+  .kv b{color:var(--ink);font-weight:600}
+  .kv .parcels{margin:2px 0 2px 4px}
+  .kv .parcels li{list-style:none;font-family:var(--mono);font-size:12.5px;color:var(--ink2);padding-left:14px;position:relative}
+  .kv .parcels li::before{content:"•";position:absolute;left:2px}
+
+  .means{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:14px}
+  .means .ml{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .means ul{margin:0;padding-left:18px}
+  .means li{font-size:13.5px;color:var(--ink2);line-height:1.5;margin-bottom:7px}
+  .means li b{color:var(--ink);font-weight:600}
+
+  .src{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+  .src a{color:var(--indigo);font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sh"><span class="ic">&#x25A4;</span><span class="t">Historic Landmark Status</span><span class="ca">&#9662;</span></div>
+
+  <!--
+    Rating class drives the color. Swap the class on .rc to match the CHRS rating value:
+      rating-orange  → Orange Tag  (community / locally significant)
+      rating-red     → Red Tag     (potentially National Register-eligible)
+      rating-none    → Unrated     (neutral; or hide the tag entirely)
+    Also update the .tag text and the "CHRS Rating:" line to match. Never hardcode orange.
+  -->
+  <div class="rc rating-orange">
+    <div class="rchd"><span class="ic">&#x25A4;</span><span class="lbl">Historic Resource</span><span class="tag">Orange Tag</span></div>
+    <div class="kv">
+      <div><b>Landmark address:</b> 2100 N Hoyne Ave</div>
+      <div><b>Tagged parcels on this site:</b></div>
+      <ul class="parcels"><li>2100 N HOYNE AVE</li></ul>
+      <div><b>CHRS Rating:</b> <span class="swatch"></span>Orange &mdash; Community / locally significant</div>
+      <div><b>Era:</b> 1890s</div>
+    </div>
+  </div>
+
+  <div class="means">
+    <div class="ml">What This Means</div>
+    <ul>
+      <li>May have restrictions on exterior modifications</li>
+      <li>Demolition permits require <b>Commission on Chicago Landmarks</b> review</li>
+      <li>May qualify for <b>Class L</b>, Federal Historic (20%), and Illinois Historic (25%) tax incentives</li>
+      <li>Alterations must preserve historic character</li>
+    </ul>
+  </div>
+
+  <div class="src">&#8599; <a href="#">Historic Preservation Division</a> &nbsp;&middot;&nbsp; Source: Chicago Landmarks &amp; Historic Resources Survey</div>
+</div>
+</body>
+</html>

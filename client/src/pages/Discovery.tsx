@@ -10,6 +10,7 @@ import { GeneralContractorRankingsView } from "@/components/GeneralContractorRan
 import { MinorityContractorDirectoryView } from "@/components/MinorityContractorDirectoryView";
 import { CTARankingsView } from "@/components/CTARankingsView";
 import { CommercialLenderRankingsView } from "@/components/CommercialLenderRankingsView";
+import { WestTownTaxDelinquencyView } from "@/components/WestTownTaxDelinquencyView";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearch } from "wouter";
 import { motion } from "framer-motion";
@@ -660,7 +661,7 @@ function AttorneyView() {
   );
 }
 
-type ViewType = 'childcare' | 'attorneys' | 'evs' | 'ev-stations' | 'hotels' | 'grocery' | 'coffee' | 'gas-stations' | 'sbif' | 'nmtc' | 'tax-appeal-attorneys' | 'lender-rankings' | 'commercial-lender-rankings' | 'architect-rankings' | 'expeditor-rankings' | 'gc-rankings' | 'minority-contractors' | 'cta-rankings';
+type ViewType = 'childcare' | 'attorneys' | 'evs' | 'ev-stations' | 'hotels' | 'grocery' | 'coffee' | 'gas-stations' | 'sbif' | 'nmtc' | 'tax-appeal-attorneys' | 'lender-rankings' | 'commercial-lender-rankings' | 'architect-rankings' | 'expeditor-rankings' | 'gc-rankings' | 'minority-contractors' | 'cta-rankings' | 'west-town-tax-delinquency';
 
 const rankingViewConfig: Record<string, { icon: typeof Car; title: string; color: string; bgColor: string; countLabel?: string }> = {
   'evs': { icon: Car, title: 'EV Registrations', color: 'text-foreground', bgColor: 'bg-secondary' },
@@ -838,7 +839,7 @@ function RankingsView({ type }: { type: string }) {
   );
 }
 
-const validViewTypes: ViewType[] = ['childcare', 'attorneys', 'evs', 'ev-stations', 'hotels', 'grocery', 'coffee', 'gas-stations', 'sbif', 'nmtc', 'tax-appeal-attorneys', 'lender-rankings', 'commercial-lender-rankings', 'architect-rankings', 'expeditor-rankings', 'gc-rankings', 'minority-contractors', 'cta-rankings'];
+const validViewTypes: ViewType[] = ['childcare', 'attorneys', 'evs', 'ev-stations', 'hotels', 'grocery', 'coffee', 'gas-stations', 'sbif', 'nmtc', 'tax-appeal-attorneys', 'lender-rankings', 'commercial-lender-rankings', 'architect-rankings', 'expeditor-rankings', 'gc-rankings', 'minority-contractors', 'cta-rankings', 'west-town-tax-delinquency'];
 
 export default function Discovery() {
   const { isSubscriber, isLoading: authLoading } = useAuth();
@@ -1029,6 +1030,12 @@ export default function Discovery() {
                     CTA Train Ridership Rankings
                   </div>
                 </SelectItem>
+                <SelectItem value="west-town-tax-delinquency" data-testid="select-item-west-town-tax-delinquency">
+                  <div className="flex items-center gap-2">
+                    <Calculator className="w-4 h-4" />
+                    West Town Property-Tax Delinquency
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
             
@@ -1054,6 +1061,7 @@ export default function Discovery() {
         {viewType === 'expeditor-rankings' && <ExpeditorRankingsView />}
         {viewType === 'gc-rankings' && <GeneralContractorRankingsView />}
         {viewType === 'minority-contractors' && <MinorityContractorDirectoryView />}
+        {viewType === 'west-town-tax-delinquency' && <WestTownTaxDelinquencyView />}
         {viewType === 'cta-rankings' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Card className="border border-border">

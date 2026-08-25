@@ -1,0 +1,28 @@
+{
+  "qualifying_routes": [
+    "9",
+    "20",
+    "22",
+    "36",
+    "49",
+    "66",
+    "72",
+    "79",
+    "X9"
+  ],
+  "route_names": {
+    "9": "Ashland",
+    "20": "Madison",
+    "22": "Clark",
+    "36": "Broadway",
+    "49": "Western",
+    "66": "Chicago",
+    "72": "North",
+    "79": "79th Street",
+    "X9": "Ashland Express"
+  },
+  "tod_radius_miles": 0.25,
+  "notes": "Routes with 10-minute or better weekday peak service. Verify with official CTA/City sources as this list may change.",
+  "source": "Chicago TOD Ordinance - https://www.chicago.gov/city/en/depts/dcd/supp_info/tod.html",
+  "last_updated": "2024-01-29"
+}

@@ -1,0 +1,626 @@
+{
+  "ROGERS PARK": {
+    "communityArea": "ROGERS PARK",
+    "childrenUnder5": 2828,
+    "licensedSlots": 928,
+    "centerSlots": 880,
+    "familyHomeSlots": 48,
+    "childrenPerSlot": 3.0474137931034484
+  },
+  "WEST RIDGE": {
+    "communityArea": "WEST RIDGE",
+    "childrenUnder5": 5503,
+    "licensedSlots": 1212,
+    "centerSlots": 1019,
+    "familyHomeSlots": 193,
+    "childrenPerSlot": 4.54042904290429
+  },
+  "UPTOWN": {
+    "communityArea": "UPTOWN",
+    "childrenUnder5": 2352,
+    "licensedSlots": 1666,
+    "centerSlots": 1622,
+    "familyHomeSlots": 44,
+    "childrenPerSlot": 1.411764705882353
+  },
+  "LINCOLN SQUARE": {
+    "communityArea": "LINCOLN SQUARE",
+    "childrenUnder5": 2247,
+    "licensedSlots": 1236,
+    "centerSlots": 1162,
+    "familyHomeSlots": 74,
+    "childrenPerSlot": 1.8179611650485437
+  },
+  "NORTH CENTER": {
+    "communityArea": "NORTH CENTER",
+    "childrenUnder5": 3342,
+    "licensedSlots": 1355,
+    "centerSlots": 1304,
+    "familyHomeSlots": 51,
+    "childrenPerSlot": 2.466420664206642
+  },
+  "LAKE VIEW": {
+    "communityArea": "LAKE VIEW",
+    "childrenUnder5": 5288,
+    "licensedSlots": 2137,
+    "centerSlots": 2111,
+    "familyHomeSlots": 26,
+    "childrenPerSlot": 2.474496958352831
+  },
+  "LINCOLN PARK": {
+    "communityArea": "LINCOLN PARK",
+    "childrenUnder5": 3107,
+    "licensedSlots": 2082,
+    "centerSlots": 2082,
+    "familyHomeSlots": 0,
+    "childrenPerSlot": 1.4923150816522575
+  },
+  "NEAR NORTH SIDE": {
+    "communityArea": "NEAR NORTH SIDE",
+    "childrenUnder5": 2953,
+    "licensedSlots": 2144,
+    "centerSlots": 2139,
+    "familyHomeSlots": 5,
+    "childrenPerSlot": 1.3773320895522387
+  },
+  "EDISON PARK": {
+    "communityArea": "EDISON PARK",
+    "childrenUnder5": 917,
+    "licensedSlots": 461,
+    "centerSlots": 461,
+    "familyHomeSlots": 0,
+    "childrenPerSlot": 1.9891540130151844
+  },
+  "NORWOOD PARK": {
+    "communityArea": "NORWOOD PARK",
+    "childrenUnder5": 2570,
+    "licensedSlots": 214,
+    "centerSlots": 145,
+    "familyHomeSlots": 69,
+    "childrenPerSlot": 12.009345794392523
+  },
+  "JEFFERSON PARK": {
+    "communityArea": "JEFFERSON PARK",
+    "childrenUnder5": 1712,
+    "licensedSlots": 401,
+    "centerSlots": 340,
+    "familyHomeSlots": 61,
+    "childrenPerSlot": 4.26932668329177
+  },
+  "FOREST GLEN": {
+    "communityArea": "FOREST GLEN",
+    "childrenUnder5": 1243,
+    "licensedSlots": 389,
+    "centerSlots": 375,
+    "familyHomeSlots": 14,
+    "childrenPerSlot": 3.1953727506426737
+  },
+  "NORTH PARK": {
+    "communityArea": "NORTH PARK",
+    "childrenUnder5": 1614,
+    "licensedSlots": 702,
+    "centerSlots": 682,
+    "familyHomeSlots": 20,
+    "childrenPerSlot": 2.299145299145299
+  },
+  "ALBANY PARK": {
+    "communityArea": "ALBANY PARK",
+    "childrenUnder5": 2334,
+    "licensedSlots": 615,
+    "centerSlots": 404,
+    "familyHomeSlots": 211,
+    "childrenPerSlot": 3.795121951219512
+  },
+  "PORTAGE PARK": {
+    "communityArea": "PORTAGE PARK",
+    "childrenUnder5": 3459,
+    "licensedSlots": 1413,
+    "centerSlots": 1133,
+    "familyHomeSlots": 280,
+    "childrenPerSlot": 2.447983014861996
+  },
+  "IRVING PARK": {
+    "communityArea": "IRVING PARK",
+    "childrenUnder5": 3486,
+    "licensedSlots": 965,
+    "centerSlots": 758,
+    "familyHomeSlots": 207,
+    "childrenPerSlot": 3.612435233160622
+  },
+  "DUNNING": {
+    "communityArea": "DUNNING",
+    "childrenUnder5": 1611,
+    "licensedSlots": 558,
+    "centerSlots": 409,
+    "familyHomeSlots": 149,
+    "childrenPerSlot": 2.8870967741935485
+  },
+  "MONTCLARE": {
+    "communityArea": "MONTCLARE",
+    "childrenUnder5": 1054,
+    "licensedSlots": 247,
+    "centerSlots": 154,
+    "familyHomeSlots": 93,
+    "childrenPerSlot": 4.267206477732794
+  },
+  "BELMONT CRAGIN": {
+    "communityArea": "BELMONT CRAGIN",
+    "childrenUnder5": 4520,
+    "licensedSlots": 1746,
+    "centerSlots": 1172,
+    "familyHomeSlots": 574,
+    "childrenPerSlot": 2.588774341351661
+  },
+  "HERMOSA": {
+    "communityArea": "HERMOSA",
+    "childrenUnder5": 1397,
+    "licensedSlots": 414,
+    "centerSlots": 325,
+    "familyHomeSlots": 89,
+    "childrenPerSlot": 3.3743961352657004
+  },
+  "AVONDALE": {
+    "communityArea": "AVONDALE",
+    "childrenUnder5": 1725,
+    "licensedSlots": 966,
+    "centerSlots": 782,
+    "familyHomeSlots": 184,
+    "childrenPerSlot": 1.7857142857142858
+  },
+  "LOGAN SQUARE": {
+    "communityArea": "LOGAN SQUARE",
+    "childrenUnder5": 4092,
+    "licensedSlots": 2061,
+    "centerSlots": 1937,
+    "familyHomeSlots": 124,
+    "childrenPerSlot": 1.985443959243086
+  },
+  "HUMBOLDT PARK": {
+    "communityArea": "HUMBOLDT PARK",
+    "childrenUnder5": 4476,
+    "licensedSlots": 1865,
+    "centerSlots": 1512,
+    "familyHomeSlots": 353,
+    "childrenPerSlot": 2.4
+  },
+  "WEST TOWN": {
+    "communityArea": "WEST TOWN",
+    "childrenUnder5": 5042,
+    "licensedSlots": 2130,
+    "centerSlots": 2062,
+    "familyHomeSlots": 68,
+    "childrenPerSlot": 2.367136150234742
+  },
+  "AUSTIN": {
+    "communityArea": "AUSTIN",
+    "childrenUnder5": 6467,
+    "licensedSlots": 2980,
+    "centerSlots": 1809,
+    "familyHomeSlots": 1171,
+    "childrenPerSlot": 2.1701342281879197
+  },
+  "WEST GARFIELD PARK": {
+    "communityArea": "WEST GARFIELD PARK",
+    "childrenUnder5": 736,
+    "licensedSlots": 384,
+    "centerSlots": 166,
+    "familyHomeSlots": 218,
+    "childrenPerSlot": 1.9166666666666667
+  },
+  "EAST GARFIELD PARK": {
+    "communityArea": "EAST GARFIELD PARK",
+    "childrenUnder5": 1277,
+    "licensedSlots": 771,
+    "centerSlots": 628,
+    "familyHomeSlots": 143,
+    "childrenPerSlot": 1.6562905317769132
+  },
+  "NEAR WEST SIDE": {
+    "communityArea": "NEAR WEST SIDE",
+    "childrenUnder5": 2692,
+    "licensedSlots": 2734,
+    "centerSlots": 2670,
+    "familyHomeSlots": 64,
+    "childrenPerSlot": 0.9846378931967813
+  },
+  "NORTH LAWNDALE": {
+    "communityArea": "NORTH LAWNDALE",
+    "childrenUnder5": 1851,
+    "licensedSlots": 1576,
+    "centerSlots": 1283,
+    "familyHomeSlots": 293,
+    "childrenPerSlot": 1.174492385786802
+  },
+  "SOUTH LAWNDALE": {
+    "communityArea": "SOUTH LAWNDALE",
+    "childrenUnder5": 3916,
+    "licensedSlots": 871,
+    "centerSlots": 687,
+    "familyHomeSlots": 184,
+    "childrenPerSlot": 4.495981630309989
+  },
+  "LOWER WEST SIDE": {
+    "communityArea": "LOWER WEST SIDE",
+    "childrenUnder5": 1114,
+    "licensedSlots": 1008,
+    "centerSlots": 960,
+    "familyHomeSlots": 48,
+    "childrenPerSlot": 1.1051587301587302
+  },
+  "LOOP": {
+    "communityArea": "LOOP",
+    "childrenUnder5": 1277,
+    "licensedSlots": 974,
+    "centerSlots": 974,
+    "familyHomeSlots": 0,
+    "childrenPerSlot": 1.311088295687885
+  },
+  "NEAR SOUTH SIDE": {
+    "communityArea": "NEAR SOUTH SIDE",
+    "childrenUnder5": 1458,
+    "licensedSlots": 1114,
+    "centerSlots": 1114,
+    "familyHomeSlots": 0,
+    "childrenPerSlot": 1.3087971274685817
+  },
+  "ARMOUR SQUARE": {
+    "communityArea": "ARMOUR SQUARE",
+    "childrenUnder5": 699,
+    "licensedSlots": 1116,
+    "centerSlots": 1100,
+    "familyHomeSlots": 16,
+    "childrenPerSlot": 0.6263440860215054
+  },
+  "DOUGLAS": {
+    "communityArea": "DOUGLAS",
+    "childrenUnder5": 1186,
+    "licensedSlots": 114,
+    "centerSlots": 81,
+    "familyHomeSlots": 33,
+    "childrenPerSlot": 10.403508771929825
+  },
+  "OAKLAND": {
+    "communityArea": "OAKLAND",
+    "childrenUnder5": 580,
+    "licensedSlots": 0,
+    "centerSlots": 0,
+    "familyHomeSlots": 0,
+    "childrenPerSlot": null
+  },
+  "FULLER PARK": {
+    "communityArea": "FULLER PARK",
+    "childrenUnder5": 77,
+    "licensedSlots": 137,
+    "centerSlots": 99,
+    "familyHomeSlots": 38,
+    "childrenPerSlot": 0.5620437956204379
+  },
+  "GRAND BOULEVARD": {
+    "communityArea": "GRAND BOULEVARD",
+    "childrenUnder5": 1979,
+    "licensedSlots": 706,
+    "centerSlots": 551,
+    "familyHomeSlots": 155,
+    "childrenPerSlot": 2.803116147308782
+  },
+  "KENWOOD": {
+    "communityArea": "KENWOOD",
+    "childrenUnder5": 922,
+    "licensedSlots": 233,
+    "centerSlots": 174,
+    "familyHomeSlots": 59,
+    "childrenPerSlot": 3.9570815450643777
+  },
+  "WASHINGTON PARK": {
+    "communityArea": "WASHINGTON PARK",
+    "childrenUnder5": 987,
+    "licensedSlots": 300,
+    "centerSlots": 254,
+    "familyHomeSlots": 46,
+    "childrenPerSlot": 3.29
+  },
+  "HYDE PARK": {
+    "communityArea": "HYDE PARK",
+    "childrenUnder5": 961,
+    "licensedSlots": 751,
+    "centerSlots": 727,
+    "familyHomeSlots": 24,
+    "childrenPerSlot": 1.2796271637816246
+  },
+  "WOODLAWN": {
+    "communityArea": "WOODLAWN",
+    "childrenUnder5": 1242,
+    "licensedSlots": 727,
+    "centerSlots": 610,
+    "familyHomeSlots": 117,
+    "childrenPerSlot": 1.7083906464924348
+  },
+  "SOUTH SHORE": {
+    "communityArea": "SOUTH SHORE",
+    "childrenUnder5": 3420,
+    "licensedSlots": 1291,
+    "centerSlots": 984,
+    "familyHomeSlots": 307,
+    "childrenPerSlot": 2.6491092176607283
+  },
+  "CHATHAM": {
+    "communityArea": "CHATHAM",
+    "childrenUnder5": 1353,
+    "licensedSlots": 1201,
+    "centerSlots": 754,
+    "familyHomeSlots": 447,
+    "childrenPerSlot": 1.1265611990008326
+  },
+  "AVALON PARK": {
+    "communityArea": "AVALON PARK",
+    "childrenUnder5": 547,
+    "licensedSlots": 317,
+    "centerSlots": 151,
+    "familyHomeSlots": 166,
+    "childrenPerSlot": 1.725552050473186
+  },
+  "SOUTH CHICAGO": {
+    "communityArea": "SOUTH CHICAGO",
+    "childrenUnder5": 1936,
+    "licensedSlots": 1115,
+    "centerSlots": 929,
+    "familyHomeSlots": 186,
+    "childrenPerSlot": 1.736322869955157
+  },
+  "BURNSIDE": {
+    "communityArea": "BURNSIDE",
+    "childrenUnder5": 138,
+    "licensedSlots": 40,
+    "centerSlots": 0,
+    "familyHomeSlots": 40,
+    "childrenPerSlot": 3.45
+  },
+  "CALUMET HEIGHTS": {
+    "communityArea": "CALUMET HEIGHTS",
+    "childrenUnder5": 604,
+    "licensedSlots": 543,
+    "centerSlots": 398,
+    "familyHomeSlots": 145,
+    "childrenPerSlot": 1.1123388581952118
+  },
+  "ROSELAND": {
+    "communityArea": "ROSELAND",
+    "childrenUnder5": 2169,
+    "licensedSlots": 1393,
+    "centerSlots": 923,
+    "familyHomeSlots": 470,
+    "childrenPerSlot": 1.5570710696338836
+  },
+  "PULLMAN": {
+    "communityArea": "PULLMAN",
+    "childrenUnder5": 277,
+    "licensedSlots": 201,
+    "centerSlots": 127,
+    "familyHomeSlots": 74,
+    "childrenPerSlot": 1.3781094527363185
+  },
+  "SOUTH DEERING": {
+    "communityArea": "SOUTH DEERING",
+    "childrenUnder5": 556,
+    "licensedSlots": 406,
+    "centerSlots": 295,
+    "familyHomeSlots": 111,
+    "childrenPerSlot": 1.3694581280788178
+  },
+  "EAST SIDE": {
+    "communityArea": "EAST SIDE",
+    "childrenUnder5": 1532,
+    "licensedSlots": 490,
+    "centerSlots": 330,
+    "familyHomeSlots": 160,
+    "childrenPerSlot": 3.126530612244898
+  },
+  "WEST PULLMAN": {
+    "communityArea": "WEST PULLMAN",
+    "childrenUnder5": 1220,
+    "licensedSlots": 956,
+    "centerSlots": 657,
+    "familyHomeSlots": 299,
+    "childrenPerSlot": 1.2761506276150627
+  },
+  "RIVERDALE": {
+    "communityArea": "RIVERDALE",
+    "childrenUnder5": 616,
+    "licensedSlots": 274,
+    "centerSlots": 246,
+    "familyHomeSlots": 28,
+    "childrenPerSlot": 2.2481751824817517
+  },
+  "HEGEWISCH": {
+    "communityArea": "HEGEWISCH",
+    "childrenUnder5": 374,
+    "licensedSlots": 288,
+    "centerSlots": 253,
+    "familyHomeSlots": 35,
+    "childrenPerSlot": 1.2986111111111112
+  },
+  "GARFIELD RIDGE": {
+    "communityArea": "GARFIELD RIDGE",
+    "childrenUnder5": 1944,
+    "licensedSlots": 416,
+    "centerSlots": 334,
+    "familyHomeSlots": 82,
+    "childrenPerSlot": 4.673076923076923
+  },
+  "ARCHER HEIGHTS": {
+    "communityArea": "ARCHER HEIGHTS",
+    "childrenUnder5": 516,
+    "licensedSlots": 145,
+    "centerSlots": 0,
+    "familyHomeSlots": 145,
+    "childrenPerSlot": 3.5586206896551724
+  },
+  "BRIGHTON PARK": {
+    "communityArea": "BRIGHTON PARK",
+    "childrenUnder5": 2247,
+    "licensedSlots": 609,
+    "centerSlots": 508,
+    "familyHomeSlots": 101,
+    "childrenPerSlot": 3.689655172413793
+  },
+  "MCKINLEY PARK": {
+    "communityArea": "MCKINLEY PARK",
+    "childrenUnder5": 677,
+    "licensedSlots": 680,
+    "centerSlots": 665,
+    "familyHomeSlots": 15,
+    "childrenPerSlot": 0.9955882352941177
+  },
+  "BRIDGEPORT": {
+    "communityArea": "BRIDGEPORT",
+    "childrenUnder5": 1336,
+    "licensedSlots": 1387,
+    "centerSlots": 1380,
+    "familyHomeSlots": 7,
+    "childrenPerSlot": 0.9632299927901946
+  },
+  "NEW CITY": {
+    "communityArea": "NEW CITY",
+    "childrenUnder5": 2630,
+    "licensedSlots": 847,
+    "centerSlots": 704,
+    "familyHomeSlots": 143,
+    "childrenPerSlot": 3.105076741440378
+  },
+  "WEST ELSDON": {
+    "communityArea": "WEST ELSDON",
+    "childrenUnder5": 1104,
+    "licensedSlots": 236,
+    "centerSlots": 116,
+    "familyHomeSlots": 120,
+    "childrenPerSlot": 4.677966101694915
+  },
+  "GAGE PARK": {
+    "communityArea": "GAGE PARK",
+    "childrenUnder5": 1919,
+    "licensedSlots": 841,
+    "centerSlots": 580,
+    "familyHomeSlots": 261,
+    "childrenPerSlot": 2.281807372175981
+  },
+  "CLEARING": {
+    "communityArea": "CLEARING",
+    "childrenUnder5": 1541,
+    "licensedSlots": 217,
+    "centerSlots": 144,
+    "familyHomeSlots": 73,
+    "childrenPerSlot": 7.1013824884792625
+  },
+  "WEST LAWN": {
+    "communityArea": "WEST LAWN",
+    "childrenUnder5": 2239,
+    "licensedSlots": 844,
+    "centerSlots": 590,
+    "familyHomeSlots": 254,
+    "childrenPerSlot": 2.6528436018957344
+  },
+  "CHICAGO LAWN": {
+    "communityArea": "CHICAGO LAWN",
+    "childrenUnder5": 3750,
+    "licensedSlots": 1198,
+    "centerSlots": 669,
+    "familyHomeSlots": 529,
+    "childrenPerSlot": 3.1302170283806343
+  },
+  "WEST ENGLEWOOD": {
+    "communityArea": "WEST ENGLEWOOD",
+    "childrenUnder5": 1772,
+    "licensedSlots": 1111,
+    "centerSlots": 750,
+    "familyHomeSlots": 361,
+    "childrenPerSlot": 1.594959495949595
+  },
+  "ENGLEWOOD": {
+    "communityArea": "ENGLEWOOD",
+    "childrenUnder5": 930,
+    "licensedSlots": 742,
+    "centerSlots": 548,
+    "familyHomeSlots": 194,
+    "childrenPerSlot": 1.2533692722371967
+  },
+  "GREATER GRAND CROSSING": {
+    "communityArea": "GREATER GRAND CROSSING",
+    "childrenUnder5": 1924,
+    "licensedSlots": 1514,
+    "centerSlots": 1144,
+    "familyHomeSlots": 370,
+    "childrenPerSlot": 1.2708058124174373
+  },
+  "ASHBURN": {
+    "communityArea": "ASHBURN",
+    "childrenUnder5": 2108,
+    "licensedSlots": 1260,
+    "centerSlots": 765,
+    "familyHomeSlots": 495,
+    "childrenPerSlot": 1.673015873015873
+  },
+  "AUBURN GRESHAM": {
+    "communityArea": "AUBURN GRESHAM",
+    "childrenUnder5": 3260,
+    "licensedSlots": 1820,
+    "centerSlots": 1108,
+    "familyHomeSlots": 712,
+    "childrenPerSlot": 1.7912087912087913
+  },
+  "BEVERLY": {
+    "communityArea": "BEVERLY",
+    "childrenUnder5": 1114,
+    "licensedSlots": 534,
+    "centerSlots": 414,
+    "familyHomeSlots": 120,
+    "childrenPerSlot": 2.0861423220973783
+  },
+  "WASHINGTON HEIGHTS": {
+    "communityArea": "WASHINGTON HEIGHTS",
+    "childrenUnder5": 1077,
+    "licensedSlots": 1667,
+    "centerSlots": 1175,
+    "familyHomeSlots": 492,
+    "childrenPerSlot": 0.6460707858428314
+  },
+  "MOUNT GREENWOOD": {
+    "communityArea": "MOUNT GREENWOOD",
+    "childrenUnder5": 1276,
+    "licensedSlots": 68,
+    "centerSlots": 68,
+    "familyHomeSlots": 0,
+    "childrenPerSlot": 18.764705882352942
+  },
+  "MORGAN PARK": {
+    "communityArea": "MORGAN PARK",
+    "childrenUnder5": 1308,
+    "licensedSlots": 410,
+    "centerSlots": 169,
+    "familyHomeSlots": 241,
+    "childrenPerSlot": 3.1902439024390246
+  },
+  "O'HARE": {
+    "communityArea": "O'HARE",
+    "childrenUnder5": 926,
+    "licensedSlots": 59,
+    "centerSlots": 59,
+    "familyHomeSlots": 0,
+    "childrenPerSlot": 15.694915254237289
+  },
+  "EDGEWATER": {
+    "communityArea": "EDGEWATER",
+    "childrenUnder5": 1890,
+    "licensedSlots": 613,
+    "centerSlots": 566,
+    "familyHomeSlots": 47,
+    "childrenPerSlot": 3.0831973898858074
+  },
+  "DATA SOURCE: AMERICAN COMMUNITY SURVEY (ACS) 2023 5-YEAR ESTIMATES.  ACS ESTIMATES FOR SMALL COMMUNITIES CAN HAVE LARGE MARGINS OF ERROR.": {
+    "communityArea": "DATA SOURCE: AMERICAN COMMUNITY SURVEY (ACS) 2023 5-YEAR ESTIMATES.  ACS ESTIMATES FOR SMALL COMMUNITIES CAN HAVE LARGE MARGINS OF ERROR.",
+    "childrenUnder5": 0,
+    "licensedSlots": 0,
+    "centerSlots": 0,
+    "familyHomeSlots": 0,
+    "childrenPerSlot": null
+  }
+}

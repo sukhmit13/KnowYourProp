@@ -1,0 +1,110 @@
+# Replit Prompt — Redesigned interest-rate card (this-area vs. today, with conditional caution) — build to spec
+
+Replace the current avg-interest-rate display in the **Local Mortgage Market Activity (HMDA)** section with a redesigned **side-by-side comparison card**: the area's closed-loan average on the left, today's market benchmark on the right, and a center delta that shows the gap and direction. The delta is **neutral by default** and turns **marigold caution** only when today is *materially* higher. Implement CSS/HTML **verbatim**; check CRITICAL DETAILS.
+
+## 🔴 Today's rate is DATA, reused — never LLM-generated, never a second fetch
+The right-hand "today" value is the **same** rate you already fetch for the valuation calculator. Do **NOT** add a second fetch and do **NOT** let the model state a rate from its own knowledge. Read the shared value and map it into the three fields below (same contract as the HMDA takeaway):
+- `market_rate_today` ← the calculator's current rate (normalize to a percent number, 2 dp for display; keep full precision for the math)
+- `market_rate_asof` ← the date that rate was valid for
+- `market_rate_source` ← the label (e.g. "Freddie Mac PMMS 30-yr")
+
+If `market_rate_asof` is older than ~2 weeks (stale), **fail closed**: hide the "today" side / the whole comparison rather than showing a stale number as "today."
+
+## Tokens
+```
+--paper:#faf9f6; --card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --caution:#f0a41c; --cautionText:#96600a;
+--disp:"Instrument Serif"; --mono:"JetBrains Mono"; --sans:"Inter";
+```
+
+## 1) Card CSS (verbatim)
+```css
+.ratecard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px 20px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+.rchd{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.rchd svg{width:14px;height:14px;stroke:var(--indigo);fill:none}
+
+.rccmp{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}
+.rcside .lab{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.rcside .lab .d{width:7px;height:7px;border-radius:50%;flex:none}
+.rcside .val{font-family:var(--disp);font-size:44px;color:var(--ink);line-height:.92}
+.rcside .sub{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:9px;line-height:1.45}
+.rcside.area .lab .d{background:#9aa1b0}
+.rcside.today{text-align:right}
+.rcside.today .lab{color:var(--indigo)} .rcside.today .lab .d{background:var(--indigo)}
+.rcside.today .val{color:var(--indigo)}
+.rcside.today .sub b{color:var(--ink2);font-weight:600}
+
+/* center delta — NEUTRAL by default */
+.rcdelta{display:flex;flex-direction:column;align-items:center;gap:5px;padding:0 6px}
+.rcdelta .ar{width:34px;height:34px;border-radius:50%;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.rcdelta .ar svg{width:18px;height:18px;stroke:var(--ink2);fill:none}
+.rcdelta .amt{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink)}
+.rcdelta .lbl{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.3}
+
+/* CONDITIONAL caution — added ONLY when today − area ≥ +1.00 pt (materially higher).
+   Vivid marigold: solid yellow circle + white arrow + amber text. Never red, never green. */
+.rcdelta.caution .ar{background:var(--caution);border-color:#d98f14}
+.rcdelta.caution .ar svg{stroke:#fff}
+.rcdelta.caution .amt{color:#b26c07}
+.rcdelta.caution .lbl{color:#b26c07}
+
+.rcexplain{font-size:12.5px;color:var(--ink2);line-height:1.5;margin-top:18px;padding-top:15px;border-top:1px solid var(--line)}
+.rcexplain b{color:var(--ink);font-weight:600}
+.rcfine{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px;line-height:1.5}
+```
+
+## 2) Card HTML (verbatim; bind the values)
+```html
+<div class="ratecard">
+  <div class="rchd"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Interest rates — this area vs. today</div>
+
+  <div class="rccmp">
+    <div class="rcside area">
+      <span class="lab"><span class="d"></span>This area · {year} closed</span>
+      <div class="val">{area_avg_rate}%</div>
+      <div class="sub">Avg across {closed_loan_n} closed first-lien loans in this census tract</div>
+    </div>
+
+    <!-- add class "caution" to .rcdelta ONLY when materially higher (see LOGIC). Arrow points per direction. -->
+    <div class="rcdelta{CAUTION_CLASS}">
+      <div class="ar"><svg viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">{ARROW_PATH}</svg></div>
+      <div class="amt">{SIGNED_DELTA} pts</div>
+      <div class="lbl">{HIGHER_OR_LOWER}<br>today</div>
+    </div>
+
+    <div class="rcside today">
+      <span class="lab"><span class="d"></span>Today · market benchmark</span>
+      <div class="val">{market_rate_today}%</div>
+      <div class="sub">30-yr fixed · <b>{market_rate_source}</b>, as of {market_rate_asof}</div>
+    </div>
+  </div>
+
+  <div class="rcexplain">{EXPLAIN}</div>
+  <div class="rcfine">HMDA first-lien originations only · excludes HELOCs and second mortgages. Today's benchmark is a national 30-yr snapshot, not a local quote.</div>
+</div>
+```
+
+## LOGIC (all computed in code — never by the model)
+Compute `diff = market_rate_today − area_avg_rate` (in percentage points) and render:
+
+1. **Direction** (arrow + word), from the sign of `diff`:
+   - `diff > 0` → `HIGHER_OR_LOWER = "higher"`, right-pointing arrow `ARROW_PATH = <path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>`
+   - `diff < 0` → `HIGHER_OR_LOWER = "lower"`, left-pointing arrow `ARROW_PATH = <path d="M19 12H5"/><path d="m11 18-6-6 6-6"/>`
+   - `|diff| < 0.05` (≈ in line) → still show the number; either arrow is fine, keep it neutral.
+2. **Signed magnitude:** `SIGNED_DELTA = (diff >= 0 ? "+" : "−") + abs(diff).toFixed(2)` → e.g. `+0.20`, `−0.15`, `+1.20`.
+3. **Caution class — the only place color appears:**
+   - `CAUTION_CLASS = " caution"` **only when `diff >= 1.00`** (today materially higher — a full point-plus above area closings).
+   - Otherwise `CAUTION_CLASS = ""` (neutral). **Down-case is ALWAYS neutral — never green, never colored**, even for a large negative `diff`. The asymmetry is intentional: a big upward move is a real "financing got pricier" watch-out; a downward move is not a favorability signal for a neutral tool.
+   - Threshold lives in code as a single constant (`MATERIAL_GAP_PT = 1.00`). It is a tunable judgment call — `0.75` is defensible if you want the caution to appear a bit more often; do not go below `0.75` or normal rate noise starts coloring.
+4. **`EXPLAIN` sentence** is directional prose, hedged — the area figure is a full-year blended average (conventional/FHA/VA), today's is a current 30-yr snapshot, so they are **not apples-to-apples**. Say "a touch more / a bit more," never "exactly X bps." Two variants:
+   - Normal gap: *"<b>Loans here closed just {below/above} today's market.</b> The {year} tract average (a full-year blend of conventional, FHA and VA first-lien loans) is about {|diff| in bps} under/over the current 30-year benchmark — so a buyer financing now would likely pay a {touch more / bit less} than recent closings here."*
+   - Material upward gap (caution): *"<b>Financing has gotten meaningfully pricier.</b> Today's benchmark sits a full point-plus above what loans here closed at in {year} — a real 'rates have moved' signal worth flagging."*
+
+## CRITICAL DETAILS
+1. **Reused rate, no second fetch** — `market_rate_today` is the SAME value the valuation calculator already pulls; import from the single source. `as_of` travels with it; stale (> ~2 weeks) → fail closed (hide the today side / comparison).
+2. **Model never states a rate** — the number is a bound data field; direction, sign, and the caution class are all computed in code.
+3. **Caution is up-only and rare** — marigold appears ONLY when `diff >= 1.00`. Never red, never green, and the down-case stays neutral. One constant `MATERIAL_GAP_PT` controls it.
+4. **Caution styling is the solid-marigold circle** (`background:var(--caution)`, white arrow) + amber text `#b26c07` (NOT pure `--caution` on text — too low-contrast at 13px, NOT `--cautionText` brown either). Only the `.rcdelta.caution` block changes; the neutral block is untouched.
+5. **Comparison is directional + hedged** — full-year blended avg vs. today's snapshot, not a precise spread. Never claim an exact bps difference in the prose.
+6. **Serif (`--disp`) only** on the two big rate numbers (`.rcside .val`). Labels, delta, subs, and fine print are Mono; the explain sentence is Inter. No other element uses the serif.
+7. **Grid is `1fr auto 1fr`** — the delta column sizes to content and stays centered; the two rate sides balance. `.rcside.today` is right-aligned.

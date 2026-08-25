@@ -23,3 +23,13 @@ export const TEAM_EMAILS = new Set(
 export function isTeamAccount(email: string | null | undefined): boolean {
   return !!email && TEAM_EMAILS.has(email.toLowerCase());
 }
+
+// Team members (any @test.com account except the owner) are paused from
+// creating new reports while the site redesign is in progress. Applies in
+// both development and production. Remove this gate when the redesign ships.
+export const TEAM_RUNS_PAUSED = true;
+export function isPausedTeamMember(email: string | null | undefined): boolean {
+  if (!TEAM_RUNS_PAUSED || !email) return false;
+  const lower = email.toLowerCase();
+  return lower.endsWith('@test.com') && lower !== 'test@test.com';
+}

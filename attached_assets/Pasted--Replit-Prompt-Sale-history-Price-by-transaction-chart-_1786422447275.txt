@@ -1,0 +1,102 @@
+# Replit Prompt — Sale-history "Price by transaction" chart (Version B, columns) — build to spec
+
+Replace the washed-out sale chart with a **column chart**: height = price, columns in transaction order, the most-recent one accented. Scales to any number of recorded sales. Implement CSS/SVG **verbatim**; check CRITICAL DETAILS.
+
+## 🔴 Why columns (not the old flat line)
+The prior chart plotted both prices at the **same height** on a flat grey line — it visually said "no change" while the price tripled. Columns encode price as **height**, so the growth is the shape of the chart. One series, most-recent accented.
+
+## Layout / zero tokens
+This is a chart built from the sale records already in the report — **pure code, no LLM**. The change figure and the caveat flag are computed in code.
+
+## Tokens
+```
+--card:#fff; --ink:#141414; --ink2:#54544f; --muted:#8b8a84; --line:#e7e5df;
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --takeBorder:#dde1f6; --histBar:#9aa1b0;
+--disp:"Instrument Serif"; --mono:"JetBrains Mono"; --sans:"Inter";
+```
+
+## Input (from the sale records already in the section)
+```json
+{
+  "transactions": [                         // ALL recorded sales, sorted OLDEST → NEWEST
+    { "price": 500000, "price_label": "$500K", "year": 2003 },
+    { "price": 1500000, "price_label": "$1.5M", "year": 2019 }
+  ],
+  "overall_change_label": "+$1.0M · 3.0×",  // computed: newest vs oldest (delta + multiple)
+  "value_add_note": true                    // true if permit history shows work between first & last sale
+}
+```
+- `price_label` and `overall_change_label` are formatted in code (compact $). `value_add_note` is a boolean from the permit section (report-data-first cross-check).
+
+## CSS (verbatim)
+```css
+.chartcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 24px 18px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+.chd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.chd .t{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.chd .t span{color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px}
+.chgbadge{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--indigo);background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:8px;padding:6px 11px}
+.chgbadge svg{width:13px;height:13px;stroke:var(--indigo);fill:none}
+.plot{width:100%;height:auto;display:block}
+.fine{font-family:var(--mono);font-size:9.5px;color:var(--muted);line-height:1.5;margin-top:6px}
+```
+
+## HTML shell (verbatim)
+```html
+<div class="chartcard">
+  <div class="chd">
+    <div class="t">Price by transaction<span>chronological · not to scale</span></div>
+    <span class="chgbadge"><svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 17 6-6 4 4 6-6"/><path d="M16 7h4v4"/></svg>{overall_change_label}</span>
+  </div>
+  <svg class="plot" viewBox="0 0 620 250" preserveAspectRatio="xMidYMid meet"><!-- generated, see below --></svg>
+  <div class="fine">{FOOTNOTE}</div>
+</div>
+```
+
+## SVG generation (compute in code — scales to N columns)
+Constants: `W=620`, `Hbase=195` (baseline y), `topPad=35` (room for value labels), `margin=80`.
+```
+maxBarH = Hbase - topPad            // 160
+maxPrice = max(t.price for t in transactions)
+N        = transactions.length
+bandW    = (W - 2*margin) / N
+colW     = min(72, bandW * 0.62)
+for i, t in transactions (0 = oldest, left):
+    cx     = margin + bandW * (i + 0.5)
+    barH   = max(8, t.price / maxPrice * maxBarH)     // floor 8px so tiny sales still show
+    y      = Hbase - barH
+    isNewest = (i === N-1)
+    fill   = isNewest ? '#2b3a9e' : '#9aa1b0'          // most-recent accent; history muted (one series, current accented)
+    valFill= isNewest ? '#2b3a9e' : '#141414'
+    valFs  = isNewest ? 30 : 24                        // shrink a step when N is large (see note)
+    emit <rect x={cx-colW/2} y={y} width={colW} height={barH} rx="5" fill={fill}/>
+    emit <text x={cx} y={y-9} text-anchor="middle" font-family="Instrument Serif,serif" font-size={valFs} fill={valFill}>{t.price_label}</text>
+    emit <text x={cx} y={Hbase+23} text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill={isNewest?'#141414':'#54544f'}>{t.year}</text>
+    if i===0     emit <text x={cx} y={Hbase+41} … fill="#8b8a84">FIRST</text>
+    if isNewest  emit <text x={cx} y={Hbase+41} … fill="#8b8a84">MOST RECENT</text>
+emit baseline <line x1={margin} y1={Hbase} x2={W-margin} y2={Hbase} stroke="#e7e5df" stroke-width="1"/>
+```
+- **Value-label font size** steps down as N grows so labels don't collide: N≤2 → 30/34; N=3–4 → 23; N≥5 → 19 (and drop to `price_label` compact form). If labels still collide at high N, keep the newest + first labeled and let the rest rely on the year axis (label selectively).
+
+## FOOTNOTE
+- If `value_add_note === true`:
+  `Recorded transactions — positioned by transaction order, height by price; spacing is not to time-scale. Part of the change reflects permitted improvements, not price growth alone.`
+- Else:
+  `Recorded transactions — positioned by transaction order, height by price; spacing is not to time-scale.`
+
+## LOGIC
+1. **Height = price / maxPrice** (shared max), floor 8px. This is the whole point — never render equal-height bars.
+2. **One series, current accented** — all history bars `--histBar` grey, the **most-recent** bar `--indigo`; most-recent value + year emphasized. This matches the report's "most recent = indigo" motif; it is a single price series with the current period accented, not two categories.
+3. **Sort oldest→newest, left→right.** `overall_change_label` = newest vs oldest (delta + `×` multiple), computed in code — never annualize it (see #5).
+4. **Scales to N** via `bandW`/`colW`; value labels step down / go selective as N grows (never let labels overlap — measure).
+5. **No annualized "%/yr."** Show the raw change (`+$1.0M · 3.0×`) only. Annualizing would imply pure market appreciation, but part is value-add — hence the conditional caveat.
+6. **`value_add_note` is a code cross-check** against the permit section (report-data-first): true when permitted work exists between the first and last sale. Drives the footnote clause only.
+7. **`not to scale`** — x is transaction order (even bands), not real time; keep the note.
+
+## CRITICAL DETAILS
+1. **Columns, height = price** — the fix for the flat/washed chart; equal-height bars are the bug, never ship them.
+2. **Most-recent bar indigo, history grey** — single series, current accented (not a 2-category legend).
+3. **Scales to any sale count** — code-generated rects; label font steps down / goes selective past ~4 to avoid collisions.
+4. **Change badge = newest vs oldest, delta + multiple, computed in code. No annualized %.**
+5. **Conditional value-add caveat** from the permit cross-check.
+6. **Serif (`--disp`) ONLY** on the price value labels; year/role/badge/footnote are Mono.
+7. **Zero LLM tokens** — chart + figures are computed from the sale records in code.

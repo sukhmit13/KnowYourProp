@@ -1,0 +1,148 @@
+# Replit Prompt — (Part B) Standard Takeaway component + (Part A) Entertainment & Culture
+
+Two parts. **Part B is the reusable takeaway standard — apply it to EVERY section that has a takeaway, now and going forward** (retrofit the existing ones so they all match). **Part A** is the Entertainment & Culture section, which uses the Part B component. Implement CSS/HTML **verbatim**.
+
+---
+
+# PART B — THE STANDARD TAKEAWAY COMPONENT (use identically everywhere)
+
+Every section-level takeaway in the report uses this ONE component. Same box, same label size, same headline size/type, same bullet rows, same right-aligned jump chips. No per-section variants. If a section's current takeaway differs (different font sizes, inline chips, etc.), replace it with this.
+
+## Shared tokens (define once, use across all takeaways)
+```
+--indigo:#2b3a9e; --indigoSoft:#eef0fb; --takeBorder:#dde1f6; --takeDivider:#e3e5f4;
+--good:#2f7d3f; --caution:#f0a41c; --ink:#141414; --ink2:#54544f; --card:#fff;
+--disp:"Instrument Serif"; --mono:"JetBrains Mono"; --sans:"Inter";
+/* takeaway type scale — the single source of truth, do NOT override per section */
+--take-label:11px;    /* the "TAKEAWAY" eyebrow — bumped up from the old 9.5px */
+--take-title:21px;    /* the serif headline — same in EVERY section */
+--take-body:13px;     /* bullet text */
+```
+
+## CSS (verbatim — this is the canonical takeaway)
+```css
+.take{background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:12px;padding:18px 20px 19px;margin-bottom:20px}
+
+/* label row: "TAKEAWAY" eyebrow + optional rating pill on the right */
+.take-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.take-label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:var(--take-label);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo)}
+.take-label svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+.take-rating{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;border-radius:999px;padding:6px 13px;background:var(--card);border:1px solid var(--takeBorder);color:var(--indigo)}
+.take-rating .d{width:8px;height:8px;border-radius:50%;background:currentColor}
+.take-rating.good{color:var(--good);border-color:#cfe6d3}
+.take-rating.caution{color:var(--cautionText);border-color:#f0d79a}
+
+.take-title{font-family:var(--disp);font-size:var(--take-title);line-height:1.28;color:var(--ink);margin-bottom:14px}
+
+/* bullet row: dot (top-aligned) + body (flex) + jump chip pinned FAR RIGHT, vertically centered */
+.take-row{display:flex;align-items:flex-start;gap:11px;padding:10px 0}
+.take-row + .take-row{border-top:1px solid var(--takeDivider)}
+.take-row .dot{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.take-row.good .dot{background:var(--good)}
+.take-row.caution .dot{background:var(--caution)}
+.take-row.insight .dot{background:var(--indigo)}
+.take-row .body{flex:1;font-size:var(--take-body);line-height:1.5;color:var(--ink2)}
+.take-row .body b{color:var(--ink);font-weight:600}
+.take-chip{flex:none;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid var(--takeBorder);border-radius:8px;padding:6px 11px;white-space:nowrap}
+.take-chip svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+```
+
+## HTML (canonical structure)
+```html
+<div class="take">
+  <div class="take-head">
+    <span class="take-label"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Takeaway</span>
+    <!-- optional: only when the section has an overall verdict tier (e.g. Transit "Strong access", FAR "Under-built") -->
+    <span class="take-rating good"><span class="d"></span>{RATING}</span>
+  </div>
+  <div class="take-title">{HEADLINE}</div>
+
+  <!-- one .take-row per bullet; dot class = favorability; chip only when it links somewhere -->
+  <div class="take-row {good|caution|insight}">
+    <span class="dot"></span>
+    <span class="body">{BULLET_HTML}</span>
+    <a class="take-chip" href="#{SECTION_ID}">{CHIP_LABEL} <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a>
+  </div>
+</div>
+```
+
+## STANDARD RULES (enforce on every takeaway in the report)
+1. **The jump chip (`.take-chip`) is a ROW SIBLING pinned far-right, vertically centered** (`flex:none; align-self:center; margin-left:auto`). It is NEVER placed inside the `.body` text — it must not read like punctuation trailing the sentence. A bullet with no destination simply omits the chip.
+2. **One type scale, everywhere:** label `--take-label` (11px), headline `--take-title` (21px serif), body `--take-body` (13px). Do NOT resize these per section — that's the drift that produced a 24px headline in one section and 21px in another.
+3. **Label word is always "Takeaway"** (mono uppercase) with the lightbulb icon. The section-specific synthesis lives in the serif headline, not the label. (Retire the old per-section labels like "Snapshot" / "What the record shows".)
+4. **Dot color = favorability, and it's the ONLY place color varies:** `.good` green (genuinely positive), `.caution` marigold (a real watch-out), `.insight` indigo (derived/neutral read), default grey (plain context). Never red on a takeaway dot unless the section genuinely warrants it. Race/politics/demographics stay grey (see People Profile rules).
+5. **Rating pill** (`.take-rating`) is OPTIONAL and right-aligned in the label row — use only when the section has a computed overall tier (Transit access, FAR verdict). Most sections omit it.
+6. **Subtle row dividers** (`.take-row + .take-row`) separate bullets so each far-right chip clearly pairs with its row.
+7. **Retrofit:** replace the takeaway markup in DOB, Sale History, Property Tax, Parcel, Liens, Schools, People Profile, Transit, Construction, New Business Licenses, FAR, etc. with THIS component. After retrofit, every takeaway is pixel-identical in chrome; only the words and dot colors differ.
+
+---
+
+# PART A — ENTERTAINMENT & CULTURE section
+
+Top-level section (filled indigo **square** header). One Part-B takeaway on top, then five subsections (Michelin Restaurants, James Beard, Registered Murals, Architectural Landmarks, Art Galleries) as clean data — each an outline-icon subsection header + a summary chip + list rows. No per-subsection takeaways.
+
+## Extra tokens
+```
+--prestige:#1c1b1a;   /* dark award-badge fill — NOT Michelin red */
+```
+
+## Award badges — dark "prestige", never status red
+```css
+.aw{font-family:var(--sans);font-size:10.5px;font-weight:600;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.aw.bib{background:var(--prestige);color:#fff}      /* Bib Gourmand */
+.aw.jb{background:var(--prestige);color:#fff}       /* James Beard award */
+.aw.sel{background:var(--card);color:var(--ink2);border:1px solid #cfccc4}  /* Michelin "Selected" */
+.aw.mich{background:var(--card);color:var(--muted);border:1px solid var(--line);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.yr{font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 8px}  /* built-year / mural-year tag */
+```
+> **Do NOT use Michelin red (#c8102e) for badges.** Red is the status/"bad" color in this report; an award in red fights the favorability system. Awards are prestige-dark; secondary tags are neutral outlines.
+
+## Subsection header + list-row CSS
+```css
+.ssh{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
+.ssh .t{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.ssh .rad{font-family:var(--mono);font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.ssh .chip{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--indigo);background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:6px;padding:3px 8px}
+.ssline{height:1px;background:var(--line);margin-bottom:6px}
+.row{padding:13px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:none}
+.rtop{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.rnm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rnm .name{font-size:14px;font-weight:600;color:var(--ink)}
+.dist{font-family:var(--mono);font-size:10.5px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 8px;white-space:nowrap}
+.meta{font-size:12px;color:var(--muted);margin-top:4px}
+.addr{font-size:11.5px;color:var(--muted);margin-top:2px}
+.src{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:10px}
+.more{font-size:11.5px;color:var(--indigo);text-decoration:none;font-weight:600;display:inline-block;margin-top:12px}
+```
+
+## Section structure (verbatim reference = delivered `report-entculture.html`)
+1. **Header:** square + "Entertainment & Culture" + count chip (`{N} Michelin · {N} James Beard · {N} murals`).
+2. **Takeaway (Part B component)** — 3 bullets:
+   - `.good` → dining standout ({N} Michelin within 1 mi, {N} Bib Gourmand, the James Beard winner). Chip → `#michelin`, label "Restaurants".
+   - `.insight` → culture (murals count, landmarks, nearest gallery distance). Chip → `#murals`, label "Culture".
+   - `.insight` → what it means for the property (desirability + foot-traffic, two-sided with the evening-activity/parking trade-off). No chip.
+3. **Subsections**, each `.ssh` (outline icon) + `.rad` radius + `.chip` count, then `.row` list:
+   - `#michelin` Michelin Guide Restaurants (utensils icon): name + `.aw` badge(s) + `meta` (cuisine · price · neighborhood) + `addr` + `.dist`. Truncate to ~6 with "Show all {N}".
+   - James Beard Award Winners (trophy icon): the winner(s) with `.aw.jb` "{Award} · {Year}".
+   - `#murals` Registered Murals (palette icon): name + `.yr` + "by {Artist} · {medium}" + `addr`.
+   - `#landmarks` Architectural Landmarks (columns icon): name + `.yr` "Built {year}" + "Architect: {name} · Designated {year}" + `addr`.
+   - Art Galleries (image icon): name + license tag + licensed date + `addr`.
+
+## LOGIC
+1. **Award badge from the Michelin distinction:** Bib Gourmand → `.aw.bib`; Selected → `.aw.sel`; a starred restaurant → a `★`×N badge (`.aw.bib` style); plain Michelin-listed → `.aw.mich`. A James Beard winner also gets a `.aw.jb` "James Beard" tag in its Michelin row.
+2. **Cross-listing is intentional, not a dup:** a restaurant that is BOTH Michelin and a James Beard winner (e.g. Lula Cafe) appears in the Michelin list AND the James Beard subsection — different award bodies. De-dupe within a single list, not across the two subsections.
+3. **Sort:** restaurants by distance ascending (a "what's near me" amenity list). If you'd rather lead with prestige, sort by tier (Bib Gourmand → Selected) then distance — pick ONE and keep it consistent.
+4. **Radius per subsection is data-driven** (Michelin/JB/landmarks/galleries = 1 mi; murals = 0.5 mi) — show the actual radius in `.rad`, don't hardcode.
+5. **Count chips** reflect real counts within each radius; "Show all" reveals the full list beyond the initial ~6.
+
+## CRITICAL DETAILS
+1. **Takeaway is the Part-B standard component** — same label(11px)/headline(21px serif)/body(13px), right-aligned centered chips. Not a bespoke E&C takeaway.
+2. **Award badges are prestige-dark, never Michelin red** (red = status/bad in this report).
+3. **One section takeaway on top; subsections are clean data with a summary chip**, no per-subsection takeaways.
+4. **Dining bullet is `.good` (green)** — a genuine amenity positive — but the "what it means" bullet stays two-sided (foot-traffic upside + evening/parking trade-off), not pure hype.
+5. **Cross-listed restaurant** (Michelin + James Beard) shows in both subsections by design; de-dupe only within a list.
+6. **Subsection icons are 17px outline** (utensils / trophy / palette / columns / image); section header is the filled indigo square.
+7. Serif (`--disp`) only on the takeaway headline. Everything else Inter; labels/dates/distances/sources Mono.
+```

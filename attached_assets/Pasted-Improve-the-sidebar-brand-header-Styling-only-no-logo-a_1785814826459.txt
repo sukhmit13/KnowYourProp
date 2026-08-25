@@ -1,0 +1,23 @@
+Improve the sidebar brand header. Styling only — no logo artwork changes; the <Logo> component and its colors stay exactly as they are.
+
+In the sidebar header, render the logo larger: change the <Logo> call from size={24} to size={36}. Set the "KnowYourProp" wordmark in the brand display font — Instrument Serif, ~22px, --ink — instead of the current small sans text. Add breathing room: increase the header's padding (≈18px), and add ~4px more gap between the wordmark and the mark, plus more separation between the brand row and the "New Analysis" button below it. The goal is for the logo to read as the anchor of the sidebar, not be dwarfed by the button. Keep the hamburger toggle to the left of the mark.
+
+Block 2 — Reconcile status tokens to the logo palette. Paste into Replit (this supersedes earlier status-color values):
+
+Align the design-system status colors to the logo's own palette, with contrast-safe text variants. Styling only — update CSS variables and their usages; do not change any logic.
+
+Your logo's four colors ARE the status system. Adopt them as follows, respecting one hard rule: on light surfaces, use the bright hue for fills/backgrounds and a darker variant for text/markers.
+
+Brand / primary — Indigo: --indigo: #2b3a9e (unchanged; safe as text at 9:1).
+Good / eligible — Green: --good: #2f7d3f (works as both text and accent, 4.83:1) · soft background --good-soft: #e9f4ec.
+Problem / risk — Red: solid fill / logo-match --bad: #d13b26; for text and small markers use --bad-text: #b3311f (5.9:1, comfortably legible) · soft background --bad-soft: #fbece9.
+Caution / needs-confirmation — Gold: --caution: #f3b31f may be used only as a solid fill, a soft-tint background, or the logo — never as text or a thin icon/marker (it's 1.8:1 on light = illegible). For gold text/markers use --caution-text: #8f6a08 (4.7:1 for small text) or 
+#a87b0a for bold ≥16px labels · soft background --caution-soft: #fdf6cf.
+
+Apply across the report: badge/pill backgrounds use the soft tints; badge/pill text and ✓ / ! / × markers use the text-safe variants (green 
+#2f7d3f, gold 
+#8f6a08, red 
+#b3311f); solid status fills (e.g. a filled gold chip) may use the bright logo hues with white text. Verify every status label still meets ≥4.5:1 (small) or ≥3:1 (bold ≥16px) against its background.
+
+Do not restyle the logo. Do not use bright gold 
+#f3b31f as text anywhere.

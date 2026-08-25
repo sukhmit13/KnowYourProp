@@ -1,0 +1,223 @@
+ADD TOD STATUS INCLUDING QUALIFYING BUS ROUTES
+
+Chicago's TOD areas include properties within 0.25 miles of:
+1. CTA rail stations
+2. Metra stations  
+3. High-frequency CTA bus routes (specified routes only)
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 1: IDENTIFY QUALIFYING BUS ROUTES
+═══════════════════════════════════════════════════════════════════════════
+
+High-frequency bus routes that qualify for TOD (10-minute or better service):
+
+CREATE: /server/data/tod_qualifying_bus_routes.json
+
+{
+  "qualifying_routes": [
+    "9",   // Ashland
+    "20",  // Madison
+    "22",  // Clark
+    "36",  // Broadway
+    "49",  // Western
+    "66",  // Chicago
+    "72",  // North
+    "79",  // 79th Street
+    "X9"   // Ashland Express
+  ],
+  "notes": "Routes with 10-minute or better weekday peak service",
+  "last_updated": "2024-01-29"
+}
+
+NOTE: Verify this list with official CTA/City sources. This list may change.
+
+Search Chicago Data Portal for official list:
+https://data.cityofchicago.org/browse?q=high+frequency+bus
+
+OR check CTA website for current high-frequency routes.
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 2: UPDATE TOD CHECK LOGIC
+═══════════════════════════════════════════════════════════════════════════
+
+Expand TOD check to include qualifying bus routes:
+
+const qualifyingBusRoutes = require('./data/tod_qualifying_bus_routes.json');
+
+function checkTODStatus(transitStations) {
+  // Check 1: Rail stations (CTA + Metra)
+  const railStations = transitStations.filter(s => 
+    s.type === 'CTA Rail' || s.type === 'Metra'
+  );
+  
+  const closestRailStation = railStations[0];
+  
+  if (closestRailStation && closestRailStation.distance <= 0.25) {
+    return {
+      inTOD: true,
+      todType: 'Rail Station',
+      nearestStation: closestRailStation.name,
+      stationType: closestRailStation.type,
+      distance: closestRailStation.distance
+    };
+  }
+  
+  // Check 2: High-frequency bus routes
+  const qualifyingBusStops = transitStations.filter(s => 
+    s.type === 'CTA Bus' &&
+    qualifyingBusRoutes.qualifying_routes.includes(s.route)
+  );
+  
+  const closestQualifyingBus = qualifyingBusStops[0];
+  
+  if (closestQualifyingBus && closestQualifyingBus.distance <= 0.25) {
+    return {
+      inTOD: true,
+      todType: 'High-Frequency Bus',
+      nearestStation: closestQualifyingBus.name,
+      busRoute: closestQualifyingBus.route,
+      distance: closestQualifyingBus.distance
+    };
+  }
+  
+  // Not in TOD
+  return {
+    inTOD: false,
+    closestRailStation: closestRailStation,
+    closestQualifyingBus: closestQualifyingBus
+  };
+}
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 3: UPDATED DISPLAY FORMAT
+═══════════════════════════════════════════════════════════════════════════
+
+Transit-Oriented Development (TOD):
+────────────────────────────────────
+
+{IF inTOD AND todType === 'Rail Station'}
+  ✅ Within TOD Area (Rail Transit)
+  
+  Nearest Rail Station:
+  • {stationName} ({stationType})
+  • Distance: {distance} miles
+  
+  TOD Benefits:
+  • Reduced parking requirements
+  • Streamlined development approvals
+  • Transit-friendly development encouraged
+
+{ELSE IF inTOD AND todType === 'High-Frequency Bus'}
+  ✅ Within TOD Area (High-Frequency Bus)
+  
+  Nearest Qualifying Bus Stop:
+  • Route {busRoute}: {stopName}
+  • Distance: {distance} miles
+  
+  TOD Benefits:
+  • Reduced parking requirements
+  • Streamlined development approvals
+  • Transit-friendly development encouraged
+
+{ELSE}
+  ❌ Not in TOD Area
+  
+  {IF closestRailStation OR closestQualifyingBus}
+    Nearest qualifying transit:
+    {IF closestRailStation AND distance < 0.5}
+      • {railStationName} - {distance} miles (rail)
+    {END IF}
+    {IF closestQualifyingBus AND distance < 0.5}
+      • Route {busRoute} - {distance} miles (high-freq bus)
+    {END IF}
+    
+    Note: TOD area is within 0.25 miles of qualifying transit.
+  {END IF}
+
+{END IF}
+
+What qualifies for TOD:
+- CTA rail stations (all lines)
+- Metra stations (all lines)
+- High-frequency CTA bus routes (routes with 10-min service):
+  #9, #20, #22, #36, #49, #66, #72, #79, X9
+
+[Learn More About TOD →]
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 4: BUS ROUTE DATA STRUCTURE
+═══════════════════════════════════════════════════════════════════════════
+
+When showing bus stops, make sure you capture the route number:
+
+Bus stop data should include:
+{
+  name: "Ashland & Division",
+  type: "CTA Bus",
+  route: "9",        // Route number (important for TOD check)
+  routeName: "Ashland",
+  distance: 0.15,
+  coordinates: [lat, lon]
+}
+
+If you're already showing bus routes, you likely have this data.
+Just ensure the route number is captured and accessible.
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 5: VERIFY QUALIFYING ROUTES LIST
+═══════════════════════════════════════════════════════════════════════════
+
+IMPORTANT: The list of qualifying bus routes may change over time.
+
+To get the most current list:
+
+1. Check CTA website for "high-frequency routes"
+   URL: https://www.transitchicago.com/
+
+2. Search Chicago Data Portal for:
+   "high frequency bus routes"
+   "transit priority corridors"
+
+3. Check city TOD ordinance:
+   URL: https://www.chicago.gov/city/en/depts/dcd/supp_info/tod.html
+
+4. Look for routes with 10-minute or better peak service
+
+Update tod_qualifying_bus_routes.json annually or when CTA changes service.
+
+═══════════════════════════════════════════════════════════════════════════
+IMPLEMENTATION PRIORITY
+═══════════════════════════════════════════════════════════════════════════
+
+PHASE 1 (Do this now):
+- Include rail stations in TOD check ✅
+- This is the primary TOD definition
+- Most important and clear-cut
+
+PHASE 2 (Add later):
+- Include high-frequency bus routes
+- Once you verify which routes qualify
+- Requires route number data from your bus stops
+
+If unsure about bus routes, start with rail-only TOD check.
+You can always add bus routes later once you confirm the official list.
+
+═══════════════════════════════════════════════════════════════════════════
+SIMPLIFIED APPROACH (IF BUS DATA IS UNCLEAR)
+═══════════════════════════════════════════════════════════════════════════
+
+If you can't easily identify which bus stops are on qualifying routes:
+
+Just use rail-only TOD for now:
+
+Transit-Oriented Development (TOD):
+────────────────────────────────────
+✅ Within TOD Area (0.2 mi from rail station)
+
+Note: TOD areas include properties within 0.25 miles of rail 
+stations or select high-frequency bus routes.
+
+This is still accurate and valuable. Add bus routes when you have 
+confirmed data.
+
+═══════════════════════════════════════════════════════════════════════════

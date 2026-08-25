@@ -1,0 +1,81 @@
+# Replit Prompt — Standard Section Structure (apply to EVERY section with a takeaway)
+
+A single canonical scaffold for the top of every section. Today sections diverge: some wrap the takeaway in an extra card, some repeat the title, some add a grey divider, some don't. Standardize all of them to this. Implement **verbatim**; check CRITICAL DETAILS.
+
+## The canonical structure — exactly three parts, in this order
+```
+1. Section header      — filled indigo square + mono uppercase title, optional right-aligned scope chip
+2. Takeaway box        — the shared Standard Takeaway component, DIRECTLY below the header
+3. Section data        — the section's charts/tables/cards
+```
+Nothing else between 1 and 2. No wrapper. No repeated title. No divider line.
+
+## 🔴 The four rules that fix the current drift
+1. **The takeaway box is the ONLY framed element at the top.** It already has its own tint + border — do **not** put it inside a second bordered card. (New Business Licenses currently double-frames it; remove the outer card.)
+2. **One title per section = the section header.** Never repeat the section name on a card header inside the section. If a section currently shows its title twice (header + card), delete the card's copy.
+3. **No divider between header and takeaway.** Spacing only (`.secthead` margin-bottom). Remove any `<hr>` / grey rule sitting between the section header and the takeaway.
+4. **Scope/meta chip goes on the section-header row**, right-aligned — not on a duplicate-title card. (e.g. `33 businesses · 1 mi · 12 mo`.) It's optional per section; omit when there's nothing to scope.
+
+## CSS (verbatim)
+```css
+/* 1 — section header */
+.secthead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:16px}
+.secthead .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+.secthead .scope{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.01em;text-transform:none;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 11px;white-space:nowrap}
+
+/* 2 — the ONLY framed element (shared Standard Takeaway component; no wrapper) */
+.take{background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:12px;padding:18px 20px 19px}
+.take-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.take-label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo)}
+.take-label svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+.take-title{font-family:var(--disp);font-size:21px;line-height:1.28;color:var(--ink);margin-bottom:14px}
+.take-row{display:flex;align-items:flex-start;gap:11px;padding:10px 0}
+.take-row + .take-row{border-top:1px solid var(--takeDivider)}
+.take-row .dot{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.take-row.good .dot{background:var(--good)} .take-row.caution .dot{background:var(--caution)} .take-row.insight .dot{background:var(--indigo)}
+.take-row .body{flex:1;font-size:13px;line-height:1.5;color:var(--ink2)}
+.take-row .body b{color:var(--ink);font-weight:600}
+.take-chip{flex:none;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;background:var(--card);border:1px solid var(--takeBorder);border-radius:8px;padding:6px 11px;white-space:nowrap}
+.take-chip svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
+```
+
+## HTML (verbatim skeleton for every section)
+```html
+<section>
+  <!-- 1 — header (scope chip optional) -->
+  <div class="secthead">
+    <span class="sq"></span>{Section Title}
+    <span class="scope">{scope_chip}</span>   <!-- omit this span entirely if no scope -->
+  </div>
+
+  <!-- 2 — takeaway, directly below, no wrapper/divider -->
+  <div class="take">
+    <div class="take-head"><span class="take-label"><svg …lightbulb…></svg>Takeaway</span></div>
+    <div class="take-title">{takeaway.title}</div>
+    <!-- one .take-row per bullet; tone ∈ good|caution|insight; optional far-right .take-chip -->
+  </div>
+
+  <!-- 3 — section data (charts/tables/cards) -->
+  …
+</section>
+```
+
+## Spacing (standardize the vertical rhythm)
+- `.secthead` → takeaway: **16px** (`.secthead margin-bottom`). No rule/line.
+- Takeaway → first data element: **~18–22px** margin on the data block (section's choice, consistent within the report).
+- Between sections: the page's existing section gap (unchanged).
+- No subtitle line under the header by default (they were removed as redundant). If a section genuinely needs one, it's a single muted line between header and takeaway with its own small margin — still no card, no divider.
+
+## Retrofit checklist (apply to each existing section)
+- [ ] Remove any outer bordered card wrapping the takeaway.
+- [ ] Remove the duplicated section title (the card-header copy).
+- [ ] Remove the grey divider/`<hr>` between header and takeaway.
+- [ ] Move any scope/count chip to the `.secthead` row (`.scope`, right-aligned).
+- [ ] Confirm the takeaway is the shared `.take` component (11px label / 21px serif headline / 13px body / far-right centered chips).
+- [ ] Confirm dot tones use the shared favorability rule (good/caution/insight), unchanged.
+
+## CRITICAL DETAILS
+1. **One frame** (the `.take` box), **one title** (the `.secthead`), **no divider**, **scope chip on the header row** — these four together are the fix.
+2. **Shared Standard Takeaway component** everywhere — identical label/headline/body sizes and far-right centered chips. Not a per-section variant.
+3. **Serif (`--disp`) ONLY** on `.take-title` (and the section's own big data numbers). Header + label + chip are Mono.
+4. **This is layout, not content** — pure code, zero LLM tokens. The takeaway text still comes from the generator; only the frame around it is standardized here.

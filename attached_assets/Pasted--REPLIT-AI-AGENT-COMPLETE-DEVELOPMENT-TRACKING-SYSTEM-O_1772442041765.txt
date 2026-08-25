@@ -1,0 +1,1124 @@
+# REPLIT AI AGENT - COMPLETE DEVELOPMENT TRACKING SYSTEM
+
+---
+
+## OVERVIEW
+
+Build a comprehensive development tracking system that combines:
+1. **Zoning Applications** (Councilmatic) → Earliest signal, no details
+2. **Development News** (RSS feeds) → Rich details for major projects
+3. **Building Permits** (existing) → Construction stage
+
+**Result:** Complete development timeline with 3 stages of intelligence.
+
+---
+
+## WHAT YOU'RE BUILDING
+
+### **3-Stage Development Intelligence:**
+
+```
+┌─────────────────────────────────────────────────────┐
+│ STAGE 1: EARLY WARNING (Weeks 0-10)                │
+│ Source: Councilmatic Zoning Applications           │
+│ Coverage: 100% of zoning changes                   │
+│ Details: Address, status, dates                    │
+│ Value: Earliest signal                             │
+└─────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────┐
+│ STAGE 2: PROJECT DETAILS (Weeks 4-12)              │
+│ Source: Chicago YIMBY + Block Club RSS             │
+│ Coverage: 30% of projects (major ones)             │
+│ Details: Units, stories, developer, renderings     │
+│ Value: Rich project intelligence                   │
+└─────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────┐
+│ STAGE 3: CONSTRUCTION (Weeks 16+)                  │
+│ Source: Building Permits (you already have!)       │
+│ Coverage: 100% of approved projects                │
+│ Details: Cost, contractor, parsed units/stories    │
+│ Value: Confirmed construction activity             │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## FILE STRUCTURE
+
+```
+scrapers/
+├── development_parser.py      # SHARED - Parse text for units/stories
+├── rss_fetcher.py             # STAGE 2 - YIMBY/Block Club RSS
+├── zoning_councilmatic.py     # STAGE 1 - Councilmatic scraper
+├── permit_parser.py           # STAGE 3 - Parse permit descriptions
+└── development_coordinator.py # MAIN - Combine all sources
+
+test/
+└── test_development_tracking.py  # Test all systems
+```
+
+---
+
+## FILE 1: `development_parser.py` (SHARED UTILITIES)
+
+**Used by both RSS and permit scrapers**
+
+```python
+"""
+Shared utilities for parsing development info from text
+Used by RSS scraper and building permit parser
+"""
+
+import re
+
+
+class DevelopmentTextParser:
+    """
+    Extract structured data from text descriptions
+    """
+    
+    def extract_units(self, text):
+        """
+        Extract unit count from text
+        
+        Examples:
+        "48 units"
+        "48-unit building"
+        "building with 48 apartments"
+        "containing 48 residential units"
+        """
+        patterns = [
+            r'(\d+)[\s-]*(?:unit|apartment|condo|residence)s?',
+            r'(?:contain(?:ing)?|with)\s+(\d+)\s+(?:unit|apartment|residence)',
+            r'(\d+)[\s-]*bed(?:room)?\s+(?:unit|apartment)',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                try:
+                    units = int(match.group(1))
+                    if 1 <= units <= 1000:
+                        return units
+                except:
+                    continue
+        
+        return None
+    
+    def extract_stories(self, text):
+        """
+        Extract number of stories
+        
+        Examples:
+        "five stories"
+        "5-story building"
+        "rise five stories"
+        """
+        # Text numbers to digits
+        text_to_num = {
+            'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+            'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+        }
+        
+        patterns = [
+            r'(\d+)[\s-]*stor(?:y|ies)',
+            r'(one|two|three|four|five|six|seven|eight|nine|ten)\s+stor(?:y|ies)',
+            r'rise\s+(\d+)\s+stor(?:y|ies)',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                stories_str = match.group(1)
+                
+                if stories_str.lower() in text_to_num:
+                    return text_to_num[stories_str.lower()]
+                
+                try:
+                    stories = int(stories_str)
+                    if 1 <= stories <= 100:
+                        return stories
+                except:
+                    continue
+        
+        return None
+    
+    def extract_address(self, text):
+        """
+        Extract Chicago address from text
+        
+        Examples:
+        "2121 West Grand Avenue"
+        "2119-29 W Grand Ave"
+        """
+        patterns = [
+            # Range: "2119-29 W Grand Ave"
+            r'(\d{3,4}-\d{1,2}\s+(?:North|South|East|West|N|S|E|W)\.?\s+\w+(?:\s+\w+)?(?:\s+Avenue|Ave|Street|St|Road|Rd|Boulevard|Blvd)?)',
+            
+            # Single: "2121 West Grand Avenue"
+            r'(\d{3,4}\s+(?:North|South|East|West|N|S|E|W)\.?\s+\w+(?:\s+\w+)?(?:\s+Avenue|Ave|Street|St|Road|Rd|Boulevard|Blvd)?)',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                address = match.group(1).strip().upper()
+                address = re.sub(r'\s+', ' ', address)
+                return address
+        
+        return None
+    
+    def extract_developer(self, text):
+        """
+        Extract developer name
+        
+        Examples:
+        "Developer Panoptic Group"
+        "developed by Wildwood Investments"
+        """
+        patterns = [
+            r'developer\s+([A-Z][A-Za-z\s&]+?)(?:\s+is|\s+has|,|\.|$)',
+            r'developed\s+by\s+([A-Z][A-Za-z\s&]+?)(?:\s+and|,|\.|$)',
+            r'(?:project|building)\s+(?:is\s+)?(?:being\s+)?led\s+by\s+([A-Z][A-Za-z\s&]+?)(?:,|\.|$)',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, text)
+            if match:
+                return match.group(1).strip()
+        
+        return None
+```
+
+---
+
+## FILE 2: `rss_fetcher.py` (STAGE 2 - NEWS)
+
+**Extract development details from YIMBY/Block Club articles**
+
+```python
+"""
+Fetch and parse development news from RSS feeds
+Chicago YIMBY + Block Club Chicago
+"""
+
+import feedparser
+from bs4 import BeautifulSoup
+from datetime import datetime
+from development_parser import DevelopmentTextParser
+
+
+class DevelopmentRSSFetcher:
+    """
+    Fetch development news from RSS feeds
+    """
+    
+    def __init__(self):
+        self.feeds = {
+            'yimby': 'https://chicagoyimby.com/feed/',
+            'blockclub': 'https://blockclubchicago.org/feed/',
+        }
+        self.parser = DevelopmentTextParser()
+    
+    def fetch_all_developments(self, limit=50):
+        """
+        Fetch from all RSS sources
+        """
+        print("[RSS] Fetching development news...")
+        
+        all_developments = []
+        
+        # Fetch from YIMBY
+        yimby_devs = self._fetch_from_feed('yimby', limit)
+        all_developments.extend(yimby_devs)
+        
+        # Fetch from Block Club
+        blockclub_devs = self._fetch_from_feed('blockclub', limit)
+        all_developments.extend(blockclub_devs)
+        
+        # Deduplicate
+        all_developments = self._deduplicate(all_developments)
+        
+        print(f"[RSS] Total: {len(all_developments)} unique developments")
+        return all_developments
+    
+    def _fetch_from_feed(self, source, limit):
+        """
+        Fetch from a single RSS feed
+        """
+        print(f"[RSS] Fetching {source}...")
+        
+        feed = feedparser.parse(self.feeds[source])
+        developments = []
+        
+        for entry in feed.entries[:limit]:
+            # Only process development-related articles
+            if not self._is_development_article(entry.title):
+                continue
+            
+            # Get article content
+            article_html = self._get_entry_content(entry)
+            
+            # Parse for structured data
+            dev_data = self._parse_article(
+                article_html,
+                entry.title,
+                entry.link,
+                source
+            )
+            
+            if dev_data and dev_data.get('address'):
+                developments.append(dev_data)
+                print(f"[RSS] ✓ {dev_data['address']} - {dev_data.get('units')} units")
+        
+        return developments
+    
+    def _parse_article(self, html, title, url, source):
+        """
+        Parse article for development data
+        """
+        soup = BeautifulSoup(html, 'html.parser')
+        text = soup.get_text()
+        combined = title + ' ' + text
+        
+        # Extract data using shared parser
+        address = self.parser.extract_address(title) or self.parser.extract_address(text[:500])
+        units = self.parser.extract_units(text)
+        stories = self.parser.extract_stories(text)
+        developer = self.parser.extract_developer(text)
+        
+        # Extract status from title
+        status = self._extract_status(title)
+        
+        return {
+            'source': f'{source.upper()} RSS',
+            'address': address,
+            'units': units,
+            'stories': stories,
+            'developer': developer,
+            'status': status,
+            'article_url': url,
+            'article_title': title,
+            'has_details': True,  # RSS always has details
+            'scraped_at': datetime.now().isoformat()
+        }
+    
+    def _extract_status(self, title):
+        """
+        Extract status from article title
+        """
+        title_lower = title.lower()
+        
+        if any(kw in title_lower for kw in ['approved', 'approves']):
+            return 'approved'
+        elif any(kw in title_lower for kw in ['proposed', 'plans revealed']):
+            return 'proposed'
+        elif any(kw in title_lower for kw in ['construction', 'underway']):
+            return 'under_construction'
+        else:
+            return 'unknown'
+    
+    def _is_development_article(self, title):
+        """
+        Check if article is about development
+        """
+        keywords = [
+            'approved', 'proposed', 'plans', 'development',
+            'building', 'construction', 'zoning', 'apartments',
+            'mixed-use', 'residential', 'tower', 'stories', 'units'
+        ]
+        return any(kw in title.lower() for kw in keywords)
+    
+    def _get_entry_content(self, entry):
+        """
+        Extract content from RSS entry
+        """
+        if hasattr(entry, 'content'):
+            return entry.content[0].value
+        elif hasattr(entry, 'summary'):
+            return entry.summary
+        else:
+            return ''
+    
+    def _deduplicate(self, developments):
+        """
+        Remove duplicates by address
+        """
+        seen = {}
+        for dev in developments:
+            addr = dev.get('address')
+            if not addr:
+                continue
+            
+            addr_norm = addr.upper().replace('.', '').replace('  ', ' ')
+            
+            if addr_norm not in seen:
+                seen[addr_norm] = dev
+            else:
+                # Keep the one with more details
+                if self._count_fields(dev) > self._count_fields(seen[addr_norm]):
+                    seen[addr_norm] = dev
+        
+        return list(seen.values())
+    
+    def _count_fields(self, dev):
+        """Count non-null fields"""
+        return sum(1 for v in dev.values() if v is not None)
+```
+
+---
+
+## FILE 3: `zoning_councilmatic.py` (STAGE 1 - ZONING)
+
+**Scrape zoning applications from Councilmatic**
+
+```python
+"""
+Scrape Chicago Councilmatic for zoning applications
+Provides earliest signal (weeks 0-10)
+"""
+
+import requests
+from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
+import re
+from development_parser import DevelopmentTextParser
+
+
+class CouncilmaticZoningScraper:
+    """
+    Scrape zoning applications from Councilmatic
+    """
+    
+    def __init__(self):
+        self.base_url = "https://chicago.councilmatic.org"
+        self.search_url = f"{self.base_url}/search/"
+        self.parser = DevelopmentTextParser()
+    
+    def get_recent_zoning_changes(self, days=90, ward=None):
+        """
+        Get recent zoning applications
+        
+        Returns zoning apps with NO project details
+        (Just address, status, dates)
+        """
+        print(f"[COUNCILMATIC] Fetching zoning changes (last {days} days)...")
+        
+        params = {
+            'q': 'Zoning Reclassification',
+            'selected_facets': 'topics_exact:Zoning'
+        }
+        
+        if ward:
+            params['selected_facets'] += f'|wards:{ward}'
+        
+        response = requests.get(self.search_url, params=params)
+        
+        if response.status_code != 200:
+            print(f"[COUNCILMATIC] Error: {response.status_code}")
+            return []
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        items = soup.find_all('div', class_='result-item')
+        
+        if not items:
+            items = soup.find_all('div', class_='legislation-item')
+        
+        print(f"[COUNCILMATIC] Found {len(items)} items")
+        
+        zoning_changes = []
+        for item in items:
+            try:
+                change = self._parse_item(item)
+                if change and self._is_recent(change.get('introduced_date'), days):
+                    zoning_changes.append(change)
+            except Exception as e:
+                print(f"[COUNCILMATIC] Parse error: {e}")
+                continue
+        
+        print(f"[COUNCILMATIC] Extracted {len(zoning_changes)} zoning applications")
+        return zoning_changes
+    
+    def _parse_item(self, item):
+        """
+        Parse single ordinance item
+        """
+        # Get title and URL
+        title_elem = item.find('h3') or item.find('h4')
+        if not title_elem:
+            return None
+        
+        title_link = title_elem.find('a')
+        if not title_link:
+            return None
+        
+        title = title_link.text.strip()
+        url = self.base_url + title_link['href']
+        ordinance_id = url.split('/')[-2] if '/' in url else None
+        
+        # Extract address
+        address = self.parser.extract_address(title)
+        
+        # Get status
+        status_elem = item.find('span', class_='label')
+        status = status_elem.text.strip() if status_elem else 'unknown'
+        
+        # Get date
+        date_elem = item.find('time') or item.find('span', class_='date')
+        introduced_date = None
+        if date_elem:
+            date_text = date_elem.get('datetime') or date_elem.text
+            introduced_date = self._parse_date(date_text)
+        
+        # Get ward
+        ward = None
+        ward_elem = item.find('span', text=re.compile(r'Ward \d+'))
+        if ward_elem:
+            ward_match = re.search(r'Ward (\d+)', ward_elem.text)
+            if ward_match:
+                ward = int(ward_match.group(1))
+        
+        return {
+            'source': 'Councilmatic',
+            'ordinance_id': ordinance_id,
+            'title': title,
+            'address': address,
+            'status': status,
+            'introduced_date': introduced_date,
+            'ward': ward,
+            'url': url,
+            'has_details': False,  # Councilmatic never has project details
+            'units': None,
+            'stories': None,
+            'developer': None,
+            'scraped_at': datetime.now().isoformat()
+        }
+    
+    def _parse_date(self, date_text):
+        """Parse various date formats"""
+        if not date_text:
+            return None
+        
+        try:
+            return datetime.fromisoformat(date_text.replace('Z', '')).date().isoformat()
+        except:
+            pass
+        
+        formats = ['%Y-%m-%d', '%m/%d/%Y', '%B %d, %Y']
+        for fmt in formats:
+            try:
+                return datetime.strptime(date_text.strip(), fmt).date().isoformat()
+            except:
+                continue
+        
+        return None
+    
+    def _is_recent(self, date_str, days):
+        """Check if within last N days"""
+        if not date_str:
+            return True
+        
+        try:
+            item_date = datetime.fromisoformat(date_str)
+            cutoff = datetime.now() - timedelta(days=days)
+            return item_date >= cutoff
+        except:
+            return True
+```
+
+---
+
+## FILE 4: `permit_parser.py` (STAGE 3 - CONSTRUCTION)
+
+**Parse building permit work descriptions**
+
+```python
+"""
+Parse building permit work descriptions
+Extract units/stories from permit text
+"""
+
+from development_parser import DevelopmentTextParser
+
+
+class BuildingPermitParser:
+    """
+    Parse building permit descriptions for structured data
+    """
+    
+    def __init__(self):
+        self.parser = DevelopmentTextParser()
+    
+    def parse_permit(self, permit_data):
+        """
+        Parse permit work description
+        
+        Args:
+            permit_data: Dict with 'work_description' field
+            
+        Returns:
+            Updated dict with parsed units/stories
+        """
+        work_desc = permit_data.get('work_description', '')
+        
+        if not work_desc:
+            return permit_data
+        
+        # Parse description
+        units = self.parser.extract_units(work_desc)
+        stories = self.parser.extract_stories(work_desc)
+        
+        # Add parsed data
+        permit_data['units'] = units
+        permit_data['stories'] = stories
+        permit_data['has_details'] = (units is not None or stories is not None)
+        
+        return permit_data
+    
+    def parse_permits_batch(self, permits):
+        """
+        Parse multiple permits
+        """
+        print(f"[PERMITS] Parsing {len(permits)} permit descriptions...")
+        
+        parsed = []
+        for permit in permits:
+            parsed_permit = self.parse_permit(permit)
+            parsed.append(parsed_permit)
+            
+            if parsed_permit.get('units'):
+                print(f"[PERMITS] ✓ {parsed_permit.get('address')} - {parsed_permit['units']} units")
+        
+        return parsed
+```
+
+---
+
+## FILE 5: `development_coordinator.py` (MAIN COORDINATOR)
+
+**Combine all sources into unified intelligence**
+
+```python
+"""
+Coordinate development data from all sources
+Merge zoning apps, RSS news, and building permits
+"""
+
+from zoning_councilmatic import CouncilmaticZoningScraper
+from rss_fetcher import DevelopmentRSSFetcher
+from permit_parser import BuildingPermitParser
+from datetime import datetime
+
+
+class DevelopmentCoordinator:
+    """
+    Combine all development data sources
+    """
+    
+    def __init__(self):
+        self.councilmatic = CouncilmaticZoningScraper()
+        self.rss = DevelopmentRSSFetcher()
+        self.permit_parser = BuildingPermitParser()
+    
+    def get_complete_development_data(self, address=None, radius_miles=0.5, ward=None):
+        """
+        Get complete development intelligence from all sources
+        
+        Args:
+            address: Property address (for nearby search)
+            radius_miles: Search radius
+            ward: Ward number (for ward-based search)
+            
+        Returns:
+            dict: Complete development data organized by stage
+        """
+        print("="*60)
+        print("FETCHING COMPLETE DEVELOPMENT DATA")
+        print("="*60)
+        
+        # STAGE 1: Zoning Applications (earliest signal)
+        zoning_apps = self._get_zoning_data(ward)
+        
+        # STAGE 2: RSS News (project details)
+        news_projects = self._get_news_data()
+        
+        # STAGE 3: Building Permits (you already have this data)
+        # permits = self._get_permit_data()  # Use your existing permit scraper
+        
+        # MERGE: Match zoning apps with RSS details
+        merged = self._merge_zoning_with_news(zoning_apps, news_projects)
+        
+        # FILTER: By address/distance if provided
+        if address:
+            merged = self._filter_by_distance(merged, address, radius_miles)
+        
+        # CATEGORIZE by stage
+        categorized = self._categorize_by_stage(merged)
+        
+        print(f"\n{'='*60}")
+        print(f"RESULTS:")
+        print(f"  Stage 1 (Zoning): {len(categorized['zoning_only'])}")
+        print(f"  Stage 2 (With Details): {len(categorized['with_details'])}")
+        print(f"  Total: {len(merged)}")
+        print(f"{'='*60}\n")
+        
+        return categorized
+    
+    def _get_zoning_data(self, ward):
+        """Get zoning applications from Councilmatic"""
+        print("\n### STAGE 1: Zoning Applications")
+        return self.councilmatic.get_recent_zoning_changes(days=90, ward=ward)
+    
+    def _get_news_data(self):
+        """Get development news from RSS"""
+        print("\n### STAGE 2: Development News")
+        return self.rss.fetch_all_developments(limit=50)
+    
+    def _merge_zoning_with_news(self, zoning_apps, news_projects):
+        """
+        Merge zoning applications with RSS news articles
+        Adds project details to zoning apps when available
+        """
+        print("\n### MERGING: Zoning + News")
+        
+        all_developments = []
+        
+        # Create lookup dict for news projects by address
+        news_by_address = {}
+        for news in news_projects:
+            if news.get('address'):
+                addr_norm = self._normalize_address(news['address'])
+                news_by_address[addr_norm] = news
+        
+        # Match zoning apps with news
+        for zoning in zoning_apps:
+            if zoning.get('address'):
+                addr_norm = self._normalize_address(zoning['address'])
+                
+                # Check if we have news article for this address
+                if addr_norm in news_by_address:
+                    news = news_by_address[addr_norm]
+                    
+                    # MERGE: Add news details to zoning data
+                    zoning['has_details'] = True
+                    zoning['units'] = news.get('units')
+                    zoning['stories'] = news.get('stories')
+                    zoning['developer'] = news.get('developer')
+                    zoning['article_url'] = news.get('article_url')
+                    zoning['article_title'] = news.get('article_title')
+                    
+                    print(f"[MERGE] ✓ Matched: {zoning['address']} - {zoning['units']} units")
+                    
+                    # Remove from news dict so we don't duplicate
+                    del news_by_address[addr_norm]
+            
+            all_developments.append(zoning)
+        
+        # Add remaining news projects that didn't match zoning
+        for news in news_by_address.values():
+            all_developments.append(news)
+        
+        return all_developments
+    
+    def _categorize_by_stage(self, developments):
+        """
+        Categorize developments by stage
+        """
+        return {
+            'with_details': [d for d in developments if d.get('has_details')],
+            'zoning_only': [d for d in developments if not d.get('has_details')],
+            'all': developments
+        }
+    
+    def _normalize_address(self, address):
+        """Normalize address for comparison"""
+        return address.upper().replace('.', '').replace('  ', ' ').strip()
+    
+    def _filter_by_distance(self, developments, address, radius_miles):
+        """
+        Filter developments by distance from address
+        (You'll need to implement geocoding and distance calc)
+        """
+        # TODO: Add geocoding and distance filtering
+        # For now, just return all
+        return developments
+```
+
+---
+
+## FILE 6: `test_development_tracking.py` (TEST EVERYTHING)
+
+```python
+"""
+Test complete development tracking system
+"""
+
+from development_coordinator import DevelopmentCoordinator
+import json
+
+
+def test_complete_system():
+    """
+    Test all development tracking sources
+    """
+    coordinator = DevelopmentCoordinator()
+    
+    print("\n" + "="*60)
+    print("TESTING COMPLETE DEVELOPMENT TRACKING SYSTEM")
+    print("="*60)
+    
+    # Test 1: Get all developments (citywide)
+    print("\n### TEST 1: All Recent Developments")
+    all_data = coordinator.get_complete_development_data()
+    
+    # Display with_details (matched zoning + news)
+    print("\n### DEVELOPMENTS WITH FULL DETAILS:")
+    for i, dev in enumerate(all_data['with_details'][:5], 1):
+        print(f"\n{i}. {dev['address']}")
+        print(f"   Units: {dev.get('units')}")
+        print(f"   Stories: {dev.get('stories')}")
+        print(f"   Developer: {dev.get('developer')}")
+        print(f"   Status: {dev.get('status')}")
+        print(f"   Source: {dev.get('source')}")
+        if dev.get('article_url'):
+            print(f"   Article: {dev['article_url']}")
+    
+    # Display zoning_only (early stage, no details yet)
+    print("\n### EARLY STAGE (No Details Yet):")
+    for i, dev in enumerate(all_data['zoning_only'][:5], 1):
+        print(f"\n{i}. {dev['address']}")
+        print(f"   Status: {dev.get('status')}")
+        print(f"   Date: {dev.get('introduced_date')}")
+        print(f"   Source: {dev.get('source')}")
+        print(f"   Note: Details not yet public")
+    
+    # Test 2: Get developments in specific ward
+    print("\n### TEST 2: Ward 27 Developments")
+    ward_data = coordinator.get_complete_development_data(ward=27)
+    
+    print(f"\nWard 27 Summary:")
+    print(f"  With Details: {len(ward_data['with_details'])}")
+    print(f"  Zoning Only: {len(ward_data['zoning_only'])}")
+    print(f"  Total: {len(ward_data['all'])}")
+    
+    # Save to JSON
+    output = {
+        'summary': {
+            'with_details': len(all_data['with_details']),
+            'zoning_only': len(all_data['zoning_only']),
+            'total': len(all_data['all'])
+        },
+        'developments': all_data['all']
+    }
+    
+    with open('complete_development_data.json', 'w') as f:
+        json.dump(output, f, indent=2)
+    
+    print(f"\n✓ Saved to complete_development_data.json")
+    
+    return all_data
+
+
+if __name__ == '__main__':
+    test_complete_system()
+```
+
+---
+
+## DEPENDENCIES
+
+```bash
+pip install requests beautifulsoup4 feedparser --break-system-packages
+```
+
+---
+
+## IMPLEMENTATION STEPS
+
+### **Phase 1: Build Individual Components (3-4 hours)**
+
+```bash
+# Step 1: Create shared parser
+# Create: scrapers/development_parser.py
+
+# Step 2: Create RSS fetcher
+# Create: scrapers/rss_fetcher.py
+
+# Step 3: Create Councilmatic scraper
+# Create: scrapers/zoning_councilmatic.py
+
+# Step 4: Create permit parser (optional)
+# Create: scrapers/permit_parser.py
+```
+
+---
+
+### **Phase 2: Build Coordinator (1 hour)**
+
+```bash
+# Create: scrapers/development_coordinator.py
+# This merges all sources
+```
+
+---
+
+### **Phase 3: Test (30 min)**
+
+```bash
+# Create: test/test_development_tracking.py
+
+# Run test
+python3 test_development_tracking.py
+```
+
+**Expected output:**
+```
+FETCHING COMPLETE DEVELOPMENT DATA
+===================================
+
+### STAGE 1: Zoning Applications
+[COUNCILMATIC] Found 73 zoning applications
+
+### STAGE 2: Development News
+[RSS] Found 28 developments
+
+### MERGING: Zoning + News
+[MERGE] ✓ Matched: 2121 W GRAND AVENUE - 48 units
+[MERGE] ✓ Matched: 2119 W GRAND AVENUE - 48 units
+
+RESULTS:
+  Stage 1 (Zoning): 58
+  Stage 2 (With Details): 15
+  Total: 73
+```
+
+---
+
+## OUTPUT FORMAT
+
+### **Development with Details (30%):**
+
+```json
+{
+  "address": "2121 WEST GRAND AVENUE",
+  "source": "Councilmatic",
+  "has_details": true,
+  
+  "status": "Passed",
+  "introduced_date": "2025-10-15",
+  "ward": 27,
+  "ordinance_id": "o2025-0017512",
+  "url": "https://chicago.councilmatic.org/...",
+  
+  "units": 48,
+  "stories": 5,
+  "developer": "Panoptic Group",
+  "article_url": "https://chicagoyimby.com/...",
+  "article_title": "City Council Approves 2121 West Grand..."
+}
+```
+
+### **Development without Details (70%):**
+
+```json
+{
+  "address": "2315-2325 W GRAND AVENUE",
+  "source": "Councilmatic",
+  "has_details": false,
+  
+  "status": "Introduced",
+  "introduced_date": "2026-02-15",
+  "ward": 27,
+  "ordinance_id": "o2026-0022521",
+  "url": "https://chicago.councilmatic.org/...",
+  
+  "units": null,
+  "stories": null,
+  "developer": null
+}
+```
+
+---
+
+## INTEGRATION WITH PROPERTY REPORTS
+
+```python
+from scrapers.development_coordinator import DevelopmentCoordinator
+
+def add_development_intelligence(property_address):
+    """
+    Add complete development intelligence to property report
+    """
+    coordinator = DevelopmentCoordinator()
+    
+    # Get all nearby developments
+    dev_data = coordinator.get_complete_development_data(
+        address=property_address,
+        radius_miles=0.5
+    )
+    
+    return {
+        'nearby_developments': {
+            'with_details': dev_data['with_details'],
+            'early_stage': dev_data['zoning_only'],
+            'total': len(dev_data['all']),
+            'summary': {
+                'detailed_projects': len(dev_data['with_details']),
+                'pending_zoning': len(dev_data['zoning_only'])
+            }
+        }
+    }
+```
+
+---
+
+## DISPLAY IN REPORTS
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NEARBY DEVELOPMENT ACTIVITY
+
+Within 0.5 miles: 8 projects
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DETAILED PROJECTS (3)
+
+1. 2121 W GRAND AVE (0.2 mi)
+   📊 48 units, 5 stories, mixed-use
+   👷 Developer: Panoptic Group
+   📅 Status: Zoning approved Nov 2025
+   📸 Details: [Link to YIMBY article]
+   
+   Next: Building permit expected Q1 2026
+
+2. 2119 W GRAND AVE (0.3 mi)
+   📊 48 units, 5 stories
+   👷 Developer: Dan Popovych
+   📅 Status: Pending City Council
+   
+   Next: Council vote expected March 2026
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EARLY STAGE (5)
+
+3. 2315-2325 W GRAND AVE (0.1 mi)
+   ⏱️ Zoning application filed Feb 2026
+   📅 Community meeting: March 2026
+   
+   Note: Very early stage - project details
+   will be available after community meeting
+
+4. 1234 W DIVISION ST (0.3 mi)
+   ⏱️ Zoning change introduced Jan 2026
+   📅 Status: In Committee
+   
+   Note: Details pending approval
+
+5. 5678 W ARMITAGE (0.4 mi)
+   ⏱️ Zoning application introduced Dec 2025
+   
+   Note: Early stage - details not yet public
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TREND ANALYSIS
+
+8 total development projects nearby
+• 3 with full details (major projects)
+• 5 early stage (details pending)
+• All projects are upzoning/densification
+
+Signal: ⬆️ STRONG POSITIVE
+Grand Avenue is a major development corridor
+Property values likely to increase
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+---
+
+## EXPECTED RESULTS
+
+### **From Complete System:**
+
+**Stage 1 - Zoning (Councilmatic):**
+- ~70-100 zoning applications (90 days)
+- 100% have: address, status, dates
+- 0% have: units, stories, developer
+
+**Stage 2 - News (RSS):**
+- ~25-30 developments (50 articles)
+- 100% have: address, units, stories
+- 50-60% have: developer name
+
+**Merged:**
+- ~15-20 matches (zoning + news)
+- These have COMPLETE DATA
+- ~50-80 zoning-only (early stage)
+
+---
+
+## CRITICAL NOTES
+
+✅ **Start with Councilmatic + RSS** - Skip permit parser initially  
+✅ **Councilmatic gives NO details** - Just early warning  
+✅ **RSS gives FULL details** - But only 30% coverage  
+✅ **Merged data is GOLD** - Early warning + full details  
+✅ **70% will have no details** - That's normal, they're early stage  
+
+---
+
+## TROUBLESHOOTING
+
+**If RSS returns 0 developments:**
+- Check feed URLs are accessible
+- Verify development keyword matching
+- Lower the keyword threshold
+
+**If Councilmatic returns 0:**
+- Check HTML structure hasn't changed
+- Try direct URL: https://chicago.councilmatic.org/search/?q=Zoning
+- Update CSS selectors if needed
+
+**If merge finds 0 matches:**
+- Normal if data sets are from different time periods
+- RSS covers major projects, Councilmatic covers ALL
+- Expect only 15-30% match rate
+
+---
+
+## TL;DR
+
+**What to build:**
+
+1. `development_parser.py` - Shared text parsing utilities
+2. `rss_fetcher.py` - YIMBY + Block Club RSS scraper
+3. `zoning_councilmatic.py` - Councilmatic zoning scraper
+4. `development_coordinator.py` - Merge all sources
+5. `test_development_tracking.py` - Test script
+
+**What it does:**
+- Stage 1: Zoning apps (100% coverage, no details)
+- Stage 2: RSS news (30% coverage, full details)
+- Merge: Match by address → complete data
+
+**Test:**
+```bash
+python3 test_development_tracking.py
+```
+
+**Result:**
+```
+With Details: 15 projects (units, stories, developer)
+Early Stage: 58 projects (just address, status, dates)
+Total: 73 developments tracked
+```
+
+**Value:**
+- 3-stage development intelligence
+- Earliest warning (weeks 0-10)
+- Rich details for major projects (30%)
+- Complete timeline coverage
+
+**This is a professional-grade development tracking system!** 🎯

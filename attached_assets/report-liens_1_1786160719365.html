@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;--bad:#d13b26;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:30px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .cardbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04);margin-bottom:20px}
+  .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
+  .sh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .sh .t{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+  .sh .badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 9px;background:var(--card);border:1px solid #bcdcc4;color:var(--good)}
+  .sh .badge .d{width:7px;height:7px;border-radius:50%;background:var(--good)}
+  .sh .ctrls{margin-left:auto;display:flex;gap:8px}
+  .ctrl{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:600;color:var(--ink2);cursor:pointer}
+  .ctrl.clear{color:var(--good);border-color:#bcdcc4;background:var(--goodSoft)}
+  .ctrl svg{width:12px;height:12px;fill:none;stroke:currentColor}
+
+  /* takeaway */
+  .take{background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:12px;padding:16px 18px}
+  .takeh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .takeh svg{width:13px;height:13px;stroke:var(--indigo)}
+  .taket{font-family:var(--disp);font-size:20px;line-height:1.25;color:var(--ink);margin-bottom:12px}
+  .cn{display:flex;gap:9px;font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:8px}
+  .cn:last-child{margin-bottom:0}
+  .cn .dt{width:5px;height:5px;border-radius:50%;flex:none;margin-top:7px}
+  .cn.g .dt{background:var(--good)}.cn.n .dt{background:#9aa1b0}
+  .cn b{color:var(--ink);font-weight:600}
+
+  /* debt snapshot tiles */
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+  .dt2{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+  .dt2 .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .dt2 .v{font-size:15px;font-weight:600;color:var(--ink);line-height:1.2;display:flex;align-items:center;gap:6px}
+  .dt2 .v.ok{color:var(--good)}
+  .dt2 .v svg{width:13px;height:13px;stroke:var(--good);fill:none;flex:none}
+  .dt2 .s{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .dt2.pos{background:var(--indigoSoft);border-color:#dfe3f7}
+  .dt2.pos .l{color:var(--indigo)}
+  .dcaveat{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--ink2);line-height:1.5;margin-bottom:16px;padding:11px 14px;background:var(--card);border:1px solid #ecd49a;border-left:3px solid #e0a92e;border-radius:10px}
+  .dcaveat svg{width:14px;height:14px;stroke:var(--cautionText);fill:none;flex:none;margin-top:1px}
+  .dcaveat b{color:var(--cautionText);font-weight:700}
+
+  /* lifecycle */
+  .life{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+  .lifeh{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:28px}
+  .runway{position:relative;height:8px;border-radius:999px;background:#e6e4dd;margin-bottom:8px}
+  .runway .fill{position:absolute;left:0;top:0;height:100%;border-radius:999px;background:var(--indigo)}
+  .runway .now{position:absolute;top:-4px;width:3px;height:16px;background:var(--ink);border-radius:2px}
+  .runway .nowlab{position:absolute;top:-22px;transform:translateX(-50%);font-size:10px;font-weight:700;color:var(--indigo)}
+  .lifeends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-bottom:12px}
+  .lifeends b{color:var(--ink2)}
+  .lifesum{font-size:12px;color:var(--ink2);line-height:1.5;padding-top:12px;border-top:1px solid var(--line)}
+  .lifesum b{color:var(--ink);font-weight:600}.lifesum .gd{color:var(--good);font-weight:700}
+
+  /* property records KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+  .kpi{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 16px;text-align:center}
+  .kpi.ok{background:var(--goodSoft);border-color:#cfe6d6}
+  .kpi .l{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .kpi .n{font-family:var(--disp);font-size:30px;line-height:1;color:var(--ink)}
+  .kpi.ok .n{color:var(--good)}
+
+  /* doc table */
+  .dtable{width:100%;border-collapse:collapse;font-size:12.5px}
+  .dtable thead td{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:0 0 10px}
+  .dtable thead td:last-child{text-align:right}
+  .dtable tbody tr{border-top:1px solid var(--line)}
+  .dtable td{padding:11px 0;vertical-align:middle}
+  .dtable .doc a{font-family:var(--mono);font-size:12px;color:var(--indigo);text-decoration:none;font-weight:500}
+  .dtable .badge2{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:4px 9px}
+  .dtable .rel{margin-left:8px;font-size:10px;font-weight:600;color:var(--good)}
+  .dtable .rec{text-align:right;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .dtable tr.released .doc a{color:var(--muted);text-decoration:line-through}
+  .dtable tr.released td{opacity:.75}
+  .allrec{display:block;text-align:center;margin-top:14px;font-size:12.5px;font-weight:600;color:var(--indigo);text-decoration:none}
+
+  /* owner liens */
+  .clean{display:flex;align-items:center;gap:10px;background:var(--goodSoft);border:1px solid #cfe6d6;border-radius:11px;padding:13px 16px;margin-bottom:12px}
+  .clean svg{width:18px;height:18px;stroke:var(--good);fill:none;flex:none}
+  .clean .x{font-size:13px;font-weight:600;color:var(--ink)}
+  .olinks{display:flex;flex-direction:column;gap:7px;font-size:12px}
+  .olinks a{color:var(--indigo);text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+  .olinks a svg{width:12px;height:12px;stroke:var(--indigo);fill:none}
+  .olinks .chip{font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:2px 7px}
+  .olast{font-size:10.5px;color:var(--muted);margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LIENS parent -->
+  <div class="cardbox">
+    <div class="sh"><span class="sq"></span><span class="t">Liens</span><span class="badge"><span class="d"></span>Clear title</span></div>
+    <div class="take">
+      <div class="takeh"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>The Takeaway</div>
+      <div class="taket">Clean title, lightly leveraged — one modest mortgage and no distress signals on record.</div>
+      <div class="cn g"><span class="dt"></span><span><b>Low leverage.</b> A single active mortgage of <b>$277,000</b> (First Eagle Bank, 2023) — roughly <b>a quarter</b> of the property's estimated value. Refinancing risk is <b>Low</b>, with ~27 years of runway.</span></div>
+      <div class="cn g"><span class="dt"></span><span><b>No distress.</b> <b>Zero</b> active liens, no foreclosure, no mechanics liens, and no lis pendens on record.</span></div>
+      <div class="cn g"><span class="dt"></span><span><b>Owner LLC is clean.</b> No personal liens found against <b>2100 Hoyne LLC</b> (last searched Aug 2026).</span></div>
+      <div class="cn n"><span class="dt"></span><span>15 recorded documents over the property's history — 4 mortgages (older ones released) and 2 loan modifications.</span></div>
+    </div>
+  </div>
+
+  <!-- DEBT SNAPSHOT -->
+  <div class="cardbox">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span class="t">Debt Snapshot</span></div>
+    <div class="g4">
+      <div class="dt2"><div class="l">Lender</div><div class="v">First Eagle Bk</div></div>
+      <div class="dt2"><div class="l">Original Amount</div><div class="v">$277,000</div><div class="s">recorded — not current balance</div></div>
+      <div class="dt2 pos"><div class="l">Lien Position</div><div class="v">1st · sole active</div><div class="s">derived from record order</div></div>
+      <div class="dt2"><div class="l">Recorded</div><div class="v">6/14/2023</div></div>
+      <div class="dt2"><div class="l">Maturity</div><div class="v">~2053</div><div class="s">est. · 30-yr (residential)</div></div>
+      <div class="dt2"><div class="l">Foreclosure</div><div class="v ok"><svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>None on record</div></div>
+      <div class="dt2"><div class="l">Mechanics Liens</div><div class="v ok"><svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>None on record</div></div>
+      <div class="dt2"><div class="l">Refinancing Risk</div><div class="v ok">Low</div><div class="s">27 yrs remaining</div></div>
+    </div>
+    <div class="dcaveat"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span><b>Verify before relying on this.</b> The amount shown is the <b>original recorded loan</b>, not the current balance. <b>Lien position</b> is inferred from the recording order of unreleased liens — confirm the payoff amount and priority (and any undrawn credit lines) for a true equity picture.</span></div>
+    <div class="life">
+      <div class="lifeh">Loan lifecycle · refinancing runway</div>
+      <div class="runway"><span class="fill" style="width:10%"></span><span class="now" style="left:10%"></span><span class="nowlab" style="left:10%">Now</span></div>
+      <div class="lifeends"><span>Recorded <b>Jun 2023</b></span><span>Est. maturity <b>~2053</b></span></div>
+      <div class="lifesum">~3 yrs elapsed · <b>27 yrs remaining</b> on a 30-yr term · refinancing risk <span class="gd">Low</span> · 2 modifications recorded.</div>
+    </div>
+  </div>
+
+  <!-- PROPERTY RECORDS -->
+  <div class="cardbox">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="t">Property Records</span>
+      <div class="ctrls"><button class="ctrl clear"><svg viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Clear</button><button class="ctrl"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh</button></div></div>
+    <div class="kpis">
+      <div class="kpi"><div class="l">Total Docs</div><div class="n">15</div></div>
+      <div class="kpi"><div class="l">Mortgages</div><div class="n">4</div></div>
+      <div class="kpi ok"><div class="l">Active Liens</div><div class="n">0</div></div>
+      <div class="kpi ok"><div class="l">Lis Pendens</div><div class="n">0</div></div>
+    </div>
+    <table class="dtable">
+      <thead><tr><td>Doc #</td><td>Type</td><td>Recorded</td></tr></thead>
+      <tbody>
+        <tr><td class="doc"><a href="#">2414428305</a></td><td><span class="badge2">Release</span></td><td class="rec">5/23/2024</td></tr>
+        <tr><td class="doc"><a href="#">2316515047</a></td><td><span class="badge2">Mortgage</span></td><td class="rec">6/14/2023</td></tr>
+        <tr><td class="doc"><a href="#">2316515048</a></td><td><span class="badge2">Assignment</span></td><td class="rec">6/14/2023</td></tr>
+        <tr><td class="doc"><a href="#">1813408021</a></td><td><span class="badge2">Modification</span></td><td class="rec">5/14/2018</td></tr>
+        <tr><td class="doc"><a href="#">1317033074</a></td><td><span class="badge2">Modification</span></td><td class="rec">6/19/2013</td></tr>
+        <tr class="released"><td class="doc"><a href="#">0813641085</a></td><td><span class="badge2">Mortgage</span><span class="rel">✓ Released</span></td><td class="rec">5/15/2008</td></tr>
+        <tr><td class="doc"><a href="#">0601718035</a></td><td><span class="badge2">Warranty Deed</span></td><td class="rec">1/17/2006</td></tr>
+        <tr><td class="doc"><a href="#">0010582509</a></td><td><span class="badge2">Assignment</span></td><td class="rec">7/2/2001</td></tr>
+      </tbody>
+    </table>
+    <a class="allrec" href="#">View all 15 documents on Cook County Recorder ↗</a>
+  </div>
+
+  <!-- OWNER LIENS -->
+  <div class="cardbox">
+    <div class="sh"><svg class="hic" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg><span class="t">Owner Liens · 2100 Hoyne LLC</span></div>
+    <div class="clean"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span class="x">No personal liens found against 2100 Hoyne LLC</span></div>
+    <div class="olinks">
+      <a href="#"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>View all property documents on Recorder</a>
+      <a href="#"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>View owner name search results <span class="chip">2100 Hoyne LLC</span></a>
+    </div>
+    <div class="olast">Last searched Aug 2, 2026</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -239,8 +239,13 @@ export function Sidebar() {
       } catch {}
       clearSearch();
       setLocation(`/run/${run.id}`);
-    } catch (_err) {
+    } catch (err) {
       // keep search mode open on error so user can retry
+      toast({
+        title: "Could not create report",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
     } finally {
       isSubmittingRef.current = false;
     }

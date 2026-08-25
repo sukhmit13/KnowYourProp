@@ -3,10 +3,10 @@ import { createPortal } from "react-dom";
 import { useSearch, useLocation, Link } from "wouter";
 import {
   MapPin, ChevronDown, Lock, Map, Building2, BarChart3, Users, Train, Loader2,
-  ExternalLink, Ruler, DollarSign, Newspaper, Globe, Phone, Mail,
+  ExternalLink, Ruler, DollarSign, Newspaper, Globe,
   CheckCircle2, XCircle, Menu, Star,
   Layers, Navigation, HardHat, ClipboardList, Link2, Printer, Search, CreditCard,
-  Eye, Landmark, BookOpen,
+  Eye, Landmark,
 } from "lucide-react";
 import { yearsTile, heightTile, parkingTile, zoningMeaningBullets } from "@/lib/wardZoningDisplay";
 import { motion } from "framer-motion";
@@ -88,6 +88,8 @@ export default function AddressPreview() {
   const { toast } = useToast();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [pvWardOpen, setPvWardOpen] = useState(false);
+  const [pvZoningOpen, setPvZoningOpen] = useState(false);
   const [mode, setMode] = useState<'signin' | 'register'>('signin');
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [email, setEmail] = useState("");
@@ -193,7 +195,10 @@ export default function AddressPreview() {
         credentials: 'include',
         body: JSON.stringify({ address: rawAddress }),
       });
-      if (!res.ok) throw new Error('Could not create run');
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message || 'Could not create run');
+      }
       const run = await res.json();
       const checkoutParams = new URLSearchParams({
         type: 'report',
@@ -646,201 +651,161 @@ export default function AddressPreview() {
             {hasGeo && (geo.alderman || geo.zoning) && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {geo.alderman && (
-                  <Card id="preview-section-ward" className="rounded-2xl overflow-hidden" style={{background:'#fff', borderColor:'var(--sb-line)', boxShadow:'var(--shadow-sm)'}}>
-                    <CardHeader className="pb-3">
-                    <CardTitle className="chead">
-                        Ward & Alderperson
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="font-body">
-                      {geo.ward && <span className="wz-ward">Ward {geo.ward}</span>}
-                      <div className="wz-name">{geo.alderman}</div>
-                      <div className="wz-contact">
+                  <div className="kyp-ctxc" id="preview-section-ward">
+                    <div className="top" role="button" tabIndex={0} aria-expanded={pvWardOpen}
+                      onClick={() => setPvWardOpen((o) => !o)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPvWardOpen((o) => !o); } }}
+                      data-testid="toggle-ward-card">
+                      <div className="crest"><span className="n">{geo.ward}</span><span className="u">Ward</span></div>
+                      <div className="mid">
+                        <div className="k">Alderperson</div>
+                        <div className="nm">{geo.alderman}</div>
+                        <div className="sub">
+                          {geo.aldermanYearsInOffice && <><b>{yearsTile(geo.aldermanYearsInOffice).n} yrs</b> in office</>}
+                          {geo.aldermanYearsInOffice && geo.aldermanAttendance && <> · </>}
+                          {geo.aldermanAttendance && <>{geo.aldermanAttendance} attendance</>}
+                          {!geo.aldermanYearsInOffice && !geo.aldermanAttendance && (geo.aldermanWardOffice || null)}
+                        </div>
+                      </div>
+                      <div className="chev">{pvWardOpen ? '⌃' : '⌄'}</div>
+                    </div>
+                    <div className={`body${pvWardOpen ? '' : ' closed'}`}>
+                      <div className="kyp-cxrows">
                         {geo.aldermanPhone && (
-                          <div className="wz-crow">
-                            <Phone style={{color:'var(--ref-blue)'}} />
-                            <a href={`tel:${geo.aldermanPhone.replace(/[^0-9+]/g, '')}`}>{geo.aldermanPhone}</a>
-                          </div>
+                          <div className="kyp-cxrow"><span className="i">✆</span><a href={`tel:${geo.aldermanPhone.replace(/[^0-9+]/g, '')}`}>{geo.aldermanPhone}</a></div>
                         )}
                         {geo.aldermanEmail && (
-                          <div className="wz-crow">
-                            <Mail style={{color:'var(--ref-blue)'}} />
-                            <a href={`mailto:${geo.aldermanEmail}`}>{geo.aldermanEmail}</a>
-                          </div>
+                          <div className="kyp-cxrow"><span className="i">✉</span><a href={`mailto:${geo.aldermanEmail}`}>{geo.aldermanEmail}</a></div>
                         )}
                         {geo.aldermanWardOffice && (
-                          <div className="wz-crow">
-                            <MapPin style={{color:'var(--sb-muted)'}} />
-                            <a
-                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(geo.aldermanWardOffice)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="wz-addr"
-                              style={{fontWeight:400}}
-                            >
-                              {geo.aldermanWardOffice}
-                            </a>
-                          </div>
+                          <div className="kyp-cxrow"><span className="i">⌖</span><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(geo.aldermanWardOffice)}`} target="_blank" rel="noopener noreferrer">{geo.aldermanWardOffice}</a></div>
                         )}
                       </div>
                       {(geo.aldermanYearsInOffice || geo.aldermanAttendance) && (
-                        <div className="wz-akpis">
+                        <div className="kyp-cxstats">
                           {geo.aldermanYearsInOffice && (
-                            <div className="wz-tile">
-                              <div className="l">Years in Office</div>
-                              <div className="n" data-testid="text-alderman-years">{yearsTile(geo.aldermanYearsInOffice).n}</div>
-                              <div className="s">{yearsTile(geo.aldermanYearsInOffice).sub}</div>
+                            <div className="kyp-cxstat ind">
+                              <span className="n" data-testid="text-alderman-years">{yearsTile(geo.aldermanYearsInOffice).n}</span>
+                              <span><div className="l">Years in office</div><div className="s">{yearsTile(geo.aldermanYearsInOffice).sub}</div></span>
                             </div>
                           )}
                           {geo.aldermanAttendance && (
-                            <div className="wz-tile">
-                              <div className="l">Attendance</div>
-                              <div className="n" data-testid="text-alderman-attendance">{geo.aldermanAttendance}</div>
-                              <div className="s">this council session</div>
+                            <div className="kyp-cxstat dark">
+                              <span className="n" data-testid="text-alderman-attendance">{geo.aldermanAttendance}</span>
+                              <span><div className="l">Attendance</div><div className="s">this council session</div></span>
                             </div>
                           )}
                         </div>
                       )}
-                      <a className="wz-cta" href={geo.aldermanCouncilmaticUrl || "https://chicago.councilmatic.org/compare-council-members/"} target="_blank" rel="noopener noreferrer" data-testid="link-alderman-councilmatic">
-                        <span className="ic"><BookOpen /></span>
-                        <span className="body">
-                          <span className="h">Learn more about your alderperson's legislation &amp; donors</span>
-                          <span className="sub">Voting record &amp; campaign finance · via Councilmatic</span>
-                        </span>
+                      <a className="kyp-cxcta" href={geo.aldermanCouncilmaticUrl || "https://chicago.councilmatic.org/compare-council-members/"} target="_blank" rel="noopener noreferrer" data-testid="link-alderman-councilmatic">
+                        <span><span className="h" style={{display:'block'}}>Legislation &amp; donors</span><span className="s" style={{display:'block'}}>Voting record &amp; campaign finance · via Councilmatic</span></span>
                         <span className="arr">↗</span>
                       </a>
-                      <div className="wz-wtm">
-                        <div className="wz-wtmh">Why This Matters</div>
-                        <div className="wz-b"><span className="dot"></span><span className="txt"><b>Zoning changes start here.</b> Your alderperson introduces the rezoning or Planned Development ordinance, and City Council almost always follows their lead — a custom known as aldermanic prerogative.</span></div>
-                        <div className="wz-b"><span className="dot"></span><span className="txt"><b>Local permits need their support.</b> Special-use permits, liquor licenses, signs, sidewalk cafés, and curb cuts.</span></div>
-                        <div className="wz-b"><span className="dot"></span><span className="txt"><b>They control $1.5M a year</b> in discretionary ward funds for streets, lighting, and sidewalks.</span></div>
-                        <div className="wz-b"><span className="dot"></span><span className="txt"><b>It's custom, not law.</b> By-right projects don't need their approval — DPD, the Zoning Board of Appeals, and the Plan Commission make the official decisions.</span></div>
+                      <div className="kyp-cxwtm">
+                        <div className="kyp-cxwtmh">Why this matters</div>
+                        <div className="kyp-cxb"><span className="dot"></span><span><b>Zoning changes start here.</b> Your alderperson introduces the rezoning or Planned Development ordinance, and City Council almost always follows their lead — a custom known as aldermanic prerogative.</span></div>
+                        <div className="kyp-cxb"><span className="dot"></span><span><b>Local permits need their support.</b> Special-use permits, liquor licenses, signs, sidewalk cafés, and curb cuts.</span></div>
+                        <div className="kyp-cxb"><span className="dot"></span><span><b>They control $1.5M a year</b> in discretionary ward funds for streets, lighting, and sidewalks.</span></div>
+                        <div className="kyp-cxb"><span className="dot"></span><span><b>It's custom, not law.</b> By-right projects don't need their approval — DPD, the Zoning Board of Appeals, and the Plan Commission make the official decisions.</span></div>
                       </div>
                       {geo.aldermanUrl && (
-                        <a
-                          href={geo.aldermanUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 hover:underline mt-2"
-                          style={{fontSize:'12.5px', fontWeight:500, color:'var(--ref-blue)'}}
-                        >
-                          View Full Ward {geo.ward} Page
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
+                        <a className="kyp-cxlink" href={geo.aldermanUrl} target="_blank" rel="noopener noreferrer">View full Ward {geo.ward} page ↗</a>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 )}
                 {geo.zoning && (
-                  <Card className="rounded-2xl overflow-hidden" style={{background:'#fff', borderColor:'var(--sb-line)', boxShadow:'var(--shadow-sm)'}}>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="chead">
-                        Zoning Details · {geo.zoning}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="font-body">
+                  <div className="kyp-ctxc">
+                    <div className="top" role="button" tabIndex={0} aria-expanded={pvZoningOpen}
+                      onClick={() => setPvZoningOpen((o) => !o)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPvZoningOpen((o) => !o); } }}
+                      data-testid="toggle-zoning-card">
+                      <div className="crest zone"><span className="n">{geo.zoning}</span><span className="u">Zoning</span></div>
+                      <div className="mid">
+                        <div className="k">Zoning district</div>
+                        <div className="nm">{zoningInfo?.name || geo.zoning}</div>
+                        {zoningInfo && (
+                          <div className="sub">
+                            {[zoningInfo.residentialAllowed && 'residential', zoningInfo.commercialAllowed && 'commercial', zoningInfo.industrialAllowed && 'industrial'].filter(Boolean).join(' + ').replace(/^./, (c: string) => c.toUpperCase())}
+                            {zoningInfo.maxFAR && <> · <b>{zoningInfo.maxFAR} FAR</b></>}
+                          </div>
+                        )}
+                      </div>
+                      <div className="chev">{pvZoningOpen ? '⌃' : '⌄'}</div>
+                    </div>
+                    <div className={`body${pvZoningOpen ? '' : ' closed'}`}>
                       {isLoadingZoning ? (
-                        <div className="space-y-3">
+                        <div className="space-y-3 pt-4">
                           <Skeleton className="h-6 w-2/3" />
                           <Skeleton className="h-4 w-full" />
-                          <div className="flex gap-2">
-                            <Skeleton className="h-8 w-24" />
-                            <Skeleton className="h-8 w-24" />
-                            <Skeleton className="h-8 w-24" />
-                          </div>
                         </div>
                       ) : zoningInfo ? (
-                        <div>
-                          <p className="wz-ztitle">{zoningInfo.name}</p>
-                          <p className="wz-zdesc">{zoningInfo.description}</p>
-                          <div className="wz-cats">
+                        <>
+                          <div className="kyp-cxrows">
                             {[
-                              { label: 'Residential', allowed: zoningInfo.residentialAllowed },
-                              { label: 'Commercial', allowed: zoningInfo.commercialAllowed },
-                              { label: 'Industrial', allowed: zoningInfo.industrialAllowed },
-                            ].map(({ label, allowed }) => (
-                              <span key={label} className={`wz-cat ${allowed ? 'on' : 'off'}`}>
-                                <span className="cd"></span>
-                                {label}
+                              { label: 'Residential', allowed: zoningInfo.residentialAllowed, note: zoningInfo.residentialAllowed && zoningInfo.commercialAllowed && (zoningInfo.allowedUses || []).join(' ').toLowerCase().includes('above') ? '— above ground floor' : null },
+                              { label: 'Commercial', allowed: zoningInfo.commercialAllowed, note: null },
+                              { label: 'Industrial', allowed: zoningInfo.industrialAllowed, note: null },
+                            ].map(({ label, allowed, note }) => (
+                              <div key={label} className={`kyp-cxrow${allowed ? ' on' : ''}`}>
                                 <span className="mk">{allowed ? '✓' : '✕'}</span>
-                              </span>
+                                <span className="w">{label}</span>
+                                {note && <span className="note">{note}</span>}
+                              </div>
                             ))}
                           </div>
-                          <div className="wz-zmet">
-                            {zoningInfo.maxFAR && (
-                              <div className="wz-tile">
-                                <div className="l">Max FAR</div>
-                                <div className="n">{zoningInfo.maxFAR}</div>
-                                <div className="s">floor-area ratio</div>
-                              </div>
-                            )}
-                            {zoningInfo.maxHeight && (
-                              <div className="wz-tile">
-                                <div className="l">Max Height</div>
-                                <div className="n">{heightTile(zoningInfo.maxHeight).n}</div>
-                                {heightTile(zoningInfo.maxHeight).sub && <div className="s">{heightTile(zoningInfo.maxHeight).sub}</div>}
-                              </div>
-                            )}
-                            {zoningInfo.parkingMin && (
-                              <div className="wz-tile">
-                                <div className="l">Parking</div>
-                                <div className="n">{parkingTile(zoningInfo.parkingMin).n}</div>
-                                {parkingTile(zoningInfo.parkingMin).sub && <div className="s">{parkingTile(zoningInfo.parkingMin).sub}</div>}
-                              </div>
-                            )}
-                            {zoningInfo.minLotAreaPerUnit != null && (
-                              <div className="wz-tile">
-                                <div className="l">Min Lot Area</div>
-                                <div className="n">{zoningInfo.minLotAreaPerUnit.toLocaleString()}</div>
-                                <div className="s">sq ft per unit</div>
-                              </div>
-                            )}
+                          <div className="kyp-cxtiles">
+                            <div className="kyp-cxtile">
+                              <div className="l">Max FAR</div>
+                              <div className="n">{zoningInfo.maxFAR || 'None'}</div>
+                              <div className="s">{zoningInfo.maxFAR ? 'floor-area ratio' : 'not specified'}</div>
+                            </div>
+                            <div className="kyp-cxtile dark">
+                              <div className="l">Max Height</div>
+                              <div className="n">{zoningInfo.maxHeight ? heightTile(zoningInfo.maxHeight).n : 'None'}</div>
+                              <div className="s">{zoningInfo.maxHeight ? (heightTile(zoningInfo.maxHeight).sub || 'max height') : 'not specified'}</div>
+                            </div>
+                            <div className="kyp-cxtile slate">
+                              <div className="l">Parking</div>
+                              <div className="n">{zoningInfo.parkingMin ? parkingTile(zoningInfo.parkingMin).n : 'None'}</div>
+                              <div className="s">{zoningInfo.parkingMin ? (parkingTile(zoningInfo.parkingMin).sub || 'minimum') : 'not specified'}</div>
+                            </div>
+                            <div className="kyp-cxtile slate">
+                              <div className="l">Min Lot Area</div>
+                              <div className="n">{zoningInfo.minLotAreaPerUnit != null ? zoningInfo.minLotAreaPerUnit.toLocaleString() : 'None'}</div>
+                              <div className="s">{zoningInfo.minLotAreaPerUnit != null ? 'sq ft per unit' : 'not specified'}</div>
+                            </div>
                           </div>
                           {zoningInfo.allowedUses?.length > 0 && (
-                            <div>
-                              <p className="wz-zlbl">Allowed Uses — As of Right</p>
-                              <div className="wz-uses">
+                            <>
+                              <div className="kyp-cxlbl">Allowed uses — as of right</div>
+                              <div className="kyp-cxuses">
                                 {zoningInfo.allowedUses.map((use: string, i: number) => (
-                                  <span key={i} className="wz-use">{use}</span>
+                                  <span key={i} className="kyp-cxuse">{use}</span>
                                 ))}
                               </div>
-                            </div>
+                            </>
                           )}
-                          <div className="wz-wtm" style={{marginTop:0, marginBottom:'18px'}}>
-                            <div className="wz-wtmh">What This Zoning Means</div>
+                          <div className="kyp-cxwtm">
+                            <div className="kyp-cxwtmh">What this zoning means</div>
                             {zoningMeaningBullets(zoningInfo).map((b: { bold: string; text: string }, i: number) => (
-                              <div key={i} className="wz-b"><span className="dot"></span><span className="txt"><b>{b.bold}</b> {b.text}</span></div>
+                              <div key={i} className="kyp-cxb"><span className="dot"></span><span><b>{b.bold}</b> {b.text}</span></div>
                             ))}
                           </div>
-                          <div className="wz-zfoot">
+                          <div className="kyp-cxfoot">
                             Data may not reflect recent rezonings.{' '}
-                            <a
-                              href="https://gisapps.chicago.gov/ZoningMapWeb/?liab=1&config=zoning"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Verify on the official map
-                            </a>
-                            {geo.tractGeoid ? <> — search by <span className="mono-pin">{geo.tractGeoid}</span></> : ''}
-                            <br />
-                            <a
-                              className="wz-zlink"
-                              href="https://codelibrary.amlegal.com/codes/chicago/latest/chicagozoning_il/0-0-0-48750"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <ExternalLink />
-                              Chicago Zoning Code — Use Standards &amp; Regulations
-                            </a>
+                            <a href="https://gisapps.chicago.gov/ZoningMapWeb/?liab=1&config=zoning" target="_blank" rel="noopener noreferrer">Verify on the official map</a>
+                            {geo.tractGeoid ? <> — search by <span className="pin">{geo.tractGeoid}</span></> : ''}
                           </div>
-                        </div>
+                          <a className="kyp-cxlink" href="https://codelibrary.amlegal.com/codes/chicago/latest/chicagozoning_il/0-0-0-48750" target="_blank" rel="noopener noreferrer">Chicago Zoning Code — Use Standards ↗</a>
+                        </>
                       ) : (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground pt-4">
                           Zoning information not available for this code. Check with Chicago DPD for details.
                         </p>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 )}
               </div>
             )}

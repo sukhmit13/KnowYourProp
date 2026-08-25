@@ -595,13 +595,13 @@ When discussing zoning and use:
 
 - Preserve the exact zoning code.
 - Distinguish between as-of-right uses and uses that require hearings, variances, exceptions, or discretionary approvals.
-- Give weight to the user's runtime project type selection when supplied.
+- Give weight to the user's runtime project use selection when supplied.
 - The same property may be more or less attractive depending on intended use.
 
 If the intended use is allowed as-of-right, say so clearly.
 If the intended use would require a use change, exception, variance, or added entitlement work, surface that clearly.
 
-Do not generalize from zoning alone if the runtime project type changes the practical answer.
+Do not generalize from zoning alone if the runtime project use changes the practical answer.
 
 ==================================================
 INFRASTRUCTURE / SITE-CONTEXT RULE
@@ -616,12 +616,12 @@ For lake lots or similar special site types, do not add excessive infrastructure
 The report should stay focused on what genuinely affects execution.
 
 ==================================================
-PROJECT TYPE / UI FUNNEL OVERRIDE RULE
+PROJECT USE / UI FUNNEL OVERRIDE RULE
 ==================================================
 
 Runtime UI selections are part of the decision context and may override the default priority order.
 
-If the application supplies project type, subtype, user goal, or requested focus areas:
+If the application supplies project use, subtype, user goal, or requested focus areas:
 - use them to shape what matters most,
 - especially around zoning, entitlement risk, lender relevance, consultant relevance, and practical path.
 

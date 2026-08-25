@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--takeBorder:#dde1f6;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4f2ec;font-family:var(--sans);color:var(--ink);padding:34px 40px}
+  .wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+  .vlabel{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--indigo);text-transform:uppercase;letter-spacing:.06em;margin-bottom:-10px}
+  .chartcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 24px 18px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+  .chd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+  .chd .t{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+  .chd .t span{color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px}
+  .chgbadge{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--indigo);background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:8px;padding:6px 11px}
+  .chgbadge svg{width:13px;height:13px;stroke:var(--indigo);fill:none}
+  .plot{width:100%;height:auto;display:block}
+  .fine{font-family:var(--mono);font-size:9.5px;color:var(--muted);line-height:1.5;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="vlabel">Version B — twin columns · 2 transactions (this property)</div>
+  <div class="chartcard">
+    <div class="chd"><div class="t">Price by transaction<span>chronological · not to scale</span></div><span class="chgbadge"><svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 17 6-6 4 4 6-6"/><path d="M16 7h4v4"/></svg>+$1.0M · 3.0×</span></div>
+    <svg class="plot" viewBox="0 0 620 250" preserveAspectRatio="xMidYMid meet">
+      <line x1="120" y1="195" x2="500" y2="195" stroke="#e7e5df" stroke-width="1"/>
+      <rect x="185" y="142" width="72" height="53" rx="5" fill="#9aa1b0"/>
+      <rect x="365" y="35" width="72" height="160" rx="5" fill="#2b3a9e"/>
+      <text x="221" y="130" text-anchor="middle" font-family="Instrument Serif,serif" font-size="28" fill="#141414">$500K</text>
+      <text x="401" y="24" text-anchor="middle" font-family="Instrument Serif,serif" font-size="32" fill="#2b3a9e">$1.5M</text>
+      <text x="221" y="218" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12.5" font-weight="700" fill="#54544f">2003</text>
+      <text x="401" y="218" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12.5" font-weight="700" fill="#141414">2019</text>
+      <text x="221" y="236" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#8b8a84">FIRST RECORDED</text>
+      <text x="401" y="236" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#8b8a84">MOST RECENT</text>
+    </svg>
+  </div>
+
+  <div class="vlabel">Version B — twin columns · 4 transactions (how it scales)</div>
+  <div class="chartcard">
+    <div class="chd"><div class="t">Price by transaction<span>chronological · not to scale</span></div><span class="chgbadge"><svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 17 6-6 4 4 6-6"/><path d="M16 7h4v4"/></svg>+$1.0M · 3.0×</span></div>
+    <svg class="plot" viewBox="0 0 620 250" preserveAspectRatio="xMidYMid meet">
+      <line x1="80" y1="195" x2="540" y2="195" stroke="#e7e5df" stroke-width="1"/>
+      <!-- 4 columns: heights ∝ price (max 1500 → 160px) -->
+      <rect x="108" y="142" width="60" height="53"  rx="5" fill="#9aa1b0"/>
+      <rect x="223" y="130" width="60" height="65"  rx="5" fill="#9aa1b0"/>
+      <rect x="338" y="100" width="60" height="95"  rx="5" fill="#9aa1b0"/>
+      <rect x="453" y="35"  width="60" height="160" rx="5" fill="#2b3a9e"/>
+      <text x="138" y="131" text-anchor="middle" font-family="Instrument Serif,serif" font-size="23" fill="#141414">$500K</text>
+      <text x="253" y="119" text-anchor="middle" font-family="Instrument Serif,serif" font-size="23" fill="#141414">$610K</text>
+      <text x="368" y="89"  text-anchor="middle" font-family="Instrument Serif,serif" font-size="23" fill="#141414">$890K</text>
+      <text x="483" y="24"  text-anchor="middle" font-family="Instrument Serif,serif" font-size="27" fill="#2b3a9e">$1.5M</text>
+      <text x="138" y="216" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#54544f">2003</text>
+      <text x="253" y="216" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#54544f">2008</text>
+      <text x="368" y="216" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#54544f">2014</text>
+      <text x="483" y="216" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#141414">2019</text>
+      <text x="138" y="234" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#8b8a84">FIRST</text>
+      <text x="483" y="234" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#8b8a84">MOST RECENT</text>
+    </svg>
+    <div class="fine">Illustrative — this property has 2 sales; shown with 4 to demonstrate scaling. One series (all one color); most-recent value tinted. Height = price, so growth stays visual as columns are added.</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1627,17 +1627,6 @@ export interface ProximityData {
     dailyTraffic: number;
     dataYear: string;
   } | null;
-  newConstruction: {
-    distanceFt: number;
-    nearestPin: string;
-    dataYear: string;
-    past5Years: Array<{
-      year: string;
-      pin10: string;
-      distanceFt: number;
-    }>;
-    countInHalfMilePast5Years: number;
-  } | null;
   vacantLand: {
     distanceFt: number;
     nearestPin: string;
@@ -1701,20 +1690,6 @@ export async function fetchProximityData(pin14: string): Promise<ProximityData |
     const row = data[0];
     console.log(`[PROXIMITY API] Found data for year: ${row.year}, total rows: ${data.length}`);
     
-    const newConstructionPast5Years = data
-      .filter((r: any) => r.nearest_new_construction_pin10)
-      .map((r: any) => ({
-        year: r.year || '',
-        pin10: r.nearest_new_construction_pin10,
-        distanceFt: parseFloat(r.nearest_new_construction_dist_ft) || 0,
-      }));
-    const halfMileFt = 2640;
-    const uniqueNewConstructionInHalfMile = new Set(
-      newConstructionPast5Years
-        .filter((nc: any) => nc.distanceFt <= halfMileFt)
-        .map((nc: any) => nc.pin10)
-    ).size;
-    
     return {
       dataYear: row.year || '',
       numPinsInHalfMile: parseInt(row.num_pin_in_half_mile) || 0,
@@ -1752,13 +1727,6 @@ export async function fetchProximityData(pin14: string): Promise<ProximityData |
         distanceFt: parseFloat(row.nearest_road_highway_dist_ft) || 0,
         dailyTraffic: parseFloat(row.nearest_road_highway_daily_traffic) || 0,
         dataYear: row.nearest_road_highway_data_year || row.year || '',
-      } : null,
-      newConstruction: row.nearest_new_construction_pin10 ? {
-        distanceFt: parseFloat(row.nearest_new_construction_dist_ft) || 0,
-        nearestPin: row.nearest_new_construction_pin10,
-        dataYear: row.nearest_new_construction_data_year || row.year || '',
-        past5Years: newConstructionPast5Years,
-        countInHalfMilePast5Years: uniqueNewConstructionInHalfMile,
       } : null,
       vacantLand: row.nearest_vacant_land_pin10 ? {
         distanceFt: parseFloat(row.nearest_vacant_land_dist_ft) || 0,

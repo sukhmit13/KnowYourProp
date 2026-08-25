@@ -60,7 +60,7 @@ function mixLabel(e: {
   // fall back to work-type mix
   if ((e.renovationCount || 0) >= (e.newConstructionCount || 0) && (e.renovationCount || 0) > 0) return 'mostly renovations';
   if ((e.newConstructionCount || 0) > 0) return 'mostly new construction';
-  return 'mixed project types';
+  return 'mixed project uses';
 }
 
 /** Build a normalized-name index; names that collide (2+ entries) are marked ambiguous and never match. */

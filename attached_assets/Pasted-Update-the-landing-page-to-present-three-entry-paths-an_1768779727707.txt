@@ -1,0 +1,64 @@
+Update the landing page to present three entry paths and clarify behavior parity.
+
+Scope:
+- Copy + UI changes only.
+- Do NOT change existing routing, data extraction logic, or APIs.
+- All paths must reuse existing analysis logic.
+
+1) Hero section (unchanged copy):
+Heading:
+"Have a property in mind?"
+
+Subheading:
+"Enter an address below to review zoning details, eligibility, and location-based development incentives."
+
+Address placeholder:
+"Enter a Chicago address to screen the site…"
+
+Behavior:
+- Address-based search remains the primary flow.
+- Clicking Analyze runs the full existing analysis.
+
+2) Area-based option (ZIP / Neighborhood):
+Title:
+"Don’t have a specific site in mind, but know your ZIP code or neighborhood?"
+
+Body (IMPORTANT – add this sentence):
+"Searching by ZIP code or neighborhood will return the same analysis as an address—showing all applicable zoning, eligibility, and incentive data available at the area level."
+
+Button:
+"Explore by Area →"
+
+Behavior:
+- ZIP / Community Area selection should render the same results page structure used for address-based searches.
+- Populate all data that can be derived at the area level.
+- Do NOT require an address to proceed.
+
+3) Citywide option:
+Title:
+"Just want to look citywide?"
+
+Body:
+"Explore citywide data to identify underserved areas, funding-eligible locations, and neighborhood-level patterns."
+
+Button:
+"Explore Citywide →"
+
+Behavior:
+- Route to the existing citywide exploration view.
+- No address or area selection required.
+
+4) Project-type logic clarification (IMPORTANT):
+- After any entry path (address, ZIP, neighborhood), allow the user to select a project type.
+- Project type selection should:
+  - Add or surface additional datasets relevant to that project type
+  - NOT remove or override baseline zoning and eligibility outputs
+- Baseline outputs must remain consistent across all entry paths.
+
+5) Ensure the previously removed three-column feature section remains deleted.
+
+Deliverable:
+- Landing page presents three clear entry paths.
+- ZIP / Neighborhood searches yield the same outputs as address searches where applicable.
+- Project type selection layers in additional, relevant data without changing core results.
+- No other functional changes.

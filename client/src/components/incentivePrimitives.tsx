@@ -107,7 +107,8 @@ export function IncentiveCardRow({ state, name, badge, open }: { state: IncAvail
   );
 }
 
-export function IncentiveTypeLabel({ children, order }: { children: React.ReactNode; order: number }) {
+export function IncentiveTypeLabel({ children, order, variant = "current" }: { children: React.ReactNode; order: number; variant?: "current" | "hybrid" }) {
+  if (variant === "hybrid") return <span className="kic-type print:hidden" style={{ order }}>{children}</span>;
   return <p className="font-jbmono text-[9.5px] font-bold uppercase tracking-[0.07em] text-muted-foreground mt-2 print:hidden" style={{ order }}>{children}</p>;
 }
 

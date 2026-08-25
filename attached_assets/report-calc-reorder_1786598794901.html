@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:"Instrument Serif";font-weight:400;src:url("ogfonts/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:400;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:500;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:600;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inter";font-weight:700;src:url("ogfonts/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2")}
+  :root{--paper:#faf9f6;--wash:#f4f2ec;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;
+    --indigo:#2b3a9e;--indigoSoft:#eef0fb;--good:#2f7d3f;--goodSoft:#e9f4ec;--caution:#f0a41c;--cautionText:#96600a;--cautionSoft:#fdf8f0;--bad:#c0392b;
+    --sans:"Inter",sans-serif;--disp:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--wash);font-family:var(--sans);color:var(--ink);padding:26px}
+  .wrap{max-width:820px;margin:0 auto}
+  .cap{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8a897f;margin:0 0 9px 2px}
+  .cap.sp{margin-top:22px}.cap .n{color:var(--indigo)}
+
+  .rail{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card);margin-bottom:8px}
+  .step{flex:1;padding:11px 8px;border-right:1px solid var(--line);text-align:center;position:relative}
+  .step:last-child{border-right:none}
+  .step .n{display:inline-flex;width:18px;height:18px;border-radius:5px;background:var(--indigoSoft);color:var(--indigo);font-size:10px;font-weight:700;align-items:center;justify-content:center;margin-bottom:6px}
+  .step .t{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink);line-height:1.3}
+  .step.moved{background:var(--indigoSoft)}.step.moved .n{background:var(--indigo);color:#fff}.step.moved .t{color:var(--indigo)}
+  .step .swap{position:absolute;top:-1px;right:3px;font-family:var(--mono);font-size:6.5px;font-weight:700;color:#fff;background:var(--good);border-radius:0 0 4px 4px;padding:1px 4px}
+  .flow{text-align:center;font-size:11px;color:var(--ink2);margin-bottom:4px}.flow b{color:var(--ink)}
+
+  /* mode header — single static indicator */
+  .mhead{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+  .mhead .lbl{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .mhead .mode{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .mhead .mode .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--indigo);margin-right:7px}
+  .mhead .tier{margin-left:auto;display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .mhead .tier span{font-size:11px;font-weight:600;padding:6px 13px;color:var(--ink2)}
+  .mhead .tier span.on{background:var(--indigo);color:#fff}
+  .mhead .from{font-size:10px;color:var(--muted);width:100%;margin-top:2px}
+
+  /* revised step 1 */
+  .s1{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .s1h{display:flex;align-items:center;gap:9px;padding:13px 16px 6px}
+  .s1h .num{width:20px;height:20px;border-radius:5px;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+  .s1h .t{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+  .s1h .r{margin-left:auto;font-size:10.5px;color:var(--muted)}
+  .cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;padding:8px 16px 16px}
+  .col{padding:0 16px;border-right:1px solid var(--line)}
+  .col:first-child{padding-left:0}.col:last-child{border-right:none;padding-right:0}
+  .col .h{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+  .lab{font-size:11px;color:var(--ink2);margin-bottom:5px}
+  .inp{border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--paper);font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px}
+  .inp .pre{color:var(--muted);font-weight:500}
+  .sel{border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--paper);font-size:11.5px;color:var(--ink2);display:flex;align-items:center;justify-content:space-between}
+  .sel svg{width:11px;height:11px;stroke:var(--muted);fill:none;stroke-width:2}
+  .sub{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .builds{font-size:10.5px;color:var(--indigo);font-weight:600;margin-top:8px;display:inline-flex;align-items:center;gap:5px}
+  .builds svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+  .old{font-size:10px;color:var(--bad);margin-top:8px;text-decoration:line-through;opacity:.7}
+
+  .note{background:#fff;border:1px solid var(--line);border-radius:11px;padding:14px 16px;font-size:12px;color:var(--ink2);line-height:1.6;margin-top:16px}
+  .note b{color:var(--ink)}.note .k{font-family:var(--mono);font-size:10.5px;color:var(--indigo)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="cap">Reordered — <span class="n">build before judge</span> (Income → NOI moves ahead of Deal at a Glance)</div>
+  <div class="rail">
+    <div class="step"><span class="n">1</span><div class="t">Enter the Deal</div></div>
+    <div class="step moved"><span class="swap">↑ was 3</span><span class="n">2</span><div class="t">Income → NOI</div></div>
+    <div class="step moved"><span class="swap">↓ was 2</span><span class="n">3</span><div class="t">Deal at a Glance</div></div>
+    <div class="step"><span class="n">4</span><div class="t">Coverage Check</div></div>
+    <div class="step"><span class="n">5</span><div class="t">How it's Calculated</div></div>
+  </div>
+  <div class="flow">inputs → <b>NOI built</b> → verdict → coverage → reference</div>
+
+  <div class="cap sp">Mode header — one static indicator, not a 3-way with two greyed out</div>
+  <div class="mhead">
+    <span class="lbl">Analyzing as</span><span class="mode"><span class="dot"></span>Investor · buy-to-lease</span>
+    <span class="tier"><span class="on">Simple</span><span>Advanced</span></span>
+    <span class="from">From your project type: Coffee Shop / Cafe → Investor. (Owner-occupant &amp; Tenant modes arrive later — no "coming soon" clutter until they're real.)</span>
+  </div>
+
+  <div class="cap sp">Step 1 — inputs only; the odd forward-pointing NOI is gone</div>
+  <div class="s1">
+    <div class="s1h"><span class="num">1</span><span class="t">Enter the Deal</span><span class="r">purchase · financing · income basis</span></div>
+    <div class="cols">
+      <div class="col">
+        <div class="h">Purchase</div>
+        <div class="lab">Purchase price</div>
+        <div class="inp"><span class="pre">$</span>825,000</div>
+        <div class="sub">Asking price or your offer</div>
+      </div>
+      <div class="col">
+        <div class="h">Financing</div>
+        <div class="lab">Loan type</div>
+        <div class="sel">Conventional · 20% / 30yr<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="sub">Rate 6.69% · Freddie Mac PMMS</div>
+      </div>
+      <div class="col">
+        <div class="h">Income basis</div>
+        <div class="lab">Rent basis</div>
+        <div class="sel">Market · 2BR $3,195 × 4<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="builds"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>NOI is built in Step 2</div>
+        <div class="old">✗ NOI $98,044 · see breakdown ↓ (Step 3)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Two fixes, one reorder.</b> Moving <span class="k">Income → NOI</span> to Step 2 fixes both oddities: the verdict (Deal at a Glance) now comes <b>after</b> the NOI it's built from, and Step 1 no longer shows a computed number that points forward — it holds the <b>rent basis input</b>, and NOI first appears where it's built.<br>
+    <b>Mode header.</b> Until Owner-occupant &amp; Tenant are built, show a single "Investor · buy-to-lease" indicator instead of a 3-way selector with two disabled. Reintroduce the selector when those modes are real. (Everything else — the transparent NOI, Simple/Advanced, both DSCRs, the flags — stays exactly as built.)
+  </div>
+
+</div>
+</body>
+</html>

@@ -101,6 +101,59 @@ export const propertyTaxFetchLog = pgTable("property_tax_fetch_log", {
   fetchedAt: timestamp("fetched_at").defaultNow(),
 });
 
+// West Town tax-delinquency pilot. This is intentionally separate from the
+// one-off property tax cache: it stores the bounded parcel universe, durable
+// scan queue, and historical Treasurer observations used by Market Discovery.
+export const westTownTaxParcels = pgTable("west_town_tax_parcels", {
+  id: serial("id").primaryKey(),
+  pin: text("pin").notNull().unique("west_town_tax_parcels_pin_key"),
+  address: text("address"),
+  city: text("city"),
+  zipCode: text("zip_code"),
+  latitude: numeric("latitude"),
+  longitude: numeric("longitude"),
+  communityAreaNumber: integer("community_area_number").notNull().default(24),
+  seedSource: text("seed_source").notNull().default("cook_county_assessor"),
+  queueStatus: text("queue_status").notNull().default("pending"), // pending | in_progress | retry_wait | checked | unknown
+  attemptCount: integer("attempt_count").notNull().default(0),
+  nextAttemptAt: timestamp("next_attempt_at"),
+  lastAttemptAt: timestamp("last_attempt_at"),
+  lastCheckedAt: timestamp("last_checked_at"),
+  lastError: text("last_error"),
+  currentStatus: text("current_status"), // current | delinquent | sold | unknown; only Treasurer-confirmed statuses are shown as confirmed
+  currentAmountDue: numeric("current_amount_due"),
+  oldestUnpaidYear: integer("oldest_unpaid_year"),
+  taxYearsJson: jsonb("tax_years_json"),
+  statusSource: text("status_source").notNull().default("pilot_scan"), // pilot_scan
+  treasurerBillUrl: text("treasurer_bill_url").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const westTownTaxSnapshots = pgTable("west_town_tax_snapshots", {
+  id: serial("id").primaryKey(),
+  parcelId: integer("parcel_id").notNull(),
+  pin: text("pin").notNull(),
+  attemptNumber: integer("attempt_number").notNull(),
+  outcome: text("outcome").notNull(), // current | delinquent | sold | unknown | error
+  amountDue: numeric("amount_due"),
+  oldestUnpaidYear: integer("oldest_unpaid_year"),
+  taxYearsJson: jsonb("tax_years_json"),
+  treasurerBillUrl: text("treasurer_bill_url").notNull(),
+  errorMessage: text("error_message"),
+  checkedAt: timestamp("checked_at").defaultNow(),
+});
+
+export const westTownTaxPilotSettings = pgTable("west_town_tax_pilot_settings", {
+  id: integer("id").primaryKey(), // single row: 1
+  scanEnabled: boolean("scan_enabled").notNull().default(false),
+  universeSeededAt: timestamp("universe_seeded_at"),
+  lastScannerStartedAt: timestamp("last_scanner_started_at"),
+  lastActivityAt: timestamp("last_activity_at"),
+  lastError: text("last_error"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Lien / Recorder of Deeds Cache
 export const lienCache = pgTable("lien_cache", {
   id: serial("id").primaryKey(),
@@ -372,6 +425,12 @@ export interface LienDocument {
   releasesDocNumbers?: string[];
   // For LIEN/MORTGAGE documents: true if a release document explicitly references this document
   isReleased?: boolean;
+  // Heuristic: lien/mortgage is over 2 years old with no release on record — statistically unlikely to be enforced
+  isProbablyCleared?: boolean;
+  // True when the grantor is a water department (City utility)
+  isWaterDept?: boolean;
+  // Maturity date scraped from mortgage document text
+  maturityDate?: string;
   // Direct URL to the Cook County Recorder document detail page
   viewLink?: string;
 }
@@ -398,8 +457,14 @@ export interface LienResult {
   // Active status (liens not offset by releases)
   activeLienCount: number;
   activeMortgageCount: number;
+  /** Count of active (non-released) lis pendens / litigation filings */
+  activeListPendensCount: number;
+  /** Count of active water-department liens */
+  waterDeptLienCount: number;
   hasForeclosure: boolean;
   overallStatus: 'clear' | 'has_liens' | 'has_foreclosure' | 'unknown';
+  /** True when the scrape itself failed — absence of data is NOT the same as clean title */
+  searchFailed?: boolean;
   // Owner name search results
   ownerName: string | null;
   ownerLiens: LienDocument[];
@@ -529,7 +594,7 @@ export const compareHistory = pgTable("compare_history", {
   id: serial("id").primaryKey(),
   runIds: jsonb("run_ids").notNull().$type<number[]>(), // Array of run IDs that were compared
   addresses: jsonb("addresses").notNull().$type<string[]>(), // Array of addresses for display even if runs are deleted
-  projectTypes: jsonb("project_types").$type<(string | null)[]>(), // Array of project types for each run
+  projectTypes: jsonb("project_types").$type<(string | null)[]>(), // Array of project uses for each run
   createdAt: timestamp("created_at").defaultNow(),
   userId: text("user_id"), // Owner email — scopes compare history per account
 });
@@ -546,7 +611,7 @@ export const zbaCases = pgTable("zba_cases", {
   applicantName: text("applicant_name"),
   representativeRaw: text("representative_raw"), // raw "Appearance:" line
   representativeNorm: text("representative_norm"), // normalized name for grouping
-  outcome: text("outcome").notNull(), // APPROVED, DENIED, WITHDRAWN, OTHER
+  outcome: text("outcome").notNull(), // APPROVED, DENIED, WITHDRAWN, CONTINUED, OTHER
   pdfUrl: text("pdf_url").notNull(),
   rawCaseText: text("raw_case_text"), // for debugging
   createdAt: timestamp("created_at").defaultNow(),
@@ -593,7 +658,7 @@ export type ZbaIndexRun = typeof zbaIndexRuns.$inferSelect;
 export type CreateZbaCaseRequest = z.infer<typeof insertZbaCaseSchema>;
 
 // ZBA Outcome types
-export const ZBA_OUTCOMES = ['APPROVED', 'DENIED', 'WITHDRAWN', 'OTHER'] as const;
+export const ZBA_OUTCOMES = ['APPROVED', 'DENIED', 'WITHDRAWN', 'CONTINUED', 'OTHER'] as const;
 export type ZbaOutcome = typeof ZBA_OUTCOMES[number];
 
 // Rep Verification Status types

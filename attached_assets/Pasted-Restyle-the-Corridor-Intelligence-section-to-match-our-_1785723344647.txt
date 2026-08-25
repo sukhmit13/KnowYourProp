@@ -1,0 +1,25 @@
+Restyle the "Corridor Intelligence" section to match our report design system, and convert the section summary into stat tiles. Front-end / styling only — do NOT change the corridor data, the tier logic, the distance calc, routing, or auth. The two attached HTML files are the visual reference: report-corridor-collapsed.html (default state, all corridors closed) and report-corridor.html (one corridor expanded).
+
+Design tokens (use existing CSS variables; add any missing):
+
+JetBrains Mono for the section title, distances, tier badges, and column labels; Inter for corridor names + body; Instrument Serif for the big summary-tile numbers
+--indigo:#2b3a9e, --indigoSoft:#ecedf9, --ink:#141414, --ink2:#565651, --muted:#8b8a84, --line:#eae8e2, --paper:#faf9f6
+
+Section header: single indigo icon + "CORRIDOR INTELLIGENCE" in mono uppercase, bottom border --line. One icon only, no bullet. Muted subtitle beneath ("Major commercial corridors within 0.5 miles of this property").
+
+Convert the SECTION SUMMARY bullets into a 4-up row of stat tiles. Each tile (--paper background, --line border, rounded 11px): the count as a large Instrument Serif number, a bold --ink2 label beneath (New construction permits / New business licenses / News articles / Zoning appeal), and a small muted sub-line carrying the detail + source (e.g. "4 corridors · 28 units · via City Permits"). Keep every fact currently in the bullets — just lead with the number.
+
+Corridor row (collapsed):
+
+Indigo nav/arrow icon, then the corridor name in Inter bold (not monospace — it's a name, not a code label).
+Tier badge: mono, rounded. Tier 1 → --indigoSoft background, indigo text, label "Tier 1 · Primary". Tier 2 → neutral 
+#f1efe9 background, --ink2 text, label "Tier 2 · Emerging". (Spell out Primary/Emerging so the tier is self-explanatory.)
+Distance in mono muted ("0.18 mi away").
+Right side: neutral count pills (--paper background, --line border, rounded-full) each with a small indigo leading icon — licenses / permits / article / appeal. Then a down chevron to expand.
+Description line in --ink2 beneath, indented under the name.
+
+Corridor row (expanded): below the row, a two-column layout — "NEW BUSINESS LICENSES" (left) and "NEW CONSTRUCTION" (right), each a mono-uppercase label with an indigo icon. License entries: business name in Inter bold, date in mono muted (right-aligned), address in mono, category tags as neutral --paper chips. Construction entries: address in Inter bold, date in mono muted, then key/value detail lines (type · use · distance, stories · units · value, architect · contractor) in --ink2 with bold --ink on the key figures. Below both columns, a "RECENT COVERAGE" mono label with article title (Inter semibold) + source/date (muted). Keep this structure exactly — only type and color change.
+
+Footnote: "Showing corridors within 0.5 miles. Tier 1 = primary commercial corridor · Tier 2 = secondary / emerging corridor." in muted text.
+
+No black anywhere; keep it factual — no ranking, scores, or editorializing. Icons indigo, count pills and category tags neutral.

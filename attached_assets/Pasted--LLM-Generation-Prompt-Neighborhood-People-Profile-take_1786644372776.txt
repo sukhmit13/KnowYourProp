@@ -1,0 +1,79 @@
+# LLM Generation Prompt — Neighborhood People Profile takeaway
+
+Production prompt the backend sends the model to write the **Neighborhood People Profile** (demographics) takeaway. Returns Standard Takeaway JSON. Demographics + an investment lens is the single most fair-housing-sensitive section in the report — the guardrails are non-negotiable.
+
+## 🔴 GOVERNING RULE — Report-Data-First
+`cross_reference_allowed: false`. Every figure comes from THIS section's own data (ACS, HMDA, LEHD, elections). No world knowledge, no other sections, no external lookups.
+
+## 🔴 THREE TIERS — decide by *legitimate business use*, not by "is it sensitive"
+Don't bury everything sensitive. Tier each attribute by whether it has a real, non-steering market use:
+
+**Tier A — market-economic (rate freely; carry the thesis):** income, poverty, education, employment, **tenure mix (owner/renter)**, vacancy, home values, gross rents, population growth, median age (as rental-demand context), the **daytime economy**, and the **buyer-financing profile** (application/origination/denial counts & rates, income, DTI, age, financing type).
+
+**Tier B — sensitive-adjacent but with a legitimate business use (allowed as neutral `insight` rows, framed by that use, never by desirability):**
+- **Language** → a customer / tenant-base **operational** signal: share speaking a language other than English, top languages, limited-English share → bilingual signage/staffing for a customer-facing use, tenant-outreach reach for a landlord. Frame commercially; NEVER as "foreignness," a desirability signal, or tied to national origin as a value judgment.
+- **Ballot measures on property / tax / wage / zoning / rent** → a **cost & policy** signal: how the electorate voted on measures that bear on **transaction costs, operating costs, or land use** (e.g. a real-estate transfer tax, minimum wage). State the measure and outcome factually and note the cost bearing; do NOT say whether the outcome is good or bad, and do NOT frame by party.
+
+**Tier C — protected composition & partisan lean (CONTEXT ONLY — reported, not rated, never a signal):** **race, ethnicity, color, national origin, religion, familial status, disability, sex, and overall political affiliation/lean.** State the fact/trend neutrally in the labeled **"Context — reported, not rated"** area. Never rate it, never tie it to value/desirability/risk, never steer (who "should" live/buy there), never imply a group's presence changes value.
+
+## 🔴 FAIR-HOUSING FIREWALL (non-negotiable, applies across all tiers)
+1. **Tier C attributes never rate the neighborhood** and never appear outside the neutral context area.
+2. **Tier B is framed by its business use, never by desirability.** Language = commercial/tenant reach; ballot measures = cost/policy. Never partisan, never "who lives here is good/bad."
+3. **HMDA firewall.** Use HMDA **counts and rates** (applications, % originated, % denied), applicant **income, DTI, age, financing/loan type**. **NEVER** characterize the buyer pool by applicant **race, ethnicity, or sex** — those charts exist for fair-lending transparency, not for a desirability read.
+4. **No coded change-language.** Describe change through income / value / rent / tenure figures. **Never** use "up-and-coming," "improving," "transitional," "revitalizing," "pioneer," "emerging," or displacement/"who's moving in-or-out" framing, and never tie neighborhood change to racial/ethnic/religious composition.
+5. **Never label the neighborhood** "good/bad/desirable/nice/safe/rough." Use market vocabulary and figures (submarket, tenure, basis, absorption, rent growth).
+6. **Same calm register** whether figures rose or fell.
+7. **Excluded from this takeaway entirely:** places of worship / religious institutions, and recently-sold comps. Do not reference them.
+
+## INPUT (this section's own data; computed in code)
+```json
+{
+  "geo":"West Town · ZIP 60642",
+  "acs":{ "pop_change_pct":4.6, "median_age":[31.2,32.5],
+    "median_hh_income":[101939,141179], "median_hh_income_change_pct":38.5,
+    "per_capita_income_change_pct":58.9, "below_poverty_pct":[11.0,8.3],
+    "owner_occ_pct":[39.1,32.5], "renter_occ_pct":[60.9,67.5], "housing_vacancy_pct":[9.2,6.3],
+    "median_home_value":[426500,604200], "median_home_value_change_pct":41.7,
+    "median_gross_rent":[1642,2216], "median_gross_rent_change_pct":35.0, "transit_commute_pct":38.3 },
+  "hmda":{ "applications":3890, "originated_pct":50.6, "denied_pct":8.6,
+    "buyer_age_top_band":"25-34", "buyer_income_top_band":">$200k", "buyer_dti_mostly":"<43%" },
+  "daytime":{ "jobs_here":823, "residents_leave":2283, "net_pull":-1460,
+    "top_industries":["Food Service & Accommodation","Arts & Entertainment","Retail Trade"] },
+  "context_only":{ "voting_lean":"Strongly Democratic", "avg_dem_margin":"D+72.7%",
+    "non_english_home_pct":31.5, "top_languages":["Spanish","Polish","Chinese"] }
+}
+```
+Note: `context_only` = protected/political attributes. They may appear ONLY in the neutral "Context — reported, not rated" area, never in a rated row.
+
+## OUTPUT — return JSON only (Standard Takeaway shape)
+```json
+{ "title":"…one sophisticated, factual sentence…",
+  "rows":[ {"tone":"good|caution|insight|neutral","html":"…","chip":"ACS 5-yr"|"HMDA 2025"|"Verify basis"|null} ],
+  "context_note":"…one neutral sentence for protected/political attributes, or null…" }
+```
+Aim for **5–6 rated rows + one context_note.** Suggested spine (adapt to the data):
+1. `good` — **income base** (Tier A): median HH & per-capita income change, poverty direction.
+2. `insight` — **tenure & rental demand** (Tier A): renter share + change, vacancy, gross-rent change.
+3. `caution` — **basis/affordability** (Tier A): home-value change; steep → "underwrite to today's price" (chip `Verify basis`). Flat/soft → make it `insight`.
+4. `insight` — **language / customer-&-tenant base** (Tier B): non-English share, top languages, LEP → operational read for a customer-facing use or a landlord.
+5. `insight` — **ballot / policy signals** (Tier B): property-relevant measures (transfer tax, wage, zoning, rent) and outcomes → transaction/operating-cost bearing. Factual, non-partisan.
+6. `insight` — **daytime character** (Tier A): transit share, net daytime pull, top job industries; and/or the **buyer pool** (HMDA counts/rates + income/DTI/age only).
+- `context_note` — Tier C only: race/ethnicity composition/trend + partisan lean, neutral, explicitly "background, not rated."
+
+### Coloring
+- `good` — genuinely market-favorable economic facts (rising incomes supporting rents, tightening rental demand).
+- `caution` — a real investor watch-out (stretched entry basis, affordability/absorption risk). Never red, never a verdict on residents.
+- `insight` — neutral market context (buyer pool, daytime economy, tenure structure).
+- `neutral` — daytime character and the context_note.
+- **Never `bad`/red for demographics. Never a rating on protected/political attributes.**
+
+### Headline
+One sophisticated, factual sentence built from the economic signals — e.g. "A fast-appreciating, renter-majority submarket carried by sharply rising household incomes — strong rental fundamentals against a stretched entry basis." No characterizing language, no protected-class content in the title.
+
+### Self-check before returning
+1. Zero protected/sensitive attribute used as a rating, desirability, or steering signal; those live only in `context_note`. (Firewall 1)
+2. HMDA framed by counts/rates + income/DTI/age — never applicant race/ethnicity/sex. (Firewall 3)
+3. No coded change-language ("up-and-coming," etc.); change shown via income/value/rent/tenure figures. (Firewall 4)
+4. No "good/bad/desirable/safe" neighborhood labels; market vocabulary only. (Firewall 5)
+5. No places of worship, no comps. (Firewall 7)
+6. Every figure from the input; `cross_reference_allowed:false`. Valid JSON, ≤5 rated rows.

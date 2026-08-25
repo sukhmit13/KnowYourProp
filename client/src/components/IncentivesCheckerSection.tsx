@@ -52,7 +52,7 @@ function grantTypeLabel(gt: string) {
   return gt;
 }
 
-function ProgramCard({ result, order, id, className }: { result: CheckResult; order: number; id: string; className?: string }) {
+function ProgramCard({ result, order, id, className, variant = "current" }: { result: CheckResult; order: number; id: string; className?: string; variant?: "current" | "hybrid" }) {
   const state: IncentiveState = result.status === "in_area" || result.status === "potentially_eligible" ? "good" : result.status === "manual_check" || result.status === "data_pending" ? "caution" : "na";
   const columns = result.lenders?.length ? [{ head: "Participating lenders", items: result.lenders.map(l => `${l.name} · ${l.contact} · ${l.phone}`) }] : undefined;
   const datesText = (result.status === 'potentially_eligible' || result.status === 'in_area')
@@ -60,7 +60,7 @@ function ProgramCard({ result, order, id, className }: { result: CheckResult; or
     : "";
   const noteText = [datesText || null, result.actionRequired ? "Requires application / approval — not automatic." : null].filter(Boolean).join(" · ");
   return (
-    <IncentiveCard id={id} order={order} className={className} name={result.name} type={grantTypeLabel(result.grantType || result.category)} state={state} pill_label={checkerBadge(result)} verdict={result.statement} verdict_sub={state === "na" ? "The available location data does not establish eligibility for this program." : undefined} columns={columns} note={noteText ? { icon: datesText ? "calendar" : "clock", text: noteText } : undefined} links={result.learnMoreUrl ? [{ label: "Program info", href: result.learnMoreUrl }] : []} />
+    <IncentiveCard id={id} order={order} className={className} variant={variant} name={result.name} type={grantTypeLabel(result.grantType || result.category)} state={state} pill_label={checkerBadge(result)} verdict={result.statement} verdict_sub={state === "na" ? "The available location data does not establish eligibility for this program." : undefined} columns={columns} note={noteText ? { icon: datesText ? "calendar" : "clock", text: noteText } : undefined} links={result.learnMoreUrl ? [{ label: "Program info", href: result.learnMoreUrl }] : []} />
   );
 }
 
@@ -87,7 +87,7 @@ export function checkerTypeGroup(category: string): 1 | 2 | 3 | 4 | 5 {
 }
 
 function checkerBadge(r: CheckResult): string {
-  if (r.awaitingProjectType) return 'Awaiting Project Type';
+  if (r.awaitingProjectType) return 'Awaiting Project Use';
   if (r.isRequirement) return 'Requirement';
   if (r.status === 'in_area') return 'In Area';
   if (r.status === 'potentially_eligible') return 'Potentially Eligible';
@@ -96,7 +96,7 @@ function checkerBadge(r: CheckResult): string {
   return 'Not Applicable';
 }
 
-export function IncentiveCheckerCards({ results, isLoading, naOpen, likelyOpen = true, confirmOpen = true }: { results: CheckResult[] | null | undefined; isLoading: boolean; naOpen: boolean; likelyOpen?: boolean; confirmOpen?: boolean }) {
+export function IncentiveCheckerCards({ results, isLoading, naOpen, likelyOpen = true, confirmOpen = true, variant = "current" }: { results: CheckResult[] | null | undefined; isLoading: boolean; naOpen: boolean; likelyOpen?: boolean; confirmOpen?: boolean; variant?: "current" | "hybrid" }) {
   if (isLoading) {
     return <Skeleton className="h-12 w-full rounded-[10px]" style={{ order: 1050 }} />;
   }
@@ -120,7 +120,7 @@ export function IncentiveCheckerCards({ results, isLoading, naOpen, likelyOpen =
         // which is display:none on screen but prints even when the group is screen-collapsed.
         const hiddenCls = s === 3 ? (naOpen ? "" : "hidden") : s === 0 ? (likelyOpen ? "" : "ghide") : (confirmOpen ? "" : "ghide");
         return (
-          <ProgramCard key={r.key} result={r} id={`print-section-checker-${r.key}`} order={order} className={hiddenCls} />
+          <ProgramCard key={r.key} result={r} id={`print-section-checker-${r.key}`} order={order} className={hiddenCls} variant={variant} />
         );
       })}
     </>
