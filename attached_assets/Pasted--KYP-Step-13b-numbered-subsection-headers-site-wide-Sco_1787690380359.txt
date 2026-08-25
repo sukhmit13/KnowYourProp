@@ -1,0 +1,194 @@
+# KYP — Step 13b: numbered subsection headers, site-wide
+
+🔴 **Scope:** the `.kyp-subhead` component and the numbering that feeds it. This is a
+**design-system change**, not a section change — it touches every section that already uses
+`.kyp-subhead`. Do not alter any section's content, data, copy or layout while doing it. If a
+number on screen changes, it is out of scope.
+
+Ship this **before** Step 14. It is cheaper to regression-check nine sections than twenty.
+
+---
+
+## The problem
+
+`.kyp-subhead` renders an 11px indigo mono label beside an 11px mono **bold** counter, separated
+by a hairline. The heading and its own metadata carry the same visual weight, so the heading does
+not outrank the thing describing it. Against filled colour blocks with 36px display numerals and
+two-column panels, it stops reading as a divider and starts reading as a caption on the block
+above it.
+
+Inside a long section — Zoning History runs four subsections — the reader loses the structure.
+
+**The fix is weight and an index, not a second collapse layer.** Subsections must never become
+collapsible. Steps 5–13 were spent removing nested collapse (Step 9b: one header, one click; the
+People section had eleven collapse states all defaulting closed). A collapsible subsection inside
+an already-collapsible accordion row reintroduces exactly that.
+
+---
+
+## 1. The component
+
+```css
+.kyp-subhead{
+  display:flex; align-items:center; gap:10px;
+  margin:38px 0 13px; padding-top:11px;
+  border-top:1px solid var(--ink);
+  scroll-margin-top:20px;
+}
+.kyp-subhead .n{
+  font-family:var(--mono); font-size:13px; font-weight:700;
+  letter-spacing:.04em; color:var(--indigo); flex:none;
+}
+.kyp-subhead .lbl{
+  font-family:var(--mono); font-size:13px; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--indigo);
+}
+.kyp-subhead .ct{
+  font-family:var(--mono); font-size:11px; font-weight:400; color:var(--muted);
+}
+.kyp-subhead .rule{display:none}
+```
+
+Four things changed: the numeral is new; the label goes 11px → 13px and indigo; the counter drops
+to non-bold muted so the label wins; a 1px ink rule and 38px of air replace the hairline.
+
+**`.rule` is kept and hidden deliberately.** Every existing `<span class="rule"></span>` across
+Steps 5–13 stays valid and simply stops painting. **Do not delete those spans** — that would turn a
+CSS change into a markup migration across every shipped section for no benefit.
+
+`scroll-margin-top` is preserved because `jumpTargets` scrolls to subsection anchors.
+
+The only markup addition anywhere is the numeral, as the **first** child:
+
+```html
+<div class="kyp-subhead">
+  <span class="n">06.3</span>
+  <span class="lbl">The record</span>
+  <span class="ct">5 actions · 2 matters</span>
+  <span class="rule"></span>
+</div>
+```
+
+---
+
+## 1A. While you are in this file — the block label is crowded
+
+`.kyp-block .bl` carries **no `margin-top`**, so the label sits flush against a 36–46px display
+serif that is set at `line-height:.95` — a box tighter than the glyphs it contains. Every hero
+block and count block in every section is affected.
+
+```css
+.kyp-block .bl{ /* …existing… */ margin-top:8px; line-height:1.45 }
+.kyp-block.count .bl{ /* …existing… */ margin-top:0 }   /* count stacks horizontally */
+.kyp-block .bd{ /* …existing… */ margin-top:5px; line-height:1.35 }
+```
+
+`.count` is excluded because it is `flex-direction:row` — value and label sit side by side there,
+so a top margin would misalign them.
+
+Bundled here because it is the same kind of change — one CSS edit, no markup, every shipped
+section inherits it — and it wants the same regression sweep.
+
+---
+
+## 2. Numbering — it must survive a reorder
+
+Sections are user-draggable. A hardcoded `06.3` is wrong the moment someone moves that row.
+
+### 2.1 The parent number is already computed — reuse it, do not restate it
+
+The accordion derives each row's displayed number from its position in `sectionOrder`; that is why
+dragging renumbers the rows today. **The subsection number must read from that same value.** Never
+store a section number as a constant, and never write one into copy.
+
+Expose it through context rather than prop-drilling:
+
+```jsx
+const SectionNumberContext = createContext(null);
+// the accordion row wraps its body:
+<SectionNumberContext.Provider value={rowNumber}>{children}</SectionNumberContext.Provider>
+```
+
+`06.1` is then `${useContext(SectionNumberContext)}.${childIndex}`, and a drag updates both levels
+together because both derive from one source.
+
+### 2.2 Number over **rendered** subheads, never declared ones
+
+This is the rule that decides whether numbering helps or hurts.
+
+Subheads are conditional. `WHAT THE RECORD ESTABLISHES` renders only when a Board order states a
+configuration; `WHO FILED THEM` only when a professional is named. If numbers are assigned to the
+declared list, a parcel missing one renders `06.1, 06.3, 06.4` — and a gap in a sequence reads as
+**a section that failed to load.** Numbering exists to make structure legible; a hole in it does
+the opposite.
+
+**Filter first, then index.** Decide visibility before numbering, in the section component where
+the conditions live:
+
+```jsx
+const subheads = [
+  { key:'changed',     label:'What changed',                show: true },
+  { key:'establishes', label:'What the record establishes', show: !!boardOrder },
+  { key:'record',      label:'The record',                  show: actions.length > 0 },
+  { key:'filed',       label:'Who filed them',              show: professionals.length > 0 },
+].filter(s => s.show);
+// index is now position in the filtered array — contiguous by construction
+```
+
+⚠️ **Do not implement this with a render-time counter ref.** A `useRef` incremented as each subhead
+renders looks simpler and breaks under StrictMode double-rendering and on reorder. The ordered
+array is the contract.
+
+### 2.3 Loading states do not get a number
+
+A subhead whose body is still a skeleton renders its label and **no numeral** — assigning it one
+would shift every number below it when the fetch resolves and the section reflows. Number it once
+its content resolves.
+
+---
+
+## 3. Where it applies
+
+| Population | Treatment |
+|---|---|
+| Sections already using `.kyp-subhead` (Steps 5–13) | Numbered now. CSS change plus the numeral. |
+| Sections still on `chead` / `chead-sub` | **Leave alone.** |
+
+**Recommendation: do not retrofit legacy `chead` sections.** Numbering a subsection implies it has
+been through the design pass, and a numbered header sitting above an un-redesigned body reads as a
+half-finished migration rather than a consistent one. The report is already visibly mixed; adding
+numbering to legacy sections does not resolve that, it adds a second axis of partial migration.
+Each section gets its numbering when it gets its redesign.
+
+If you would rather have numbering everywhere immediately, it is mechanically possible — but only
+for sections that sit in the accordion and therefore have a row number. Anything still nested
+inside the Property Details card has no parent number to hang off.
+
+---
+
+## 4. Print, PDF and jump targets
+
+- **PDF/print:** numerals must render in the printed report, and the print order must match the
+  on-screen order **at print time** — both read from `sectionOrder`, so verify the PDF path is not
+  using a separate static ordering.
+- **Find Section:** subsection entries in `jumpTargets` should show their number
+  (`06.3 · The record`) so the menu and the page agree.
+- ⚠️ **An exported PDF is a snapshot.** If the user reorders after exporting, the old PDF's numbers
+  are stale. That is already true of the row numbers and is acceptable — but never let a number
+  appear inside body copy or a chat answer where it will outlive the layout. Cross-references in
+  prose use the subsection **name**, not its number.
+
+---
+
+## ✅ Done-when
+
+- [ ] `.kyp-subhead` renders 13px indigo label, indigo numeral, muted non-bold counter, 1px ink
+      rule above, 38px of air.
+- [ ] No `<span class="rule">` was deleted from any shipped section.
+- [ ] Every section using `.kyp-subhead` shows numerals; no legacy `chead` section does.
+- [ ] Dragging a section to a new position renumbers its subsections in the same render.
+- [ ] A section with a conditional subhead hidden renders contiguous numbers — never a gap.
+- [ ] A subhead awaiting data renders without a numeral and gains one when content resolves.
+- [ ] Numerals appear in the PDF, and PDF order matches on-screen order.
+- [ ] `.kyp-block .bl` has breathing room in every section; `.count` blocks are unchanged.
+- [ ] No section's content, copy, data or layout changed.

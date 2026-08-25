@@ -1311,6 +1311,22 @@ export default function RunDetail() {
   const isMetraRidershipOpen = sectionStates.metraRidership;
   const setIsMetraRidershipOpen = useCallback((v: boolean) => setSectionOpen('metraRidership', v), [setSectionOpen]);
 
+  const transitSubsections = buildSubsectionNumbers([
+    ['glance', !!transitData],
+    ['ctaRail', !!transitData?.ctaRail?.length],
+    ['ctaRidership', !!transitData?.ctaRail?.length && !isLoadingRidership],
+    ['metra', !!transitData?.metra?.length],
+    ['ctaBus', !!transitData?.ctaBus?.length],
+    ['ctaBusRidership', !!transitData?.ctaBus?.length && !isLoadingBusRidership],
+    ['traffic', !!trafficData && !isLoadingTraffic],
+  ]);
+  const rowDisplayNumber = (rowId: string) => {
+    const position = accOrder.indexOf(rowId);
+    return String((position < 0 ? accOrder.length : position) + 1).padStart(2, "0");
+  };
+  const subsectionJumpLabel = (rowId: string, subsection: number, label: string) =>
+    `${rowDisplayNumber(rowId)}.${subsection} · ${label}`;
+
   // ── Linked takeaway jump chips: anchor id → display label + collapsible opener ──
   const jumpTargets: Record<string, { label: string; open?: () => void }> = {
     'ptax-bill': { label: 'Tax Bill' },
@@ -1320,10 +1336,15 @@ export default function RunDetail() {
     'far-analysis': { label: 'FAR Analysis', open: () => setSectionOpen('farAnalysis', true) },
     'section-rentcast': { label: 'Rental Market', open: () => setSectionOpen('rentcast', true) },
     'section-airbnb': { label: 'Short-Term Rental', open: () => setSectionOpen('airbnb', true) },
-    'crime-breakdown': { label: 'Crime Breakdown' },
-    'crime-area-ranking': { label: 'Area Ranking' },
-    'transit-glance': { label: 'Closest Stops' },
-    'transit-ridership': { label: 'Ridership', open: () => setSectionOpen('ctaRidership', true) },
+    'crime-breakdown': { label: subsectionJumpLabel('crime', 1, 'Around this address') },
+    'crime-area-ranking': { label: subsectionJumpLabel('crime', 2, 'Community area') },
+    'transit-glance': { label: subsectionJumpLabel('transit', 1, 'Closest Mode of Transport') },
+    'transit-ridership': {
+      label: transitSubsections.ctaRidership
+        ? subsectionJumpLabel('transit', transitSubsections.ctaRidership, 'CTA L Ridership')
+        : 'CTA L Ridership',
+      open: () => setSectionOpen('ctaRidership', true),
+    },
     'print-section-schools-daycare': { label: 'Schools & Day Care' },
     'hmda-lenders': { label: 'Lenders', open: () => setSectionOpen('hmdaStats', true) },
   };
@@ -2737,6 +2758,11 @@ export default function RunDetail() {
   const permitProfessionalsVisible = !!dobDerived && dobDerived.professionals.length > 0;
   const isLoadingPermits = isLoadingPermitsViolations;
   const isLoadingViolations = isLoadingPermitsViolations;
+  const permitSubsections = buildSubsectionNumbers([
+    ['history', !isLoadingPermits],
+    ['professionals', permitProfessionalsVisible],
+    ['violations', !isLoadingViolations],
+  ]);
   const { data: sidewalkCafeData, isLoading: isLoadingSidewalkCafe } = useSidewalkCafe(run?.address);
 
   // Vacant and abandoned buildings nearby
@@ -3614,15 +3640,6 @@ export default function RunDetail() {
   const zoningHistoryBadge = !isLoadingZoningHistory && zoningHistoryView.actionCount > 0 && facts?.zoning
     ? `${zoningHistoryView.actionCount} action${zoningHistoryView.actionCount === 1 ? '' : 's'} · ${facts.zoning}`
     : undefined;
-  const transitSubsections = buildSubsectionNumbers([
-      ['glance', !!transitData],
-      ['ctaRail', !!transitData?.ctaRail?.length],
-      ['ctaRidership', !!transitData?.ctaRail?.length],
-      ['metra', !!transitData?.metra?.length],
-      ['ctaBus', !!transitData?.ctaBus?.length],
-      ['ctaBusRidership', !!transitData?.ctaBus?.length],
-      ['traffic', isLoadingTraffic || !!trafficData],
-    ]);
   const accProps = (rowId: string) => {
     const scan = accScanSections.find((s) => s.id === rowId);
     const custom = ACC_CUSTOM_META[rowId];
@@ -15524,7 +15541,7 @@ export default function RunDetail() {
 
               {/* ---- A. Permit History ---- */}
               <div id="dob-permits">
-                <KypSubhead subsection={1}>
+                <KypSubhead subsection={permitSubsections.history}>
                   <span className="lbl">Permit History</span>
                   {dobDerived && dobDerived.allPermits.length > 0 && (
                     <span className="ct" data-testid="badge-dob-count">{dobDerived.allPermits.length}{dobDerived.permitYears ? ` · ${dobDerived.permitYears.earliest}–${dobDerived.permitYears.latest}` : ''}</span>
@@ -15658,7 +15675,7 @@ export default function RunDetail() {
                 const fmt$ = (n: number) => '$' + Math.round(n).toLocaleString();
                 return (
                   <div data-testid="dob-professionals">
-                    <KypSubhead subsection={2}>
+                    <KypSubhead subsection={permitSubsections.professionals}>
                       <span className="lbl">Professionals who worked on this building</span>
                       <span className="ct">{dobDerived.professionals.length} · most recent first</span>
                       <span className="rule" />
@@ -15708,7 +15725,7 @@ export default function RunDetail() {
 
               {/* ---- C. Building Violations ---- */}
               <div id="dob-violations">
-                <KypSubhead subsection={2 + (permitProfessionalsVisible ? 1 : 0)}>
+                <KypSubhead subsection={permitSubsections.violations}>
                   <span className="lbl">Building Violations</span>
                   {violationsData && !violationsData.parseError && !violationsData.apiError && (
                     <span className="ct">{violationsData.openViolations || 0} open · {((violationsData as any).olderViolations || []).length} historical</span>

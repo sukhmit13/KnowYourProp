@@ -23,4 +23,12 @@ test("subsection labels are contiguous for every rendered heading", () => {
   assert.match(markup, />04\.1</);
   assert.match(markup, />04\.2</);
   assert.doesNotMatch(markup, />04\.3</);
+
+  const loadingMarkup = renderToStaticMarkup(
+    <SectionNumberContext.Provider value={4}>
+      <KypSubhead><span className="lbl">Loading section</span></KypSubhead>
+    </SectionNumberContext.Provider>,
+  );
+
+  assert.doesNotMatch(loadingMarkup, /class="n"/);
 });

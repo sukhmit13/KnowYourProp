@@ -94,7 +94,7 @@
 .kyp-block.debt{background:var(--kyp-debt)}
 .kyp-block.dark{background:#16171b} .kyp-block.slate{background:var(--kyp-slate)}
 .kyp-block .bv{font-family:var(--kyp-disp);font-size:36px;line-height:.95}
-.kyp-block .bl{font-family:var(--kyp-mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;opacity:.92}
+.kyp-block .bl{font-family:var(--kyp-mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;opacity:.92;margin-top:8px;line-height:1.45}
 .kyp-block .bd{font-size:10.5px;opacity:.85;margin-top:2px;line-height:1.3}
 .kyp-block .chip{align-self:flex-start;font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;background:rgba(255,255,255,.2);border-radius:6px;padding:3px 8px}
 .kyp-block .dots{display:flex;gap:5px}
@@ -385,7 +385,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 /* compact count/toggle variant — short row, no hero negative space */
 .kyp-block.count{min-height:0;flex-direction:row;align-items:center;justify-content:flex-start;gap:16px;padding:15px 18px}
 .kyp-block.count .bv{font-size:42px;flex:none;line-height:.9}
-.kyp-block.count .bl{font-size:9.5px}
+.kyp-block.count .bl{font-size:9.5px;margin-top:0}
 
 /* ===== year column trend — bars take verdict tone (good=falling, att=rising) ===== */
 .kyp-ytrend{margin-top:6px}
