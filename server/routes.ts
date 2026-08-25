@@ -9347,12 +9347,16 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         }
         return { ...article, corridorKeys: matchedCorridors, mentionsNeighborhood };
       }).filter((a): a is NonNullable<typeof a> => a !== null && (a.corridorKeys.length > 0 || a.mentionsNeighborhood)).slice(0, 30);
-      const dpdApplications = dpdResult.applications.flatMap(application => {
-        if (application.latitude == null || application.longitude == null) return [];
-        const matchedCorridors = findNearbyCorridors(application.latitude, application.longitude, application.address)
-          .map(c => c.corridorKey).filter(key => corridorKeys.includes(key));
-        return matchedCorridors.length ? [{ ...application, corridorKeys: matchedCorridors }] : [];
-      });
+       const dpdApplications = dpdResult.applications.flatMap(application => {
+         if (application.latitude == null || application.longitude == null) return [];
+         const distanceMi = haversineDistanceMi(lat, lng, application.latitude, application.longitude);
+         if (distanceMi > CORRIDOR_DPD_RADIUS_MILES) return [];
+         const matchedCorridors = findNearbyCorridors(application.latitude, application.longitude, application.address)
+           .map(c => c.corridorKey).filter(key => corridorKeys.includes(key));
+         return matchedCorridors.length
+           ? [{ ...application, corridorKeys: matchedCorridors, distanceMi: Math.round(distanceMi * 100) / 100 }]
+           : [];
+       });
       res.json({
         is_near_corridor: true,
         corridors,
@@ -9588,6 +9592,9 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       res.status(500).json({ error: 'Error fetching radius rental data' });
     }
   });
+
+  // Keep corridor DPD signals local to the report address, matching the corridor discovery radius.
+  const CORRIDOR_DPD_RADIUS_MILES = 0.5;
 
   // Upcoming Developments - news and permits, supplemented by bounded DPD Plan Commission applications.
   function haversineDistanceMi(lat1: number, lon1: number, lat2: number, lon2: number): number {
