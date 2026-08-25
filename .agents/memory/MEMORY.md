@@ -33,3 +33,4 @@
 - [Ownership & Title evidence](ownership-title-evidence.md) — debt is resolved-snapshot-only; failed recorder searches stay unknown; historical releases remain visible and hedged.
 - [Treasurer cache safety](treasurer-cache-safety.md) — empty Treasurer refreshes must never erase a previously verified bill or payment history.
 - [West Town pilot isolation](west-town-pilot-isolation.md) — Market Discovery scans are lazy, self-contained, and must never share individual report tax data.
+- [GitHub sync with oversized history](github-sync-large-history.md) — old non-LFS blobs can block normal pushes even after current files move to LFS.
