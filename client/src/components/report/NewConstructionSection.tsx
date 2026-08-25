@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { HardHat, TrendingDown, TrendingUp } from "lucide-react";
+import { KypSubhead } from "@/components/report/AccordionSection";
 
 interface Props {
   data?: any;
@@ -49,14 +50,14 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits 
         </p>
       </div>
 
-      <div className="kyp-subhead fam-green"><span className="lbl">Permit mix</span><span className="ct">select a type to filter records</span><span className="rule" /></div>
+      <KypSubhead className="fam-green" subsection={1}><span className="lbl">Permit mix</span><span className="ct">select a type to filter records</span><span className="rule" /></KypSubhead>
       <div className="kyp-biz-mix">
         {categories.map(([category, count]) => <button key={category} type="button" className={`kyp-hbar${filter === category ? " active" : ""}`} onClick={() => setFilter(filter === category ? null : category)}>
           <span className="hl">{label[category] || category}</span><span className="htrack"><i className="ind" style={{ width: `${Number(count) / maxCategory * 100}%` }}><b className="hbar-count">{count}</b></i></span>
         </button>)}
       </div>
 
-      {years.length > 0 && <><div className="kyp-subhead fam-green"><span className="lbl">Annual permit volume</span><span className="ct">three-year source period</span><span className="rule" /></div>
+      {years.length > 0 && <><KypSubhead className="fam-green" subsection={2}><span className="lbl">Annual permit volume</span><span className="ct">three-year source period</span><span className="rule" /></KypSubhead>
         <div className="kyp-biz-mix">{years.map(([year, row]) => <div className="kyp-hbar yr" key={year}><span className="hl">{year}</span><span className="htrack"><i className="ind" style={{ width: `${row.total / maxYear * 100}%` }}><b className="hbar-count">{row.total}</b></i></span></div>)}</div>
       </>}
       <div className="kyp-biz-takeaway">
@@ -64,7 +65,7 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits 
         <p>{trend.suppressed ? `Trend is not shown because only ${trend.current12Months + trend.prior12Months} permits fall in the two comparison years; at least four combined permits are needed.` : `${trend.current12Months} permits in the trailing 12 months versus ${trend.prior12Months} in the prior 12 months (${trend.changePct! > 0 ? "+" : ""}${trend.changePct}%).`}</p>
       </div>
 
-      <div className="kyp-subhead fam-green"><span className="lbl">{permits.length} nearby permit{permits.length === 1 ? "" : "s"}</span><span className="ct">nearest first</span><span className="rule" /></div>
+      <KypSubhead className="fam-green" subsection={years.length > 0 ? 3 : 2}><span className="lbl">{permits.length} nearby permit{permits.length === 1 ? "" : "s"}</span><span className="ct">nearest first</span><span className="rule" /></KypSubhead>
       <div className="kyp-biz-list">{permits.slice(0, 12).map((permit: any, index: number) => <article key={permit.permitNumber} className="kyp-biz-card" data-testid={`row-new-construction-${index}`}>
         <div><b>{permit.address}</b><span>{label[permit.category]} · issued {permit.issueDate || "date unavailable"}{permit.likelyStillBuilding ? " · likely still building" : ""}</span></div>
         <span className="kyp-biz-distance">{permit.distanceMiles.toFixed(2)} mi</span>

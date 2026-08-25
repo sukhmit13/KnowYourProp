@@ -1,8 +1,36 @@
-import { type ReactNode, type HTMLAttributes } from "react";
+import React, { createContext, useContext, type ReactNode, type HTMLAttributes } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 export type AccVerdict = "good" | "watch" | "context";
 const VCLASS: Record<AccVerdict, string> = { good: "g", watch: "o", context: "c" };
+
+export const SectionNumberContext = createContext<number | null>(null);
+
+export function buildSubsectionNumbers(headings: Array<[string, boolean]>): Record<string, number> {
+  return headings.reduce<Record<string, number>>((numbers, [key, rendered]) => {
+    if (rendered) numbers[key] = Object.keys(numbers).length + 1;
+    return numbers;
+  }, {});
+}
+
+interface KypSubheadProps extends HTMLAttributes<HTMLDivElement> {
+  subsection?: number;
+  children: ReactNode;
+}
+
+export function KypSubhead({ subsection, children, className, ...props }: KypSubheadProps) {
+  const sectionNumber = useContext(SectionNumberContext);
+  const number = sectionNumber != null && subsection != null
+    ? `${String(sectionNumber).padStart(2, "0")}.${subsection}`
+    : null;
+
+  return (
+    <div {...props} className={["kyp-subhead", className].filter(Boolean).join(" ")}>
+      {number && <span className="n">{number}</span>}
+      {children}
+    </div>
+  );
+}
 
 export interface AccordionSectionProps {
   index: number;               // 1-based visual position (renders "01", "02", …)
@@ -64,7 +92,9 @@ export function AccordionSection({
           </span>
         )}
       </div>
-      <div className={`kyp-accbody${bodyOpen ? "" : " closed"}`}>{children}</div>
+      <SectionNumberContext.Provider value={index}>
+        <div className={`kyp-accbody${bodyOpen ? "" : " closed"}`}>{children}</div>
+      </SectionNumberContext.Provider>
     </div>
   );
 }

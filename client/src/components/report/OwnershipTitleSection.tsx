@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { KypSubhead } from "@/components/report/AccordionSection";
 
 // ---- Sale History derivation (spec: every flag computed in code, not an LLM) ----
 // Pure, exported helper carrying forward the proven saleVM/decoratedVM logic from the
@@ -581,7 +582,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
 
       {showTimeline && (
         <div className="kyp-otl" data-testid="ownership-timeline">
-          <div className="kyp-subhead"><span className="lbl">Ownership &amp; debt timeline</span><span className="rule" /></div>
+          <KypSubhead subsection={showTimeline ? 1 : undefined}><span className="lbl">Ownership &amp; debt timeline</span><span className="rule" /></KypSubhead>
           <div className="kyp-otlplot">
             <div className="kyp-timeline-line" />
             <div className="kyp-timeline-events">
@@ -646,11 +647,11 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         </div>
       ))}
 
-      <div className="kyp-subhead">
+      <KypSubhead subsection={showTimeline ? 2 : 1}>
         <span className="lbl">Chain of title</span>
         <span className="ct">{sales.length} qualifying transfer{sales.length === 1 ? "" : "s"}</span>
         <span className="rule" />
-      </div>
+      </KypSubhead>
       {sales.length === 0 && <div className="kyp-status-empty">No qualifying sale with a declared price was found in the available transfer record.</div>}
       {sales.map((sale: DerivedSale, index: number) => (
         <div id={`ownership-sale-${targetToken(sale.docNo || sale.ms)}`} className="kyp-xact" key={`${sale.docNo || sale.ms}-${index}`} data-testid={index === 0 ? "sale-recent" : `sale-item-${index}`}>
@@ -674,11 +675,11 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         </div>
       ))}
 
-      <div className="kyp-subhead">
+      <KypSubhead subsection={showTimeline ? 3 : 2}>
         <span className="lbl">Debt on title</span>
         <span className="ct">{debtSnapshotReady ? `current owner · ${active.length} unreleased · ${released.length} historical/cleared` : "resolved snapshot required"}</span>
         <span className="rule" />
-      </div>
+      </KypSubhead>
       {!debtSnapshotReady ? (
         <div className="kyp-status-empty unknown">
           <b>Debt status is not resolved yet.</b>{" "}
@@ -739,11 +740,11 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         );
       })}
 
-      <div className="kyp-subhead">
+      <KypSubhead subsection={showTimeline ? 4 : 3}>
         <span className="lbl">Title status</span>
         <span className={`kyp-pill ${titleBadge[0]}`}>{titleBadge[1]}</span>
         <span className="rule" />
-      </div>
+      </KypSubhead>
       {!titleKnown ? (
         <div className="kyp-status-empty unknown" data-testid="ownership-title-unknown">
           <b>Title status is unavailable.</b>{" "}
@@ -770,11 +771,11 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
           ))}
           {historicalLiens.length > 0 && (
             <>
-              <div className="kyp-subhead kyp-subhead-minor">
+              <KypSubhead className="kyp-subhead-minor" subsection={showTimeline ? 5 : 4}>
                 <span className="lbl">Historical filings</span>
                 <span className="ct">{historicalLiens.length} released or probably cleared</span>
                 <span className="rule" />
-              </div>
+              </KypSubhead>
               {historicalLiens.map((lien: any, index: number) => {
                 const documentNumber = normalizedDocNumber(lien);
                 const release = releaseFor(documentNumber);

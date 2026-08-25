@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { DocRef } from "@/components/report/OwnershipTitleSection";
+import { KypSubhead } from "@/components/report/AccordionSection";
 import { useOwnerLienSearch } from "@/hooks/use-runs";
 
 interface PreTitleCheckProps {
@@ -487,11 +488,11 @@ export function PreTitleCheck({ pin, address, openViolationsCount = 0, lienData,
 
             {lienData && (
               <div className="kyp-owner-liens" data-testid="owner-liens-card">
-                <div className="kyp-subhead">
+                <KypSubhead subsection={1}>
                   <span className="lbl">Owner liens</span>
                   <span className="ct">Pre-title review · follows the owner, not this parcel</span>
                   <span className="rule" />
-                </div>
+                </KypSubhead>
 
                 <div className="kyp-owner-lien-tools">
                   <div>

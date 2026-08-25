@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, memo, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { useRoute, useLocation } from "wouter";
 import { buildScanSections } from "@/components/report/scanBuilder";
-import { AccordionSection } from "@/components/report/AccordionSection";
+import { AccordionSection, buildSubsectionNumbers, KypSubhead } from "@/components/report/AccordionSection";
 import { NewBusinessLicensesSection } from "@/components/report/NewBusinessLicensesSection";
 import { NewConstructionSection } from "@/components/report/NewConstructionSection";
 import { OwnershipTitleSection, deriveSaleHistory } from "@/components/report/OwnershipTitleSection";
@@ -2734,6 +2734,7 @@ export default function RunDetail() {
   );
   const permitsData = combinedPermitViolations?.permits || null;
   const violationsData = combinedPermitViolations?.violations || null;
+  const permitProfessionalsVisible = !!dobDerived && dobDerived.professionals.length > 0;
   const isLoadingPermits = isLoadingPermitsViolations;
   const isLoadingViolations = isLoadingPermitsViolations;
   const { data: sidewalkCafeData, isLoading: isLoadingSidewalkCafe } = useSidewalkCafe(run?.address);
@@ -3613,6 +3614,15 @@ export default function RunDetail() {
   const zoningHistoryBadge = !isLoadingZoningHistory && zoningHistoryView.actionCount > 0 && facts?.zoning
     ? `${zoningHistoryView.actionCount} action${zoningHistoryView.actionCount === 1 ? '' : 's'} · ${facts.zoning}`
     : undefined;
+  const transitSubsections = buildSubsectionNumbers([
+      ['glance', !!transitData],
+      ['ctaRail', !!transitData?.ctaRail?.length],
+      ['ctaRidership', !!transitData?.ctaRail?.length],
+      ['metra', !!transitData?.metra?.length],
+      ['ctaBus', !!transitData?.ctaBus?.length],
+      ['ctaBusRidership', !!transitData?.ctaBus?.length],
+      ['traffic', isLoadingTraffic || !!trafficData],
+    ]);
   const accProps = (rowId: string) => {
     const scan = accScanSections.find((s) => s.id === rowId);
     const custom = ACC_CUSTOM_META[rowId];
@@ -15514,13 +15524,13 @@ export default function RunDetail() {
 
               {/* ---- A. Permit History ---- */}
               <div id="dob-permits">
-                <div className="kyp-subhead">
+                <KypSubhead subsection={1}>
                   <span className="lbl">Permit History</span>
                   {dobDerived && dobDerived.allPermits.length > 0 && (
                     <span className="ct" data-testid="badge-dob-count">{dobDerived.allPermits.length}{dobDerived.permitYears ? ` · ${dobDerived.permitYears.earliest}–${dobDerived.permitYears.latest}` : ''}</span>
                   )}
                   <span className="rule" />
-                </div>
+                </KypSubhead>
                 {isLoadingPermits ? (
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-3/4" />
@@ -15648,11 +15658,11 @@ export default function RunDetail() {
                 const fmt$ = (n: number) => '$' + Math.round(n).toLocaleString();
                 return (
                   <div data-testid="dob-professionals">
-                    <div className="kyp-subhead">
+                    <KypSubhead subsection={2}>
                       <span className="lbl">Professionals who worked on this building</span>
                       <span className="ct">{dobDerived.professionals.length} · most recent first</span>
                       <span className="rule" />
-                    </div>
+                    </KypSubhead>
                     {dobDerived.professionals.map((pro, pi) => {
                       const enr = dobEnrichFor(pro.name);
                       const isExpediter = /EXPEDIT/i.test(pro.role);
@@ -15698,13 +15708,13 @@ export default function RunDetail() {
 
               {/* ---- C. Building Violations ---- */}
               <div id="dob-violations">
-                <div className="kyp-subhead">
+                <KypSubhead subsection={2 + (permitProfessionalsVisible ? 1 : 0)}>
                   <span className="lbl">Building Violations</span>
                   {violationsData && !violationsData.parseError && !violationsData.apiError && (
                     <span className="ct">{violationsData.openViolations || 0} open · {((violationsData as any).olderViolations || []).length} historical</span>
                   )}
                   <span className="rule" />
-                </div>
+                </KypSubhead>
                 {isLoadingViolations ? (
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-3/4" />
@@ -15889,7 +15899,7 @@ export default function RunDetail() {
                               const blk = crimeTractData?.violent ? tierBlock(crimeTier(crimeTractData.violent.saferThanPercent)) : 'slate';
                               return (
                                 <div id="crime-breakdown">
-                                  <div className="kyp-subhead"><span className="lbl">Around this address</span><span className="ct">trailing 12 mo</span><span className="rule" /></div>
+                                  <KypSubhead subsection={1}><span className="lbl">Around this address</span><span className="ct">trailing 12 mo</span><span className="rule" /></KypSubhead>
                                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 6 }}>
                                     <button type="button" className={`kyp-block count ${blk}`} data-testid="crime-radius-250ft" aria-pressed={crimeRadius === 'nearby'} onClick={() => setCrimeRadius('nearby')}
                                          style={{ cursor: 'pointer', border: 'none', textAlign: 'left', font: 'inherit', boxShadow: crimeRadius === 'nearby' ? '0 0 0 2px var(--kyp-indigoL)' : 'none' }}>
@@ -15925,10 +15935,10 @@ export default function RunDetail() {
 
                             {crimeTractData?.violent && crimeTractData?.property && (
                               <div id="crime-area-ranking" data-testid="crime-area-ranking">
-                                <div className="kyp-subhead">
+                                <KypSubhead subsection={2}>
                                   <span className="lbl">{facts?.communityArea ? `${facts.communityArea} community area` : 'Community area'}</span>
                                   <span className="ct">per capita · last full year</span><span className="rule" />
-                                </div>
+                                </KypSubhead>
                                 {[
                                   { key: 'violent', label: 'Violent crime · per 1,000 residents', d: crimeTractData.violent },
                                   { key: 'property', label: 'Property & other crime · per 1,000 residents', d: crimeTractData.property },
@@ -16032,7 +16042,7 @@ export default function RunDetail() {
                       ) : null;
                       return (
                         <div id="transit-glance" data-testid="transit-glance">
-                          <div className="kyp-subhead fam-indigo" style={{marginTop:6}}><span className="lbl">Closest Mode of Transport</span><span className="rule"/></div>
+                          <KypSubhead className="fam-indigo" subsection={transitSubsections.glance} style={{marginTop:6}}><span className="lbl">Closest Mode of Transport</span><span className="rule"/></KypSubhead>
                           {hybridInc ? (
                           <div className="kyp-modes">
                             {/* Bus */}
@@ -16186,7 +16196,7 @@ export default function RunDetail() {
                     {/* CTA Rail */}
                     {transitData.ctaRail.length > 0 && (
                       <div>
-                        <div className="kyp-subhead fam-indigo"><span className="lbl">CTA Rail Stations</span><span className="ct">2 mi</span><span className="rule"/></div>
+                        <KypSubhead className="fam-indigo" subsection={transitSubsections.ctaRail}><span className="lbl">CTA Rail Stations</span><span className="ct">2 mi</span><span className="rule"/></KypSubhead>
                           <div className="mt-2">
                             <div className="space-y-1">
                               {transitData.ctaRail.map((stop, idx) => (
@@ -16218,7 +16228,7 @@ export default function RunDetail() {
                     {/* CTA L Ridership Data */}
                     {transitData.ctaRail.length > 0 && (
                       <div id="transit-ridership">
-                        <div className="kyp-subhead fam-indigo"><span className="lbl">CTA L Ridership</span><span className="rule"/></div>
+                        <KypSubhead className="fam-indigo" subsection={transitSubsections.ctaRidership}><span className="lbl">CTA L Ridership</span><span className="rule"/></KypSubhead>
                           <div className="mt-2">
                             {isLoadingRidership ? (
                               <div className="space-y-3">
@@ -16421,7 +16431,7 @@ export default function RunDetail() {
                     {/* Metra */}
                     {transitData.metra.length > 0 && (
                       <div>
-                        <div className="kyp-subhead fam-indigo"><span className="lbl">Metra Stations & Ridership</span><span className="ct">2 mi</span><span className="rule"/></div>
+                        <KypSubhead className="fam-indigo" subsection={transitSubsections.metra}><span className="lbl">Metra Stations & Ridership</span><span className="ct">2 mi</span><span className="rule"/></KypSubhead>
                           <div className="mt-2">
                             <div className="space-y-1">
                               {transitData.metra.map((stop, idx) => (
@@ -16733,7 +16743,7 @@ export default function RunDetail() {
                     {/* CTA Bus */}
                     {transitData.ctaBus.length > 0 && (
                       <div>
-                        <div className="kyp-subhead fam-indigo"><span className="lbl">CTA Bus Routes</span><span className="ct">0.5 mi</span><span className="rule"/></div>
+                        <KypSubhead className="fam-indigo" subsection={transitSubsections.ctaBus}><span className="lbl">CTA Bus Routes</span><span className="ct">0.5 mi</span><span className="rule"/></KypSubhead>
                           <div className="px-4 mt-2">
                             <div className="space-y-1">
                               {transitData.ctaBus.map((stop, idx) => (
@@ -16759,7 +16769,7 @@ export default function RunDetail() {
                     {/* CTA Bus Ridership Data */}
                     {transitData.ctaBus.length > 0 && (
                       <div>
-                        <div className="kyp-subhead fam-indigo"><span className="lbl">CTA Bus Ridership</span><span className="rule"/></div>
+                        <KypSubhead className="fam-indigo" subsection={transitSubsections.ctaBusRidership}><span className="lbl">CTA Bus Ridership</span><span className="rule"/></KypSubhead>
                           <div className="px-4 mt-2">
                             {isLoadingBusRidership ? (
                               <div className="space-y-3">
@@ -16954,7 +16964,7 @@ export default function RunDetail() {
                     {/* Street Traffic Count */}
                     {(isLoadingTraffic || trafficData) && (
                       <div>
-                        <div className="kyp-subhead fam-indigo"><span className="lbl">Street Traffic Volume</span><span className="rule"/></div>
+                        <KypSubhead className="fam-indigo" subsection={transitSubsections.traffic}><span className="lbl">Street Traffic Volume</span><span className="rule"/></KypSubhead>
                           <div className="px-4 mt-2 pb-4">
                             {isLoadingTraffic ? (
                               <div className="space-y-3">
@@ -17450,7 +17460,7 @@ export default function RunDetail() {
                         <div className="kyp-sec">
                           <div className="kyp-content">
                             {/* ── Subsection 1: Site-Specific Coverage — always rendered; an explicit "none" is a real finding ── */}
-                                <div className="kyp-subhead fam-slate"><span className="lbl">Site-Specific Coverage</span><span className="ct">{hasSite ? siteCount : 0}</span><span className="rule" /></div>
+                                <KypSubhead className="fam-slate" subsection={1}><span className="lbl">Site-Specific Coverage</span><span className="ct">{hasSite ? siteCount : 0}</span><span className="rule" /></KypSubhead>
                                 {!hasSite ? (
                                   <div className="kyp-empty" data-testid="news-site-empty">No news coverage names this property.</div>
                                 ) : genSite ? (
@@ -17485,7 +17495,7 @@ export default function RunDetail() {
                             {/* ── Subsection 2: Neighborhood News ── */}
                             {hasNeighborhood && (
                               <>
-                                <div className="kyp-subhead fam-slate" id="print-section-neighborhood-news" style={{ marginTop: 34 }}><span className="lbl">Neighborhood News</span><span className="ct">{facts?.communityArea} · 120 days</span><span className="rule" /></div>
+                                <KypSubhead className="fam-slate" subsection={2} id="print-section-neighborhood-news" style={{ marginTop: 34 }}><span className="lbl">Neighborhood News</span><span className="ct">{facts?.communityArea} · 120 days</span><span className="rule" /></KypSubhead>
                                 {isLoadingNeighborhoodNews ? (
                                   <div className="space-y-2">
                                     <Skeleton className="h-4 w-3/4" />

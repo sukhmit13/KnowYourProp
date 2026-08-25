@@ -354,12 +354,12 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
   .kyp-timeline-events{display:grid;grid-template-columns:repeat(3,1fr)}
 }
 
-/* ===== fractal: sub-eyebrow (sub-section divider) ===== */
-.kyp-subhead{display:flex;align-items:center;gap:10px;margin:26px 0 12px;scroll-margin-top:20px}
-.kyp-subhead .lbl{font-family:var(--kyp-mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kyp-indigo)}
-.kyp-subhead .ct{font-family:var(--kyp-mono);font-size:11px;font-weight:700;color:var(--kyp-muted)}
-.kyp-subhead .rule{flex:1;height:1px;background:var(--kyp-line)}
-.kyp-subhead.fam-green .lbl{color:var(--kyp-green)} .kyp-subhead.fam-orange .lbl{color:var(--kyp-orange)} .kyp-subhead.fam-slate .lbl{color:var(--kyp-slate)}
+/* ===== fractal: numbered sub-section divider ===== */
+.kyp-subhead{display:flex;align-items:center;gap:10px;margin:38px 0 13px;padding-top:11px;border-top:1px solid var(--kyp-ink);scroll-margin-top:20px}
+.kyp-subhead .n{font-family:var(--kyp-mono);font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--kyp-indigo);flex:none}
+.kyp-subhead .lbl{font-family:var(--kyp-mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo)}
+.kyp-subhead .ct{font-family:var(--kyp-mono);font-size:11px;font-weight:400;color:var(--kyp-muted)}
+.kyp-subhead .rule{display:none}
 
 /* ===== horizontal magnitude bars — labeled distribution (crime by type, etc.) ===== */
 .kyp-hbar{display:flex;align-items:center;gap:12px;padding:9px 0;border:0;border-bottom:1px solid var(--kyp-line);background:transparent;text-align:left;width:100%}

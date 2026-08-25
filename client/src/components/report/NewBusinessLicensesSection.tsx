@@ -5,6 +5,7 @@ import {
   titleCaseBusiness,
   type NearbyLicensesResponse,
 } from "@shared/businessLicenses";
+import { KypSubhead } from "@/components/report/AccordionSection";
 
 interface Props {
   data?: NearbyLicensesResponse;
@@ -81,11 +82,11 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
         </p>
       </div>
 
-      <div className="kyp-subhead fam-green">
+      <KypSubhead className="fam-green" subsection={1}>
         <span className="lbl">License mix</span>
         <span className="ct">distinct businesses · select to filter openings</span>
         <span className="rule" />
-      </div>
+      </KypSubhead>
       <div className="kyp-biz-mix">
         {rankedMix.slice(0, 8).map(([label, count]) => {
           const active = filter === label;
@@ -99,11 +100,11 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
         {rankedMix.length > 8 && <div className="kyp-biz-overflow">+ {rankedMix.length - 8} smaller license mix{rankedMix.length - 8 === 1 ? "" : "es"} not shown</div>}
       </div>
 
-      <div className="kyp-subhead fam-green">
+      <KypSubhead className="fam-green" subsection={2}>
         <span className="lbl">{filter ? `${filtered.length} matching opening${filtered.length === 1 ? "" : "s"}` : `${establishments.length} openings`}</span>
         <span className="ct">nearest first · each business counted once</span>
         <span className="rule" />
-      </div>
+      </KypSubhead>
       <div className="kyp-biz-list">
         {visible.map((business, index) => {
           const earliest = business.licenses.reduce((oldest, license) => !oldest || license.startDate < oldest ? license.startDate : oldest, "");
