@@ -1311,15 +1311,6 @@ export default function RunDetail() {
   const isMetraRidershipOpen = sectionStates.metraRidership;
   const setIsMetraRidershipOpen = useCallback((v: boolean) => setSectionOpen('metraRidership', v), [setSectionOpen]);
 
-  const transitSubsections = buildSubsectionNumbers([
-    ['glance', !!transitData],
-    ['ctaRail', !!transitData?.ctaRail?.length],
-    ['ctaRidership', !!transitData?.ctaRail?.length && !isLoadingRidership],
-    ['metra', !!transitData?.metra?.length],
-    ['ctaBus', !!transitData?.ctaBus?.length],
-    ['ctaBusRidership', !!transitData?.ctaBus?.length && !isLoadingBusRidership],
-    ['traffic', !!trafficData && !isLoadingTraffic],
-  ]);
   const rowDisplayNumber = (rowId: string) => {
     const position = accOrder.indexOf(rowId);
     return String((position < 0 ? accOrder.length : position) + 1).padStart(2, "0");
@@ -1327,42 +1318,6 @@ export default function RunDetail() {
   const subsectionJumpLabel = (rowId: string, subsection: number, label: string) =>
     `${rowDisplayNumber(rowId)}.${subsection} · ${label}`;
 
-  // ── Linked takeaway jump chips: anchor id → display label + collapsible opener ──
-  const jumpTargets: Record<string, { label: string; open?: () => void }> = {
-    'ptax-bill': { label: 'Tax Bill' },
-    'ptax-assess': { label: 'Assessed Value', open: () => setSectionOpen('assessedValue', true) },
-    'ptax-exempt': { label: 'Exemptions', open: () => setSectionOpen('exemptionHistory', true) },
-    'ptax-appeal': { label: 'Appeal History', open: () => setSectionOpen('appealHistory', true) },
-    'far-analysis': { label: 'FAR Analysis', open: () => setSectionOpen('farAnalysis', true) },
-    'section-rentcast': { label: 'Rental Market', open: () => setSectionOpen('rentcast', true) },
-    'section-airbnb': { label: 'Short-Term Rental', open: () => setSectionOpen('airbnb', true) },
-    'crime-breakdown': { label: subsectionJumpLabel('crime', 1, 'Around this address') },
-    'crime-area-ranking': { label: subsectionJumpLabel('crime', 2, 'Community area') },
-    'transit-glance': { label: subsectionJumpLabel('transit', 1, 'Closest Mode of Transport') },
-    'transit-ridership': {
-      label: transitSubsections.ctaRidership
-        ? subsectionJumpLabel('transit', transitSubsections.ctaRidership, 'CTA L Ridership')
-        : 'CTA L Ridership',
-      open: () => setSectionOpen('ctaRidership', true),
-    },
-    'print-section-schools-daycare': { label: 'Schools & Day Care' },
-    'hmda-lenders': { label: 'Lenders', open: () => setSectionOpen('hmdaStats', true) },
-  };
-  const jumpTo = useCallback((id: string) => {
-    jumpTargets[id]?.open?.();
-    // opens the enclosing accordion row (rows default closed), then scrolls
-    revealAnchor(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setSectionOpen]);
-  const renderJump = (id: string | undefined) => {
-    if (!id || !jumpTargets[id]) return null;
-    return (
-      <button type="button" className="crm-jump" data-testid={`jump-${id}`} onClick={(e) => { e.stopPropagation(); jumpTo(id); }}>
-        {jumpTargets[id].label}
-        <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
-      </button>
-    );
-  };
   // AI takeaway bullets carry a code-validated `metric` — map it to the evidence anchor
   const crimeMetricAnchor = (m?: string) => !m ? undefined : (m.startsWith('ranks.') || m.startsWith('trend')) ? 'crime-area-ranking' : 'crime-breakdown';
   const transitMetricAnchor = (m?: string) => m ? 'transit-glance' : undefined;
@@ -2042,6 +1997,55 @@ export default function RunDetail() {
   const { data: metraRidershipData, isLoading: isLoadingMetraRidership } = useMetraRidership(nearestMetraStopName);
   const { data: metraLineData } = useMetraLineRidership(!!nearestMetraStopName);
   const { data: todData, isLoading: isLoadingTOD } = useTODStatus(facts?.lat, facts?.lon);
+
+  // These labels derive from live transit hooks, so they must be initialized
+  // after every transit loading/data value above has been declared.
+  const transitSubsections = buildSubsectionNumbers([
+    ['glance', !!transitData],
+    ['ctaRail', !!transitData?.ctaRail?.length],
+    ['ctaRidership', !!transitData?.ctaRail?.length && !isLoadingRidership],
+    ['metra', !!transitData?.metra?.length],
+    ['ctaBus', !!transitData?.ctaBus?.length],
+    ['ctaBusRidership', !!transitData?.ctaBus?.length && !isLoadingBusRidership],
+    ['traffic', !!trafficData && !isLoadingTraffic],
+  ]);
+
+  // ── Linked takeaway jump chips: anchor id → display label + collapsible opener ──
+  const jumpTargets: Record<string, { label: string; open?: () => void }> = {
+    'ptax-bill': { label: 'Tax Bill' },
+    'ptax-assess': { label: 'Assessed Value', open: () => setSectionOpen('assessedValue', true) },
+    'ptax-exempt': { label: 'Exemptions', open: () => setSectionOpen('exemptionHistory', true) },
+    'ptax-appeal': { label: 'Appeal History', open: () => setSectionOpen('appealHistory', true) },
+    'far-analysis': { label: 'FAR Analysis', open: () => setSectionOpen('farAnalysis', true) },
+    'section-rentcast': { label: 'Rental Market', open: () => setSectionOpen('rentcast', true) },
+    'section-airbnb': { label: 'Short-Term Rental', open: () => setSectionOpen('airbnb', true) },
+    'crime-breakdown': { label: subsectionJumpLabel('crime', 1, 'Around this address') },
+    'crime-area-ranking': { label: subsectionJumpLabel('crime', 2, 'Community area') },
+    'transit-glance': { label: subsectionJumpLabel('transit', 1, 'Closest Mode of Transport') },
+    'transit-ridership': {
+      label: transitSubsections.ctaRidership
+        ? subsectionJumpLabel('transit', transitSubsections.ctaRidership, 'CTA L Ridership')
+        : 'CTA L Ridership',
+      open: () => setSectionOpen('ctaRidership', true),
+    },
+    'print-section-schools-daycare': { label: 'Schools & Day Care' },
+    'hmda-lenders': { label: 'Lenders', open: () => setSectionOpen('hmdaStats', true) },
+  };
+  const jumpTo = useCallback((id: string) => {
+    jumpTargets[id]?.open?.();
+    // opens the enclosing accordion row (rows default closed), then scrolls
+    revealAnchor(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setSectionOpen]);
+  const renderJump = (id: string | undefined) => {
+    if (!id || !jumpTargets[id]) return null;
+    return (
+      <button type="button" className="crm-jump" data-testid={`jump-${id}`} onClick={(e) => { e.stopPropagation(); jumpTo(id); }}>
+        {jumpTargets[id].label}
+        <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+      </button>
+    );
+  };
 
   // selectedProjectCategory must be declared before the useEffect below that references it in its CDG eligibility IIFE
   const selectedProjectCategory = selectedProjectType && businessUsesData?.uses
