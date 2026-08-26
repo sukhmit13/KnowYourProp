@@ -994,6 +994,9 @@ export default function RunDetail() {
   // Whole-card collapse for the top Ward & Alderperson and Zoning Details cards (default expanded; collapsed = abridged one-liner)
   const [wardCardOpen, setWardCardOpen] = useState(false);
   const [zoningCardOpen, setZoningCardOpen] = useState(false);
+  // Declared before the effect that updates it: production minification can
+  // otherwise turn this harmless-looking ordering into a TDZ crash.
+  const asidesRef = useRef({ wardCardOpen: false, zoningCardOpen: false });
   useEffect(() => { asidesRef.current = { wardCardOpen, zoningCardOpen }; }, [wardCardOpen, zoningCardOpen]);
   const [isCypOpen, setIsCypOpen] = useState(true);
   const [cypModalOpen, setCypModalOpen] = useState(false);
@@ -1006,7 +1009,6 @@ export default function RunDetail() {
   const localCollapsiblesRef = useRef({ naIncOpen, isTifCardOpen, isOppZoneCardOpen, isCypOpen, zbaExpanded });
   // accOpen + top-card asides also need print snapshot/restore (rows default closed)
   const accOpenRef = useRef<Record<string, boolean>>({});
-  const asidesRef = useRef({ wardCardOpen: false, zoningCardOpen: false });
   useEffect(() => { sectionStatesRef.current = sectionStates; }, [sectionStates]);
   useEffect(() => { allSectionsExpandedRef.current = allSectionsExpanded; }, [allSectionsExpanded]);
   useEffect(() => { localCollapsiblesRef.current = { naIncOpen, isTifCardOpen, isOppZoneCardOpen, isCypOpen, zbaExpanded }; }, [naIncOpen, isTifCardOpen, isOppZoneCardOpen, isCypOpen, zbaExpanded]);
@@ -2759,14 +2761,6 @@ export default function RunDetail() {
   );
   const permitsData = combinedPermitViolations?.permits || null;
   const violationsData = combinedPermitViolations?.violations || null;
-  const permitProfessionalsVisible = !!dobDerived && dobDerived.professionals.length > 0;
-  const isLoadingPermits = isLoadingPermitsViolations;
-  const isLoadingViolations = isLoadingPermitsViolations;
-  const permitSubsections = buildSubsectionNumbers([
-    ['history', !isLoadingPermits],
-    ['professionals', permitProfessionalsVisible],
-    ['violations', !isLoadingViolations],
-  ]);
   const { data: sidewalkCafeData, isLoading: isLoadingSidewalkCafe } = useSidewalkCafe(run?.address);
 
   // Vacant and abandoned buildings nearby
@@ -3392,6 +3386,14 @@ export default function RunDetail() {
     };
   }, [permitsData, pinLookupData]);
 
+  const permitProfessionalsVisible = dobDerived?.professionals.length > 0;
+  const isLoadingPermits = isLoadingPermitsViolations;
+  const isLoadingViolations = isLoadingPermitsViolations;
+  const permitSubsections = buildSubsectionNumbers([
+    ['history', !isLoadingPermits],
+    ['professionals', permitProfessionalsVisible],
+    ['violations', !isLoadingViolations],
+  ]);
   const dobFirmList = dobDerived?.professionals.map(p => ({ name: p.name, role: p.role })) || [];
   const { data: dobEnrichment, isLoading: isLoadingDobEnrichment } = useQuery<{ results: Array<{ name: string; matched: boolean; citywide: { permits: number; totalValue: number; lastActiveYear: number | null; mix: string } | null; certs: string[] }>; asOf: string } | null>({
     queryKey: ['/api/dob/professional-enrichment', dobFirmList.map(f => f.name).join('|')],
