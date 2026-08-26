@@ -1,0 +1,85 @@
+# ⛔ STOP — Step 16 correction
+
+**Do not implement `REPLIT_STEP16_county_record.md` §2.1 or §5 as written.** Its field inventory
+was built from a partial read of the section and would delete about eleven fields that render
+today.
+
+If Step 16 has already run, this document is the fix. If it has not, apply this first and treat
+§5 of Step 16 as replaced.
+
+---
+
+## What was wrong
+
+The Parcel Information subsection spans **`RunDetail.tsx:9861–10747` — 887 lines.** The spec was
+written from the first ~390. The `charData` block at roughly `10360–10570` was never read.
+
+**The section renders 26 fields, not 13.**
+
+---
+
+## The complete inventory — every field must have a decision
+
+| Field | Decision |
+|---|---|
+| Land Size | keep — fact grid |
+| Building Size | keep — hero 2 + fact grid |
+| Apartments / Units in Building | keep — hero 1 |
+| Year Built · Age | keep — hero 3 |
+| Condition · Construction Quality | keep — hero 3 breakdown + fact grid |
+| Bedrooms · Bathrooms | keep — unit-configuration cell |
+| Basement (+ **Basement Finish**) | keep — fact grid, finish as sub-line |
+| Attic (+ **Attic Type**, **Attic Finish**) | keep — fact grid, finish as sub-line |
+| Exterior | keep — fact grid |
+| Use · Mixed Use | keep — fact grid |
+| Unit Size | keep — hero 2 as `per unit` |
+| **A/C** | **keep** — was cut in error |
+| **Heating** | **keep** — was cut in error |
+| **Roof** | **keep** — was cut in error |
+| **Porch** | **keep** — was cut in error |
+| **Garage** (+ size, construction, attached) | **keep** — was cut in error |
+| **Fireplaces** | **keep** — was cut in error |
+| **Total Rooms** | **keep** — was cut in error |
+| Building Type | cut — restates Class + Use |
+| Unit Type | cut — "Apartment" on every multi-family parcel |
+| Unit Share of Building | cut — unit sf ÷ building sf, derived and both are on screen |
+
+**Three cuts, not eleven.** Everything else keeps a home.
+
+### Grid shape
+
+The fact grid becomes **two labelled groups**, matching how the section already organises itself:
+
+- **Parcel & structure** — Land, Building, Exterior, Roof, Basement, Attic, Porch, Garage
+- **Systems & interior** — Heating, A/C, Fireplaces, Total Rooms, Construction quality, Condition
+
+Plus the wide **Unit configuration** cell (Step 16 §3, unchanged) and **Use / Mixed use**.
+
+Fixed `repeat(4,1fr)`, `.kyp-facts.bold`, hairline dividers. A group label is **not** a numbered
+subhead — it is a `.prc-grouplbl`-weight divider inside one grid.
+
+---
+
+## Fields the code populates but never renders
+
+`pinResolver` fills these and nothing displays them. They are not regressions — they are
+**available**, and three matter:
+
+- **`halfBaths`** — feeds Step 16 §3. Print `2 full + 1 half`; divide only the full baths.
+- **`isMixedUse`** and **`nonResidentialUnits`** — these gate the Class 2-12 mixed-use threshold
+  in the tax work. Today `Mixed Use` renders as a bare Yes/No while a commercial unit count sits
+  unused beside it. Render both: `Mixed use · Yes — 1 commercial unit of 3`.
+- `prorationRate`, `isCondo`, `isCommonArea`, `isParkingSpace`, `buildingUnits`, `rooms`, `unitSf`
+
+⚠️ Do not add these in this step. Note them, ship the corrected inventory, and decide separately.
+
+---
+
+## ✅ Done-when
+
+- [ ] All 26 rendered fields are accounted for: 23 kept, 3 cut with the reasons above.
+- [ ] A/C, Heating, Roof, Porch, Garage, Fireplaces and Total Rooms render.
+- [ ] Basement and Attic show their finish/type sub-values.
+- [ ] The grid is two labelled groups, not one undifferentiated run.
+- [ ] `Mixed use` renders `nonResidentialUnits` alongside the Yes/No.
+- [ ] Nothing that renders today is absent without a stated reason.

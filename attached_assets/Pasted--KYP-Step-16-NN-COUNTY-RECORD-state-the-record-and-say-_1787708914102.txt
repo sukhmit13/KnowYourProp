@@ -1,0 +1,170 @@
+# KYP — Step 16: `NN · COUNTY RECORD` — state the record, and say when it is not this building's
+
+🔴 **Scope:** the Parcel Information subsection and its PIN-resolution states. Change only what
+this document specifies. **Do not touch `03 · Active Listing`** — this step deliberately *removes*
+a comparison so that one stays the only place it happens.
+
+Ships after **Step 13b**.
+
+---
+
+## 1. Rename, and what the section is for
+
+`RunDetail.tsx:9861–10250` — a `Collapsible` under Property Details, default closed.
+
+Rename to **`COUNTY RECORD`**. "Parcel Information (Cook County)" names a container; the source is
+the point. Everything in this section is one account of the building — the assessor's — and the
+section's job is to state it plainly and say how much of it can be trusted.
+
+### 1.1 It does not compare itself to anything
+
+An earlier draft built a three-source reconciliation panel here. **That was wrong**, because
+`03 · Active Listing` already runs the claims-vs-record comparison, and a second one duplicates it.
+
+**Rule: the county record is the baseline; the section holding the competing record does the
+comparing.** One direction, one place.
+
+- Listing says 3 units, county says 2 → surfaces in `03`.
+- A ZBA order states a unit count → surfaces in Zoning History.
+- CHRS records an era → Historic Status defers to the county's exact year (Step 15 §1.2).
+
+This section is byte-identical whether or not a listing exists.
+
+⚠️ **Unresolved before this ships:** the boundary with **Property Overview**, which has no spec yet
+and presumably also carries units, size and year built. My read is that Overview *orients* and this
+section is *the assessor's filing* — but that distinction is thin, and if it does not hold, these
+should be one section. Decide before building either.
+
+---
+
+## 2. Structure
+
+Three hero blocks, an eight-cell fact grid, a provenance line. **No subheads** — a record has
+nothing to divide.
+
+| Block | Value | Label | Breakdown |
+|---|---|---|---|
+| 1 | `2` | Apartments on the county record | Class · Assessed at |
+| 2 | `1,638` | Building sf on a {land} sf lot | Coverage · Per unit |
+| 3 | `1879` | Built — {n} years old | Condition · As of |
+
+Block 1's `Assessed at 10% of market value` is the consequence of the class and the hook into the
+tax section. Coverage and per-unit are **derived**, not recorded — the source line says so.
+
+Badge: `Class {n}`, indigo. A classification is a state, not a verdict.
+
+### 2.1 The fact grid
+
+Use the existing **`.kyp-facts`** component (`gap:1px` over `--line` gives hairline dividers), at a
+fixed `repeat(4,1fr)` — **not** `auto-fit`. An auto-fitting grid reflows to ragged rows whose
+columns do not align, and the containment is what makes a field list readable.
+
+Add a `.bold` modifier: numeric values in the display face at 26px, everything else unchanged.
+
+⚠️ **Do not invent new class names for this.** `.kyp-facts` already exists and is used by Property
+Overview; an earlier draft defined a second, conflicting `.kyp-facts` in the same stylesheet. The
+same draft used `.num` for the display value, which collided with the accordion's `.acchd .num`
+chip and painted an indigo box behind every number. **Check the stylesheet for a name before
+adding one**, and scope descendant selectors — `.accrow.i .num` should be
+`.accrow.i > .acchd > .num` so it cannot reach into a section body.
+
+---
+
+## 3. Unit configuration — four states, not two
+
+Today: `matching = apartments === bedrooms && bedrooms === baths` → either "configured as two
+matching 1BR / 1BA apartments" or, for everything else, "mixed unit sizes."
+
+**The assessor records building totals, never a unit-by-unit split.** So a per-unit bedroom count
+is almost never a fact we hold — but the arithmetic forces different amounts of certainty, and the
+current binary throws that away. Render one wide cell spanning two grid columns:
+
+| Condition | Tag | Copy |
+|---|---|---|
+| `units === beds === baths` | `Determined` (green) | Each unit has **one bedroom and one bath**. No other distribution is possible. |
+| `beds % units === 0` | `Split not recorded` (slate) | Divides evenly to **{b} bed / {a} bath** per unit — but the county records building totals, not the split. **A {b+1}-bed plus a {b−1}-bed would show the same figures.** |
+| `beds % units !== 0` | `Units differ` (indigo) | **{beds} bedrooms cannot divide evenly across {units} units**, so the apartments are not the same size. Rent will not be uniform, which matters if you are underwriting from an average. |
+| `beds < units` | `Studios likely` (indigo) | Fewer bedrooms than units — **at least {units−beds} apartments have no recorded bedroom**, usually studios or an uncatalogued conversion. |
+
+The third case is the one worth building for: non-uniformity is **proven**, not guessed, and today
+it renders identically to the second.
+
+**Two hard rules.**
+
+1. **Never print a fractional bedroom.** "2.5 beds per unit" describes no apartment that exists.
+2. **Never render this cell when `apartments` is missing.** Every statement above is a claim about
+   a division; with no divisor there is nothing to say.
+
+Where a half-bath field exists, print `2 full + 1 half` and divide **only the full baths** — a half
+bath cannot be assigned to a unit by arithmetic.
+
+---
+
+## 4. Six lookup states, not one
+
+The PIN resolves five different ways and the county call can fail. The current design renders a
+green line for the happy path and muted grey for the rest; the redesign must treat three of them as
+warnings, because **the figures below do not describe this address.**
+
+| `pinLookupData.source` | Line | Body |
+|---|---|---|
+| assessor match, high confidence | green `✓ PIN auto-detected` | renders normally |
+| assessor match, `confidence === 'medium'` | **amber** `⚠ PIN matched — verify` | *"Confirm it is your parcel before relying on the figures."* |
+| **`geo_fallback`** | **red** `✕ Not in the assessor database` | *"The figures below describe {nearestAddress}, the nearest parcel we could match — not this address."* |
+| `exempt_api` | indigo `◆ Tax-exempt property` | *"Assessment and tax figures will be absent or nominal — that is the record, not a gap in ours."* |
+| no PIN | red `✕ No PIN found` | **the full input + Look Up**, and no section body until a PIN resolves |
+| `propertyTaxData.error` | red `✕ Assessor lookup failed` | *"Nothing below is missing — it is unread."* Retry. |
+
+### 4.1 `geo_fallback` is the one to fix first
+
+It means we could not find the parcel and are showing **a neighbouring building's record**. Today
+that renders as muted grey text with eight fields beneath it at full weight, reading as though they
+describe the subject. It is the most consequential state in the section and currently the quietest.
+
+**Rule: where the figures describe something other than this address, say so above them.** A caveat
+that follows the data has already been overtaken by it. This applies equally to the co-parcel
+footnote — on a parcel where it fires, it belongs above the grid.
+
+### 4.2 The PIN form inverts
+
+Today a text input renders on every property, including the ~95% where detection worked. Replace it
+with a provenance line — `✓ PIN auto-detected · {pin} · Cook County Assessor, tax year {yr} ·
+Refresh ⟳ · Wrong parcel? Enter a PIN →` — and render the full form **only** in the no-PIN state.
+`Refresh` keeps its current behaviour; it belongs next to the PIN, not floating above the body.
+
+---
+
+## 5. Field inventory
+
+**Kept:** land sf, building sf, apartments, class + description, year built, age, basement, attic,
+exterior wall, use, mixed use, bedrooms, full baths, unit size (as per-unit in block 2), tax year,
+construction quality, repair condition, PIN, PIN status, manual entry, refresh, co-parcel address,
+takeaway.
+
+**Moved:** the listing-conflict caveat → `03 · Active Listing` (§1.1).
+
+**Cut, with reasons:**
+
+- `Building Type` — "Residential" restates Class + Use; three overlapping fields
+  (`buildingType`, `buildingUse`, `pinLookupData.propertyType`) for one concept.
+- `Unit Share of Building` — 819 ÷ 1,638. Derived, and the derivation is already on screen.
+- `Unit Type` — "Apartment" on every multi-family parcel.
+
+⚠️ Two fields were dropped by accident in an earlier draft and restored: **`Mixed Use`**, which
+gates the Class 2-12 threshold work in the tax section, and **`Refresh`**. Re-check the inventory
+against `RunDetail.tsx:9861–10250` before shipping.
+
+---
+
+## ✅ Done-when
+
+- [ ] Section reads `COUNTY RECORD`; no comparison panel renders here, and `03` is untouched.
+- [ ] Three hero blocks, a fixed 4-column `.kyp-facts.bold` grid, no subheads.
+- [ ] No new class name duplicates an existing one; `.accrow.i .num` is scoped so it cannot reach a
+      section body.
+- [ ] Unit configuration renders all four states, never a fractional bedroom, and not at all when
+      `apartments` is missing.
+- [ ] All six lookup states render; `geo_fallback` and `error` are visually distinct from success.
+- [ ] Any statement that the figures describe another parcel renders **above** the figures.
+- [ ] The PIN form appears only in the no-PIN state; `Refresh` survives.
+- [ ] `Mixed Use` is present.
