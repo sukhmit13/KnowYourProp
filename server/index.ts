@@ -199,9 +199,9 @@ async function seedTeamAccounts() {
   setupAuth(app);
 
   // One-time browser-cache purge for clients stuck on a stale cached bundle.
-  // Old bundles still call /api on every load; if the browser hasn't seen the
-  // current build yet (tracked via cookie), tell it to wipe its HTTP cache so
-  // the next navigation fetches the fresh index.html + assets.
+  // This must run for the document request itself, not only /api: a broken
+  // bundle can fail before React mounts and therefore before it makes an API
+  // request. The build cookie prevents repeat purges after recovery.
   if (process.env.NODE_ENV === "production") {
     try {
       const fs = await import("fs");
@@ -209,7 +209,7 @@ async function seedTeamAccounts() {
       const crypto = await import("crypto");
       const indexHtml = fs.readFileSync(path.resolve(import.meta.dirname, "public", "index.html"));
       const buildId = crypto.createHash("sha1").update(indexHtml).digest("hex").slice(0, 12);
-      app.use("/api", (req: Request, res: Response, next: NextFunction) => {
+      app.use((req: Request, res: Response, next: NextFunction) => {
         const cookies = req.headers.cookie || "";
         if (!cookies.includes(`kyp_build=${buildId}`)) {
           res.setHeader("Clear-Site-Data", '"cache"');
