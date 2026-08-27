@@ -1,0 +1,1038 @@
+# KYP — Step 0: ship the stylesheet. **CSS only. No markup changes.**
+
+🔴 **Supersedes the first version of this document.** That version told you to add
+`className="kypwrap"` to every section and also claimed nothing would change appearance. Those two
+instructions contradict each other, and the markup half was written against code I cannot see.
+**Both are removed.** This step now adds CSS and nothing else.
+
+---
+
+## 1. Why this step exists
+
+Every spec so far — 13, 13b, 14, 15, 16 — has described components by name (`.kyp-block`,
+`.kyp-zrec`, `.kyp-says`, `.kyp-xfer`, `.kyp-subhead`, `.kyp-procard`) and has never once shipped
+their CSS. Those definitions only ever existed in a mock stylesheet outside this repo.
+`client/src/index.css` contains **zero** `kyp-` rules today.
+
+That is why Zoning History shipped with the right content and the wrong appearance. The structure
+was buildable from prose, so it got built. The visual language was not in the document at all, so
+Tailwind and shadcn primitives filled the gap.
+
+## 2. What this step does and does not do
+
+**Does:** appends ~940 lines of CSS to `client/src/index.css`.
+
+**Does not:** touch a single `.tsx` file. No wrapper class, no markup, no copy, no logic.
+
+Every rule in the sheet is scoped under `.kypwrap`, and **nothing in the app has that class yet**.
+So this step is inert by construction: the page must look pixel-identical afterwards. If anything
+moves, a rule escaped its scope and that is the bug to fix before going further.
+
+The wrapper gets applied later, **inside each section's own re-ship step**, so the visual change
+arrives together with the markup that is meant to use it. That is also where the wrapper's placement
+gets decided per section — see §4.
+
+## 3. Why it is scoped, and must never be hoisted to `:root`
+
+Two token names collide with the app's shadcn variables:
+
+| Token | This sheet | `index.css :root` | If hoisted |
+|---|---|---|---|
+| `--card` | `#fff` | `0 0% 100%` (HSL triplet) | `bg-card` resolves `hsl(#fff)` → invalid → transparent |
+| `--muted` | `#8b8a84` | `45 24% 96%` (HSL triplet) | `bg-muted` / `text-muted-foreground` break app-wide |
+
+`text-muted-foreground` is used throughout `RunDetail.tsx`. Hoisting would silently break large parts
+of the page in a way that is painful to trace.
+
+**The codebase already contains the correct pattern.** `index.css:4` defines the Incentives
+section's tokens on `.incwrap`, not `:root`, and `RunDetail.tsx:7291` applies that class to wrap the
+section. Incentives renders correctly for exactly this reason.
+
+Three things from the mock sheet were **deliberately dropped** in this port:
+
+- `*{box-sizing:border-box;margin:0;padding:0}` — Tailwind preflight already does both.
+- The font `@import` — `index.html:29` and `index.css:1` already load Instrument Serif, Inter and
+  JetBrains Mono. **Do not add another.**
+- `body{background:var(--paper)}` — the wrapper paints **no background**. It carries tokens, text
+  colour and the body font, and nothing else. A wrapper that repainted its own ground could not be
+  placed on an accordion row without changing the page.
+
+## 4. Read this before the next step — where the wrapper goes
+
+The mock's section header carries `06`, `ZONING HISTORY`, the takeaway with **2017 set in Instrument
+Serif**, and the `5 ACTIONS · RT-4` badge. All of that is `kyp-` typography, and it sits in the
+**collapsed header row**, not the expanded body.
+
+So the wrapper cannot go on the section body alone — it has to enclose the header row too, or the
+header can never match the mock. Exactly where it attaches depends on the current accordion markup,
+which is not in the copy of the repo I have: `.accrow` and `.acchd` do not appear in it at all.
+
+**Before the next step, paste me the JSX for one accordion section shell** — the row that renders
+`06 · ZONING HISTORY · <takeaway> · <badge>` plus its expanded container — and the `.accrow` /
+`.acchd` rules from `index.css`. With that I can specify the wrapper's exact attachment point rather
+than guessing at it, which is what produced the contradiction in the first version of this document.
+
+**One hazard to check when it lands:** `.accrow.i .num` is a descendant selector. Once a section is
+wrapped, it can reach into the body and paint an indigo chip behind any `.num` inside. If that rule
+exists in its current form, it will need scoping to a child selector — but confirm the real selector
+before changing it.
+
+---
+
+## ✅ Done-when
+
+- [ ] `client/src/index.css` ends with the block from §5, appended verbatim and unmodified.
+- [ ] **No `.tsx` file was touched in this step.**
+- [ ] Every selector in the appended block begins `.kypwrap`. Nothing sits at `:root`.
+- [ ] No font import was added.
+- [ ] The app renders **pixel-identically** to before — including Zoning History, Incentives, and
+      any region using `bg-muted`, `text-muted-foreground` or `bg-card`. Any visual change at all
+      means a rule escaped scope.
+
+---
+
+## 5. The stylesheet — append verbatim to `client/src/index.css`
+
+```css
+/* ============================================================
+   KYP BOLD HYBRID — the shared component sheet.
+   Scoped to .kypwrap so its tokens cannot leak into shadcn.
+   --card and --muted collide with the app's HSL triplets at
+   :root; that is why nothing here may be hoisted to :root.
+   Every redesigned section wraps its body in <div class="kypwrap">
+   and adds ZERO css of its own.
+   ============================================================ */
+.kypwrap{
+  --paper:#faf9f6; --card:#fff; --wash:#f4f2ec;
+  --ink:#141414; --ink2:#565651; --muted:#8b8a84; --line:#e7e5df;
+  --indigo:#2b3a9e; --indigoL:#3f51cf; --indigoSoft:#eef0fb; --teal:#0e8fa6;
+  --green:#2f7d3f; --orange:#e07a2e; --bad:#c0392b; --slate:#3a3a36;
+  --disp:'Instrument Serif'; --mono:'JetBrains Mono'; --sans:'Inter';
+}
+
+/* wrapper paints NO background — the accordion shell owns the page ground.
+   Tokens + type inheritance only, so wrapping a section cannot repaint it. */
+.kypwrap{color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+/* ========== TYPE RAMP — six levels, three fonts ========== */
+.kypwrap .kyp-eyebrow{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo);margin-bottom:12px}
+.kypwrap .kyp-eyebrow .dot{width:9px;height:9px;border-radius:2px;background:currentColor;flex:none}
+.kypwrap .kyp-eyebrow.fam-green{color:var(--green)} .kyp-eyebrow.fam-orange{color:var(--orange)}
+.kypwrap .kyp-eyebrow.fam-slate{color:var(--slate)} .kyp-eyebrow.fam-indigo{color:var(--indigo)}
+
+.kypwrap .kyp-headline{font-family:var(--sans);font-weight:600;font-size:clamp(21px,2.3vw,26px);line-height:1.28;letter-spacing:-.01em;color:var(--ink);margin-bottom:16px;max-width:52ch}
+.kypwrap .kyp-headline em{font-family:var(--disp);font-style:italic;font-weight:400;font-size:1.08em;color:var(--indigo)}
+.kypwrap .kyp-headline em.att{color:var(--orange)} .kyp-headline em.grn{color:var(--green)}
+
+.kypwrap .kyp-title{font-family:var(--sans);font-weight:700;font-size:17px;letter-spacing:-.01em;color:var(--ink);margin-bottom:12px}
+.kypwrap .kyp-title .qual{font-weight:400;color:var(--ink2);font-size:.82em}
+
+.kypwrap .kyp-stat{font-family:var(--disp);font-size:clamp(28px,3vw,38px);line-height:1;color:var(--ink)}
+.kypwrap .kyp-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.kypwrap .kyp-src{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.45;margin-top:12px;border-top:1px solid var(--line);padding-top:9px}
+.kypwrap .kyp-body{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--ink2)}
+.kypwrap .kyp-charttitle{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);font-weight:700;margin:24px 0 8px}
+
+/* ========== PILLS ========== */
+.kypwrap .kyp-pill{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;border-radius:7px;padding:3px 9px}
+.kypwrap .kyp-pill.good{background:var(--green)} .kyp-pill.att{background:var(--orange)}
+.kypwrap .kyp-pill.bad{background:var(--bad)} .kyp-pill.ctx{background:var(--slate)}
+.kypwrap .kyp-linepill{display:inline-block;border-radius:5px;padding:1px 7px;font-family:var(--mono);font-size:10px;font-weight:700;color:#fff}
+.kypwrap .kyp-trend{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;color:#fff}
+.kypwrap .kyp-trend.up{background:var(--green)} .kyp-trend.down{background:var(--bad)}
+.kypwrap .kyp-rank{font-family:var(--mono);font-size:11px;font-weight:700;color:#fff;background:var(--slate);border-radius:6px;padding:2px 8px}
+
+/* ========== CARD SHELL ========== */
+.kypwrap .kyp-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+
+/* ========== PERMIT CARD ========== */
+.kypwrap .kyp-permit{border:1px solid var(--line);border-left:4px solid var(--slate);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--card)}
+.kypwrap .kyp-permit .ph{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.kypwrap .kyp-permit .pscope{font-size:14.5px;font-weight:700;color:var(--ink)}
+.kypwrap .kyp-permit .pcost{font-family:var(--disp);font-size:21px;color:var(--ink);flex:none;line-height:1}
+.kypwrap .kyp-permit .ptags{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0 11px}
+.kypwrap .kyp-permit .ptag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:3px 7px;background:var(--wash);color:var(--ink2);border:1px solid var(--line)}
+.kypwrap .kyp-permit .ptag.good{background:#e9f4ec;color:var(--green);border-color:#cfe6d5}
+.kypwrap .kyp-permit .ptag.att{background:#fbeede;color:#c0651e;border-color:#f0d9bf}
+.kypwrap .kyp-permit .pmeta{display:grid;grid-template-columns:1fr 1fr;gap:9px 20px;padding-top:11px;border-top:1px solid var(--line)}
+.kypwrap .kyp-permit .pml{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.kypwrap .kyp-permit .pmv{font-size:13px;font-weight:600;color:var(--ink)}
+.kypwrap .kyp-permit .pmv.dim{font-weight:400;color:var(--ink2)}
+
+/* ========== PROFESSIONAL CARD (firm on the building's permits) ========== */
+.kypwrap .kyp-procard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--card);transition:box-shadow .12s ease}
+.kypwrap .kyp-procard:hover{box-shadow:0 4px 14px rgba(20,20,20,.06)}
+.kypwrap .kyp-procard .ptop{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.kypwrap .kyp-procard .prole{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border-radius:5px;padding:3px 7px}
+.kypwrap .kyp-procard .pnm{font-size:15px;font-weight:700;color:var(--ink)}
+.kypwrap .kyp-procard .pera{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink2);border:1px solid var(--line);border-radius:5px;padding:3px 7px}
+.kypwrap .kyp-procard .phere{font-size:13px;color:var(--ink2)} .kyp-procard .phere b{color:var(--ink)}
+.kypwrap .kyp-procard .pcity{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--ink2);margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
+.kypwrap .kyp-procard .pview{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;white-space:nowrap}
+
+/* ========== SUBSECTION TAKEAWAY (the mini one-liner under a sub-eyebrow) ==========
+   Fractal echo of the section headline, one level down. Leading tone dot. */
+.kypwrap .kyp-subtake{display:flex;gap:9px;align-items:flex-start;font-size:15px;font-weight:500;color:var(--ink2);line-height:1.45;margin:0 0 13px;max-width:66ch}
+.kypwrap .kyp-subtake b{color:var(--ink);font-weight:700}
+.kypwrap .kyp-subtake em{font-family:var(--disp);font-style:italic;font-weight:400;color:var(--indigo);font-size:1.07em}
+.kypwrap .kyp-subtake .d{width:8px;height:8px;border-radius:2px;flex:none;margin-top:5px;background:var(--indigo)}
+.kypwrap .kyp-subtake.good .d{background:var(--green)} .kyp-subtake.good em{color:var(--green)}
+.kypwrap .kyp-subtake.att .d{background:var(--orange)} .kyp-subtake.att em{color:#c0651e}
+.kypwrap .kyp-subtake.ctx .d{background:var(--slate)}
+
+/* ========== RECORD CARD (permit / sale / lien / event row-card) ==========
+   Leading serif value · title + sub · trailing mono meta. Left accent by tone. */
+.kypwrap .kyp-reccard{display:flex;align-items:center;gap:15px;border:1px solid var(--line);border-left:4px solid var(--indigo);border-radius:12px;padding:13px 17px;margin-bottom:10px;background:var(--card);transition:box-shadow .12s ease}
+.kypwrap .kyp-reccard:hover{box-shadow:0 4px 14px rgba(20,20,20,.06)}
+.kypwrap .kyp-reccard.good{border-left-color:var(--green)} .kyp-reccard.att{border-left-color:var(--orange)} .kyp-reccard.ctx{border-left-color:var(--slate)}
+.kypwrap .kyp-reccard .rc-v{font-family:var(--disp);font-size:25px;line-height:.9;color:var(--ink);flex:none;min-width:66px}
+.kypwrap .kyp-reccard .rc-body{flex:1;min-width:0}
+.kypwrap .kyp-reccard .rc-t{font-size:14.5px;font-weight:700;color:var(--ink)}
+.kypwrap .kyp-reccard .rc-s{font-size:12px;color:var(--ink2);margin-top:2px}
+.kypwrap .kyp-reccard .rc-meta{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink2);flex:none;text-align:right}
+
+/* ========== SUBSECTION HEADER (a labeled block inside an expanded section) ========== */
+.kypwrap .kyp-subhead{display:flex;align-items:center;gap:10px;margin:38px 0 13px;padding-top:11px;border-top:1px solid var(--ink);scroll-margin-top:20px}
+.kypwrap .kyp-subhead .n{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--indigo);flex:none}
+.kypwrap .kyp-subhead .lbl{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--indigo)}
+.kypwrap .kyp-subhead .ct{font-family:var(--mono);font-size:11px;font-weight:400;color:var(--muted)}
+.kypwrap .kyp-subhead .rule{display:none}
+.kypwrap .kyp-subhead.fam-green .lbl{color:var(--green)} .kyp-subhead.fam-orange .lbl{color:var(--orange)} .kyp-subhead.fam-slate .lbl{color:var(--slate)}
+/* jump chip = a pill that scrolls to a subsection */
+.kypwrap .kyp-jchip{cursor:pointer;text-decoration:none}
+.kypwrap .kyp-jchip::after{content:'↓';margin-left:5px;opacity:.7;font-family:var(--sans)}
+
+/* ========== FACTS GRID (label → value cells, hairline dividers) ========== */
+.kypwrap .kyp-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.kypwrap .kyp-fact{background:var(--card);padding:12px 14px}
+.kypwrap .kyp-fl{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.kypwrap .kyp-fv{font-size:14px;font-weight:600;color:var(--ink)}
+.kypwrap .kyp-fv .sub{font-weight:400;color:var(--ink2);font-size:12px}
+/* bold-hybrid variant: numeric values in the display face, labels unchanged */
+.kypwrap .kyp-facts.bold .kyp-fact{padding:14px 16px}
+.kypwrap .kyp-facts.bold .kyp-fv{font-size:15px}
+.kypwrap .kyp-facts.bold .kyp-fv.dnum{font-family:var(--disp);font-size:26px;font-weight:400;line-height:1}
+.kypwrap .kyp-facts.bold .kyp-fv.dnum .u{font-size:.5em;color:var(--ink2)}
+.kypwrap .kyp-facts.bold .kyp-fs{font-size:10.5px;color:var(--muted);margin-top:5px}
+
+/* ========== SECTION INDENT (universal rule) ==========
+   The section's DOT/bullet hangs alone in a left gutter. The eyebrow TEXT,
+   the headline, the verdict pill, and ALL content align to ONE text column
+   past the bullet — exactly like the collapsed row (number badge in the
+   gutter, title + takeaway tabbed past it). Nothing sits flush with the
+   bullet. Put the whole section in .kyp-sec. Gutter = dot(9) + gap(8) = 17. */
+.kypwrap .kyp-sec{padding-left:17px}
+.kypwrap .kyp-sec > .kyp-eyebrow .dot{margin-left:-17px}
+.kypwrap .kyp-content{padding-left:0}
+
+/* ========== LIST ROWS (accent bar) ========== */
+.kypwrap .kyp-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.kypwrap .kyp-row:last-child{border-bottom:none}
+.kypwrap .kyp-rbar{width:4px;height:30px;border-radius:2px;flex:none;background:var(--indigo)}
+.kypwrap .kyp-rn{font-size:14.5px;font-weight:600;flex:1}
+.kypwrap .kyp-rd{font-family:var(--mono);font-size:12px;color:var(--ink2);font-weight:600}
+
+/* ========== STATION / ROUTE HEADER ========== */
+.kypwrap .kyp-rhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.kypwrap .kyp-rname{font-size:16px;font-weight:700}
+
+/* ========== FILLED STAT BLOCK ========== */
+.kypwrap .kyp-blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.kypwrap .kyp-block{border-radius:12px;padding:16px;color:#fff;min-height:132px;display:flex;flex-direction:column;justify-content:space-between}
+.kypwrap .kyp-block.ind{background:var(--indigoL)} .kyp-block.grn{background:var(--green)}
+.kypwrap .kyp-block.dark{background:#16171b} .kyp-block.slate{background:var(--slate)} .kyp-block.orange{background:var(--orange)} .kyp-block.red{background:var(--bad)}
+/* compact count/toggle variant — short row, no hero negative space */
+.kypwrap .kyp-block.count{min-height:0;flex-direction:row;align-items:center;justify-content:flex-start;gap:16px;padding:15px 18px}
+.kypwrap .kyp-block.count .bv{font-size:42px;flex:none;line-height:.9}
+.kypwrap .kyp-block.count .bl{font-size:9.5px;margin-top:0}
+.kypwrap .kyp-block .bv{font-family:var(--disp);font-size:36px;line-height:.95}
+.kypwrap .kyp-block .bl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;opacity:.92;margin-top:8px;line-height:1.45}
+.kypwrap .kyp-block .bd{font-size:10.5px;opacity:.85;margin-top:5px;line-height:1.35}
+.kypwrap .kyp-block .chip{align-self:flex-start;font-family:var(--mono);font-size:9.5px;font-weight:700;background:rgba(255,255,255,.2);border-radius:6px;padding:3px 8px}
+.kypwrap .kyp-block .dots{display:flex;gap:5px}
+.kypwrap .kyp-block .dots i{width:11px;height:11px;border-radius:3px;background:rgba(255,255,255,.35)}
+.kypwrap .kyp-block .dots i.on{background:rgba(255,255,255,.95)}
+
+/* ========== DAY-TYPE BOX ========== */
+.kypwrap .kyp-daybox{background:var(--wash);border-radius:12px;padding:15px 16px;margin-bottom:14px}
+.kypwrap .kyp-daytop{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px}
+.kypwrap .kyp-dbig{font-family:var(--disp);font-size:34px;line-height:.9}
+.kypwrap .kyp-dbl{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink2);font-weight:700;margin-top:4px}
+.kypwrap .kyp-dtri{display:flex;gap:18px}
+.kypwrap .kyp-dcell{text-align:right}
+.kypwrap .kyp-dcell .dv{font-family:var(--disp);font-size:20px;line-height:1}
+.kypwrap .kyp-dcell .dl{font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:2px}
+.kypwrap .kyp-daybars{display:flex;align-items:flex-end;gap:6px;height:40px}
+.kypwrap .kyp-daybars i{flex:1;border-radius:5px 5px 0 0;background:var(--indigoL)}
+.kypwrap .kyp-daybars i.sat{background:#9aa6e6} .kyp-daybars i.sun{background:#c3cbf1}
+.kypwrap .kyp-dlab{display:flex;gap:6px;margin-top:5px}
+.kypwrap .kyp-dlab span{flex:1;text-align:center;font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase}
+
+/* ========== COMPARISON BAR ========== */
+.kypwrap .kyp-cmp{margin:14px 0 4px}
+.kypwrap .kyp-cmptop{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.kypwrap .kyp-cmplab{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink2);font-weight:700}
+.kypwrap .kyp-track{position:relative;height:14px;background:var(--wash);border-radius:8px}
+.kypwrap .kyp-track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:var(--indigoL)}
+.kypwrap .kyp-track .tick{position:absolute;top:-3px;width:2px;height:20px;background:var(--ink2);opacity:.5}
+.kypwrap .kyp-track .tlab{position:absolute;top:20px;font-family:var(--mono);font-size:8.5px;color:var(--muted);transform:translateX(-50%);white-space:nowrap;font-weight:700}
+.kypwrap .kyp-cap{font-size:12px;color:var(--ink2);margin-top:26px;line-height:1.4}
+
+/* ========== MODE TILES (walk time as a left marker panel) ==========
+   Markup: .kyp-mtile > .kyp-mtw(.big + .u) + .kyp-mtbody(.kyp-mth · .kyp-mtn ·
+   .kyp-mtpills > .kyp-linepill · .kyp-mts). The walk time is the hero marker. */
+.kypwrap .kyp-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kypwrap .kyp-mtile{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:var(--card)}
+.kypwrap .kyp-mtw{flex:none;width:74px;background:var(--indigoSoft);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;border-right:1px solid var(--line)}
+.kypwrap .kyp-mtw .big{font-family:var(--disp);font-size:38px;line-height:.85;color:var(--indigo)}
+.kypwrap .kyp-mtw .u{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--indigo);opacity:.82;margin-top:4px;text-align:center}
+.kypwrap .kyp-mtbody{padding:13px 15px;min-width:0}
+.kypwrap .kyp-mth{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--indigo);margin-bottom:5px}
+.kypwrap .kyp-mtn{font-size:15px;font-weight:700;color:var(--ink)}
+.kypwrap .kyp-mtpills{margin-top:6px}
+.kypwrap .kyp-mts{font-size:11px;color:var(--ink2);margin-top:7px;line-height:1.35}
+
+/* ========== METRA CARD ========== */
+.kypwrap .kyp-mcard{border:1px solid var(--line);border-radius:11px;padding:13px;margin-bottom:10px}
+.kypwrap .kyp-mctop{display:flex;align-items:center;gap:9px;margin-bottom:9px;flex-wrap:wrap}
+.kypwrap .kyp-mline{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.kypwrap .kyp-mline:last-child{border-bottom:none}
+.kypwrap .kyp-zone{font-size:12px;color:var(--ink2);font-style:italic;margin-top:10px;line-height:1.45;background:var(--wash);padding:10px 12px;border-radius:9px}
+.kypwrap .kyp-zb{display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--ink2);border:1px solid var(--line);border-radius:5px;padding:1px 7px}
+
+/* ========== CHART LEGEND ========== */
+.kypwrap .kyp-leg{display:flex;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.kypwrap .kyp-lg{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.kypwrap .kyp-lg .ln{width:14px;height:3px;border-radius:2px}
+.kypwrap svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
+.kypwrap .kyp-axc{font-family:var(--mono);font-size:9px;fill:var(--muted)}
+
+/* ========== GROUP DIVIDER (count badge + label + rule) ========== */
+.kypwrap .kyp-group{display:flex;align-items:center;gap:11px;margin:22px 0 14px}
+.kypwrap .kyp-gcount{font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;border-radius:7px;padding:3px 9px;min-width:28px;text-align:center}
+.kypwrap .kyp-glabel{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.kypwrap .kyp-grule{flex:1;height:1px;background:var(--line)}
+.kypwrap .kyp-group.on .kyp-gcount{background:var(--green)} .kyp-group.on .kyp-glabel{color:var(--ink)}
+.kypwrap .kyp-group.warn .kyp-gcount{background:var(--orange)} .kyp-group.warn .kyp-glabel{color:var(--ink)}
+.kypwrap .kyp-group.off .kyp-gcount{background:var(--slate);opacity:.72} .kyp-group.off .kyp-glabel{color:var(--muted)}
+
+/* ========== COLLAPSED SCAN ROW (the report ToC) ========== */
+.kypwrap .kyp-scan{display:flex;flex-direction:column;gap:10px}
+@keyframes kypIn{to{opacity:1;transform:none}}
+.kypwrap .kyp-scanrow{display:flex;align-items:stretch;background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:visible;
+  opacity:0;transform:translateY(10px);animation:kypIn .5s cubic-bezier(.2,.7,.2,1) forwards;
+  transition:box-shadow .16s ease,transform .16s ease,background .16s ease,border-color .16s ease}
+.kypwrap .kyp-scanrow:hover{transform:translateX(3px);box-shadow:0 7px 22px rgba(20,20,20,.09);border-color:#d9d6cd;z-index:2}
+.kypwrap .kyp-scanrow.drag{opacity:.35}
+.kypwrap .kyp-scanrow.over{box-shadow:0 0 0 2px var(--indigo) inset}
+.kypwrap .kyp-scanrow .accent{width:5px;flex:none;border-radius:13px 0 0 13px;transition:width .16s ease}
+.kypwrap .kyp-scanrow:hover .accent{width:9px}
+.kypwrap .kyp-fam-indigo .accent{background:var(--indigo)} .kyp-fam-green .accent{background:var(--green)}
+.kypwrap .kyp-fam-orange .accent{background:var(--orange)} .kyp-fam-slate .accent{background:var(--slate)}
+.kypwrap .kyp-fam-indigo:hover{background:#f7f8fd} .kyp-fam-green:hover{background:#f6faf7}
+.kypwrap .kyp-fam-orange:hover{background:#fdf8f2} .kyp-fam-slate:hover{background:#f8f8f6}
+.kypwrap .kyp-drag{display:flex;align-items:center;padding:0 6px 0 11px;color:#c9c6bd;cursor:grab;font-size:14px;line-height:1;user-select:none;transition:color .15s}
+.kypwrap .kyp-scanrow:hover .kyp-drag{color:var(--ink2)}
+.kypwrap .kyp-drag:active{cursor:grabbing}
+/* number badge — the gutter that title + takeaway both align past */
+.kypwrap .kyp-numb{align-self:center;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;flex:none;font-variant-numeric:tabular-nums;margin-right:13px;transition:transform .16s ease}
+.kypwrap .kyp-scanrow:hover .kyp-numb{transform:scale(1.07)}
+.kypwrap .kyp-fam-indigo .kyp-numb{background:#eef0fb;color:var(--indigo)} .kyp-fam-green .kyp-numb{background:#e9f4ec;color:var(--green)}
+.kypwrap .kyp-fam-orange .kyp-numb{background:#fbeede;color:#c0651e} .kyp-fam-slate .kyp-numb{background:#ecece9;color:var(--slate)}
+.kypwrap .kyp-scanmain{flex:1;min-width:0;padding:12px 8px 12px 0;display:flex;flex-direction:column;gap:3px;justify-content:center;cursor:pointer}
+.kypwrap .kyp-scankick{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.kypwrap .kyp-fam-indigo .kyp-scankick{color:var(--indigo)} .kyp-fam-green .kyp-scankick{color:var(--green)}
+.kypwrap .kyp-fam-orange .kyp-scankick{color:#c0651e} .kyp-fam-slate .kyp-scankick{color:var(--slate)}
+/* SCAN colored by VERDICT — ONE color system (use .kyp-v-good/att/ctx on the row).
+   accent + number badge + kicker + takeaway-emphasis + pill all share the verdict
+   tone, so a row reads as its verdict from either side. green=good, orange=attention,
+   slate=context. (Family colors are for expanded-section theming, not the scan.) */
+.kypwrap .kyp-v-good .accent{background:var(--green)} .kyp-v-att .accent{background:var(--orange)} .kyp-v-ctx .accent{background:var(--slate)}
+.kypwrap .kyp-v-good .kyp-numb{background:#e9f4ec;color:var(--green)} .kyp-v-att .kyp-numb{background:#fbeede;color:#c0651e} .kyp-v-ctx .kyp-numb{background:#ecece9;color:var(--slate)}
+.kypwrap .kyp-v-good .kyp-scankick{color:var(--green)} .kyp-v-att .kyp-scankick{color:#c0651e} .kyp-v-ctx .kyp-scankick{color:var(--slate)}
+.kypwrap .kyp-v-good:hover{background:#f6faf7} .kyp-v-att:hover{background:#fdf8f2} .kyp-v-ctx:hover{background:#f8f8f6}
+.kypwrap .kyp-scantake{font-size:15px;font-weight:600;color:var(--ink);line-height:1.3;letter-spacing:-.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kypwrap .kyp-scantake em{font-family:var(--disp);font-style:italic;font-weight:400;font-size:1.08em;letter-spacing:0}
+.kypwrap .kyp-v-good .kyp-scantake em{color:var(--green)} .kyp-v-att .kyp-scantake em{color:#c0651e} .kyp-v-ctx .kyp-scantake em{color:var(--slate)}
+.kypwrap .kyp-scanright{display:flex;align-items:center;gap:12px;padding-right:14px;flex:none}
+.kypwrap .kyp-hero{text-align:right;line-height:1}
+.kypwrap .kyp-hero .hv{font-family:var(--disp);font-size:25px;color:var(--ink);line-height:.95}
+.kypwrap .kyp-hero .hl{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.kypwrap .kyp-info{position:relative;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);color:var(--muted);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:12px;font-style:italic;cursor:help;flex:none;transition:border-color .15s,color .15s}
+.kypwrap .kyp-info:hover{border-color:var(--indigo);color:var(--indigo)}
+.kypwrap .kyp-tip{display:none;position:fixed;width:256px;z-index:60;background:#16171b;color:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 14px 38px rgba(0,0,0,.26);text-align:left;cursor:default;font-family:var(--sans);font-style:normal}
+.kypwrap .kyp-tip li, .kypwrap .kyp-tip .tt{font-style:normal}
+.kypwrap .kyp-tip.show{display:block;animation:kypIn .14s ease forwards}
+.kypwrap .kyp-tip .tt{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#aab2e4;margin-bottom:9px}
+.kypwrap .kyp-tip ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.kypwrap .kyp-tip li{font-size:11.5px;line-height:1.35;color:#e8e8ec;padding-left:13px;position:relative}
+.kypwrap .kyp-tip li::before{content:'';position:absolute;left:0;top:6px;width:4px;height:4px;border-radius:50%;background:#6b78c9}
+.kypwrap .kyp-tip .arw{position:absolute;top:-5px;right:12px;width:11px;height:11px;background:#16171b;transform:rotate(45deg)}
+.kypwrap .kyp-chev{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.4;flex:none;transition:transform .2s ease}
+.kypwrap .kyp-scanrow.open .kyp-chev{transform:rotate(180deg)}
+.kypwrap .kyp-eye{width:30px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;flex:none;transition:color .15s}
+.kypwrap .kyp-eye:hover{color:var(--ink)}
+.kypwrap .kyp-eye svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.kypwrap .kyp-scanrow.off{opacity:.5;background:var(--wash)}
+.kypwrap .kyp-scanrow.off .accent{background:var(--muted)!important}
+.kypwrap .kyp-scanrow.off .kyp-numb{background:#ecece9!important;color:var(--muted)!important}
+.kypwrap .kyp-scanrow.off .kyp-scankick{color:var(--muted)!important}
+.kypwrap .kyp-preview{display:none;padding:4px 16px 15px 0;margin-top:9px;border-top:1px solid var(--line)}
+.kypwrap .kyp-scanrow.open .kyp-preview{display:block}
+.kypwrap .kyp-pvrow{display:flex;gap:9px;font-size:13px;color:var(--ink2);margin-top:10px;line-height:1.45}
+.kypwrap .kyp-pvrow .sq{width:7px;height:7px;border-radius:2px;flex:none;margin-top:5px}
+.kypwrap .kyp-jump{margin-top:13px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+
+/* ========== INCENTIVE CARD ========== */
+.kypwrap .kyp-inc{border:1px solid var(--line);border-left:4px solid var(--green);border-radius:12px;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px;background:var(--card);transition:transform .12s ease,box-shadow .12s ease}
+.kypwrap .kyp-inc:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,20,20,.07)}
+.kypwrap .kyp-inc .in{font-size:15.5px;font-weight:700}
+.kypwrap .kyp-inc .id{font-size:12.5px;color:var(--ink2);margin-top:3px;line-height:1.4}
+.kypwrap .kyp-incgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kypwrap .kyp-inc.na{border-left-color:var(--slate);opacity:.62;background:transparent;border-style:dashed}
+.kypwrap .kyp-inc.na:hover{transform:none;box-shadow:none}
+.kypwrap .kyp-inc.na .in{color:var(--ink2)}
+
+/* ========== RICH INCENTIVE CARD (expandable program card) ==========
+   Header (state marker · name · type · verdict pill · chevron) + body
+   (verdict box · key-facts tiles · who-can-apply/eligibility columns ·
+   links/source). State drives left accent + marker + verdict pill tone. */
+.kypwrap .kyp-inccard{border:1px solid var(--line);border-left:4px solid var(--slate);border-radius:12px;background:var(--card);margin-bottom:10px;transition:box-shadow .12s ease}
+.kypwrap .kyp-inccard.good{border-left-color:var(--green)} .kyp-inccard.caution{border-left-color:var(--orange)}
+.kypwrap .kyp-inccard.na{border-left-color:var(--slate);opacity:.7}
+.kypwrap .kyp-inccard:hover{box-shadow:0 4px 14px rgba(20,20,20,.06)}
+.kypwrap .kic-hd{display:flex;align-items:center;gap:11px;padding:14px 16px;cursor:pointer;flex-wrap:wrap}
+.kypwrap .kic-mk{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;font-size:12px;font-weight:800;line-height:1}
+.kypwrap .kyp-inccard.good .kic-mk{background:#e9f4ec;color:var(--green)}
+.kypwrap .kyp-inccard.caution .kic-mk{background:#fbeede;color:#c0651e}
+.kypwrap .kyp-inccard.na .kic-mk{background:#ececea;color:var(--slate)}
+.kypwrap .kic-nm{font-size:15px;font-weight:700;color:var(--ink)}
+.kypwrap .kic-tp{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);background:var(--wash);border:1px solid var(--line);border-radius:5px;padding:3px 7px}
+.kypwrap .kic-hd .kyp-pill{margin-left:auto}
+.kypwrap .kic-chev{width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:2.4;flex:none;transition:transform .18s ease}
+.kypwrap .kyp-inccard.open .kic-chev{transform:rotate(180deg)}
+.kypwrap .kic-body{display:none;padding:0 16px 16px}
+.kypwrap .kyp-inccard.open .kic-body{display:block}
+.kypwrap .kic-v{border-radius:9px;padding:12px 14px;margin-bottom:12px}
+.kypwrap .kyp-inccard.good .kic-v{background:#e9f4ec} .kyp-inccard.caution .kic-v{background:#fbf4e2} .kyp-inccard.na .kic-v{background:var(--wash)}
+.kypwrap .kic-vt{font-size:13px;font-weight:600;color:var(--ink);line-height:1.5}
+.kypwrap .kic-vs{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:5px}
+.kypwrap .kic-kf{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.kypwrap .kic-kfc{background:var(--wash);border-radius:11px;padding:13px 15px;min-width:122px}
+.kypwrap .kic-kl{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:7px}
+.kypwrap .kic-kv{font-family:var(--disp);font-size:27px;line-height:1;color:var(--ink)}
+.kypwrap .kic-kd{font-size:11px;color:var(--ink2);margin-top:7px;line-height:1.4;max-width:150px}
+.kypwrap .kic-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:12px}
+.kypwrap .kic-ch{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.kypwrap .kic-cols ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+.kypwrap .kic-cols li{font-size:12px;color:var(--ink2);line-height:1.45;padding-left:13px;position:relative}
+.kypwrap .kic-cols li::before{content:'';position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:var(--indigo)}
+.kypwrap .kic-ft{display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding-top:12px;border-top:1px solid var(--line)}
+.kypwrap .kic-lnk{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;display:inline-flex;gap:5px;align-items:center}
+.kypwrap .kic-src{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+/* type sub-group label within a state group */
+.kypwrap .kic-type{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);margin:16px 0 9px}
+
+/* ===== horizontal magnitude bars — labeled distribution (crime by type, etc.) ===== */
+.kypwrap .kyp-hbar{display:flex;align-items:center;gap:14px;padding:5px 0;border-bottom:none}
+.kypwrap .kyp-hbar:last-of-type{border-bottom:none}
+.kypwrap .kyp-hbar .hl{width:150px;font-size:13.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px}
+.kypwrap .kyp-hbar .hl .tick{width:4px;height:16px;border-radius:2px;background:var(--muted);flex:none}
+.kypwrap .kyp-hbar .hl .tick.ind{background:var(--indigoL)} .kyp-hbar .hl .tick.att{background:var(--orange)} .kyp-hbar .hl .tick.red{background:var(--bad)}
+.kypwrap .kyp-hbar .htrack{position:relative;flex:1;height:26px;background:#eceae3;border-radius:6px}
+.kypwrap .kyp-hbar .htrack i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--slate);display:flex;align-items:center;justify-content:flex-end;padding-right:11px;color:#fff;font-family:var(--disp);font-size:20px;line-height:1}
+.kypwrap .kyp-hbar .htrack i.ind{background:var(--indigoL)} .kyp-hbar .htrack i.att{background:var(--orange)} .kyp-hbar .htrack i.red{background:var(--bad)}
+/* when a bar is too short to hold its number, the number sits just past its end —
+   never in a far-right gutter, never clipped inside the mark */
+.kypwrap .kyp-hbar .htrack .hv{position:absolute;top:0;height:100%;display:none;align-items:center;font-family:var(--disp);font-size:20px;color:var(--ink);white-space:nowrap}
+.kypwrap .kyp-hbar.narrow .htrack .hv{display:flex}
+.kypwrap .kyp-hbar.narrow .htrack i{padding-right:0;font-size:0}
+.kypwrap .kyp-hsum{font-size:13px;color:var(--ink2);line-height:1.5;margin-top:12px;max-width:64ch}
+.kypwrap .kyp-hsum b{color:var(--ink);font-weight:700}
+
+/* ===== year column trend — bars take verdict tone (good=falling, att=rising) ===== */
+.kypwrap .kyp-ytrend{margin-top:6px}
+.kypwrap .kyp-ytrend .yttop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.kypwrap .kyp-ytrend .ytbars{display:flex;align-items:flex-end;gap:14px;height:112px;padding-top:6px}
+.kypwrap .kyp-ytcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.kypwrap .kyp-ytcol .v{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:5px}
+.kypwrap .kyp-ytcol .bar{width:100%;max-width:52px;border-radius:6px 6px 0 0;background:var(--green);opacity:.4}
+.kypwrap .kyp-ytcol.cur .bar{opacity:1}
+.kypwrap .kyp-ytcol.cur .v{color:var(--green)}
+.kypwrap .kyp-ytrend.att .kyp-ytcol .bar{background:var(--orange)}
+.kypwrap .kyp-ytrend.att .kyp-ytcol.cur .v{color:#c0651e}
+.kypwrap .kyp-ytcol .yr{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);margin-top:7px}
+
+/* ===== article / coverage card — source-linked with verification (news, corridor, dev) ===== */
+.kypwrap .kyp-arts{display:flex;flex-direction:column;gap:10px}
+.kypwrap .kyp-art{border:1px solid var(--line);border-left:5px solid var(--slate);border-radius:12px;padding:16px 19px;background:var(--card)}
+.kypwrap .kyp-art.v-good{border-left-color:var(--green)} .kyp-art.v-att{border-left-color:var(--orange)} .kyp-art.v-ctx{border-left-color:var(--slate)}
+.kypwrap .kyp-art.parcel{background:linear-gradient(90deg,var(--indigoSoft),var(--card) 42%)}
+.kypwrap .kyp-art .atop{display:flex;align-items:center;gap:9px;margin-bottom:8px;flex-wrap:wrap}
+.kypwrap .kyp-art .abadge{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;padding:3px 8px;white-space:nowrap}
+.kypwrap .kyp-art .abadge.parcel{background:var(--indigo);color:#fff}
+.kypwrap .kyp-art .abadge.adj{background:var(--indigoSoft);color:var(--indigo);border:1px solid var(--indigoSoft)}
+.kypwrap .kyp-art .ameta{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.02em}
+.kypwrap .kyp-art .ameta b{color:var(--ink2);font-weight:600}
+.kypwrap .kyp-art .aage{margin-left:auto;font-family:var(--mono);font-size:9.5px;font-weight:700;color:#c0651e;background:#fdf3df;border:1px solid #f0d79a;border-radius:6px;padding:3px 8px}
+.kypwrap .kyp-art .atitle{font-size:17px;font-weight:700;color:var(--ink);line-height:1.3;letter-spacing:-.01em;margin-bottom:10px}
+.kypwrap .kyp-art .atitle a{color:var(--ink);text-decoration:none;border-bottom:1.5px solid var(--indigoSoft)}
+.kypwrap .kyp-art .atake{display:flex;gap:9px;align-items:flex-start}
+.kypwrap .kyp-art .atake .tk{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border-radius:5px;padding:3px 7px;flex:none;margin-top:1px}
+.kypwrap .kyp-art .atake .tx{font-size:13px;color:var(--ink);line-height:1.5;font-weight:500}
+.kypwrap .kyp-art .aattr{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px;line-height:1.45}
+.kypwrap .kyp-art .averify{display:flex;gap:10px;align-items:flex-start;margin-top:11px;padding-top:11px;border-top:1px dashed var(--line)}
+.kypwrap .kyp-art .averify .vtx{font-size:12px;color:var(--ink2);line-height:1.5}
+.kypwrap .kyp-art .averify .vtx b{color:var(--ink);font-weight:600}
+.kypwrap .kyp-art .averify .vtx a{color:var(--indigo);text-decoration:none;border-bottom:1.5px solid var(--indigoSoft);font-weight:600}
+.kypwrap .kyp-art .aread{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;margin-top:11px}
+/* verify pill — smaller kyp-pill for inline status */
+.kypwrap .kyp-vpill{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;border-radius:6px;padding:4px 8px;flex:none;white-space:nowrap}
+.kypwrap .kyp-vpill.good{background:var(--green)} .kyp-vpill.att{background:var(--orange)} .kyp-vpill.ctx{background:var(--slate)}
+.kypwrap .kyp-vpill svg{width:11px;height:11px;fill:none;stroke:currentColor}
+.kypwrap .kyp-art .aread svg{width:11px;height:11px;fill:none;stroke:currentColor}
+.kypwrap .kyp-art .atake .tk{align-self:flex-start}
+
+/* ===== coverage ARCHIVE — editorial index of articles (news + neighborhood news) =====
+   Not a data card. Serif headline leads; dateline + source as byline; our one-line read +
+   a quiet record-check. Hairline rules between entries — reads like a press archive. */
+.kypwrap .kyp-arch{display:flex;flex-direction:column}
+.kypwrap .kyp-archrow{padding:22px 0;border-bottom:1px solid var(--line)}
+.kypwrap .kyp-archrow:last-child{border-bottom:none}
+.kypwrap .kyp-archmeta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:10px}
+.kypwrap .kyp-archdate{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+.kypwrap .kyp-archsep{color:var(--muted)}
+.kypwrap .kyp-archsrc{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.kypwrap .kyp-archtag{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border-radius:5px;padding:2px 7px}
+.kypwrap .kyp-archtag.adj{color:var(--ink2);background:var(--wash)}
+.kypwrap .kyp-archage{font-family:var(--mono);font-size:8.5px;font-weight:700;color:#c0651e;background:#fdf3df;border:1px solid #f0d79a;border-radius:5px;padding:2px 6px}
+.kypwrap .kyp-archstatus{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+.kypwrap .kyp-archstatus .d{width:7px;height:7px;border-radius:50%;background:var(--slate);flex:none}
+.kypwrap .kyp-archstatus.good .d{background:var(--green)} .kyp-archstatus.att .d{background:var(--orange)} .kyp-archstatus.ctx .d{background:var(--slate)}
+.kypwrap .kyp-archtitle{display:block;font-family:var(--disp);font-size:23px;line-height:1.2;color:var(--ink);text-decoration:none;margin-bottom:8px}
+.kypwrap .kyp-archtitle:hover{color:var(--indigo)}
+.kypwrap .kyp-archsum{font-size:14.5px;color:var(--ink2);line-height:1.55;margin-bottom:8px;max-width:72ch}
+.kypwrap .kyp-archattr{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:11px;line-height:1.45}
+.kypwrap .kyp-archfoot{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.kypwrap .kyp-archrec{font-size:12.5px;color:var(--ink2);line-height:1.5}
+.kypwrap .kyp-archrec b{color:var(--ink);font-weight:600}
+.kypwrap .kyp-archrec a{color:var(--indigo);text-decoration:none;border-bottom:1.5px solid var(--indigoSoft);font-weight:600}
+.kypwrap .kyp-archread{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);text-decoration:none;white-space:nowrap;align-self:center}
+
+/* ===== media-archive upgrade — source tile + lead story (kills the flat text-wall) ===== */
+.kypwrap .kyp-archrow{display:flex;gap:20px;align-items:flex-start}
+.kypwrap .kyp-archbody{flex:1;min-width:0}
+.kypwrap .kyp-archthumb{width:116px;height:116px;border-radius:12px;flex:none;display:flex;flex-direction:column;justify-content:space-between;padding:13px 14px;color:#fff;position:relative;overflow:hidden}
+.kypwrap .kyp-archthumb .tsrc{font-family:var(--disp);font-size:20px;line-height:1.02;letter-spacing:.01em}
+.kypwrap .kyp-archthumb .tdt{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;opacity:.82;text-transform:uppercase}
+.kypwrap .kyp-archthumb.s-indigo{background:linear-gradient(150deg,#3140a6,#1d2670)}
+.kypwrap .kyp-archthumb.s-green{background:linear-gradient(150deg,#357f45,#204f2b)}
+.kypwrap .kyp-archthumb.s-slate{background:linear-gradient(150deg,#45443d,#262620)}
+.kypwrap .kyp-archthumb.s-red{background:linear-gradient(150deg,#95382a,#6a2117)}
+.kypwrap .kyp-archthumb.s-orange{background:linear-gradient(150deg,#bb6620,#8a4914)}
+.kypwrap .kyp-archkick{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+.kypwrap .kyp-archrow.lead .kyp-archthumb{width:150px;height:150px}
+.kypwrap .kyp-archrow.lead .kyp-archthumb .tsrc{font-size:25px}
+.kypwrap .kyp-archrow.lead .kyp-archtitle{font-size:29px;line-height:1.14}
+
+/* ===== logo tile — real publisher logo on a clean plate (fallback: .kyp-archthumb color plate) ===== */
+.kypwrap .kyp-archlogo{width:112px;height:112px;border-radius:12px;flex:none;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden}
+.kypwrap .kyp-archlogo img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.kypwrap .kyp-archrow.lead .kyp-archlogo{width:146px;height:146px}
+.kypwrap .kyp-archdate{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+
+/* ===== business-license row — establishment list (nearest-first) ===== */
+.kypwrap .kyp-bizrow{padding:12px 0;border-bottom:1px solid var(--line)}
+.kypwrap .kyp-bizrow:last-child{border-bottom:none}
+.kypwrap .kyp-bizrow .bt{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.kypwrap .kyp-bizrow .bnm{font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:9px}
+.kypwrap .kyp-bizrow .bnm .d{width:7px;height:7px;border-radius:2px;background:var(--orange);flex:none}
+.kypwrap .kyp-bizrow .bdist{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink2);flex:none}
+.kypwrap .kyp-bizrow .baddr{margin:3px 0 0 16px}
+.kypwrap .kyp-bizrow .baddr a{font-size:13px;color:var(--indigo);text-decoration:none;border-bottom:1px solid var(--indigoSoft)}
+.kypwrap .kyp-bizrow .bmeta{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:7px 0 0 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.kypwrap .kyp-bizrow .bmeta .lic{color:var(--ink2);font-weight:600}
+.kypwrap .kyp-bizrow .bmeta .n2{background:var(--wash);border-radius:5px;padding:2px 7px;color:var(--ink2);font-weight:700}
+/* clickable mix bar active state (reuses .kyp-hbar) */
+.kypwrap .kyp-hbar.ind .htrack i{background:var(--indigo)}
+.kypwrap .kyp-hbar.fam-orange .htrack i{background:var(--orange)}
+.kypwrap .kyp-hbar.click{cursor:pointer;border-radius:7px;padding-left:8px;padding-right:8px;margin:0 -8px;transition:background .12s}
+.kypwrap .kyp-hbar.click:hover{background:var(--wash)}
+.kypwrap .kyp-hbar.active{background:var(--indigoSoft)}
+.kypwrap .kyp-divl{display:flex;align-items:center;gap:12px;margin:18px 0 6px}
+.kypwrap .kyp-divl .lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.kypwrap .kyp-divl .ln{flex:1;height:1px;background:var(--line)}
+
+/* green variant for hbar (license-mix by lead category) */
+.kypwrap .kyp-hbar .hl .tick.grn{background:var(--green)} .kyp-hbar .htrack i.grn{background:var(--green)}
+/* license-category chip (soft-filled by category) */
+.kypwrap .kyp-liccat{display:inline-flex;align-items:center;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink);background:#fff;border:1.5px solid var(--slate);border-radius:5px;padding:3px 8px;white-space:nowrap}
+
+/* ===== business mini-cards — compact grid (2–3 across) ===== */
+.kypwrap .kyp-bizgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(256px,1fr));gap:12px}
+.kypwrap .kyp-bizcard{border:1px solid var(--line);border-radius:12px;padding:14px 15px;background:var(--card);transition:box-shadow .12s ease}
+.kypwrap .kyp-bizcard:hover{box-shadow:0 4px 14px rgba(20,20,20,.06)}
+.kypwrap .kyp-bizcard .bt{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.kypwrap .kyp-bizcard .bnm{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.22}
+.kypwrap .kyp-bizcard .bdist{font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--ink2);background:var(--wash);border-radius:6px;padding:2px 7px;flex:none;white-space:nowrap}
+.kypwrap .kyp-bizcard .baddr{display:block;font-size:12px;color:var(--indigo);text-decoration:none;margin-top:4px}
+.kypwrap .kyp-bizcard .baddr:hover{text-decoration:underline}
+.kypwrap .kyp-bizcard .bchips{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.kypwrap .kyp-bizcard .bwhen{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:10px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.kypwrap .kyp-bizcard .bwhen .n2{background:var(--wash);border-radius:5px;padding:2px 6px;color:var(--ink2);font-weight:700}
+
+/* ===== violation row + caveat (DOB violations) ===== */
+.kypwrap .kyp-viol{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.kypwrap .kyp-viol:last-of-type{border-bottom:none}
+.kypwrap .kyp-viol .vchip{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:3px 8px;flex:none;white-space:nowrap;margin-top:1px}
+.kypwrap .kyp-viol .vchip.open{background:#fbeceb;color:var(--bad);border:1px solid #f0d0cb}
+.kypwrap .kyp-viol .vchip.complied{background:#e9f4ec;color:var(--green);border:1px solid #cfe6d5}
+.kypwrap .kyp-viol .vchip.stale{background:var(--wash);color:var(--ink2);border:1px solid var(--line)}
+.kypwrap .kyp-viol .vbody{flex:1;min-width:0}
+.kypwrap .kyp-viol .vsc{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.35}
+.kypwrap .kyp-viol .vmeta{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
+.kypwrap .kyp-caveat{font-size:12.5px;color:var(--ink2);line-height:1.5;background:var(--wash);border-radius:10px;padding:12px 14px;margin-top:14px}
+.kypwrap .kyp-caveat b{color:var(--ink);font-weight:600}
+.kypwrap .kyp-morelink{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);cursor:pointer;margin-top:13px;display:inline-block}
+.kypwrap .kyp-eradiv{display:flex;align-items:baseline;gap:10px;margin:22px 0 11px}
+.kypwrap .kyp-eradiv .lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.kypwrap .kyp-eradiv .meta{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.kypwrap .kyp-eradiv .ln{flex:1;height:1px;background:var(--line)}
+.kypwrap .kyp-footnote{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:13px;padding-top:11px;border-top:1px dashed var(--line)}
+.kypwrap .kyp-footnote b{color:var(--ink2);font-weight:600}
+
+/* ===== EVENT TIMELINE — sparse events on a spine. One lane = permits only;
+   multiple lanes = the combined property timeline (sales · permits · zoning · debt). */
+.kypwrap .kyp-tl{position:relative;margin:16px 0 4px}
+.kypwrap .kyp-tl .lane{position:relative;height:52px}
+.kypwrap .kyp-tl .lname{position:absolute;left:0;top:19px;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);width:74px}
+.kypwrap .kyp-tl .track{position:absolute;left:84px;right:8px;top:0;bottom:0}
+.kypwrap .kyp-tl .line{position:absolute;left:0;right:0;top:26px;height:2px;background:var(--line);border-radius:2px}
+.kypwrap .kyp-tl .ev{position:absolute;top:26px;transform:translate(-50%,-50%);border-radius:50%;background:var(--slate);box-shadow:0 0 0 3px var(--paper)}
+.kypwrap .kyp-tl .ev.lg{width:19px;height:19px} .kyp-tl .ev.md{width:13px;height:13px} .kyp-tl .ev.sm{width:9px;height:9px}
+.kypwrap .kyp-tl .ev.cur{background:var(--indigoL)}
+.kypwrap .kyp-tl .ev.nocost{background:var(--card);box-shadow:0 0 0 2px #cfcdc4, 0 0 0 5px var(--paper)}
+.kypwrap .kyp-tl .ev .lb{position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--ink);white-space:nowrap}
+.kypwrap .kyp-tl .divider{position:absolute;top:4px;bottom:10px;border-left:1.5px dashed #b9b7ae}
+.kypwrap .kyp-tl .divider .dl{position:absolute;top:-4px;left:7px;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+.kypwrap .kyp-tl .eralab{position:absolute;top:42px;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.kypwrap .kyp-tl .axis{position:relative;height:15px;margin-left:84px}
+.kypwrap .kyp-tl .axis .yr{position:absolute;font-family:var(--mono);font-size:9px;color:var(--muted);transform:translateX(-50%)}
+
+/* ===== bolder permit / professional / violation treatments ===== */
+.kypwrap .kyp-permit{border-left-width:5px}
+.kypwrap .kyp-permit.good{border-left-color:var(--green)}
+.kypwrap .kyp-permit.att{border-left-color:var(--orange)}
+.kypwrap .kyp-permit .pscope{font-size:15.5px;line-height:1.35}
+.kypwrap .kyp-permit .pcost{font-size:27px}
+.kypwrap .kyp-permit .ptag.good{background:var(--green);color:#fff;border-color:var(--green)}
+.kypwrap .kyp-permit .ptag.att{background:var(--orange);color:#fff;border-color:var(--orange)}
+.kypwrap .kyp-permit .ptag.era{background:var(--slate);color:#fff;border-color:var(--slate)}
+.kypwrap .kyp-permit .pmv{font-size:13.5px}
+
+.kypwrap .kyp-procard{border-left:5px solid var(--indigoL)}
+.kypwrap .kyp-procard.prior{border-left-color:var(--slate)}
+.kypwrap .kyp-procard .prole{background:var(--indigo);color:#fff}
+.kypwrap .kyp-procard .pnm{font-size:16.5px}
+.kypwrap .kyp-procard .phere{font-size:13.5px}
+.kypwrap .kyp-procard .phere .n{font-family:var(--disp);font-size:19px;color:var(--ink);line-height:1;margin-right:2px}
+.kypwrap .kyp-procard .pera{background:var(--wash);border-color:var(--line)}
+
+.kypwrap .kyp-viol{padding:14px 0}
+.kypwrap .kyp-viol .vchip{color:#fff;border:none;font-size:9px;padding:4px 9px}
+.kypwrap .kyp-viol .vchip.open{background:var(--bad)}
+.kypwrap .kyp-viol .vchip.complied{background:var(--green)}
+.kypwrap .kyp-viol .vchip.stale{background:var(--slate)}
+.kypwrap .kyp-viol .vsc{font-size:14.5px;font-weight:700}
+.kypwrap .kyp-viol .vchip.open, .kypwrap .kyp-viol .vchip.complied, .kypwrap .kyp-viol .vchip.stale{color:#fff}
+/* certification chips (MBE/WBE/DBE/VBE/BEPD) on professional cards */
+.kypwrap .kyp-procard .pcerts{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.kypwrap .kyp-cert{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green);background:#e9f4ec;border:1px solid #cfe6d5;border-radius:5px;padding:3px 7px}
+
+/* ===== OWNERSHIP & TITLE (merged sales + debt) =====================
+   Money is TYPED, never one column. Paid = indigo (what changed hands),
+   Borrowed = cyan (what was lent against it), Claimed = red (adverse).
+   --debt is a NEW categorical hue, not a verdict color: validated at
+   normal ΔE 18.5 vs indigo and 17.2 vs verdict green, deutan 15.6. */
+.kypwrap{ --debt:#0a93b8; --debtSoft:#e6f5f9; --debtLine:#b9e2ee; }
+.kypwrap .kyp-block.debt{background:var(--debt)}
+
+/* owner strip */
+.kypwrap .kyp-owner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--indigoSoft);border-radius:12px;padding:13px 16px;margin-bottom:14px}
+.kypwrap .kyp-owner .olab{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--indigo);background:#fff;border-radius:5px;padding:3px 8px;flex:none}
+.kypwrap .kyp-owner .onm{font-size:16.5px;font-weight:700;color:var(--ink)}
+.kypwrap .kyp-owner .oent{font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:5px;padding:3px 7px}
+.kypwrap .kyp-owner .osince{margin-left:auto;font-size:12.5px;color:var(--ink2)}
+.kypwrap .kyp-owner .osince b{color:var(--ink);font-weight:600}
+
+/* money-type tag — the one rule that keeps units apart */
+.kypwrap .kyp-mt{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:3px 7px;flex:none}
+.kypwrap .kyp-mt.paid{color:#fff;background:var(--indigo)}
+.kypwrap .kyp-mt.borrowed{color:#fff;background:var(--debt)}
+.kypwrap .kyp-mt.claimed{color:#fff;background:var(--bad)}
+.kypwrap .kyp-mt.consid{color:var(--ink2);background:var(--wash);border:1px solid var(--line)}
+
+/* timeline */
+.kypwrap .kyp-otl{margin-top:10px}
+.kypwrap .kyp-otlleg{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.kypwrap .kyp-otlleg i{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);font-style:normal}
+.kypwrap .kyp-otlleg .sw{width:13px;height:9px;border-radius:2px;flex:none}
+.kypwrap .kyp-otlleg .sw.paid{width:11px;height:11px;background:var(--indigo);transform:rotate(45deg);border-radius:2px}
+.kypwrap .kyp-otlleg .sw.brw{background:var(--debt)}
+.kypwrap .kyp-otlleg .sw.loc{background:repeating-linear-gradient(45deg,var(--debt) 0 3px,#fff 3px 6px);border:1px solid var(--debt)}
+.kypwrap .kyp-otlleg .sw.dis{background:var(--bad);border-radius:50%;width:10px;height:10px}
+.kypwrap .kyp-otlplot{width:100%;height:auto;display:block}
+.kypwrap .kyp-otlnote{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:7px;line-height:1.5}
+
+/* transaction + loan cards */
+.kypwrap .kyp-xact{border:1px solid var(--line);border-left:5px solid var(--indigo);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--card)}
+.kypwrap .kyp-xact.loan{border-left-color:var(--debt)}
+.kypwrap .kyp-xact.loan.cleared{border-left-color:var(--muted)}
+.kypwrap .kyp-xact.claim{border-left-color:var(--bad)}
+.kypwrap .kyp-xact .xtop{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:9px}
+.kypwrap .kyp-xact .xamt{font-family:var(--disp);font-size:27px;line-height:1;color:var(--ink);margin-left:auto}
+.kypwrap .kyp-xact .xttl{font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.35}
+.kypwrap .kyp-xact .xtags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.kypwrap .kyp-xact .xtag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);background:var(--wash);border:1px solid var(--line);border-radius:5px;padding:3px 7px}
+.kypwrap .kyp-xact .xtag.era{background:var(--slate);color:#fff;border-color:var(--slate)}
+.kypwrap .kyp-xact .xtag.ok{background:var(--green);color:#fff;border-color:var(--green)}
+.kypwrap .kyp-xact .xtag.att{background:var(--orange);color:#fff;border-color:var(--orange)}
+.kypwrap .kyp-xact .xgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px 22px;padding-top:10px;border-top:1px dashed var(--line)}
+.kypwrap .kyp-xact .xf .k{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px}
+.kypwrap .kyp-xact .xf .v{font-size:13.5px;color:var(--ink);font-weight:600}
+.kypwrap .kyp-xact .xf .v.na{color:var(--muted);font-weight:400}
+.kypwrap .kyp-xact .xflag{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:var(--orange);margin-top:9px;line-height:1.45}
+.kypwrap .kyp-xact a.doc{color:var(--indigo);text-decoration:none;font-weight:600}
+
+/* ===== loan terms strip + inline runway ===== */
+.kypwrap .kyp-terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 22px;margin-top:11px;padding-top:11px;border-top:1px dashed var(--line)}
+.kypwrap .kyp-terms .tc{min-width:0}
+.kypwrap .kyp-terms .tk{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px}
+.kypwrap .kyp-terms .tv{display:block;font-family:var(--disp);font-size:22px;line-height:1;color:var(--ink)}
+.kypwrap .kyp-terms .tv.sm{font-family:var(--sans);font-size:13.5px;font-weight:600;line-height:1.25}
+.kypwrap .kyp-terms .tv.na{font-family:var(--sans);font-size:13px;font-weight:400;color:var(--muted);line-height:1.25}
+.kypwrap .kyp-terms .ts{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.3}
+.kypwrap .kyp-terms a{color:var(--indigo);text-decoration:none;font-weight:600}
+.kypwrap .kyp-rw{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+.kypwrap .kyp-rwbar{position:relative;height:6px;border-radius:999px;background:#e9e7e0;overflow:hidden}
+.kypwrap .kyp-rwbar i{position:absolute;left:0;top:0;height:100%;border-radius:999px;background:var(--debt);display:block}
+.kypwrap .kyp-rwlab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px}
+.kypwrap .kyp-rwlab b{color:var(--ink2);font-weight:700}
+.kypwrap .kyp-rwnote{font-size:11.5px;color:var(--ink2);margin-top:7px}
+.kypwrap .kyp-rwnote b{color:var(--ink);font-weight:600}
+
+/* ===== primary lien strip — keeps rate/maturity/recorded high in the section ===== */
+.kypwrap .kyp-lienstrip{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--debtSoft);border:1px solid var(--debtLine);border-radius:12px;padding:12px 16px;margin:12px 0 4px}
+.kypwrap .kyp-lienstrip .llab{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--debt);border-radius:5px;padding:4px 8px;flex:none}
+.kypwrap .kyp-lienstrip .lnm{font-size:14.5px;font-weight:700;color:var(--ink)}
+.kypwrap .kyp-lienstrip .lt{display:flex;align-items:baseline;gap:6px;font-size:11.5px;color:var(--ink2)}
+.kypwrap .kyp-lienstrip .lt .k{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.kypwrap .kyp-lienstrip .lt .v{font-family:var(--disp);font-size:19px;line-height:1;color:var(--ink)}
+.kypwrap .kyp-lienstrip .lt .v.sm{font-family:var(--sans);font-size:13px;font-weight:600}
+.kypwrap .kyp-lienstrip .lamt{margin-left:auto;font-family:var(--disp);font-size:26px;line-height:1;color:var(--debt)}
+.kypwrap .kyp-lienstrip .lts{flex-basis:100%;display:flex;align-items:baseline;gap:26px;flex-wrap:wrap;padding-top:10px;margin-top:2px;border-top:1px solid var(--debtLine)}
+.kypwrap .kyp-lienstrip .sep{width:1px;height:26px;background:var(--debtLine);flex:none}
+/* line-of-credit callout */
+.kypwrap .kyp-loc{display:flex;gap:11px;align-items:flex-start;background:#fdf8f0;border:1px solid #e6cfa0;border-left:4px solid var(--orange);border-radius:11px;padding:12px 15px;margin-top:12px}
+.kypwrap .kyp-loc .ic{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--orange);border-radius:5px;padding:4px 8px;flex:none}
+.kypwrap .kyp-loc .tx{font-size:12.5px;color:var(--ink2);line-height:1.5}
+.kypwrap .kyp-loc .tx b{color:var(--ink);font-weight:700}
+
+/* timeline nodes are interactive: hover ring + deep link to the card below */
+.kypwrap .kyp-tlnode{cursor:pointer}
+.kypwrap .kyp-tlnode circle, .kypwrap .kyp-tlnode rect{transition:transform .12s ease}
+.kypwrap .kyp-tlnode:hover circle, .kypwrap .kyp-tlnode:hover rect{transform-box:fill-box;transform-origin:center;transform:scale(1.35)}
+.kypwrap .kyp-tlnode:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+/* breakdown rows inside a filled block */
+.kypwrap .kyp-block .bbreak{border-top:1px solid rgba(255,255,255,.28);padding-top:9px;margin-top:9px;display:flex;flex-direction:column;gap:5px}
+.kypwrap .kyp-block .br{font-size:10.5px;opacity:.9;line-height:1.35;display:flex;gap:7px}
+.kypwrap .kyp-block .br b{font-weight:700;opacity:1;flex:none;font-variant-numeric:tabular-nums}
+.kypwrap .kyp-blocks.four{grid-template-columns:repeat(4,1fr)}
+
+/* ===== ONE treatment for every recorded document reference =====
+   Doc number + recording date are the same fact (both off the recorder
+   index) and always render together, in this order, always linked. */
+.kypwrap .kyp-docref{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:1px dashed var(--line);font-family:var(--mono);font-size:10.5px;color:var(--ink2)}
+.kypwrap .kyp-docref .k{font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.kypwrap .kyp-docref .v{color:var(--ink2);font-weight:600}
+.kypwrap .kyp-docref .sep{color:#c8c6bd}
+.kypwrap .kyp-docref a{color:var(--indigo);text-decoration:none;font-weight:700}
+.kypwrap .kyp-docref a:hover{text-decoration:underline}
+.kypwrap .kyp-docref .approx{color:var(--muted);font-weight:400}
+
+/* ===== NEW BUSINESS LICENSES — categories are designations, never verdicts =====
+   No green/orange here: we have no benchmark for "good" business formation,
+   so nothing in this section earns a verdict colour. Emphasis carries the
+   finding instead — food-involved is the accent, everything else recedes. */
+.kypwrap .kyp-bizcard{border-left:4px solid var(--line)}
+.kypwrap .kyp-bizcard{border-left-color:var(--indigo)}
+.kypwrap .kyp-bizcard .bnm{font-size:15px}
+.kypwrap .kyp-bizcard .bdist{font-family:var(--disp);font-size:16px;font-weight:400;background:none;color:var(--ink);padding:0}
+
+/* card chips are tinted, never flat gray */
+.kypwrap .kyp-bizcard{border-left-width:5px}
+.kypwrap .kyp-bizcard .bchips .kyp-liccat{display:inline-flex;align-items:center;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink);background:#fff;border:1.5px solid var(--slate);border-radius:5px;padding:3px 8px;white-space:nowrap}
+.kypwrap .kyp-bizcard.food .bchips .kyp-liccat{display:inline-flex;align-items:center;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink);background:#fff;border:1.5px solid var(--slate);border-radius:5px;padding:3px 8px;white-space:nowrap}
+.kypwrap .kyp-bizcard .bnm{font-size:16px}
+.kypwrap .kyp-bizcard .bdist{font-size:19px;color:var(--indigo)}
+.kypwrap .kyp-bizcard .bwhen{font-size:10px}
+
+/* chart key — shared by any .kyp-hbar group */
+.kypwrap .kyp-barkey{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:11px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.kypwrap .kyp-barkey i{width:13px;height:11px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:middle}
+/* label chips inside a bar row are filled — they are the object, not decoration */
+.kypwrap .kyp-hbar .hl .kyp-liccat{display:inline-flex;align-items:center;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink);background:#fff;border:1.5px solid var(--slate);border-radius:5px;padding:3px 8px;white-space:nowrap}
+.kypwrap .kyp-hbar .hl.chips{width:250px;display:flex;gap:5px;flex-wrap:wrap}
+/* hero block row: the total is wider than its parts */
+.kypwrap .kyp-blocks.hero{grid-template-columns:1.4fr 1fr 1fr}
+.kypwrap .kyp-blocks.hero .kyp-block:first-child .bv{font-size:46px}
+
+/* a light block — breaks a row of heavy fills so the set reads as a hierarchy */
+.kypwrap .kyp-block.wash{background:var(--wash);color:var(--ink);border:1px solid var(--line)}
+.kypwrap .kyp-block.wash .bl{color:var(--indigo);opacity:1}
+.kypwrap .kyp-block.wash .bd{color:var(--ink2);opacity:1}
+
+/* family-themed stat blocks (DESIGN_SYSTEM §'Family colors')
+   corridor/development = orange · transit/crime/proximity = teal */
+.kypwrap .kyp-block.teal{background:var(--teal)}
+.kypwrap .kyp-blocks.hero .kyp-block:first-child .bv{font-size:46px}
+/* corridor/development family accent on the section shell */
+.kypwrap .kyp-accent-orange{--fam:var(--orange)}
+
+/* ===== ACTIVE LISTING — every number is somebody's claim =====================
+   This is the one section built on unverified data. Provenance is a first-class
+   mark, not a footnote: CLAIMED = the seller says so, RECORD = we checked. */
+.kypwrap .kyp-prov{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:3px 7px;flex:none}
+.kypwrap .kyp-prov.claimed{color:#fff;background:var(--slate)}
+.kypwrap .kyp-prov.record{color:#fff;background:var(--indigo)}
+.kypwrap .kyp-block .bclaim{align-self:flex-start;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.22);border-radius:5px;padding:3px 7px;margin-bottom:9px}
+
+/* status strip */
+.kypwrap .kyp-lstat{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--wash);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:12.5px;color:var(--ink2)}
+.kypwrap .kyp-lstat .pill{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--green);border-radius:5px;padding:4px 9px;flex:none}
+.kypwrap .kyp-lstat b{color:var(--ink);font-weight:600}
+.kypwrap .kyp-lstat a{color:var(--indigo);text-decoration:none;font-weight:600}
+.kypwrap .kyp-lstat .rc{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--indigo);cursor:pointer;white-space:nowrap}
+
+/* claims vs record */
+.kypwrap .kyp-xrow{display:grid;grid-template-columns:1fr 1fr 118px;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.kypwrap .kyp-xrow:last-of-type{border-bottom:none}
+.kypwrap .kyp-xrow .k{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px}
+.kypwrap .kyp-xrow .v{font-size:14.5px;font-weight:600;color:var(--ink)}
+.kypwrap .kyp-xrow .v.na{color:var(--muted);font-weight:400;font-size:13px}
+.kypwrap .kyp-xrow .res{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;border-radius:6px;padding:5px 9px;text-align:center}
+.kypwrap .kyp-xrow .res.ok{background:var(--green)}
+.kypwrap .kyp-xrow .res.diff{background:var(--orange)}
+.kypwrap .kyp-xrow .res.bad{background:var(--bad)}
+.kypwrap .kyp-xrow .res.none{background:var(--wash);color:var(--ink2);border:1px solid var(--line)}
+
+/* disclosures — the field that exists and was never rendered */
+.kypwrap .kyp-disc{display:flex;gap:11px;align-items:flex-start;padding:11px 14px;border-radius:10px;background:#fdf8f0;border:1px solid #e6cfa0;border-left:4px solid var(--orange);margin-bottom:8px}
+.kypwrap .kyp-disc.noted{background:var(--indigoSoft);border-color:#dfe3f7;border-left-color:var(--indigo)}
+.kypwrap .kyp-disc.noted .ic{background:var(--indigo)}
+.kypwrap .kyp-disc.cleared{background:#e9f4ec;border-color:#cfe6d5;border-left-color:var(--green)}
+.kypwrap .kyp-disc.cleared .ic{background:var(--green)}
+.kypwrap .kyp-disc .ic{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--orange);border-radius:5px;padding:4px 8px;flex:none}
+.kypwrap .kyp-disc .tx{font-size:13px;color:var(--ink);line-height:1.5}
+
+/* ===== 10 NEW CONSTRUCTION ==================================================
+   Deliberately adds NO new bar chart, NO new card, NO new chip. A year row is
+   the same object as a ranked count row (.kyp-hbar); a nearby build is the same
+   object as a nearby business (.kyp-bizcard); a permit number is the same object
+   as a recorder document (.kyp-docref). Only two size modifiers are new. */
+.kypwrap .kyp-hbar.yr .hl{font-family:var(--mono);font-size:12.5px;font-weight:700;display:block}
+/* Two charts stacked in one section must share a label gutter, or they read as
+   two different components. The gutter belongs to the chart, not the bar. */
+.kypwrap .kyp-bars.g150 .kyp-hbar .hl, .kypwrap .kyp-bars.g150 .kyp-hbar .hl.chips{width:150px}
+.kypwrap .kyp-hbar.yr .hl .ytd{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.06em;color:var(--indigo);display:block;margin-top:2px}
+.kypwrap .kyp-hbar .pace{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid #dde1f6;border-radius:6px;padding:3px 7px;flex:none;white-space:nowrap}
+.kypwrap .kyp-bizcard .bfields{display:grid;grid-template-columns:repeat(auto-fit,minmax(102px,1fr));gap:7px 16px;margin-top:11px;padding-top:10px;border-top:1px dashed var(--line)}
+.kypwrap .kyp-bizcard .bfields .k{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px}
+.kypwrap .kyp-bizcard .bfields .v{font-size:12px;font-weight:600;color:var(--ink);line-height:1.3}
+.kypwrap .kyp-lstat .pill.ind{background:var(--indigo)}
+.kypwrap .kyp-bizcard a.bnm{text-decoration:none}
+.kypwrap .kyp-bizcard a.bnm:hover{text-decoration:underline}
+.kypwrap .kyp-bizcard{display:flex;flex-direction:column}
+.kypwrap .kyp-bizcard .kyp-docref{margin-top:auto}
+
+/* ===== 11 NEARBY DEVELOPMENT ================================================
+   One new component: the pipeline strip. It makes no claim — it orients the
+   reader across 09/10/11 — so it is quiet by design, and it READS the other
+   sections' computed counts rather than recomputing them. */
+.kypwrap .kyp-pipe{display:flex;align-items:stretch;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:14px 0 4px;background:var(--card)}
+.kypwrap .kyp-pipe .st{flex:1;padding:13px 16px;display:flex;align-items:baseline;gap:11px;min-width:0;border-left:1px solid var(--line)}
+.kypwrap .kyp-pipe .st:first-child{border-left:none}
+.kypwrap .kyp-pipe .st.here{background:var(--indigoSoft)}
+.kypwrap .kyp-pipe .n{font-family:var(--disp);font-size:27px;line-height:1;color:var(--indigo);flex:none}
+.kypwrap .kyp-pipe .st.here .n{color:var(--indigo)}
+.kypwrap .kyp-pipe .lb{min-width:0}
+.kypwrap .kyp-pipe .k{display:block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--slate)}
+.kypwrap .kyp-pipe .st.here .k{color:var(--indigo)}
+.kypwrap .kyp-pipe .d{display:block;font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3}
+.kypwrap .kyp-pipe a{color:inherit;text-decoration:none}
+@media(max-width:640px){.kyp-pipe{flex-direction:column}.kyp-pipe .st{border-left:none;border-top:1px solid var(--line)}.kyp-pipe .st:first-child{border-top:none}}
+
+/* a card whose subject is a claim, not a record, wears its provenance in the title row */
+.kypwrap .kyp-bizcard .bt .kyp-prov{align-self:center}
+
+/* ===== 12 NEIGHBORHOOD & PEOPLE ============================================
+   The most fair-housing-sensitive section in the report. The tier structure is
+   STRUCTURAL, not a colour code: Tier A metrics carry a delta; Tier C metrics
+   carry no delta, no arrow, no colour. Removing the change channel IS the rule —
+   an arrow on a race row says "this went the right way", which is the violation. */
+.kypwrap .kyp-terms .tc .pv{display:block;font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:5px}
+.kypwrap .kyp-terms .tc .dl{display:block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.02em;margin-top:5px;color:var(--ink2)}
+.kypwrap .kyp-terms .tc .dl.up{color:var(--green)}
+.kypwrap .kyp-terms .tc .dl.att{color:#a65f14}
+.kypwrap .kyp-terms .tc .dl.dn{color:var(--bad)}
+
+/* Tier C — context, reported not rated. Its own block, at the bottom, and the
+   heading states the rule rather than relying on a legend swatch. */
+.kypwrap .kyp-ctx{border:1px solid var(--line);border-left:4px solid var(--slate);border-radius:12px;padding:17px 19px;margin-top:24px;background:var(--wash)}
+.kypwrap .kyp-ctx .ch{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--slate);margin-bottom:8px}
+.kypwrap .kyp-ctx .cw{font-size:12px;color:var(--ink2);line-height:1.55;margin-bottom:15px}
+.kypwrap .kyp-ctx .cw b{color:var(--ink);font-weight:600}
+.kypwrap .kyp-ctx .kyp-terms{border-top:1px dashed #d5d2c8;margin-top:0}
+.kypwrap .kyp-ctx .kyp-terms .tv{color:var(--ink2)}
+
+/* a ballot measure bearing on property cost — Tier B, never partisan, never rated */
+.kypwrap .kyp-vote{border:1px solid var(--line);border-left:4px solid var(--indigo);border-radius:11px;padding:14px 16px;margin-bottom:10px;background:var(--card)}
+.kypwrap .kyp-vote .vq{font-size:13px;color:var(--ink2);line-height:1.5}
+.kypwrap .kyp-vote .vq b{color:var(--ink);font-weight:700}
+.kypwrap .kyp-vote .vy{display:inline-block;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border-radius:5px;padding:3px 7px;margin-right:9px;vertical-align:2px}
+.kypwrap .kyp-vote .vb{display:flex;align-items:center;gap:13px;margin-top:11px}
+.kypwrap .kyp-vote .vtrack{position:relative;flex:1;height:20px;background:#eceae3;border-radius:5px}
+.kypwrap .kyp-vote .vtrack i{position:absolute;left:0;top:0;bottom:0;background:var(--indigoL);border-radius:5px}
+.kypwrap .kyp-vote .vthr{position:absolute;left:50%;top:-3px;bottom:-3px;border-left:1.5px dashed var(--slate)}
+.kypwrap .kyp-vote .vp{font-family:var(--disp);font-size:19px;line-height:1;color:var(--ink);flex:none;min-width:104px;text-align:right}
+.kypwrap .kyp-vote .vo{display:flex;align-items:baseline;gap:11px;margin-top:11px;padding-top:10px;border-top:1px dashed var(--line);flex-wrap:wrap}
+.kypwrap .kyp-vote .vn{flex:1;min-width:220px;font-size:11.5px;color:var(--ink2);line-height:1.5}
+.kypwrap .kyp-vote .vn b{color:var(--ink);font-weight:700}
+
+/* ===== PROPERTY TAXES ======================================================
+   The bill is arithmetic, so show the arithmetic. .kyp-calc is a build-up
+   ledger: each row is one operation, the running total is on the right, and
+   every input names its source. Reused wherever a headline number is derived
+   rather than reported. */
+.kypwrap .kyp-calc{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card);margin:14px 0 4px}
+.kypwrap .kyp-calc .cr{display:grid;grid-template-columns:1fr 132px 152px;gap:14px;align-items:baseline;padding:12px 18px;border-top:1px solid var(--line)}
+.kypwrap .kyp-calc .cr:first-child{border-top:none}
+.kypwrap .kyp-calc .cr.sub{background:var(--wash)}
+.kypwrap .kyp-calc .cr.tot{background:var(--indigoSoft);border-top:2px solid var(--indigo)}
+.kypwrap .kyp-calc .k{font-size:13px;color:var(--ink2);min-width:0}
+.kypwrap .kyp-calc .k b{color:var(--ink);font-weight:700}
+.kypwrap .kyp-calc .k .sc{display:block;font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.02em}
+.kypwrap .kyp-calc .op{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink2);text-align:right;white-space:nowrap}
+.kypwrap .kyp-calc .op.neg{color:var(--green)}
+.kypwrap .kyp-calc .rt{font-family:var(--disp);font-size:22px;line-height:1;color:var(--ink);text-align:right}
+.kypwrap .kyp-calc .cr.tot .rt{font-size:28px;color:var(--indigo)}
+.kypwrap .kyp-calc .cr.tot .k b{color:var(--indigo)}
+@media(max-width:640px){.kyp-calc .cr{grid-template-columns:1fr 110px;row-gap:6px}.kyp-calc .rt{grid-column:1/-1;text-align:left}}
+
+/* exemption transfer diff — the buyer's bill shock */
+.kypwrap .kyp-xfer{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:12px 0}
+.kypwrap .kyp-xfer .col{padding:15px 18px}
+.kypwrap .kyp-xfer .col+.col{border-left:1px solid var(--line);background:#fdf8f0}
+.kypwrap .kyp-xfer .h{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.kypwrap .kyp-xfer .col+.col .h{color:#a65f14}
+.kypwrap .kyp-xfer .v{font-family:var(--disp);font-size:30px;line-height:1;color:var(--ink)}
+.kypwrap .kyp-xfer .col+.col .v{color:#a65f14}
+.kypwrap .kyp-xfer .li{font-size:11.5px;color:var(--ink2);margin-top:9px;line-height:1.6}
+.kypwrap .kyp-xfer .li i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:6px}
+@media(max-width:640px){.kyp-xfer{grid-template-columns:1fr}.kyp-xfer .col+.col{border-left:none;border-top:1px solid var(--line)}}
+/* a representative's record on THIS parcel — win/no-change proportion */
+.kypwrap .kyp-procard .pwl{display:flex;gap:3px;height:8px;border-radius:4px;overflow:hidden;margin-top:10px;background:#eceae3}
+.kypwrap .kyp-procard .pwl i{display:block;border-radius:3px}
+.kypwrap .kyp-procard .pwl i.win{background:var(--indigoL)}
+.kypwrap .kyp-procard .pwl i.no{background:#c8c6bd}
+
+/* scenario diff — reuses the Active Listing claim-vs-record row, widened for a
+   money column. Left = what the city record says. Right = what the user plans. */
+.kypwrap .kyp-xrow.scn{grid-template-columns:170px 1fr 1fr 150px}
+.kypwrap .kyp-xrow.scn .eff{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink2);text-align:right}
+.kypwrap .kyp-xrow.scn .eff.good{color:var(--green)}
+.kypwrap .kyp-xrow.scn .rk{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.kypwrap .kyp-scnhd{display:grid;grid-template-columns:170px 1fr 1fr 150px;gap:16px;padding-bottom:9px;border-bottom:2px solid var(--ink);margin-top:6px}
+.kypwrap .kyp-scnhd .h{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+@media(max-width:760px){.kyp-xrow.scn,.kyp-scnhd{grid-template-columns:1fr 1fr}}
+
+/* ---- Step 14 · zoning history ---- */
+/* citywide slot with no index behind it — the honest .pcite.nomatch equivalent */
+.kypwrap .kyp-procard .pcity.nomatch{color:var(--muted);font-style:italic}
+.kypwrap .kyp-procard .pfirm{font-size:13px;color:var(--ink2)}
+/* one recorded action = one row, not a card. every field appears once. */
+.kypwrap .kyp-zrec{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.kypwrap .kyp-zrec .zr{padding:13px 17px;border-top:1px solid var(--line)}
+.kypwrap .kyp-zrec .zr:first-child{border-top:0}
+.kypwrap .kyp-zrec .zr1{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.kypwrap .kyp-zrec .zt{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border-radius:5px;padding:3px 8px}
+.kypwrap .kyp-zrec .zt.zba{color:#5a5a52;background:#eceae3}
+.kypwrap .kyp-zrec .zs{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--indigo);border-radius:5px;padding:3px 8px}
+.kypwrap .kyp-zrec .zs.ok{background:var(--green)}
+.kypwrap .kyp-zrec .zs.no{background:var(--bad)}
+.kypwrap .kyp-zrec .zd{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink2);white-space:nowrap}
+.kypwrap .kyp-zrec .z2{font-size:13.5px;color:var(--ink);margin-top:6px;line-height:1.5}
+.kypwrap .kyp-zrec .z2 .app{color:var(--muted)}
+.kypwrap .kyp-zrec .z3{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.kypwrap .kyp-zrec .z3 a{color:var(--indigo);font-weight:700;text-decoration:none}
+.kypwrap .kyp-zrec .z3 .sep{color:#c8c6bd}
+.kypwrap .kyp-zrec .zlapse{margin-top:7px;font-size:12.5px;color:var(--ink2)}
+.kypwrap .kyp-zrec .zlapse b{color:var(--ink)}
+/* Step 14b · what the filing says vs what it establishes */
+.kypwrap .kyp-says{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card);margin:14px 0 4px}
+.kypwrap .kyp-says .sc{padding:16px 18px}
+.kypwrap .kyp-says .sc+.sc{border-left:1px solid var(--line);background:var(--wash)}
+.kypwrap .kyp-says .sh{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo);margin-bottom:11px}
+.kypwrap .kyp-says .sc+.sc .sh{color:var(--slate)}
+.kypwrap .kyp-says ul{margin:0;padding:0;list-style:none}
+.kypwrap .kyp-says li{position:relative;padding-left:17px;font-size:13.5px;line-height:1.58;color:var(--ink2);margin-bottom:11px}
+.kypwrap .kyp-says li:last-child{margin-bottom:0}
+.kypwrap .kyp-says li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:2px;background:var(--indigoL)}
+.kypwrap .kyp-says .sc+.sc li::before{background:var(--slate)}
+.kypwrap .kyp-says li b{color:var(--ink)}
+/* Step 14c · grouped matters + hearing track */
+.kypwrap .kyp-zrec .zgrp{padding:10px 17px;background:var(--wash);border-top:1px solid var(--line);font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);display:flex;gap:9px;align-items:baseline}
+.kypwrap .kyp-zrec .zgrp:first-child{border-top:0}
+.kypwrap .kyp-zrec .zgrp .gq{font-family:var(--sans);font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted)}
+.kypwrap .kyp-zrec .ztrack{margin-left:7px;font-family:var(--mono);font-size:9.5px;font-weight:400;color:var(--muted);letter-spacing:0;text-transform:none}
+.kypwrap .kyp-zrec .zquote{margin-top:6px;padding-left:11px;border-left:2px solid var(--line);font-size:12.5px;line-height:1.5;color:var(--ink2);font-style:italic}
+.kypwrap .kyp-zrec .zgnote{padding:11px 17px;border-top:1px dashed var(--line);font-size:12.5px;line-height:1.55;color:var(--ink2);background:var(--paper)}
+.kypwrap .kyp-zrec .zgnote b{color:var(--ink)}
+/* hero blocks fill the row — count is content-driven, not fixed at three */
+.kypwrap .kyp-blocks.hero.two{grid-template-columns:1.4fr 1fr}
+.kypwrap .kyp-blocks.hero.one{grid-template-columns:1fr}
+/* prominent variant of the says panel — for sections where it is the main event */
+.kypwrap .kyp-says.lg{margin:20px 0 4px;border-width:2px}
+.kypwrap .kyp-says.lg .sc{padding:20px 22px}
+.kypwrap .kyp-says.lg .sh{font-size:11px;letter-spacing:.09em;margin-bottom:14px}
+.kypwrap .kyp-says.lg li{font-size:14px;line-height:1.6;margin-bottom:13px;padding-left:19px}
+.kypwrap .kyp-says.lg li::before{top:8px;width:7px;height:7px}
+.kypwrap .kyp-says.lg .sc+.sc li::before{background:#c8c6bd}
+.kypwrap .kyp-says.lg .gate{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:4px;letter-spacing:.01em}
+/* Step 16 · county record vs other sources */
+.kypwrap .kyp-recs{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card);margin:14px 0 4px}
+.kypwrap .kyp-recs .rhd, .kypwrap .kyp-recs .rr{display:grid;grid-template-columns:150px 1fr 1fr 128px;gap:16px;align-items:baseline;padding:12px 18px}
+.kypwrap .kyp-recs .rhd{padding-bottom:9px;border-bottom:2px solid var(--ink);font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2)}
+.kypwrap .kyp-recs .rr{border-top:1px solid var(--line)}
+.kypwrap .kyp-recs .rr:first-of-type{border-top:0}
+.kypwrap .kyp-recs .f{font-family:var(--mono);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink2)}
+.kypwrap .kyp-recs .v{font-size:15px;font-weight:600;color:var(--ink)}
+.kypwrap .kyp-recs .v .sm{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+.kypwrap .kyp-recs .v.none{font-weight:400;color:var(--muted);font-size:13px}
+.kypwrap .kyp-recs .st{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;padding:4px 9px;justify-self:start;white-space:nowrap}
+.kypwrap .kyp-recs .st.ok{background:#e8f2ea;color:var(--green)}
+.kypwrap .kyp-recs .st.dis{background:#fdecea;color:var(--bad)}
+.kypwrap .kyp-recs .st.na{background:var(--wash);color:var(--muted)}
+/* unit configuration — building totals, and what they do or do not establish */
+.kypwrap .kyp-facts .kyp-fact.wide{grid-column:span 2}
+.kypwrap .kyp-cfg{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.kypwrap .kyp-cfg .n{font-family:var(--disp);font-size:26px;line-height:1;color:var(--ink)}
+.kypwrap .kyp-cfg .n .u{font-size:.5em;color:var(--ink2)}
+.kypwrap .kyp-cfg .over{font-size:12px;color:var(--muted)}
+.kypwrap .kyp-cfgnote{font-size:11.5px;line-height:1.45;color:var(--ink2);margin-top:7px}
+.kypwrap .kyp-cfgnote b{color:var(--ink)}
+.kypwrap .kyp-cfgnote .tag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:5px;padding:2px 6px;margin-right:7px;white-space:nowrap}
+.kypwrap .kyp-cfgnote .tag.known{background:#e8f2ea;color:var(--green)}
+.kypwrap .kyp-cfgnote .tag.split{background:var(--wash);color:var(--ink2)}
+.kypwrap .kyp-cfgnote .tag.uneven{background:var(--indigoSoft);color:var(--indigo)}
+```
