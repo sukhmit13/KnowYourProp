@@ -18,7 +18,6 @@ interface RawPermit {
   street_number?: string;
   street_direction?: string;
   street_name?: string;
-  suffix?: string;
   contact_1_name?: string;
   contact_1_type?: string;
   contact_2_name?: string;
@@ -107,7 +106,9 @@ function contacts(raw: RawPermit) {
 
 function normalize(raw: RawPermit): NewConstructionPermit {
   const workDescription = raw.work_description || "";
-  const address = [raw.street_number, raw.street_direction, raw.street_name, raw.suffix].filter(Boolean).join(" ") || "Address unavailable";
+  // Chicago's current Building Permits schema includes the suffix in
+  // street_name (for example, "WABASH AVE"); there is no separate suffix field.
+  const address = [raw.street_number, raw.street_direction, raw.street_name].filter(Boolean).join(" ") || "Address unavailable";
   const latitude = Number(raw.latitude);
   const longitude = Number(raw.longitude);
   return {
@@ -134,7 +135,7 @@ export async function getChicagoNewConstructionPermits(): Promise<NewConstructio
   if (inFlight) return inFlight;
   inFlight = (async () => {
     const startDate = `${new Date().getFullYear() - 3}-01-01`;
-    const select = "permit_,permit_type,work_description,issue_date,reported_cost,community_area,latitude,longitude,street_number,street_direction,street_name,suffix,contact_1_name,contact_1_type,contact_2_name,contact_2_type,contact_3_name,contact_3_type,contact_4_name,contact_4_type";
+    const select = "permit_,permit_type,work_description,issue_date,reported_cost,community_area,latitude,longitude,street_number,street_direction,street_name,contact_1_name,contact_1_type,contact_2_name,contact_2_type,contact_3_name,contact_3_type,contact_4_name,contact_4_type";
     const results: RawPermit[] = [];
     const limit = 2000;
     for (let offset = 0; ; offset += limit) {
@@ -146,7 +147,10 @@ export async function getChicagoNewConstructionPermits(): Promise<NewConstructio
         "$offset": String(offset),
       });
       const response = await fetch(`https://data.cityofchicago.org/resource/ydr8-5enu.json?${query}`, { signal: AbortSignal.timeout(15_000) });
-      if (!response.ok) throw new Error(`Chicago permits API ${response.status}`);
+      if (!response.ok) {
+        const detail = (await response.text()).slice(0, 500);
+        throw new Error(`Chicago permits API ${response.status}: ${detail}`);
+      }
       const page = await response.json() as RawPermit[];
       results.push(...page);
       if (page.length < limit) break;

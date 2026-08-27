@@ -13,6 +13,9 @@ description: Field names, API behaviors, and pitfalls for Chicago Data Portal da
   - Filter active: `license_status='AAI'`
 - `fi3z-jc3f` — Alternative Fuel Locations (EV stations)
   - Filter: `fuel_type_code='ELEC' AND status_code='E'`
+- `ydr8-5enu` — Building Permits
+  - `street_name` already includes the street suffix (for example, `WABASH AVE`)
+  - There is no separate `suffix` column; selecting it makes Socrata reject the entire query with HTTP 400
 
 ## SoQL pitfalls
 - **Do NOT use `$order=:id`** — not supported on all datasets, causes HTTP 400
@@ -21,4 +24,4 @@ description: Field names, API behaviors, and pitfalls for Chicago Data Portal da
 - **Pagination**: `$offset` + `$limit` without `$order` works fine for these slow-changing datasets
 - **Quotes in WHERE**: `city='CHICAGO'` works; `city = 'CHICAGO'` (with spaces) also works
 
-**Why:** These were discovered through HTTP 400 failures. The `$order=:id` bug and apostrophe escaping were the root causes of the initial grocery/day-care refresh failures.
+**Why:** These were discovered through HTTP 400 failures. Invalid ordering, escaping, or even one nonexistent selected field causes the whole dataset request to fail rather than omitting that field.
