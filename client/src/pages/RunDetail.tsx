@@ -661,12 +661,133 @@ interface SectionStates {
 // Official CHRS designation colors — NOT brand colors; do not change to indigo.
 function getChrsColor(colorTag: string | null | undefined): string {
   switch (colorTag) {
-    case 'Red': return '#b23b2e';
-    case 'Orange': return '#e07d1f';
-    case 'Yellow': return '#b7950b';
-    case 'Green': return '#3f7a4e';
+    case 'Red': return '#d13b26';    // --ref-red / --bad  "logo red"
+    case 'Orange': return '#ff6b35'; // --color-orange
+    case 'Yellow': return '#f3b31f'; // --ref-yellow / --caution  "logo gold"
+    case 'Green': return '#2fb457';  // --ref-green, raised for brightness
     default: return '#8b8a84';
   }
+}
+
+function HistoricStatusPanel({
+  landmarkData,
+  facts,
+  run,
+  propertyTaxData,
+  pinLookupData,
+  landmarkTaggedAddresses,
+}: {
+  landmarkData: any;
+  facts: any;
+  run: any;
+  propertyTaxData: any;
+  pinLookupData: any;
+  landmarkTaggedAddresses: string[];
+}) {
+  const colorTag = landmarkData.colorTag as string | null | undefined;
+  const tagClass = colorTag?.toLowerCase() || '';
+  const isHoldRating = colorTag === 'Red' || colorTag === 'Orange';
+  const sigDesc = colorTag === 'Red'
+    ? 'nationally significant'
+    : colorTag === 'Orange'
+    ? 'significant within the surrounding community'
+    : colorTag === 'Yellow'
+    ? 'pre-1940s, extensively altered'
+    : colorTag === 'Green'
+    ? 'pre-1940s, slightly altered'
+    : 'recorded historic resource';
+  const searchNum = (facts?.formattedAddress ?? run?.address ?? '').match(/^\d+/)?.[0];
+  const landmarkNum = landmarkData.address?.match(/^\d+/)?.[0];
+  const isNearbyMatch = !!(searchNum && landmarkNum && searchNum !== landmarkNum);
+  const isDesignated = !!landmarkData.isOfficialLandmark || !!landmarkData.isLandmarkDistrict;
+  const countyYear = propertyTaxData?.yearBuilt ?? pinLookupData?.characteristicsData?.yearBuilt ?? null;
+  const taggedCount = landmarkTaggedAddresses.length || (landmarkData.address ? 1 : 0);
+  const districtLabel = landmarkData.landmarkDistrictName
+    ? `${landmarkData.landmarkDistrictName}${landmarkData.landmarkDistrictId ? ` · ID ${landmarkData.landmarkDistrictId}` : ''}`
+    : null;
+  const tiers = [
+    ['Red', 'red', 'National Register calibre'],
+    ['Orange', 'orange', 'Significant within the community'],
+    ['Yellow', 'yellow', 'Pre-1940, extensively altered'],
+    ['Green', 'green', 'Pre-1940, slightly altered'],
+  ];
+
+  return (
+    <div className="seccard space-y-3" data-testid="landmark-section-body">
+      {(landmarkData.foundOnCoParcel || isNearbyMatch) && (
+        <div className="kyp-caveat" data-testid="landmark-match-caveat">
+          <b>This record may describe another building.</b>{' '}
+          {landmarkData.foundOnCoParcel
+            ? <>The survey match was found on co-parcel <b>{landmarkData.foundOnCoParcel}</b>, not the primary address.</>
+            : <>The survey address <b>{landmarkData.address || 'listed address'}</b> is adjacent to <b>{searchNum}</b>; confirm the rating belongs to this building.</>}
+        </div>
+      )}
+
+      <div className={`kyp-blocks hero ${isHoldRating ? '' : 'two'}`} data-testid="landmark-hero-facts">
+        <div className={`kyp-block ${colorTag === 'Red' ? 'ind-deep' : 'ind'}`}>
+          <div>
+            <div className={`bv ${tagClass ? `chrs-${tagClass}` : ''}`}>{colorTag || 'Historic resource'}</div>
+            <div className="bl">Survey rating{colorTag ? ` — ${colorTag === 'Red' ? '1st' : colorTag === 'Orange' ? '2nd' : colorTag === 'Yellow' ? '3rd' : '4th'} of 4 tiers` : ''}</div>
+          </div>
+          <div className="bbreak"><div className="br"><b>Means</b><span>{sigDesc}</span></div></div>
+        </div>
+        {isHoldRating && (
+          <div className={`kyp-block ${colorTag === 'Red' ? 'ind-deep' : 'ind'}`}>
+            <div><div className="bv">90 days</div><div className="bl">Demolition permit held — automatic on this rating</div></div>
+            <div className="bbreak"><div className="br"><b>Rule</b><span>Municipal Code §14A-4-407.6</span></div></div>
+          </div>
+        )}
+        <div className={`kyp-block ${colorTag === 'Red' ? 'ind-deep' : 'ind'}`}>
+          <div>
+            <div className="bv">{landmarkData.decade ? `${landmarkData.decade}s` : countyYear || '—'}</div>
+            <div className="bl">Era recorded · {taggedCount} tagged parcel{taggedCount === 1 ? '' : 's'} on site</div>
+            {landmarkData.decade && countyYear && <div className="bd">County record: {countyYear}</div>}
+          </div>
+          <div className="bbreak"><div className="br"><b>{landmarkData.landmarkName ? 'Name' : districtLabel ? 'District' : 'Survey only'}</b><span>{landmarkData.landmarkName || districtLabel || 'not a designated landmark'}</span></div></div>
+        </div>
+      </div>
+
+      {colorTag && (
+        <div className="kyp-chrstier" data-testid="landmark-tier-legend">
+          {tiers.map(([label, cls, meaning]) => (
+            <div className={`tr ${colorTag === label ? 'on' : ''}`} key={label}>
+              <div className="th"><span className={`kyp-chrsw ${cls}`} style={{ margin: 0 }} />{label}{colorTag === label && <span className="me">· this property</span>}</div>
+              <div className="tb">{meaning}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="kyp-says lg" data-testid="landmark-consequences">
+        <div className="sc">
+          <div className="sh">What the rating triggers</div>
+          <ul>
+            {isHoldRating && <li><b>A 90-day hold on any demolition permit.</b> Automatic for {colorTag}-coded buildings under Municipal Code §14A-4-407.6; it is not discretionary and is not a fee.</li>}
+            {isDesignated ? (
+              <li><b>Review of exterior alterations.</b> Designated status can impose preservation requirements; confirm the applicable ordinance and contributing-building status.</li>
+            ) : (
+              <li><b>Nothing else is binding from the survey rating alone.</b> A CHRS catalogue entry does not itself restrict ordinary exterior alterations.</li>
+            )}
+          </ul>
+        </div>
+        <div className="sc">
+          <div className="sh">What it does not unlock</div>
+          <ul>
+            <li><b>Class L</b> — requires municipal landmark designation.<span className={`req ${isDesignated ? 'met' : ''}`}>{isDesignated ? `Municipal designation: ${landmarkData.officialLandmarkName || districtLabel || 'recorded designation'}` : 'Survey rating is a catalogue entry, not a designation'}</span></li>
+            <li><b>Federal Historic 20%</b> — requires National Register listing and an income-producing use.<span className="req">A survey or municipal record alone does not meet either requirement</span></li>
+            <li><b>Illinois Historic 25%</b> — requires National Register listing.<span className="req">See 07 · Location Incentives for this property’s verdict</span></li>
+            {landmarkData.isLandmarkDistrict && !landmarkData.isOfficialLandmark && <li><b>Contributing-building status</b> — the district does not prove this building contributes.<span className="req">Confirm the district’s contributing inventory before underwriting credits</span></li>}
+          </ul>
+        </div>
+      </div>
+
+      <div className="kyp-caveat"><b>A survey rating is not a designation.</b> The Chicago Historic Resources Survey catalogues buildings citywide. Its colour code is a significance signal; municipal landmark designation or National Register listing is a separate act.</div>
+      <div className="kyp-src">
+        Source: <a href="https://www.chicago.gov/city/en/depts/dcd/provdrs/hist.html" target="_blank" rel="noopener noreferrer">Chicago Landmarks &amp; Historic Resources Survey</a>
+        {' · '}official landmarks dataset (uct4-hrvh){landmarkData.address ? ` · matched to ${landmarkData.address}` : ''}{districtLabel ? ` · ${districtLabel}` : ' · not in a landmark district'}
+      </div>
+    </div>
+  );
 }
 
 const DEFAULT_SECTION_STATES: SectionStates = {
@@ -2315,6 +2436,7 @@ export default function RunDetail() {
     coParcelAddresses.length > 0 ? coParcelAddresses : undefined,
   );
   const primaryLandmarkData = landmarkData?.foundOnCoParcel ? null : landmarkData;
+  const landmarkIsRelevant = !!(landmarkData?.isLandmark || landmarkData?.isLandmarkDistrict);
 
   // Config-driven incentives checker (runs after landmark data is available)
   // Parse parcel unit count for incentives checker — handles word form ("Two") and numeric strings.
@@ -3803,7 +3925,7 @@ export default function RunDetail() {
           { label: 'Property Details', icon: Building2, action: () => { setSectionOpen('propertyDetails', true); return 'print-section-property-info'; } },
           { label: 'Active Listing Snapshot', icon: Newspaper, action: () => { setAccOpen((open) => ({ ...open, listing: true })); return 'print-section-listing-snapshot'; } },
           { label: 'Permits & Violations', icon: ClipboardCheck, action: () => 'section-permits' },
-          { label: 'Historic Landmark Status', icon: Landmark, action: () => { setSectionOpen('propertyDetails', true); setSectionOpen('landmark', true); return 'print-section-property-info'; } },
+          { label: 'Historic Status', icon: Landmark, action: () => { setSectionOpen('propertyDetails', true); setSectionOpen('landmark', true); return 'print-section-property-info'; } },
           { label: 'Ownership & Title', icon: History, action: () => { setAccHidden((m) => ({ ...m, ownership: false })); setAccOpen((m) => ({ ...m, ownership: true })); return 'section-ownership'; } },
           { label: 'Property Tax Records', icon: Receipt, action: () => { setSectionOpen('propertyDetails', true); setSectionOpen('propertyTaxInfo', true); return 'print-section-property-info'; } },
           { label: 'Pre-Title Check', icon: AlertTriangle, action: () => { setSectionOpen('preTitleCheck', true); return 'print-section-pre-title-check'; } },
@@ -4457,6 +4579,11 @@ export default function RunDetail() {
                               <span className="pin">{run.address}</span>
                             ) : 'PIN or address'}
                           </div>
+                          {landmarkData && !landmarkIsRelevant && (
+                            <div className="kyp-cxfoot" data-testid="zoning-no-historic-designation">
+                              <b>Historic status:</b> No historic designation on record.
+                            </div>
+                          )}
                           <a className="kyp-cxlink" href="https://codelibrary.amlegal.com/codes/chicago/latest/chicagozoning_il/0-0-0-48750" target="_blank" rel="noopener noreferrer" data-testid="link-zoning-code">Chicago Zoning Code — Use Standards ↗</a>
                         </>
                       ) : (
@@ -9319,10 +9446,9 @@ export default function RunDetail() {
                       let landmarkBullet = null;
                       if (landmarkData?.isLandmark) {
                         const tag = landmarkData.colorTag;
-                        if (tag === 'Red') landmarkBullet = `Red Tag landmark — demolition prohibited, alterations heavily restricted`;
-                        else if (tag === 'Orange') landmarkBullet = `Orange Tag landmark — significant alteration restrictions apply`;
-                        else if (tag === 'Yellow') landmarkBullet = `Yellow Tag landmark — some alteration restrictions apply`;
-                        else landmarkBullet = `Historic landmark — additional review required for alterations`;
+                        if (tag === 'Red' || tag === 'Orange') landmarkBullet = `${tag} survey rating — demolition permits are held 90 days under §14A-4-407.6`;
+                        else if (tag) landmarkBullet = `${tag} survey rating — no automatic demolition hold from this rating`;
+                        else if (landmarkData.isOfficialLandmark || landmarkData.isLandmarkDistrict) landmarkBullet = `Historic designation on record — confirm the applicable alteration review`;
                       }
 
                       const hasBullets = profileBullet || saleBullet || taxBullet || lienBullet || permitBullet || landmarkBullet;
@@ -9537,7 +9663,6 @@ export default function RunDetail() {
                     )}
 
 
-                    {/* Landmark Status Sub-section */}
                     {/* Zoning History Sub-section */}
                     {false && run?.address && (
                       <Collapsible open={isZoningHistoryOpen} onOpenChange={setIsZoningHistoryOpen}>
@@ -9890,23 +10015,22 @@ export default function RunDetail() {
                       </CollapsibleContent>
                     </Collapsible>
 
+                    {(isLoadingLandmark || !landmarkData || landmarkIsRelevant) && (
                     <Collapsible open={isLandmarkSectionOpen} onOpenChange={setIsLandmarkSectionOpen}>
                       <CollapsibleTrigger asChild>
                         <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
                           <h3 className="chead chead-icon">
                             <Landmark className="w-4 h-4" />
-                            Historic Landmark Status
+                            Historic Status
                           </h3>
                           <div className="flex items-center gap-2">
                             {!isLoadingLandmark && (
                               <div className="flex flex-wrap gap-1.5">
                                 {landmarkData?.isLandmark ? (
-                                  <span className="lmk-tag" style={{ backgroundColor: getChrsColor(landmarkData.colorTag) }} data-testid="badge-chrs-tag">
-                                    <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>
-                                    {landmarkData.colorTag ? `${landmarkData.colorTag} Tag` : 'Historic Landmark'}
+                                  <span className="records-fact" data-testid="badge-chrs-tag">
+                                    {landmarkData.colorTag && <span className={`kyp-chrsw ${landmarkData.colorTag.toLowerCase()}`} />}
+                                    {landmarkData.colorTag ? `${landmarkData.colorTag} tag` : 'Historic resource'}
                                   </span>
-                                ) : !isLandmarkSectionOpen && landmarkData ? (
-                                  <span className="records-fact">Not a Landmark</span>
                                 ) : null}
                                 {!isLandmarkSectionOpen && landmarkData?.isLandmarkDistrict && (
                                   <span className="records-fact">Landmark District</span>
@@ -9920,6 +10044,23 @@ export default function RunDetail() {
                       <CollapsibleContent>
                       <div className="px-4">
                       {isLoadingLandmark ? (
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                        </div>
+                      ) : landmarkData ? (
+                        <HistoricStatusPanel
+                          landmarkData={landmarkData}
+                          facts={facts}
+                          run={run}
+                          propertyTaxData={propertyTaxData}
+                          pinLookupData={pinLookupData}
+                          landmarkTaggedAddresses={landmarkTaggedAddresses}
+                        />
+                      ) : (
+                        <div className="kyp-empty">Unable to check landmark status</div>
+                      )}
+                      {false && ((landmarkData: any) => (isLoadingLandmark ? (
                         <div className="space-y-2">
                           <Skeleton className="h-4 w-3/4" />
                           <Skeleton className="h-4 w-1/2" />
@@ -9948,9 +10089,9 @@ export default function RunDetail() {
                           : '— pre-1940s, extensively altered';
                         const isRelevant = landmarkData.isLandmark || landmarkData.isLandmarkDistrict;
                         const headline = landmarkData.isLandmark && landmarkData.colorTag
-                          ? `A ${sigDesc}${landmarkData.decade ? ` ${landmarkData.decade}s` : ''} resource, ${landmarkData.colorTag}-rated in the city survey — extra review on changes, but potential access to historic tax credits.`
+                          ? `A ${sigDesc}${landmarkData.decade ? ` ${landmarkData.decade}s` : ''} resource, ${landmarkData.colorTag}-rated in the city survey.`
                           : landmarkData.isLandmark
-                          ? `A recorded historic resource — extra review on changes, but potential access to historic tax credits.`
+                          ? `A recorded historic resource in the city survey.`
                           : landmarkData.isLandmarkDistrict
                           ? `Within ${landmarkData.landmarkDistrictName ? `the ${landmarkData.landmarkDistrictName}` : 'a'} landmark district — exterior changes get extra review, but rehabs may qualify for historic tax credits.`
                           : null;
@@ -9973,7 +10114,7 @@ export default function RunDetail() {
                                 </div>
                                 <div className="crm-cn g">
                                   <span className="dt" />
-                                  <span><b>But it can unlock real money.</b> Historic status may qualify a rehab for <b>Class L</b>, <b>Federal Historic (20%)</b>, and <b>Illinois Historic (25%)</b> tax incentives.</span>
+                                  <span><b>Credits require separate eligibility.</b> A survey rating alone does not unlock <b>Class L</b>, <b>Federal Historic (20%)</b>, or <b>Illinois Historic (25%)</b> tax incentives.</span>
                                 </div>
                                 {landmarkData.colorTag ? (
                                   <div className="crm-cn n">
@@ -10037,7 +10178,7 @@ export default function RunDetail() {
                           {isRelevant && (
                             <div className="lmk-wtm" data-testid="landmark-wtm">
                               <div className="lmk-wtmh">What This Means</div>
-                              <div className="lmk-b con"><span className="dot" /><span>Exterior modifications may face <b>restrictions</b>, and alterations are expected to <b>preserve historic character</b>.</span></div>
+                              <div className="lmk-b con"><span className="dot" /><span>A survey rating alone does <b>not</b> impose general exterior-alteration restrictions.</span></div>
                               <div className="lmk-b con"><span className="dot" /><span>Demolition permits require <b>Commission on Chicago Landmarks</b> review.</span></div>
                               <div className="lmk-b up"><span className="dot" /><span>May qualify for <b>Class L</b>, Federal Historic <b>(20%)</b>, and Illinois Historic <b>(25%)</b> tax incentives.</span></div>
                               <div className="lmk-b neu"><span className="dot" /><span>Applies to survey-rated resources; exact requirements depend on whether it's individually designated or in a landmark district.</span></div>
@@ -10058,10 +10199,11 @@ export default function RunDetail() {
                         );
                       })() : (
                         <p className="text-sm text-muted-foreground">Unable to check landmark status</p>
-                      )}
+                      )))(landmarkData!)}
                       </div>
                       </CollapsibleContent>
                     </Collapsible>
+                    )}
 
                     {/* Parcel Information Sub-section */}
                     <Collapsible open={isParcelSectionOpen} onOpenChange={setIsParcelSectionOpen}>
@@ -12382,6 +12524,11 @@ export default function RunDetail() {
                               {farStatus === 'overbuilt' && (
                                 <div className="crm-cn c" data-testid="dev-takeaway-variance">
                                   <span className="dt" /><span className="txt"><b>Expansion requires a variance</b> — additions are restricted while the building exceeds the FAR limit.</span>{renderJump('far-analysis')}
+                                </div>
+                              )}
+                              {(landmarkData?.colorTag === 'Red' || landmarkData?.colorTag === 'Orange') && (
+                                <div className="crm-cn c" data-testid="dev-takeaway-demolition-hold">
+                                  <span className="dt" /><span className="txt"><b>A demolition permit here is held 90 days</b> under Municipal Code §14A-4-407.6.</span>
                                 </div>
                               )}
                               {unitBullet && (

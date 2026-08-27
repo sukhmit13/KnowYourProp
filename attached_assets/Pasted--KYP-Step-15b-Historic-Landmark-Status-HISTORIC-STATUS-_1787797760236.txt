@@ -1,0 +1,270 @@
+# KYP — Step 15b: Historic Landmark Status → `HISTORIC STATUS`
+
+🔴 **Scope:** `RunDetail.tsx` **9948–10119** — the whole section, **172 lines, read at 100%.**
+Ships after Step 13b. Replaces the earlier Step 15 document, which was written from ~23% of the
+section and never landed.
+
+**Nothing from Step 15 shipped.** This section contains **zero `kyp-` classes** today; it renders on
+`.lmk-*` and a borrowed `.crm-take`. That is why it looks unchanged — the spec described components
+whose CSS never existed.
+
+---
+
+## 0. The thing to fix first — the section overstates what the rating gives you
+
+The takeaway and `What This Means` both say a survey rating **may qualify** the property for
+**Class L**, **Federal Historic 20%** and **Illinois Historic 25%**. Checked against the programme
+rules, none of the three is available on a survey rating alone:
+
+| Credit | Actual requirement | Survey rating enough? |
+|---|---|---|
+| Class L | **Municipal landmark designation** (individual, or contributing in a designated district) | **No** |
+| Federal Historic 20% | **National Register listing** *and* income-producing use — NPS excludes an owner's private residence | **No** |
+| Illinois Historic 25% | **National Register listing** | **No** |
+
+A CHRS colour code is the City's record that a building is significant. **Designation is a separate
+act of City Council.** The current copy hedges with "may qualify", but a reader underwriting a rehab
+will price those credits in, and they are not there.
+
+**The one thing that *is* automatic** is the opposite: an Orange- or Red-coded building has its
+demolition permit **held 90 days** under Chicago Municipal Code **§14A-4-407.6** — no hearing, no
+discretion, nothing to apply for. Today that is buried in a bullet as "Demolition permits require
+Commission on Chicago Landmarks review", which understates it by naming a review rather than a
+duration.
+
+**Invert the emphasis.** What binds is certain and immediate. What pays is conditional and distant.
+
+Equally: the section currently implies exterior alterations face restrictions. On a survey-rated,
+undesignated building they do not. Say so — a false constraint costs a reader as much as a false
+benefit.
+
+---
+
+## 1. Structure
+
+No subheads. **One fact with two consequences does not need dividing.**
+
+1. `.kyp-blocks hero` — three **indigo** blocks (`.ind`; `.ind-deep` on a Red-rated parcel)
+2. `.kyp-chrstier` — the survey's own four-tier scale, this property marked
+3. `.kyp-says lg` — **What the rating triggers** | **What it does not unlock**
+4. `.kyp-caveat` — a survey rating is not a designation
+5. `.kyp-src`
+
+### 1.1 Hero blocks
+
+| # | `.bv` | `.bl` | `.bbreak` |
+|---|---|---|---|
+| 1 | the rating word | `Survey rating — {n}nd of 4 tiers` | `Means` the tier's significance |
+| 2 | `90 days` | `Demolition permit held — automatic on this rating` | `Rule` Municipal Code §14A-4-407.6 |
+| 3 | era | `Era recorded · {n} tagged parcel(s) on site` | `Survey only` not a designated landmark |
+
+**The blocks stay indigo — never filled with the survey colour.** A survey code is a state, not a
+verdict. Only the *rating word* takes the survey hue, at its exact brand value, on the deep indigo
+substrate. See §2.1 for why the block darkens rather than the word lightening.
+
+**Block 2 renders only for Orange and Red.** Yellow and Green carry no hold; for those the block is
+dropped and the row falls back to `kyp-blocks hero two`. Never render a 90-day hold on a code that
+does not trigger one.
+
+**Block 3 defers to the county** on the exact year — CHRS records a decade, the assessor records a
+year, and the county is the baseline.
+
+### 1.2 The four-tier legend — `.kyp-chrstier`
+
+Four cells: Red / Orange / Yellow / Green, each a labelled swatch plus one line of what the tier
+means. The property's own tier gets `.on` and `· this property`.
+
+This is the **only** place the survey colours appear at any size, and every swatch is labelled. That
+is what lets the palette carry meaning at all (§2). It also answers the question the rating alone
+raises — *is Orange good or bad?* — by showing the scale rather than asserting a position on it.
+
+### 1.3 The two columns
+
+**Left — `WHAT THE RATING TRIGGERS`.** Only what is in force now.
+
+**Right — `WHAT IT DOES NOT UNLOCK`.** Not "may unlock". Each credit with a `.req` line naming the
+requirement the parcel fails. Where a parcel *is* designated, `.req` becomes `.req.met` and names
+the designation that qualifies it.
+
+**The verdict itself lives in `07 · Location Incentives`,** which already runs the eligibility
+check. This section states the requirement and points there — one direction, no duplicated
+reconciliation. Location Incentives' own takeaway should read
+`Class L, Federal 20%, Illinois 25% — all not applicable without designation.`
+
+## 2. CHRS colours — from your brand palette, and never load-bearing alone
+
+The survey colours now come from the tokens already in `index.css`, three of them annotated as the
+logo palette:
+
+| Tier | Value | Source |
+|---|---|---|
+| Red | `#d13b26` | `--ref-red` / `--bad` — *"logo red"* |
+| Orange | `#ff6b35` | `--color-orange` |
+| Yellow | `#f3b31f` | `--ref-yellow` / `--caution` — *"logo gold"* |
+| Green | `#2fb457` | `--ref-green` `#2f7d3f` raised for brightness |
+
+Only green is not an exact brand token — `--ref-green` is the muted one, so it is lifted in the same
+hue family. Everything else is the brand value, unchanged.
+
+**This also happens to fix a real accessibility defect.** The shipped survey palette fails badly:
+
+| | worst pair, normal | worst pair, deuteranomaly | worst pair, protanomaly |
+|---|---|---|---|
+| Shipped today | ΔE 16.2 | **ΔE 1.0 — Orange and Yellow are the same swatch** | ΔE 4.3 |
+| Brand palette | ΔE 16.3 | **ΔE 11.2** | **ΔE 11.6** |
+
+Deuteranomaly affects roughly 6% of men. At ΔE 1.0 an Orange rating and a Yellow rating are
+indistinguishable; at 11.2 they are clearly different. The brighter values earn this — saturation is
+what carries separation once hue collapses.
+
+It also pulls the survey orange clear of the verdict palette: **CHRS orange vs verdict orange goes
+from ΔE 2.7 to 9.7**, so the two oranges stop reading as the same signal.
+
+Replace `getChrsColor` with these four values, keeping its existing comment.
+
+The survey colours appear **only** on `.kyp-chrsw` swatches, in the `.kyp-chrstier` legend, and as
+the hero block's display word — never as a fill behind body text, never on a chip alone.
+
+### 2.1 The rating word uses the exact brand value — never a lightened tint
+
+`.bv.chrs-{colour}` carries the **unmodified** brand hex, the same value as the tag and the swatch.
+An earlier draft lightened it to `#ffd0bf` to chase contrast; that greyed the brand colour out and
+read as faded. **Do not lighten the rating word.**
+
+The blocks stay `--kyp-indigoL` — the same indigo as every other hero row in the report. On it:
+
+| tier | luminance contrast | chromatic separation |
+|---|---|---|
+| orange `#ff6b35` | 2.25:1 | ΔE 68 |
+| gold `#f3b31f` | 3.43:1 | ΔE 75 |
+| green `#2fb457` | 2.37:1 | ΔE 60 |
+| **red `#d13b26`** | **1.33:1** | ΔE 63 |
+
+Orange, gold and green read clearly — at 46px with ΔE 60+ of chromatic separation, and with the
+rating also stated in the tag, the `.bl` label, the tier legend and the takeaway sentence, the word
+is reinforcement rather than the sole carrier.
+
+**Red is the exception.** At 1.33:1 a dark red on mid blue goes muddy, and it looks it. For a
+**Red-rated property only**, the whole hero row uses `.kyp-block.ind-deep` (`#192261`), where red
+reaches 3.03:1. A property has exactly one tier, so no reader ever sees the two block shades side by
+side.
+
+⚠️ This is a deliberate exception to a 3:1 large-text target on three tiers, taken because the
+alternative — a tinted brand colour, or a dark row on every property — is worse. If it should hold
+the line instead, the fix is `.ind-deep` on all four tiers, and the row goes navy everywhere.
+
+⚠️ **One residual:** CHRS red `#d13b26` sits ΔE 4.5 from verdict red `#c0392b`. They are close, but
+CHRS red only ever appears as a labelled swatch, and a Red rating means *National Register calibre* —
+which is not a bad outcome. Worth knowing; not worth breaking the brand match over.
+
+**The tag reads `Orange tag`, never `CHRS orange`.** The row badge itself is **indigo** — the badge
+marks a state, and only the swatch inside it carries the survey hue.
+
+---
+
+## 3. Conditional promotion, not a permanent row
+
+**~97% of Chicago parcels carry no survey rating.** So this is neither a permanent top-level section
+nor a buried subsection.
+
+**Promote it to its own accordion row only when the parcel is survey-rated, individually designated,
+or inside a landmark district.** On every other property it does not exist as a row at all — the
+fact becomes a single line inside `05 · Zoning & What You Can Build`:
+*"No historic designation on record."*
+
+That keeps a real constraint at full weight where it applies and off the screen entirely where it
+does not. An empty "Not a Landmark" row on 97% of reports is noise.
+
+**Development Potential also carries the hold.** Where it states what can be built, one line —
+*"A demolition permit here is held 90 days (§14A-4-407.6)"* — linking back. That is the only fact
+allowed in two places, because it changes the answer in both.
+
+## 4. Every label and field — 27 labels, 19 fields
+
+### 4.1 Labels
+
+| Renders today | Becomes |
+|---|---|
+| `Historic Landmark Status` | section title → **`Historic Status`** |
+| `Takeaway` + headline | the accordion row's takeaway line; the `.crm-take` panel is removed |
+| `Historic Resource` / `Historic Resource / Landmark District` / `Within Landmark District` | hero block 3 `.bbreak` — `Survey only · not a designated landmark`, or the district name when in one |
+| `Chicago Historic Resources Survey` | hero block 1 `.bl` and `.kyp-src` |
+| `CHRS Rating` | hero block 1 `.bv` + the `.on` cell of the tier legend |
+| `Landmark Address` | `.kyp-src` — and, when it differs from the subject, the caveat in §4.3 |
+| `Name` | hero block 3 `.bbreak` — renders in place of `Survey only` when `landmarkName` exists |
+| `Landmark District` | `.kyp-src` tail — `not in a landmark district`, or the district name and ID |
+| `Tagged Parcels on Site` | hero block 3 `.bl` — `Era recorded · {n} tagged parcel(s) on site` |
+| `Detected on Co-Parcel` | `.kyp-caveat` **above** the hero row — the rating describes another parcel |
+| `Era` | hero block 3 `.bv` |
+| `What This Means` | split into the two `.kyp-says` columns |
+| the four CHRS tiers and their meanings | `.kyp-chrstier` legend (§1.2) |
+| `Exterior modifications may face restrictions` | **corrected** — on an undesignated building they do not; becomes "Nothing else is binding" |
+| `Demolition permits require Commission on Chicago Landmarks review` | **promoted** — hero block 2 and the left column, as a 90-day hold |
+| `May qualify for Class L / Federal (20%) / Illinois (25%)` | right column, each with its unmet requirement |
+| `Not a Landmark` badge | **removed** — the row does not render at all (§3) |
+| `Historic Landmark` fallback tag | tag reads `Historic resource` when `colorTag` is null |
+| `Historic Preservation Division` link | `.kyp-src` |
+| `Unable to check landmark status` | error state, kept verbatim |
+| `Red` / `Orange` / `Yellow` / `Green` | `.kyp-chrsw` + the rating word |
+| `Exterior alterations and especially demolition trigger…` (`.crm-cn.c`) | left column item 1, restated as the 90-day hold |
+| `Historic status may qualify a rehab for…` (`.crm-cn.g`) | right column, split into three credits with their requirements |
+| `It's a survey "{tag}" rating…` (`.crm-cn.n`) | the `.kyp-caveat` — designation is a separate act |
+| `District status, not individual designation…` (`.crm-cn.n`, district branch) | right column, as the contributing-building line |
+
+### 4.2 Fields
+
+| Field | Where |
+|---|---|
+| `isLandmark` | gates the section body |
+| `colorTag` | hero block 1 `.bv.chrs-*`, the tier legend's `.on` cell, the row badge swatch, `getChrsColor`, and the §1.1 gate on block 2 |
+| `decade` | hero block 3 `.bv` |
+| `isLandmarkDistrict` | `.kyp-src` tail; adds the contributing-building line to the right column |
+| `landmarkDistrictName`, `landmarkDistrictId` | `.kyp-src` tail |
+| `landmarkName` | hero block 3 `.bbreak` |
+| `address` | `.kyp-src`, and §4.3 when it differs |
+| `foundOnCoParcel` | the caveat above the hero row |
+| `landmarkTaggedAddresses` | hero block 3 `.bl` count |
+| `primaryLandmarkData` | unchanged — still gates the badge in Property Overview |
+| `isNearbyMatch`, `searchNum`, `landmarkNum` | **promoted** — see §4.3 |
+| `sigDesc`, `sigShort` | hero block 1 `.bbreak` `Means` row and the rating fact's sub-line |
+| `isRelevant`, `headline`, `chrsColor`, `getChrsColor` | retained; `headline` moves to the accordion takeaway |
+
+### 4.3 `isNearbyMatch` is currently a `<small>` and should not be
+
+When the surveyed address's house number differs from the subject's, today the section prints
+`· nearest historic resource, adjacent to 522` in small grey text **inside** the address field —
+below three blocks and a takeaway that have already asserted the building is historic.
+
+**It means the rating may describe the building next door.** Render it as a `.kyp-caveat` **above**
+the hero blocks, same as `foundOnCoParcel`. Standing rule: where figures describe something other
+than this address, say so before them.
+
+---
+
+## 5. Empty and error states
+
+`isRelevant === false` — **the section does not render.** Per §3 the row is not created at all, and
+`05 · Zoning & What You Can Build` carries the one-line statement instead.
+
+`landmarkData` null — keep `Unable to check landmark status` verbatim, as `.kyp-empty`. An unread
+record is not an absent one.
+
+---
+
+## ✅ Done-when
+
+- [ ] No claim that a survey rating qualifies the property for Class L, Federal 20% or Illinois 25%.
+- [ ] Each credit states the requirement it does not meet, in `.req`.
+- [ ] The 90-day hold is stated as a duration with §14A-4-407.6, and renders **only** for Orange and Red.
+- [ ] The section no longer says exterior alterations face restrictions on an undesignated building.
+- [ ] `getChrsColor` returns the four brand values; every swatch carries its rating word.
+- [ ] The hero rating word is the **exact** brand hex — not a lightened tint.
+- [ ] The hero row is standard `.ind`, except on a Red-rated parcel where all three are `.ind-deep`.
+- [ ] The tag reads `Orange tag`; the row badge is indigo.
+- [ ] Survey colour appears only on labelled swatches and in the tier legend — never as a fill.
+- [ ] The four-tier legend renders with this property's tier marked.
+- [ ] The section is conditionally promoted; on an unrated parcel no row exists and `05` carries the line.
+- [ ] `foundOnCoParcel` and `isNearbyMatch` render **above** the hero blocks, not inside a field.
+- [ ] Era shows the survey decade and the county's exact year.
+- [ ] Development Potential carries the demolition-hold line.
+- [ ] All 27 labels and 19 fields are accounted for; nothing dropped without a reason above.

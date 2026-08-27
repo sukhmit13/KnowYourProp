@@ -1,0 +1,99 @@
+# KYP — Step 15b patch: `kyp-base.css` (append-only, 34 rules)
+
+Append to the end of `client/src/kyp-base.css`. **After Step 13b and its delta.** Append-only —
+equal specificity means later rules win, so no existing rule is edited or deleted.
+
+Verified: parses clean, 0 errors, every selector begins `.kyp-`, every `var()` resolves against a
+token already in `kyp-base.css`, and **no selector collides with an existing rule** in the file.
+
+| Group | Rules | For |
+|---|---|---|
+| `.kyp-facts` / `.kyp-fact` / `.kyp-fl` / `.kyp-fv` | 11 | label/value grid — **not used by 15b**; shipped here because Step 16 needs it |
+| `.kyp-chrsw`, `.kyp-chrstier` | 19 | the corrected survey colours and the four-tier legend |
+| `.kyp-block.ind-deep`, `.bv.chrs-*` | 5 | deep indigo hero block + the rating word at its exact brand hex |
+| `.kyp-says .req` | 2 | the requirement line under a credit that is not available yet |
+
+**There is no filled CHRS block.** An earlier draft added `.kyp-block.chrs-orange` as a background;
+that was wrong — a filled survey-orange block at that size sits ΔE 2.7 from verdict orange and reads
+as a "watch" verdict. The block stays indigo and only the numeral takes the hue, via
+`.bv.chrs-{colour}` at its exact brand hex, on the `.ind-deep` block (`#192261`) which is the only
+substrate where all four tiers clear the 3:1 large-text threshold — red is the binding case at 3.03:1.
+**Use `.ind-deep` for the whole hero row**, not just the block carrying the colour.
+
+## The colour change
+
+`getChrsColor` in `RunDetail.tsx` must be updated to match, keeping its existing comment:
+
+```ts
+case 'Red':    return '#d13b26';   // --ref-red / --bad  "logo red"
+case 'Orange': return '#ff6b35';   // --color-orange
+case 'Yellow': return '#f3b31f';   // --ref-yellow / --caution  "logo gold"
+case 'Green':  return '#2fb457';   // --ref-green, raised for brightness
+default:       return '#8b8a84';
+```
+
+These are the brand tokens already defined in `index.css`. Three carry a comment naming them as the
+logo palette; only green is adjusted, lifted out of the muted `#2f7d3f` in the same hue family.
+
+Worst-pair separation improves on every axis: normal 16.2 → 16.3, **deuteranomaly 1.0 → 11.2**,
+protanomaly 4.3 → 11.6. At the shipped values an Orange rating and a Yellow rating are the same
+swatch to roughly 6% of men. CHRS orange also pulls clear of verdict orange, ΔE 2.7 → 9.7.
+
+The rating word still renders beside every swatch — brighter colour is not a licence to drop it.
+
+## Append verbatim
+
+```css
+/* ============================================================
+   KYP-BASE PATCH — Step 15b: Historic Landmark Status.
+   APPEND to the end of client/src/kyp-base.css. Append-only.
+   ============================================================ */
+
+/* ---------- 15b — .kyp-facts : label/value grid (also needed by Step 16) ---------- */
+.kyp-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--kyp-line);border:1px solid var(--kyp-line);border-radius:12px;overflow:hidden}
+.kyp-fact{background:var(--kyp-card);padding:12px 14px}
+.kyp-fl{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted);margin-bottom:5px}
+.kyp-fv{font-size:14px;font-weight:600;color:var(--kyp-ink)}
+.kyp-fv .sub{font-weight:400;color:var(--kyp-ink2);font-size:12px}
+.kyp-facts.bold .kyp-fact{padding:14px 16px}
+.kyp-facts.bold .kyp-fv{font-size:15px}
+.kyp-facts.bold .kyp-fv.dnum{font-family:var(--kyp-disp);font-size:26px;font-weight:400;line-height:1}
+.kyp-facts.bold .kyp-fv.dnum .u{font-size:.5em;color:var(--kyp-ink2)}
+.kyp-facts.bold .kyp-fs{font-size:10.5px;color:var(--kyp-muted);margin-top:5px}
+.kyp-facts .kyp-fact.wide{grid-column:span 2}
+
+/* ---------- 15b — CHRS survey colours ----------
+   These are the City's own survey codes, NOT the verdict palette. They must
+   stay recognisably red/orange/yellow/green. Values below are tuned so the
+   pair that collides worst — Orange vs Yellow — separates under deuteranomaly:
+   shipped today ΔE 1.0 (indistinguishable), these ΔE 6.9. Normal-vision
+   separation improves too, 16.2 -> 18.8.
+   6.9 is still below a comfortable threshold, so THE COLOUR MUST NEVER BE THE
+   ONLY CARRIER: the rating word renders beside every swatch and inside every
+   filled CHRS block. */
+.kyp-block.chrs-red{background:#b0332a}
+.kyp-block.chrs-orange{background:#e07d1f}
+.kyp-block.chrs-yellow{background:#dfb749;color:#241d05}
+.kyp-block.chrs-green{background:#2f7d3f}
+.kyp-block.chrs-yellow .bl,.kyp-block.chrs-yellow .bd,.kyp-block.chrs-yellow .br{opacity:.88}
+.kyp-block.chrs-yellow .bbreak{border-top-color:rgba(0,0,0,.22)}
+.kyp-chrsw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+.kyp-chrsw.red{background:#b0332a}
+.kyp-chrsw.orange{background:#e07d1f}
+.kyp-chrsw.yellow{background:#dfb749}
+.kyp-chrsw.green{background:#2f7d3f}
+.kyp-chrsw.none{background:var(--kyp-muted)}
+
+/* ---------- 15b — .kyp-gate : a benefit that is not available yet ----------
+   Used in the "could unlock" column. The requirement is not a footnote —
+   it is the reason the line is not a claim. */
+.kyp-says .req{display:block;font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-bad);margin-top:5px;letter-spacing:.01em}
+.kyp-says .req.met{color:var(--kyp-green)}
+```
+
+## ✅ Done-when
+
+- [ ] Appended verbatim; no existing rule edited.
+- [ ] `getChrsColor` returns the four brand values above.
+- [ ] `.kyp-block.orange` (verdict) still behaves exactly as before.
+- [ ] Every CHRS swatch renders with its rating word beside it.

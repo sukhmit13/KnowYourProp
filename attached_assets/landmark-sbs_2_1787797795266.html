@@ -1,9 +1,184 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<title>Current — as shipped today vs Step 15b — brand palette on indigo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#e8e6de;font-family:Inter,system-ui,sans-serif}
+.wrap{display:grid;grid-template-columns:1fr 1fr;height:100vh}
+.col{min-width:0;display:flex;flex-direction:column;border-right:1px solid #cfccc2}
+.hd{background:#141414;color:#fff;padding:13px 22px;font-family:'JetBrains Mono',monospace;font-size:11px;
+    font-weight:700;letter-spacing:.09em;text-transform:uppercase;display:flex;gap:12px;align-items:center;flex:none}
+.hd.p{background:#2b3a9e}
+.hd .sub{margin-left:auto;font-weight:400;letter-spacing:.02em;text-transform:none;opacity:.75;font-size:10px}
+iframe{flex:1;width:100%;border:0;display:block;background:#f4f2ec}
+@media(max-width:900px){.wrap{grid-template-columns:1fr;height:auto}iframe{height:90vh}}
+</style></head><body>
+<div class="wrap">
+  <div class="col"><div class="hd">Current — as shipped today<span class="sub">RunDetail.tsx 9948–10119 · .lmk-* / .crm-take · zero kyp- classes</span></div>
+    <iframe srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;title&gt;Historic Landmark Status — current&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+:root{
+  --indigo:#2b3a9e; --indigo-soft:#ecedf9; --ink:#141414; --ink2:#54544f;
+  --na:#8b8a84; --line:#e7e5df; --paper:#faf9f6; --good:#2f7d3f;
+  --bad:#d13b26; --caution:#f3b31f; --take-border:#dde1f6;
+  --font-jbmono:&#x27;JetBrains Mono&#x27;,monospace; --font-serif:&#x27;Instrument Serif&#x27;,Georgia,serif;
+  --font-body:&#x27;Inter&#x27;,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f4f2ec;color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+.seccard{padding:2px}
+.space-y-3&gt;*+*{margin-top:12px}
+.chead{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--ink)}
+.chead svg{width:16px;height:16px;stroke:var(--ink2);fill:none;stroke-width:2}
+.trigrow{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:8px;margin-bottom:6px}
+.records-fact{font-family:var(--font-jbmono);font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.04em;color:var(--ink2);background:var(--paper);border:1px solid var(--line);
+  border-radius:6px;padding:4px 9px}
+.chev{color:var(--na);font-size:13px;margin-left:10px}
+p.none{font-size:14px;color:var(--na)}
+.crm-take{background:var(--indigo-soft);border:1px solid var(--take-border,#dde1f6);border-radius:12px;padding:18px 20px 19px;margin-bottom:20px}
+.crm-takeh{margin-bottom:0}
+.crm-takeh{display:flex;align-items:center;gap:8px;font-family:var(--font-jbmono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo);margin-bottom:12px}
+.crm-takeh svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
+.crm-taket{font-family:var(--font-serif);font-size:21px;line-height:1.28;color:var(--ink);margin-bottom:14px}
+.crm-conn{display:flex;flex-direction:column}
+.crm-cn{display:flex;align-items:flex-start;gap:11px;padding:10px 0;font-size:13px;line-height:1.5;color:var(--ink2)}
+.crm-cn .dt{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
+.crm-cn.g .dt{background:var(--good)}
+.crm-cn.n .dt{background:#9aa1b0}
+.crm-cn.b .dt{background:var(--bad)}
+.crm-cn b{color:var(--ink);font-weight:600}
+.crm-cn.c .dt{background:var(--caution)}
+.crm-conn .crm-cn{border-top:1px solid #e3e5f4}
+.crm-conn .crm-cn:first-child{border-top:0;padding-top:0}
+.crm-conn .crm-cn:last-child{padding-bottom:0}
+.crm-cn .txt,.crm-cn .tx{flex:1}
+.crm-cn{flex-wrap:wrap}
+.crm-cn .crm-jump{margin-left:14px}
+.lmk-tag{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 11px;color:#fff}
+.lmk-tag svg{width:12px;height:12px;stroke:#fff;fill:none}
+.lmk-res{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:#fff}
+.lmk-restop{display:flex;align-items:center;gap:11px;padding-bottom:13px;border-bottom:1px solid var(--line);margin-bottom:13px}
+.lmk-restop .ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none}
+.lmk-restop .ic svg{width:18px;height:18px;fill:none}
+.lmk-restop .nm{font-size:15px;font-weight:600;color:var(--ink)}
+.lmk-restop .sub{font-size:11.5px;color:var(--na);margin-top:2px}
+.lmk-rgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px 22px}
+.lmk-rgrid{grid-template-columns:1fr}
+.lmk-rf .l{font-family:var(--font-jbmono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--na);margin-bottom:5px}
+.lmk-rf .v{font-size:13px;font-weight:600;color:var(--ink)}
+.lmk-rf .v .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px}
+.lmk-rf .v small{font-weight:400;color:var(--na)}
+.lmk-wtm{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+.lmk-wtmh{font-family:var(--font-jbmono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:12px}
+.lmk-b{display:flex;gap:9px;margin-bottom:9px;font-size:12.5px;line-height:1.5;color:var(--ink2)}
+.lmk-b:last-child{margin-bottom:0}
+.lmk-b .dot{width:5px;height:5px;border-radius:50%;flex:none;margin-top:6px}
+.lmk-b.con .dot{background:var(--caution)}
+.lmk-b.up .dot{background:var(--good)}
+.lmk-b.neu .dot{background:#9aa1b0}
+.lmk-b b{color:var(--ink);font-weight:600}
+.lmk-src{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px;color:var(--na);margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.lmk-src a{color:var(--indigo);text-decoration:none;font-weight:500;display:inline-flex;align-items:center;gap:5px}
+.lmk-src a:hover{text-decoration:underline}
+.lmk-src a svg{width:12px;height:12px;stroke:var(--indigo);fill:none}
+.lmk-src .sep{color:var(--line)}
+.crm-cn.i .dt{background:var(--indigo)}
+
+.lmk-b.neu .dot{background:#9aa1b0}
+.lmk-src{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;
+  font-family:var(--font-jbmono);font-size:9.5px;color:var(--na)}
+.lmk-src a{display:inline-flex;align-items:center;gap:5px;color:var(--indigo);
+  font-weight:700;text-decoration:none}
+.lmk-src svg{width:11px;height:11px;stroke:var(--indigo);fill:none;stroke-width:2}
+.lmk-src .sep{color:#c8c6bd}
+
+&lt;/style&gt;
+&lt;/head&gt;&lt;body&gt;
+
+&lt;!-- CollapsibleTrigger — chead + .lmk-tag coloured by getChrsColor() --&gt;
+&lt;div class=&quot;trigrow&quot;&gt;
+  &lt;h3 class=&quot;chead&quot;&gt;
+    &lt;svg viewBox=&quot;0 0 24 24&quot;&gt;&lt;path d=&quot;M3 21h18&quot;/&gt;&lt;path d=&quot;M5 21V10l7-5 7 5v11&quot;/&gt;&lt;path d=&quot;M9 21v-6h6v6&quot;/&gt;&lt;/svg&gt;
+    Historic Landmark Status
+  &lt;/h3&gt;
+  &lt;div style=&quot;display:flex;align-items:center&quot;&gt;
+    &lt;span class=&quot;lmk-tag&quot; style=&quot;background-color:#e07d1f&quot;&gt;
+      &lt;svg viewBox=&quot;0 0 24 24&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;path d=&quot;M3 21h18&quot;/&gt;&lt;path d=&quot;M5 21V10l7-5 7 5v11&quot;/&gt;&lt;path d=&quot;M9 21v-6h6v6&quot;/&gt;&lt;/svg&gt;
+      Orange Tag
+    &lt;/span&gt;
+    &lt;span class=&quot;chev&quot;&gt;&amp;#9660;&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;seccard space-y-3&quot;&gt;
+
+  &lt;!-- .crm-take — borrowed from the market/crime takeaway component --&gt;
+  &lt;div class=&quot;crm-take&quot;&gt;
+    &lt;div class=&quot;crm-takeh&quot;&gt;
+      &lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;path d=&quot;M9 18h6&quot;/&gt;&lt;path d=&quot;M10 22h4&quot;/&gt;&lt;path d=&quot;M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z&quot;/&gt;&lt;/svg&gt;
+      Takeaway
+    &lt;/div&gt;
+    &lt;div class=&quot;crm-taket&quot;&gt;A locally significant 1870s resource, Orange-rated in the city survey &amp;mdash; extra review on changes, but potential access to historic tax credits.&lt;/div&gt;
+    &lt;div class=&quot;crm-conn&quot;&gt;
+      &lt;div class=&quot;crm-cn c&quot;&gt;&lt;span class=&quot;dt&quot;&gt;&lt;/span&gt;
+        &lt;span&gt;&lt;b&gt;Changes draw extra scrutiny.&lt;/b&gt; Exterior alterations and especially &lt;b&gt;demolition&lt;/b&gt; trigger Commission on Chicago Landmarks review (a demolition-delay hold) &amp;mdash; a real constraint on redevelopment.&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;crm-cn g&quot;&gt;&lt;span class=&quot;dt&quot;&gt;&lt;/span&gt;
+        &lt;span&gt;&lt;b&gt;But it can unlock real money.&lt;/b&gt; Historic status may qualify a rehab for &lt;b&gt;Class L&lt;/b&gt;, &lt;b&gt;Federal Historic (20%)&lt;/b&gt;, and &lt;b&gt;Illinois Historic (25%)&lt;/b&gt; tax incentives.&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;crm-cn n&quot;&gt;&lt;span class=&quot;dt&quot;&gt;&lt;/span&gt;
+        &lt;span&gt;&lt;b&gt;It&#x27;s a survey &quot;Orange&quot; rating&lt;/b&gt; &amp;mdash; community / locally significant &amp;mdash; not necessarily a fully designated landmark. Confirm exact protections before planning work.&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- .lmk-res resource card --&gt;
+  &lt;div class=&quot;lmk-res&quot;&gt;
+    &lt;div class=&quot;lmk-restop&quot;&gt;
+      &lt;span class=&quot;ic&quot; style=&quot;background:#e07d1f1c&quot;&gt;
+        &lt;svg viewBox=&quot;0 0 24 24&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; style=&quot;stroke:#e07d1f&quot;&gt;&lt;path d=&quot;M3 21h18&quot;/&gt;&lt;path d=&quot;M5 21V10l7-5 7 5v11&quot;/&gt;&lt;path d=&quot;M9 21v-6h6v6&quot;/&gt;&lt;/svg&gt;
+      &lt;/span&gt;
+      &lt;div&gt;
+        &lt;div class=&quot;nm&quot;&gt;Historic Resource&lt;/div&gt;
+        &lt;div class=&quot;sub&quot;&gt;Chicago Historic Resources Survey&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;lmk-rgrid&quot;&gt;
+      &lt;div class=&quot;lmk-rf&quot;&gt;&lt;div class=&quot;l&quot;&gt;Landmark Address&lt;/div&gt;&lt;div class=&quot;v&quot;&gt;522 N CLAREMONT AVE&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;lmk-rf&quot;&gt;&lt;div class=&quot;l&quot;&gt;CHRS Rating&lt;/div&gt;&lt;div class=&quot;v&quot;&gt;&lt;span class=&quot;sw&quot; style=&quot;background:#e07d1f&quot;&gt;&lt;/span&gt;Orange &lt;small&gt;&amp;mdash; community / locally significant&lt;/small&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;lmk-rf&quot;&gt;&lt;div class=&quot;l&quot;&gt;Era&lt;/div&gt;&lt;div class=&quot;v&quot;&gt;1870s&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- .lmk-wtm --&gt;
+  &lt;div class=&quot;lmk-wtm&quot;&gt;
+    &lt;div class=&quot;lmk-wtmh&quot;&gt;What This Means&lt;/div&gt;
+    &lt;div class=&quot;lmk-b con&quot;&gt;&lt;span class=&quot;dot&quot;&gt;&lt;/span&gt;&lt;span&gt;Exterior modifications may face &lt;b&gt;restrictions&lt;/b&gt;, and alterations are expected to &lt;b&gt;preserve historic character&lt;/b&gt;.&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;lmk-b con&quot;&gt;&lt;span class=&quot;dot&quot;&gt;&lt;/span&gt;&lt;span&gt;Demolition permits require &lt;b&gt;Commission on Chicago Landmarks&lt;/b&gt; review.&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;lmk-b up&quot;&gt;&lt;span class=&quot;dot&quot;&gt;&lt;/span&gt;&lt;span&gt;May qualify for &lt;b&gt;Class L&lt;/b&gt;, Federal Historic &lt;b&gt;(20%)&lt;/b&gt;, and Illinois Historic &lt;b&gt;(25%)&lt;/b&gt; tax incentives.&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;lmk-b neu&quot;&gt;&lt;span class=&quot;dot&quot;&gt;&lt;/span&gt;&lt;span&gt;Applies to survey-rated resources; exact requirements depend on whether it&#x27;s individually designated or in a landmark district.&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;lmk-src&quot;&gt;
+    &lt;a href=&quot;#&quot;&gt;&lt;svg viewBox=&quot;0 0 24 24&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;path d=&quot;M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6&quot;/&gt;&lt;path d=&quot;M15 3h6v6&quot;/&gt;&lt;path d=&quot;M10 14 21 3&quot;/&gt;&lt;/svg&gt;Historic Preservation Division&lt;/a&gt;
+    &lt;span class=&quot;sep&quot;&gt;&amp;middot;&lt;/span&gt;&lt;span&gt;Source: Chicago Landmarks &amp;amp; Historic Resources Survey&lt;/span&gt;
+  &lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/body&gt;&lt;/html&gt;
+"></iframe></div>
+  <div class="col"><div class="hd p">Step 15b — brand palette on indigo<span class="sub">--kyp-indigoL #3f51cf · rating word #ff6b35</span></div>
+    <iframe srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;title&gt;Historic Status — Step 15b&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
 /* ============================================================
    KYP — THE shared component sheet. ONE definition of every
    token, type level, and primitive. Every section @imports this
    and adds ZERO css of its own. If two sections ever look
-   different, it's because someone wrote css outside this file —
-   don't. Add the value here once, use the class everywhere.
+   different, it&#x27;s because someone wrote css outside this file —
+   don&#x27;t. Add the value here once, use the class everywhere.
    ============================================================ */
 
 :root{
@@ -11,7 +186,7 @@
   --kyp-ink:#141414; --kyp-ink2:#565651; --kyp-muted:#8b8a84; --kyp-line:#e7e5df;
   --kyp-indigo:#2b3a9e; --kyp-indigoL:#3f51cf; --kyp-indigoSoft:#eef0fb;
   --kyp-green:#2f7d3f; --kyp-orange:#e07a2e; --kyp-bad:#c0392b; --kyp-slate:#3a3a36;
-  --kyp-disp:'Instrument Serif'; --kyp-mono:'JetBrains Mono'; --kyp-sans:'Inter';
+  --kyp-disp:&#x27;Instrument Serif&#x27;; --kyp-mono:&#x27;JetBrains Mono&#x27;; --kyp-sans:&#x27;Inter&#x27;;
    --kyp-debt:#0a93b8; --kyp-debtSoft:#e6f5f9; --kyp-debtLine:#b9e2ee;
 }
 
@@ -67,13 +242,13 @@
 .kyp-card{background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:16px;padding:22px 24px}
 
 /* ========== SECTION INDENT (universal rule) ==========
-   The section's DOT/bullet hangs alone in a left gutter. The eyebrow TEXT,
+   The section&#x27;s DOT/bullet hangs alone in a left gutter. The eyebrow TEXT,
    the headline, the verdict pill, and ALL content align to ONE text column
    past the bullet — exactly like the collapsed row (number badge in the
    gutter, title + takeaway tabbed past it). Nothing sits flush with the
    bullet. Put the whole section in .kyp-sec. Gutter = dot(9) + gap(8) = 17. */
 .kyp-sec{padding-left:17px}
-.kyp-sec > .kyp-eyebrow .dot{margin-left:-17px}
+.kyp-sec &gt; .kyp-eyebrow .dot{margin-left:-17px}
 .kyp-content{padding-left:0}
 
 /* ========== LIST ROWS (accent bar) ========== */
@@ -94,7 +269,7 @@
 .kyp-block.debt{background:var(--kyp-debt)}
 .kyp-block.dark{background:#16171b} .kyp-block.slate{background:var(--kyp-slate)}
 .kyp-block .bv{font-family:var(--kyp-disp);font-size:36px;line-height:.95}
-.kyp-block .bl{font-family:var(--kyp-mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;opacity:.92;margin-top:8px;line-height:1.45}
+.kyp-block .bl{font-family:var(--kyp-mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;opacity:.92}
 .kyp-block .bd{font-size:10.5px;opacity:.85;margin-top:2px;line-height:1.3}
 .kyp-block .chip{align-self:flex-start;font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;background:rgba(255,255,255,.2);border-radius:6px;padding:3px 8px}
 .kyp-block .dots{display:flex;gap:5px}
@@ -211,7 +386,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-tip .tt{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#aab2e4;margin-bottom:9px}
 .kyp-tip ul{list-style:none;display:flex;flex-direction:column;gap:6px}
 .kyp-tip li{font-size:11.5px;line-height:1.35;color:#e8e8ec;padding-left:13px;position:relative}
-.kyp-tip li::before{content:'';position:absolute;left:0;top:6px;width:4px;height:4px;border-radius:50%;background:#6b78c9}
+.kyp-tip li::before{content:&#x27;&#x27;;position:absolute;left:0;top:6px;width:4px;height:4px;border-radius:50%;background:#6b78c9}
 .kyp-tip .arw{position:absolute;top:-5px;right:12px;width:11px;height:11px;background:#16171b;transform:rotate(45deg)}
 .kyp-chev{width:16px;height:16px;stroke:var(--kyp-muted);fill:none;stroke-width:2.4;flex:none;transition:transform .2s ease}
 .kyp-scanrow.open .kyp-chev{transform:rotate(180deg)}
@@ -268,7 +443,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kic-ch{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted);margin-bottom:6px}
 .kic-cols ul{list-style:none;display:flex;flex-direction:column;gap:5px}
 .kic-cols li{font-size:12px;color:var(--kyp-ink2);line-height:1.45;padding-left:13px;position:relative}
-.kic-cols li::before{content:'';position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:var(--kyp-indigo)}
+.kic-cols li::before{content:&#x27;&#x27;;position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:var(--kyp-indigo)}
 .kic-ft{display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding-top:12px;border-top:1px solid var(--kyp-line)}
 .kic-lnk{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-indigo);text-decoration:none;display:inline-flex;gap:5px;align-items:center}
 .kic-src{margin-left:auto;font-family:var(--kyp-mono);font-size:9.5px;color:var(--kyp-muted)}
@@ -278,7 +453,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 /* print: hybrid cards must print full detail even when screen-collapsed (parity with .incbody rule) */
 @media print{.kyp-inccard .kic-body{display:block !important}.kic-chev{display:none}}
 
-/* ===== Ownership & Title: borrowed money is a category, not a verdict ===== */
+/* ===== Ownership &amp; Title: borrowed money is a category, not a verdict ===== */
 .kyp-owner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--kyp-indigoSoft);border-radius:12px;padding:13px 16px;margin-bottom:14px}
 .kyp-owner .olab,.kyp-owner .oent,.kyp-mt,.kyp-xact .xtag,.kyp-xact .xf .k,.kyp-terms .tk{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
 .kyp-owner .olab{color:var(--kyp-indigo);background:#fff;border-radius:5px;padding:3px 8px}
@@ -331,7 +506,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-title-alert{margin-bottom:10px;padding:12px 14px;border-radius:10px;font-size:12.5px;line-height:1.5}
 .kyp-title-alert.bad{background:#fbeeed;border:1px solid #e7bfbb;color:#81251d}
 .kyp-owner-lien-tools{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:11px;padding:11px 13px;border:1px solid var(--kyp-line);border-radius:9px;background:var(--kyp-wash)}
-.kyp-owner-lien-tools>div:first-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.kyp-owner-lien-tools&gt;div:first-child{display:flex;flex-direction:column;gap:2px;min-width:0}
 .kyp-owner-lien-tools .tool-label{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted)}
 .kyp-owner-lien-tools b{font-size:12.5px;color:var(--kyp-ink);overflow-wrap:anywhere}
 .kyp-owner-lien-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
@@ -354,12 +529,12 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
   .kyp-timeline-events{display:grid;grid-template-columns:repeat(3,1fr)}
 }
 
-/* ===== fractal: numbered sub-section divider ===== */
-.kyp-subhead{display:flex;align-items:center;gap:10px;margin:38px 0 13px;padding-top:11px;border-top:1px solid var(--kyp-ink);scroll-margin-top:20px}
-.kyp-subhead .n{font-family:var(--kyp-mono);font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--kyp-indigo);flex:none}
-.kyp-subhead .lbl{font-family:var(--kyp-mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo)}
-.kyp-subhead .ct{font-family:var(--kyp-mono);font-size:11px;font-weight:400;color:var(--kyp-muted)}
-.kyp-subhead .rule{display:none}
+/* ===== fractal: sub-eyebrow (sub-section divider) ===== */
+.kyp-subhead{display:flex;align-items:center;gap:10px;margin:26px 0 12px;scroll-margin-top:20px}
+.kyp-subhead .lbl{font-family:var(--kyp-mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kyp-indigo)}
+.kyp-subhead .ct{font-family:var(--kyp-mono);font-size:11px;font-weight:700;color:var(--kyp-muted)}
+.kyp-subhead .rule{flex:1;height:1px;background:var(--kyp-line)}
+.kyp-subhead.fam-green .lbl{color:var(--kyp-green)} .kyp-subhead.fam-orange .lbl{color:var(--kyp-orange)} .kyp-subhead.fam-slate .lbl{color:var(--kyp-slate)}
 
 /* ===== horizontal magnitude bars — labeled distribution (crime by type, etc.) ===== */
 .kyp-hbar{display:flex;align-items:center;gap:12px;padding:9px 0;border:0;border-bottom:1px solid var(--kyp-line);background:transparent;text-align:left;width:100%}
@@ -385,7 +560,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 /* compact count/toggle variant — short row, no hero negative space */
 .kyp-block.count{min-height:0;flex-direction:row;align-items:center;justify-content:flex-start;gap:16px;padding:15px 18px}
 .kyp-block.count .bv{font-size:42px;flex:none;line-height:.9}
-.kyp-block.count .bl{font-size:9.5px;margin-top:0}
+.kyp-block.count .bl{font-size:9.5px}
 
 /* ===== year column trend — bars take verdict tone (good=falling, att=rising) ===== */
 .kyp-ytrend{margin-top:6px}
@@ -514,7 +689,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-acchd .eb{font-family:var(--kyp-mono);font-size:13.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-slate);display:inline;white-space:normal}
 .kyp-accrow.g .eb{color:var(--kyp-green)}.kyp-accrow.o .eb{color:var(--kyp-orange)}
 .kyp-acchd .tk{font-size:15px;font-weight:500;color:var(--kyp-ink);display:inline}
-.kyp-acchd .tk::before{content:"— ";color:var(--kyp-muted);margin:0 4px 0 8px;font-weight:400}
+.kyp-acchd .tk::before{content:&quot;— &quot;;color:var(--kyp-muted);margin:0 4px 0 8px;font-weight:400}
 .kyp-acchd .tk em{font-family:var(--kyp-disp);font-style:italic;font-weight:400;font-size:1.1em;color:var(--kyp-green)}
 .kyp-acchd .tk em.o{color:var(--kyp-orange)}
 .kyp-acchd .badge{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;border-radius:7px;padding:5px 11px;white-space:nowrap;flex:none;margin-top:2px}
@@ -600,7 +775,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-cxfoot .pin{font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-ink2)}
 .kyp-cxlink{display:inline-flex;align-items:center;gap:5px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-indigo);text-decoration:none;margin-top:11px}
 
-/* ---- Step 6: Permits & Violations hybrid ---- */
+/* ---- Step 6: Permits &amp; Violations hybrid ---- */
 .kyp-block.bad{background:var(--kyp-bad)}
 /* permit card */
 .kyp-permit{border:1px solid var(--kyp-line);border-left:5px solid var(--kyp-slate);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--kyp-card)}
@@ -648,7 +823,6 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-morelink{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-indigo);cursor:pointer;margin-top:13px;display:inline-block}
 .kyp-procard .kyp-pcerts{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
 .kyp-cert{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-green);background:#e9f4ec;border:1px solid #cfe6d5;border-radius:5px;padding:3px 7px}
-
 /* ============================================================
    KYP-BASE PATCH — Step 13b + Step 14 components.
    APPEND to the end of client/src/kyp-base.css. Append only:
@@ -714,7 +888,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-says ul{margin:0;padding:0;list-style:none}
 .kyp-says li{position:relative;padding-left:17px;font-size:13.5px;line-height:1.58;color:var(--kyp-ink2);margin-bottom:11px}
 .kyp-says li:last-child{margin-bottom:0}
-.kyp-says li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:2px;background:var(--kyp-indigoL)}
+.kyp-says li::before{content:&quot;&quot;;position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:2px;background:var(--kyp-indigoL)}
 .kyp-says .sc+.sc li::before{background:var(--kyp-slate)}
 .kyp-says li b{color:var(--kyp-ink)}
 .kyp-says.lg{margin:20px 0 4px;border-width:2px}
@@ -740,20 +914,19 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
   .kyp-xfer .col+.col{border-left:none;border-top:1px solid var(--kyp-line)}
 }
 
-/* Keep every new statistic-block variant readable on narrow screens. */
-@media (max-width:640px){
-  .kyp-blocks.four,
-  .kyp-blocks.hero,
-  .kyp-blocks.hero.two,
-  .kyp-blocks.hero.one{grid-template-columns:1fr}
-}
-
-/* Zoning-history modifiers: a district change is a state, not a warning. */
+/* ---------- 14 — .kyp-xfer.zone : a district change is a state, not a warning ----------
+   The base .kyp-xfer right column is amber because its first use was the tax
+   exemption transfer, where the &quot;after&quot; IS the bad news. A rezoning is neither
+   good nor bad, so the zoning variant is indigo. Do not use bare .kyp-xfer here. */
 .kyp-xfer.zone .col+.col{background:var(--kyp-indigoSoft)}
 .kyp-xfer.zone .col+.col .h{color:var(--kyp-indigo)}
 .kyp-xfer.zone .col+.col .v{color:var(--kyp-ink)}
-.kyp-procard .pfirm{font-size:13px;color:var(--kyp-ink2);margin-top:-4px;margin-bottom:5px}
 
+/* ---------- 14 — .kyp-procard .pfirm : the firm line under the name ----------
+   The live procard has .ptop/.prole/.pnm/.pera/.phere/.pcity/.pview but no
+   firm line. This is the ONLY addition to procard — everything else live is
+   further along than my copy and must not be touched. */
+.kyp-procard .pfirm{font-size:13px;color:var(--kyp-ink2);margin-top:-4px;margin-bottom:5px}
 /* ============================================================
    KYP-BASE PATCH — Step 15b: Historic Landmark Status.
    APPEND to the end of client/src/kyp-base.css. Append-only.
@@ -773,45 +946,167 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-facts .kyp-fact.wide{grid-column:span 2}
 
 /* ---------- 15b — CHRS survey colours ----------
-   These are the City's own survey codes, NOT the verdict palette. */
-.kyp-block.chrs-red{background:#b0332a}
-.kyp-block.chrs-orange{background:#e07d1f}
-.kyp-block.chrs-yellow{background:#dfb749;color:#241d05}
-.kyp-block.chrs-green{background:#2f7d3f}
-.kyp-block.chrs-yellow .bl,.kyp-block.chrs-yellow .bd,.kyp-block.chrs-yellow .br{opacity:.88}
-.kyp-block.chrs-yellow .bbreak{border-top-color:rgba(0,0,0,.22)}
+   Taken from the KYP brand palette already in index.css:
+     Red    #d13b26  = --ref-red / --bad   &quot;logo red&quot;
+     Orange #ff6b35  = --color-orange
+     Yellow #f3b31f  = --ref-yellow / --caution   &quot;logo gold&quot;
+     Green  #2fb457  = --ref-green #2f7d3f raised for brightness
+   Worst-pair separation: normal 16.3, deuteranomaly 11.2, protanomaly 11.6.
+   Shipped today is deuteranomaly 1.0 — Orange and Yellow are the same swatch
+   to roughly 6% of men. The brand values fix that as a side effect of being
+   brighter, and they also pull CHRS orange clear of verdict orange:
+   ΔE 2.7 -&gt; 9.7.
+   Still: the rating word renders beside every swatch. Colour never alone. */
 .kyp-chrsw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:-1px}
-.kyp-chrsw.red{background:#b0332a}
-.kyp-chrsw.orange{background:#e07d1f}
-.kyp-chrsw.yellow{background:#dfb749}
-.kyp-chrsw.green{background:#2f7d3f}
+.kyp-chrsw.red{background:#d13b26}
+.kyp-chrsw.orange{background:#ff6b35}
+.kyp-chrsw.yellow{background:#f3b31f}
+.kyp-chrsw.green{background:#2fb457}
 .kyp-chrsw.none{background:var(--kyp-muted)}
 
 /* ---------- 15b — .kyp-gate : a benefit that is not available yet ----------
-   Used in the "could unlock" column. The requirement is not a footnote —
+   Used in the &quot;could unlock&quot; column. The requirement is not a footnote —
    it is the reason the line is not a claim. */
 .kyp-says .req{display:block;font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-bad);margin-top:5px;letter-spacing:.01em}
 .kyp-says .req.met{color:var(--kyp-green)}
 
-/* ---------- 15b — the survey legend and exact display colours ---------- */
+/* ---------- 15b — .kyp-chrstier : the four-tier survey legend ----------
+   Where this property sits in the survey&#x27;s OWN scale. This is the only place
+   the survey colours appear at size, and every swatch is labelled — which is
+   what lets the palette carry meaning at ΔE 6.9 under deuteranomaly. */
 .kyp-chrstier{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--kyp-line);border-radius:12px;overflow:hidden;background:var(--kyp-card);margin:12px 0 4px}
 .kyp-chrstier .tr{padding:12px 14px}
 .kyp-chrstier .tr+.tr{border-left:1px solid var(--kyp-line)}
 .kyp-chrstier .th{display:flex;align-items:center;gap:7px;font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-ink2);margin-bottom:6px}
 .kyp-chrstier .tb{font-size:12.5px;line-height:1.45;color:var(--kyp-ink2)}
 .kyp-chrstier .tr.on{background:var(--kyp-wash)}
-.kyp-chrstier .tr.on .th,.kyp-chrstier .tr.on .tb{color:var(--kyp-ink)}
+.kyp-chrstier .tr.on .th{color:var(--kyp-ink)}
+.kyp-chrstier .tr.on .tb{color:var(--kyp-ink)}
 .kyp-chrstier .tr.on .me{margin-left:4px;color:var(--kyp-indigo)}
+@media (max-width:760px){.kyp-chrstier{grid-template-columns:1fr 1fr}.kyp-chrstier .tr:nth-child(3){border-left:0}}
+
+/* ---------- 15b — the survey rating as the block&#x27;s display value ----------
+   The rating word renders in its EXACT brand colour — the same value as the
+   tag and the swatch. Do NOT lighten it to chase contrast: a tinted brand
+   colour reads as faded, which is the defect this replaces.
+   On the standard .ind block (#3f51cf) three of the four tiers hold up on
+   chromatic separation (ΔE 60-75) even though luminance contrast is modest:
+     orange 2.25:1   gold 3.43:1   green 2.37:1
+   Red is the exception at 1.33:1 — a dark red on mid blue goes muddy. For a
+   RED-rated property only, the whole hero row uses .ind-deep, where red
+   reaches 3.03:1. A property has exactly one tier, so a reader never sees the
+   two block shades side by side. */
 .kyp-block.ind-deep{background:#192261}
 .kyp-block .bv.chrs-red{color:#d13b26}
 .kyp-block .bv.chrs-orange{color:#ff6b35}
 .kyp-block .bv.chrs-yellow{color:#f3b31f}
 .kyp-block .bv.chrs-green{color:#2fb457}
-@media (max-width:760px){.kyp-chrstier{grid-template-columns:1fr 1fr}.kyp-chrstier .tr:nth-child(3){border-left:0}}
 
-/* Step 15b brand-palette overrides: survey colours are labelled state markers,
-   never the report's filled verdict backgrounds. */
-.kyp-chrsw.red{background:#d13b26}
-.kyp-chrsw.orange{background:#ff6b35}
-.kyp-chrsw.yellow{background:#f3b31f}
-.kyp-chrsw.green{background:#2fb457}
+&lt;/style&gt;
+&lt;style&gt;body{background:var(--kyp-wash);font-family:var(--kyp-sans);color:var(--kyp-ink);
+  -webkit-font-smoothing:antialiased;margin:0;padding:2px}
+.trig{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 12px;margin-bottom:14px}
+.trig .t{font-family:var(--kyp-mono);font-size:12px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--kyp-indigo)}
+.trig .tw{font-family:var(--kyp-sans);font-weight:400;text-transform:none;letter-spacing:0;
+  color:var(--kyp-ink);font-size:14px}
+.trig .tw em{font-family:var(--kyp-disp);font-style:italic;font-size:17px;color:var(--kyp-indigo)}
+.trig .tk{flex:none;display:inline-flex;align-items:center;gap:7px;font-family:var(--kyp-mono);
+  font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;
+  background:var(--kyp-indigo);border-radius:8px;padding:5px 11px}
+&lt;/style&gt;
+&lt;/head&gt;&lt;body&gt;
+
+&lt;!-- row badge is INDIGO — a state, not a verdict. The swatch carries the survey colour. --&gt;
+&lt;div class=&quot;trig&quot;&gt;
+  &lt;span class=&quot;t&quot;&gt;Historic Status &lt;span class=&quot;tw&quot;&gt;&amp;mdash; Orange-rated &amp;mdash; a demolition permit is held &lt;em&gt;90 days&lt;/em&gt;, and no credit is unlocked yet.&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;tk&quot;&gt;&lt;span class=&quot;kyp-chrsw orange&quot; style=&quot;margin:0&quot;&gt;&lt;/span&gt;Orange tag&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;!-- deep-indigo hero row: the rating word carries the exact brand colour, unlightened --&gt;
+&lt;div class=&quot;kyp-blocks hero&quot;&gt;
+  &lt;div class=&quot;kyp-block ind&quot;&gt;
+    &lt;div&gt;&lt;div class=&quot;bv chrs-orange&quot;&gt;Orange&lt;/div&gt;&lt;div class=&quot;bl&quot;&gt;Survey rating &amp;mdash; 2nd of 4 tiers&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;bbreak&quot;&gt;
+      &lt;div class=&quot;br&quot;&gt;&lt;b&gt;Means&lt;/b&gt;&lt;span&gt;significant within the surrounding community&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;kyp-block ind&quot;&gt;
+    &lt;div&gt;&lt;div class=&quot;bv&quot;&gt;90 days&lt;/div&gt;&lt;div class=&quot;bl&quot;&gt;Demolition permit held &amp;mdash; automatic on this rating&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;bbreak&quot;&gt;
+      &lt;div class=&quot;br&quot;&gt;&lt;b&gt;Rule&lt;/b&gt;&lt;span&gt;Municipal Code &amp;sect;14A-4-407.6&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;kyp-block ind&quot;&gt;
+    &lt;div&gt;&lt;div class=&quot;bv&quot;&gt;1870s&lt;/div&gt;&lt;div class=&quot;bl&quot;&gt;Era recorded &amp;middot; 1 tagged parcel on site&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;bbreak&quot;&gt;
+      &lt;div class=&quot;br&quot;&gt;&lt;b&gt;Survey only&lt;/b&gt;&lt;span&gt;not a designated landmark&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- the survey&#x27;s own four-tier scale, with this property marked --&gt;
+&lt;div class=&quot;kyp-chrstier&quot;&gt;
+  &lt;div class=&quot;tr&quot;&gt;
+    &lt;div class=&quot;th&quot;&gt;&lt;span class=&quot;kyp-chrsw red&quot; style=&quot;margin:0&quot;&gt;&lt;/span&gt;Red&lt;/div&gt;
+    &lt;div class=&quot;tb&quot;&gt;National Register calibre&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;tr on&quot;&gt;
+    &lt;div class=&quot;th&quot;&gt;&lt;span class=&quot;kyp-chrsw orange&quot; style=&quot;margin:0&quot;&gt;&lt;/span&gt;Orange&lt;span class=&quot;me&quot;&gt;&amp;middot; this property&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;tb&quot;&gt;Significant within the community&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;tr&quot;&gt;
+    &lt;div class=&quot;th&quot;&gt;&lt;span class=&quot;kyp-chrsw yellow&quot; style=&quot;margin:0&quot;&gt;&lt;/span&gt;Yellow&lt;/div&gt;
+    &lt;div class=&quot;tb&quot;&gt;Pre-1940, extensively altered&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;tr&quot;&gt;
+    &lt;div class=&quot;th&quot;&gt;&lt;span class=&quot;kyp-chrsw green&quot; style=&quot;margin:0&quot;&gt;&lt;/span&gt;Green&lt;/div&gt;
+    &lt;div class=&quot;tb&quot;&gt;Pre-1940, slightly altered&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- one fact, two consequences — no subheads --&gt;
+&lt;div class=&quot;kyp-says lg&quot;&gt;
+  &lt;div class=&quot;sc&quot;&gt;
+    &lt;div class=&quot;sh&quot;&gt;What the rating triggers&lt;/div&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;b&gt;A 90-day hold on any demolition permit.&lt;/b&gt; Automatic for Orange- and Red-coded
+        buildings under Municipal Code &amp;sect;14A-4-407.6, so the Department of Planning can explore
+        designation. Not discretionary, and not a fee.&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Scrutiny on exterior alterations&lt;/b&gt; &amp;mdash; work is expected to preserve historic
+        character.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;sc&quot;&gt;
+    &lt;div class=&quot;sh&quot;&gt;What it does not unlock&lt;/div&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;b&gt;Class L&lt;/b&gt; &amp;mdash; needs municipal landmark designation.
+        &lt;span class=&quot;req&quot;&gt;Survey rating is a catalogue entry, not a designation&lt;/span&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Federal Historic 20%&lt;/b&gt; &amp;mdash; needs National Register listing, and an
+        income-producing use.
+        &lt;span class=&quot;req&quot;&gt;An owner-occupied residence is excluded outright&lt;/span&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Illinois Historic 25%&lt;/b&gt; &amp;mdash; same certified-historic-structure basis as the
+        federal credit.
+        &lt;span class=&quot;req&quot;&gt;See 07 &amp;middot; Location Incentives for this property&amp;rsquo;s verdict&lt;/span&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;kyp-caveat&quot;&gt;
+  &lt;b&gt;A survey rating is not a designation.&lt;/b&gt; The 1996 Chicago Historic Resources Survey catalogued
+  buildings citywide. It carries one automatic consequence &amp;mdash; the demolition hold &amp;mdash; but
+  every historic tax incentive requires a separate designation: a municipal landmark ordinance, or
+  National Register listing. Pursuing designation is the route from the left column to the right one,
+  and the colours here are the survey&amp;rsquo;s own code, not this report&amp;rsquo;s verdict scale.
+&lt;/div&gt;
+
+&lt;div class=&quot;kyp-src&quot;&gt;
+  Source: &lt;a href=&quot;#&quot;&gt;Chicago Landmarks &amp;amp; Historic Resources Survey&lt;/a&gt; &amp;middot; official
+  landmarks dataset (uct4-hrvh) &amp;middot; matched to this parcel&amp;rsquo;s geometry, not to the street
+  address alone &amp;middot; not in a landmark district.
+&lt;/div&gt;
+
+&lt;/body&gt;&lt;/html&gt;
+"></iframe></div>
+</div>
+</body></html>
