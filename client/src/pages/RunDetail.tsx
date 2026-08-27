@@ -54,6 +54,7 @@ import { groupLicenseEstablishments, licenseEstablishmentKey, titleCaseBusiness 
 import { computeValuationMetrics, computeNoiModel, computeDscrLoanRatio, type ValuationSnapshot } from "@/lib/valuation";
 import StatTile from "@/components/StatTile";
 import InsightReportSection from "@/components/InsightReportSection";
+import { CountyRecordSection } from "@/components/report/CountyRecordSection";
 
 function proRoleIcon(role: string) {
   const r = (role || '').toLowerCase();
@@ -1257,7 +1258,7 @@ export default function RunDetail() {
   const incentiveEligibilityRef = useRef<Record<string, boolean>>({});
 
   // ---- Step 5 accordion state: order / hidden / open (persisted per run) ----
-  const ACC_DEFAULT_ORDER = ["overview", "historic", "permits", "listing", "ownership", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
+  const ACC_DEFAULT_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "ownership", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
@@ -3822,6 +3823,7 @@ export default function RunDetail() {
     analysis: { title: "Project Use Analysis", summary: "Deep-dive analysis for your selected use.", info: ["Demand & demographics for your use", "Nearby competitors", "Use-specific estimators"] },
     potential: { title: "Development Potential", summary: "FAR, buildable envelope and rental potential.", info: ["FAR & buildable envelope", "Market rents (RentCast)", "Short-term rental (Airbnb)", "Commercial listings"] },
     historic: { title: "Historic Status", summary: "Chicago Historic Resources Survey rating and designation signals.", info: ["CHRS survey rating", "Municipal designation signals", "Demolition-hold rule", "Credit eligibility requirements"] },
+    countyRecord: { title: "COUNTY RECORD", summary: "Cook County Assessor and Treasurer record for the subject parcel.", info: ["Parcel and structure facts", "Recorded unit configuration", "Assessor valuation inputs", "PIN and source links"] },
   };
   const listingStillChecking = generateListingSnapshot.isPending
     || (!listingSnapshot && !isListingSnapshotError);
@@ -10219,7 +10221,8 @@ export default function RunDetail() {
                     </Collapsible>
                     )}
 
-                    {/* Parcel Information Sub-section */}
+                     {/* Legacy nested Parcel Information subsection. The live County Record is top-level below. */}
+                     {false && (
                     <Collapsible open={isParcelSectionOpen} onOpenChange={setIsParcelSectionOpen}>
                       <CollapsibleTrigger asChild>
                         <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
@@ -11104,7 +11107,8 @@ export default function RunDetail() {
                         )}
                       </div>
                       </CollapsibleContent>
-                    </Collapsible>
+                     </Collapsible>
+                     )}
 
                     {/* Listing Details Sub-section */}
                     {listingData && (
@@ -12129,6 +12133,33 @@ export default function RunDetail() {
               </Card>
             </Collapsible>
           </motion.div>
+          </AccordionSection>
+
+          <AccordionSection {...accProps("countyRecord")}>
+            <CountyRecordSection
+              propertyTaxData={propertyTaxData}
+              pinLookupData={pinLookupData}
+              isLoadingPropertyTax={isLoadingPropertyTax}
+              isLoadingPinLookup={isLoadingPinLookup}
+              refreshPropertyTax={refreshPropertyTax}
+              submittedPin={submittedPin}
+              propertyPin={propertyPin}
+              setPropertyPin={setPropertyPin}
+              setSubmittedPin={setSubmittedPin}
+              run={run}
+              showManualEntryForm={showManualEntryForm}
+              setShowManualEntryForm={setShowManualEntryForm}
+              manualBuildingSqFt={manualBuildingSqFt}
+              setManualBuildingSqFt={setManualBuildingSqFt}
+              manualLandSqFt={manualLandSqFt}
+              setManualLandSqFt={setManualLandSqFt}
+              manualStories={manualStories}
+              setManualStories={setManualStories}
+              handleSaveManualProperty={handleSaveManualProperty}
+              updateManualProperty={updateManualProperty}
+              coParcelPin={coParcelPin}
+              coParcelAddress={coParcelAddress}
+            />
           </AccordionSection>
 
           {/* Historic Status is a permanent top-level row, including for unrated parcels. */}

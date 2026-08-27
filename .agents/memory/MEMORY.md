@@ -35,3 +35,4 @@
 - [West Town pilot isolation](west-town-pilot-isolation.md) — Market Discovery scans are lazy, self-contained, and must never share individual report tax data.
 - [GitHub sync with oversized history](github-sync-large-history.md) — old non-LFS blobs can block normal pushes even after current files move to LFS.
 - [Historic status legal framing](historic-status-legal-framing.md) — CHRS survey ratings are not designations or credit eligibility; only Red/Orange automatically trigger a 90-day demolition hold.
+- [County record evidence](county-record-evidence.md) — assessor-record facts stay separate from commercial valuation-model inputs; unit splits show only what county totals support.

@@ -1,0 +1,351 @@
+# KYP — Step 16b: `Parcel Information (Cook County)` → `COUNTY RECORD`
+
+🔴 **Scope:** `RunDetail.tsx` **10121–11007** — the whole section, **887 lines, read at 100%.**
+Ships after 13b, 15b and the 16b CSS patch.
+
+🔴 **Supersedes `REPLIT_STEP16_county_record.md` and `STEP16_CORRECTION.md`. Delete both.**
+Step 16 was written from ~390 lines and listed 13 fields. The correction raised that to 26.
+**The section renders 56 labels and reads 84 distinct data fields.** Both earlier documents would
+have deleted most of it.
+
+The section contains **zero `kyp-` classes** today; it renders on `.prc-*`, `.parcel-*` and a
+borrowed `.crm-take`.
+
+---
+
+## 0. What both earlier specs missed: this is three sections in one shell
+
+The body has **three mutually exclusive data branches**, plus an overlay:
+
+| Branch | Fires when | Fields |
+|---|---|---|
+| **Residential** | `propertyTaxData` has land/building/type/use/year | 8 |
+| **Commercial** | no residential data **and** `pinLookupData.commercialData` exists | 24, incl. an income statement |
+| **Neither** | otherwise | renders an empty grid |
+| **Characteristics** (overlay) | `characteristicsData` present, on either branch | 31 |
+| **Manual entry** | land sf **or** building sf missing | 6 |
+
+Neither earlier spec mentioned the commercial branch at all. It is not a corner case — it is every
+Class 5 parcel, which is most of the commercial inventory this product is aimed at.
+
+---
+
+## 1. The finding that matters most — the commercial figures are a model, not a record
+
+On a Class 5 parcel the section prints **NOI, Cap Rate, Effective Gross Income, Potential Gross
+Income, Vacancy Rate, Expense Ratio, Rent/SF** and an **Investment Rating**, in the same grid, at the
+same weight, as Building Size and Year Built.
+
+**They are not the same kind of fact.** Building size is observed. Those figures are the assessor's
+**inputs to a valuation model** — the vacancy and expense ratios are class-wide assumptions, and the
+cap rate is the one the assessor applied, not one any transaction produced. A reader who takes a 7%
+cap rate off this screen as market has been misled by the layout, not by the data.
+
+**Required treatment:**
+
+1. Move them into their own panel under a subhead, **`HOW THE ASSESSOR VALUED IT`**.
+2. `.kyp-tiles.modelled` — the same filled tiles, wrapped in a dashed indigo-wash frame. Same shape as the record figures, visibly marked as a different kind of claim.
+3. A `.kyp-modhd` header immediately above, stating in plain words that these are modelled and
+   **must not be underwritten from**. Not a footnote.
+4. Rename the labels to carry the epistemics: `Assumed NOI`, `Applied cap rate`, `Assumed vacancy`.
+   A label that says `NOI` claims the building earned it.
+
+### 1.1 Cut `Investment Rating`
+
+It is a letter grade the county derives from the model inputs directly above it. Reprinting it turns
+a valuation artefact into a property quality score, and it is the single most likely field on this
+screen to be quoted out of context. **Everything it derives from stays** — state that in a
+`.kyp-footnote` so the cut is visible rather than silent.
+
+---
+
+## 2. Structure
+
+Two numbered subheads. This section has genuinely separate panels, so unlike Historic Status it earns
+them.
+
+1. Three hero blocks
+2. `.kyp-caveat` — co-parcel / lookup-state warnings, **above the blocks** (§4)
+3. `08.1 WHAT THE COUNTY RECORDS` — `.kyp-unitwrap`, then `.kyp-tiles`, then `.kyp-recgrid`, then `.kyp-yn`
+4. `.kyp-src` — PIN provenance, refresh, assessor and treasurer links
+5. `08.2 HOW THE ASSESSOR VALUED IT` — Class 5 only
+6. `.kyp-footnote`, manual-entry caveat, `.kyp-src`
+
+Numbers derive from `accProps.index` and renumber sequentially over the subheads that render — on a
+residential parcel `08.2` does not exist, so `08.1` is the only one and **no number renders at all**
+(one subhead is not a division).
+
+### 2.1 Hero blocks
+
+| # | `.bv` | `.bl` | `.bbreak` |
+|---|---|---|---|
+| 1 | apartments | `Apartments on the county record` | `Class` n + description · `Assessed at` 10% of market value |
+| 2 | building sf | `Building sf on a {land} sf lot` | `Coverage` % — derived · `Per unit` sf — derived |
+| 3 | year built | `Built — {n} years old` | `Condition` · `As of` the {yr} assessment |
+
+All indigo. A classification is a state, not a verdict. Coverage and per-unit are **derived, not
+recorded** — say so in the row, as above.
+
+On a commercial parcel block 1 becomes `Total units` and block 2 uses `commercialData.bldgSf` /
+`landSf`. Where apartments is absent, drop block 1 and use `kyp-blocks hero two`.
+
+### 2.2 Use the components the rest of the report already uses
+
+The report has a settled vocabulary for this. Match it rather than inventing a fourth grid:
+
+| Established pattern | Where it is used today | Use here for |
+|---|---|---|
+| Large filled blocks, indigo / dark / verdict | Permits' `12 · $248K · 1 NOT CLOSED OUT` row | the three hero blocks |
+| Small filled tiles, one indigo + the rest dark | the zoning card's `MAX FAR / MAX HEIGHT / PARKING / MIN LOT AREA` | the four figures that matter — `.kyp-tiles` |
+| Quiet label/value grid, hairline separated | the permit card's `PERMIT NO. / OWNER OF RECORD` block | every plain recorded field — `.kyp-recgrid` |
+| ✓ / ✗ marked rows | the zoning card's `✓ Residential / ✗ Industrial` | recorded booleans — `.kyp-yn` |
+
+**An earlier draft gave every field its own white outlined mini card.** That was a fifth pattern the
+report does not use, and 36 identical boxes flatten the hierarchy — land size and porch type read as
+equally important. Deleted.
+
+**`.kyp-tiles` — four figures, filled.** Land size (indigo), building size, apartments, year built.
+The derived values ride in `.s`: `52% lot coverage — derived`, `819 sf per unit — derived`. **Never
+more than four.** The moment a fifth tile is tempting, it belongs in the record grid.
+
+**`.kyp-recgrid` — everything else.** 16 fields on a residential parcel, four across, one hairline
+between them, no box per field. A record should read as a record, not as sixteen cards. A qualifier
+shares its field's cell in `.s` — `Basement / Unfinished`, `Garage / Detached`.
+
+**`.kyp-yn` — recorded booleans.** `Mixed use`, `Condominium`, and whether a building record exists at
+all. A mark and a word, never a colour: these are states, not verdicts.
+
+**Absence renders.** A field the county does not carry gets `.kyp-rec.none` — muted, reading
+`Not recorded`, with a one-line reason (`condominium field`). A field that simply vanishes is
+indistinguishable from one we forgot, and this section has a history of exactly that. Gate it on
+fields *expected* for the parcel's class — no 24 empty commercial cells on a two-flat.
+
+**Unit configuration is not part of either grid.** It sits above them in `.kyp-unitwrap` — see §3.
+
+The residential and characteristics branches merge into the one record grid. Where both carry a
+field, the characteristics value wins — the current `showBuildingSf`/`showLandSf`/`showYearBuilt`
+diffing exists only to avoid printing a field twice, and merging removes the need for it.
+
+---
+
+## 3. Unit configuration — draw the building, and draw the alternative
+
+Today: `matching = apartments === bedrooms && bedrooms === baths` → either "configured as two matching
+1BR / 1BA apartments" or, for everything else, "mixed unit sizes."
+
+**The assessor records building totals, never a unit-by-unit split.** So the honest content is not a
+sentence — it is **the set of splits consistent with those totals**. Render it as tiles, one per unit,
+in `.kyp-unitwrap`:
+
+- **Solid tiles** = recorded.
+- **Dashed tiles** = consistent with the totals but not recorded.
+- **A second, muted row** = the alternative distribution that produces identical totals.
+
+That last row is the whole point. "The split is not recorded" is a sentence a reader skims; *two
+layouts that both add to 4 beds and 2 baths* is a fact they cannot skim.
+
+| Condition | Tag | Tiles |
+|---|---|---|
+| `units === beds === baths` | `Determined` (green) | solid, `1 bed / 1 bath` each. **No other distribution is possible** — the only case where a per-unit figure is a fact. |
+| `beds % units === 0` | `Split not recorded` (slate) | dashed, the even split, each marked *if divided evenly* — **plus the alternative row**, `{b+1}` and `{b−1}` |
+| `beds % units !== 0` | `Units differ` (indigo) | dashed, `Larger unit` / `Smaller unit` with the most likely split. **Non-uniformity is proven** whatever the exact division. No alternative row — every alternative is also uneven, which is the finding. |
+| `beds < units` | `Studios likely` (indigo) | one tile per unit; the surplus render `.u.empty` with `—` and *no bedroom recorded* |
+
+The header carries the county totals in full — `county totals · 4 beds · 2 baths · 2 units` — so the
+tiles never have to be trusted as the source.
+
+**Two hard rules.** Never print a fractional bedroom — "2.5 beds per unit" describes no apartment
+that exists. Never render at all when `apartments` is missing; every statement is a claim about a
+division, and with no divisor there is nothing to say.
+
+`halfBaths` prints as `{n} full + {m} half` **in the totals line** and **only the full baths divide** —
+a half bath cannot be assigned to a unit by arithmetic.
+
+### 3.1 On a commercial parcel the mix is recorded, so stop inferring
+
+`studioUnits` / `oneBrUnits` / `twoBrUnits` / `threeBrUnits` / `fourBrUnits` is the county's own
+breakdown. **Where it exists, render the same component with solid tiles, one per bedroom type, and
+none of the four states above run.** Label it `Unit mix`, tag it `Recorded`, and show each type's
+share of the total. It is a record, not a deduction, and it should not look like one.
+
+---
+
+## 4. Six lookup states, and the two that change what you should believe
+
+| `pinLookupData.source` | Treatment |
+|---|---|
+| assessor match, high confidence | `.kyp-src` provenance line — green tick, PIN, tax year |
+| assessor match, `confidence === 'medium'` | **slate** `⚠ PIN matched — verify` + *"Confirm it is your parcel before relying on the figures."* Today this appends "(verify below)" to a **green** line; green plus a warning is a mixed signal. |
+| **`geo_fallback`** | **red**, **above the hero blocks** — *"The figures below describe {nearestAddress}, the nearest parcel we could match — not this address."* |
+| `exempt_api` | indigo — *"Assessment and tax figures will be absent or nominal — that is the record, not a gap in ours."* |
+| no PIN | red + **the full input and Look Up**, and no section body until a PIN resolves |
+| `propertyTaxData.error` | red — *"Nothing below is missing — it is unread."* Retry. Today the whole body is replaced by the raw error string. |
+
+**`geo_fallback` is the one to fix first.** It means we could not find the parcel and are showing a
+neighbouring building's record. Today it renders as muted grey with the full field grid beneath it at
+normal weight, reading as though it describes the subject. It is the most consequential state in the
+section and currently the quietest.
+
+`coParcelPin` gets the same treatment and the same position — **above the grid**, not the amber strip
+it uses today. Amber is not in the palette.
+
+**Standing rule: where the figures describe something other than this address, say so above them.**
+A caveat that follows the data has already been overtaken by it.
+
+### 4.1 The PIN form inverts
+
+A text input renders on **every** property today, including the ~95% where detection worked. Replace
+it with the `.kyp-src` provenance line — PIN · source · tax year · `Refresh ⟳` · `Wrong parcel?
+Enter a PIN →` · `Verify on Assessor site` · `Tax bill (Treasurer)` — and render the full form
+**only** in the no-PIN state.
+
+### 4.2 Manual entry renders only when something is missing
+
+The callout currently fires whenever land **or** building sf is absent, which on a commercial parcel
+is routine and produces a "details unavailable" panel beside a full income statement. Gate it on the
+specific missing field, name that field, and keep everything entered labelled **manual** wherever it
+appears. Preserve `manualBuildingSqFt`, `manualLandSqFt`, `manualStories` and the edit path.
+
+---
+
+## 5. This section does not compare itself to anything
+
+An earlier draft built a reconciliation panel here. **That was wrong** — `03 · Active Listing`
+already runs the claims-vs-record comparison.
+
+**Rule: the county record is the baseline; the section holding the competing record does the
+comparing.** One direction, one place. The existing `.prc-caveat` listing-conflict block **moves to
+`03`**. The takeaway line may *state* the disagreement — "the listing claims 3" — but the section
+body is byte-identical whether or not a listing exists.
+
+---
+
+## 6. Every label and field
+
+**56 labels, 84 fields.** Full inventory below; nothing is dropped without a reason.
+
+### 6.1 Residential branch (8)
+
+| Label | Becomes |
+|---|---|
+| Land Size | `Land` cell + hero block 2 |
+| Building Size | `Building` cell + hero block 2 |
+| Building Type | **cut** — restates Class + Use; three overlapping fields (`buildingType`, `buildingUse`, `propertyType`) for one concept |
+| Use | `Use` cell |
+| Apartments | hero block 1 |
+| Age | hero block 3 |
+| Basement | `Basement` cell (+ finish in `.kyp-fs`) |
+| Attic | `Attic` cell (+ finish in `.kyp-fs`) |
+
+### 6.2 Characteristics overlay (18 labels / 31 fields)
+
+| Label | Becomes |
+|---|---|
+| Unit Size | hero block 2 `.bbreak` — `Per unit` |
+| Units in Building | hero block 1 (condo) + `nonResidentialUnits` in `.kyp-fs` |
+| Unit Share of Building | **cut** — `unitSf ÷ buildingSf`, derived, and both are on screen |
+| Mixed Use | `Use` cell `.kyp-fs`, **with `nonResidentialUnits`** — it gates the Class 2-12 threshold in the tax work and today renders as a bare Yes |
+| Unit Type | **cut** — "Apartment" on every multi-family parcel; parking/common-area variants keep a line |
+| Year Built | hero block 3 |
+| Bedrooms · Bathrooms | unit-configuration cell (§3), `halfBaths` included |
+| Total Rooms | `Rooms` cell |
+| Construction Quality | `Porch` cell `.kyp-fs` and hero block 3 |
+| Exterior | `Exterior` cell |
+| Roof | `Exterior` cell `.kyp-fs` |
+| Garage | `Garage` cell (+ `garageAttached`) |
+| Heating · A/C | `Heating` cell + `.kyp-fs` |
+| Fireplaces | `Rooms` cell `.kyp-fs` |
+| Condition | hero block 3 `.bbreak` |
+| Porch | `Porch` cell |
+| Basement / Attic finish | `.kyp-fs` on their cells |
+| assessment year | the subhead's `.ct` |
+| `isCondo` | switches the subhead to `Condominium record`; `prorationRate`, `isParkingSpace`, `isCommonArea` render only on a condo |
+
+### 6.3 Commercial branch (18 labels / 24 fields)
+
+| Label | Becomes |
+|---|---|
+| Property Type | hero block 1 `.bl` |
+| Building Size · Land Size · Age | hero blocks 2 and 3 |
+| Market Value | `08.2` — `Market value`, with `marketValuePerSf` and `marketValuePerUnit` in `.kyp-fs` |
+| NOI | `08.2` — **`Assumed NOI`**, with `egi` / `pgi` in `.kyp-fs` |
+| Cap Rate | `08.2` — **`Applied cap rate`** |
+| Vacancy Rate | `08.2` — **`Assumed vacancy`**, with `expenseRatio` and `adjustedRentPerSf` in `.kyp-fs` |
+| Eff. Gross Income · Potential Gross Income · Expense Ratio · Rent/SF | folded into the four cells above as `.kyp-fs` |
+| Investment Rating | **cut** — §1.1 |
+| Total Units | `Units` cell |
+| Township · Class | `Township` cell (+ `classEstimate` in `.kyp-fs`) |
+| Associated PINs | `.kyp-fact.wide` — **and it must say the assessment covers both**, so the figures are the pair, not this PIN alone |
+| Unit Breakdown | the `Units` cell `.kyp-fs` — and it **replaces** the §3 inference |
+| `assessmentYear` | the subhead's `.ct` |
+
+### 6.4 Manual entry, controls and footer (12)
+
+Building Size (Manual), Land Size (Manual), Stories (Manual), Building Sq Ft, Land Sq Ft, Stories,
+Save Property Data, Cancel, Edit Manual Data — all kept, gated per §4.2.
+Look Up (no-PIN state only), Refresh, Verify on Assessor Site, View Tax Bill (Treasurer) — all move
+into `.kyp-src`.
+The Open Data Portal disclaimer is kept, in the final `.kyp-src`.
+
+**Cut, with reasons: 4.** `Building Type`, `Unit Share of Building`, `Unit Type`, `Investment
+Rating`. Everything else keeps a home.
+
+### 6.5 Populated but never rendered
+
+`pinResolver` fills these and nothing displays them. Not regressions — **available**:
+`prorationRate`, `isCondo`, `isCommonArea`, `isParkingSpace`, `buildingUnits`, `unitSf`.
+⚠️ Do not add them in this step beyond the condo cases named in §6.2.
+
+---
+
+### 6.6 The remainder, named exactly
+
+Every field not called out by name above, so the inventory closes at 56/56 and 75/75:
+
+| Field / label | Where |
+|---|---|
+| `Value/SF` (`marketValuePerSf`), `Value/Unit` (`marketValuePerUnit`) | `Market value` cell `.kyp-fs` |
+| `Parcel & Structure` (group label) | replaced by the `08.1 WHAT THE COUNTY RECORDS` subhead |
+| `landSquareFeet`, `buildingSquareFeet` | `Land` and `Building` cells + hero block 2 |
+| `propertyClass` | hero block 1 `.bbreak` `Class` row and the row badge |
+| `taxYearMostRecent` | the `08.1` subhead `.ct` and hero block 3 `As of` |
+| `repairCondition` | hero block 3 `.bbreak` `Condition` |
+| `isMixedUse` | `Use` cell `.kyp-fs`, paired with `nonResidentialUnits` |
+| `coParcelAddress` | the co-parcel `.kyp-caveat` above the blocks (§4) |
+| `assessorUrl`, `treasurerBillUrl` | `.kyp-src` links — `Verify on the Assessor site`, `Tax bill (Treasurer)` |
+| `sourceListingUrl` | the manual-entry caveat, as the "check your original listing" link (§4.2) |
+
+---
+
+## 7. Pull it out into its own section
+
+`COUNTY RECORD` becomes a **top-level accordion row**. It sits nested inside
+`02 · Property Overview` → `Property Details` today, three levels deep.
+
+Move the body into `client/src/components/report/CountyRecordSection.tsx` and leave a one-line row,
+matching the pattern `ownership` / `newBusinessLicenses` / `newConstruction` already use. Add
+`countyRecord` to `ACC_DEFAULT_ORDER` (line 1049) and give it an `ACC_CUSTOM_META` entry.
+
+---
+
+## ✅ Done-when
+
+- [ ] `COUNTY RECORD` is a top-level `AccordionSection`, not nested inside Property Details.
+- [ ] Section reads `COUNTY RECORD`. No comparison panel renders here; `03 · Active Listing` is untouched and receives the listing-conflict block.
+- [ ] Commercial valuation fields render in a **separate `.kyp-facts.modelled` panel** under `08.2`, with the `.kyp-modhd` warning above them.
+- [ ] `NOI`, `Cap Rate` and `Vacancy Rate` are relabelled `Assumed` / `Applied`.
+- [ ] `Investment Rating` does not render; the footnote says why.
+- [ ] Four `.kyp-tiles` — one indigo, three dark. Never a fifth.
+- [ ] Everything else in one `.kyp-recgrid`; residential and characteristics merged, no duplicate fields.
+- [ ] Recorded booleans render as `.kyp-yn` marks, not as fields with a Yes/No value.
+- [ ] A field the county does not carry renders as `.kyp-rec.none` — `Not recorded` — never vanishes silently.
+- [ ] No component here is new to the report — tiles, record grid and marks all already exist elsewhere.
+- [ ] Unit configuration renders as `.kyp-unitwrap` tiles, not a sentence — all four states.
+- [ ] The `beds % units === 0` state renders the **alternative distribution row**.
+- [ ] Never a fractional bedroom; never renders when `apartments` is missing.
+- [ ] A recorded commercial unit mix replaces the inference entirely, with solid tiles.
+- [ ] All six lookup states render; `geo_fallback`, `coParcelPin` and `error` are **above** the figures.
+- [ ] No amber anywhere in the section.
+- [ ] The PIN form appears only in the no-PIN state; `Refresh` and both external links survive in `.kyp-src`.
+- [ ] Manual entry is gated on the specific missing field and names it.
+- [ ] All 56 labels and 84 fields are accounted for; the only cuts are the four in §6.4, each with a reason.
