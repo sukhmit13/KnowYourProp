@@ -747,3 +747,9 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
   .kyp-blocks.hero.two,
   .kyp-blocks.hero.one{grid-template-columns:1fr}
 }
+
+/* Zoning-history modifiers: a district change is a state, not a warning. */
+.kyp-xfer.zone .col+.col{background:var(--kyp-indigoSoft)}
+.kyp-xfer.zone .col+.col .h{color:var(--kyp-indigo)}
+.kyp-xfer.zone .col+.col .v{color:var(--kyp-ink)}
+.kyp-procard .pfirm{font-size:13px;color:var(--kyp-ink2);margin-top:-4px;margin-bottom:5px}

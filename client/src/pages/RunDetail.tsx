@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef, memo, useMemo } from "react";
+import { useEffect, useState, useCallback, useRef, memo, useMemo, Fragment } from "react";
 import ReactDOM from "react-dom";
 import { useRoute, useLocation } from "wouter";
 import { buildScanSections } from "@/components/report/scanBuilder";
@@ -116,6 +116,42 @@ function normalizedZoningAddress(value: string | undefined | null): string {
     .trim();
 }
 
+function parseZoningNumber(value: string): number | null {
+  const words: Record<string, number> = {
+    one: 1, two: 2, three: 3, four: 4, five: 5,
+    six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+  };
+  const normalized = value.toLowerCase().trim();
+  if (words[normalized] != null) return words[normalized];
+  const number = Number(normalized);
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function parseBoardUnitEvidence(description: string | null | undefined): {
+  count: number | null;
+  breakdown: { front?: number; rear?: number } | null;
+} {
+  const text = String(description || '');
+  const matches = Array.from(text.matchAll(/\b(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+dwelling\s+units?\b/gi));
+  if (!matches.length) return { count: null, breakdown: null };
+  const counts = matches
+    .map((match) => parseZoningNumber(match[1]))
+    .filter((count): count is number => count != null);
+  if (!counts.length) return { count: null, breakdown: null };
+  const breakdown: { front?: number; rear?: number } = {};
+  for (const match of matches) {
+    const count = parseZoningNumber(match[1]);
+    if (count == null || match.index == null) continue;
+    const context = text.slice(Math.max(0, match.index - 80), match.index + match[0].length + 100);
+    if (/\bfront\b/i.test(context) && breakdown.front == null) breakdown.front = count;
+    else if (/\brear\b/i.test(context) && breakdown.rear == null) breakdown.rear = count;
+  }
+  return {
+    count: counts.reduce((sum, count) => sum + count, 0),
+    breakdown: breakdown.front != null || breakdown.rear != null ? breakdown : null,
+  };
+}
+
 function buildZoningHistoryView(
   items: any[] | undefined,
   currentZone: string | null | undefined,
@@ -155,8 +191,9 @@ function buildZoningHistoryView(
   // Only a final approved case can support wording about what the Board ordered.
   const boardConfiguration = caseRows.find((item) =>
     item.decision === 'Approved'
-    && /(?:two[- ]story.*two.*dwelling.*front.*one.*dwelling.*rear|front building.*rear building)/i.test(item.description || ''),
+    && /front building.*rear building/i.test(item.description || ''),
   );
+  const boardUnitEvidence = parseBoardUnitEvidence(boardConfiguration?.description);
   const developmentAddress = rezoning?.developmentAddress;
   const developmentElsewhere = !!developmentAddress
     && normalizedZoningAddress(developmentAddress) !== normalizedZoningAddress(subjectAddress);
@@ -170,7 +207,9 @@ function buildZoningHistoryView(
       ? `No rezoning or ZBA case on record — ${currentZone} since the 2004 code rewrite.`
       : 'No rezoning or ZBA case on record.';
   if (boardConfiguration) {
-    takeaway = `Subdivided in ${String(boardConfiguration.date).slice(0, 4)} — the Board's order kept all three units, front and rear.`;
+    takeaway = boardUnitEvidence.count != null
+      ? `Subdivided in ${String(boardConfiguration.date).slice(0, 4)} — the Board's order kept ${boardUnitEvidence.count} dwelling units across the front and rear buildings.`
+      : `Subdivided in ${String(boardConfiguration.date).slice(0, 4)} — the Board's order addressed the existing front and rear buildings.`;
   } else if (developmentElsewhere && rezoning) {
     takeaway = `Split from ${developmentAddress}’s zoning lot in ${String(rezoning.passedDate || rezoning.date).slice(0, 4)} — the filing names development on the other parcel.`;
   } else if (rezoning?.toZone) {
@@ -178,9 +217,56 @@ function buildZoningHistoryView(
   } else if (approvedCase) {
     takeaway = `${approvedCase.decision} at the Zoning Board — ${approvedCase.ordinanceId || 'recorded case'} in ${String(approvedCase.date).slice(0, 4)}.`;
   }
+
+  const matterGroups = new Map<string, { key: string; rows: any[] }>();
+  const groupForKey = (key: string) => {
+    if (!matterGroups.has(key)) matterGroups.set(key, { key, rows: [] });
+    return matterGroups.get(key)!;
+  };
+  // Final ZBA decisions on the same date share a hearing track. Council actions
+  // remain independent unless the source data eventually supplies a durable
+  // cross-record identifier; temporal proximity is not evidence of one matter.
+  for (const item of caseRows) {
+    const date = String(item.date || '').slice(0, 10) || 'undated';
+    groupForKey(`zba:${date}`).rows.push(item);
+  }
+  for (let index = 0; index < councilItems.length; index++) {
+    const item = councilItems[index];
+    groupForKey(`council:${item.ordinanceId || item.id || index}`).rows.push(item);
+  }
+  const matters = Array.from(matterGroups.values())
+    .map((matter) => {
+      const orderedRows = [...matter.rows].sort((a, b) =>
+        String(a.passedDate || a.date || '').localeCompare(String(b.passedDate || b.date || '')),
+      );
+      const text = orderedRows.map((item) => `${item.description || ''} ${item.title || ''}`).join(' ');
+      const label = /subdivid|lot split|two zoning lots|divide the lot/i.test(text)
+        ? 'the subdivision'
+        : /lot area per dwelling unit/i.test(text) && /setback|parking/i.test(text)
+          ? 'the new building'
+          : null;
+      const decidedDate = orderedRows
+        .map((item) => String(item.passedDate || item.date || '').slice(0, 10))
+        .filter(Boolean)
+        .sort()
+        .pop() || null;
+      return {
+        key: matter.key,
+        label,
+        track: `${orderedRows.length} action${orderedRows.length === 1 ? '' : 's'}${decidedDate ? ` · decided ${zoningHistoryDate(decidedDate, true)}` : ''}`,
+        rows: orderedRows,
+      };
+    })
+    .sort((a, b) => {
+      const dateA = a.rows.map((item) => String(item.passedDate || item.date || '')).filter(Boolean).sort()[0] || '';
+      const dateB = b.rows.map((item) => String(item.passedDate || item.date || '')).filter(Boolean).sort()[0] || '';
+      return dateA.localeCompare(dateB);
+    });
+
   return {
     rawItems,
     rows,
+    matters,
     caseRows,
     rawHearingCount: zbaItems.length,
     actionCount: councilItems.length + caseRows.length,
@@ -191,6 +277,8 @@ function buildZoningHistoryView(
     boardConfiguration,
     developmentAddress,
     developmentElsewhere,
+    boardUnitCount: boardUnitEvidence.count,
+    boardUnitBreakdown: boardUnitEvidence.breakdown,
     takeaway,
   };
 }
@@ -5040,14 +5128,9 @@ export default function RunDetail() {
           </motion.div>
           </AccordionSection>
 
-          {/* Zoning History — a first-class report section, collapsed by default. */}
+          {/* Zoning History — first-class evidence section. */}
           <AccordionSection {...accProps("zoningHistory")}>
-            <motion.div
-              id="print-section-zoning-history"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.145 }}
-            >
+            <motion.div id="print-section-zoning-history" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.145 }}>
               {isLoadingZoningHistory ? (
                 <div className="seccard space-y-3" data-testid="zoning-history-loading">
                   <Skeleton className="h-24 w-full" />
@@ -5057,434 +5140,263 @@ export default function RunDetail() {
               ) : (() => {
                 const view = zoningHistoryView;
                 const filing = view.rezoning;
-                const contacts = view.rawItems.filter((item: any) => item.zoningAttorney || item.architect);
+                const pendingDpd = zoningHistoryData?.pendingDpd || [];
+                const countyUnitRaw = propertyTaxData?.apartments
+                  ?? (pinLookupData?.characteristicsData as any)?.units
+                  ?? pinLookupData?.commercialData?.totalUnits
+                  ?? null;
+                const countyUnitCount = (() => {
+                  const match = String(countyUnitRaw ?? '').match(/\d+/);
+                  return match ? Number(match[0]) : null;
+                })();
                 const filingIsChecked = filing?.enriched === true;
-                const statusTone = (item: any) => item.type === 'legistar'
-                  ? 'border-indigo-300 bg-indigo-50/70 dark:border-indigo-900 dark:bg-indigo-950/30'
-                  : item.decision === 'Approved'
-                    ? 'border-emerald-300 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/30'
-                    : item.decision === 'Denied'
-                      ? 'border-red-300 bg-red-50/70 dark:border-red-900 dark:bg-red-950/30'
-                      : 'border-border bg-muted/30';
+                const namedContacts = new Map<string, { role: 'ZONING COUNSEL' | 'ARCHITECT'; contact: any; rows: any[] }>();
+                for (const item of view.rawItems) {
+                  for (const [role, contact] of [['ZONING COUNSEL', item.zoningAttorney], ['ARCHITECT', item.architect]] as const) {
+                    if (!contact?.name) continue;
+                    const key = `${String(contact.name).trim().toLowerCase()}|${String(contact.firm || '').trim().toLowerCase()}`;
+                    const existing = namedContacts.get(key);
+                    const linkedRows = view.rows.filter((row: any) => {
+                      const candidate = role === 'ZONING COUNSEL' ? row.zoningAttorney : row.architect;
+                      return candidate?.name && String(candidate.name).trim().toLowerCase() === String(contact.name).trim().toLowerCase()
+                        && String(candidate.firm || '').trim().toLowerCase() === String(contact.firm || '').trim().toLowerCase();
+                    });
+                    if (existing) existing.rows = Array.from(new Set([...existing.rows, ...linkedRows]));
+                    else namedContacts.set(key, { role, contact, rows: linkedRows });
+                  }
+                }
+                const contacts = Array.from(namedContacts.values());
+                const hasNarrative = !!view.boardConfiguration || filingIsChecked;
+                const hasPending = pendingDpd.length > 0;
+                const subsection = buildSubsectionNumbers([
+                  ['changed', !!filing],
+                  ['establishes', hasNarrative],
+                  ['record', view.rows.length > 0],
+                  ['filed', contacts.length > 0],
+                  ['pending', hasPending],
+                ]);
+                const actionCountLabel = `${view.actionCount} action${view.actionCount === 1 ? '' : 's'}${view.matters.length >= 2 ? ` · ${view.matters.length} matters` : ''} · ${view.rawHearingCount} hearing entr${view.rawHearingCount === 1 ? 'y' : 'ies'}`;
+                const formatCountPhrase = (front?: number, rear?: number) => {
+                  if (front != null && rear != null) return `${front} front and ${rear} rear dwelling unit${front + rear === 1 ? '' : 's'}`;
+                  if (front != null) return `${front} front dwelling unit${front === 1 ? '' : 's'}`;
+                  if (rear != null) return `${rear} rear dwelling unit${rear === 1 ? '' : 's'}`;
+                  return null;
+                };
+                const boardYear = String(view.boardConfiguration?.date || '').slice(0, 4);
+                const boardFinding = view.boardConfiguration?.description
+                  ? `The ${boardYear || 'dated'} Board order addressed the existing front and rear buildings${view.boardUnitCount != null ? ` and kept ${formatCountPhrase(view.boardUnitBreakdown?.front, view.boardUnitBreakdown?.rear) || `${view.boardUnitCount} dwelling units`}` : ''}.`
+                  : null;
+                const reliefFor = (item: any) => {
+                  const base = item.description || item.title || 'Zoning action';
+                  const caseLabel = item.type === 'zba' && item.ordinanceId ? ` · Case ${item.ordinanceId}` : '';
+                  const appLabel = item.type === 'legistar' && item.applicationNumber ? ` · application ${item.applicationNumber}` : '';
+                  return `${base}${caseLabel}${appLabel}`;
+                };
+                const typeFor = (item: any) => item.type === 'legistar'
+                  ? 'MAP AMENDMENT'
+                  : /special\s*use/i.test(`${item.title || ''} ${item.description || ''}`)
+                    ? 'SPECIAL USE'
+                    : 'VARIATION';
+                const decisionFor = (item: any) => item.type === 'legistar'
+                  ? (item.passedDate ? 'Passed' : item.status || 'Filed')
+                  : item.decision || item.status || 'Recorded';
+                const decisionClass = (item: any) => item.type === 'legistar'
+                  ? ''
+                  : item.decision === 'Approved' ? 'ok' : item.decision === 'Denied' ? 'no' : '';
+                const targetPermitAddress = view.developmentElsewhere && view.developmentAddress
+                  ? view.developmentAddress
+                  : coParcelAddress || run?.address;
+                const permitRowsForTarget = (permitsData?.permits || []).filter((permit: any) =>
+                  !targetPermitAddress || normalizedZoningAddress(permit.sourceAddress || permit.address) === normalizedZoningAddress(targetPermitAddress),
+                );
+                const permitLookupResolved = !!coParcelAddress
+                  && !!combinedPermitViolations?.addresses?.some((address: string) => normalizedZoningAddress(address) === normalizedZoningAddress(coParcelAddress))
+                  && !!permitsData && !permitsData.apiError && !permitsData.parseError
+                  && Object.prototype.hasOwnProperty.call(permitsData.addressBreakdown || {}, coParcelAddress);
+                const permitDatesAvailable = permitRowsForTarget.every((permit: any) => !permit.issueDate || !Number.isNaN(new Date(permit.issueDate).getTime()));
+                const renderRecordRow = (item: any, index: number) => {
+                  const date = item.passedDate || item.date;
+                  const continued = item.type === 'zba' && item.hearingDates?.length
+                    ? ` · continued from ${zoningHistoryDate(item.hearingDates[item.hearingDates.length - 1], true)}`
+                    : '';
+                  return (
+                    <div className="zr" key={`${item.type}-${item.ordinanceId || item.title}-${date}-${index}`} data-testid={`zoning-history-row-${index}`}>
+                      <div className="zr1">
+                        <span className={`zt ${item.type === 'zba' ? 'zba' : ''}`}>{typeFor(item)}</span>
+                        <span className={`zs ${decisionClass(item)}`}>{decisionFor(item)}</span>
+                        <span className="zd">{zoningHistoryDate(date, true)}</span>
+                      </div>
+                      <div className="z2">{reliefFor(item)}{continued && <span className="app">{continued}</span>}</div>
+                      {item === view.boardConfiguration && item.description && <div className="zquote">“{item.description}”</div>}
+                      <div className="z3">
+                        {item.attachmentUrl && <a href={item.attachmentUrl} target="_blank" rel="noopener noreferrer"><FileText className="h-3 w-3" />Decision PDF ↗</a>}
+                        {item.councilmaticUrl && <><span className="sep">·</span><a href={item.councilmaticUrl} target="_blank" rel="noopener noreferrer">Councilmatic ↗</a></>}
+                        {item.legistarUrl && <><span className="sep">·</span><a href={item.legistarUrl} target="_blank" rel="noopener noreferrer">Legistar ↗</a></>}
+                        {!item.attachmentUrl && !item.councilmaticUrl && !item.legistarUrl && <span>{item.source || 'Official public record'}</span>}
+                      </div>
+                    </div>
+                  );
+                };
+                const renderPendingRow = (application: any, index: number) => (
+                  <div className="zr" key={application.id || index} data-testid={`zoning-history-pending-row-${index}`}>
+                    <div className="zr1">
+                      <span className="zt">PENDING APPLICATION</span>
+                      <span className="zs">{application.status || 'Filed'}</span>
+                      <span className="zd">{zoningHistoryDate(application.hearingDate, true)}</span>
+                    </div>
+                    <div className="z2"><a href={application.applicationUrl || application.hearingUrl} target="_blank" rel="noopener noreferrer">{application.address}</a> · {application.applicationType}</div>
+                    {application.applicant && <div className="z2">Applicant: {application.applicant}</div>}
+                    <div className="z2">{application.proposal}</div>
+                    <div className="z3">
+                      {application.applicationUrl && <a href={application.applicationUrl} target="_blank" rel="noopener noreferrer">Application ↗</a>}
+                      {application.hearingUrl && <><span className="sep">·</span><a href={application.hearingUrl} target="_blank" rel="noopener noreferrer">Official hearing page ↗</a></>}
+                    </div>
+                  </div>
+                );
                 return (
-                  <div className="seccard space-y-5" data-testid="zoning-history-content">
+                  <div className="seccard" data-testid="zoning-history-content">
                     {view.actionCount === 0 ? (
-                      <div className="space-y-3" data-testid="zoning-history-empty">
-                        <p className="text-sm text-muted-foreground">
-                          No City Council zoning action or Zoning Board case was found for this address in the checked public record.
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          This does not establish that no application was ever filed. Planning applications do not appear here until they reach the legislative or Board record.
-                        </p>
+                      <div className="kyp-empty" data-testid="zoning-history-empty">
+                        No City Council zoning action or Zoning Board case was found for this address in the checked public record. This does not establish that no application was ever filed.
                       </div>
                     ) : (
                       <>
-                        <div className="grid gap-3 md:grid-cols-3" data-testid="zoning-history-hero-facts">
-                          <div className="rounded-lg border border-indigo-300 bg-indigo-50/70 p-3 dark:border-indigo-900 dark:bg-indigo-950/30">
-                            <div className="text-[11px] font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Current district</div>
-                            <div className="mt-1 text-lg font-semibold text-foreground">{facts?.zoning || 'Not in the record'}</div>
-                            <div className="mt-1 text-xs text-muted-foreground">Current parcel designation</div>
+                        {view.developmentElsewhere && view.developmentAddress && (
+                          <div className="kyp-caveat" data-testid="zoning-history-development-address">
+                            <b>Named development address:</b> {view.developmentAddress}. Permit activity on this parcel is not used as an outcome for that stated development.
                           </div>
-                          <div className="rounded-lg border border-indigo-300 bg-indigo-50/70 p-3 dark:border-indigo-900 dark:bg-indigo-950/30">
-                            <div className="text-[11px] font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Confirmed district change</div>
-                            <div className="mt-1 text-sm font-semibold text-foreground">
-                              {filing?.fromZone && filing?.toZone ? `${filing.fromZone} → ${filing.toZone}` : filing?.toZone || 'No enacted map amendment found'}
-                            </div>
-                            <div className="mt-1 text-xs text-muted-foreground">
-                              {filing ? `Passed ${zoningHistoryDate(filing.passedDate, true)}` : view.hasUnenactedMapFiling ? 'A filing is shown below; no passage date is recorded.' : 'No City Council matter found'}
+                        )}
+                        <div className={`kyp-blocks hero ${filing || view.hasUnenactedMapFiling ? '' : 'two'}`} data-testid="zoning-history-hero-facts">
+                          <div className="kyp-block ind">
+                            <div><div className="bv">{facts?.zoning || 'Not in the record'}</div><div className="bl">Today’s designation</div></div>
+                            <div className="bbreak">
+                              <div className="br"><b>Set by</b><span>{filing ? `the ${String(filing.passedDate || filing.date || '').slice(0, 4)} map amendment` : 'the current checked record'}</span></div>
+                              <div className="br"><b>Allows</b><span>{zoningInfo?.description || zoningInfo?.category || 'the district’s listed use classes'}</span></div>
                             </div>
                           </div>
-                          <div className="rounded-lg border border-border bg-muted/30 p-3">
-                            <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">ZBA record</div>
-                            <div className="mt-1 text-sm font-semibold text-foreground">
-                              {zoningHistoryData?.coverage?.zba?.checked === false
-                                ? 'Not checked'
-                                : `${view.caseRows.length} case${view.caseRows.length === 1 ? '' : 's'} · ${view.rawHearingCount} hearing${view.rawHearingCount === 1 ? '' : 's'}`}
+                          {(filing || view.hasUnenactedMapFiling) && (
+                            <div className="kyp-block ind">
+                              <div><div className="bv">{filing ? `${filing.fromZone ? `${filing.fromZone} → ` : ''}${filing.toZone || facts?.zoning || '—'}` : 'Filed'}</div><div className="bl">{filing ? 'Confirmed district change' : 'Map amendment filed — no passage recorded'}</div></div>
+                              <div className="bbreak">
+                                <div className="br"><b>{filing ? String(filing.passedDate || filing.date || '').slice(0, 4) : 'Status'}</b><span>{filing ? 'map amendment passed' : 'passage not recorded'}</span></div>
+                              </div>
                             </div>
-                            <div className="mt-1 text-xs text-muted-foreground">Final disposition is shown once per case.</div>
+                          )}
+                          <div className="kyp-block ind">
+                            <div><div className="bv">{view.boardUnitCount ?? view.caseRows.length}</div><div className="bl">{view.boardUnitCount != null ? `Dwelling units the ${boardYear || 'dated'} order kept here` : `Zoning Board cases · ${view.rawHearingCount} hearings`}</div></div>
+                            <div className="bbreak">
+                              {view.boardUnitBreakdown ? (
+                                <>
+                                  {view.boardUnitBreakdown.front != null && <div className="br"><b>Front</b><span>{view.boardUnitBreakdown.front} dwelling unit{view.boardUnitBreakdown.front === 1 ? '' : 's'}</span></div>}
+                                  {view.boardUnitBreakdown.rear != null && <div className="br"><b>Rear</b><span>{view.boardUnitBreakdown.rear} dwelling unit{view.boardUnitBreakdown.rear === 1 ? '' : 's'}</span></div>}
+                                </>
+                              ) : view.caseRows.map((item: any) => <div className="br" key={item.ordinanceId || item.title}><b>{item.decision || 'Record'}</b><span>{item.ordinanceId || item.title}</span></div>)}
+                            </div>
                           </div>
                         </div>
 
                         {filing && (
-                          <section className="space-y-3" data-testid="zoning-history-district-change">
-                            <div className="flex items-center gap-2">
-                              <div className="h-px flex-1 bg-border" />
-                              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">What changed</h3>
-                              <div className="h-px flex-1 bg-border" />
+                          <>
+                            <KypSubhead subsection={subsection.changed} data-testid="zoning-history-district-change"><span className="lbl">What changed</span><span className="rule" /></KypSubhead>
+                            <div className="kyp-xfer zone">
+                              <div className="col"><div className="h">Before — prior districts</div><div className="v">{filing.fromZone || 'Not stated in the checked filing'}</div>{filing.fromZone && <div className="li"><b>{filing.fromZone !== filing.toZone ? 'Split-zoned' : 'Prior district'}</b> — {filing.fromZone !== filing.toZone ? 'one lot carrying two districts, which is why it could not be divided as it stood.' : 'the checked filing records this as the prior district.'}</div>}</div>
+                              <div className="col"><div className="h">After — in force today</div><div className="v">{filing.toZone || facts?.zoning || 'Not stated in the checked filing'}</div><div className="li">{filing.toZone ? `${filing.toZone} across the whole lot.` : 'The resulting district is not stated in the checked filing.'}</div></div>
                             </div>
-                            <div className="grid gap-3 md:grid-cols-2">
-                              <div className="rounded-md border border-border p-3">
-                                <div className="text-xs font-medium text-muted-foreground">Before</div>
-                                <div className="mt-1 font-semibold">{filing.fromZone || 'Not stated in the checked filing'}</div>
-                              </div>
-                              <div className="rounded-md border border-indigo-300 bg-indigo-50/50 p-3 dark:border-indigo-900 dark:bg-indigo-950/20">
-                                <div className="text-xs font-medium text-indigo-700 dark:text-indigo-300">After</div>
-                                <div className="mt-1 font-semibold">{filing.toZone || facts?.zoning || 'Not stated in the checked filing'}</div>
-                              </div>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              Introduced {zoningHistoryDate(filing.introducedDate || filing.date, true)} · passed {zoningHistoryDate(filing.passedDate || filing.date, true)}
-                              {filing.status ? ` · ${filing.status}` : ''}
-                            </p>
-                          </section>
+                            <div className="kyp-src">Introduced {zoningHistoryDate(filing.introducedDate || filing.date, true)} · passed {zoningHistoryDate(filing.passedDate || filing.date, true)}{filing.ordinanceId ? ` · Ordinance ${filing.ordinanceId}` : ''}</div>
+                          </>
                         )}
 
-                        {filing && (
-                          <section className="rounded-lg border border-slate-300 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/30" data-testid="zoning-history-application-evidence">
-                            <h3 className="text-sm font-semibold">What the application says</h3>
-                            <p className="mt-1 text-xs text-muted-foreground">Applicant statements are shown as filed; they are not treated as proof of construction or occupancy.</p>
-                            {filingIsChecked ? (
-                              <ul className="mt-3 space-y-2 text-sm">
-                                <li><span className="font-medium">Applicant:</span> {filing.applicant || 'Not stated in the checked filing'}</li>
-                                <li><span className="font-medium">Existing condition:</span> {filing.existingPropertyContext || 'Not stated in the checked filing'}</li>
-                                <li><span className="font-medium">Reason:</span> {filing.applicationReason || 'Not stated in the checked filing'}</li>
-                                <li><span className="font-medium">Proposed use:</span> {filing.proposedUse || 'Not stated in the checked filing'}</li>
-                              </ul>
-                            ) : (
-                              <p className="mt-3 text-sm text-muted-foreground">Application narrative, applicant, and professional fields were not checked for this filing.</p>
-                            )}
-                            {view.developmentAddress && (
-                              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/30" data-testid="zoning-history-development-address">
-                                <span className="font-medium">Named development address:</span> {view.developmentAddress}
-                                {view.developmentElsewhere && <span className="block mt-1 text-xs text-muted-foreground">This is not the report address. Permit activity for this parcel is not used as an outcome for that stated development.</span>}
+                        {hasNarrative && (
+                          <>
+                            <KypSubhead subsection={subsection.establishes}><span className="lbl">What the record establishes</span><span className="ct">{view.boardConfiguration?.ordinanceId ? `Board order ${view.boardConfiguration.ordinanceId}` : ''}{view.boardConfiguration?.ordinanceId && filing?.applicationNumber ? ' · ' : ''}{filing?.applicationNumber ? `application ${filing.applicationNumber}` : ''}</span><span className="rule" /></KypSubhead>
+                            <div className="kyp-says lg">
+                              <div className="sc">
+                                <div className="sh">Found in the record</div>
+                                <ul>
+                                  {boardFinding && <li><b>{view.boardUnitCount != null ? `${view.boardUnitCount} dwelling units stand here.` : 'The existing front and rear buildings are described here.'}</b> {boardFinding} <span className="gate">Board order, not a certificate of occupancy</span></li>}
+                                  {filing && <li><b>The map amendment settled the district change.</b> {filing.fromZone && filing.toZone ? `${filing.fromZone} became ${filing.toZone}` : 'The filing records the enacted district.'}</li>}
+                                  {filingIsChecked && filing?.applicant && <li><b>Applicant:</b> {filing.applicant}<span className="gate">applicant statement, as filed</span></li>}
+                                  {filingIsChecked && filing?.existingPropertyContext && <li><b>Existing condition:</b> {filing.existingPropertyContext}<span className="gate">applicant statement, as filed</span></li>}
+                                  {filingIsChecked && filing?.applicationReason && <li><b>Reason:</b> {filing.applicationReason}<span className="gate">applicant statement, as filed</span></li>}
+                                  {filingIsChecked && filing?.proposedUse && <li><b>Proposed use:</b> {filing.proposedUse}<span className="gate">applicant statement, as filed</span></li>}
+                                  {filing?.developmentAddress && !view.developmentElsewhere && <li><b>Named development address:</b> {filing.developmentAddress}<span className="gate">applicant statement, as filed</span></li>}
+                                </ul>
                               </div>
-                            )}
-                          </section>
-                        )}
-
-                        <section className="space-y-3" data-testid="zoning-history-records">
-                          <div className="flex items-center gap-2">
-                            <div className="h-px flex-1 bg-border" />
-                            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Recorded actions</h3>
-                            <div className="h-px flex-1 bg-border" />
-                          </div>
-                          <div className="space-y-3">
-                            {view.rows.map((item: any, index: number) => (
-                              <article key={`${item.type}-${item.ordinanceId || item.title}-${item.date}-${index}`} className={`rounded-lg border p-4 ${statusTone(item)}`} data-testid={`zoning-history-row-${index}`}>
-                                <div className="flex flex-wrap items-start justify-between gap-2">
-                                  <div>
-                                    <div className="flex flex-wrap items-center gap-2">
-                                      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{item.type === 'legistar' ? zoningCouncilActionLabel(item) : 'Zoning Board case'}</span>
-                                      {item.decision && <Badge variant={item.decision === 'Approved' ? 'default' : item.decision === 'Denied' ? 'destructive' : 'secondary'}>{item.decision}</Badge>}
-                                      {item.type === 'legistar' && item.status && <Badge variant="secondary">{item.status}</Badge>}
-                                      {item.ordinanceId && <span className="font-jbmono text-xs text-muted-foreground">{item.ordinanceId}</span>}
-                                    </div>
-                                    <h4 className="mt-1 text-sm font-semibold">{item.title}</h4>
-                                  </div>
-                                  <span className="text-xs text-muted-foreground">{zoningHistoryDate(item.passedDate || item.date, true)}</span>
-                                </div>
-                                {item.type === 'legistar' && <p className="mt-2 text-xs text-muted-foreground">
-                                  Introduced {zoningHistoryDate(item.introducedDate || item.date, true)}
-                                  {item.passedDate ? ` · passed ${zoningHistoryDate(item.passedDate, true)}` : item.status ? ` · ${item.status}` : ' · passage not recorded'}
-                                </p>}
-                                {item.type === 'zba' && item.hearingDates?.length > 0 && <p className="mt-2 text-xs text-muted-foreground">Hearing track: {item.hearingDates.map((date: string) => zoningHistoryDate(date, true)).join(' → ')} → {zoningHistoryDate(item.date, true)}</p>}
-                                {item.description && <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>}
-                                {(item.zoningAttorney || item.architect || item.applicant) && (
-                                  <p className="mt-2 text-xs text-muted-foreground">
-                                    {item.applicant ? `Applicant: ${item.applicant}` : ''}
-                                    {item.zoningAttorney ? `${item.applicant ? ' · ' : ''}Counsel: ${item.zoningAttorney.name}${item.zoningAttorney.firm ? ` (${item.zoningAttorney.firm})` : ''}` : ''}
-                                    {item.architect ? `${item.applicant || item.zoningAttorney ? ' · ' : ''}Architect: ${item.architect.name}${item.architect.firm ? ` (${item.architect.firm})` : ''}` : ''}
-                                  </p>
-                                )}
-                                <div className="mt-3 flex flex-wrap gap-3 text-xs font-medium">
-                                  {item.attachmentUrl && <a href={item.attachmentUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline"><FileText className="h-3.5 w-3.5" />Source document</a>}
-                                  {item.councilmaticUrl && <a href={item.councilmaticUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline"><Globe className="h-3.5 w-3.5" />Councilmatic</a>}
-                                  {item.legistarUrl && <a href={item.legistarUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline"><ExternalLink className="h-3.5 w-3.5" />Legistar</a>}
-                                </div>
-                              </article>
-                            ))}
-                          </div>
-                        </section>
-
-                        {view.boardConfiguration && (
-                          <section className="rounded-lg border border-border bg-muted/20 p-4" data-testid="zoning-history-board-finding">
-                            <h3 className="text-sm font-semibold">Board finding</h3>
-                            <blockquote className="mt-2 border-l-2 border-primary pl-3 text-sm leading-relaxed text-muted-foreground">
-                              “{view.boardConfiguration.description}”
-                            </blockquote>
-                            <p className="mt-2 text-xs text-muted-foreground">This describes the Board record, not a certificate of occupancy or a finding about present lawful use.</p>
-                          </section>
-                        )}
-
-                        <section className="rounded-lg border border-border p-4" data-testid="zoning-history-professionals">
-                          <h3 className="text-sm font-semibold">Counsel &amp; architect</h3>
-                          {contacts.length ? (
-                            <div className="mt-3 grid gap-3 md:grid-cols-2">
-                              {contacts.map((item: any, index: number) => (
-                                <div key={`${item.ordinanceId || index}-contact`} className="rounded-md bg-muted/40 p-3 text-sm">
-                                  {item.zoningAttorney && <p><span className="font-medium">Zoning counsel:</span> {item.zoningAttorney.name}{item.zoningAttorney.firm ? ` · ${item.zoningAttorney.firm}` : ''}</p>}
-                                  {item.architect && <p className={item.zoningAttorney ? 'mt-1' : ''}><span className="font-medium">Architect:</span> {item.architect.name}{item.architect.firm ? ` · ${item.architect.firm}` : ''}</p>}
-                                </div>
-                              ))}
+                              <div className="sc">
+                                <div className="sh">Still to confirm</div>
+                                <ul>
+                                  {view.boardConfiguration && <li><b>Whether the rear unit is legally established.</b> A Board order is strong evidence, but it is not a certificate of occupancy.</li>}
+                                  {view.caseRows.some((item: any) => item.decision === 'Approved') && <li><b>Whether a permit application was filed but never issued.</b> The permit record is issuance-led, so a filed-and-stalled application would not appear.</li>}
+                                  {countyUnitCount != null && view.boardUnitCount != null && countyUnitCount !== view.boardUnitCount && <li><b>The recorded unit count.</b> Cook County lists {countyUnitCount}; the Board order states {view.boardUnitCount}.<span className="gate">county: {countyUnitCount} · Board order: {view.boardUnitCount}</span></li>}
+                                </ul>
+                              </div>
                             </div>
-                          ) : (
-                            <p className="mt-2 text-sm text-muted-foreground">Not checked or not stated in the bounded filing extraction.</p>
-                          )}
-                        </section>
+                          </>
+                        )}
+
+                        {view.rows.length > 0 && (
+                          <>
+                            <KypSubhead subsection={subsection.record} data-testid="zoning-history-records"><span className="lbl">The record</span><span className="ct">{actionCountLabel}</span><span className="rule" /></KypSubhead>
+                            <div className="kyp-zrec">
+                              {view.matters.length >= 2 ? view.matters.map((matter: any, matterIndex: number) => {
+                                const approved = matter.rows.filter((item: any) =>
+                                  item.type === 'zba'
+                                  && item.decision === 'Approved'
+                                  && !/special\s*use/i.test(`${item.title || ''} ${item.description || ''}`),
+                                );
+                                const decisionDate = approved.map((item: any) => item.date).filter(Boolean).sort().pop();
+                                const expiry = decisionDate ? new Date(`${decisionDate}T12:00:00`) : null;
+                                if (expiry) expiry.setFullYear(expiry.getFullYear() + 1);
+                                const hasPermitInWindow = expiry && permitRowsForTarget.some((permit: any) => {
+                                  const issued = new Date(permit.issueDate).getTime();
+                                  const start = new Date(`${decisionDate}T00:00:00`).getTime();
+                                  return Number.isFinite(issued) && issued >= start && issued <= expiry.getTime();
+                                });
+                                const hasLaterPermit = expiry && permitRowsForTarget.some((permit: any) => {
+                                  const issued = new Date(permit.issueDate).getTime();
+                                  return Number.isFinite(issued) && issued > expiry.getTime();
+                                });
+                                return <Fragment key={matter.key}><div className="zgrp">Matter {matterIndex + 1}{matter.label ? ` — ${matter.label}` : ''}<span className="ztrack">{matter.track}</span></div>{matter.rows.map(renderRecordRow)}{approved.length > 0 && permitLookupResolved && permitDatesAvailable && expiry && <div className="zgnote"><b>{hasPermitInWindow ? 'Issued permit activity was found in the 12-month window.' : 'No issued permit was found in the checked 12-month window.'}</b> Under §17-13-1106, a variation is void unless a building permit is applied for within 12 months; this window ended <b>{expiry.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</b>. {hasPermitInWindow ? 'The public permit record supports timely activity, but confirm the application date with the City.' : hasLaterPermit ? <>Later issued-permit activity exists at <b>{targetPermitAddress}</b>, but it does not establish that this variation was exercised on time.</> : <>The issuance-led permit record does not establish timely exercise; a filed but unissued application would not appear.</>}</div>}</Fragment>;
+                              }) : <>{view.rows.map(renderRecordRow)}</>}
+                            </div>
+                          </>
+                        )}
+
+                        {contacts.length > 0 && (
+                          <>
+                            <KypSubhead subsection={subsection.filed} data-testid="zoning-history-professionals"><span className="lbl">Who filed them</span><span className="ct">{contacts.length} named</span><span className="rule" /></KypSubhead>
+                            {contacts.map(({ role, contact, rows: contactRows }, index) => {
+                              const what = contactRows[0]?.type === 'legistar' ? 'map amendment' : contactRows[0]?.description || contactRows[0]?.title || 'zoning action';
+                              const rankingDate = contactRows.map((row: any) => row.date || row.passedDate).filter(Boolean).sort().pop();
+                              return <div className="kyp-procard" key={`${contact.name}-${contact.firm || ''}`} data-testid={`zoning-history-professional-${index}`}>
+                                <div className="ptop"><span className="prole">{role}</span><span className="pnm">{contact.name}</span><span className="pera">Named in filing</span></div>
+                                {contact.firm && <div className="pfirm">{contact.firm}</div>}
+                                <div className="phere"><b>Here</b> · <span className="n">{contactRows.length}</span> of {view.actionCount} actions — {what}{rankingDate ? ` · ${zoningHistoryDate(rankingDate, true)}` : ''}</div>
+                                <div className="pcity"><span>No citywide zoning-counsel record — showing this parcel’s filings only.</span>{contactRows[0]?.attachmentUrl && <a className="pview" href={contactRows[0].attachmentUrl} target="_blank" rel="noopener noreferrer">Filed PDF ↗</a>}</div>
+                              </div>;
+                            })}
+                          </>
+                        )}
+                        <div className="kyp-footnote">Every professional named in a zoning filing is listed — a starting point, not a recommendation. ZBA orders carry no attorney field, so absence is not evidence.</div>
+                        <div className="kyp-caveat"><b>This amendment runs with the land.</b> A map amendment permanently changes the parcel’s district and never expires. A ZBA variation or special use is different — it attaches to one proposal and can lapse.</div>
+                        <div className="kyp-src">Source: Chicago Councilmatic and Legistar for matter and ordinance records · Chicago Zoning Board of Appeals calendar and decisions · variation validity per Chicago Zoning Ordinance §17-13-1106 · current designation confirmed against the City of Chicago zoning map{zoningHistoryCoverage ? ` · ${zoningHistoryCoverage}` : ''}</div>
                       </>
                     )}
-                    {(zoningHistoryData?.pendingDpd?.length || 0) > 0 && (
-                      <section className="rounded-lg border border-amber-300 bg-amber-50/50 p-4 dark:border-amber-900 dark:bg-amber-950/20" data-testid="zoning-history-dpd-context">
-                        <h3 className="text-sm font-semibold">Current DPD application context</h3>
-                        <p className="mt-1 text-xs text-muted-foreground">Exact address match on recent Chicago Plan Commission hearing pages. This is a filed application signal, not an approval, permit, or proof of construction.</p>
-                        <div className="mt-3 space-y-3">
-                          {zoningHistoryData.pendingDpd.map((application: any) => (
-                            <article key={application.id} className="rounded-md border border-border bg-background/70 p-3">
-                              <div className="flex flex-wrap items-center justify-between gap-2">
-                                <a href={application.applicationUrl || application.hearingUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline">{application.address}</a>
-                                <Badge variant="outline">{application.status}</Badge>
-                              </div>
-                              <p className="mt-1 text-xs text-muted-foreground">{application.applicationType}{application.hearingDate ? ` · hearing page ${zoningHistoryDate(application.hearingDate, true)}` : ''}</p>
-                              {application.applicant && <p className="mt-2 text-xs text-muted-foreground">Applicant: {application.applicant}</p>}
-                              <p className="mt-2 text-sm text-muted-foreground">{application.proposal}</p>
-                              <a href={application.hearingUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-xs text-primary hover:underline">Official hearing page</a>
-                            </article>
-                          ))}
+                    {hasPending && (
+                      <>
+                        <KypSubhead subsection={subsection.pending}><span className="lbl">Pending applications</span><span className="ct">{pendingDpd.length}</span><span className="rule" /></KypSubhead>
+                        <div className="kyp-zrec" data-testid="zoning-history-dpd-context">
+                          {pendingDpd.map(renderPendingRow)}
+                          {zoningHistoryData?.dpdCoverage?.note && <div className="zgnote">{zoningHistoryData.dpdCoverage.note}</div>}
                         </div>
-                        {zoningHistoryData?.dpdCoverage?.note && <p className="mt-3 text-xs text-muted-foreground">{zoningHistoryData.dpdCoverage.note}</p>}
-                      </section>
+                        <div className="kyp-caveat">This is a filed application signal, not an approval, permit, or proof of construction.</div>
+                      </>
                     )}
-
-                    <div className="border-t pt-3 text-xs text-muted-foreground" data-testid="zoning-history-coverage">
-                      {zoningHistoryCoverage || 'Coverage note unavailable.'}
-                      <span className="block mt-1">A City Council map amendment changes the district map; it is not, by itself, a permit, variance, certificate of occupancy, or proof that a proposed project was built.</span>
-                    </div>
                   </div>
                 );
               })()}
             </motion.div>
           </AccordionSection>
-
-
-          {/* Retired renderer retained temporarily below while the legacy Property Details block is removed. */}
-          {false && run?.address && (
-            <motion.div
-              id="print-section-zoning-history-placeholder"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.145 }}
-            >
-              <Collapsible defaultOpen={false}>
-                <Card className="border border-border overflow-visible">
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover-elevate pb-3" data-testid="trigger-zoning-history-old">
-                      <div className="flex items-center justify-between gap-2">
-                        <CardTitle className="chead flex items-center gap-2">
-                          Zoning History
-                        </CardTitle>
-                        <div className="flex items-center gap-2">
-                          {!isLoadingZoningHistory && zoningHistoryData?.items?.length > 0 && (
-                            <Badge variant="secondary" className="text-xs" data-testid="badge-zoning-history-count-old">
-                              {zoningHistoryData.items.length} record{zoningHistoryData.items.length !== 1 ? 's' : ''}
-                            </Badge>
-                          )}
-                          <span className="text-muted-foreground text-sm">▶</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Ordinances, rezonings, and ZBA cases for this address
-                      </p>
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <CardContent className="pt-0">
-                      {isLoadingZoningHistory ? (
-                        <div className="space-y-3">
-                          <Skeleton className="h-12 w-full" />
-                          <Skeleton className="h-12 w-full" />
-                          <Skeleton className="h-10 w-2/3" />
-                        </div>
-                      ) : zoningHistoryData?.items?.length > 0 ? (
-                        <div className="space-y-0 divide-y divide-border/50">
-                          {zoningHistoryData.items.map((item: any, i: number) => (
-                            <div key={i} className="py-3 flex items-start gap-3" data-testid={`row-zoning-history-${i}`}>
-                              <div className="mt-0.5 shrink-0">
-                                {item.type === 'zba' ? (
-                                  <div className={`w-2 h-2 rounded-full mt-1.5 ${
-                                    item.decision === 'Approved' ? 'bg-green-500' :
-                                    item.decision === 'Denied' ? 'bg-red-500' :
-                                    'bg-muted-foreground'
-                                  }`} />
-                                ) : (
-                                  <div className="w-2 h-2 rounded-full bg-primary mt-1.5" />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-2 flex-wrap">
-                                  <p className="text-sm font-medium leading-snug">{item.title}</p>
-                                  {item.date && (
-                                    <span className="text-xs text-muted-foreground shrink-0">
-                                      {new Date(item.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                  {item.decision && (
-                                    <Badge
-                                      variant={item.decision === 'Approved' ? 'default' : item.decision === 'Denied' ? 'destructive' : 'secondary'}
-                                      className="text-xs"
-                                      data-testid={`badge-zh-decision-${i}`}
-                                    >
-                                      {item.decision}
-                                    </Badge>
-                                  )}
-                                  {item.fromZone && item.toZone && (
-                                    <span className="inline-flex items-center gap-1 text-xs font-jbmono font-semibold bg-muted px-1.5 py-0.5 rounded" data-testid={`badge-zh-zones-${i}`}>
-                                      <span className="text-muted-foreground">{item.fromZone}</span>
-                                      <ChevronRight className="w-3 h-3 text-muted-foreground" />
-                                      <span className="text-foreground">{item.toZone}</span>
-                                    </span>
-                                  )}
-                                  {item.ordinanceId && (
-                                    <span className="text-xs font-jbmono text-muted-foreground">{item.ordinanceId}</span>
-                                  )}
-                                  <span className="text-xs text-muted-foreground">{item.source}</span>
-                                </div>
-                                {item.description && item.description !== item.title && (
-                                  <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                                )}
-                                {(item.zoningAttorney || item.architect) && (
-                                  <div className="mt-1.5 space-y-0.5">
-                                    {item.zoningAttorney && (
-                                      <div className="flex items-baseline gap-1.5 text-xs" data-testid={`text-zh-attorney-${i}`}>
-                                        <span className="text-muted-foreground font-medium shrink-0">Atty:</span>
-                                        <span className="text-foreground">
-                                          {item.zoningAttorney.name}
-                                          {item.zoningAttorney.firm && (
-                                            <span className="text-muted-foreground"> · {item.zoningAttorney.firm}</span>
-                                          )}
-                                        </span>
-                                        {item.zoningAttorney.email && (
-                                          <a
-                                            href={`mailto:${item.zoningAttorney.email}`}
-                                            className="text-muted-foreground hover:text-foreground shrink-0"
-                                            title={item.zoningAttorney.email}
-                                            data-testid={`link-zh-attorney-email-${i}`}
-                                          >
-                                            <Mail className="w-3 h-3" />
-                                          </a>
-                                        )}
-                                      </div>
-                                    )}
-                                    {item.architect && (
-                                      <div className="flex items-baseline gap-1.5 text-xs" data-testid={`text-zh-architect-${i}`}>
-                                        <span className="text-muted-foreground font-medium shrink-0">Arch:</span>
-                                        <span className="text-foreground">
-                                          {item.architect.name}
-                                          {item.architect.firm && (
-                                            <span className="text-muted-foreground"> · {item.architect.firm}</span>
-                                          )}
-                                        </span>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex items-start gap-1.5 shrink-0 mt-1">
-                                {item.attachmentUrl && (
-                                  <a
-                                    href={item.attachmentUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap flex items-center gap-0.5"
-                                    data-testid={`link-zh-pdf-${i}`}
-                                    title="View ordinance PDF"
-                                  >
-                                    <FileText className="w-3 h-3" />
-                                    PDF
-                                  </a>
-                                )}
-                                {item.councilmaticUrl && (
-                                  <a
-                                    href={item.councilmaticUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-muted-foreground hover:text-foreground"
-                                    data-testid={`link-zh-councilmatic-${i}`}
-                                    title="View on Councilmatic"
-                                  >
-                                    <Globe className="w-3.5 h-3.5" />
-                                  </a>
-                                )}
-                                {item.legistarUrl && (
-                                  <a
-                                    href={item.legistarUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-muted-foreground hover:text-foreground"
-                                    data-testid={`link-zh-legistar-${i}`}
-                                    title="View on Legistar"
-                                  >
-                                    <ExternalLink className="w-3.5 h-3.5" />
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <p className="text-sm text-muted-foreground">
-                            No zoning ordinances or ZBA cases found in the official legislative record for this address.
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Applications filed with the Dept. of Planning &amp; Development don't appear here until formally introduced to City Council — which can take months. To find pending applications, search these resources directly:
-                          </p>
-                          <div className="flex flex-wrap gap-2 pt-1">
-                            <a
-                              href={`https://chicago.councilmatic.org/search/?q=${encodeURIComponent((run?.address || '').replace(/,.*$/, '').trim())}&f-bill-type=Ordinance`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border border-border hover:bg-accent transition-colors"
-                              data-testid="link-zh-councilmatic"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              Councilmatic
-                            </a>
-                            <a
-                              href="https://chicago.legistar.com/Legislation.aspx"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border border-border hover:bg-accent transition-colors"
-                              data-testid="link-zh-legistar-browse"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              Chicago Legistar
-                            </a>
-                            <a
-                              href="https://gisapps.chicago.gov/ZoningMapWeb/?liab=1&config=zoning"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border border-border hover:bg-accent transition-colors"
-                              data-testid="link-zh-zoningmap"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              Chicago Zoning Map
-                            </a>
-                          </div>
-                        </div>
-                      )}
-                      {facts?.zoning && (
-                        <div className="mt-4 pt-3 border-t">
-                          <p className="text-xs text-muted-foreground">
-                            Current designation: <strong className="text-foreground">{facts?.zoning}</strong>
-                            {zoningHistoryData?.ordinanceDate && (
-                              <> — in effect since{' '}
-                                <strong className="text-foreground">
-                                  {new Date(zoningHistoryData.ordinanceDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                                </strong>
-                              </>
-                            )}
-                          </p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
-            </motion.div>
-          )}
-
           {/* Project Use Specific Analysis - Collapsible Section */}
           {(isDaycareOrSchool || isGrocery || isGasStation || isAutoService || isSeniorCare || isHotel || isRestaurant || isCoffeeShop || isBar || isCannabis) && (
           <AccordionSection {...accProps("analysis")}>
