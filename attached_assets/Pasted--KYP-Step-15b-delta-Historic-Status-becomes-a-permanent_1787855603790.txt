@@ -1,0 +1,43 @@
+# KYP — Step 15b **delta**: Historic Status becomes a permanent row
+
+You have already given Replit Step 15b. **One decision changed after that**, when we settled on
+flattening every section. Nothing else in 15b moved — the palette, the credits correction, the
+demolition hold, the tier legend and the field inventory are all unchanged.
+
+## What changed
+
+**Then — §3 said conditional promotion.** A row only when the parcel is survey-rated, designated, or
+in a landmark district. On the other ~97% of parcels no row existed at all, and the fact was a single
+line inside `05 · Zoning & What You Can Build`.
+
+**Now — it is a permanent top-level row.** Every parcel gets a `HISTORIC STATUS` row. On an unrated
+parcel it renders **collapsed**, with the takeaway *"No historic designation on record."*, **no
+badge**, and `.kyp-empty` in the body if opened.
+
+Flat means flat. A conditional row is a special case with no payoff once every section is top-level,
+and one collapsed line is cheaper than a rule nobody can see.
+
+## What to change
+
+1. **Remove the conditional gate.** The `historic` row always renders and always sits in
+   `ACC_DEFAULT_ORDER`.
+2. **The unrated state is a takeaway, not an absence.** `No historic designation on record.` in the
+   row header, no badge.
+3. **Do not add the line to `05 · Zoning & What You Can Build`.** If it was already added, remove it —
+   the row carries it now, and the fact should not appear twice.
+4. **Development Potential keeps its line** — *"A demolition permit here is held 90 days
+   (§14A-4-407.6)"* — on rated parcels only. That one is deliberate duplication: it changes the answer
+   in both places.
+
+## Nothing to do for the CSS patch
+
+The 15b patch you pasted carried 11 `.kyp-facts` rules I had included for Step 16. Step 16b no longer
+uses them, so they sit in `kyp-base.css` unused. **Leave them.** They collide with nothing and a
+later section may want a facts grid; removing them is churn for no gain.
+
+## ✅ Done-when
+
+- [ ] `historic` renders on every parcel, always in `ACC_DEFAULT_ORDER`.
+- [ ] An unrated parcel shows a collapsed row reading `No historic designation on record.` with no badge.
+- [ ] `05 · Zoning & What You Can Build` does **not** carry a historic-designation line.
+- [ ] Everything else from Step 15b is untouched.

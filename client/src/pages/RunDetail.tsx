@@ -1257,7 +1257,7 @@ export default function RunDetail() {
   const incentiveEligibilityRef = useRef<Record<string, boolean>>({});
 
   // ---- Step 5 accordion state: order / hidden / open (persisted per run) ----
-  const ACC_DEFAULT_ORDER = ["overview", "permits", "listing", "ownership", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
+  const ACC_DEFAULT_ORDER = ["overview", "historic", "permits", "listing", "ownership", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
@@ -3821,6 +3821,7 @@ export default function RunDetail() {
     zoningHistory: { title: "Zoning History", summary: "Recorded City Council and Zoning Board actions for this parcel.", info: ["City Council filings", "Zoning Board decisions", "Filing documents and named professionals"] },
     analysis: { title: "Project Use Analysis", summary: "Deep-dive analysis for your selected use.", info: ["Demand & demographics for your use", "Nearby competitors", "Use-specific estimators"] },
     potential: { title: "Development Potential", summary: "FAR, buildable envelope and rental potential.", info: ["FAR & buildable envelope", "Market rents (RentCast)", "Short-term rental (Airbnb)", "Commercial listings"] },
+    historic: { title: "Historic Status", summary: "Chicago Historic Resources Survey rating and designation signals.", info: ["CHRS survey rating", "Municipal designation signals", "Demolition-hold rule", "Credit eligibility requirements"] },
   };
   const listingStillChecking = generateListingSnapshot.isPending
     || (!listingSnapshot && !isListingSnapshotError);
@@ -3856,6 +3857,24 @@ export default function RunDetail() {
   const zoningHistoryBadge = !isLoadingZoningHistory && zoningHistoryView.actionCount > 0 && facts?.zoning
     ? `${zoningHistoryView.actionCount} action${zoningHistoryView.actionCount === 1 ? '' : 's'} · ${facts.zoning}`
     : undefined;
+  const historicStatusTakeaway = isLoadingLandmark
+    ? <Skeleton className="h-4 w-72" data-testid="historic-status-takeaway-skeleton" />
+    : !landmarkData
+    ? "Unable to check landmark status."
+    : !landmarkIsRelevant
+    ? "No historic designation on record."
+    : landmarkData.colorTag
+    ? `${landmarkData.colorTag}-rated historic resource${landmarkData.decade ? ` · ${landmarkData.decade}s` : ''}.`
+    : landmarkData.landmarkDistrictName
+    ? `Within ${landmarkData.landmarkDistrictName}.`
+    : "Historic resource on record.";
+  const historicStatusBadge = !isLoadingLandmark && landmarkData && landmarkIsRelevant
+    ? landmarkData.colorTag
+      ? `${landmarkData.colorTag} TAG`
+      : landmarkData.isLandmarkDistrict
+      ? "LANDMARK DISTRICT"
+      : "DESIGNATED"
+    : undefined;
   const accProps = (rowId: string) => {
     const scan = accScanSections.find((s) => s.id === rowId);
     const custom = ACC_CUSTOM_META[rowId];
@@ -3869,9 +3888,9 @@ export default function RunDetail() {
       index: (pos < 0 ? accOrder.length : pos) + 1,
       order: (pos < 0 ? accOrder.length : pos) + 1,
       eyebrow: title,
-      takeaway: rowId === "listing" ? listingTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : scan?.takeaway ?? summary,
+      takeaway: rowId === "listing" ? listingTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : scan?.takeaway ?? summary,
       verdict,
-      badge: rowId === "listing" ? listingBadge : rowId === "zoningHistory" ? zoningHistoryBadge : scan?.verdict?.label,
+      badge: rowId === "listing" ? listingBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
       info: (scan?.info || custom?.info || []).join(" · "),
       open: accOpen[rowId] === true,
       onToggle: () => setAccOpen((m) => ({ ...m, [rowId]: !m[rowId] })),
@@ -3925,7 +3944,7 @@ export default function RunDetail() {
           { label: 'Property Details', icon: Building2, action: () => { setSectionOpen('propertyDetails', true); return 'print-section-property-info'; } },
           { label: 'Active Listing Snapshot', icon: Newspaper, action: () => { setAccOpen((open) => ({ ...open, listing: true })); return 'print-section-listing-snapshot'; } },
           { label: 'Permits & Violations', icon: ClipboardCheck, action: () => 'section-permits' },
-          { label: 'Historic Status', icon: Landmark, action: () => { setSectionOpen('propertyDetails', true); setSectionOpen('landmark', true); return 'print-section-property-info'; } },
+          { label: 'Historic Status', icon: Landmark, action: () => { setAccHidden((m) => ({ ...m, historic: false })); setAccOpen((m) => ({ ...m, historic: true })); return 'print-section-historic-status'; } },
           { label: 'Ownership & Title', icon: History, action: () => { setAccHidden((m) => ({ ...m, ownership: false })); setAccOpen((m) => ({ ...m, ownership: true })); return 'section-ownership'; } },
           { label: 'Property Tax Records', icon: Receipt, action: () => { setSectionOpen('propertyDetails', true); setSectionOpen('propertyTaxInfo', true); return 'print-section-property-info'; } },
           { label: 'Pre-Title Check', icon: AlertTriangle, action: () => { setSectionOpen('preTitleCheck', true); return 'print-section-pre-title-check'; } },
@@ -4579,11 +4598,6 @@ export default function RunDetail() {
                               <span className="pin">{run.address}</span>
                             ) : 'PIN or address'}
                           </div>
-                          {landmarkData && !landmarkIsRelevant && (
-                            <div className="kyp-cxfoot" data-testid="zoning-no-historic-designation">
-                              <b>Historic status:</b> No historic designation on record.
-                            </div>
-                          )}
                           <a className="kyp-cxlink" href="https://codelibrary.amlegal.com/codes/chicago/latest/chicagozoning_il/0-0-0-48750" target="_blank" rel="noopener noreferrer" data-testid="link-zoning-code">Chicago Zoning Code — Use Standards ↗</a>
                         </>
                       ) : (
@@ -10015,7 +10029,7 @@ export default function RunDetail() {
                       </CollapsibleContent>
                     </Collapsible>
 
-                    {(isLoadingLandmark || !landmarkData || landmarkIsRelevant) && (
+                    {false && (
                     <Collapsible open={isLandmarkSectionOpen} onOpenChange={setIsLandmarkSectionOpen}>
                       <CollapsibleTrigger asChild>
                         <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
@@ -10028,8 +10042,8 @@ export default function RunDetail() {
                               <div className="flex flex-wrap gap-1.5">
                                 {landmarkData?.isLandmark ? (
                                   <span className="records-fact" data-testid="badge-chrs-tag">
-                                    {landmarkData.colorTag && <span className={`kyp-chrsw ${landmarkData.colorTag.toLowerCase()}`} />}
-                                    {landmarkData.colorTag ? `${landmarkData.colorTag} tag` : 'Historic resource'}
+                                    {landmarkData?.colorTag && <span className={`kyp-chrsw ${String(landmarkData?.colorTag).toLowerCase()}`} />}
+                                    {landmarkData?.colorTag ? `${landmarkData?.colorTag} tag` : 'Historic resource'}
                                   </span>
                                 ) : null}
                                 {!isLandmarkSectionOpen && landmarkData?.isLandmarkDistrict && (
@@ -12115,6 +12129,31 @@ export default function RunDetail() {
               </Card>
             </Collapsible>
           </motion.div>
+          </AccordionSection>
+
+          {/* Historic Status is a permanent top-level row, including for unrated parcels. */}
+          <AccordionSection {...accProps("historic")}>
+            <div id="print-section-historic-status">
+              {isLoadingLandmark ? (
+                <div className="seccard space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              ) : !landmarkData ? (
+                <div className="kyp-empty" data-testid="historic-status-empty">Unable to check landmark status</div>
+              ) : !landmarkIsRelevant ? (
+                <div className="kyp-empty" data-testid="historic-status-unrated">No historic designation on record.</div>
+              ) : (
+                <HistoricStatusPanel
+                  landmarkData={landmarkData}
+                  facts={facts}
+                  run={run}
+                  propertyTaxData={propertyTaxData}
+                  pinLookupData={pinLookupData}
+                  landmarkTaggedAddresses={landmarkTaggedAddresses}
+                />
+              )}
+            </div>
           </AccordionSection>
 
           {/* Development Potential Section */}

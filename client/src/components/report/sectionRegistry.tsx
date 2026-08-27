@@ -4,14 +4,17 @@ import { type ScanSection } from "./CollapsibleSection";
 type SectionMeta = Pick<ScanSection, "id" | "anchorId" | "title" | "summary" | "info">;
 
 export const SECTION_ORDER = [
-  "overview", "permits", "ownership", "zoning", "valuation", "debt", "market", "transit", "newBusinessLicenses", "newConstruction",
+  "overview", "historic", "permits", "ownership", "zoning", "valuation", "debt", "market", "transit", "newBusinessLicenses", "newConstruction",
   "crime", "proximity", "corridor", "development", "people", "incentives", "news",
 ] as const;
 
 export const SECTION_META: Record<string, SectionMeta> = {
   overview: { id: "overview", anchorId: "print-section-property-info", title: "Property Overview",
     summary: "Address, PIN, zoning, building profile and lot — the basic facts.",
-    info: ["Location map", "Facts: PIN, zoning, Opportunity-Zone flag", "Building profile: units, sqft, beds/baths, year", "Parcel / assessor record", "Historic landmark status"] },
+    info: ["Location map", "Facts: PIN, zoning, Opportunity-Zone flag", "Building profile: units, sqft, beds/baths, year", "Parcel / assessor record"] },
+  historic: { id: "historic", anchorId: "print-section-historic-status", title: "Historic Status",
+    summary: "Chicago Historic Resources Survey rating and designation signals.",
+    info: ["CHRS survey rating", "Municipal designation signals", "Demolition-hold rule", "Credit eligibility requirements"] },
   permits: { id: "permits", anchorId: "section-permits", title: "Permits & Violations",
     summary: "Building permits, professionals on record, and code violations.",
     info: ["Permit history — current vs prior owner", "Professionals who worked on the building", "Building violations", "Sidewalk cafe permits", "MBE/WBE/DBE/VBE/BEPD are City of Chicago vendor certifications (minority-, women-, disadvantaged-, veteran-owned, and business enterprises owned by people with disabilities). We show them as reported by the city directory; we do not verify current standing."] },
