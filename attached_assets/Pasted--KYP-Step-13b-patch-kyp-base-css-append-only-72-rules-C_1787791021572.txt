@@ -1,0 +1,176 @@
+# KYP — Step 13b: patch `kyp-base.css` (append-only, 72 rules)
+
+🔴 **Cancels Step 0 in all three versions. Delete them.** Step 0 assumed the design system had never
+shipped. It has — `client/src/kyp-base.css` exists, is loaded, and holds 214 component families.
+Nothing gets appended to `index.css`. Nothing gets scoped to a wrapper. Ignore every earlier
+instruction about `.kypwrap`.
+
+## What this is
+
+`kyp-base.css` is ahead of my working copy in most places and behind it in a few. This patch closes
+only the gap, and only for the two things shipping next.
+
+**It is append-only.** Every rule here has the same specificity as the one it supersedes, so a later
+rule wins and nothing above needs deleting. Do not remove or edit any existing rule.
+
+| Group | Rules | Effect |
+|---|---|---|
+| Numbered subheads | 5 | `06.1 WHAT CHANGED` replaces the flat centred-rule form, site-wide |
+| Block spacing + hero grids | 14 | fixes the crowded label/description in filled blocks; adds `.hero`, `.hero.two`, `.hero.one`, `.four`, `.wash` |
+| `.kyp-zrec` | 24 | compact zoning record rows grouped by matter |
+| `.kyp-says` | 18 | two-column found-in-the-record / still-to-confirm |
+| `.kyp-xfer` | 11 | before/after district diff |
+
+Verified before sending: parses clean, 0 errors, every selector begins `.kyp-`, every `var()` resolves
+against a token already defined in `kyp-base.css`.
+
+**Deliberately excluded:** `.kyp-procard` — the live version is further along than mine (16.5px name,
+5px indigo left border) and this patch would regress it. Leave it alone.
+
+## 1. Two things change appearance immediately
+
+This is not inert, and that is intended.
+
+**Subheads change everywhere they already render** — Permits, Transit, Neighborhood News. They become
+larger, gain a 1px ink rule above, and the flat divider line disappears. Any existing subhead that
+does not yet carry a number will look like a header with a missing number until its section is
+updated. That is expected and it is the point: they were getting lost.
+
+**Filled blocks gain breathing room.** `.bl` picks up `margin-top:8px`, `.bd` goes from `2px` to
+`5px`. This affects every `.kyp-block` in the app — 23 in `RunDetail.tsx`. It is the crowding fix
+that was requested for Historic Status, applied globally as agreed.
+
+## 2. Add the number span to existing subheads
+
+The new form expects an optional `.n` before `.lbl`:
+
+```tsx
+<div className="kyp-subhead">
+  <span className="n">06.1</span>
+  <span className="lbl">What changed</span>
+  <span className="ct">optional count</span>
+  <span className="rule" />
+</div>
+```
+
+`.rule` is kept and hidden so existing markup stays valid — do not strip it. **The number must be
+derived from the section's live accordion position, not hard-coded**, so it follows when a user
+reorders sections. `accProps` already computes `index` and `order`; pass the section's index down and
+render `{index}.{n}`.
+
+Do this for the 14 existing `.kyp-subhead` instances in `RunDetail.tsx`.
+
+## 3. What is NOT in this step
+
+`.kyp-zrec`, `.kyp-says` and `.kyp-xfer` are shipped here but **nothing uses them yet**. Zoning
+History currently renders in Tailwind utilities and contains zero `kyp-` classes. Rewriting that
+section's markup is Step 14b and comes next — do not start it in this step.
+
+---
+
+## ✅ Done-when
+
+- [ ] The block in §4 is appended verbatim to the end of `client/src/kyp-base.css`.
+- [ ] **No existing rule in `kyp-base.css` was edited or deleted.**
+- [ ] `index.css` is untouched. No `.kypwrap` anywhere.
+- [ ] `.kyp-procard` is unchanged.
+- [ ] All 14 existing `.kyp-subhead` instances render a `.n` number derived from accordion position.
+- [ ] Reordering sections renumbers the subheads.
+- [ ] Filled blocks are no longer crowded between value, label and description.
+
+---
+
+## 4. Append verbatim to the end of `client/src/kyp-base.css`
+
+```css
+/* ============================================================
+   KYP-BASE PATCH — Step 13b + Step 14 components.
+   APPEND to the end of client/src/kyp-base.css. Append only:
+   equal specificity means these later rules win, so nothing
+   above needs deleting. Tokens are already --kyp-* prefixed.
+   ============================================================ */
+
+/* ---------- 13b — numbered subheads (replaces the flat form) ---------- */
+.kyp-subhead{display:flex;align-items:center;gap:10px;margin:38px 0 13px;padding-top:11px;border-top:1px solid var(--kyp-ink);scroll-margin-top:20px}
+.kyp-subhead .n{font-family:var(--kyp-mono);font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--kyp-indigo);flex:none}
+.kyp-subhead .lbl{font-family:var(--kyp-mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo)}
+.kyp-subhead .ct{font-family:var(--kyp-mono);font-size:11px;font-weight:400;color:var(--kyp-muted)}
+.kyp-subhead .rule{display:none}
+
+/* ---------- 13b — block label spacing + hero grid variants ---------- */
+.kyp-block.count .bl{font-size:9.5px;margin-top:0}
+.kyp-block .bl{font-family:var(--kyp-mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;opacity:.92;margin-top:8px;line-height:1.45}
+.kyp-block .bd{font-size:10.5px;opacity:.85;margin-top:5px;line-height:1.35}
+.kyp-block .bbreak{border-top:1px solid rgba(255,255,255,.28);padding-top:9px;margin-top:9px;display:flex;flex-direction:column;gap:5px}
+.kyp-block .br{font-size:10.5px;opacity:.9;line-height:1.35;display:flex;gap:7px}
+.kyp-block .br b{font-weight:700;opacity:1;flex:none;font-variant-numeric:tabular-nums}
+.kyp-blocks.four{grid-template-columns:repeat(4,1fr)}
+.kyp-blocks.hero{grid-template-columns:1.4fr 1fr 1fr}
+.kyp-blocks.hero .kyp-block:first-child .bv{font-size:46px}
+.kyp-block.wash{background:var(--kyp-wash);color:var(--kyp-ink);border:1px solid var(--kyp-line)}
+.kyp-block.wash .bl{color:var(--kyp-indigo);opacity:1}
+.kyp-block.wash .bd{color:var(--kyp-ink2);opacity:1}
+.kyp-blocks.hero.two{grid-template-columns:1.4fr 1fr}
+.kyp-blocks.hero.one{grid-template-columns:1fr}
+
+/* ---------- 14 — .kyp-zrec  zoning record rows, grouped by matter ---------- */
+.kyp-zrec{border:1px solid var(--kyp-line);border-radius:12px;overflow:hidden;background:var(--kyp-card)}
+.kyp-zrec .zr{padding:13px 17px;border-top:1px solid var(--kyp-line)}
+.kyp-zrec .zr:first-child{border-top:0}
+.kyp-zrec .zr1{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.kyp-zrec .zt{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo);background:var(--kyp-indigoSoft);border-radius:5px;padding:3px 8px}
+.kyp-zrec .zt.zba{color:#5a5a52;background:#eceae3}
+.kyp-zrec .zs{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--kyp-indigo);border-radius:5px;padding:3px 8px}
+.kyp-zrec .zs.ok{background:var(--kyp-green)}
+.kyp-zrec .zs.no{background:var(--kyp-bad)}
+.kyp-zrec .zd{margin-left:auto;font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-ink2);white-space:nowrap}
+.kyp-zrec .z2{font-size:13.5px;color:var(--kyp-ink);margin-top:6px;line-height:1.5}
+.kyp-zrec .z2 .app{color:var(--kyp-muted)}
+.kyp-zrec .z3{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px;font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-muted)}
+.kyp-zrec .z3 a{color:var(--kyp-indigo);font-weight:700;text-decoration:none}
+.kyp-zrec .z3 .sep{color:#c8c6bd}
+.kyp-zrec .zlapse{margin-top:7px;font-size:12.5px;color:var(--kyp-ink2)}
+.kyp-zrec .zlapse b{color:var(--kyp-ink)}
+.kyp-zrec .zgrp{padding:10px 17px;background:var(--kyp-wash);border-top:1px solid var(--kyp-line);font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--kyp-ink2);display:flex;gap:9px;align-items:baseline}
+.kyp-zrec .zgrp:first-child{border-top:0}
+.kyp-zrec .zgrp .gq{font-family:var(--kyp-sans);font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--kyp-muted)}
+.kyp-zrec .ztrack{margin-left:7px;font-family:var(--kyp-mono);font-size:9.5px;font-weight:400;color:var(--kyp-muted);letter-spacing:0;text-transform:none}
+.kyp-zrec .zquote{margin-top:6px;padding-left:11px;border-left:2px solid var(--kyp-line);font-size:12.5px;line-height:1.5;color:var(--kyp-ink2);font-style:italic}
+.kyp-zrec .zgnote{padding:11px 17px;border-top:1px dashed var(--kyp-line);font-size:12.5px;line-height:1.55;color:var(--kyp-ink2);background:var(--kyp-paper)}
+.kyp-zrec .zgnote b{color:var(--kyp-ink)}
+
+/* ---------- 14 — .kyp-says  found-in-the-record vs still-to-confirm ---------- */
+.kyp-says{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--kyp-line);border-radius:12px;overflow:hidden;background:var(--kyp-card);margin:14px 0 4px}
+.kyp-says .sc{padding:16px 18px}
+.kyp-says .sc+.sc{border-left:1px solid var(--kyp-line);background:var(--kyp-wash)}
+.kyp-says .sh{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kyp-indigo);margin-bottom:11px}
+.kyp-says .sc+.sc .sh{color:var(--kyp-slate)}
+.kyp-says ul{margin:0;padding:0;list-style:none}
+.kyp-says li{position:relative;padding-left:17px;font-size:13.5px;line-height:1.58;color:var(--kyp-ink2);margin-bottom:11px}
+.kyp-says li:last-child{margin-bottom:0}
+.kyp-says li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:2px;background:var(--kyp-indigoL)}
+.kyp-says .sc+.sc li::before{background:var(--kyp-slate)}
+.kyp-says li b{color:var(--kyp-ink)}
+.kyp-says.lg{margin:20px 0 4px;border-width:2px}
+.kyp-says.lg .sc{padding:20px 22px}
+.kyp-says.lg .sh{font-size:11px;letter-spacing:.09em;margin-bottom:14px}
+.kyp-says.lg li{font-size:14px;line-height:1.6;margin-bottom:13px;padding-left:19px}
+.kyp-says.lg li::before{top:8px;width:7px;height:7px}
+.kyp-says.lg .sc+.sc li::before{background:#c8c6bd}
+.kyp-says.lg .gate{display:block;font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-muted);margin-top:4px;letter-spacing:.01em}
+
+/* ---------- 14 — .kyp-xfer  before/after district diff ---------- */
+.kyp-xfer{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--kyp-line);border-radius:12px;overflow:hidden;margin:12px 0}
+.kyp-xfer .col{padding:15px 18px}
+.kyp-xfer .col+.col{border-left:1px solid var(--kyp-line);background:#fdf8f0}
+.kyp-xfer .h{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-muted);margin-bottom:9px}
+.kyp-xfer .col+.col .h{color:#a65f14}
+.kyp-xfer .v{font-family:var(--kyp-disp);font-size:30px;line-height:1;color:var(--kyp-ink)}
+.kyp-xfer .col+.col .v{color:#a65f14}
+.kyp-xfer .li{font-size:11.5px;color:var(--kyp-ink2);margin-top:9px;line-height:1.6}
+.kyp-xfer .li i{font-style:normal;font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted);margin-left:6px}
+@media (max-width:640px){
+  .kyp-xfer{grid-template-columns:1fr}
+  .kyp-xfer .col+.col{border-left:none;border-top:1px solid var(--kyp-line)}
+}
+```
