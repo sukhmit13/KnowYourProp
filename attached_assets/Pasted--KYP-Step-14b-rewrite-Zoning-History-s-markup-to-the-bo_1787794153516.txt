@@ -1,0 +1,330 @@
+# KYP — Step 14b: rewrite Zoning History's markup to the bold hybrid
+
+🔴 **Scope:** `RunDetail.tsx` lines **5011–5456** (the `AccordionSection {...accProps("zoningHistory")}`
+block) and the `buildZoningHistoryView` helper at **line 119**. Ships after Step 13b.
+
+The section's *content* is already right — case consolidation, hearing tracks, the Board quote, the
+coverage disclosure. Do not re-derive any of it. This step changes how it is presented, plus two
+data defects found while reading the code.
+
+Today the section renders in **446 lines of Tailwind utilities with zero `kyp-` classes**. Every
+component named below now exists in `kyp-base.css` after Step 13b.
+
+---
+
+## 0. Two deletions before anything else
+
+**0.1 — Delete the dead renderer.** Lines **5222 onward**, the block opening
+`{/* Retired renderer retained temporarily... */}` / `{false && run?.address && (`. It never renders.
+Delete it and its `data-testid="trigger-zoning-history-old"` markup entirely.
+
+**0.2 — Remove amber from this section.** Two places use it:
+
+- the named-development callout — `border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30`
+- the DPD context block — `border-amber-300 bg-amber-50/50 …`
+
+Neither is a warning. A development named at another address is **context**, and a pending DPD
+application is a **filed signal, not a fault**. Both become slate: `var(--kyp-slate)` text on
+`var(--kyp-wash)`, `1px solid var(--kyp-line)`. Amber is not in the palette.
+
+---
+
+## 1. A data defect to fix first — the takeaway is hardcoded to one property
+
+`buildZoningHistoryView`, line ~173:
+
+```js
+takeaway = `Subdivided in ${year} — the Board's order kept all three units, front and rear.`;
+```
+
+**"all three units, front and rear" is a string literal.** It fires for any property whose
+`boardConfiguration` regex matches, regardless of what the order actually says. The detector is also
+written against one filing's exact wording:
+
+```js
+/(?:two[- ]story.*two.*dwelling.*front.*one.*dwelling.*rear|front building.*rear building)/i
+```
+
+Fix both:
+
+1. **Parse the counts out of the description** rather than asserting them. Extract each
+   `<number> dwelling unit` occurrence and sum. If the sum cannot be parsed, the takeaway must not
+   state a number — fall back to
+   `Subdivided in {year} — the Board's order addressed the existing front and rear buildings.`
+2. **Store what was parsed** on the view as `boardUnitCount` (number | null) and
+   `boardUnitBreakdown` (e.g. `{front: 2, rear: 1}` | null). Hero block 3 and §4.2 both read it.
+3. Keep the general `front building.*rear building` arm of the regex; drop the property-specific arm.
+
+**Never print a unit count this parse did not produce.**
+
+---
+
+## 2. Subhead numbering
+
+Four numbered subheads. The number is `{index}.{n}` where `index` is the value `accProps` already
+computes from `accOrder` — **pass it into the section and derive; never hard-code `06`.**
+
+| n | Label | Renders when |
+|---|---|---|
+| .1 | `WHAT CHANGED` | `view.rezoning` exists |
+| .2 | `WHAT THE RECORD ESTABLISHES` | `view.boardConfiguration` **or** `filing?.enriched` |
+| .3 | `THE RECORD` | `view.rows.length > 0` |
+| .4 | `WHO FILED THEM` | `contacts.length > 0` |
+
+**Renumber sequentially over the subheads that actually render.** If `.1` is suppressed because no
+map amendment exists, `THE RECORD` becomes `.1`, not `.2`. A gap in the numbering reads as missing
+content.
+
+`.3` carries a count in `.ct`: `{actionCount} actions · {matterCount} matters · {rawHearingCount} hearing entries`.
+Drop the `matters` clause when `matterCount < 2`.
+
+---
+
+## 3. Three filled hero blocks
+
+Replace the three pale Tailwind cards with `<div className="kyp-blocks hero">` and three
+`<div className="kyp-block ind">`. **All three are indigo.** A zoning designation is a state, not a
+verdict — no green, orange or red anywhere in this row.
+
+| # | `.bv` | `.bl` | `.bbreak` rows (`.br`) |
+|---|---|---|---|
+| 1 | `facts.zoning` | `Today's designation` | `Set by` the enacting action · `Allows` the district's use classes |
+| 2 | district change or lot outcome | see below | one `.br` per dated step |
+| 3 | unit count, or case count | see below | front/rear split, or per-case decisions |
+
+**Block 2** — when `view.rezoning` exists, `.bv` is the change (`RS-3 + RT-4 → RT-4`) and `.bl` reads
+`Confirmed district change`. When it does not but `view.hasUnenactedMapFiling` is true, `.bv` is
+`Filed`, `.bl` is `Map amendment filed — no passage recorded`. When neither, the block does not
+render and the row falls back to `kyp-blocks hero two`.
+
+**Block 3** — when `boardUnitCount` parsed, `.bv` is that number and `.bl` reads
+`Dwelling units the {year} order kept here`, with `boardUnitBreakdown` in `.bbreak`. Otherwise `.bv`
+is `view.caseRows.length` and `.bl` reads `Zoning Board cases · {rawHearingCount} hearings`.
+
+Block 1 always renders. Use `hero.two` / `hero.one` so the row always fills its width.
+
+---
+
+## 4. `.1 WHAT CHANGED` and `.2 WHAT THE RECORD ESTABLISHES`
+
+### 4.1 The district diff — `.kyp-xfer`
+
+Replace the Before/After pair with **`.kyp-xfer zone`** — the `.zone` variant, added in 13b. The base `.kyp-xfer` right column is amber because its first use was the tax-exemption transfer, where the "after" *is* the bad news. A rezoning is neither good nor bad, so it is indigo. Structure: two `.col`, left `BEFORE — PRIOR DISTRICTS`, right
+`AFTER — IN FORCE TODAY`. The right column is the tinted one.
+
+Under each district, one line of plain English — for a split-zoned parcel, say so and say why it
+mattered: *"Split-zoned — one lot carrying two districts, which is why it could not be divided as it
+stood."* Where `fromZone` is absent, print `Not stated in the checked filing` and no explanation.
+
+Keep the introduced/passed dates, moved into the `.kyp-src` line below the component.
+
+### 4.2 Two columns, not a list — `.kyp-says`
+
+Today this is a single-column `<ul>` of `Applicant / Existing condition / Reason / Proposed use`,
+with a **separate** Board-finding card below it. Merge both into one `.kyp-says lg` with two `.sc`:
+
+**Left — `FOUND IN THE RECORD`.** Each item is a bolded claim followed by its support. Build from,
+in this order:
+
+1. `boardConfiguration` → the unit statement, using the parsed counts from §1. This is the
+   strongest item because a Board order is an adjudicated finding.
+2. `rezoning` → what the map amendment settled.
+3. `filing.existingPropertyContext` / `applicationReason` / `proposedUse` → what the application
+   described. **These are applicant statements** — the sentence must say so.
+
+**Right — `STILL TO CONFIRM`.** Slate, not amber (`.sc + .sc` already handles this). Each item is a
+question with the reason it stays open. Render only those whose condition holds:
+
+| Item | Condition |
+|---|---|
+| Whether the rear unit is legally established | `boardConfiguration` exists |
+| Whether a permit was filed but never issued | any approved ZBA variation exists |
+| The recorded unit count | county unit count is known **and** differs from `boardUnitCount` |
+
+The third must state both figures and name both sources. If the county count is unknown, the item
+does not render — an open question needs two things to disagree.
+
+Put the Board's exact words in `.3` as `.zquote` on the case row that produced them (§5.2), not here.
+The quote is evidence for a specific action; this panel is the synthesis.
+
+Header meta goes in the subhead's `.ct`: `Board order {ordinanceId} · application {n}`.
+
+---
+
+## 5. `.3 THE RECORD` — `.kyp-zrec` rows grouped by matter
+
+Replace the `<article>` cards — and `statusTone()`, which tints whole cards green/red/indigo — with a
+single `.kyp-zrec` container of compact rows.
+
+### 5.1 Matter grouping
+
+`view.rows` is currently a flat date-sorted list. Add `matters` to the view: an ordered array of
+`{ key, label, track, rows }`.
+
+**Group by decided date and continuation track**, which is derivable:
+
+- Each `caseRow` belongs to the group keyed by its final decision date.
+- A council item belongs to the group whose date is nearest and not later than its passage date;
+  if none, it forms its own group.
+- Groups are ordered oldest first — matters read as a sequence.
+
+**Label from the relief text, with an explicit fallback.** Test the concatenated `description` +
+`title` of the group's rows:
+
+| Test | Label |
+|---|---|
+| `/subdivid|lot split|two zoning lots|divide the lot/i` | `the subdivision` |
+| `/lot area per dwelling unit/i` **and** `/setback|parking/i` | `the new building` |
+| otherwise | *no name* |
+
+Render `MATTER {i} — {label}` when a label was produced, otherwise `MATTER {i}`, and always append
+the derived summary in `.ztrack` — `{n} actions · decided {date}`. **Do not invent a name a rule did
+not produce.** A group header with a date is honest; a wrong name is not.
+
+When `matters.length < 2`, render the rows without group headers. One group is not a grouping.
+
+### 5.2 One row per action, every field once
+
+Each row: type chip (`VARIATION` / `MAP AMENDMENT` / `SPECIAL USE`), decision chip, the relief in one
+sentence, the case number, the date right-aligned, and the document links on their own line.
+
+Decision colour is on the **chip only** (`.zs.ok` green, `.zs.no` red), never the row background.
+A map amendment gets no verdict colour — it is a state. This is the §18 rule: a colour never carries
+meaning alone.
+
+Where a row's `description` is the Board's own wording, render it as `.zquote` beneath the relief
+line. Print `hearingDates` as `continued from {date}` inline after the case number — not as a
+separate paragraph.
+
+### 5.3 The lapse note
+
+When the group contains approved ZBA variations, append one `.zgnote` to that group stating the
+12-month window under **§17-13-1106**, the computed expiry, and whether a permit was found.
+
+Both gates from Step 14 §5.6 still apply: the permit path must have fetched the co-parcel's permits
+**with dates**, and the co-parcel must have resolved for this property. **Where either gate fails,
+render nothing** — do not soften the wording, omit the note.
+
+---
+
+## 6. `.4 WHO FILED THEM` — `.kyp-procard`
+
+`.kyp-procard` already exists and is used by permit professionals and tax-appeal counsel. This is its
+third use — reuse it exactly, do not add rules.
+
+One card per named professional, deduplicated across `contacts` by name + firm. Use the live sub-elements exactly — `.ptop`, `.prole`, `.pnm`, `.pera`, `.pfirm`, `.phere`, `.pcity`, `.pview`. `.pfirm` is new in 13b; everything else already exists.
+
+`.prole` is `ZONING COUNSEL` or `ARCHITECT`. `.pnm` is the name, `.pfirm` the firm. `.phere` states the record on this parcel — `Here · {n} of {total} actions — {what}`, with the count in `.phere .n` so it sets in the display face. The citywide fallback goes in `.pcity` with the document link as `.pview`.
+
+**No bar chart.** `.pwl` is a distribution and there is no citywide zoning-counsel dataset to
+distribute against. Render the fallback line instead:
+*"No citywide zoning-counsel record — showing this parcel's filings only."*
+
+**The architect row renders only when a filing names one.** An unnamed architect is not a finding.
+
+**Do not rate zoning counsel.** No win rate, no ranking.
+
+---
+
+## 7. Footnotes and source line
+
+Below `.4`, in this order:
+
+1. `.kyp-footnote` — every professional named in a filing is listed; a starting point, not a
+   recommendation. Note that ZBA orders carry no attorney field, so absence is not evidence.
+2. `.kyp-caveat` — **the map-amendment rule, stated once.** It currently appears in the coverage
+   footer; that is the only place it should live. An amendment runs with the land and never expires;
+   a variation or special use attaches to one proposal and can lapse.
+3. `.kyp-src` — sources, ward, `§17-13-1106`, and the existing coverage text from
+   `zoningHistoryCoverageText`.
+
+---
+
+## 8. The empty state
+
+`actionCount === 0` keeps its current copy — it is correct — but renders as one `.kyp-empty` line
+with **no hero blocks, no subheads and no badge**, and the row stays collapsed. An absence of zoning
+actions is the normal state for most Chicago parcels. It is not a finding and should not occupy a
+screen.
+
+---
+
+## 9. Every label that renders today, and where it goes
+
+Audited against lines 5011–5220. Nothing here is dropped.
+
+| Renders today | Becomes |
+|---|---|
+| `Current district` | hero block 1 — `Today's designation` |
+| `Confirmed district change` | hero block 2 |
+| `ZBA record` | hero block 3, fallback state (§3) |
+| `What changed` | subhead `.1` |
+| `Before` / `After` | `.kyp-xfer` columns (§4.1) |
+| `What the application says` | subhead `.2`, left column `FOUND IN THE RECORD` |
+| `Applicant` · `Existing condition` · `Reason` · `Proposed use` | items in that left column, each marked as an applicant statement |
+| `Board finding` + its blockquote | merged: synthesis into `.2`, exact words into `.zquote` on the case row (§4.2, §5.2) |
+| `Named development address` | **§9.1 below** |
+| `Recorded actions` | subhead `.3` — `THE RECORD` |
+| `Counsel & architect` | subhead `.4` — `WHO FILED THEM`, `.kyp-procard` |
+| `Current DPD application context` | **§9.2 below** |
+| coverage footer | `.kyp-src` (§7.3) |
+
+### 9.0 Field-level inventory — all 38 fields the section reads
+
+| Field | Where it lands |
+|---|---|
+| `attachmentUrl`, `councilmaticUrl`, `legistarUrl` | the links line on each `.kyp-zrec` row (§5.2) — all three survive |
+| `applicationUrl`, `hearingUrl` | the links line on each pending-application row (§9.2) |
+| `introducedDate`, `passedDate` | `.kyp-src` under `.kyp-xfer` (§4.1) and the row date in `.3` |
+| `fromZone`, `toZone` | `.kyp-xfer` columns, and hero block 2's `.bv` |
+| `zoningAttorney{name,firm}`, `architect{name,firm}` | `.kyp-procard` in `.4` (§6) |
+| `developmentAddress`, `developmentElsewhere` | `.kyp-caveat` above the hero row (§9.1) |
+| `rawItems` | source for `contacts`; not rendered directly |
+| `hearingDates` | `continued from {date}` inline after the case number (§5.2) |
+| `ordinanceId`, `title`, `description`, `decision`, `status`, `type`, `date` | the `.kyp-zrec` row itself |
+| `actionCount`, `caseRows`, `rawHearingCount`, `rows`, `matters` | subhead `.ct` counts and grouping |
+| `rezoning`, `boardConfiguration`, `hasUnenactedMapFiling` | hero blocks and `.2` |
+| `applicant`, `applicationReason`, `existingPropertyContext`, `proposedUse` | `.2` left column |
+| `address`, `applicationType`, `proposal`, `hearingDate`, `id` | pending applications (§9.2) |
+
+### 9.1 Named development address
+
+Keep it, but move it. It currently sits inside the application panel in an amber box. It belongs
+**above** the hero blocks as a `.kyp-caveat` in slate, because when `developmentElsewhere` is true it
+governs how every figure below should be read.
+
+Copy stays as-is, including the second line about permit activity not being used as an outcome.
+When `developmentElsewhere` is false, render the address inline in `.2` with no callout — a
+development named at *this* address is not a caveat.
+
+### 9.2 Current DPD application context
+
+Keep every field — `address`, `applicationType`, `status`, `applicant`, `proposal`, `hearingDate`,
+and both links. Render it as its own numbered subhead **after `.4`**, labelled
+`PENDING APPLICATIONS`, with one `.kyp-zrec` row per application reusing §5.2's row shape.
+
+Slate, not amber. A filed application is a state, and the existing copy already says it is not an
+approval or a permit — keep that line verbatim in `.kyp-caveat`.
+
+It renders only when `pendingDpd.length > 0`, and it counts in the sequential numbering (§2).
+
+---
+
+## ✅ Done-when
+
+- [ ] The `{false && …}` block at 5222+ is deleted.
+- [ ] No `border-amber-*` or `bg-amber-*` remains in this section.
+- [ ] `boardUnitCount` is parsed from the description; the takeaway prints no count it did not parse.
+- [ ] The property-specific arm of the `boardConfiguration` regex is gone.
+- [ ] Hero row is three filled indigo `.kyp-block`s, collapsing to `hero.two` / `hero.one`.
+- [ ] Subhead numbers derive from `accProps.index` and renumber when sections are reordered.
+- [ ] Subheads renumber sequentially when one is suppressed — no gaps.
+- [ ] Application narrative and Board finding are one two-column `.kyp-says`, not two panels.
+- [ ] Records render as `.kyp-zrec` rows; `statusTone()` is deleted; no row background carries a verdict.
+- [ ] Matter headers appear only at ≥2 groups, and only carry a name a rule produced.
+- [ ] The lapse note renders only when both gates pass.
+- [ ] No `.pwl` bar renders; the architect row renders only when named.
+- [ ] The map-amendment rule appears exactly once in the section.
+- [ ] Every field that renders today still renders, or is listed here with a reason.
+- [ ] `.kyp-xfer` carries the `zone` modifier — the district diff is indigo, not amber.
+- [ ] The procard uses `.pcity`/`.pview` for the fallback line, not invented class names.

@@ -1,0 +1,1194 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<title>Current — as shipped today vs Step 14b — the rewrite</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#e8e6de;font-family:Inter,system-ui,sans-serif}
+.wrap{display:grid;grid-template-columns:1fr 1fr;height:100vh}
+.col{min-width:0;display:flex;flex-direction:column;border-right:1px solid #cfccc2}
+.hd{background:#141414;color:#fff;padding:13px 22px;font-family:'JetBrains Mono',monospace;font-size:11px;
+    font-weight:700;letter-spacing:.09em;text-transform:uppercase;display:flex;gap:12px;align-items:center;flex:none}
+.hd.p{background:#2b3a9e}
+.hd .sub{margin-left:auto;font-weight:400;letter-spacing:.02em;text-transform:none;opacity:.75;font-size:10px}
+iframe{flex:1;width:100%;border:0;display:block;background:#f4f2ec}
+@media(max-width:900px){.wrap{grid-template-columns:1fr;height:auto}iframe{height:90vh}}
+</style></head><body>
+<div class="wrap">
+  <div class="col"><div class="hd">Current — as shipped today<span class="sub">RunDetail.tsx 5011–5220 · Tailwind utilities, zero kyp- classes</span></div>
+    <iframe srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;title&gt;Zoning History — current, as shipped&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+/* Faithful-enough shim for the Tailwind/shadcn utilities the LIVE zoning
+   section uses. Values taken from Tailwind&#x27;s default scale so the replica
+   matches what ships, not what I remember shipping. */
+:root{
+  --background:#fff; --foreground:#1a1a1a; --muted-fg:#666; --border:#e5e5e5;
+  --primary:#000; --muted:#f7f6f2;
+  --indigo50:#eef2ff; --indigo300:#a5b4fc; --indigo700:#4338ca;
+  --emerald50:#ecfdf5; --emerald300:#6ee7b7;
+  --red50:#fef2f2; --red300:#fca5a5;
+  --amber50:#fffbeb; --amber300:#fcd34d;
+  --slate50:#f8fafc; --slate300:#cbd5e1;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#fff;color:var(--foreground);
+  font-family:Inter,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+.seccard{padding:4px 2px}
+.space-y-5&gt;*+*{margin-top:20px}
+.space-y-3&gt;*+*{margin-top:12px}
+.space-y-2&gt;*+*{margin-top:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card{border:1px solid var(--border);border-radius:8px;padding:12px}
+.card.p4{padding:16px}
+.card.ind{border-color:var(--indigo300);background:color-mix(in srgb,var(--indigo50) 70%,#fff)}
+.card.em{border-color:var(--emerald300);background:color-mix(in srgb,var(--emerald50) 70%,#fff)}
+.card.rd{border-color:var(--red300);background:color-mix(in srgb,var(--red50) 70%,#fff)}
+.card.am{border-color:var(--amber300);background:var(--amber50)}
+.card.sl{border-color:var(--slate300);background:var(--slate50)}
+.card.mu{background:color-mix(in srgb,var(--muted) 30%,#fff)}
+.card.rmd{border-radius:6px}
+.lbl11{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.025em;color:var(--muted-fg)}
+.lbl11.ind{color:var(--indigo700)}
+.v-lg{margin-top:4px;font-size:18px;font-weight:600}
+.v-sm{margin-top:4px;font-size:14px;font-weight:600}
+.xs{margin-top:4px;font-size:12px;color:var(--muted-fg);line-height:1.5}
+.sm{font-size:14px}
+.h3{font-size:14px;font-weight:600}
+.h4{margin-top:4px;font-size:14px;font-weight:600}
+.divider{display:flex;align-items:center;gap:8px}
+.divider .ln{height:1px;flex:1;background:var(--border)}
+.divider h3{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.025em;color:var(--muted-fg)}
+.badge{display:inline-block;font-size:12px;font-weight:600;border-radius:6px;padding:2px 8px;
+  background:var(--primary);color:#fff;line-height:1.4}
+.badge.sec{background:var(--muted);color:var(--foreground);border:1px solid var(--border)}
+.badge.des{background:#dc2626;color:#fff}
+.badge.out{background:transparent;color:var(--foreground);border:1px solid var(--border)}
+.jb{font-family:&#x27;JetBrains Mono&#x27;,monospace;font-size:12px;color:var(--muted-fg)}
+.row-top{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8px}
+.chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.p-xs{margin-top:8px;font-size:12px;color:var(--muted-fg);line-height:1.5}
+.p-sm{margin-top:8px;font-size:14px;color:var(--muted-fg);line-height:1.55}
+.links{margin-top:12px;display:flex;flex-wrap:wrap;gap:12px;font-size:12px;font-weight:500}
+.links a{color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.links a:hover{text-decoration:underline}
+ul.app{margin-top:12px;list-style:none}
+ul.app li{font-size:14px;line-height:1.6}
+ul.app li+li{margin-top:8px}
+ul.app b{font-weight:500}
+blockquote{margin-top:8px;border-left:2px solid var(--primary);padding-left:12px;
+  font-size:14px;line-height:1.6;color:var(--muted-fg)}
+.foot{border-top:1px solid var(--border);padding-top:12px;margin-top:20px;
+  font-size:12px;color:var(--muted-fg);line-height:1.6}
+.foot span{display:block;margin-top:4px}
+.contacts{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.contacts .c{border-radius:6px;background:color-mix(in srgb,var(--muted) 40%,#fff);padding:12px;font-size:14px}
+.contacts .c p+p{margin-top:4px}
+
+&lt;/style&gt;
+&lt;/head&gt;&lt;body&gt;
+&lt;div class=&quot;seccard space-y-5&quot;&gt;
+
+  &lt;!-- hero facts : grid gap-3 md:grid-cols-3 --&gt;
+  &lt;div class=&quot;grid3&quot;&gt;
+    &lt;div class=&quot;card ind&quot;&gt;
+      &lt;div class=&quot;lbl11 ind&quot;&gt;Current district&lt;/div&gt;
+      &lt;div class=&quot;v-lg&quot;&gt;RT-4&lt;/div&gt;
+      &lt;div class=&quot;xs&quot;&gt;Current parcel designation&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;card ind&quot;&gt;
+      &lt;div class=&quot;lbl11 ind&quot;&gt;Confirmed district change&lt;/div&gt;
+      &lt;div class=&quot;v-sm&quot;&gt;RS-3 + RT-4 &amp;rarr; RT-4&lt;/div&gt;
+      &lt;div class=&quot;xs&quot;&gt;Passed Jul 30, 2014&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;card mu&quot;&gt;
+      &lt;div class=&quot;lbl11&quot;&gt;ZBA record&lt;/div&gt;
+      &lt;div class=&quot;v-sm&quot;&gt;4 cases &amp;middot; 8 hearings&lt;/div&gt;
+      &lt;div class=&quot;xs&quot;&gt;Final disposition is shown once per case.&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- What changed --&gt;
+  &lt;div class=&quot;space-y-3&quot;&gt;
+    &lt;div class=&quot;divider&quot;&gt;&lt;span class=&quot;ln&quot;&gt;&lt;/span&gt;&lt;h3&gt;What changed&lt;/h3&gt;&lt;span class=&quot;ln&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;grid2&quot;&gt;
+      &lt;div class=&quot;card&quot;&gt;
+        &lt;div class=&quot;xs&quot; style=&quot;margin-top:0;font-weight:500&quot;&gt;Before&lt;/div&gt;
+        &lt;div class=&quot;v-sm&quot;&gt;RS-3 + RT-4&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;card ind&quot;&gt;
+        &lt;div class=&quot;xs&quot; style=&quot;margin-top:0;font-weight:500;color:var(--indigo700)&quot;&gt;After&lt;/div&gt;
+        &lt;div class=&quot;v-sm&quot;&gt;RT-4&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;p class=&quot;p-xs&quot;&gt;Introduced Jul 30, 2014 &amp;middot; passed Jul 30, 2014 &amp;middot; Passed&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;!-- What the application says --&gt;
+  &lt;div class=&quot;card p4 sl&quot;&gt;
+    &lt;h3 class=&quot;h3&quot;&gt;What the application says&lt;/h3&gt;
+    &lt;p class=&quot;xs&quot;&gt;Applicant statements are shown as filed; they are not treated as proof of construction or occupancy.&lt;/p&gt;
+    &lt;ul class=&quot;app&quot;&gt;
+      &lt;li&gt;&lt;b&gt;Applicant:&lt;/b&gt; 522 N Claremont LLC&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Existing condition:&lt;/b&gt; A single-family home on a split-zoned lot&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Reason:&lt;/b&gt; To clear the split zoning so the lot can be divided&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Proposed use:&lt;/b&gt; Residential &amp;mdash; two zoning lots&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;div class=&quot;card rmd am&quot; style=&quot;margin-top:12px&quot;&gt;
+      &lt;span style=&quot;font-weight:500;font-size:14px&quot;&gt;Named development address:&lt;/span&gt;
+      &lt;span style=&quot;font-size:14px&quot;&gt;520 N Claremont Ave&lt;/span&gt;
+      &lt;span class=&quot;xs&quot; style=&quot;display:block&quot;&gt;This is not the report address. Permit activity for this parcel is not used as an outcome for that stated development.&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Recorded actions --&gt;
+  &lt;div class=&quot;space-y-3&quot;&gt;
+    &lt;div class=&quot;divider&quot;&gt;&lt;span class=&quot;ln&quot;&gt;&lt;/span&gt;&lt;h3&gt;Recorded actions&lt;/h3&gt;&lt;span class=&quot;ln&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+
+    &lt;div class=&quot;card p4 em&quot;&gt;
+      &lt;div class=&quot;row-top&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;chips&quot;&gt;
+            &lt;span class=&quot;lbl11&quot;&gt;Zoning Board case&lt;/span&gt;
+            &lt;span class=&quot;badge&quot;&gt;Approved&lt;/span&gt;
+            &lt;span class=&quot;jb&quot;&gt;73-17-Z&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;h4 class=&quot;h4&quot;&gt;Reduce off-street parking from 3 stalls to 2&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;span class=&quot;xs&quot; style=&quot;margin-top:0&quot;&gt;Jul 21, 2017&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;p class=&quot;p-xs&quot;&gt;Hearing track: Jun 16, 2017 &amp;rarr; Jul 21, 2017&lt;/p&gt;
+      &lt;div class=&quot;links&quot;&gt;&lt;a&gt;&amp;#128196; Source document&lt;/a&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;card p4 em&quot;&gt;
+      &lt;div class=&quot;row-top&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;chips&quot;&gt;
+            &lt;span class=&quot;lbl11&quot;&gt;Zoning Board case&lt;/span&gt;
+            &lt;span class=&quot;badge&quot;&gt;Approved&lt;/span&gt;
+            &lt;span class=&quot;jb&quot;&gt;72-17-Z&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;h4 class=&quot;h4&quot;&gt;Reduce front setback 15&#x27; &amp;rarr; 13.55&#x27;, south setback 2&#x27; &amp;rarr; zero, combined side 4.6&#x27; &amp;rarr; 2.96&#x27;&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;span class=&quot;xs&quot; style=&quot;margin-top:0&quot;&gt;Jul 21, 2017&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;p class=&quot;p-xs&quot;&gt;Hearing track: Jun 16, 2017 &amp;rarr; Jul 21, 2017&lt;/p&gt;
+      &lt;div class=&quot;links&quot;&gt;&lt;a&gt;&amp;#128196; Source document&lt;/a&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;card p4 em&quot;&gt;
+      &lt;div class=&quot;row-top&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;chips&quot;&gt;
+            &lt;span class=&quot;lbl11&quot;&gt;Zoning Board case&lt;/span&gt;
+            &lt;span class=&quot;badge&quot;&gt;Approved&lt;/span&gt;
+            &lt;span class=&quot;jb&quot;&gt;71-17-Z&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;h4 class=&quot;h4&quot;&gt;Reduce minimum lot area per dwelling unit 3,000 &amp;rarr; 2,884.37 sf&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;span class=&quot;xs&quot; style=&quot;margin-top:0&quot;&gt;Jul 21, 2017&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;p class=&quot;p-xs&quot;&gt;Hearing track: Jun 16, 2017 &amp;rarr; Jul 21, 2017&lt;/p&gt;
+      &lt;div class=&quot;links&quot;&gt;&lt;a&gt;&amp;#128196; Source document&lt;/a&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;card p4 em&quot;&gt;
+      &lt;div class=&quot;row-top&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;chips&quot;&gt;
+            &lt;span class=&quot;lbl11&quot;&gt;Zoning Board case&lt;/span&gt;
+            &lt;span class=&quot;badge&quot;&gt;Approved&lt;/span&gt;
+            &lt;span class=&quot;jb&quot;&gt;70-17-Z&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;h4 class=&quot;h4&quot;&gt;Reduce south setback 2&#x27; &amp;rarr; 0.59&#x27; to subdivide the lot into two zoning lots&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;span class=&quot;xs&quot; style=&quot;margin-top:0&quot;&gt;Jun 16, 2017&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;p class=&quot;p-sm&quot;&gt;The existing two-story, two dwelling unit front building and one dwelling unit rear building will remain.&lt;/p&gt;
+      &lt;div class=&quot;links&quot;&gt;&lt;a&gt;&amp;#128196; Source document&lt;/a&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;card p4 ind&quot;&gt;
+      &lt;div class=&quot;row-top&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;chips&quot;&gt;
+            &lt;span class=&quot;lbl11&quot;&gt;City Council map amendment&lt;/span&gt;
+            &lt;span class=&quot;badge sec&quot;&gt;Passed&lt;/span&gt;
+            &lt;span class=&quot;jb&quot;&gt;O2014-4194&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;h4 class=&quot;h4&quot;&gt;Zoning Reclassification Map No. 1-H &amp;middot; App No. 18063&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;span class=&quot;xs&quot; style=&quot;margin-top:0&quot;&gt;Jul 30, 2014&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;p class=&quot;p-xs&quot;&gt;Introduced Jul 30, 2014 &amp;middot; passed Jul 30, 2014&lt;/p&gt;
+      &lt;p class=&quot;p-xs&quot;&gt;Counsel: Sara K. Barnes (Law Office of Samuel V.P. Banks)&lt;/p&gt;
+      &lt;div class=&quot;links&quot;&gt;&lt;a&gt;&amp;#127760; Councilmatic&lt;/a&gt;&lt;a&gt;&amp;#8599; Legistar&lt;/a&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Board finding --&gt;
+  &lt;div class=&quot;card p4 mu&quot;&gt;
+    &lt;h3 class=&quot;h3&quot;&gt;Board finding&lt;/h3&gt;
+    &lt;blockquote&gt;&amp;ldquo;The existing two-story, two dwelling unit front building and one dwelling unit rear building will remain.&amp;rdquo;&lt;/blockquote&gt;
+    &lt;p class=&quot;p-xs&quot;&gt;This describes the Board record, not a certificate of occupancy or a finding about present lawful use.&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Counsel &amp; architect --&gt;
+  &lt;div class=&quot;card p4&quot;&gt;
+    &lt;h3 class=&quot;h3&quot;&gt;Counsel &amp;amp; architect&lt;/h3&gt;
+    &lt;div class=&quot;contacts&quot;&gt;
+      &lt;div class=&quot;c&quot;&gt;&lt;p&gt;&lt;b style=&quot;font-weight:500&quot;&gt;Zoning counsel:&lt;/b&gt; Sara K. Barnes &amp;middot; Law Office of Samuel V.P. Banks&lt;/p&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- DPD --&gt;
+  &lt;div class=&quot;card p4 am&quot;&gt;
+    &lt;h3 class=&quot;h3&quot;&gt;Current DPD application context&lt;/h3&gt;
+    &lt;p class=&quot;xs&quot;&gt;Exact address match on recent Chicago Plan Commission hearing pages. This is a filed application signal, not an approval, permit, or proof of construction.&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;foot&quot;&gt;
+    City Council: Councilmatic matter index checked back to 2011. ZBA: calendar and decisions checked for ward 27.
+    &lt;span&gt;A City Council map amendment changes the district map; it is not, by itself, a permit, variance, certificate of occupancy, or proof that a proposed project was built.&lt;/span&gt;
+  &lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/body&gt;&lt;/html&gt;
+"></iframe></div>
+  <div class="col"><div class="hd p">Step 14b — the rewrite<span class="sub">kyp-base.css + the 13b patch · .kyp-zrec / .kyp-says / .kyp-xfer.zone</span></div>
+    <iframe srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;title&gt;Zoning History — Step 14b&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+/* ============================================================
+   KYP — THE shared component sheet. ONE definition of every
+   token, type level, and primitive. Every section @imports this
+   and adds ZERO css of its own. If two sections ever look
+   different, it&#x27;s because someone wrote css outside this file —
+   don&#x27;t. Add the value here once, use the class everywhere.
+   ============================================================ */
+
+:root{
+  --kyp-paper:#faf9f6; --kyp-card:#fff; --kyp-wash:#f4f2ec;
+  --kyp-ink:#141414; --kyp-ink2:#565651; --kyp-muted:#8b8a84; --kyp-line:#e7e5df;
+  --kyp-indigo:#2b3a9e; --kyp-indigoL:#3f51cf; --kyp-indigoSoft:#eef0fb;
+  --kyp-green:#2f7d3f; --kyp-orange:#e07a2e; --kyp-bad:#c0392b; --kyp-slate:#3a3a36;
+  --kyp-disp:&#x27;Instrument Serif&#x27;; --kyp-mono:&#x27;JetBrains Mono&#x27;; --kyp-sans:&#x27;Inter&#x27;;
+   --kyp-debt:#0a93b8; --kyp-debtSoft:#e6f5f9; --kyp-debtLine:#b9e2ee;
+}
+
+/* Active Listing — CLAIMED describes the seller-side source, not a verified property fact. */
+.kyp-prov{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:3px 7px;flex:none}
+.kyp-prov.claimed{color:#fff;background:var(--kyp-slate)}
+.kyp-block .bclaim{align-self:flex-start;font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.22);border-radius:5px;padding:3px 7px;margin-bottom:9px}
+.kyp-lstat{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--kyp-wash);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:12.5px;color:var(--kyp-ink2)}
+.kyp-lstat .pill{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--kyp-green);border-radius:5px;padding:4px 9px;flex:none}
+.kyp-lstat b{color:var(--kyp-ink);font-weight:600}.kyp-lstat a{color:var(--kyp-indigo);text-decoration:none;font-weight:600}
+.kyp-lstat .rc{margin-left:auto;font-family:var(--kyp-mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--kyp-indigo);cursor:pointer;white-space:nowrap;background:none;border:0}
+.kyp-xrow{display:grid;grid-template-columns:1fr 1fr 118px;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--kyp-line)}
+.kyp-xrow:last-of-type{border-bottom:none}.kyp-xrow .k{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted);display:block;margin-bottom:3px}
+.kyp-xrow .v{font-size:14.5px;font-weight:600;color:var(--kyp-ink)}.kyp-xrow .v.na{color:var(--kyp-muted);font-weight:400;font-size:13px}
+.kyp-xrow .res{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;border-radius:6px;padding:5px 9px;text-align:center}
+.kyp-xrow .res.ok{background:var(--kyp-green)}.kyp-xrow .res.diff{background:var(--kyp-orange)}.kyp-xrow .res.bad{background:var(--kyp-bad)}.kyp-xrow .res.none{background:var(--kyp-wash);color:var(--kyp-ink2);border:1px solid var(--kyp-line)}
+.kyp-disc{display:flex;gap:11px;align-items:flex-start;padding:11px 14px;border-radius:10px;margin-bottom:8px;background:#fdf8f0;border:1px solid #e6cfa0;border-left:4px solid var(--kyp-orange)}
+.kyp-disc.noted{background:var(--kyp-indigoSoft);border-color:#dfe3f7;border-left-color:var(--kyp-indigo)}.kyp-disc.noted .ic{background:var(--kyp-indigo)}
+.kyp-disc.cleared{background:#e9f4ec;border-color:#cfe6d5;border-left-color:var(--kyp-green)}.kyp-disc.cleared .ic{background:var(--kyp-green)}
+.kyp-disc .ic{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--kyp-orange);border-radius:5px;padding:4px 8px;flex:none}
+.kyp-disc .tx{font-size:13px;color:var(--kyp-ink);line-height:1.5}
+@media (max-width:640px){.kyp-xrow{grid-template-columns:1fr}.kyp-xrow .res{justify-self:start}}
+
+/* ========== TYPE RAMP — six levels, three fonts ========== */
+.kyp-eyebrow{display:flex;align-items:center;gap:8px;font-family:var(--kyp-mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--kyp-indigo);margin-bottom:12px}
+.kyp-eyebrow .dot{width:9px;height:9px;border-radius:2px;background:currentColor;flex:none}
+.kyp-eyebrow.fam-green{color:var(--kyp-green)} .kyp-eyebrow.fam-orange{color:var(--kyp-orange)}
+.kyp-eyebrow.fam-slate{color:var(--kyp-slate)} .kyp-eyebrow.fam-indigo{color:var(--kyp-indigo)}
+
+.kyp-headline{font-family:var(--kyp-sans);font-weight:600;font-size:clamp(21px,2.3vw,26px);line-height:1.28;letter-spacing:-.01em;color:var(--kyp-ink);margin-bottom:16px;max-width:52ch}
+.kyp-headline em{font-family:var(--kyp-disp);font-style:italic;font-weight:400;font-size:1.08em;color:var(--kyp-indigo)}
+.kyp-headline em.att{color:var(--kyp-orange)} .kyp-headline em.grn{color:var(--kyp-green)}
+
+.kyp-title{font-family:var(--kyp-sans);font-weight:700;font-size:17px;letter-spacing:-.01em;color:var(--kyp-ink);margin-bottom:12px}
+.kyp-title .qual{font-weight:400;color:var(--kyp-ink2);font-size:.82em}
+
+.kyp-stat{font-family:var(--kyp-disp);font-size:clamp(28px,3vw,38px);line-height:1;color:var(--kyp-ink)}
+.kyp-label{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-ink2)}
+.kyp-src{font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-muted);line-height:1.45;margin-top:12px;border-top:1px solid var(--kyp-line);padding-top:9px}
+.kyp-body{font-family:var(--kyp-sans);font-size:14px;line-height:1.5;color:var(--kyp-ink2)}
+.kyp-charttitle{font-family:var(--kyp-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--kyp-ink2);font-weight:700;margin:24px 0 8px}
+
+/* ========== PILLS ========== */
+.kyp-pill{display:inline-flex;align-items:center;gap:5px;font-family:var(--kyp-mono);font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;border-radius:7px;padding:3px 9px}
+.kyp-pill.good{background:var(--kyp-green)} .kyp-pill.att{background:var(--kyp-orange)}
+.kyp-pill.bad{background:var(--kyp-bad)} .kyp-pill.ctx{background:var(--kyp-slate)}
+.kyp-linepill{display:inline-block;border-radius:5px;padding:1px 7px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;color:#fff}
+.kyp-trend{font-family:var(--kyp-mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;color:#fff}
+.kyp-trend.up{background:var(--kyp-green)} .kyp-trend.down{background:var(--kyp-bad)}
+.kyp-rank{font-family:var(--kyp-mono);font-size:11px;font-weight:700;color:#fff;background:var(--kyp-slate);border-radius:6px;padding:2px 8px}
+
+/* ========== CARD SHELL ========== */
+.kyp-card{background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:16px;padding:22px 24px}
+
+/* ========== SECTION INDENT (universal rule) ==========
+   The section&#x27;s DOT/bullet hangs alone in a left gutter. The eyebrow TEXT,
+   the headline, the verdict pill, and ALL content align to ONE text column
+   past the bullet — exactly like the collapsed row (number badge in the
+   gutter, title + takeaway tabbed past it). Nothing sits flush with the
+   bullet. Put the whole section in .kyp-sec. Gutter = dot(9) + gap(8) = 17. */
+.kyp-sec{padding-left:17px}
+.kyp-sec &gt; .kyp-eyebrow .dot{margin-left:-17px}
+.kyp-content{padding-left:0}
+
+/* ========== LIST ROWS (accent bar) ========== */
+.kyp-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--kyp-line)}
+.kyp-row:last-child{border-bottom:none}
+.kyp-rbar{width:4px;height:30px;border-radius:2px;flex:none;background:var(--kyp-indigo)}
+.kyp-rn{font-size:14.5px;font-weight:600;flex:1}
+.kyp-rd{font-family:var(--kyp-mono);font-size:12px;color:var(--kyp-ink2);font-weight:600}
+
+/* ========== STATION / ROUTE HEADER ========== */
+.kyp-rhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.kyp-rname{font-size:16px;font-weight:700}
+
+/* ========== FILLED STAT BLOCK ========== */
+.kyp-blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.kyp-block{border-radius:12px;padding:16px;color:#fff;min-height:132px;display:flex;flex-direction:column;justify-content:space-between}
+.kyp-block.ind{background:var(--kyp-indigoL)} .kyp-block.grn{background:var(--kyp-green)}
+.kyp-block.debt{background:var(--kyp-debt)}
+.kyp-block.dark{background:#16171b} .kyp-block.slate{background:var(--kyp-slate)}
+.kyp-block .bv{font-family:var(--kyp-disp);font-size:36px;line-height:.95}
+.kyp-block .bl{font-family:var(--kyp-mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;opacity:.92}
+.kyp-block .bd{font-size:10.5px;opacity:.85;margin-top:2px;line-height:1.3}
+.kyp-block .chip{align-self:flex-start;font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;background:rgba(255,255,255,.2);border-radius:6px;padding:3px 8px}
+.kyp-block .dots{display:flex;gap:5px}
+.kyp-block .dots i{width:11px;height:11px;border-radius:3px;background:rgba(255,255,255,.35)}
+.kyp-block .dots i.on{background:rgba(255,255,255,.95)}
+
+/* ========== DAY-TYPE BOX ========== */
+.kyp-daybox{background:var(--kyp-wash);border-radius:12px;padding:15px 16px;margin-bottom:14px}
+.kyp-daytop{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px}
+.kyp-dbig{font-family:var(--kyp-disp);font-size:34px;line-height:.9}
+.kyp-dbl{font-family:var(--kyp-mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--kyp-ink2);font-weight:700;margin-top:4px}
+.kyp-dtri{display:flex;gap:18px}
+.kyp-dcell{text-align:right}
+.kyp-dcell .dv{font-family:var(--kyp-disp);font-size:20px;line-height:1}
+.kyp-dcell .dl{font-family:var(--kyp-mono);font-size:9px;text-transform:uppercase;color:var(--kyp-muted);font-weight:700;margin-top:2px}
+.kyp-daybars{display:flex;align-items:flex-end;gap:6px;height:40px}
+.kyp-daybars i{flex:1;border-radius:5px 5px 0 0;background:var(--kyp-indigoL)}
+.kyp-daybars i.sat{background:#9aa6e6} .kyp-daybars i.sun{background:#c3cbf1}
+.kyp-dlab{display:flex;gap:6px;margin-top:5px}
+.kyp-dlab span{flex:1;text-align:center;font-family:var(--kyp-mono);font-size:9px;color:var(--kyp-muted);font-weight:700;text-transform:uppercase}
+
+/* ========== COMPARISON BAR ========== */
+.kyp-cmp{margin:14px 0 4px}
+.kyp-cmptop{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.kyp-cmplab{font-family:var(--kyp-mono);font-size:10px;text-transform:uppercase;color:var(--kyp-ink2);font-weight:700}
+.kyp-track{position:relative;height:14px;background:var(--kyp-wash);border-radius:8px}
+.kyp-track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:var(--kyp-indigoL)}
+.kyp-track .tick{position:absolute;top:-3px;width:2px;height:20px;background:var(--kyp-ink2);opacity:.5}
+.kyp-track .tlab{position:absolute;top:20px;font-family:var(--kyp-mono);font-size:8.5px;color:var(--kyp-muted);transform:translateX(-50%);white-space:nowrap;font-weight:700}
+.kyp-cap{font-size:12px;color:var(--kyp-ink2);margin-top:26px;line-height:1.4}
+
+/* ===== MODE TILES (walk time as a left marker panel) — replaces the old .kyp-mtile ===== */
+.kyp-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kyp-mtile{display:flex;border:1px solid var(--kyp-line);border-radius:13px;overflow:hidden;background:var(--kyp-card)}
+.kyp-mtw{flex:none;width:74px;background:var(--kyp-indigoSoft);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;border-right:1px solid var(--kyp-line)}
+.kyp-mtw .big{font-family:var(--kyp-disp);font-size:38px;line-height:.85;color:var(--kyp-indigo)}
+.kyp-mtw .u{font-family:var(--kyp-mono);font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo);opacity:.82;margin-top:4px;text-align:center}
+.kyp-mtbody{padding:13px 15px;min-width:0}
+.kyp-mth{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo);margin-bottom:5px}
+.kyp-mtn{font-size:15px;font-weight:700;color:var(--kyp-ink)}
+.kyp-mtpills{margin-top:6px}
+.kyp-mts{font-size:11px;color:var(--kyp-ink2);margin-top:7px;line-height:1.35}
+
+/* ========== METRA CARD ========== */
+.kyp-mcard{border:1px solid var(--kyp-line);border-radius:11px;padding:13px;margin-bottom:10px}
+.kyp-mctop{display:flex;align-items:center;gap:9px;margin-bottom:9px;flex-wrap:wrap}
+.kyp-mline{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--kyp-line);font-size:13px}
+.kyp-mline:last-child{border-bottom:none}
+.kyp-zone{font-size:12px;color:var(--kyp-ink2);font-style:italic;margin-top:10px;line-height:1.45;background:var(--kyp-wash);padding:10px 12px;border-radius:9px}
+.kyp-zb{display:inline-block;font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;color:var(--kyp-ink2);border:1px solid var(--kyp-line);border-radius:5px;padding:1px 7px}
+
+/* ========== CHART LEGEND ========== */
+.kyp-leg{display:flex;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.kyp-lg{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.kyp-lg .ln{width:14px;height:3px;border-radius:2px}
+svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
+.kyp-axc{font-family:var(--kyp-mono);font-size:9px;fill:var(--kyp-muted)}
+
+/* ========== GROUP DIVIDER (count badge + label + rule) ========== */
+.kyp-group{display:flex;align-items:center;gap:11px;margin:22px 0 14px}
+.kyp-gcount{font-family:var(--kyp-mono);font-size:12px;font-weight:700;color:#fff;border-radius:7px;padding:3px 9px;min-width:28px;text-align:center}
+.kyp-glabel{font-family:var(--kyp-mono);font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.kyp-grule{flex:1;height:1px;background:var(--kyp-line)}
+.kyp-group.on .kyp-gcount{background:var(--kyp-green)} .kyp-group.on .kyp-glabel{color:var(--kyp-ink)}
+.kyp-group.off .kyp-gcount{background:var(--kyp-slate);opacity:.72} .kyp-group.off .kyp-glabel{color:var(--kyp-muted)}
+
+/* ========== COLLAPSED SCAN ROW (the report ToC) ========== */
+.kyp-scan{display:flex;flex-direction:column;gap:10px}
+@keyframes kypIn{to{opacity:1;transform:none}}
+.kyp-scanrow{display:flex;align-items:stretch;background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:13px;overflow:visible;
+  opacity:0;transform:translateY(10px);animation:kypIn .5s cubic-bezier(.2,.7,.2,1) forwards;
+  transition:box-shadow .16s ease,transform .16s ease,background .16s ease,border-color .16s ease}
+.kyp-scanrow:hover{transform:translateX(3px);box-shadow:0 7px 22px rgba(20,20,20,.09);border-color:#d9d6cd;z-index:2}
+.kyp-scanrow.drag{opacity:.35}
+.kyp-scanrow.over{box-shadow:0 0 0 2px var(--kyp-indigo) inset}
+.kyp-scanrow .accent{width:5px;flex:none;border-radius:13px 0 0 13px;transition:width .16s ease}
+.kyp-scanrow:hover .accent{width:9px}
+.kyp-fam-indigo .accent{background:var(--kyp-indigo)} .kyp-fam-green .accent{background:var(--kyp-green)}
+.kyp-fam-orange .accent{background:var(--kyp-orange)} .kyp-fam-slate .accent{background:var(--kyp-slate)}
+.kyp-fam-indigo:hover{background:#f7f8fd} .kyp-fam-green:hover{background:#f6faf7}
+.kyp-fam-orange:hover{background:#fdf8f2} .kyp-fam-slate:hover{background:#f8f8f6}
+.kyp-drag{display:flex;align-items:center;padding:0 6px 0 11px;color:#c9c6bd;cursor:grab;font-size:14px;line-height:1;user-select:none;transition:color .15s}
+.kyp-scanrow:hover .kyp-drag{color:var(--kyp-ink2)}
+.kyp-drag:active{cursor:grabbing}
+/* number badge — the gutter that title + takeaway both align past */
+.kyp-numb{align-self:center;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--kyp-mono);font-size:13px;font-weight:700;flex:none;font-variant-numeric:tabular-nums;margin-right:13px;transition:transform .16s ease}
+.kyp-scanrow:hover .kyp-numb{transform:scale(1.07)}
+.kyp-fam-indigo .kyp-numb{background:#eef0fb;color:var(--kyp-indigo)} .kyp-fam-green .kyp-numb{background:#e9f4ec;color:var(--kyp-green)}
+.kyp-fam-orange .kyp-numb{background:#fbeede;color:#c0651e} .kyp-fam-slate .kyp-numb{background:#ecece9;color:var(--kyp-slate)}
+.kyp-scanmain{flex:1;min-width:0;padding:12px 8px 12px 0;display:flex;flex-direction:column;gap:3px;justify-content:center;cursor:pointer}
+.kyp-scankick{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.kyp-fam-indigo .kyp-scankick{color:var(--kyp-indigo)} .kyp-fam-green .kyp-scankick{color:var(--kyp-green)}
+.kyp-fam-orange .kyp-scankick{color:#c0651e} .kyp-fam-slate .kyp-scankick{color:var(--kyp-slate)}
+/* SCAN colored by VERDICT — ONE color system (use .kyp-v-good/att/ctx on the row).
+   accent + number badge + kicker + takeaway-emphasis + pill all share the verdict
+   tone, so a row reads as its verdict from either side. green=good, orange=attention,
+   slate=context. (Family colors are for expanded-section theming, not the scan.) */
+.kyp-v-good .accent{background:var(--kyp-green)} .kyp-v-att .accent{background:var(--kyp-orange)} .kyp-v-ctx .accent{background:var(--kyp-slate)}
+.kyp-v-good .kyp-numb{background:#e9f4ec;color:var(--kyp-green)} .kyp-v-att .kyp-numb{background:#fbeede;color:#c0651e} .kyp-v-ctx .kyp-numb{background:#ecece9;color:var(--kyp-slate)}
+.kyp-v-good .kyp-scankick{color:var(--kyp-green)} .kyp-v-att .kyp-scankick{color:#c0651e} .kyp-v-ctx .kyp-scankick{color:var(--kyp-slate)}
+.kyp-v-good:hover{background:#f6faf7} .kyp-v-att:hover{background:#fdf8f2} .kyp-v-ctx:hover{background:#f8f8f6}
+.kyp-scantake{font-size:15px;font-weight:600;color:var(--kyp-ink);line-height:1.3;letter-spacing:-.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kyp-scantake em{font-family:var(--kyp-disp);font-style:italic;font-weight:400;font-size:1.08em;letter-spacing:0}
+.kyp-v-good .kyp-scantake em{color:var(--kyp-green)} .kyp-v-att .kyp-scantake em{color:#c0651e} .kyp-v-ctx .kyp-scantake em{color:var(--kyp-slate)}
+.kyp-scanright{display:flex;align-items:center;gap:12px;padding-right:14px;flex:none}
+.kyp-hero{text-align:right;line-height:1}
+.kyp-hero .hv{font-family:var(--kyp-disp);font-size:25px;color:var(--kyp-ink);line-height:.95}
+.kyp-hero .hl{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted);margin-top:3px}
+.kyp-info{position:relative;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--kyp-line);color:var(--kyp-muted);display:flex;align-items:center;justify-content:center;font-family:var(--kyp-disp);font-size:12px;font-style:italic;cursor:help;flex:none;transition:border-color .15s,color .15s}
+.kyp-info:hover{border-color:var(--kyp-indigo);color:var(--kyp-indigo)}
+.kyp-tip{display:none;position:fixed;width:256px;z-index:60;background:#16171b;color:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 14px 38px rgba(0,0,0,.26);text-align:left;cursor:default;font-family:var(--kyp-sans);font-style:normal}
+.kyp-tip li,.kyp-tip .tt{font-style:normal}
+.kyp-tip.show{display:block;animation:kypIn .14s ease forwards}
+.kyp-tip .tt{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#aab2e4;margin-bottom:9px}
+.kyp-tip ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.kyp-tip li{font-size:11.5px;line-height:1.35;color:#e8e8ec;padding-left:13px;position:relative}
+.kyp-tip li::before{content:&#x27;&#x27;;position:absolute;left:0;top:6px;width:4px;height:4px;border-radius:50%;background:#6b78c9}
+.kyp-tip .arw{position:absolute;top:-5px;right:12px;width:11px;height:11px;background:#16171b;transform:rotate(45deg)}
+.kyp-chev{width:16px;height:16px;stroke:var(--kyp-muted);fill:none;stroke-width:2.4;flex:none;transition:transform .2s ease}
+.kyp-scanrow.open .kyp-chev{transform:rotate(180deg)}
+.kyp-eye{width:30px;display:flex;align-items:center;justify-content:center;color:var(--kyp-muted);cursor:pointer;flex:none;transition:color .15s}
+.kyp-eye:hover{color:var(--kyp-ink)}
+.kyp-eye svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.kyp-scanrow.off{opacity:.5;background:var(--kyp-wash)}
+.kyp-scanrow.off .accent{background:var(--kyp-muted)!important}
+.kyp-scanrow.off .kyp-numb{background:#ecece9!important;color:var(--kyp-muted)!important}
+.kyp-scanrow.off .kyp-scankick{color:var(--kyp-muted)!important}
+.kyp-preview{display:none;padding:4px 16px 15px 0;margin-top:9px;border-top:1px solid var(--kyp-line)}
+.kyp-scanrow.open .kyp-preview{display:block}
+.kyp-pvrow{display:flex;gap:9px;font-size:13px;color:var(--kyp-ink2);margin-top:10px;line-height:1.45}
+.kyp-pvrow .sq{width:7px;height:7px;border-radius:2px;flex:none;margin-top:5px}
+.kyp-jump{margin-top:13px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--kyp-indigo);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+
+/* ========== INCENTIVE CARD ========== */
+.kyp-inc{border:1px solid var(--kyp-line);border-left:4px solid var(--kyp-green);border-radius:12px;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px;background:var(--kyp-card);transition:transform .12s ease,box-shadow .12s ease}
+.kyp-inc:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,20,20,.07)}
+.kyp-inc .in{font-size:15.5px;font-weight:700}
+.kyp-inc .id{font-size:12.5px;color:var(--kyp-ink2);margin-top:3px;line-height:1.4}
+.kyp-incgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kyp-inc.na{border-left-color:var(--kyp-slate);opacity:.62;background:transparent;border-style:dashed}
+.kyp-inc.na:hover{transform:none;box-shadow:none}
+.kyp-inc.na .in{color:var(--kyp-ink2)}
+
+/* ── incentives: orange StatBlock + warn group divider (Needs-confirmation state) ── */
+.kyp-block.orange{background:var(--kyp-orange)}
+.kyp-group.warn .kyp-gcount{background:var(--kyp-orange)} .kyp-group.warn .kyp-glabel{color:var(--kyp-ink)}
+
+/* ── rich incentive program card (expandable) ── */
+.kyp-inccard{border:1px solid var(--kyp-line);border-left:4px solid var(--kyp-slate);border-radius:12px;background:var(--kyp-card);margin-bottom:10px;transition:box-shadow .12s ease}
+.kyp-inccard.good{border-left-color:var(--kyp-green)} .kyp-inccard.caution{border-left-color:var(--kyp-orange)}
+.kyp-inccard.na{border-left-color:var(--kyp-slate);opacity:.7}
+.kyp-inccard:hover{box-shadow:0 4px 14px rgba(20,20,20,.06)}
+.kic-hd{display:flex;align-items:center;gap:11px;padding:14px 16px;cursor:pointer;flex-wrap:wrap}
+.kic-nm{font-size:15px;font-weight:700;color:var(--kyp-ink)}
+.kic-tp{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-ink2);background:var(--kyp-wash);border:1px solid var(--kyp-line);border-radius:5px;padding:3px 7px}
+.kic-hd .kyp-pill{margin-left:auto}
+.kic-chev{width:15px;height:15px;stroke:var(--kyp-muted);fill:none;stroke-width:2.4;flex:none;transition:transform .18s ease}
+.kyp-inccard.open .kic-chev{transform:rotate(180deg)}
+.kic-body{display:none;padding:0 16px 16px}
+.kyp-inccard.open .kic-body{display:block}
+.kic-v{border-radius:9px;padding:12px 14px;margin-bottom:12px}
+.kyp-inccard.good .kic-v{background:#e9f4ec} .kyp-inccard.caution .kic-v{background:#fbf4e2} .kyp-inccard.na .kic-v{background:var(--kyp-wash)}
+.kic-vt{font-size:13px;font-weight:600;color:var(--kyp-ink);line-height:1.5}
+.kic-vs{font-size:12px;color:var(--kyp-ink2);line-height:1.5;margin-top:5px}
+.kic-kf{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.kic-kfc{background:var(--kyp-wash);border-radius:11px;padding:13px 15px;min-width:122px}
+.kic-kl{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-ink2);margin-bottom:7px}
+.kic-kv{font-family:var(--kyp-disp);font-size:27px;line-height:1;color:var(--kyp-ink)}
+.kic-kd{font-size:11px;color:var(--kyp-ink2);margin-top:7px;line-height:1.4;max-width:150px}
+.kic-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:12px}
+.kic-ch{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted);margin-bottom:6px}
+.kic-cols ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+.kic-cols li{font-size:12px;color:var(--kyp-ink2);line-height:1.45;padding-left:13px;position:relative}
+.kic-cols li::before{content:&#x27;&#x27;;position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:var(--kyp-indigo)}
+.kic-ft{display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding-top:12px;border-top:1px solid var(--kyp-line)}
+.kic-lnk{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-indigo);text-decoration:none;display:inline-flex;gap:5px;align-items:center}
+.kic-src{margin-left:auto;font-family:var(--kyp-mono);font-size:9.5px;color:var(--kyp-muted)}
+.kic-type{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--kyp-ink2);margin:16px 0 9px}
+/* group-collapse: mirror whatever hides .inc when its group folds, for hybrid cards */
+.kyp-inccard.inc-hidden{display:none}
+/* print: hybrid cards must print full detail even when screen-collapsed (parity with .incbody rule) */
+@media print{.kyp-inccard .kic-body{display:block !important}.kic-chev{display:none}}
+
+/* ===== Ownership &amp; Title: borrowed money is a category, not a verdict ===== */
+.kyp-owner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--kyp-indigoSoft);border-radius:12px;padding:13px 16px;margin-bottom:14px}
+.kyp-owner .olab,.kyp-owner .oent,.kyp-mt,.kyp-xact .xtag,.kyp-xact .xf .k,.kyp-terms .tk{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.kyp-owner .olab{color:var(--kyp-indigo);background:#fff;border-radius:5px;padding:3px 8px}
+.kyp-owner .onm{font-size:16.5px;font-weight:700;color:var(--kyp-ink)} .kyp-owner .oent{color:var(--kyp-ink2);background:#fff;border:1px solid var(--kyp-line);border-radius:5px;padding:3px 7px}
+.kyp-owner .osince{margin-left:auto;font-size:12.5px;color:var(--kyp-ink2)} .kyp-owner .osince b{color:var(--kyp-ink)}
+.kyp-owner-banner{font-size:12px;color:var(--kyp-ink2);background:var(--kyp-wash);border:1px solid var(--kyp-line);border-radius:9px;padding:9px 12px;margin-bottom:10px}
+.kyp-mt{display:inline-flex;border-radius:5px;padding:3px 7px;color:#fff;align-self:flex-start}.kyp-mt.paid{background:var(--kyp-indigo)} .kyp-mt.borrowed{background:var(--kyp-debt)} .kyp-mt.claimed{background:var(--kyp-bad)} .kyp-mt.cleared{background:var(--kyp-slate)}
+.kyp-block .bbreak{border-top:1px solid rgba(255,255,255,.28);padding-top:9px;margin-top:9px}.kyp-xact{border:1px solid var(--kyp-line);border-left:5px solid var(--kyp-indigo);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--kyp-card)}.kyp-xact.loan{border-left-color:var(--kyp-debt)}.kyp-xact.loan.cleared,.kyp-xact.claim.cleared{border-left-color:var(--kyp-muted);background:#f7f7f4}.kyp-xact.claim{border-left-color:var(--kyp-bad)}
+.kyp-target-flash{animation:kyp-target-flash 1.4s ease-out}
+@keyframes kyp-target-flash{0%,35%{box-shadow:0 0 0 4px rgba(48,61,172,.24)}100%{box-shadow:0 0 0 0 rgba(48,61,172,0)}}
+.kyp-xact .xtop{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:9px}.kyp-xact .xttl{font-size:15.5px;font-weight:700;color:var(--kyp-ink)}.kyp-xact .xamt{font-family:var(--kyp-disp);font-size:27px;line-height:1;color:var(--kyp-ink);margin-left:auto}.kyp-xact .xtags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.kyp-xact .xtag{color:var(--kyp-ink2);background:var(--kyp-wash);border:1px solid var(--kyp-line);border-radius:5px;padding:3px 7px}
+.kyp-xact .xamount{display:flex;flex-direction:column;align-items:flex-end;gap:3px;margin-left:auto}
+.kyp-xact .xamount .xamt{margin-left:0}
+.kyp-xact .xamount small{font-family:var(--kyp-mono);font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--kyp-muted)}
+.kyp-xact .xtag.ok{color:var(--kyp-green);background:#edf7ef;border-color:#c6dfcb}
+.kyp-xact .xtag.att{color:#7a4619;background:#fff6e9;border-color:#ead2ad}
+.kyp-xact .xgrid,.kyp-terms{display:grid;grid-template-columns:1fr 1fr;gap:9px 22px;padding-top:10px;border-top:1px dashed var(--kyp-line)}.kyp-xact .xf .k,.kyp-terms .tk{display:block;color:var(--kyp-muted);margin-bottom:2px}.kyp-xact .xf .v{font-size:13.5px;color:var(--kyp-ink);font-weight:600}.kyp-terms{grid-template-columns:repeat(3,1fr);margin-top:11px}.kyp-terms .tv{font-size:13.5px;font-weight:600;color:var(--kyp-ink)}
+.kyp-terms .tn{display:block;margin-top:3px;font-size:10.5px;line-height:1.35;color:var(--kyp-muted)}
+.kyp-docref{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:1px dashed var(--kyp-line);font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-ink2)}.kyp-docref .k{font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted)}.kyp-docref a{color:var(--kyp-indigo);font-weight:700;text-decoration:none}.kyp-docref .sep{color:#c8c6bd}.kyp-docref .approx{color:var(--kyp-muted)}
+.kyp-loc{display:flex;gap:11px;align-items:flex-start;background:#fdf8f0;border:1px solid #e6cfa0;border-left:4px solid var(--kyp-orange);border-radius:11px;padding:12px 15px;margin-top:12px}.kyp-loc .ic{font-family:var(--kyp-mono);font-size:9px;font-weight:700;text-transform:uppercase;color:#fff;background:var(--kyp-orange);border-radius:5px;padding:4px 8px}.kyp-loc .tx{font-size:12.5px;color:var(--kyp-ink2);line-height:1.5}
+.kyp-timeline-line{height:6px;background:var(--kyp-debt);border-radius:999px;margin:20px 0 12px}.kyp-timeline-events{display:flex;gap:8px;flex-wrap:wrap}.kyp-timeline-event{display:flex;flex-direction:column;gap:2px;font-family:var(--kyp-mono);font-size:9px;color:var(--kyp-muted);padding:5px 8px;border-left:2px solid var(--kyp-debt)}.kyp-timeline-event small{font-family:var(--kyp-sans);font-size:11px;color:var(--kyp-ink2)}
+.kyp-timeline-events button.kyp-timeline-event{appearance:none;text-align:left;border-top:0;border-right:0;border-bottom:0;background:transparent;cursor:pointer;border-radius:0 6px 6px 0;transition:background .15s ease}
+.kyp-timeline-events button.kyp-timeline-event:hover{background:var(--kyp-wash)}
+.kyp-timeline-events button.kyp-timeline-event:focus-visible{outline:2px solid var(--kyp-indigo);outline-offset:2px}
+.kyp-timeline-event.paid{border-left-color:var(--kyp-indigo)}
+.kyp-timeline-event.claimed{border-left-color:var(--kyp-bad)}
+.kyp-timeline-event.prior-debt{border-left-color:var(--kyp-muted)}
+.kyp-scope-change{margin-top:10px;padding:9px 12px;border-radius:8px;background:var(--kyp-debtSoft);border:1px solid var(--kyp-debtLine);font-size:11.5px;line-height:1.45;color:var(--kyp-ink2)}
+.kyp-timeline-coverage{display:flex;align-items:flex-start;gap:16px;margin-top:12px;padding:11px 13px;border:1px solid var(--kyp-debtLine);border-radius:9px;background:var(--kyp-debtSoft)}
+.kyp-timeline-coverage .coverage-label{flex:0 0 auto;font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-debt)}
+.kyp-timeline-coverage div{display:grid;gap:4px}
+.kyp-timeline-coverage p{margin:0;font-size:11.5px;line-height:1.45;color:var(--kyp-ink2)}
+.kyp-timeline-coverage .coverage-row{display:grid;grid-template-columns:minmax(155px,auto) 1fr;gap:14px}
+.kyp-timeline-coverage .coverage-row span{color:var(--kyp-ink2)}
+.kyp-subhead-minor{margin-top:14px}
+.kyp-coverage{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-top:11px;padding:10px 12px;border-radius:8px;background:var(--kyp-debtSoft);border:1px solid var(--kyp-debtLine)}
+.kyp-coverage span{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-debt)}
+.kyp-coverage b{font-size:11.5px;line-height:1.4;text-align:right;color:var(--kyp-ink)}
+.kyp-loan-note,.kyp-otlnote{margin-top:10px;padding:9px 11px;border-radius:8px;background:var(--kyp-wash);font-size:11.5px;line-height:1.45;color:var(--kyp-ink2)}
+.kyp-runway{margin-top:11px;padding:10px 12px;border:1px solid var(--kyp-debtLine);border-radius:9px;background:var(--kyp-debtSoft)}
+.kyp-runway .runway-head,.kyp-runway .runway-dates{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.kyp-runway .runway-head span{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-debt)}
+.kyp-runway .runway-head b{font-size:10.5px;color:var(--kyp-ink2);text-align:right}
+.kyp-runway .runway-track{height:6px;margin:8px 0 5px;border-radius:999px;background:#d9e6e9;overflow:hidden}
+.kyp-runway .runway-track span{display:block;height:100%;border-radius:inherit;background:var(--kyp-debt)}
+.kyp-runway .runway-dates{font-family:var(--kyp-mono);font-size:8.5px;color:var(--kyp-muted)}
+.kyp-status-empty{padding:13px 15px;border:1px solid var(--kyp-line);border-radius:10px;background:var(--kyp-wash);font-size:12.5px;line-height:1.5;color:var(--kyp-ink2)}
+.kyp-status-empty.clear{background:#edf7ef;border-color:#c6dfcb;color:#235f30}
+.kyp-status-empty.unknown{background:#f3f3f0;border-color:#d9d8d1;color:var(--kyp-ink2)}
+.kyp-title-alert{margin-bottom:10px;padding:12px 14px;border-radius:10px;font-size:12.5px;line-height:1.5}
+.kyp-title-alert.bad{background:#fbeeed;border:1px solid #e7bfbb;color:#81251d}
+.kyp-owner-lien-tools{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:11px;padding:11px 13px;border:1px solid var(--kyp-line);border-radius:9px;background:var(--kyp-wash)}
+.kyp-owner-lien-tools&gt;div:first-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.kyp-owner-lien-tools .tool-label{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted)}
+.kyp-owner-lien-tools b{font-size:12.5px;color:var(--kyp-ink);overflow-wrap:anywhere}
+.kyp-owner-lien-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.kyp-owner-lien-editor{display:flex;gap:8px;margin:-2px 0 12px}
+.kyp-owner-lien-editor input{flex:1;min-width:0;border:1px solid var(--kyp-line);border-radius:8px;background:var(--kyp-card);padding:8px 10px;font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-ink);outline:none}
+.kyp-owner-lien-editor input:focus{border-color:var(--kyp-indigo);box-shadow:0 0 0 2px var(--kyp-indigoSoft)}
+.kyp-owner-lien-summary{margin:0 0 10px;padding:10px 12px;border-left:4px solid var(--kyp-orange);background:#fff6e9;border-radius:7px;font-size:11.5px;line-height:1.45;color:var(--kyp-ink2)}
+@media(max-width:640px){
+  .kyp-blocks{grid-template-columns:1fr}
+  .kyp-terms{grid-template-columns:1fr 1fr}
+  .kyp-owner .osince{margin-left:0;width:100%}
+  .kyp-coverage,.kyp-owner-lien-tools,.kyp-timeline-coverage{align-items:flex-start;flex-direction:column}
+  .kyp-coverage b{text-align:left}
+  .kyp-owner-lien-actions{justify-content:flex-start}
+  .kyp-timeline-coverage .coverage-row{grid-template-columns:1fr;gap:2px}
+}
+@media print{
+  .kyp-xact,.kyp-block,.kyp-loc,.kyp-owner,.kyp-owner-banner,.kyp-status-empty,.kyp-owner-liens{break-inside:avoid}
+  .kyp-block,.kyp-mt,.kyp-pill{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .kyp-timeline-events{display:grid;grid-template-columns:repeat(3,1fr)}
+}
+
+/* ===== fractal: sub-eyebrow (sub-section divider) ===== */
+.kyp-subhead{display:flex;align-items:center;gap:10px;margin:26px 0 12px;scroll-margin-top:20px}
+.kyp-subhead .lbl{font-family:var(--kyp-mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kyp-indigo)}
+.kyp-subhead .ct{font-family:var(--kyp-mono);font-size:11px;font-weight:700;color:var(--kyp-muted)}
+.kyp-subhead .rule{flex:1;height:1px;background:var(--kyp-line)}
+.kyp-subhead.fam-green .lbl{color:var(--kyp-green)} .kyp-subhead.fam-orange .lbl{color:var(--kyp-orange)} .kyp-subhead.fam-slate .lbl{color:var(--kyp-slate)}
+
+/* ===== horizontal magnitude bars — labeled distribution (crime by type, etc.) ===== */
+.kyp-hbar{display:flex;align-items:center;gap:12px;padding:9px 0;border:0;border-bottom:1px solid var(--kyp-line);background:transparent;text-align:left;width:100%}
+.kyp-hbar:last-of-type{border-bottom:none}
+.kyp-hbar .hl{width:150px;font-size:13.5px;font-weight:600;color:var(--kyp-ink);display:flex;align-items:center;gap:8px}
+.kyp-hbar .hl .tick{width:4px;height:16px;border-radius:2px;background:var(--kyp-muted);flex:none}
+.kyp-hbar .hl .tick.ind{background:var(--kyp-indigoL)} .kyp-hbar .hl .tick.att{background:var(--kyp-orange)} .kyp-hbar .hl .tick.red{background:var(--kyp-bad)}
+.kyp-hbar .htrack{position:relative;flex:1;height:26px;background:var(--kyp-wash);border-radius:6px;overflow:visible}
+.kyp-hbar .htrack i{position:absolute;left:0;top:0;bottom:0;min-width:26px;border-radius:6px;background:var(--kyp-muted);display:flex;align-items:center;justify-content:flex-end;padding:0 7px;box-sizing:border-box}
+.kyp-hbar .htrack i.ind{background:var(--kyp-indigoL)} .kyp-hbar .htrack i.att{background:var(--kyp-orange)} .kyp-hbar .htrack i.red{background:var(--kyp-bad)}
+.kyp-hbar .hbar-count{font-family:var(--kyp-mono);font-size:11px;font-weight:700;color:#fff;line-height:1}
+.kyp-hbar .hv{display:none}
+.kyp-hbar.active{background:var(--kyp-indigoSoft);border-radius:7px;padding-left:7px;padding-right:7px}
+.kyp-liccat{display:inline-flex;align-items:center;border:1px solid var(--kyp-line);border-radius:5px;background:var(--kyp-card);padding:3px 6px;font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.02em;color:var(--kyp-ink2);line-height:1.2}
+.kyp-biz-topline{display:flex;align-items:center;gap:8px;font-family:var(--kyp-mono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--kyp-green);margin-bottom:14px}.kyp-biz-topline svg{width:16px;height:16px}.kyp-biz-radius{margin-left:auto;color:var(--kyp-muted);font-size:9px;letter-spacing:.04em}
+.kyp-biz-heroes{margin-bottom:18px}.kyp-biz-takeaway{border-left:3px solid var(--kyp-green);background:#f2f8f2;border-radius:7px;padding:12px 14px;margin-bottom:14px}.kyp-biz-takeaway-title{display:flex;align-items:center;gap:6px;font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--kyp-green)}.kyp-biz-takeaway-title svg{width:13px;height:13px}.kyp-biz-takeaway p{font-size:13px;line-height:1.48;color:var(--kyp-ink2);margin:5px 0 0}.kyp-biz-takeaway b{color:var(--kyp-ink)}
+.kyp-biz-mix{margin-top:-4px}.kyp-biz-overflow{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted);margin:9px 0 0 6px}.kyp-biz-card{position:relative;padding:12px 0;border-bottom:1px solid var(--kyp-line);display:grid;grid-template-columns:1fr auto;gap:4px 14px}.kyp-biz-card b{font-size:13.5px;color:var(--kyp-ink);display:block}.kyp-biz-card a{display:block;font-size:11.5px;color:var(--kyp-muted);margin-top:2px;text-decoration:none}.kyp-biz-card a:hover{text-decoration:underline;color:var(--kyp-indigo)}.kyp-biz-distance{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-ink2);white-space:nowrap}.kyp-biz-cardmeta{grid-column:1/-1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted)}.kyp-biz-cardmeta .kyp-liccat{font-size:8px}.kyp-biz-loading{display:grid;gap:9px}.kyp-biz-loading span{height:42px;border-radius:7px;background:linear-gradient(90deg,var(--kyp-wash),#f6f5f1,var(--kyp-wash));background-size:200% 100%;animation:kyp-skel 1.2s infinite}.kyp-biz-loading span:nth-child(2){width:84%}.kyp-biz-loading span:nth-child(3){width:68%}@keyframes kyp-skel{to{background-position:-200% 0}}
+.kyp-hsum{font-size:13px;color:var(--kyp-ink2);line-height:1.5;margin-top:12px;max-width:64ch}
+.kyp-hsum b{color:var(--kyp-ink);font-weight:700}
+
+/* red block variant (genuinely-bad crime tier) — pill.bad already exists */
+.kyp-block.red{background:var(--kyp-bad)}
+/* compact count/toggle variant — short row, no hero negative space */
+.kyp-block.count{min-height:0;flex-direction:row;align-items:center;justify-content:flex-start;gap:16px;padding:15px 18px}
+.kyp-block.count .bv{font-size:42px;flex:none;line-height:.9}
+.kyp-block.count .bl{font-size:9.5px}
+
+/* ===== year column trend — bars take verdict tone (good=falling, att=rising) ===== */
+.kyp-ytrend{margin-top:6px}
+.kyp-ytrend .yttop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.kyp-ytrend .ytbars{display:flex;align-items:flex-end;gap:14px;height:112px;padding-top:6px}
+.kyp-ytcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.kyp-ytcol .v{font-family:var(--kyp-mono);font-size:11px;font-weight:700;color:var(--kyp-ink2);margin-bottom:5px}
+.kyp-ytcol .bar{width:100%;max-width:52px;border-radius:6px 6px 0 0;background:var(--kyp-green);opacity:.4}
+.kyp-ytcol.cur .bar{opacity:1}
+.kyp-ytcol.cur .v{color:var(--kyp-green)}
+.kyp-ytrend.att .kyp-ytcol .bar{background:var(--kyp-orange)}
+.kyp-ytrend.att .kyp-ytcol.cur .v{color:#c0651e}
+.kyp-ytcol .yr{font-family:var(--kyp-mono);font-size:10px;font-weight:700;color:var(--kyp-muted);margin-top:7px}
+
+/* ===== Step 4d — News (merged archive) ===== */
+/* subsection headline (each news scope leads with its own takeaway) */
+.kyp-subhl{font-family:var(--kyp-sans);font-weight:600;font-size:20px;line-height:1.3;letter-spacing:-.01em;color:var(--kyp-ink);margin:2px 0 16px;max-width:62ch}
+.kyp-subhl em{font-family:var(--kyp-disp);font-style:italic;font-weight:400;font-size:1.1em;color:var(--kyp-indigo)}
+.kyp-subhl em.grn{color:var(--kyp-green)}
+
+/* ===== coverage ARCHIVE — editorial index (logo plate · serif headline · byline · read) ===== */
+.kyp-arch{display:flex;flex-direction:column}
+.kyp-archrow{display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--kyp-line)}
+.kyp-archrow:last-child{border-bottom:none}
+.kyp-archbody{flex:1;min-width:0}
+.kyp-archlogo{width:72px;height:72px;border-radius:10px;flex:none;background:var(--kyp-card);border:1px solid var(--kyp-line);display:flex;align-items:center;justify-content:center;padding:10px;overflow:hidden}
+.kyp-archlogo img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.kyp-archrow.lead .kyp-archlogo{width:88px;height:88px}
+/* colored source-plate — fallback when no logo is available */
+.kyp-archthumb{width:72px;height:72px;border-radius:10px;flex:none;display:flex;flex-direction:column;justify-content:space-between;padding:9px 10px;color:#fff}
+.kyp-archthumb .tsrc{font-family:var(--kyp-disp);font-size:14px;line-height:1.02}
+.kyp-archthumb .tdt{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;opacity:.82;text-transform:uppercase}
+.kyp-archthumb.s-indigo{background:linear-gradient(150deg,#3140a6,#1d2670)}
+.kyp-archthumb.s-green{background:linear-gradient(150deg,#357f45,#204f2b)}
+.kyp-archthumb.s-slate{background:linear-gradient(150deg,#45443d,#262620)}
+.kyp-empty{font-size:13.5px;color:var(--kyp-ink2);padding:14px 0 4px;line-height:1.5}
+.kyp-archkick{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:9px}
+.kyp-archdate{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-ink2)}
+.kyp-archtag{font-family:var(--kyp-mono);font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-indigo);background:var(--kyp-indigoSoft);border-radius:5px;padding:2px 7px}
+.kyp-archtag.adj{color:var(--kyp-ink2);background:var(--kyp-wash)}
+.kyp-archage{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;color:#c0651e;background:#fdf3df;border:1px solid #f0d79a;border-radius:5px;padding:2px 6px}
+.kyp-archstatus{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--kyp-ink2)}
+.kyp-archstatus .d{width:7px;height:7px;border-radius:50%;background:var(--kyp-slate);flex:none}
+.kyp-archstatus.good .d{background:var(--kyp-green)} .kyp-archstatus.att .d{background:var(--kyp-orange)} .kyp-archstatus.ctx .d{background:var(--kyp-slate)}
+.kyp-archtitle{display:block;font-family:var(--kyp-disp);font-size:22px;line-height:1.2;color:var(--kyp-ink);text-decoration:none;margin-bottom:8px}
+.kyp-archrow.lead .kyp-archtitle{font-size:24px}
+.kyp-archtitle:hover{color:var(--kyp-indigo)}
+.kyp-archsum{font-size:14.5px;color:var(--kyp-ink2);line-height:1.55;margin-bottom:8px;max-width:72ch}
+.kyp-archattr{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted);margin-bottom:11px;line-height:1.45}
+.kyp-archfoot{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.kyp-archrec{font-size:12.5px;color:var(--kyp-ink2);line-height:1.5}
+.kyp-archrec b{color:var(--kyp-ink);font-weight:600}
+.kyp-archrec a{color:var(--kyp-indigo);text-decoration:none;border-bottom:1.5px solid var(--kyp-indigoSoft);font-weight:600}
+.kyp-archread{margin-left:auto;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-indigo);text-decoration:none;white-space:nowrap}
+
+/* category header + dev-stage tag + corridor cross-ref (neighborhood dev list) */
+.kyp-cath{display:flex;align-items:center;gap:8px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-ink2);margin:22px 0 4px}
+.kyp-cath svg{width:14px;height:14px;stroke:var(--kyp-ink2);fill:none}
+.kyp-stage{font-family:var(--kyp-mono);font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:5px;padding:2px 7px}
+.kyp-stage.perm{background:#e9f4ec;color:var(--kyp-green)} .kyp-stage.appr{background:#fbeede;color:#c0651e} .kyp-stage.prop{background:var(--kyp-wash);color:var(--kyp-ink2)}
+.kyp-across{display:inline-flex;align-items:center;gap:5px;font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-green);text-decoration:none}
+.kyp-across svg{width:11px;height:11px;stroke:currentColor;fill:none}
+
+/* takeaway supporting rows under a subsection headline (news scopes) */
+.kyp-tkrow{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;line-height:1.55;color:var(--kyp-ink2);margin:0 0 8px;max-width:72ch}
+.kyp-tkrow .dot{width:7px;height:7px;border-radius:50%;background:var(--kyp-slate);flex:none;margin-top:6px}
+.kyp-tkrow.good .dot{background:var(--kyp-green)} .kyp-tkrow.caution .dot,.kyp-tkrow.bad .dot{background:var(--kyp-orange)}
+.kyp-tkrow b{color:var(--kyp-ink);font-weight:600}
+.kyp-tkchip{display:inline-flex;align-items:center;gap:5px;font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-indigo);text-decoration:none;white-space:nowrap;margin-left:4px}
+.kyp-tkchip svg{width:11px;height:11px;stroke:currentColor;fill:none}
+
+/* ================= Step 5 — page chrome / setup / accordion ================= */
+.kyp-page{max-width:1120px;margin:0 auto;padding:30px 34px 90px}
+.kyp-meta5{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--kyp-line);border:1px solid var(--kyp-line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.kyp-m5{background:var(--kyp-card);padding:13px 15px}
+.kyp-m5 .l{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-muted);margin-bottom:5px}
+.kyp-m5 .v{font-size:14px;font-weight:600;color:var(--kyp-ink)}
+.kyp-ctx2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+
+/* ---- setup zone (3 steps) ---- */
+.kyp-setup{background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:14px;margin-bottom:16px;overflow:hidden}
+.kyp-setup .top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 18px 13px;flex-wrap:wrap}
+.kyp-setup .top .h{font-family:var(--kyp-mono);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--kyp-ink)}
+.kyp-setup .top .h b{color:var(--kyp-ink2)}
+.kyp-meter{display:flex;align-items:center;gap:8px}
+.kyp-meter .dots{display:flex;gap:5px}
+.kyp-meter .dots i{width:9px;height:9px;border-radius:50%;background:var(--kyp-line);border:1.5px solid #d7d5cc}
+.kyp-meter .dots i.on{background:var(--kyp-green);border-color:var(--kyp-green)}
+.kyp-meter .t{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-ink2)}
+.kyp-step{display:flex;align-items:center;gap:14px;padding:15px 18px;border-top:1px solid var(--kyp-line)}
+.kyp-step .n{width:30px;height:30px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-family:var(--kyp-mono);font-size:12px;font-weight:700}
+.kyp-step .n.done{background:var(--kyp-green);color:#fff}
+.kyp-step .n.open{background:var(--kyp-card);border:1.5px solid var(--kyp-indigo);color:var(--kyp-indigo)}
+.kyp-step .mid{flex:1;min-width:0}
+.kyp-step .st{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-ink2);margin-bottom:4px}
+.kyp-step .ln{font-size:14px;color:var(--kyp-ink);line-height:1.4}
+.kyp-step .ln .em{color:var(--kyp-ink2)}
+.kyp-step .pay{font-size:12.5px;color:var(--kyp-ink2);margin-top:3px}
+.kyp-step .cta{flex:none;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:9px;padding:9px 14px;white-space:nowrap;cursor:pointer}
+.kyp-step .cta.pri{background:var(--kyp-indigo);color:#fff;border:1px solid var(--kyp-indigo)}
+.kyp-step .cta.ghost{background:var(--kyp-card);color:var(--kyp-ink2);border:1px solid var(--kyp-line)}
+.kyp-usechip{display:inline-flex;align-items:center;gap:6px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--kyp-green);background:#e9f4ec;border:1px solid #cfe6d5;border-radius:6px;padding:3px 8px;margin-left:2px}
+
+/* ---- instructional bar + legend ---- */
+.kyp-instr{display:flex;align-items:flex-start;gap:10px;background:var(--kyp-wash);border-radius:11px;padding:13px 16px;font-size:12.5px;color:var(--kyp-ink2);line-height:1.5;margin-bottom:16px}
+.kyp-instr b{color:var(--kyp-ink);font-weight:700}
+.kyp-rbtop{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.kyp-legend{display:flex;gap:14px}
+.kyp-legend .lg{display:inline-flex;align-items:center;gap:6px;font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-ink2)}
+.kyp-legend .lg .d{width:9px;height:9px;border-radius:2px}
+.kyp-legend .lg .d.g{background:var(--kyp-green)}.kyp-legend .lg .d.o{background:var(--kyp-orange)}.kyp-legend .lg .d.c{background:var(--kyp-slate)}
+.kyp-reset{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--kyp-ink2);background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:8px;padding:7px 11px;cursor:pointer}
+
+/* ---- accordion ---- */
+.kyp-acc{display:flex;flex-direction:column;gap:10px}
+.kyp-accrow{background:var(--kyp-card);border:1px solid var(--kyp-line);border-left:4px solid var(--kyp-slate);border-radius:13px;overflow:hidden}
+.kyp-accrow.g{border-left-color:var(--kyp-green)}.kyp-accrow.o{border-left-color:var(--kyp-orange)}.kyp-accrow.c{border-left-color:var(--kyp-slate)}
+.kyp-accrow.offrow{opacity:.45}
+.kyp-accrow.dragrow{opacity:.55}
+.kyp-accrow.overrow{outline:2px dashed var(--kyp-indigo);outline-offset:2px}
+.kyp-acchd{display:flex;align-items:flex-start;gap:14px;padding:15px 18px;cursor:pointer}
+.kyp-acchd .drag{color:#c8c6bd;font-size:13px;flex:none;letter-spacing:-2px;cursor:grab;margin-top:6px}
+.kyp-acchd .num{font-family:var(--kyp-mono);font-size:12px;font-weight:700;color:var(--kyp-ink2);background:#eef0e9;border-radius:8px;width:34px;height:30px;display:flex;align-items:center;justify-content:center;flex:none}
+.kyp-accrow.g .num{background:#e7f2ea;color:var(--kyp-green)}.kyp-accrow.o .num{background:#fbeede;color:#c0651e}
+.kyp-acchd .mid{flex:1;min-width:0;line-height:1.5;padding-top:3px;display:block}
+.kyp-acchd .eb{font-family:var(--kyp-mono);font-size:13.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-slate);display:inline;white-space:normal}
+.kyp-accrow.g .eb{color:var(--kyp-green)}.kyp-accrow.o .eb{color:var(--kyp-orange)}
+.kyp-acchd .tk{font-size:15px;font-weight:500;color:var(--kyp-ink);display:inline}
+.kyp-acchd .tk::before{content:&quot;— &quot;;color:var(--kyp-muted);margin:0 4px 0 8px;font-weight:400}
+.kyp-acchd .tk em{font-family:var(--kyp-disp);font-style:italic;font-weight:400;font-size:1.1em;color:var(--kyp-green)}
+.kyp-acchd .tk em.o{color:var(--kyp-orange)}
+.kyp-acchd .badge{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;border-radius:7px;padding:5px 11px;white-space:nowrap;flex:none;margin-top:2px}
+.kyp-acchd .badge.g{background:var(--kyp-green)}.kyp-acchd .badge.o{background:var(--kyp-orange)}.kyp-acchd .badge.c{background:var(--kyp-slate)}
+.kyp-acchd .badge.indigo{background:var(--kyp-indigo)}
+.kyp-acchd .ico{width:27px;height:27px;border-radius:7px;border:1px solid #c9cfee;display:flex;align-items:center;justify-content:center;color:#2b3a9e;font-size:12px;flex:none;background:var(--kyp-card);margin-top:2px}
+.kyp-acchd .ico svg{width:15px;height:15px;color:#2b3a9e}
+.kyp-accbody{padding:6px 26px 26px 66px;border-top:1px solid var(--kyp-line)}
+.kyp-accbody.closed{display:none}
+@media (max-width: 720px){.kyp-accbody{padding:6px 14px 20px 14px}.kyp-acchd{gap:9px;padding:13px 12px}}
+
+/* ---- bottom: generate insight report ---- */
+.kyp-gen{margin-top:26px}
+
+/* collapsible top ward/zoning cards (whole-card toggle, abridged when closed) */
+.wz-cardhd{cursor:pointer;user-select:none}
+.wz-cardhd:hover{background:rgba(0,0,0,.02)}
+.wz-cardhd .wz-cardcar{float:right;font-size:14px;line-height:1;color:#2b3a9e}
+.wz-abridged{font-size:13.5px;color:var(--kyp-ink2,#444);padding-top:0}
+.wz-abridged b{color:var(--kyp-ink,#111);font-weight:600}
+.wz-abridged .hint{opacity:.55;margin-left:6px;font-size:12.5px}
+.wz-abridged .kyp-usechip{margin-left:8px}
+@media print{.wz-cardhd .wz-cardcar{display:none}}
+
+/* ===== context card (ward / zoning) ===== */
+.kyp-ctxc{background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:13px;overflow:hidden}
+.kyp-ctxc .top{display:flex;align-items:center;gap:13px;padding:14px 16px;cursor:pointer}
+.kyp-ctxc .crest{width:46px;height:46px;border-radius:11px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--kyp-indigo);color:#fff;line-height:1}
+.kyp-ctxc .crest .n{font-family:var(--kyp-disp);font-size:23px;line-height:.92}
+.kyp-ctxc .crest .u{font-family:var(--kyp-mono);font-size:6.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.86;margin-top:2px}
+.kyp-ctxc .crest.zone .n{font-size:16px}
+.kyp-ctxc .mid{flex:1;min-width:0}
+.kyp-ctxc .k{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--kyp-muted);margin-bottom:3px}
+.kyp-ctxc .nm{font-size:16px;font-weight:700;color:var(--kyp-ink);line-height:1.25}
+.kyp-ctxc .sub{font-size:12.5px;color:var(--kyp-ink2);margin-top:3px;line-height:1.35}
+.kyp-ctxc .sub b{color:var(--kyp-ink);font-weight:600}
+.kyp-ctxc .chev{flex:none;width:26px;height:26px;border-radius:7px;border:1px solid var(--kyp-line);display:flex;align-items:center;justify-content:center;color:var(--kyp-muted);font-size:11px}
+.kyp-ctxc .body{padding:0 18px 18px 75px;border-top:1px solid var(--kyp-line)}
+.kyp-ctxc .body.closed{display:none}
+
+/* stacked rows — ward contacts AND zoning allow-list share this shape */
+.kyp-cxrows{display:flex;flex-direction:column;gap:7px;padding-top:14px}
+.kyp-cxrow{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--kyp-ink2)}
+.kyp-cxrow .i{width:14px;height:14px;flex:none;color:var(--kyp-muted);font-size:11px;text-align:center}
+.kyp-cxrow a{color:var(--kyp-indigo);text-decoration:none;border-bottom:1px solid var(--kyp-indigoSoft)}
+.kyp-cxrow .mk{width:14px;flex:none;text-align:center;font-weight:700;color:var(--kyp-muted);font-size:12px}
+.kyp-cxrow.on{color:var(--kyp-ink)}
+.kyp-cxrow.on .mk{color:var(--kyp-green)}
+.kyp-cxrow .w{font-weight:600}
+.kyp-cxrow .note{color:var(--kyp-muted);font-weight:400;font-size:12px}
+
+/* filled stat blocks */
+.kyp-cxstats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.kyp-cxstat{display:flex;align-items:center;gap:13px;border-radius:11px;padding:13px 15px;color:#fff}
+.kyp-cxstat.ind{background:var(--kyp-indigoL)} .kyp-cxstat.dark{background:#16171b}
+.kyp-cxstat .n{font-family:var(--kyp-disp);font-size:32px;line-height:.9;flex:none}
+.kyp-cxstat .l{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.92}
+.kyp-cxstat .s{font-size:10.5px;opacity:.85;margin-top:3px;line-height:1.3}
+
+/* zoning metric blocks (4-up) */
+.kyp-cxtiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.kyp-cxtile{border-radius:11px;padding:13px 14px;color:#fff;background:var(--kyp-indigoL)}
+.kyp-cxtile.dark{background:#16171b} .kyp-cxtile.slate{background:var(--kyp-slate)}
+.kyp-cxtile .l{font-family:var(--kyp-mono);font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.92;margin-bottom:7px}
+.kyp-cxtile .n{font-family:var(--kyp-disp);font-size:27px;line-height:.95}
+.kyp-cxtile .s{font-size:10px;opacity:.85;margin-top:4px;line-height:1.3}
+
+/* use chips, bullets, cta, footer */
+.kyp-cxlbl{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-muted);margin:16px 0 8px}
+.kyp-cxuses{display:flex;gap:6px;flex-wrap:wrap}
+.kyp-cxuse{font-size:12px;font-weight:500;color:var(--kyp-indigo);background:var(--kyp-indigoSoft);border-radius:7px;padding:5px 10px}
+.kyp-cxwtm{margin-top:16px;padding-top:14px;border-top:1px dashed var(--kyp-line)}
+.kyp-cxwtmh{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-ink2);margin-bottom:9px}
+.kyp-cxb{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--kyp-ink2);line-height:1.5;margin-bottom:7px}
+.kyp-cxb .dot{width:5px;height:5px;border-radius:50%;background:var(--kyp-indigo);flex:none;margin-top:7px}
+.kyp-cxb b{color:var(--kyp-ink);font-weight:600}
+.kyp-cxcta{display:flex;align-items:center;gap:11px;margin-top:14px;padding:11px 13px;background:var(--kyp-indigoSoft);border-radius:10px;text-decoration:none}
+.kyp-cxcta .h{font-size:12.5px;font-weight:600;color:var(--kyp-ink);line-height:1.3}
+.kyp-cxcta .s{font-size:11px;color:var(--kyp-ink2);margin-top:2px}
+.kyp-cxcta .arr{color:var(--kyp-indigo);font-size:13px;flex:none;margin-left:auto}
+.kyp-cxfoot{font-size:11.5px;color:var(--kyp-muted);line-height:1.5;margin-top:14px;padding-top:12px;border-top:1px solid var(--kyp-line)}
+.kyp-cxfoot a{color:var(--kyp-indigo);text-decoration:none;border-bottom:1px solid var(--kyp-indigoSoft)}
+.kyp-cxfoot .pin{font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-ink2)}
+.kyp-cxlink{display:inline-flex;align-items:center;gap:5px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-indigo);text-decoration:none;margin-top:11px}
+
+/* ---- Step 6: Permits &amp; Violations hybrid ---- */
+.kyp-block.bad{background:var(--kyp-bad)}
+/* permit card */
+.kyp-permit{border:1px solid var(--kyp-line);border-left:5px solid var(--kyp-slate);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--kyp-card)}
+.kyp-permit.good{border-left-color:var(--kyp-green)} .kyp-permit.att{border-left-color:var(--kyp-orange)}
+.kyp-permit .ph{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+.kyp-permit .pscope{font-size:15.5px;font-weight:700;color:var(--kyp-ink);line-height:1.35}
+.kyp-permit .pcost{font-family:var(--kyp-disp);font-size:27px;color:var(--kyp-ink);flex:none;line-height:1}
+.kyp-permit .ptags{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0 11px}
+.kyp-permit .ptag{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:3px 7px;background:var(--kyp-wash);color:var(--kyp-ink2);border:1px solid var(--kyp-line)}
+.kyp-permit .ptag.good{background:var(--kyp-green);color:#fff;border-color:var(--kyp-green)}
+.kyp-permit .ptag.att{background:var(--kyp-orange);color:#fff;border-color:var(--kyp-orange)}
+.kyp-permit .ptag.era{background:var(--kyp-slate);color:#fff;border-color:var(--kyp-slate)}
+.kyp-permit .pmeta{display:grid;grid-template-columns:1fr 1fr;gap:9px 20px;padding-top:11px;border-top:1px solid var(--kyp-line)}
+.kyp-permit .pml{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted);margin-bottom:3px}
+.kyp-permit .pmv{font-size:13.5px;font-weight:600;color:var(--kyp-ink)}
+.kyp-permit .pmv.dim{font-weight:400;color:var(--kyp-ink2)}
+/* professional card */
+.kyp-procard{border:1px solid var(--kyp-line);border-left:5px solid var(--kyp-indigoL);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--kyp-card);transition:box-shadow .12s ease}
+.kyp-procard.prior{border-left-color:var(--kyp-slate)}
+.kyp-procard:hover{box-shadow:0 4px 14px rgba(20,20,20,.06)}
+.kyp-procard .ptop{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.kyp-procard .prole{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--kyp-indigo);border-radius:5px;padding:3px 7px}
+.kyp-procard .pnm{font-size:16.5px;font-weight:700;color:var(--kyp-ink)}
+.kyp-procard .pera{margin-left:auto;font-family:var(--kyp-mono);font-size:9px;font-weight:700;text-transform:uppercase;color:var(--kyp-ink2);background:var(--kyp-wash);border:1px solid var(--kyp-line);border-radius:5px;padding:3px 7px}
+.kyp-procard .phere{font-size:13.5px;color:var(--kyp-ink2)} .kyp-procard .phere b{color:var(--kyp-ink)}
+.kyp-procard .phere .n{font-family:var(--kyp-disp);font-size:19px;color:var(--kyp-ink);line-height:1;margin-right:2px}
+.kyp-procard .pcity{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--kyp-ink2);margin-top:9px;padding-top:9px;border-top:1px dashed var(--kyp-line)}
+.kyp-procard .pview{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-indigo);text-decoration:none;white-space:nowrap}
+/* violation row + caveat + era divider */
+.kyp-viol{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--kyp-line)}
+.kyp-viol:last-of-type{border-bottom:none}
+.kyp-viol .vchip{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:4px 9px;flex:none;white-space:nowrap;margin-top:1px;color:#fff}
+.kyp-viol .vchip.open{background:var(--kyp-bad)} .kyp-viol .vchip.complied{background:var(--kyp-green)} .kyp-viol .vchip.stale{background:var(--kyp-slate)}
+.kyp-viol .vbody{flex:1;min-width:0}
+.kyp-viol .vsc{font-size:14.5px;font-weight:700;color:var(--kyp-ink);line-height:1.35}
+.kyp-viol .vmeta{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted);margin-top:4px}
+.kyp-caveat{font-size:12.5px;color:var(--kyp-ink2);line-height:1.5;background:var(--kyp-wash);border-radius:10px;padding:12px 14px;margin-top:14px}
+.kyp-caveat b{color:var(--kyp-ink);font-weight:600}
+.kyp-eradiv{display:flex;align-items:baseline;gap:10px;margin:22px 0 11px}
+.kyp-eradiv .lbl{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-ink)}
+.kyp-eradiv .meta{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted)}
+.kyp-eradiv .ln{flex:1;height:1px;background:var(--kyp-line)}
+.kyp-footnote{font-size:11.5px;color:var(--kyp-muted);line-height:1.5;margin-top:13px;padding-top:11px;border-top:1px dashed var(--kyp-line)}
+.kyp-footnote b{color:var(--kyp-ink2);font-weight:600}
+.kyp-morelink{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-indigo);cursor:pointer;margin-top:13px;display:inline-block}
+.kyp-procard .kyp-pcerts{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.kyp-cert{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-green);background:#e9f4ec;border:1px solid #cfe6d5;border-radius:5px;padding:3px 7px}
+/* ============================================================
+   KYP-BASE PATCH — Step 13b + Step 14 components.
+   APPEND to the end of client/src/kyp-base.css. Append only:
+   equal specificity means these later rules win, so nothing
+   above needs deleting. Tokens are already --kyp-* prefixed.
+   ============================================================ */
+
+/* ---------- 13b — numbered subheads (replaces the flat form) ---------- */
+.kyp-subhead{display:flex;align-items:center;gap:10px;margin:38px 0 13px;padding-top:11px;border-top:1px solid var(--kyp-ink);scroll-margin-top:20px}
+.kyp-subhead .n{font-family:var(--kyp-mono);font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--kyp-indigo);flex:none}
+.kyp-subhead .lbl{font-family:var(--kyp-mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo)}
+.kyp-subhead .ct{font-family:var(--kyp-mono);font-size:11px;font-weight:400;color:var(--kyp-muted)}
+.kyp-subhead .rule{display:none}
+
+/* ---------- 13b — block label spacing + hero grid variants ---------- */
+.kyp-block.count .bl{font-size:9.5px;margin-top:0}
+.kyp-block .bl{font-family:var(--kyp-mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;opacity:.92;margin-top:8px;line-height:1.45}
+.kyp-block .bd{font-size:10.5px;opacity:.85;margin-top:5px;line-height:1.35}
+.kyp-block .bbreak{border-top:1px solid rgba(255,255,255,.28);padding-top:9px;margin-top:9px;display:flex;flex-direction:column;gap:5px}
+.kyp-block .br{font-size:10.5px;opacity:.9;line-height:1.35;display:flex;gap:7px}
+.kyp-block .br b{font-weight:700;opacity:1;flex:none;font-variant-numeric:tabular-nums}
+.kyp-blocks.four{grid-template-columns:repeat(4,1fr)}
+.kyp-blocks.hero{grid-template-columns:1.4fr 1fr 1fr}
+.kyp-blocks.hero .kyp-block:first-child .bv{font-size:46px}
+.kyp-block.wash{background:var(--kyp-wash);color:var(--kyp-ink);border:1px solid var(--kyp-line)}
+.kyp-block.wash .bl{color:var(--kyp-indigo);opacity:1}
+.kyp-block.wash .bd{color:var(--kyp-ink2);opacity:1}
+.kyp-blocks.hero.two{grid-template-columns:1.4fr 1fr}
+.kyp-blocks.hero.one{grid-template-columns:1fr}
+
+/* ---------- 14 — .kyp-zrec  zoning record rows, grouped by matter ---------- */
+.kyp-zrec{border:1px solid var(--kyp-line);border-radius:12px;overflow:hidden;background:var(--kyp-card)}
+.kyp-zrec .zr{padding:13px 17px;border-top:1px solid var(--kyp-line)}
+.kyp-zrec .zr:first-child{border-top:0}
+.kyp-zrec .zr1{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.kyp-zrec .zt{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo);background:var(--kyp-indigoSoft);border-radius:5px;padding:3px 8px}
+.kyp-zrec .zt.zba{color:#5a5a52;background:#eceae3}
+.kyp-zrec .zs{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--kyp-indigo);border-radius:5px;padding:3px 8px}
+.kyp-zrec .zs.ok{background:var(--kyp-green)}
+.kyp-zrec .zs.no{background:var(--kyp-bad)}
+.kyp-zrec .zd{margin-left:auto;font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-ink2);white-space:nowrap}
+.kyp-zrec .z2{font-size:13.5px;color:var(--kyp-ink);margin-top:6px;line-height:1.5}
+.kyp-zrec .z2 .app{color:var(--kyp-muted)}
+.kyp-zrec .z3{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px;font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-muted)}
+.kyp-zrec .z3 a{color:var(--kyp-indigo);font-weight:700;text-decoration:none}
+.kyp-zrec .z3 .sep{color:#c8c6bd}
+.kyp-zrec .zlapse{margin-top:7px;font-size:12.5px;color:var(--kyp-ink2)}
+.kyp-zrec .zlapse b{color:var(--kyp-ink)}
+.kyp-zrec .zgrp{padding:10px 17px;background:var(--kyp-wash);border-top:1px solid var(--kyp-line);font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--kyp-ink2);display:flex;gap:9px;align-items:baseline}
+.kyp-zrec .zgrp:first-child{border-top:0}
+.kyp-zrec .zgrp .gq{font-family:var(--kyp-sans);font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--kyp-muted)}
+.kyp-zrec .ztrack{margin-left:7px;font-family:var(--kyp-mono);font-size:9.5px;font-weight:400;color:var(--kyp-muted);letter-spacing:0;text-transform:none}
+.kyp-zrec .zquote{margin-top:6px;padding-left:11px;border-left:2px solid var(--kyp-line);font-size:12.5px;line-height:1.5;color:var(--kyp-ink2);font-style:italic}
+.kyp-zrec .zgnote{padding:11px 17px;border-top:1px dashed var(--kyp-line);font-size:12.5px;line-height:1.55;color:var(--kyp-ink2);background:var(--kyp-paper)}
+.kyp-zrec .zgnote b{color:var(--kyp-ink)}
+
+/* ---------- 14 — .kyp-says  found-in-the-record vs still-to-confirm ---------- */
+.kyp-says{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--kyp-line);border-radius:12px;overflow:hidden;background:var(--kyp-card);margin:14px 0 4px}
+.kyp-says .sc{padding:16px 18px}
+.kyp-says .sc+.sc{border-left:1px solid var(--kyp-line);background:var(--kyp-wash)}
+.kyp-says .sh{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kyp-indigo);margin-bottom:11px}
+.kyp-says .sc+.sc .sh{color:var(--kyp-slate)}
+.kyp-says ul{margin:0;padding:0;list-style:none}
+.kyp-says li{position:relative;padding-left:17px;font-size:13.5px;line-height:1.58;color:var(--kyp-ink2);margin-bottom:11px}
+.kyp-says li:last-child{margin-bottom:0}
+.kyp-says li::before{content:&quot;&quot;;position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:2px;background:var(--kyp-indigoL)}
+.kyp-says .sc+.sc li::before{background:var(--kyp-slate)}
+.kyp-says li b{color:var(--kyp-ink)}
+.kyp-says.lg{margin:20px 0 4px;border-width:2px}
+.kyp-says.lg .sc{padding:20px 22px}
+.kyp-says.lg .sh{font-size:11px;letter-spacing:.09em;margin-bottom:14px}
+.kyp-says.lg li{font-size:14px;line-height:1.6;margin-bottom:13px;padding-left:19px}
+.kyp-says.lg li::before{top:8px;width:7px;height:7px}
+.kyp-says.lg .sc+.sc li::before{background:#c8c6bd}
+.kyp-says.lg .gate{display:block;font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-muted);margin-top:4px;letter-spacing:.01em}
+
+/* ---------- 14 — .kyp-xfer  before/after district diff ---------- */
+.kyp-xfer{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--kyp-line);border-radius:12px;overflow:hidden;margin:12px 0}
+.kyp-xfer .col{padding:15px 18px}
+.kyp-xfer .col+.col{border-left:1px solid var(--kyp-line);background:#fdf8f0}
+.kyp-xfer .h{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-muted);margin-bottom:9px}
+.kyp-xfer .col+.col .h{color:#a65f14}
+.kyp-xfer .v{font-family:var(--kyp-disp);font-size:30px;line-height:1;color:var(--kyp-ink)}
+.kyp-xfer .col+.col .v{color:#a65f14}
+.kyp-xfer .li{font-size:11.5px;color:var(--kyp-ink2);margin-top:9px;line-height:1.6}
+.kyp-xfer .li i{font-style:normal;font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted);margin-left:6px}
+@media (max-width:640px){
+  .kyp-xfer{grid-template-columns:1fr}
+  .kyp-xfer .col+.col{border-left:none;border-top:1px solid var(--kyp-line)}
+}
+
+/* ---------- 14 — .kyp-xfer.zone : a district change is a state, not a warning ----------
+   The base .kyp-xfer right column is amber because its first use was the tax
+   exemption transfer, where the &quot;after&quot; IS the bad news. A rezoning is neither
+   good nor bad, so the zoning variant is indigo. Do not use bare .kyp-xfer here. */
+.kyp-xfer.zone .col+.col{background:var(--kyp-indigoSoft)}
+.kyp-xfer.zone .col+.col .h{color:var(--kyp-indigo)}
+.kyp-xfer.zone .col+.col .v{color:var(--kyp-ink)}
+
+/* ---------- 14 — .kyp-procard .pfirm : the firm line under the name ----------
+   The live procard has .ptop/.prole/.pnm/.pera/.phere/.pcity/.pview but no
+   firm line. This is the ONLY addition to procard — everything else live is
+   further along than my copy and must not be touched. */
+.kyp-procard .pfirm{font-size:13px;color:var(--kyp-ink2);margin-top:-4px;margin-bottom:5px}
+
+&lt;/style&gt;
+&lt;style&gt;
+  body{background:#fff;font-family:var(--kyp-sans);color:var(--kyp-ink);
+    -webkit-font-smoothing:antialiased;margin:0;padding:2px}
+  .kyp-subhead:first-of-type{margin-top:26px}
+&lt;/style&gt;
+&lt;/head&gt;&lt;body&gt;
+
+&lt;!-- §9.1 — developmentElsewhere is true, so this governs everything below it --&gt;
+&lt;div class=&quot;kyp-caveat&quot;&gt;
+  &lt;b&gt;The 2014 filing names development at 520 N Claremont Ave&lt;/b&gt;, not this address. Permit activity
+  on this parcel is not used as an outcome for that stated development.
+&lt;/div&gt;
+
+&lt;!-- §3 — three filled indigo blocks. A designation is a state: no verdict colour. --&gt;
+&lt;div class=&quot;kyp-blocks hero&quot;&gt;
+  &lt;div class=&quot;kyp-block ind&quot;&gt;
+    &lt;div&gt;&lt;div class=&quot;bv&quot;&gt;RT-4&lt;/div&gt;&lt;div class=&quot;bl&quot;&gt;Today&amp;rsquo;s designation&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;bbreak&quot;&gt;
+      &lt;div class=&quot;br&quot;&gt;&lt;b&gt;Set by&lt;/b&gt;&lt;span&gt;the 2014 map amendment&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;br&quot;&gt;&lt;b&gt;Allows&lt;/b&gt;&lt;span&gt;low-density mixed housing types&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;kyp-block ind&quot;&gt;
+    &lt;div&gt;&lt;div class=&quot;bv&quot;&gt;2 lots&lt;/div&gt;&lt;div class=&quot;bl&quot;&gt;Created from one &amp;mdash; rezoning then variation&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;bbreak&quot;&gt;
+      &lt;div class=&quot;br&quot;&gt;&lt;b&gt;2014&lt;/b&gt;&lt;span&gt;rezoned to clear the split&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;br&quot;&gt;&lt;b&gt;2017&lt;/b&gt;&lt;span&gt;setback variation to subdivide&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;kyp-block ind&quot;&gt;
+    &lt;div&gt;&lt;div class=&quot;bv&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;bl&quot;&gt;Dwelling units the 2017 order kept here&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;bbreak&quot;&gt;
+      &lt;div class=&quot;br&quot;&gt;&lt;b&gt;Front&lt;/b&gt;&lt;span&gt;2-storey, 2 units&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;br&quot;&gt;&lt;b&gt;Rear&lt;/b&gt;&lt;span&gt;1 unit &amp;mdash; the coach house&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- §4.1 --&gt;
+&lt;div class=&quot;kyp-subhead&quot;&gt;&lt;span class=&quot;n&quot;&gt;06.1&lt;/span&gt;&lt;span class=&quot;lbl&quot;&gt;What changed&lt;/span&gt;&lt;span class=&quot;rule&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;div class=&quot;kyp-xfer zone&quot;&gt;
+  &lt;div class=&quot;col&quot;&gt;
+    &lt;div class=&quot;h&quot;&gt;Before &amp;mdash; prior districts&lt;/div&gt;
+    &lt;div class=&quot;v&quot;&gt;RS-3 &lt;span style=&quot;font-size:20px;color:var(--kyp-muted)&quot;&gt;+&lt;/span&gt; RT-4&lt;/div&gt;
+    &lt;div class=&quot;li&quot;&gt;&lt;b&gt;Split-zoned&lt;/b&gt; &amp;mdash; one lot carrying two districts, which is why it could
+      not be divided as it stood.&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;col&quot;&gt;
+    &lt;div class=&quot;h&quot;&gt;After &amp;mdash; in force today&lt;/div&gt;
+    &lt;div class=&quot;v&quot;&gt;RT-4&lt;/div&gt;
+    &lt;div class=&quot;li&quot;&gt;Residential Two-Flat, Townhouse and Multi-Unit District, across the whole lot.&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;kyp-src&quot;&gt;Introduced Jul 30, 2014 &amp;middot; passed Jul 30, 2014 &amp;middot; Ordinance O2014-4194&lt;/div&gt;
+
+&lt;!-- §4.2 — the application narrative and the Board finding, merged --&gt;
+&lt;div class=&quot;kyp-subhead&quot;&gt;&lt;span class=&quot;n&quot;&gt;06.2&lt;/span&gt;&lt;span class=&quot;lbl&quot;&gt;What the record establishes&lt;/span&gt;&lt;span class=&quot;ct&quot;&gt;Board order 70-17-Z &amp;middot; application 18063&lt;/span&gt;&lt;span class=&quot;rule&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;div class=&quot;kyp-says lg&quot;&gt;
+  &lt;div class=&quot;sc&quot;&gt;
+    &lt;div class=&quot;sh&quot;&gt;Found in the record&lt;/div&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;b&gt;Three dwelling units stand here&lt;/b&gt; &amp;mdash; a 2-storey, 2-unit front building and a
+        1-unit rear building. The Board&amp;rsquo;s 2017 order granted relief on that basis.&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;The lot was subdivided&lt;/b&gt; &amp;mdash; a 2014 rezoning cleared the split-zoning, a 2017
+        variation cleared the setback.&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;The plan next door grew, then stopped.&lt;/b&gt; The 2014 application described a
+        single-family home; by 2017 it was a 3-storey, 3-unit building needing three variations
+        &amp;mdash; none of which were exercised.
+        &lt;span class=&quot;gate&quot;&gt;applicant statement, as filed&lt;/span&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;sc&quot;&gt;
+    &lt;div class=&quot;sh&quot;&gt;Still to confirm&lt;/div&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;b&gt;Whether the rear unit is legally established.&lt;/b&gt; A Board order granting relief on the
+        existing configuration is strong evidence &amp;mdash; it is not a certificate of occupancy.&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Whether a permit application was filed but never issued.&lt;/b&gt; The statute&amp;rsquo;s test is
+        a permit &lt;i&gt;applied for&lt;/i&gt;; our permit record is issuance-led, so a filed-and-stalled
+        application would not appear.&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;The recorded unit count.&lt;/b&gt; Cook County lists two apartments in the primary building;
+        the rear unit is not in that figure.
+        &lt;span class=&quot;gate&quot;&gt;county: 2 &amp;middot; Board order: 3&lt;/span&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- §5 --&gt;
+&lt;div class=&quot;kyp-subhead&quot;&gt;&lt;span class=&quot;n&quot;&gt;06.3&lt;/span&gt;&lt;span class=&quot;lbl&quot;&gt;The record&lt;/span&gt;&lt;span class=&quot;ct&quot;&gt;5 actions &amp;middot; 2 matters &amp;middot; 8 hearing entries&lt;/span&gt;&lt;span class=&quot;rule&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;div class=&quot;kyp-zrec&quot;&gt;
+
+  &lt;div class=&quot;zgrp&quot;&gt;Matter 1 &amp;mdash; the subdivision&lt;span class=&quot;gq&quot;&gt;one lot became two&lt;/span&gt;&lt;span class=&quot;ztrack&quot;&gt;2 actions &amp;middot; decided Jun 16, 2017&lt;/span&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;zr&quot;&gt;
+    &lt;div class=&quot;zr1&quot;&gt;&lt;span class=&quot;zt&quot;&gt;Map amendment&lt;/span&gt;&lt;span class=&quot;zs&quot;&gt;Passed&lt;/span&gt;&lt;span class=&quot;zd&quot;&gt;Jul 30, 2014&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;z2&quot;&gt;Zoning Reclassification Map No. 1-H &amp;middot; RS-3 + RT-4 &amp;rarr; RT-4 &amp;middot; App No. 18063&lt;/div&gt;
+    &lt;div class=&quot;z3&quot;&gt;&lt;a&gt;Ordinance O2014-4194 &amp;#8599;&lt;/a&gt;&lt;span class=&quot;sep&quot;&gt;&amp;middot;&lt;/span&gt;&lt;a&gt;Application PDF &amp;#8599;&lt;/a&gt;&lt;span class=&quot;sep&quot;&gt;&amp;middot;&lt;/span&gt;&lt;span&gt;Councilmatic&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;zr&quot;&gt;
+    &lt;div class=&quot;zr1&quot;&gt;&lt;span class=&quot;zt zba&quot;&gt;Variation&lt;/span&gt;&lt;span class=&quot;zs ok&quot;&gt;Approved&lt;/span&gt;&lt;span class=&quot;zd&quot;&gt;Jun 16, 2017&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;z2&quot;&gt;Reduce south setback 2&amp;rsquo; &amp;rarr; 0.59&amp;rsquo; &lt;b&gt;to subdivide the lot into two zoning lots&lt;/b&gt; &amp;middot; Case 70-17-Z&lt;/div&gt;
+    &lt;div class=&quot;zquote&quot;&gt;&amp;ldquo;The existing two-story, two dwelling unit front building and one dwelling unit rear building will remain.&amp;rdquo;&lt;/div&gt;
+    &lt;div class=&quot;z3&quot;&gt;&lt;a&gt;Board decision PDF &amp;#8599;&lt;/a&gt;&lt;span class=&quot;sep&quot;&gt;&amp;middot;&lt;/span&gt;&lt;span&gt;Zoning Board of Appeals&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;zgrp&quot;&gt;Matter 2 &amp;mdash; the new building&lt;span class=&quot;gq&quot;&gt;three storeys, three units, on the other lot&lt;/span&gt;&lt;span class=&quot;ztrack&quot;&gt;3 actions &amp;middot; decided Jul 21, 2017&lt;/span&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;zr&quot;&gt;
+    &lt;div class=&quot;zr1&quot;&gt;&lt;span class=&quot;zt zba&quot;&gt;Variation&lt;/span&gt;&lt;span class=&quot;zs ok&quot;&gt;Approved&lt;/span&gt;&lt;span class=&quot;zd&quot;&gt;Jul 21, 2017&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;z2&quot;&gt;Reduce minimum lot area per dwelling unit 3,000 &amp;rarr; &lt;b&gt;2,884.37 sf&lt;/b&gt; &amp;middot; Case 71-17-Z &lt;span class=&quot;app&quot;&gt;continued from Jun 16&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;z3&quot;&gt;&lt;a&gt;Board decision PDF &amp;#8599;&lt;/a&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;zr&quot;&gt;
+    &lt;div class=&quot;zr1&quot;&gt;&lt;span class=&quot;zt zba&quot;&gt;Variation&lt;/span&gt;&lt;span class=&quot;zs ok&quot;&gt;Approved&lt;/span&gt;&lt;span class=&quot;zd&quot;&gt;Jul 21, 2017&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;z2&quot;&gt;Reduce front setback 15&amp;rsquo; &amp;rarr; 13.55&amp;rsquo;, south setback 2&amp;rsquo; &amp;rarr; zero, combined side 4.6&amp;rsquo; &amp;rarr; 2.96&amp;rsquo; &amp;middot; Case 72-17-Z &lt;span class=&quot;app&quot;&gt;continued from Jun 16&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;z3&quot;&gt;&lt;a&gt;Board decision PDF &amp;#8599;&lt;/a&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;zr&quot;&gt;
+    &lt;div class=&quot;zr1&quot;&gt;&lt;span class=&quot;zt zba&quot;&gt;Variation&lt;/span&gt;&lt;span class=&quot;zs ok&quot;&gt;Approved&lt;/span&gt;&lt;span class=&quot;zd&quot;&gt;Jul 21, 2017&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;z2&quot;&gt;Reduce off-street parking 3 stalls &amp;rarr; &lt;b&gt;2&lt;/b&gt; &amp;middot; Case 73-17-Z &lt;span class=&quot;app&quot;&gt;continued from Jun 16&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;z3&quot;&gt;&lt;a&gt;Board decision PDF &amp;#8599;&lt;/a&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- §5.3 — renders only because both gates passed --&gt;
+  &lt;div class=&quot;zgnote&quot;&gt;
+    &lt;b&gt;Not exercised &amp;mdash; treat these as lapsed.&lt;/b&gt; A variation is void unless a building permit
+    is applied for within 12 months (&amp;sect;17-13-1106), so this window closed &lt;b&gt;Jul 21, 2018&lt;/b&gt;.
+    No permit was filed at &lt;b&gt;520 N Claremont&lt;/b&gt; &amp;mdash; the lot these serve &amp;mdash; inside it, or
+    since. A new application would be required.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- §6 --&gt;
+&lt;div class=&quot;kyp-subhead&quot;&gt;&lt;span class=&quot;n&quot;&gt;06.4&lt;/span&gt;&lt;span class=&quot;lbl&quot;&gt;Who filed them&lt;/span&gt;&lt;span class=&quot;ct&quot;&gt;1 named &amp;middot; ZBA orders carry no attorney field&lt;/span&gt;&lt;span class=&quot;rule&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;div class=&quot;kyp-procard&quot;&gt;
+  &lt;div class=&quot;ptop&quot;&gt;
+    &lt;span class=&quot;prole&quot;&gt;Zoning counsel&lt;/span&gt;
+    &lt;span class=&quot;pnm&quot;&gt;Sara K. Barnes, Esq.&lt;/span&gt;
+    &lt;span class=&quot;pera&quot;&gt;Prior owner&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;pfirm&quot;&gt;Law Office of Samuel V.P. Banks&lt;/div&gt;
+  &lt;div class=&quot;phere&quot;&gt;&lt;b&gt;Here&lt;/b&gt; &amp;middot; &lt;span class=&quot;n&quot;&gt;1&lt;/span&gt; of 5 actions &amp;mdash; the 2014 map
+    amendment that set RT-4 &amp;middot; passed on first reading&lt;/div&gt;
+  &lt;div class=&quot;pcity&quot;&gt;
+    &lt;span&gt;No citywide zoning-counsel record &amp;mdash; showing this parcel&amp;rsquo;s filings only.&lt;/span&gt;
+    &lt;a class=&quot;pview&quot; href=&quot;#&quot;&gt;Filed PDF &amp;#8599;&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- §7 --&gt;
+&lt;div class=&quot;kyp-footnote&quot;&gt;
+  Every professional named in a zoning filing is listed &amp;mdash; a starting point, not a
+  recommendation. The four ZBA orders name no counsel: the Board&amp;rsquo;s published decisions do not
+  carry that field, so this is not a record of who did not appear.
+&lt;/div&gt;
+&lt;div class=&quot;kyp-caveat&quot;&gt;
+  &lt;b&gt;This amendment runs with the land.&lt;/b&gt; A map amendment permanently changes the parcel&amp;rsquo;s
+  district and never expires, so a buyer inherits RT-4 without re-applying. A ZBA variation or
+  special use is different &amp;mdash; it attaches to one proposal and can lapse.
+&lt;/div&gt;
+&lt;div class=&quot;kyp-src&quot;&gt;
+  Source: Chicago Councilmatic &amp;mdash; matter, ordinance and filed application PDF &amp;middot; Legistar
+  for matter discovery &amp;middot; Chicago Zoning Board of Appeals calendar and decisions, ward 27
+  &amp;middot; variation validity per Chicago Zoning Ordinance &amp;sect;17-13-1106 &amp;middot; current
+  designation confirmed against the City of Chicago zoning map.
+&lt;/div&gt;
+
+&lt;/body&gt;&lt;/html&gt;
+"></iframe></div>
+</div>
+</body></html>
