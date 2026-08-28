@@ -40,6 +40,7 @@ export interface AccordionSectionProps {
   takeaway: ReactNode;         // finding one-liner, or summary fallback
   verdict: AccVerdict;
   badge?: string;
+  badgeTone?: "g" | "o" | "c" | "r" | "indigo";
   info?: string;
   open: boolean;
   onToggle: () => void;
@@ -52,7 +53,7 @@ export interface AccordionSectionProps {
 }
 
 export function AccordionSection({
-  index, id, order, eyebrow, takeaway, verdict, badge, info,
+  index, id, order, eyebrow, takeaway, verdict, badge, badgeTone, info,
   open, onToggle, off, onToggleOff, dragHandlers, dragging, over, children,
 }: AccordionSectionProps) {
   const v = VCLASS[verdict];
@@ -77,7 +78,7 @@ export function AccordionSection({
           <span className="eb">{eyebrow}</span>
           <span className="tk">{takeaway}</span>
         </div>
-        {badge && !off && <span className={`badge ${id === "listing" || id === "zoningHistory" ? "indigo" : v}`}>{badge}</span>}
+        {badge && !off && <span className={`badge ${badgeTone ?? (id === "zoningHistory" ? "indigo" : v)}`}>{badge}</span>}
         {onToggleOff && (
           <span
             className="ico"

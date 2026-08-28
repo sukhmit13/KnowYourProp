@@ -12,7 +12,7 @@ export interface ListingClaim {
   raw: string;
 }
 
-export type CheckResult = 'match' | 'differs' | 'wrong' | 'unavailable';
+export type CheckResult = 'match' | 'differs' | 'wrong' | 'permitted' | 'unavailable';
 
 export interface ListingCheck {
   field: ListingClaimField;
@@ -136,6 +136,15 @@ export function buildListingChecks(claims: ListingClaim[] | null | undefined, co
             field: claim.field, claimLabel: count(units), recordLabel: `Zoning maximum ${count(zoningCap)}`,
             recordSource: 'Chicago zoning code', result: 'wrong',
             note: 'The listed unit count exceeds the zoning maximum for this lot.',
+          });
+        } else if (zoningCap !== null && units <= zoningCap && finite(context.assessorApartments) !== units) {
+          rows.push({
+            field: claim.field,
+            claimLabel: count(units),
+            recordLabel: `Up to ${count(zoningCap)} permitted`,
+            recordSource: 'Chicago zoning code',
+            result: 'permitted',
+            note: 'Zoning permits this claim, but it does not confirm the property’s legal or occupied unit count.',
           });
         } else {
           rows.push(resultForExact(claim, finite(context.assessorApartments), 'Cook County Assessor', (value) => `${count(value)} apartments`, 'differs'));

@@ -519,6 +519,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-acchd .tk em.o{color:var(--kyp-orange)}
 .kyp-acchd .badge{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;border-radius:7px;padding:5px 11px;white-space:nowrap;flex:none;margin-top:2px}
 .kyp-acchd .badge.g{background:var(--kyp-green)}.kyp-acchd .badge.o{background:var(--kyp-orange)}.kyp-acchd .badge.c{background:var(--kyp-slate)}
+.kyp-acchd .badge.r{background:var(--kyp-bad)}
 .kyp-acchd .badge.indigo{background:var(--kyp-indigo)}
 .kyp-acchd .ico{width:27px;height:27px;border-radius:7px;border:1px solid #c9cfee;display:flex;align-items:center;justify-content:center;color:#2b3a9e;font-size:12px;flex:none;background:var(--kyp-card);margin-top:2px}
 .kyp-acchd .ico svg{width:15px;height:15px;color:#2b3a9e}
@@ -912,3 +913,30 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-facts.modelled .kyp-fs{font-size:10.5px;color:var(--kyp-muted);margin-top:5px}
 .kyp-src a,.kyp-src button{display:inline-flex;align-items:center;gap:4px;color:var(--kyp-indigo);font-weight:700;text-decoration:none;margin-right:10px}
 .kyp-src>*+*{margin-left:8px}
+
+/* ============================================================
+   KYP-BASE PATCH — Step 9c: Active Listing.
+   Append-only additions for listing highlights, verdict notes,
+   and the permitted comparison result.
+   ============================================================ */
+.kyp-hl{display:grid;grid-template-columns:1fr 1fr;gap:4px 34px;margin:10px 0 4px}
+.kyp-hl div{font-size:13.5px;line-height:1.5;color:var(--kyp-ink2);padding-left:14px;position:relative;padding-top:5px;padding-bottom:5px}
+.kyp-hl div::before{content:"·";position:absolute;left:2px;top:4px;color:var(--kyp-muted);font-weight:700}
+.kyp-hlmore{display:inline-block;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--kyp-indigo);text-decoration:none;margin-top:10px;background:none;border:0;padding:0;cursor:pointer}
+@media (max-width:760px){.kyp-hl{grid-template-columns:1fr}}
+.kyp-xrow .res.perm{background:var(--kyp-green)}
+.kyp-note{background:var(--kyp-wash);border-radius:10px;padding:14px 16px;margin:12px 0 4px;font-size:12.5px;line-height:1.6;color:var(--kyp-ink2)}
+.kyp-note b{color:var(--kyp-ink)}
+.kyp-note.tight{margin-top:8px}
+.kyp-method{border-top:1px dashed var(--kyp-line);margin-top:18px;padding-top:12px;font-size:11.5px;line-height:1.6;color:var(--kyp-muted)}
+.kyp-method b{color:var(--kyp-ink2)}
+.kyp-resolution{margin-top:7px;color:var(--kyp-ink2);font-size:12px}
+.kyp-resolution button{border:0;background:none;padding:0;color:var(--kyp-green);font:inherit;font-weight:700;cursor:pointer}
+.kyp-listingfacts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--kyp-line)}
+.kyp-listingfacts div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.kyp-listingfacts div.wide{grid-column:1 / -1}
+.kyp-listingfacts span{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted)}
+.kyp-listingfacts b{font-size:12.5px;font-weight:600;color:var(--kyp-ink);line-height:1.45}
+@media (max-width:640px){
+  .kyp-listingfacts{grid-template-columns:1fr 1fr}
+}

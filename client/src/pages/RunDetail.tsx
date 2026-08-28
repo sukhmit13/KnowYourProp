@@ -1181,6 +1181,7 @@ export default function RunDetail() {
   const [languagesViewMode, setLanguagesViewMode] = useState<'zip' | 'community'>('zip');
   const [licenseFilter, setLicenseFilter] = useState<string | null>(null);
   const [showAllBiz, setShowAllBiz] = useState(false);
+  const [listingHighlightsExpanded, setListingHighlightsExpanded] = useState(false);
 
   const sectionCacheRef = useRef<Record<number, SectionStates>>({});
   const prevIdRef = useRef<number | null>(null);
@@ -3827,32 +3828,70 @@ export default function RunDetail() {
   };
   const listingStillChecking = generateListingSnapshot.isPending
     || (!listingSnapshot && !isListingSnapshotError);
+  const listingParseNumber = (value: unknown): number | null => {
+    const text = String(value ?? "").trim().toLowerCase();
+    const leadingWord = text.match(/^[a-z]+/)?.[0];
+    const wordNumbers: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12 };
+    if (leadingWord && wordNumbers[leadingWord]) return wordNumbers[leadingWord];
+    const parsed = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+  const listingApartments = listingParseNumber(propertyTaxData?.apartments);
+  const listingLotSize = listingParseNumber(propertyTaxData?.landSquareFeet);
+  const listingZoningLotPerUnit = listingParseNumber(zoningInfo?.minLotAreaPerUnit);
+  const listingZoningMaxUnits = listingLotSize && listingZoningLotPerUnit && listingZoningLotPerUnit > 0
+    ? Math.floor(listingLotSize / listingZoningLotPerUnit)
+    : null;
+  const listingPermitYears = (dobDerived?.allPermits ?? [])
+    .map((permit: any) => new Date(permit.issueDate).getFullYear())
+    .filter((year: number) => Number.isFinite(year));
+  const listingChecks = listingSnapshot && listingSnapshot.status !== "not_found"
+    ? buildListingChecks(listingSnapshot.claims, {
+        annualTaxes: listingParseNumber(propertyTaxData?.totalAnnualTaxAmount),
+        lotSizeSf: listingLotSize,
+        assessorApartments: listingApartments,
+        yearBuilt: listingParseNumber(propertyTaxData?.yearBuilt ?? pinLookupData?.characteristicsData?.yearBuilt),
+        zoningMaxUnits: listingZoningMaxUnits,
+        permitYears: listingPermitYears,
+      })
+    : [];
+  const listingDisplayUnits = listingSnapshot?.unitCount && listingSnapshot.unitCount > 0
+    ? listingSnapshot.unitCount
+    : listingApartments;
+  const listingDom = listingSnapshot ? daysOnMarketVerdict(listingSnapshot.daysOnMarket, listingDisplayUnits, listingSnapshot.listedDate) : null;
+  const listingWrongChecks = listingChecks.filter((check) => check.result === "wrong");
+  const listingDiffersChecks = listingChecks.filter((check) => check.result === "differs");
+  const listingMaterialCheck = listingWrongChecks[0] ?? listingDiffersChecks[0] ?? null;
   const listingTakeaway = listingStillChecking ? (
     <Skeleton className="h-4 w-64" data-testid="listing-takeaway-skeleton" />
   ) : listingSnapshot?.status === "not_found" ? (
-    "Unlisted — no active listing found for this address."
-  ) : listingSnapshot?.status === "active" ? (
-    listingSnapshot.listPrice != null
-      ? `Listed at $${listingSnapshot.listPrice.toLocaleString()}${listingSnapshot.daysOnMarket != null ? `, ${listingSnapshot.daysOnMarket} days on market.` : "."}`
-      : `Listed${listingSnapshot.daysOnMarket != null ? `, ${listingSnapshot.daysOnMarket} days on market.` : "."}`
-  ) : listingSnapshot?.status === "pending" ? (
-    `Under contract${listingSnapshot.listPrice != null ? ` at $${listingSnapshot.listPrice.toLocaleString()}` : ""}${listingSnapshot.listedDate ? ` — listed ${listingSnapshot.listedDate}.` : "."}`
-  ) : listingSnapshot?.status === "off_market" ? (
-    `Withdrawn${listingSnapshot.soldDate ? ` ${listingSnapshot.soldDate}` : ""}${listingSnapshot.listPrice != null ? ` — last asked $${listingSnapshot.listPrice.toLocaleString()}.` : "."}`
+    "No active listing on record."
   ) : isListingSnapshotError ? (
     "Listing check unavailable — try again."
+  ) : listingSnapshot ? (
+    <>
+      {listingSnapshot.listPrice != null ? `Asking $${listingSnapshot.listPrice.toLocaleString()}` : listingSnapshot.statusLabel}
+      {listingDom && (listingDom.tone === "orange" || listingDom.tone === "red") ? ` — ${listingSnapshot.daysOnMarket} days unsold` : ""}
+      {listingMaterialCheck
+        ? `, ${listingClaimLabel(listingMaterialCheck.field)} ${listingMaterialCheck.result === "wrong" ? "conflicts with the public record" : "needs confirmation"}`
+        : listingChecks.length > 0 && listingChecks.every((check) => check.result === "match")
+          ? " — every claim we can check matches the record."
+          : listingChecks.length > 0
+            ? " — public-record checks are still incomplete."
+            : "."}
+    </>
   ) : (
     "Live listing status for this address — price, status and terms."
   );
-  const listingBadge = listingStillChecking || !listingSnapshot
+  const listingBadge = listingStillChecking || !listingSnapshot || listingSnapshot.status === "not_found"
     ? undefined
-    : listingSnapshot.status === "not_found"
-      ? "UNLISTED"
-      : listingSnapshot.status === "active"
-        ? `LISTED${listingSnapshot.daysOnMarket != null ? ` · ${listingSnapshot.daysOnMarket}D` : ""}`
-        : listingSnapshot.status === "pending"
-          ? "UNDER CONTRACT"
-          : "WITHDRAWN";
+    : listingWrongChecks.length > 0
+      ? `${listingWrongChecks.length} wrong · ${listingDiffersChecks.length} to confirm`
+      : listingDiffersChecks.length > 0
+        ? `${listingDiffersChecks.length} to confirm`
+        : listingChecks.length > 0 && listingChecks.every((check) => check.result === "match")
+          ? "all claims check out"
+          : undefined;
   const zoningHistoryTakeaway = isLoadingZoningHistory ? (
     <Skeleton className="h-4 w-72" data-testid="zoning-history-takeaway-skeleton" />
   ) : zoningHistoryView.takeaway;
@@ -3893,6 +3932,15 @@ export default function RunDetail() {
       takeaway: rowId === "listing" ? listingTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : scan?.takeaway ?? summary,
       verdict,
       badge: rowId === "listing" ? listingBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
+      badgeTone: rowId === "listing"
+        ? listingWrongChecks.length > 0
+          ? "r" as const
+          : listingDiffersChecks.length > 0
+            ? "o" as const
+            : listingChecks.length > 0 && listingChecks.every((check) => check.result === "match")
+              ? "g" as const
+              : undefined
+        : undefined,
       info: (scan?.info || custom?.info || []).join(" · "),
       open: accOpen[rowId] === true,
       onToggle: () => setAccOpen((m) => ({ ...m, [rowId]: !m[rowId] })),
@@ -5150,7 +5198,7 @@ export default function RunDetail() {
                     {!listingSnapshot && !isListingSnapshotError && !generateListingSnapshot.isPending && (
                       <div className="flex flex-col items-start gap-2">
                         <Button
-                          onClick={() => generateListingSnapshot.mutate()}
+                          onClick={() => generateListingSnapshot.mutate({})}
                           data-testid="button-check-listing"
                           className="bg-[#2b3a9e] hover:bg-[#22307f] text-white no-print"
                         >
@@ -5174,32 +5222,7 @@ export default function RunDetail() {
                     )}
 
                     {listingSnapshot && !generateListingSnapshot.isPending && (() => {
-                      const parseApartments = (value: unknown): number | null => {
-                        const words: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12 };
-                        const text = String(value ?? '').trim().toLowerCase();
-                        const parsed = words[text] ?? Number(text);
-                        return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed) : null;
-                      };
-                      const finite = (value: unknown) => {
-                        const parsed = typeof value === 'number' ? value : Number(value);
-                        return Number.isFinite(parsed) ? parsed : null;
-                      };
-                      const apartments = parseApartments(propertyTaxData?.apartments);
-                      const lotSize = finite(propertyTaxData?.landSquareFeet);
-                      const zoningLotPerUnit = finite(zoningInfo?.minLotAreaPerUnit);
-                      const zoningMaxUnits = lotSize && zoningLotPerUnit && zoningLotPerUnit > 0 ? Math.floor(lotSize / zoningLotPerUnit) : null;
-                      const permitYears = (dobDerived?.allPermits ?? [])
-                        .map((permit: any) => new Date(permit.issueDate).getFullYear())
-                        .filter((year: number) => Number.isFinite(year));
-                      const checks = listingSnapshot.status === 'not_found' ? [] : buildListingChecks(listingSnapshot.claims, {
-                        annualTaxes: finite(propertyTaxData?.totalAnnualTaxAmount),
-                        lotSizeSf: lotSize,
-                        assessorApartments: apartments,
-                        yearBuilt: finite(propertyTaxData?.yearBuilt ?? pinLookupData?.characteristicsData?.yearBuilt),
-                        zoningMaxUnits,
-                        permitYears,
-                      });
-                      const violationDates = (violationsData?.violations ?? [])
+                      const violationDates = ((violationsData as any)?.violations ?? [])
                         .map((violation: any) => new Date(violation.violationDate || violation.date || violation.openDate).getTime())
                         .filter((time: number) => Number.isFinite(time));
                       const latestFinding = violationDates.length ? Math.max(...violationDates) : null;
@@ -5211,16 +5234,44 @@ export default function RunDetail() {
                             hasArmLengthSaleAfterFinding: validatedArmLengthSale,
                             hasPermittedWorkAfterFinding: false,
                           });
-                      const snapshotUnits = finite(listingSnapshot.unitCount);
-                      const displayUnits = snapshotUnits && snapshotUnits > 0 ? snapshotUnits : apartments;
-                      const dom = daysOnMarketVerdict(listingSnapshot.daysOnMarket, displayUnits, listingSnapshot.listedDate);
-                      const material = checks.find((check) => check.result === 'wrong') ?? checks.find((check) => check.result === 'differs') ?? null;
                       const checkedDate = listingSnapshot.checkedAt && !Number.isNaN(new Date(listingSnapshot.checkedAt).getTime())
                         ? new Date(listingSnapshot.checkedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                         : 'date unavailable';
                       const sourceLabel = listingSnapshot.sourceName || 'Listing source';
-                       return (
-                         <div>
+                      const hasRemarks = Boolean(listingSnapshot.remarksSummary);
+                      const hasHighlights = listingSnapshot.keyFacts.length > 0;
+                      const subsectionNumbers = buildSubsectionNumbers([
+                        ['disclosures', disclosures.length > 0],
+                        ['checks', listingChecks.length > 0],
+                        ['listing', hasRemarks || hasHighlights || Boolean(listingData)],
+                      ]);
+                      const heroBlocks = [
+                        listingSnapshot.listPrice != null,
+                        listingMaterialCheck !== null,
+                        listingSnapshot.daysOnMarket != null,
+                      ].filter(Boolean).length;
+                      const heroLayout = heroBlocks === 1 ? 'one' : heroBlocks === 2 ? 'two' : '';
+                      const comparisonNote = listingChecks.length === 0 ? null : listingWrongChecks.length > 0
+                        ? <> <b>Red means the record settles it. Orange means it doesn’t.</b> {listingWrongChecks.map((check) => listingClaimLabel(check.field)).join(' and ')} {listingWrongChecks.length === 1 ? 'is wrong' : 'are wrong'} where the public record is authoritative. {listingDiffersChecks.length > 0 && <>{listingDiffersChecks.map((check) => listingClaimLabel(check.field)).join(' and ')} {listingDiffersChecks.length === 1 ? 'needs' : 'need'} confirmation because the listing and record measure different things. </>}Get the certificate of occupancy and the current tax bill before you price this.</>
+                        : listingDiffersChecks.length > 0
+                          ? <> <b>Red means the record settles it. Orange means it doesn’t.</b> {listingDiffersChecks.map((check) => listingClaimLabel(check.field)).join(' and ')} {listingDiffersChecks.length === 1 ? 'needs' : 'need'} confirmation: the listing and record differ, but neither alone settles the question. Get the certificate of occupancy and the current tax bill before you price this.</>
+                          : listingChecks.every((check) => check.result === 'match')
+                            ? <>Every claim we can check against a public record matches it. That is not a clean bill of health — rents, condition, and lease terms are not public.</>
+                            : null;
+                      const oldListing = listingData as any;
+                      const oldUnitTypes = Array.isArray(oldListing?.unitTypes) ? oldListing.unitTypes : [];
+                      const shownHighlights = listingHighlightsExpanded ? listingSnapshot.keyFacts : listingSnapshot.keyFacts.slice(0, 6);
+                      const legacyListingFacts = oldListing ? <div className="kyp-listingfacts" data-testid="legacy-listing-facts">
+                        {(listingSnapshot.status === 'not_found' || listingSnapshot.listPrice == null) && oldListing.listPrice != null && <div><span>List price</span><b>${Number(oldListing.listPrice).toLocaleString()}</b></div>}
+                        {oldListing.unitCount != null && <div><span>Units</span><b>{oldListing.unitCount}</b></div>}
+                        {oldListing.totalAnnualRent != null && <div><span>Annual rent</span><b>${Number(oldListing.totalAnnualRent).toLocaleString()}/yr</b></div>}
+                        {oldListing.totalMonthlyRent != null && <div><span>Monthly rent</span><b>${Number(oldListing.totalMonthlyRent).toLocaleString()}/mo</b></div>}
+                        {oldListing.propertyType && <div><span>Property type</span><b>{oldListing.propertyType}</b></div>}
+                        {oldUnitTypes.length > 0 && <div className="wide"><span>Unit breakdown</span><b>{oldUnitTypes.map((unit: any, index: number) => `${unit.floorNumber ? `Floor ${unit.floorNumber}` : `Unit ${index + 1}`}${unit.bedrooms != null ? ` · ${unit.bedrooms}BR` : ''}${unit.bathrooms != null ? `/${unit.bathrooms}BA` : ''}${unit.monthlyRent != null ? ` · $${Number(unit.monthlyRent).toLocaleString()}/mo` : ''}`).join(' · ')}</b></div>}
+                        {(listingSnapshot.status === 'not_found' || !listingSnapshot.sourceUrl) && run?.sourceListingUrl && <div className="wide"><span>Original source</span><b><a href={run.sourceListingUrl} target="_blank" rel="noopener noreferrer">View listing ↗</a></b></div>}
+                      </div> : null;
+                      return (
+                        <div>
                           <div className="kyp-lstat" data-testid="text-listing-currency">
                             <span className="pill">{listingSnapshot.statusLabel}</span>
                             <span><b>Seller-side listing claims</b>{listingSnapshot.listedDate ? ` · listed ${listingSnapshot.listedDate}` : ''} · checked {checkedDate}</span>
@@ -5228,40 +5279,54 @@ export default function RunDetail() {
                             <button type="button" className="rc no-print" onClick={() => generateListingSnapshot.mutate({ force: true })} data-testid="button-recheck-listing">Re-check now</button>
                           </div>
 
-                          {listingSnapshot.status === 'not_found' ? null : <>
-                            <div className="kyp-blocks">
-                              {listingSnapshot.listPrice != null && <div className="kyp-block ind"><span className="bclaim">Claimed</span><div className="bv">${listingSnapshot.listPrice.toLocaleString()}</div><div className="bl">Asking price</div><div className="bd">Seller’s current asking price</div></div>}
-                              <div className={`kyp-block ${material?.result === 'wrong' ? 'bad' : material ? 'orange' : 'slate'}`}>
-                                <span className="bclaim">Claimed</span>
-                                <div className="bv">{material?.claimLabel ?? '—'}</div>
-                                <div className="bl">{material ? listingClaimLabel(material.field) : 'Record check'}</div>
-                                <div className="bd">{material ? `${material.result === 'wrong' ? 'Conflicts with' : 'Differs from'} ${material.recordLabel}` : 'No disputed seller claim was found.'}</div>
-                              </div>
-                              {listingSnapshot.daysOnMarket != null && <div className={`kyp-block ${dom?.tone === 'red' ? 'bad' : dom?.tone === 'orange' ? 'orange' : 'ind'}`}>
-                                <span className="bclaim">Claimed</span><div className="bv">{listingSnapshot.daysOnMarket}</div><div className="bl">Days on market</div><div className="bd">{dom?.note ?? 'No verdict without a listing date.'}</div>
-                              </div>}
-                            </div>
+                           {listingSnapshot.status === 'not_found' ? (
+                             <>
+                               {listingSnapshot.whyHistorical && <div className="kyp-note"><b>Why this reads as historical.</b> {listingSnapshot.whyHistorical}</div>}
+                               {legacyListingFacts && <><KypSubhead subsection={subsectionNumbers.listing}><span className="lbl">What the prior listing says</span><span className="ct">saved listing details</span></KypSubhead>{legacyListingFacts}</>}
+                             </>
+                           ) : <>
+                             {heroBlocks > 0 && <div className={`kyp-blocks hero ${heroLayout}`} data-testid="listing-hero-facts">
+                               {listingSnapshot.listPrice != null && <div className="kyp-block ind">
+                                 <span className="bclaim">Claimed</span><div className="bv">${listingSnapshot.listPrice.toLocaleString()}</div>
+                                 <div className="bl">Asking price</div><div className="bd">No verdict — we don’t appraise; see Valuation.</div>
+                               </div>}
+                               {listingMaterialCheck && <div className={`kyp-block ${listingMaterialCheck.result === 'wrong' ? 'bad' : 'orange'}`}>
+                                 <span className="bclaim">Claimed · disputed</span><div className="bv">{listingMaterialCheck.claimLabel}</div>
+                                 <div className="bl">{listingClaimLabel(listingMaterialCheck.field)} — county records {listingMaterialCheck.recordLabel}</div>
+                                 <div className="bd">{listingMaterialCheck.result === 'wrong' ? 'The public record settles this conflict.' : 'The listing and record differ; neither alone settles this question.'}</div>
+                               </div>}
+                               {listingSnapshot.daysOnMarket != null && <div className={`kyp-block ${listingDom?.tone === 'red' ? 'bad' : listingDom?.tone === 'orange' ? 'orange' : 'ind'}`}>
+                                 <span className={`bclaim${listingDom?.tone === 'indigo' ? '' : ''}`}>Claimed{listingDom && listingDom.tone !== 'indigo' ? ' · above benchmark' : ''}</span>
+                                 <div className="bv">{listingSnapshot.daysOnMarket}</div><div className="bl">Days on market</div>
+                                 <div className="bd">{listingDom?.note ?? 'No verdict without a listing date.'}</div>
+                               </div>}
+                             </div>}
 
-                            {disclosures.length > 0 && <><div className="kyp-title">What the seller disclosed</div>{disclosures.map((disclosure, index) => (
+                             {disclosures.length > 0 && <><KypSubhead subsection={subsectionNumbers.disclosures}><span className="lbl">What the seller disclosed</span><span className="ct">{disclosures.length} item{disclosures.length === 1 ? '' : 's'} · {disclosures.filter((d) => d.resolution).length} resolved, {disclosures.filter((d) => !d.resolution).length} outstanding</span></KypSubhead>{disclosures.map((disclosure, index) => (
                               <div key={index} className={`kyp-disc ${disclosure.kind === 'standard' ? 'noted' : disclosure.resolution ? 'cleared' : ''}`}>
                                 <span className="ic">{disclosure.resolution ? 'Cleared' : disclosure.kind === 'standard' ? 'Noted' : 'Finding'}</span>
-                                <div className="tx"><b>{disclosure.text}</b>{disclosure.resolution && <><br />{disclosure.resolution.because}</>}<br /><span>{disclosure.consequence}</span></div>
+                                 <div className="tx"><b>{disclosure.text}</b><div>{disclosure.consequence}</div>{disclosure.resolution && <div className="kyp-resolution"><span>{disclosure.resolution.because}</span> <button type="button" onClick={() => revealAnchor('section-permits')}>See Permits &amp; Violations ↓</button></div>}</div>
                               </div>
                             ))}</>}
 
-                            {checks.length > 0 && <><div className="kyp-title">Claims checked against the record</div>
-                              {checks.map((check, index) => <div className="kyp-xrow" key={`${check.field}-${index}`}>
-                                <div><span className="k">{listingClaimLabel(check.field)} <span className="kyp-prov claimed">Claimed</span></span><div className="v">{check.claimLabel}</div></div>
+                             {listingChecks.length > 0 && <><KypSubhead subsection={subsectionNumbers.checks}><span className="lbl">Claims checked against the record</span><span className="ct">{listingChecks.filter((check) => check.result !== 'unavailable').length} of {listingChecks.length} checked automatically</span></KypSubhead>
+                               {listingChecks.map((check, index) => <div className="kyp-xrow" key={`${check.field}-${index}`}>
+                                 <div><span className="k">THE LISTING CLAIMS</span><div className="v">{check.claimLabel}</div></div>
                                 <div><span className="k">{check.recordSource}</span><div className={`v ${check.result === 'unavailable' ? 'na' : ''}`}>{check.recordLabel}</div>{check.note && <div className="text-xs text-muted-foreground mt-1">{check.note}</div>}</div>
-                                <span className={`res ${check.result === 'match' ? 'ok' : check.result === 'differs' ? 'diff' : check.result === 'wrong' ? 'bad' : 'none'}`}>{check.result === 'unavailable' ? 'Unavailable' : check.result}</span>
+                                 <span className={`res ${check.result === 'match' ? 'ok' : check.result === 'differs' ? 'diff' : check.result === 'wrong' ? 'bad' : check.result === 'unavailable' ? 'none' : 'perm'}`}>{check.result === 'unavailable' ? "CAN'T CHECK" : check.result === 'match' ? 'MATCHES' : check.result === 'differs' ? 'DIFFERS' : check.result === 'wrong' ? 'WRONG' : 'PERMITTED'}</span>
                               </div>)}
+                               {comparisonNote && <div className="kyp-note" data-testid="listing-comparison-note">{comparisonNote}</div>}
                             </>}
 
-                            {listingSnapshot.remarksSummary && <><div className="datalabel">What the listing says</div><div className="lede">{listingSnapshot.remarksSummary}</div></>}
-                            {listingSnapshot.keyFacts?.length > 0 && <><div className="datalabel">Listing highlights</div><div className="cols"><ul>{listingSnapshot.keyFacts.slice(0, 10).map((fact, index) => <li key={index}>{fact}</li>)}</ul></div>{listingSnapshot.keyFacts.length > 10 && <div className="text-xs text-muted-foreground mt-2">+{listingSnapshot.keyFacts.length - 10} more listing highlights</div>}</>}
+                             {(hasRemarks || hasHighlights || listingData) && <><KypSubhead subsection={subsectionNumbers.listing}><span className="lbl">What the listing says</span><span className="ct">{hasRemarks ? "the broker's own words" : ""}{hasRemarks && hasHighlights ? ' · ' : ''}{hasHighlights ? `${listingSnapshot.keyFacts.length} highlights` : ''}</span></KypSubhead>
+                               {listingSnapshot.remarksSummary && <div className="lede">{listingSnapshot.remarksSummary}</div>}
+                               {hasHighlights && <><div className="kyp-hl screen-only">{shownHighlights.map((fact, index) => <div key={index}>{fact}</div>)}</div><div className="kyp-hl print-only">{listingSnapshot.keyFacts.map((fact, index) => <div key={index}>{fact}</div>)}</div>{listingSnapshot.keyFacts.length > 6 && <button type="button" className="kyp-hlmore no-print" onClick={() => setListingHighlightsExpanded((expanded) => !expanded)}>{listingHighlightsExpanded ? 'Show fewer highlights ↑' : `Show all ${listingSnapshot.keyFacts.length} highlights →`}</button>}</>}
+                               {legacyListingFacts}
+                             </>}
                             {(listingSnapshot.status === 'off_market') && listingSnapshot.whyHistorical && <div className="stale" data-testid="text-why-historical"><b>Why this reads as historical:</b> {listingSnapshot.whyHistorical}</div>}
                             {(listingSnapshot.soldPrice != null && (listingSnapshot.status === 'off_market' || listingSnapshot.status === 'pending')) && <div className="stale"><b>Sold{listingSnapshot.soldDate ? ` ${listingSnapshot.soldDate}` : ''}:</b> ${listingSnapshot.soldPrice.toLocaleString()}</div>}
-                            <div className="verify" data-testid="listing-verify-caution"><div className="vh"><AlertTriangle /><span className="t">Listing facts are seller-side claims</span></div><div className="vb">The checks above compare only published listing claims with available public records. They do not replace property inspection, title review, lease diligence, or a current tax bill. Days-on-market benchmarks use a 46-day all-residential, citywide median; 5+ unit thresholds are inferred from transaction-timeline norms, not a measured Chicago commercial median.</div></div>
+                             <div className="kyp-note tight" data-testid="listing-seller-note"><b>This is the seller’s side.</b> Everything above is listing marketing, not official data. “Can’t check” means the public record does not expose that fact. A claim is marked <b>wrong</b> only where the public record is authoritative on that exact question.</div>
+                             {listingSnapshot.daysOnMarket != null && <div className="kyp-method"><b>How we read days on market.</b> The 46-day median and 45-day convention are citywide, all-residential benchmarks. There is no public 2–4 / 5+ unit split, and Wicker Park runs 21–35 days while New Eastside runs 28–60, so this benchmark is context rather than a verdict.</div>}
                             <div className="kyp-src">Source: {sourceLabel}{listingSnapshot.sourceUrl ? ` · ${listingSnapshot.sourceUrl}` : ''}</div>
                           </>}
                         </div>
@@ -11109,71 +11174,6 @@ export default function RunDetail() {
                       </CollapsibleContent>
                      </Collapsible>
                      )}
-
-                    {/* Listing Details Sub-section */}
-                    {listingData && (
-                      <div className="border border-border rounded-none p-4 mt-2">
-                        <h3 className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651] flex items-center gap-2 mb-3">
-                          <ExternalLink className="w-4 h-4 text-foreground" />
-                          Listing Details
-                        </h3>
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                          {listingData.listPrice != null && (
-                            <div>
-                              <span className="text-xs text-muted-foreground block">List Price</span>
-                              <span className="font-jbmono font-semibold">${Number(listingData.listPrice).toLocaleString()}</span>
-                            </div>
-                          )}
-                          {listingData.unitCount != null && (
-                            <div>
-                              <span className="text-xs text-muted-foreground block">Units</span>
-                              <span className="font-jbmono font-semibold">{listingData.unitCount}</span>
-                            </div>
-                          )}
-                          {listingData.totalAnnualRent != null && (
-                            <div>
-                              <span className="text-xs text-muted-foreground block">Total Annual Rent</span>
-                              <span className="font-jbmono font-semibold">${Number(listingData.totalAnnualRent).toLocaleString()}/yr</span>
-                            </div>
-                          )}
-                          {listingData.totalMonthlyRent != null && (
-                            <div>
-                              <span className="text-xs text-muted-foreground block">Total Monthly Rent</span>
-                              <span className="font-jbmono font-semibold">${Number(listingData.totalMonthlyRent).toLocaleString()}/mo</span>
-                            </div>
-                          )}
-                          {listingData.propertyType != null && (
-                            <div className="col-span-2">
-                              <span className="text-xs text-muted-foreground block">Property Type</span>
-                              <span className="font-jbmono font-semibold">{listingData.propertyType}</span>
-                            </div>
-                          )}
-                        </div>
-                        {listingData.unitTypes && listingData.unitTypes.length > 0 && (
-                          <div className="mt-3 border-t border-border pt-3">
-                            <span className="text-xs text-muted-foreground block mb-2">Unit Breakdown</span>
-                            <div className="space-y-1">
-                              {listingData.unitTypes.map((u: any, i: number) => (
-                                <div key={i} className="flex justify-between text-xs font-jbmono">
-                                  <span>
-                                    {u.floorNumber ? `Floor ${u.floorNumber}` : `Unit ${i + 1}`}
-                                    {u.bedrooms != null ? ` · ${u.bedrooms}BR` : ''}
-                                    {u.bathrooms != null ? `/${u.bathrooms}BA` : ''}
-                                  </span>
-                                  {u.monthlyRent != null && <span>${Number(u.monthlyRent).toLocaleString()}/mo</span>}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {run?.sourceListingUrl && (
-                          <a href={run.sourceListingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mt-3">
-                            <ExternalLink className="h-3 w-3" />
-                            View listing
-                          </a>
-                        )}
-                      </div>
-                    )}
 
                     {/* Property Tax Information Sub-section */}
                     {((pinLookupData?.assessedValues && pinLookupData.assessedValues.length > 0) || propertyTaxData) && (
