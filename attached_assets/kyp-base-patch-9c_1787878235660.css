@@ -1,0 +1,37 @@
+/* ============================================================
+   KYP-BASE PATCH — Step 9c: Active Listing.
+   APPEND to the end of client/src/kyp-base.css. Append-only.
+   Most of this section's vocabulary already exists — .kyp-lstat,
+   .kyp-blocks, .kyp-disc, .kyp-xrow, .kyp-prov, .kyp-src. These
+   are the four pieces the mock needs that are not there yet.
+   ============================================================ */
+
+/* ---------- 9c — .kyp-hl : listing highlights, two columns ----------
+   The broker's own bullets. Two columns because they are short and
+   there are usually a dozen; one column pushes the diligence notes
+   below the fold. */
+.kyp-hl{display:grid;grid-template-columns:1fr 1fr;gap:4px 34px;margin:10px 0 4px}
+.kyp-hl div{font-size:13.5px;line-height:1.5;color:var(--kyp-ink2);padding-left:14px;position:relative;padding-top:5px;padding-bottom:5px}
+.kyp-hl div::before{content:"·";position:absolute;left:2px;top:4px;color:var(--kyp-muted);font-weight:700}
+.kyp-hlmore{display:inline-block;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--kyp-indigo);text-decoration:none;margin-top:10px}
+@media (max-width:760px){.kyp-hl{grid-template-columns:1fr}}
+
+/* ---------- 9c — .kyp-xrow .res.perm : allowed, not merely matching ----------
+   "6 units" against "up to 7 permitted" is not a match — the record
+   permits the claim. Green, but its own word. */
+.kyp-xrow .res.perm{background:var(--kyp-green)}
+
+/* ---------- 9c — .kyp-note : an explainer that is part of the reading ----------
+   Distinct from .kyp-caveat (a warning) and .kyp-footnote (an aside).
+   This is the paragraph that tells the reader how to interpret the
+   panel directly above it, so it sits tight under it. */
+.kyp-note{background:var(--kyp-wash);border-radius:10px;padding:14px 16px;margin:12px 0 4px;font-size:12.5px;line-height:1.6;color:var(--kyp-ink2)}
+.kyp-note b{color:var(--kyp-ink)}
+.kyp-note.tight{margin-top:8px}
+
+/* ---------- 9c — .kyp-method : how a benchmark was derived ----------
+   Smaller than a note, above the source line. Where a number in the
+   section rests on a threshold we chose, this states the threshold
+   and its limits. */
+.kyp-method{border-top:1px dashed var(--kyp-line);margin-top:18px;padding-top:12px;font-size:11.5px;line-height:1.6;color:var(--kyp-muted)}
+.kyp-method b{color:var(--kyp-ink2)}
