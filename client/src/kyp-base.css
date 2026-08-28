@@ -946,3 +946,12 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 @media (max-width:640px){
   .kyp-listingfacts{grid-template-columns:1fr 1fr}
 }
+
+/* ============================================================
+   KYP-BASE PATCH — Step 18: Business License History.
+   Append-only additions from the supplied patch.
+   ============================================================ */
+.kyp-permit.bad{border-left-color:var(--kyp-bad)}
+.kyp-permit .ptag.bad{background:var(--kyp-bad);color:#fff;border-color:var(--kyp-bad)}
+.kyp-permit .pcost u{font-family:var(--kyp-mono);font-size:11px;font-weight:700;text-decoration:none;
+  margin-left:3px;color:var(--kyp-muted);vertical-align:baseline}

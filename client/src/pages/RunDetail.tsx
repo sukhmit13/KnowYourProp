@@ -1259,7 +1259,7 @@ export default function RunDetail() {
   const incentiveEligibilityRef = useRef<Record<string, boolean>>({});
 
   // ---- Step 5 accordion state: order / hidden / open (persisted per run) ----
-  const ACC_DEFAULT_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "ownership", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
+  const ACC_DEFAULT_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "businessLicenses", "ownership", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
@@ -1547,8 +1547,6 @@ export default function RunDetail() {
   const setIsTransactionTrendsOpen = useCallback((v: boolean) => setSectionOpen('transactionTrends', v), [setSectionOpen]);
   const isZoningHistoryOpen = sectionStates.zoningHistory;
   const setIsZoningHistoryOpen = useCallback((v: boolean) => setSectionOpen('zoningHistory', v), [setSectionOpen]);
-  const isBusinessLicenseHistoryOpen = sectionStates.businessLicenseHistory;
-  const setIsBusinessLicenseHistoryOpen = useCallback((v: boolean) => setSectionOpen('businessLicenseHistory', v), [setSectionOpen]);
   const isHmdaBuyerOpen = sectionStates.hmdaBuyer;
   const setIsHmdaBuyerOpen = useCallback((v: boolean) => setSectionOpen('hmdaBuyer', v), [setSectionOpen]);
   const isDevNewsSubOpen = sectionStates.devNewsSub;
@@ -3659,20 +3657,39 @@ export default function RunDetail() {
     return null;
   }
 
-  // Pre-compute business license groups outside JSX to avoid esbuild TSX generic parsing bug
+  // Pre-compute address-scoped business license groups outside JSX to avoid
+  // esbuild TSX generic parsing bugs. Effective status and the coherent latest
+  // term are intentionally derived here, not from the raw city status alone.
   const bizLicenseGroups = (() => {
     if (!bizLicenseHistoryData?.records?.length) return [];
-    const fmtDate = (d: string, short = false) => {
-      const dt = new Date(d + 'T12:00:00');
-      return dt.toLocaleDateString('en-US', short ? { month: 'short', year: 'numeric' } : { month: 'short', day: 'numeric', year: 'numeric' });
-    };
-    const groupMap = new Map();
+    const normalizeBusinessName = (value: string) => (value || '')
+      .toUpperCase()
+      .replace(/[.,]/g, ' ')
+      .replace(/\b(INC|LLC|L L C|CORP|CO|LTD|LP|LLP|COMPANY|INCORPORATED)\b/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const groupMap = new Map<string, any>();
     for (const rec of bizLicenseHistoryData.records) {
-      const key = (rec.businessName || '').trim().toUpperCase();
+      const rawName = (rec.businessName || '').trim();
+      const key = normalizeBusinessName(rawName);
       if (!groupMap.has(key)) {
-        groupMap.set(key, { businessName: rec.businessName, licenseTypes: [] as string[], earliestIssued: rec.issuedDate || '', latestExpiry: rec.expirationDate || '', latestStatus: rec.status || '', latestStatusLabel: rec.statusLabel || '' });
+        groupMap.set(key, {
+          businessName: rawName,
+          rawNames: new Set<string>(),
+          recordCount: 0,
+          licenseTypes: [] as string[],
+          earliestIssued: rec.issuedDate || '',
+          latestExpiry: rec.expirationDate || '',
+          latestStatus: rec.status || '',
+          latestStatusLabel: rec.statusLabel || '',
+        });
       }
       const g = groupMap.get(key);
+      if (rawName) {
+        g.rawNames.add(rawName);
+        if (rawName.length > g.businessName.length) g.businessName = rawName;
+      }
+      g.recordCount += 1;
       if (rec.licenseType && !g.licenseTypes.includes(rec.licenseType)) g.licenseTypes.push(rec.licenseType);
       if (rec.issuedDate && (!g.earliestIssued || rec.issuedDate < g.earliestIssued)) g.earliestIssued = rec.issuedDate;
       // Pick ONE coherent "latest" record per business (expiry preferred, issued fallback as the
@@ -3686,16 +3703,14 @@ export default function RunDetail() {
       }
     }
     const todayIso = new Date().toISOString().substring(0, 10);
-    const groups = (Array.from(groupMap.values()) as Array<{ businessName: string; licenseTypes: string[]; earliestIssued: string; latestExpiry: string; latestStatus: string; latestStatusLabel: string; }>).map(g => {
-      // Effective status is DERIVED from term dates, not the raw city status field:
-      // explicit cancellation/revocation/inactive wins; else future (or missing) end date = active; else expired.
+    const groups = (Array.from(groupMap.values()) as Array<{ businessName: string; rawNames: Set<string>; recordCount: number; licenseTypes: string[]; earliestIssued: string; latestExpiry: string; latestStatus: string; latestStatusLabel: string; }>).map(g => {
       const rawIsActive = g.latestStatus === 'AAI';
       const termEnded = !!g.latestExpiry && g.latestExpiry < todayIso;
       let effectiveStatus: 'active' | 'expired' | 'cancelled';
       let effectiveLabel: string;
       if (['AAC', 'REV', 'INV'].includes(g.latestStatus)) {
         effectiveStatus = 'cancelled';
-        effectiveLabel = g.latestStatusLabel || 'Cancelled';
+        effectiveLabel = g.latestStatus === 'REV' ? 'Revoked' : g.latestStatusLabel || 'Cancelled';
       } else if (!termEnded) {
         effectiveStatus = 'active';
         effectiveLabel = 'Active';
@@ -3704,7 +3719,21 @@ export default function RunDetail() {
         effectiveLabel = 'Expired';
       }
       const discrepancy = rawIsActive && termEnded;
-      return { ...g, effectiveStatus, effectiveLabel, discrepancy };
+      const start = g.earliestIssued ? new Date(`${g.earliestIssued}T12:00:00`).getTime() : NaN;
+      const end = (g.latestExpiry && g.latestExpiry < todayIso ? g.latestExpiry : todayIso)
+        ? new Date(`${g.latestExpiry && g.latestExpiry < todayIso ? g.latestExpiry : todayIso}T12:00:00`).getTime()
+        : NaN;
+      const tenureYears = Number.isFinite(start) && Number.isFinite(end)
+        ? Math.max(0, Math.round((end - start) / (365.25 * 24 * 60 * 60 * 1000)))
+        : null;
+      return {
+        ...g,
+        rawNameCount: g.rawNames.size,
+        effectiveStatus,
+        effectiveLabel,
+        discrepancy,
+        tenureYears,
+      };
     });
     // Most recent activity first: sort by latest license term (expiry, fall back to start),
     // so a business still licensed today sits above one that lapsed years ago.
@@ -3712,10 +3741,36 @@ export default function RunDetail() {
     return groups;
   })();
   const bizActiveCount = bizLicenseGroups.filter(g => g.effectiveStatus === 'active').length;
-  const bizDiscrepancyCount = bizLicenseGroups.filter(g => g.discrepancy).length;
-  const fmtBizDate = (d: string, short = false) => {
-    const dt = new Date(d + 'T12:00:00');
-    return dt.toLocaleDateString('en-US', short ? { month: 'short', year: 'numeric' } : { month: 'short', day: 'numeric', year: 'numeric' });
+  const bizSinceYear = bizLicenseGroups.reduce((min: number | null, group: any) => {
+    const year = group.earliestIssued ? parseInt(group.earliestIssued.substring(0, 4), 10) : NaN;
+    return Number.isFinite(year) ? min === null || year < min ? year : min : min;
+  }, null);
+  const bizLongestGroup = bizLicenseGroups.reduce((longest: any, group: any) =>
+    !longest || (group.tenureYears ?? 0) > (longest.tenureYears ?? 0) ? group : longest, null);
+  const bizLongestYears = bizLongestGroup?.tenureYears ?? null;
+  const businessLicensesTakeaway = isLoadingBizLicenseHistory ? (
+    <Skeleton className="h-4 w-80" data-testid="business-licenses-takeaway-skeleton" />
+  ) : bizLicenseGroups.length > 0 ? (
+    `${bizLicenseGroups.length} businesses since ${bizSinceYear ?? 'the earliest record'} — ${bizActiveCount} active${bizLongestYears != null && bizLongestYears > 10 && bizLongestGroup ? `, and ${bizLongestGroup.businessName} held a ${bizLongestGroup.licenseTypes[0] || 'license'} for ${bizLongestYears} years` : ''}.`
+  ) : (
+    "No business license has ever been issued at this address."
+  );
+  const businessLicensesBadge = isLoadingBizLicenseHistory
+    ? undefined
+    : bizLicenseGroups.length > 0
+      ? `${bizLicenseGroups.length} RECORDS · ${bizActiveCount} ACTIVE`
+      : "NONE ON RECORD";
+  const fmtBizDate = (value: string) => {
+    if (!value) return 'Not recorded';
+    const date = new Date(`${value}T12:00:00`);
+    return Number.isNaN(date.getTime())
+      ? value
+      : date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  };
+  const bizLicenseTypeLabel = (value: string) => {
+    if (/^Retail Food Establishment$/i.test(value)) return 'Retail Food';
+    if (/Liquor\s*-\s*Consumption on Premises/i.test(value)) return 'Consumption on Premises';
+    return value.length > 34 ? `${value.slice(0, 33).trimEnd()}…` : value;
   };
 
 
@@ -3809,6 +3864,7 @@ export default function RunDetail() {
   });
   const ACC_CUSTOM_META: Record<string, { title: string; summary: string; info: string[] }> = {
     listing: { title: "Active Listing", summary: "Live listing status for this address — price, status and terms.", info: ["AI listing lookup", "Price, status & broker", "Rent roll / unit mix when published"] },
+    businessLicenses: { title: "Business Licenses", summary: "Every business ever licensed at this address.", info: ["City of Chicago license records", "Operator, term and license class", "Active, expired and revoked"] },
     zoningHistory: { title: "Zoning History", summary: "Recorded City Council and Zoning Board actions for this parcel.", info: ["City Council filings", "Zoning Board decisions", "Filing documents and named professionals"] },
     analysis: { title: "Project Use Analysis", summary: "Deep-dive analysis for your selected use.", info: ["Demand & demographics for your use", "Nearby competitors", "Use-specific estimators"] },
     potential: { title: "Development Potential", summary: "FAR, buildable envelope and rental potential.", info: ["FAR & buildable envelope", "Market rents (RentCast)", "Short-term rental (Airbnb)", "Commercial listings"] },
@@ -3926,9 +3982,9 @@ export default function RunDetail() {
       index: (pos < 0 ? accOrder.length : pos) + 1,
       order: (pos < 0 ? accOrder.length : pos) + 1,
       eyebrow: title,
-      takeaway: rowId === "listing" ? listingTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : scan?.takeaway ?? summary,
-      verdict,
-      badge: rowId === "listing" ? listingBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
+      takeaway: rowId === "listing" ? listingTakeaway : rowId === "businessLicenses" ? businessLicensesTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : scan?.takeaway ?? summary,
+      verdict: rowId === "businessLicenses" ? "context" as const : verdict,
+      badge: rowId === "listing" ? listingBadge : rowId === "businessLicenses" ? businessLicensesBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
       badgeTone: rowId === "listing"
         ? listingSnapshot?.status === "not_found"
           ? "indigo" as const
@@ -3939,8 +3995,14 @@ export default function RunDetail() {
             : listingChecks.length > 0 && listingChecks.every((check) => check.result === "match")
               ? "g" as const
               : undefined
-        : undefined,
-      collapsible: rowId !== "listing" || listingSnapshot?.status !== "not_found",
+        : rowId === "businessLicenses"
+          ? "indigo" as const
+          : undefined,
+      collapsible: rowId === "listing"
+        ? listingSnapshot?.status !== "not_found"
+        : rowId === "businessLicenses"
+          ? isLoadingBizLicenseHistory || bizLicenseGroups.length > 0
+          : true,
       info: (scan?.info || custom?.info || []).join(" · "),
       open: accOpen[rowId] === true,
       onToggle: () => setAccOpen((m) => ({ ...m, [rowId]: !m[rowId] })),
@@ -5334,6 +5396,114 @@ export default function RunDetail() {
                     })()}
              </div>
           </motion.div>
+          </AccordionSection>
+
+          {/* Address-scoped City of Chicago business license record. */}
+          <AccordionSection {...accProps("businessLicenses")}>
+            <motion.div
+              id="print-section-business-licenses"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.19 }}
+            >
+              {isLoadingBizLicenseHistory ? (
+                <div className="space-y-3" data-testid="business-licenses-loading">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-28 w-full" />
+                  <Skeleton className="h-28 w-full" />
+                </div>
+              ) : bizLicenseGroups.length > 0 ? (() => {
+                const activeGroups = bizLicenseGroups.filter((group: any) => group.effectiveStatus === 'active');
+                const activeNames = activeGroups.map((group: any) => group.businessName).join(', ');
+                const recordYears = bizSinceYear != null ? Math.max(0, new Date().getFullYear() - bizSinceYear) : null;
+                const heroLayout = bizLongestYears == null ? 'two' : '';
+                const readDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                return (
+                  <>
+                    <div className={`kyp-blocks hero ${heroLayout}`} data-testid="business-licenses-hero">
+                      <div className="kyp-block ind">
+                        <div className="bv">{bizLicenseGroups.length}</div>
+                        <div>
+                          <div className="bl">Businesses licensed here</div>
+                          <div className="bd">{bizSinceYear != null ? `Since ${bizSinceYear}${recordYears != null ? ` — ${recordYears} years of city record` : ''}, deduplicated by operator` : 'City records deduplicated by operator'}</div>
+                        </div>
+                      </div>
+                      <div className={`kyp-block ${bizActiveCount > 0 ? 'grn' : 'orange'}`}>
+                        <div className="bv">{bizActiveCount}</div>
+                        <div>
+                          <div className="bl">Holding a license today</div>
+                          <div className="bd">{bizActiveCount === 0
+                            ? 'No license in force. The commercial space is unlicensed today.'
+                            : bizActiveCount === 1
+                              ? `${activeNames}${activeGroups[0].latestExpiry ? `, through ${fmtBizDate(activeGroups[0].latestExpiry)}` : ''}. The storefront is occupied and licensed.`
+                              : `${activeNames}. ${bizActiveCount} operators hold licenses in force.`}</div>
+                        </div>
+                      </div>
+                      {bizLongestYears != null && bizLongestGroup && (
+                        <div className="kyp-block ind">
+                          <div className="bv">{bizLongestYears}</div>
+                          <div>
+                            <div className="bl">Years — longest tenancy</div>
+                            <div className="bd">{bizLongestGroup.businessName}, {fmtBizDate(bizLongestGroup.earliestIssued)}–{bizLongestGroup.effectiveStatus === 'active' ? 'today' : fmtBizDate(bizLongestGroup.latestExpiry)}. {bizLicenseGroups.length} operator{bizLicenseGroups.length === 1 ? '' : 's'} across the record period.</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div data-testid="business-license-records">
+                      {bizLicenseGroups.map((group: any, index: number) => {
+                        const revoked = group.latestStatus === 'REV';
+                        const statusClass = group.effectiveStatus === 'active' ? 'good' : revoked ? 'bad' : '';
+                        const cityStatus = group.latestStatus || 'Not recorded';
+                        const cityStatusReading = group.discrepancy
+                          ? `${cityStatus} — contradicts the term; we show the term`
+                          : `${cityStatus} — agrees with the term`;
+                        return (
+                          <div className={`kyp-permit ${statusClass}`} key={`${group.businessName}-${index}`} data-testid={`row-biz-license-${index}`}>
+                            <div className="ph">
+                              <span className="pscope">{group.businessName}</span>
+                              {group.tenureYears != null && <span className="pcost">{group.tenureYears}<u>yrs</u></span>}
+                            </div>
+                            <div className="ptags">
+                              <span className={`ptag ${statusClass}`} data-testid={`badge-biz-status-${index}`}>{group.effectiveLabel}</span>
+                              {group.licenseTypes.map((licenseType: string) => (
+                                <span className="kyp-liccat" key={licenseType} title={licenseType}>{bizLicenseTypeLabel(licenseType)}</span>
+                              ))}
+                            </div>
+                            <div className="pmeta">
+                              <div>
+                                <div className="pml">Term</div>
+                                <div className="pmv">{fmtBizDate(group.earliestIssued)} – {group.effectiveStatus === 'active' && !group.latestExpiry ? 'today' : fmtBizDate(group.latestExpiry)}</div>
+                              </div>
+                              <div>
+                                <div className="pml">City status</div>
+                                <div className="pmv dim">{cityStatusReading}</div>
+                              </div>
+                              {group.rawNameCount > 1 && (
+                                <div>
+                                  <div className="pml">Records merged</div>
+                                  <div className="pmv dim">{group.rawNameCount} — {Array.from(group.rawNames).join(' · ')}</div>
+                                </div>
+                              )}
+                              {group.recordCount > 1 && (
+                                <div>
+                                  <div className="pml">Licenses held</div>
+                                  <div className="pmv dim">{group.recordCount} across {group.tenureYears ?? 'unrecorded'} year{group.tenureYears === 1 ? '' : 's'}</div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="kyp-src">
+                      Source: City of Chicago Business Licenses (r5kz-chrr), matched on the address of record · read {readDate}. Status is read from the license term, not the city's status field, which lags; records are grouped by operator, so a legal suffix does not split one tenant in two.
+                    </div>
+                  </>
+                );
+              })() : null}
+            </motion.div>
           </AccordionSection>
 
           {/* Zoning History — first-class evidence section. */}
@@ -9975,126 +10145,6 @@ export default function RunDetail() {
                         </CollapsibleContent>
                       </Collapsible>
                     )}
-
-                    {/* Business License History Sub-section */}
-                    <Collapsible open={isBusinessLicenseHistoryOpen} onOpenChange={setIsBusinessLicenseHistoryOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-biz-license-history" id="subsection-biz-license-history">
-                          <h3 className="chead chead-icon">
-                            <FileText className="w-4 h-4" />
-                            Business License History
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            {!isLoadingBizLicenseHistory && bizLicenseGroups.length > 0 && (
-                              <span className="bzl-count" data-testid="badge-biz-license-count">
-                                {bizLicenseGroups.length} total · <b>{bizActiveCount} active</b>
-                              </span>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isBusinessLicenseHistoryOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="seccard">
-                          {isLoadingBizLicenseHistory ? (
-                            <div className="space-y-3">
-                              <Skeleton className="h-12 w-full" />
-                              <Skeleton className="h-12 w-full" />
-                              <Skeleton className="h-10 w-2/3" />
-                            </div>
-                          ) : bizLicenseGroups.length > 0 ? (
-                            <>
-                              {/* Snapshot — computed, not AI */}
-                              {(() => {
-                                const sinceYear = bizLicenseGroups.reduce((min: number | null, g) => {
-                                  const y = g.earliestIssued ? parseInt(g.earliestIssued.substring(0, 4), 10) : NaN;
-                                  return isNaN(y) ? min : min === null || y < min ? y : min;
-                                }, null);
-                                const activeGroups = bizLicenseGroups.filter(g => g.effectiveStatus === 'active');
-                                const lapsedGroups = bizLicenseGroups.filter(g => g.effectiveStatus !== 'active');
-                                const total = bizLicenseGroups.length;
-                                const single = total === 1;
-                                const only = bizLicenseGroups[0];
-                                const headline = single
-                                  ? `${only.businessName} is the only business ever licensed here${sinceYear ? ` — since ${sinceYear}` : ''}${only.effectiveStatus === 'active' ? `, and its license runs through ${only.latestExpiry ? only.latestExpiry.substring(0, 4) : 'today'}` : `, and it is no longer ${only.effectiveStatus === 'cancelled' ? 'operating' : 'active'}`}.`
-                                  : `${total} businesses licensed at this address${sinceYear ? ` since ${sinceYear}` : ''} — ${bizActiveCount === 0 ? 'none active today' : bizActiveCount === 1 ? 'one still active today' : `${bizActiveCount} still active today`}.`;
-                                return (
-                                  <div className="crm-take" data-testid="bizlic-snapshot">
-                                    <div className="crm-takeh">
-                                      <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>
-                                      Takeaway
-                                    </div>
-                                    <div className="crm-taket">{headline}</div>
-                                    {!single && (
-                                      <div className="crm-conn">
-                                        <div className={`crm-cn ${bizActiveCount > 0 ? 'g' : 'n'}`}>
-                                          <span className="dt" />
-                                          {bizActiveCount === 0 ? (
-                                            <span><b>No active licenses today.</b> Every license on record has expired or been cancelled.</span>
-                                          ) : bizActiveCount === 1 ? (
-                                            <span><b>One active today.</b> {activeGroups[0].businessName} holds a {activeGroups[0].licenseTypes[0] || 'business license'}{activeGroups[0].latestExpiry ? <> through <b>{activeGroups[0].latestExpiry.substring(0, 4)}</b></> : null}.</span>
-                                          ) : (
-                                            <span><b>{bizActiveCount} active today.</b> {activeGroups.map(g => g.businessName).join(', ')}.</span>
-                                          )}
-                                        </div>
-                                        {lapsedGroups.length > 0 && (
-                                          <div className="crm-cn n">
-                                            <span className="dt" />
-                                            <span>{bizActiveCount > 0 ? 'The others have lapsed — ' : ''}{lapsedGroups.map(g => g.businessName).join(lapsedGroups.length === 2 ? ' and ' : ', ')} {lapsedGroups.length === 1 ? 'is' : 'are'} no longer operating.</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })()}
-
- 
-                              {/* License rows — newest first */}
-                              <div>
-                                {bizLicenseGroups.map((g, i) => (
-                                  <div key={i} className="bzl-row" data-testid={`row-biz-license-${i}`}>
-                                    <div className="bzl-top">
-                                      <span className="nm">{g.businessName}</span>
-                                      {g.earliestIssued && (
-                                        <span className="dates">
-                                          {fmtBizDate(g.earliestIssued, true)}
-                                          {g.latestExpiry && g.latestExpiry !== g.earliestIssued ? ` – ${fmtBizDate(g.latestExpiry, true)}` : ''}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="bzl-tags">
-                                      <span className={`bzl-st ${g.effectiveStatus}`} data-testid={`badge-biz-status-${i}`}>
-                                        <span className="d" />{g.effectiveLabel}
-                                      </span>
-                                      {g.licenseTypes.map((lt, j) => (
-                                        <span key={j} className="bzl-type">{lt}</span>
-                                      ))}
-                                      {g.discrepancy && (
-                                        <span className="bzl-flag" data-testid={`flag-biz-discrepancy-${i}`}>
-                                          <svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                          Record says "{g.latestStatusLabel}" — term ended {g.latestExpiry ? g.latestExpiry.substring(0, 4) : ''}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-
-                              {/* Caveat — only when ≥1 discrepancy */}
-                              {bizDiscrepancyCount > 0 && (
-                                <div className="bzl-caveat" data-testid="bizlic-caveat">
-                                  <svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                  <span><b>Status shown reflects the license term dates.</b> {bizDiscrepancyCount} record{bizDiscrepancyCount !== 1 ? 's are' : ' is'} flagged "Active" in city data but past {bizDiscrepancyCount !== 1 ? 'their terms' : 'its term'} — treated as expired here. City license status fields can lag; verify current standing with the City of Chicago before relying on it.</span>
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">No business license records found for this address.</p>
-                          )}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
 
                     {false && (
                     <Collapsible open={isLandmarkSectionOpen} onOpenChange={setIsLandmarkSectionOpen}>
