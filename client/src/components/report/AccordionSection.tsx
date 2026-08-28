@@ -41,6 +41,7 @@ export interface AccordionSectionProps {
   verdict: AccVerdict;
   badge?: string;
   badgeTone?: "g" | "o" | "c" | "r" | "indigo";
+  collapsible?: boolean;
   info?: string;
   open: boolean;
   onToggle: () => void;
@@ -55,22 +56,30 @@ export interface AccordionSectionProps {
 export function AccordionSection({
   index, id, order, eyebrow, takeaway, verdict, badge, badgeTone, info,
   open, onToggle, off, onToggleOff, dragHandlers, dragging, over, children,
+  collapsible = true,
 }: AccordionSectionProps) {
   const v = VCLASS[verdict];
-  const cls = ["kyp-accrow", v, off && "offrow", dragging && "dragrow", over && "overrow"]
+  const cls = ["kyp-accrow", v, !collapsible && "static", off && "offrow", dragging && "dragrow", over && "overrow"]
     .filter(Boolean).join(" ");
-  const bodyOpen = open && !off;
+  const bodyOpen = collapsible && open && !off;
   return (
     <div className={cls} id={`section-${id}`} data-testid={`accsec-${id}`} style={{ order }} {...dragHandlers}>
       <div
         className="kyp-acchd"
         data-testid={id === "listing" ? "trigger-listing-snapshot" : undefined}
         title={info}
-        onClick={onToggle}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
-        aria-expanded={bodyOpen}
+        {...(collapsible ? {
+          onClick: onToggle,
+          role: "button" as const,
+          tabIndex: 0,
+          onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onToggle();
+            }
+          },
+          "aria-expanded": bodyOpen,
+        } : {})}
       >
         <span className="drag" title="Drag to re-rank" onClick={(e) => e.stopPropagation()}>⠿</span>
         <span className="num">{String(index).padStart(2, "0")}</span>
@@ -93,9 +102,11 @@ export function AccordionSection({
           </span>
         )}
       </div>
-      <SectionNumberContext.Provider value={index}>
-        <div className={`kyp-accbody${bodyOpen ? "" : " closed"}`}>{children}</div>
-      </SectionNumberContext.Provider>
+      {collapsible && (
+        <SectionNumberContext.Provider value={index}>
+          <div className={`kyp-accbody${bodyOpen ? "" : " closed"}`}>{children}</div>
+        </SectionNumberContext.Provider>
+      )}
     </div>
   );
 }

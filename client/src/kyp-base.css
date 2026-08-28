@@ -915,6 +915,12 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-src>*+*{margin-left:8px}
 
 /* ============================================================
+   KYP-BASE PATCH — Step 9c DELTA (empty states).
+   ============================================================ */
+.kyp-accrow.static .kyp-acchd{cursor:default}
+.kyp-accrow.static .kyp-acchd .drag{cursor:grab}
+
+/* ============================================================
    KYP-BASE PATCH — Step 9c: Active Listing.
    Append-only additions for listing highlights, verdict notes,
    and the permitted comparison result.

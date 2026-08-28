@@ -1,0 +1,21 @@
+/* ============================================================
+   KYP-BASE PATCH — Step 9c DELTA (empty states).
+   APPEND to the end of client/src/kyp-base.css. Append-only.
+
+   If you already appended kyp-base-patch-9c.css, append ONLY this
+   file — the 11 rules in that patch are unchanged. These 3 are new.
+   ============================================================ */
+
+/* ---------- .kyp-accrow.static : a row with nothing behind it ----------
+   When the listing lookup returns not_found there is no body to open,
+   so the row stops being a disclosure control. There is no chevron
+   element in .kyp-acchd markup, so the pointer cursor is the only
+   affordance to remove. The drag handle keeps its own. */
+.kyp-accrow.static .kyp-acchd{cursor:default}
+.kyp-accrow.static .kyp-acchd .drag{cursor:grab}
+
+/* ---------- .kyp-acchd .badge.r : the missing red tone ----------
+   AccordionSectionProps declares badgeTone "r" but kyp-base.css has
+   no rule for it — a red badge renders white-on-transparent. Nothing
+   passes "r" today; this closes the trap before something does. */
+.kyp-acchd .badge.r{background:var(--kyp-bad)}

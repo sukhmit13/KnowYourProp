@@ -1614,17 +1614,6 @@ export default function RunDetail() {
   const updateRunLabel = useUpdateRunLabel();
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [labelDraft, setLabelDraft] = useState('');
-  // Auto-check the live listing once per run when no snapshot exists yet (owner views only).
-  const listingAutoCheckedRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (isStandaloneReport) return; // public/report views can't trigger the paid lookup
-    if (!run?.id || !listingSnapshotFetched) return;
-    if (listingSnapshot) return; // already have a saved snapshot
-    if (generateListingSnapshot.isPending || generateListingSnapshot.isError) return;
-    if (listingAutoCheckedRef.current === run.id) return;
-    listingAutoCheckedRef.current = run.id;
-    generateListingSnapshot.mutate({});
-  }, [isStandaloneReport, run?.id, listingSnapshotFetched, listingSnapshot, generateListingSnapshot]);
   // Declare early so the geocode useEffect below can reference it
   const { isSubscriber, user: authUser } = useAuth();
   // Report is unlocked if user is a subscriber or the run has been purchased
@@ -3826,8 +3815,12 @@ export default function RunDetail() {
     historic: { title: "Historic Status", summary: "Chicago Historic Resources Survey rating and designation signals.", info: ["CHRS survey rating", "Municipal designation signals", "Demolition-hold rule", "Credit eligibility requirements"] },
     countyRecord: { title: "COUNTY RECORD", summary: "Cook County Assessor and Treasurer record for the subject parcel.", info: ["Parcel and structure facts", "Recorded unit configuration", "Assessor valuation inputs", "PIN and source links"] },
   };
-  const listingStillChecking = generateListingSnapshot.isPending
-    || (!listingSnapshot && !isListingSnapshotError);
+  const listingChecking = generateListingSnapshot.isPending;
+  const listingNeverChecked = !listingSnapshot && !isListingSnapshotError && !listingChecking;
+  const listingStillChecking = listingChecking || listingNeverChecked;
+  const listingCheckedDate = listingSnapshot?.checkedAt && !Number.isNaN(new Date(listingSnapshot.checkedAt).getTime())
+    ? new Date(listingSnapshot.checkedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : 'date unavailable';
   const listingParseNumber = (value: unknown): number | null => {
     const text = String(value ?? "").trim().toLowerCase();
     const leadingWord = text.match(/^[a-z]+/)?.[0];
@@ -3862,10 +3855,12 @@ export default function RunDetail() {
   const listingWrongChecks = listingChecks.filter((check) => check.result === "wrong");
   const listingDiffersChecks = listingChecks.filter((check) => check.result === "differs");
   const listingMaterialCheck = listingWrongChecks[0] ?? listingDiffersChecks[0] ?? null;
-  const listingTakeaway = listingStillChecking ? (
+  const listingTakeaway = listingChecking ? (
     <Skeleton className="h-4 w-64" data-testid="listing-takeaway-skeleton" />
+  ) : listingNeverChecked ? (
+    "Not yet checked — run the lookup to search listing sites for this address."
   ) : listingSnapshot?.status === "not_found" ? (
-    "No active listing on record."
+    `No public listing found on the major listing sites. Checked ${listingCheckedDate}.`
   ) : isListingSnapshotError ? (
     "Listing check unavailable — try again."
   ) : listingSnapshot ? (
@@ -3883,8 +3878,10 @@ export default function RunDetail() {
   ) : (
     "Live listing status for this address — price, status and terms."
   );
-  const listingBadge = listingStillChecking || !listingSnapshot || listingSnapshot.status === "not_found"
+  const listingBadge = listingStillChecking || !listingSnapshot
     ? undefined
+    : listingSnapshot.status === "not_found"
+      ? "UNLISTED"
     : listingWrongChecks.length > 0
       ? `${listingWrongChecks.length} wrong · ${listingDiffersChecks.length} to confirm`
       : listingDiffersChecks.length > 0
@@ -3933,7 +3930,9 @@ export default function RunDetail() {
       verdict,
       badge: rowId === "listing" ? listingBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
       badgeTone: rowId === "listing"
-        ? listingWrongChecks.length > 0
+        ? listingSnapshot?.status === "not_found"
+          ? "indigo" as const
+          : listingWrongChecks.length > 0
           ? "r" as const
           : listingDiffersChecks.length > 0
             ? "o" as const
@@ -3941,6 +3940,7 @@ export default function RunDetail() {
               ? "g" as const
               : undefined
         : undefined,
+      collapsible: rowId !== "listing" || listingSnapshot?.status !== "not_found",
       info: (scan?.info || custom?.info || []).join(" · "),
       open: accOpen[rowId] === true,
       onToggle: () => setAccOpen((m) => ({ ...m, [rowId]: !m[rowId] })),
