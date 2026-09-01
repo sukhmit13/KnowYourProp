@@ -90,6 +90,104 @@ export const WORK_TYPE_KEYWORDS: Record<string, string[]> = {
   deck: ['deck', 'porch', 'patio', 'pergola', 'gazebo']
 };
 
+export type PermitProjectScope =
+  | 'ground-up'
+  | 'gut-rehab'
+  | 'bathroom'
+  | 'kitchen'
+  | 'kitchen-bath'
+  | 'addition'
+  | 'simple-residential'
+  | 'commercial-industrial'
+  | 'other';
+
+export interface PermitScopeClassification {
+  primary: PermitProjectScope;
+  all: PermitProjectScope[];
+  strictBathroom: boolean;
+  strictKitchen: boolean;
+  propertyContext: PermitPropertyContext;
+}
+
+export type PermitPropertyContext =
+  | 'single-family'
+  | 'condo'
+  | 'multi-family'
+  | 'residential-unspecified'
+  | 'commercial-industrial'
+  | 'unknown';
+
+/**
+ * Classify the scale and intent of a permitted project. This deliberately
+ * favors a narrower label over a broad one: a bathroom mention inside a gut
+ * rehab is not counted as a standalone bathroom remodel.
+ */
+export function classifyPermitProjectScope(permit: {
+  work_description?: string;
+  permit_type?: string;
+  workDescription?: string;
+  permitType?: string;
+}): PermitScopeClassification {
+  const description = (permit.work_description || permit.workDescription || '').toLowerCase();
+  const permitType = (permit.permit_type || permit.permitType || '').toLowerCase();
+  const text = `${description} ${permitType}`;
+  const has = (terms: string[]) => terms.some(term => text.includes(term));
+  const isGroundUp = has([
+    'new construction', 'new building', 'new structure', 'new single family',
+    'new residential', 'ground up', 'ground-up',
+  ]);
+  const isGutRehab = has([
+    'gut rehab', 'gut renovation', 'complete renovation', 'full renovation',
+    'total renovation', 'gut remodel', 'entire interior', 'whole house',
+    'whole-house', 'interior buildout',
+  ]);
+  const hasBathroom = has(['bathroom', 'bath', 'toilet', 'shower', 'tub', 'bathtub', 'vanity', 'powder room']);
+  const hasKitchen = has(['kitchen', 'kitch', 'cabinet', 'countertop', 'backsplash', 'island', 'pantry']);
+  const hasAddition = has(['addition', 'extend', 'extension', 'bump out', 'second floor', 'third floor', 'sunroom']);
+  const isCommercial = has(['commercial', 'industrial', 'warehouse', 'manufacturing', 'retail', 'office', 'storefront']);
+  const isSingleFamily = has(['single family', 'single-family', '1 dwelling unit', 'one dwelling unit', '1du']) ||
+    /\b1\s*(?:du|dwelling units?)\b/.test(text);
+  const isCondo = has(['condo', 'condominium']);
+  const isMultiFamily = has(['multi-family', 'multifamily', 'multi family', 'apartment', 'dwelling units', '2du', '3du', '4du']) ||
+    /\b(?:2|3|4)\s*(?:du|dwelling units?)\b/.test(text);
+  const isResidential = isSingleFamily || isCondo || isMultiFamily || has(['residential', 'townhouse', 'dwelling unit']);
+  const isSimpleWork = has([
+    'interior alteration', 'interior renovation', 'interior remodel',
+    'nonstructural alteration', 'non-structural alteration',
+    'repair and replace', 'repairs to existing',
+  ]);
+  const hasBroadScope = isGroundUp || isGutRehab || hasAddition || has(['basement', 'foundation', 'structural', 'whole property']);
+
+  const strictBathroom = hasBathroom && !hasKitchen && !hasBroadScope && !isCommercial;
+  const strictKitchen = hasKitchen && !hasBathroom && !hasBroadScope && !isCommercial;
+  const all: PermitProjectScope[] = [];
+
+  if (isGroundUp) all.push('ground-up');
+  else if (isGutRehab) all.push('gut-rehab');
+  else if (isCommercial) all.push('commercial-industrial');
+  else if (hasAddition) all.push('addition');
+  else if (hasBathroom && hasKitchen) all.push('kitchen-bath');
+  else if (strictBathroom || hasBathroom) all.push('bathroom');
+  else if (strictKitchen || hasKitchen) all.push('kitchen');
+  else if (isResidential && isSimpleWork) all.push('simple-residential');
+  else all.push('other');
+
+  let propertyContext: PermitPropertyContext = 'unknown';
+  if (isCommercial) propertyContext = 'commercial-industrial';
+  else if (isSingleFamily) propertyContext = 'single-family';
+  else if (isCondo) propertyContext = 'condo';
+  else if (isMultiFamily) propertyContext = 'multi-family';
+  else if (isResidential) propertyContext = 'residential-unspecified';
+
+  return {
+    primary: all[0],
+    all,
+    strictBathroom,
+    strictKitchen,
+    propertyContext,
+  };
+}
+
 export function classifyPermitWorkTypes(permit: {
   work_description?: string;
   permit_type?: string;

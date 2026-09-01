@@ -44,6 +44,47 @@ const SPECIALTY_DISPLAY_NAMES: Record<string, string> = {
   'general': 'General Renovation'
 };
 
+const PROJECT_SCOPE_DISPLAY_NAMES: Record<string, string> = {
+  'bathroom-strict': 'Bathroom-only / narrow scope',
+  bathroom: 'Bathroom mentioned',
+  'kitchen-strict': 'Kitchen-only / narrow scope',
+  kitchen: 'Kitchen mentioned',
+  'kitchen-bath': 'Kitchen and bath project',
+  'simple-residential': 'Simple residential alteration',
+  addition: 'Addition',
+  'gut-rehab': 'Gut rehab / whole interior',
+  'ground-up': 'Ground-up construction',
+  'commercial-industrial': 'Commercial / industrial',
+  other: 'Other permit work',
+};
+
+const CONTRACTOR_ROLE_DISPLAY_NAMES: Record<string, string> = {
+  general: 'General contractor',
+  electrical: 'Electrical contractor',
+  plumbing: 'Plumbing contractor',
+  'hvac/mechanical': 'HVAC / mechanical contractor',
+  roofing: 'Roofing contractor',
+  masonry: 'Masonry contractor',
+  carpentry: 'Carpentry contractor',
+  tile: 'Tile contractor',
+  concrete: 'Concrete contractor',
+  elevator: 'Elevator contractor',
+  alarm: 'Alarm contractor',
+  sign: 'Sign contractor',
+  tent: 'Tent contractor',
+  'wrecking/demolition': 'Wrecking / demolition contractor',
+  contractor: 'Other contractor',
+};
+
+const PROPERTY_CONTEXT_DISPLAY_NAMES: Record<string, string> = {
+  'single-family': 'Single-family home',
+  condo: 'Condo',
+  'multi-family': 'Multi-family residence',
+  'residential-unspecified': 'Residential — type unspecified',
+  'commercial-industrial': 'Commercial / industrial',
+  unknown: 'Property type not stated',
+};
+
 interface Contractor {
   id: string;
   name: string;
@@ -63,11 +104,24 @@ interface Contractor {
   specialtyPermits?: number;
   searchMatchCount?: number;
   searchMatches?: string[];
+  scopePermits?: number;
+  rolePermits?: number;
+  evidencePermits?: number;
+  roleCounts?: Record<string, number>;
+  projectScopeCounts?: Record<string, number>;
+  strictProjectScopeCounts?: Record<string, number>;
+  scopeValueStats?: { count: number; total: number; median: number } | null;
+  listedCityTypes?: { type: string; count: number }[];
   recentActivity: number;
   recentProjects: {
     address: string;
     date: string;
     specialty: string;
+    projectScope?: string;
+    contractorRoles?: string[];
+    rawContactTypes?: string[];
+    propertyContext?: string;
+    strictScope?: boolean;
     description: string;
     reportedValue: number;
   }[];
@@ -77,12 +131,29 @@ interface ContractorsResponse {
   contractors: Contractor[];
   total: number;
   specialtyCounts: Record<string, number>;
+  availableRoles?: string[];
   neighborhoods: string[];
   lastUpdated: string | null;
   message?: string;
 }
 
-function ContractorCard({ contractor, rank, selectedSpecialty, search }: { contractor: Contractor; rank: number; selectedSpecialty?: string; search?: string }) {
+function ContractorCard({
+  contractor,
+  rank,
+  selectedSpecialty,
+  selectedProjectScope,
+  selectedRole,
+  selectedPropertyContext,
+  search,
+}: {
+  contractor: Contractor;
+  rank: number;
+  selectedSpecialty?: string;
+  selectedProjectScope?: string;
+  selectedRole?: string;
+  selectedPropertyContext?: string;
+  search?: string;
+}) {
   const [expanded, setExpanded] = useState(false);
   
   const lastPermitDate = new Date(contractor.lastPermitDate);
@@ -98,6 +169,17 @@ function ContractorCard({ contractor, rank, selectedSpecialty, search }: { contr
     recent: { label: 'Recent', className: '' },
     inactive: { label: 'Inactive', className: '' }
   }[activityStatus];
+  const activeEvidenceLabels = [
+    selectedProjectScope && selectedProjectScope !== 'all'
+      ? PROJECT_SCOPE_DISPLAY_NAMES[selectedProjectScope]
+      : null,
+    selectedRole && selectedRole !== 'all'
+      ? CONTRACTOR_ROLE_DISPLAY_NAMES[selectedRole] || selectedRole
+      : null,
+    selectedPropertyContext && selectedPropertyContext !== 'all'
+      ? PROPERTY_CONTEXT_DISPLAY_NAMES[selectedPropertyContext] || selectedPropertyContext
+      : null,
+  ].filter(Boolean);
   
   return (
     <Card className="hover-elevate" data-testid={`contractor-card-${contractor.id}`}>
@@ -118,7 +200,14 @@ function ContractorCard({ contractor, rank, selectedSpecialty, search }: { contr
               <div className="mt-2 space-y-1 text-sm">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <BarChart3 className="w-4 h-4 flex-shrink-0" />
-                  {selectedSpecialty && selectedSpecialty !== 'all' && contractor.specialtyPermits != null ? (
+                  {activeEvidenceLabels.length > 0 && contractor.evidencePermits != null ? (
+                    <span>
+                      <span className="text-foreground font-medium">
+                        {contractor.evidencePermits.toLocaleString()} matching permits
+                      </span>
+                      <span className="text-muted-foreground/70"> · {activeEvidenceLabels.join(' · ')} · {contractor.totalPermits.toLocaleString()} total</span>
+                    </span>
+                  ) : selectedSpecialty && selectedSpecialty !== 'all' && contractor.specialtyPermits != null ? (
                     <span>
                       <span className="text-foreground font-medium">{contractor.specialtyPermits.toLocaleString()} {(SPECIALTY_DISPLAY_NAMES[selectedSpecialty] || selectedSpecialty).toLowerCase()} permits</span>
                       <span className="text-muted-foreground/70"> · {contractor.totalPermits.toLocaleString()} total</span>
@@ -135,6 +224,56 @@ function ContractorCard({ contractor, rank, selectedSpecialty, search }: { contr
                     <Search className="w-4 h-4 flex-shrink-0" />
                     <span>
                       Match: <span className="text-foreground font-medium">{contractor.searchMatches.join(' · ')}</span>
+                    </span>
+                  </div>
+                )}
+
+                {activeEvidenceLabels.length > 0 &&
+                  selectedSpecialty &&
+                  selectedSpecialty !== 'all' &&
+                  contractor.specialtyPermits != null && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Target className="w-4 h-4 flex-shrink-0" />
+                      <span>
+                        Separate overall profile filter: <span className="text-foreground font-medium">
+                          {contractor.specialtyPermits.toLocaleString()} {(SPECIALTY_DISPLAY_NAMES[selectedSpecialty] || selectedSpecialty).toLowerCase()} permits
+                        </span> across its full history
+                      </span>
+                    </div>
+                  )}
+
+                {selectedProjectScope && selectedProjectScope !== 'all' && contractor.scopeValueStats && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <DollarSign className="w-4 h-4 flex-shrink-0" />
+                    <span>
+                      Median reported whole-permit value: <span className="text-foreground font-medium">
+                        ${contractor.scopeValueStats.median.toLocaleString()}
+                      </span>
+                      <span className="text-muted-foreground/70"> · {contractor.scopeValueStats.count} permits with values</span>
+                    </span>
+                  </div>
+                )}
+
+                {contractor.roleCounts && Object.keys(contractor.roleCounts).length > 0 && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Hammer className="w-4 h-4 flex-shrink-0" />
+                    <span>
+                      Listed roles: {Object.entries(contractor.roleCounts)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 3)
+                        .map(([role, count]) => `${CONTRACTOR_ROLE_DISPLAY_NAMES[role] || role} (${count})`)
+                        .join(' · ')}
+                    </span>
+                  </div>
+                )}
+
+                {contractor.listedCityTypes && contractor.listedCityTypes.length > 0 && (
+                  <div className="flex items-start gap-2 text-muted-foreground">
+                    <Building2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span>
+                      City permit labels: {contractor.listedCityTypes
+                        .map(item => `${item.type} (${item.count})`)
+                        .join(' · ')}
                     </span>
                   </div>
                 )}
@@ -205,6 +344,22 @@ function ContractorCard({ contractor, rank, selectedSpecialty, search }: { contr
                     <Badge variant="secondary" className="text-xs">
                       {SPECIALTY_DISPLAY_NAMES[project.specialty] || project.specialty}
                     </Badge>
+                    {project.projectScope && (
+                      <Badge variant="outline" className="text-xs">
+                        {PROJECT_SCOPE_DISPLAY_NAMES[project.projectScope] || project.projectScope}
+                        {project.strictScope ? ' · narrow scope' : ''}
+                      </Badge>
+                    )}
+                    {project.propertyContext && project.propertyContext !== 'unknown' && (
+                      <Badge variant="outline" className="text-xs">
+                        {PROPERTY_CONTEXT_DISPLAY_NAMES[project.propertyContext] || project.propertyContext}
+                      </Badge>
+                    )}
+                    {project.contractorRoles?.map(role => (
+                      <Badge key={role} variant="outline" className="text-xs">
+                        {CONTRACTOR_ROLE_DISPLAY_NAMES[role] || role}
+                      </Badge>
+                    ))}
                     {project.reportedValue > 0 && (
                       <span className="text-xs text-muted-foreground">
                         ${project.reportedValue.toLocaleString()}
@@ -214,6 +369,11 @@ function ContractorCard({ contractor, rank, selectedSpecialty, search }: { contr
                 </div>
               ))}
             </div>
+                  {project.rawContactTypes && project.rawContactTypes.length > 0 && (
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      City-listed type: {project.rawContactTypes.join(' · ')}
+                    </p>
+                  )}
           </div>
         )}
       </CardContent>
@@ -223,6 +383,9 @@ function ContractorCard({ contractor, rank, selectedSpecialty, search }: { contr
 
 export default function ContractorDiscovery() {
   const [specialty, setSpecialty] = useState<string>('all');
+  const [projectScope, setProjectScope] = useState<string>('all');
+  const [contractorRole, setContractorRole] = useState<string>('all');
+  const [propertyContext, setPropertyContext] = useState<string>('all');
   const [neighborhood, setNeighborhood] = useState<string>('all');
   const [activeOnly, setActiveOnly] = useState(false);
   const [sortBy, setSortBy] = useState<string>('totalPermits');
@@ -230,10 +393,13 @@ export default function ContractorDiscovery() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const { data, isLoading, error } = useQuery<ContractorsResponse>({
-    queryKey: ['/api/contractors', specialty, neighborhood, activeOnly, sortBy, search],
+    queryKey: ['/api/contractors', specialty, projectScope, contractorRole, propertyContext, neighborhood, activeOnly, sortBy, search],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (specialty !== 'all') params.set('specialty', specialty);
+      if (projectScope !== 'all') params.set('projectScope', projectScope);
+      if (contractorRole !== 'all') params.set('contractorRole', contractorRole);
+      if (propertyContext !== 'all') params.set('propertyContext', propertyContext);
       if (neighborhood !== 'all') params.set('neighborhood', neighborhood);
       if (activeOnly) params.set('activeOnly', 'true');
       if (search.trim()) params.set('search', search.trim());
@@ -322,12 +488,13 @@ export default function ContractorDiscovery() {
                 />
               </div>
               <p className="mt-1.5 text-xs text-muted-foreground">
-                Results are ranked by matching permit work when you search a project type.
+                Results are ranked by matching permit evidence. A listed role does not prove the firm is a fit for your job, and reported value covers the whole permit—not the contractor's fee.
+                Project scope, permit role, and property context must occur on the same permit; overall specialty is a separate contractor-history filter.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <Label className="text-xs text-muted-foreground mb-1 block">Specialty</Label>
+                <Label className="text-xs text-muted-foreground mb-1 block">Overall Permit Specialty</Label>
                 <Select value={specialty} onValueChange={setSpecialty}>
                   <SelectTrigger data-testid="select-specialty">
                     <SelectValue placeholder="All Specialties" />
@@ -343,6 +510,53 @@ export default function ContractorDiscovery() {
                           </span>
                         )}
                       </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Project Scope</Label>
+                <Select value={projectScope} onValueChange={setProjectScope}>
+                  <SelectTrigger data-testid="select-project-scope">
+                    <SelectValue placeholder="All Project Scopes" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Project Scopes</SelectItem>
+                    {Object.entries(PROJECT_SCOPE_DISPLAY_NAMES).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Listed Permit Role</Label>
+                <Select value={contractorRole} onValueChange={setContractorRole}>
+                  <SelectTrigger data-testid="select-contractor-role">
+                    <SelectValue placeholder="Any Listed Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any Listed Role</SelectItem>
+                    {(data?.availableRoles || Object.keys(CONTRACTOR_ROLE_DISPLAY_NAMES)).map(role => (
+                      <SelectItem key={role} value={role}>
+                        {CONTRACTOR_ROLE_DISPLAY_NAMES[role] || role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Property Context</Label>
+                <Select value={propertyContext} onValueChange={setPropertyContext}>
+                  <SelectTrigger data-testid="select-property-context">
+                    <SelectValue placeholder="Any Property Context" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any Property Context</SelectItem>
+                    {Object.entries(PROPERTY_CONTEXT_DISPLAY_NAMES).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>{label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -444,10 +658,13 @@ export default function ContractorDiscovery() {
             <div className="space-y-3">
               {data?.contractors.map((contractor, index) => (
                 <ContractorCard 
-                  key={contractor.id} 
+                  key={`${contractor.id}-${contractor.name}-${index}`}
                   contractor={contractor} 
                   rank={index + 1}
                   selectedSpecialty={specialty}
+                   selectedProjectScope={projectScope}
+                   selectedRole={contractorRole}
+                   selectedPropertyContext={propertyContext}
                    search={search.trim()}
                 />
               ))}

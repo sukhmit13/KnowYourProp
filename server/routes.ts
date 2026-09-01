@@ -8991,6 +8991,9 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
   // Contractor Discovery API
   const contractorQuerySchema = z.object({
     specialty: z.string().optional(),
+    projectScope: z.enum(['ground-up', 'gut-rehab', 'bathroom', 'bathroom-strict', 'kitchen', 'kitchen-strict', 'kitchen-bath', 'addition', 'simple-residential', 'commercial-industrial', 'other']).optional(),
+    contractorRole: z.string().max(50).optional(),
+    propertyContext: z.enum(['single-family', 'condo', 'multi-family', 'residential-unspecified', 'commercial-industrial', 'unknown']).optional(),
     neighborhood: z.string().optional(),
     search: z.string().max(100).optional(),
     activeOnly: z.enum(['true', 'false']).optional(),
@@ -9006,7 +9009,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         return res.status(400).json({ error: 'Invalid query parameters', details: parsed.error.errors });
       }
       
-      const { specialty, neighborhood, search, activeOnly, sortBy, limit, offset } = parsed.data;
+      const { specialty, projectScope, contractorRole, propertyContext, neighborhood, search, activeOnly, sortBy, limit, offset } = parsed.data;
       
       const rankingsPath = path.join(__dirname, 'data/contractors/rankings.json');
       
@@ -9038,6 +9041,41 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
             ...c,
             specialtyPermits: c.specialtyBreakdown?.[specialty as string] || 0
           }));
+      }
+
+      if (projectScope || contractorRole || propertyContext) {
+        const strictScope = projectScope?.endsWith('-strict') || false;
+        const scopeKey = projectScope?.replace('-strict', '');
+        const roleKey = contractorRole || '*';
+        const matchingEvidenceKeys = (c: any) => Object.keys(c.evidenceCounts || {}).filter(key => {
+          const [role, scope, context, strictness] = key.split('|');
+          return role === roleKey &&
+            (!scopeKey || scope === scopeKey) &&
+            (!propertyContext || context === propertyContext) &&
+            strictness === (strictScope ? 'strict' : 'all');
+        });
+        contractors = contractors
+          .map(c => {
+            const keys = matchingEvidenceKeys(c);
+            const evidencePermits = keys.reduce((sum, key) => sum + (c.evidenceCounts?.[key] || 0), 0);
+            const values = keys.flatMap(key => c.reportedValuesByEvidence?.[key] || []).sort((a, b) => a - b);
+            const middle = Math.floor(values.length / 2);
+            const median = values.length % 2
+              ? values[middle]
+              : values.length ? (values[middle - 1] + values[middle]) / 2 : 0;
+            return {
+              ...c,
+              evidencePermits,
+              scopePermits: projectScope ? evidencePermits : undefined,
+              rolePermits: contractorRole ? evidencePermits : undefined,
+              scopeValueStats: values.length ? {
+                count: values.length,
+                total: Math.round(values.reduce((sum, value) => sum + value, 0)),
+                median: Math.round(median),
+              } : null,
+            };
+          })
+          .filter(c => c.evidencePermits > 0);
       }
       
       // Filter by neighborhood
@@ -9080,7 +9118,11 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
           (b.totalPermits - a.totalPermits)
         );
       } else if (sortField === 'totalPermits') {
-        if (bySpecialty) {
+        if (projectScope || contractorRole || propertyContext) {
+          contractors.sort((a, b) =>
+            ((b.evidencePermits || 0) - (a.evidencePermits || 0)) || (b.totalPermits - a.totalPermits)
+          );
+        } else if (bySpecialty) {
           contractors.sort((a, b) =>
             (b.specialtyPermits - a.specialtyPermits) || (b.totalPermits - a.totalPermits)
           );
@@ -9098,7 +9140,19 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       const total = contractors.length;
       const limitNum = parseInt(limit as string, 10) || 50;
       const offsetNum = parseInt(offset as string, 10) || 0;
-      contractors = contractors.slice(offsetNum, offsetNum + limitNum);
+      contractors = contractors.slice(offsetNum, offsetNum + limitNum).map((contractor: any) => {
+        const listedCityTypes = Object.entries(contractor.rawContactTypeCounts || {})
+          .sort((a: any, b: any) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([type, count]) => ({ type, count }));
+        const {
+          evidenceCounts: _evidenceCounts,
+          reportedValuesByEvidence: _reportedValuesByEvidence,
+          rawContactTypeCounts: _rawContactTypeCounts,
+          ...publicContractor
+        } = contractor;
+        return { ...publicContractor, listedCityTypes };
+      });
       
       // Get unique neighborhoods from all contractors
       const allNeighborhoods = new Set<string>();
@@ -9110,6 +9164,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         contractors,
         total,
         specialtyCounts: data.specialtyCounts || {},
+        availableRoles: Array.from(new Set(data.contractors.flatMap((c: any) => Object.keys(c.roleCounts || {})))).sort(),
         neighborhoods: Array.from(allNeighborhoods).sort(),
         lastUpdated: data.lastUpdated
       });

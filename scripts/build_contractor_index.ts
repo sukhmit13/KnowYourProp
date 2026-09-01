@@ -1,6 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { classifyPermitSpecialty, classifyPermitWorkTypes, normalizeContractorName, generateContractorSlug, SPECIALTY_DISPLAY_NAMES } from '../server/utils/contractorClassification';
+import {
+  classifyPermitSpecialty,
+  classifyPermitWorkTypes,
+  classifyPermitProjectScope,
+  normalizeContractorName,
+  generateContractorSlug,
+  SPECIALTY_DISPLAY_NAMES,
+} from '../server/utils/contractorClassification';
 
 const COMMUNITY_AREA_NAMES: Record<number, string> = {
   1: "Rogers Park", 2: "West Ridge", 3: "Uptown", 4: "Lincoln Square", 5: "North Center",
@@ -22,6 +29,7 @@ const COMMUNITY_AREA_NAMES: Record<number, string> = {
 };
 
 interface RawPermit {
+  [key: string]: string | undefined;
   id?: string;
   permit_?: string;
   permit_type?: string;
@@ -34,12 +42,6 @@ interface RawPermit {
   suffix?: string;
   community_area?: string;
   ward?: string;
-  contact_1_name?: string;
-  contact_1_type?: string;
-  contact_2_name?: string;
-  contact_2_type?: string;
-  contact_3_name?: string;
-  contact_3_type?: string;
 }
 
 interface ContractorData {
@@ -60,10 +62,22 @@ interface ContractorData {
   permitsByYear: Record<string, number>;
   recentActivity: number;
   workTypeCounts: Record<string, number>;
+  roleCounts: Record<string, number>;
+  rawContactTypeCounts: Record<string, number>;
+  projectScopeCounts: Record<string, number>;
+  strictProjectScopeCounts: Record<string, number>;
+  propertyContextCounts: Record<string, number>;
+  evidenceCounts: Record<string, number>;
+  reportedValuesByEvidence: Record<string, number[]>;
   recentProjects: {
     address: string;
     date: string;
     specialty: string;
+    projectScope: string;
+    contractorRoles: string[];
+    rawContactTypes: string[];
+    propertyContext: string;
+    strictScope: boolean;
     description: string;
     reportedValue: number;
   }[];
@@ -126,16 +140,49 @@ async function fetchAllPermits(): Promise<RawPermit[]> {
   return allPermits;
 }
 
-function extractContractor(permit: RawPermit): string | null {
-  for (let i = 1; i <= 3; i++) {
+function contractorRole(contactType: string): string {
+  const type = contactType.toUpperCase();
+  if (type.includes('ELECTRICAL')) return 'electrical';
+  if (type.includes('PLUMB')) return 'plumbing';
+  if (type.includes('HVAC') || type.includes('MECHANICAL') || type.includes('HEATING') ||
+      type.includes('VENTILATION') || type.includes('REFRIGERATION')) return 'hvac/mechanical';
+  if (type.includes('ROOF')) return 'roofing';
+  if (type.includes('MASON')) return 'masonry';
+  if (type.includes('CARPENT')) return 'carpentry';
+  if (type.includes('TILE')) return 'tile';
+  if (type.includes('CONCRETE')) return 'concrete';
+  if (type.includes('ELEVATOR')) return 'elevator';
+  if (type.includes('ALARM')) return 'alarm';
+  if (type.includes('SIGN')) return 'sign';
+  if (type.includes('TENT')) return 'tent';
+  if (type.includes('WRECK') || type.includes('DEMOLITION')) return 'wrecking/demolition';
+  if (type.includes('GENERAL')) return 'general';
+  return 'contractor';
+}
+
+function extractContractors(permit: RawPermit): { name: string; roles: string[]; rawContactTypes: string[] }[] {
+  const found = new Map<string, { roles: Set<string>; rawContactTypes: Set<string> }>();
+  for (let i = 1; i <= 15; i++) {
     const contactType = (permit[`contact_${i}_type` as keyof RawPermit] as string || '').toUpperCase();
     const contactName = permit[`contact_${i}_name` as keyof RawPermit] as string || null;
     
-    if (contactType.includes('CONTRACTOR') && contactName) {
-      return normalizeContractorName(contactName);
+    if (contactType.includes('CONTRACTOR') && !contactType.includes('OWNER AS') && contactName) {
+      const name = normalizeContractorName(contactName);
+      if (!name) continue;
+      if (!found.has(name)) found.set(name, { roles: new Set(), rawContactTypes: new Set() });
+      found.get(name)!.roles.add(contractorRole(contactType));
+      found.get(name)!.rawContactTypes.add(contactType);
     }
   }
-  return null;
+  return Array.from(found, ([name, evidence]) => ({
+    name,
+    roles: Array.from(evidence.roles),
+    rawContactTypes: Array.from(evidence.rawContactTypes),
+  }));
+}
+
+function evidenceKey(role: string, scope: string, propertyContext: string, strict: boolean): string {
+  return [role, scope, propertyContext, strict ? 'strict' : 'all'].join('|');
 }
 
 function formatAddress(permit: RawPermit): string {
@@ -153,16 +200,25 @@ async function buildContractorIndex(): Promise<void> {
   
   const permits = await fetchAllPermits();
   
-  const contractorPermits = new Map<string, RawPermit[]>();
+  const contractorPermits = new Map<string, {
+    permit: RawPermit;
+    roles: string[];
+    rawContactTypes: string[];
+  }[]>();
   
   for (const permit of permits) {
-    const contractor = extractContractor(permit);
-    if (!contractor || contractor === 'OWNER') continue;
-    
-    if (!contractorPermits.has(contractor)) {
-      contractorPermits.set(contractor, []);
+    const contractors = extractContractors(permit);
+    for (const contractor of contractors) {
+      if (contractor.name === 'OWNER') continue;
+      if (!contractorPermits.has(contractor.name)) {
+        contractorPermits.set(contractor.name, []);
+      }
+      contractorPermits.get(contractor.name)!.push({
+        permit,
+        roles: contractor.roles,
+        rawContactTypes: contractor.rawContactTypes,
+      });
     }
-    contractorPermits.get(contractor)!.push(permit);
   }
   
   console.log(`\nFound ${contractorPermits.size} unique contractors`);
@@ -172,7 +228,8 @@ async function buildContractorIndex(): Promise<void> {
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
   
-  for (const [name, permitList] of contractorPermits.entries()) {
+  for (const [name, associations] of contractorPermits.entries()) {
+    const permitList = associations.map(association => association.permit);
     if (permitList.length < 3) continue;
     
     const specialtyCount: Record<string, number> = {};
@@ -182,9 +239,16 @@ async function buildContractorIndex(): Promise<void> {
     const costs: number[] = [];
     let recentCount = 0;
     const workTypeCounts: Record<string, number> = {};
+    const roleCounts: Record<string, number> = {};
+    const rawContactTypeCounts: Record<string, number> = {};
+    const projectScopeCounts: Record<string, number> = {};
+    const strictProjectScopeCounts: Record<string, number> = {};
+    const propertyContextCounts: Record<string, number> = {};
+    const evidenceCounts: Record<string, number> = {};
+    const evidenceValues: Record<string, number[]> = {};
     
-    const sortedPermits = [...permitList].sort((a, b) => 
-      new Date(b.issue_date || 0).getTime() - new Date(a.issue_date || 0).getTime()
+    const sortedAssociations = [...associations].sort((a, b) =>
+      new Date(b.permit.issue_date || 0).getTime() - new Date(a.permit.issue_date || 0).getTime()
     );
     
     const dates = permitList
@@ -196,7 +260,14 @@ async function buildContractorIndex(): Promise<void> {
     const firstDate = new Date(Math.min(...dates.map(d => d.getTime())));
     const lastDate = new Date(Math.max(...dates.map(d => d.getTime())));
     
-    for (const permit of permitList) {
+    for (const association of associations) {
+      const permit = association.permit;
+      for (const role of association.roles) {
+        roleCounts[role] = (roleCounts[role] || 0) + 1;
+      }
+      for (const rawContactType of association.rawContactTypes) {
+        rawContactTypeCounts[rawContactType] = (rawContactTypeCounts[rawContactType] || 0) + 1;
+      }
       const classification = classifyPermitSpecialty({
         work_description: permit.work_description,
         permit_type: permit.permit_type
@@ -206,6 +277,20 @@ async function buildContractorIndex(): Promise<void> {
       }
       for (const specialty of classification.all) {
         specialtyCount[specialty] = (specialtyCount[specialty] || 0) + 1;
+      }
+      const scope = classifyPermitProjectScope(permit);
+      projectScopeCounts[scope.primary] = (projectScopeCounts[scope.primary] || 0) + 1;
+      propertyContextCounts[scope.propertyContext] = (propertyContextCounts[scope.propertyContext] || 0) + 1;
+      if (scope.strictBathroom) strictProjectScopeCounts['bathroom'] = (strictProjectScopeCounts['bathroom'] || 0) + 1;
+      if (scope.strictKitchen) strictProjectScopeCounts['kitchen'] = (strictProjectScopeCounts['kitchen'] || 0) + 1;
+      const isStrictScope = scope.strictBathroom || scope.strictKitchen;
+      const keys: string[] = [];
+      for (const role of ['*', ...association.roles]) {
+        keys.push(evidenceKey(role, scope.primary, scope.propertyContext, false));
+        if (isStrictScope) keys.push(evidenceKey(role, scope.primary, scope.propertyContext, true));
+      }
+      for (const key of new Set(keys)) {
+        evidenceCounts[key] = (evidenceCounts[key] || 0) + 1;
       }
       
       if (permit.community_area) {
@@ -230,6 +315,10 @@ async function buildContractorIndex(): Promise<void> {
         if (!isNaN(cost) && cost > 0) {
           totalValue += cost;
           costs.push(cost);
+          for (const key of new Set(keys)) {
+            if (!evidenceValues[key]) evidenceValues[key] = [];
+            evidenceValues[key].push(cost);
+          }
         }
       }
     }
@@ -268,15 +357,21 @@ async function buildContractorIndex(): Promise<void> {
       (lastDate.getTime() - firstDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000) * 10
     ) / 10;
     
-    const recentProjects = sortedPermits.slice(0, 20).map(p => {
+    const recentProjects = sortedAssociations.slice(0, 20).map(({ permit: p, roles, rawContactTypes }) => {
       const classification = classifyPermitSpecialty({
         work_description: p.work_description,
         permit_type: p.permit_type
       });
+      const scope = classifyPermitProjectScope(p);
       return {
         address: formatAddress(p),
         date: p.issue_date || '',
         specialty: classification.primary,
+        projectScope: scope.primary,
+        contractorRoles: roles,
+        rawContactTypes,
+        propertyContext: scope.propertyContext,
+        strictScope: scope.strictBathroom || scope.strictKitchen,
         description: (p.work_description || '').substring(0, 100),
         reportedValue: p.reported_cost ? parseFloat(p.reported_cost) : 0
       };
@@ -300,6 +395,13 @@ async function buildContractorIndex(): Promise<void> {
       permitsByYear: yearCount,
       recentActivity: recentCount,
       workTypeCounts,
+      roleCounts,
+      rawContactTypeCounts,
+      projectScopeCounts,
+      strictProjectScopeCounts,
+      propertyContextCounts,
+      evidenceCounts,
+      reportedValuesByEvidence: evidenceValues,
       recentProjects
     });
   }
@@ -351,7 +453,9 @@ async function buildContractorIndex(): Promise<void> {
   // Atomic write: build to a temp file, then rename over the live file.
   const outputPath = path.join(process.cwd(), 'server/data/contractors/rankings.json');
   const tmpPath = `${outputPath}.tmp`;
-  fs.writeFileSync(tmpPath, JSON.stringify(index, null, 2));
+  // This generated index is large; compact JSON keeps it comfortably below
+  // common source-control blob limits without changing the runtime schema.
+  fs.writeFileSync(tmpPath, JSON.stringify(index));
   fs.renameSync(tmpPath, outputPath);
   
   console.log(`\nContractor index saved to ${outputPath}`);

@@ -6,6 +6,9 @@ export interface SearchableContractor {
   secondarySpecialties?: string[];
   specialtyBreakdown?: Record<string, number>;
   workTypeCounts?: Record<string, number>;
+  roleCounts?: Record<string, number>;
+  projectScopeCounts?: Record<string, number>;
+  strictProjectScopeCounts?: Record<string, number>;
   topNeighborhoods?: { name: string }[];
   recentProjects?: { address?: string; specialty?: string; description?: string }[];
 }
@@ -47,6 +50,8 @@ export function getContractorSearchMatch(
     contractor.primarySpecialty || '',
     ...(contractor.secondarySpecialties || []),
     ...Object.keys(contractor.specialtyBreakdown || {}).map(key => SPECIALTY_DISPLAY_NAMES[key] || key),
+    ...Object.keys(contractor.roleCounts || {}),
+    ...Object.keys(contractor.projectScopeCounts || {}),
     ...(contractor.topNeighborhoods || []).map(neighborhood => neighborhood.name),
     projectText,
   ].join(' '));
@@ -56,6 +61,11 @@ export function getContractorSearchMatch(
 
   for (const workType of workTypes) {
     let workCount = contractor.workTypeCounts?.[workType] || 0;
+    if (!workCount) {
+      workCount = Object.entries(contractor.roleCounts || {})
+        .filter(([role]) => role.includes(workType) || workType.includes(role))
+        .reduce((sum, [, roleCount]) => sum + roleCount, 0);
+    }
     if (!workCount && workType !== 'tile') {
       workCount = contractor.specialtyBreakdown?.[workType] || 0;
     }
