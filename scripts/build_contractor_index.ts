@@ -69,6 +69,7 @@ interface ContractorData {
   projectScopeCounts: Record<string, number>;
   strictProjectScopeCounts: Record<string, number>;
   propertyContextCounts: Record<string, number>;
+  residentialUnitRangeCounts: Record<string, number>;
   evidenceCounts: Record<string, number>;
   reportedValuesByEvidence: Record<string, number[]>;
   recentProjects: {
@@ -142,8 +143,14 @@ async function fetchAllPermits(): Promise<RawPermit[]> {
   return allPermits;
 }
 
-function evidenceKey(role: string, scope: string, propertyContext: string, strict: boolean): string {
-  return [role, scope, propertyContext, strict ? 'strict' : 'all'].join('|');
+function evidenceKey(
+  role: string,
+  scope: string,
+  propertyContext: string,
+  residentialUnitRange: string,
+  strict: boolean,
+): string {
+  return [role, scope, propertyContext, residentialUnitRange, strict ? 'strict' : 'all'].join('|');
 }
 
 function formatAddress(permit: RawPermit): string {
@@ -206,6 +213,7 @@ async function buildContractorIndex(): Promise<void> {
     const projectScopeCounts: Record<string, number> = {};
     const strictProjectScopeCounts: Record<string, number> = {};
     const propertyContextCounts: Record<string, number> = {};
+    const residentialUnitRangeCounts: Record<string, number> = {};
     const evidenceCounts: Record<string, number> = {};
     const evidenceValues: Record<string, number[]> = {};
     
@@ -247,13 +255,14 @@ async function buildContractorIndex(): Promise<void> {
       const scope = classifyPermitProjectScope(permit);
       projectScopeCounts[scope.primary] = (projectScopeCounts[scope.primary] || 0) + 1;
       propertyContextCounts[scope.propertyContext] = (propertyContextCounts[scope.propertyContext] || 0) + 1;
+      residentialUnitRangeCounts[scope.residentialUnitRange] = (residentialUnitRangeCounts[scope.residentialUnitRange] || 0) + 1;
       if (scope.strictBathroom) strictProjectScopeCounts['bathroom'] = (strictProjectScopeCounts['bathroom'] || 0) + 1;
       if (scope.strictKitchen) strictProjectScopeCounts['kitchen'] = (strictProjectScopeCounts['kitchen'] || 0) + 1;
       const isStrictScope = scope.strictBathroom || scope.strictKitchen;
       const keys: string[] = [];
       for (const role of ['*', ...association.roles]) {
-        keys.push(evidenceKey(role, scope.primary, scope.propertyContext, false));
-        if (isStrictScope) keys.push(evidenceKey(role, scope.primary, scope.propertyContext, true));
+        keys.push(evidenceKey(role, scope.primary, scope.propertyContext, scope.residentialUnitRange, false));
+        if (isStrictScope) keys.push(evidenceKey(role, scope.primary, scope.propertyContext, scope.residentialUnitRange, true));
       }
       for (const key of new Set(keys)) {
         evidenceCounts[key] = (evidenceCounts[key] || 0) + 1;
@@ -338,6 +347,7 @@ async function buildContractorIndex(): Promise<void> {
         contractorRoles: roles,
         rawContactTypes,
         propertyContext: scope.propertyContext,
+        residentialUnitRange: scope.residentialUnitRange,
         strictScope: scope.strictBathroom || scope.strictKitchen,
         description: (p.work_description || '').substring(0, 100),
         reportedValue: p.reported_cost ? parseFloat(p.reported_cost) : 0
@@ -368,6 +378,7 @@ async function buildContractorIndex(): Promise<void> {
       projectScopeCounts,
       strictProjectScopeCounts,
       propertyContextCounts,
+      residentialUnitRangeCounts,
       evidenceCounts,
       reportedValuesByEvidence: evidenceValues,
       recentProjects

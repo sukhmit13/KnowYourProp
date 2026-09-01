@@ -65,6 +65,19 @@ for (const fixture of cases) {
   assert.equal(result.strictBathroom, fixture.strictBathroom, `${fixture.name}: strict bathroom`);
 }
 
+assert.equal(
+  classifyPermitProjectScope({ work_description: "ALTER EXISTING CONDO UNIT" }).residentialUnitRange,
+  "one-unit",
+);
+assert.equal(
+  classifyPermitProjectScope({ work_description: "ALTER EXISTING 4 DU BUILDING" }).residentialUnitRange,
+  "two-four-units",
+);
+assert.equal(
+  classifyPermitProjectScope({ work_description: "ALTER EXISTING APARTMENT BUILDING" }).residentialUnitRange,
+  "unknown",
+);
+
 assert.deepEqual(
   classifyPermitWorkTypes({ work_description: "INSTALL ROUGH WOOD FRAMING AND CERAMIC TILE" }).sort(),
   ["framing", "tile"].sort(),

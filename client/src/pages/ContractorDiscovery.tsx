@@ -81,6 +81,8 @@ const CONTRACTOR_ROLE_DISPLAY_NAMES: Record<string, string> = {
 };
 
 const PROPERTY_CONTEXT_DISPLAY_NAMES: Record<string, string> = {
+  'one-unit-residential': '1-unit residential (single-family / condo)',
+  'residential-1-4': 'Residential, 1–4 units',
   'single-family': 'Single-family home',
   condo: 'Condo',
   'multi-family': 'Multi-family residence',
@@ -559,9 +561,13 @@ export default function ContractorDiscovery() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Any Property Context</SelectItem>
-                    {Object.entries(PROPERTY_CONTEXT_DISPLAY_NAMES).map(([key, label]) => (
+                    <SelectItem value="one-unit-residential">1-unit residential (single-family / condo)</SelectItem>
+                    <SelectItem value="residential-1-4">Residential, 1–4 units</SelectItem>
+                    {Object.entries(PROPERTY_CONTEXT_DISPLAY_NAMES)
+                      .filter(([key]) => !['one-unit-residential', 'residential-1-4'].includes(key))
+                      .map(([key, label]) => (
                       <SelectItem key={key} value={key}>{label}</SelectItem>
-                    ))}
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

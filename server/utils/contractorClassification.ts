@@ -126,6 +126,7 @@ export interface PermitScopeClassification {
   strictKitchen: boolean;
   propertyContext: PermitPropertyContext;
   propertyContextSource: 'permit-description' | 'permit-unit-count' | 'unknown';
+  residentialUnitRange: 'one-unit' | 'two-four-units' | 'unknown';
 }
 
 export type PermitPropertyContext =
@@ -175,7 +176,10 @@ export function classifyPermitProjectScope(permit: {
     /\b(?:2|3|4)\s*(?:du|dwelling units?)\b/.test(text);
   const isResidential = isSingleFamily || isCondo || isMultiFamily || has(['residential', 'townhouse', 'dwelling unit']);
   const residentialUnitMatch = text.match(/\b(\d+)\s+residential units?\b/);
-  const statedResidentialUnits = residentialUnitMatch ? Number(residentialUnitMatch[1]) : null;
+  const dwellingUnitMatch = text.match(/\b([1-9])\s*(?:du|dwelling units?)\b/);
+  const statedResidentialUnits = residentialUnitMatch
+    ? Number(residentialUnitMatch[1])
+    : dwellingUnitMatch ? Number(dwellingUnitMatch[1]) : null;
   const isSimpleWork = has([
     'interior alteration', 'interior renovation', 'interior remodel',
     'nonstructural alteration', 'non-structural alteration',
@@ -212,6 +216,12 @@ export function classifyPermitProjectScope(permit: {
       ? 'permit-unit-count'
       : 'permit-description';
   }
+  const residentialUnitRange: PermitScopeClassification['residentialUnitRange'] =
+    (statedResidentialUnits === 1 || isSingleFamily || isCondo)
+      ? 'one-unit'
+      : statedResidentialUnits != null && statedResidentialUnits >= 2 && statedResidentialUnits <= 4
+        ? 'two-four-units'
+        : 'unknown';
 
   return {
     primary: all[0],
@@ -220,6 +230,7 @@ export function classifyPermitProjectScope(permit: {
     strictKitchen,
     propertyContext,
     propertyContextSource,
+    residentialUnitRange,
   };
 }
 

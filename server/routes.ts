@@ -8993,7 +8993,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     specialty: z.string().optional(),
     projectScope: z.enum(['ground-up', 'gut-rehab', 'bathroom', 'bathroom-strict', 'kitchen', 'kitchen-strict', 'kitchen-bath', 'addition', 'basement-excavation', 'simple-residential', 'commercial-industrial', 'other']).optional(),
     contractorRole: z.string().max(50).optional(),
-    propertyContext: z.enum(['single-family', 'condo', 'multi-family', 'residential-unspecified', 'commercial-industrial', 'unknown']).optional(),
+    propertyContext: z.enum(['single-family', 'condo', 'multi-family', 'residential-unspecified', 'commercial-industrial', 'unknown', 'one-unit-residential', 'residential-1-4']).optional(),
     neighborhood: z.string().optional(),
     search: z.string().max(100).optional(),
     activeOnly: z.enum(['true', 'false']).optional(),
@@ -9055,10 +9055,15 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         const scopeKey = projectScope?.replace('-strict', '');
         const roleKey = contractorRole || '*';
         const matchingEvidenceKeys = (c: any) => Object.keys(c.evidenceCounts || {}).filter(key => {
-          const [role, scope, context, strictness] = key.split('|');
+          const [role, scope, context, unitRange, strictness] = key.split('|');
           return role === roleKey &&
             (!scopeKey || scope === scopeKey) &&
-            (!propertyContext || context === propertyContext) &&
+            (!propertyContext ||
+              (propertyContext === 'one-unit-residential'
+                ? unitRange === 'one-unit'
+                : propertyContext === 'residential-1-4'
+                  ? unitRange === 'one-unit' || unitRange === 'two-four-units'
+                  : context === propertyContext)) &&
             strictness === (strictScope ? 'strict' : 'all');
         });
         contractors = contractors
