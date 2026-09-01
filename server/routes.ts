@@ -8991,7 +8991,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
   // Contractor Discovery API
   const contractorQuerySchema = z.object({
     specialty: z.string().optional(),
-    projectScope: z.enum(['ground-up', 'gut-rehab', 'bathroom', 'bathroom-strict', 'kitchen', 'kitchen-strict', 'kitchen-bath', 'addition', 'simple-residential', 'commercial-industrial', 'other']).optional(),
+    projectScope: z.enum(['ground-up', 'gut-rehab', 'bathroom', 'bathroom-strict', 'kitchen', 'kitchen-strict', 'kitchen-bath', 'addition', 'basement-excavation', 'simple-residential', 'commercial-industrial', 'other']).optional(),
     contractorRole: z.string().max(50).optional(),
     propertyContext: z.enum(['single-family', 'condo', 'multi-family', 'residential-unspecified', 'commercial-industrial', 'unknown']).optional(),
     neighborhood: z.string().optional(),
@@ -9032,14 +9032,21 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       // and attach the trade-specific permit count for display/sorting.
       const bySpecialty = specialty && specialty !== 'all';
       if (bySpecialty) {
+        const directWorkKey = specialty === 'hvac' ? 'hvac' :
+          specialty === 'deck-porch' ? 'deck' :
+          specialty === 'windows-doors' ? 'windows' :
+          specialty as string;
         contractors = contractors
           .filter(c =>
-            c.primarySpecialty === specialty ||
-            (c.specialtyBreakdown && c.specialtyBreakdown[specialty as string] >= 3)
+            (c.directWorkTypeCounts?.[directWorkKey] || 0) >= 3 ||
+            (!c.directWorkTypeCounts && (
+              c.primarySpecialty === specialty ||
+              (c.specialtyBreakdown && c.specialtyBreakdown[specialty as string] >= 3)
+            ))
           )
           .map(c => ({
             ...c,
-            specialtyPermits: c.specialtyBreakdown?.[specialty as string] || 0
+            specialtyPermits: c.directWorkTypeCounts?.[directWorkKey] || c.specialtyBreakdown?.[specialty as string] || 0
           }));
       }
 

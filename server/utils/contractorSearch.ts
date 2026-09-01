@@ -6,6 +6,7 @@ export interface SearchableContractor {
   secondarySpecialties?: string[];
   specialtyBreakdown?: Record<string, number>;
   workTypeCounts?: Record<string, number>;
+  directWorkTypeCounts?: Record<string, number>;
   roleCounts?: Record<string, number>;
   projectScopeCounts?: Record<string, number>;
   strictProjectScopeCounts?: Record<string, number>;
@@ -60,7 +61,7 @@ export function getContractorSearchMatch(
   const labels: string[] = [];
 
   for (const workType of workTypes) {
-    let workCount = contractor.workTypeCounts?.[workType] || 0;
+    let workCount = contractor.directWorkTypeCounts?.[workType] || 0;
     if (!workCount) {
       workCount = Object.entries(contractor.roleCounts || {})
         .filter(([role]) => role.includes(workType) || workType.includes(role))

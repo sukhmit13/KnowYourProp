@@ -4,9 +4,10 @@ import {
   classifyPermitSpecialty,
   classifyPermitWorkTypes,
   classifyPermitProjectScope,
-  normalizeContractorName,
   generateContractorSlug,
   SPECIALTY_DISPLAY_NAMES,
+  extractContractorContacts,
+  isRoleRelevantToWorkType,
 } from '../server/utils/contractorClassification';
 
 const COMMUNITY_AREA_NAMES: Record<number, string> = {
@@ -62,6 +63,7 @@ interface ContractorData {
   permitsByYear: Record<string, number>;
   recentActivity: number;
   workTypeCounts: Record<string, number>;
+  directWorkTypeCounts: Record<string, number>;
   roleCounts: Record<string, number>;
   rawContactTypeCounts: Record<string, number>;
   projectScopeCounts: Record<string, number>;
@@ -140,47 +142,6 @@ async function fetchAllPermits(): Promise<RawPermit[]> {
   return allPermits;
 }
 
-function contractorRole(contactType: string): string {
-  const type = contactType.toUpperCase();
-  if (type.includes('ELECTRICAL')) return 'electrical';
-  if (type.includes('PLUMB')) return 'plumbing';
-  if (type.includes('HVAC') || type.includes('MECHANICAL') || type.includes('HEATING') ||
-      type.includes('VENTILATION') || type.includes('REFRIGERATION')) return 'hvac/mechanical';
-  if (type.includes('ROOF')) return 'roofing';
-  if (type.includes('MASON')) return 'masonry';
-  if (type.includes('CARPENT')) return 'carpentry';
-  if (type.includes('TILE')) return 'tile';
-  if (type.includes('CONCRETE')) return 'concrete';
-  if (type.includes('ELEVATOR')) return 'elevator';
-  if (type.includes('ALARM')) return 'alarm';
-  if (type.includes('SIGN')) return 'sign';
-  if (type.includes('TENT')) return 'tent';
-  if (type.includes('WRECK') || type.includes('DEMOLITION')) return 'wrecking/demolition';
-  if (type.includes('GENERAL')) return 'general';
-  return 'contractor';
-}
-
-function extractContractors(permit: RawPermit): { name: string; roles: string[]; rawContactTypes: string[] }[] {
-  const found = new Map<string, { roles: Set<string>; rawContactTypes: Set<string> }>();
-  for (let i = 1; i <= 15; i++) {
-    const contactType = (permit[`contact_${i}_type` as keyof RawPermit] as string || '').toUpperCase();
-    const contactName = permit[`contact_${i}_name` as keyof RawPermit] as string || null;
-    
-    if (contactType.includes('CONTRACTOR') && !contactType.includes('OWNER AS') && contactName) {
-      const name = normalizeContractorName(contactName);
-      if (!name) continue;
-      if (!found.has(name)) found.set(name, { roles: new Set(), rawContactTypes: new Set() });
-      found.get(name)!.roles.add(contractorRole(contactType));
-      found.get(name)!.rawContactTypes.add(contactType);
-    }
-  }
-  return Array.from(found, ([name, evidence]) => ({
-    name,
-    roles: Array.from(evidence.roles),
-    rawContactTypes: Array.from(evidence.rawContactTypes),
-  }));
-}
-
 function evidenceKey(role: string, scope: string, propertyContext: string, strict: boolean): string {
   return [role, scope, propertyContext, strict ? 'strict' : 'all'].join('|');
 }
@@ -207,7 +168,7 @@ async function buildContractorIndex(): Promise<void> {
   }[]>();
   
   for (const permit of permits) {
-    const contractors = extractContractors(permit);
+    const contractors = extractContractorContacts(permit);
     for (const contractor of contractors) {
       if (contractor.name === 'OWNER') continue;
       if (!contractorPermits.has(contractor.name)) {
@@ -239,6 +200,7 @@ async function buildContractorIndex(): Promise<void> {
     const costs: number[] = [];
     let recentCount = 0;
     const workTypeCounts: Record<string, number> = {};
+    const directWorkTypeCounts: Record<string, number> = {};
     const roleCounts: Record<string, number> = {};
     const rawContactTypeCounts: Record<string, number> = {};
     const projectScopeCounts: Record<string, number> = {};
@@ -270,10 +232,14 @@ async function buildContractorIndex(): Promise<void> {
       }
       const classification = classifyPermitSpecialty({
         work_description: permit.work_description,
-        permit_type: permit.permit_type
+        permit_type: permit.permit_type,
+        work_type: permit.work_type,
       });
       for (const workType of classifyPermitWorkTypes(permit)) {
         workTypeCounts[workType] = (workTypeCounts[workType] || 0) + 1;
+        if (association.roles.some(role => isRoleRelevantToWorkType(role, workType))) {
+          directWorkTypeCounts[workType] = (directWorkTypeCounts[workType] || 0) + 1;
+        }
       }
       for (const specialty of classification.all) {
         specialtyCount[specialty] = (specialtyCount[specialty] || 0) + 1;
@@ -360,7 +326,8 @@ async function buildContractorIndex(): Promise<void> {
     const recentProjects = sortedAssociations.slice(0, 20).map(({ permit: p, roles, rawContactTypes }) => {
       const classification = classifyPermitSpecialty({
         work_description: p.work_description,
-        permit_type: p.permit_type
+        permit_type: p.permit_type,
+        work_type: p.work_type,
       });
       const scope = classifyPermitProjectScope(p);
       return {
@@ -395,6 +362,7 @@ async function buildContractorIndex(): Promise<void> {
       permitsByYear: yearCount,
       recentActivity: recentCount,
       workTypeCounts,
+      directWorkTypeCounts,
       roleCounts,
       rawContactTypeCounts,
       projectScopeCounts,

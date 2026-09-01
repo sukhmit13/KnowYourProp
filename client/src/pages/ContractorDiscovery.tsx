@@ -39,6 +39,9 @@ const SPECIALTY_DISPLAY_NAMES: Record<string, string> = {
   'windows-doors': 'Windows/Doors',
   'siding-exterior': 'Siding/Exterior',
   'flooring': 'Flooring',
+  'tile': 'Tile',
+  'framing': 'Framing',
+  'excavation': 'Excavation/Foundation',
   'addition': 'Additions',
   'basement': 'Basement',
   'general': 'General Renovation'
@@ -52,6 +55,7 @@ const PROJECT_SCOPE_DISPLAY_NAMES: Record<string, string> = {
   'kitchen-bath': 'Kitchen and bath project',
   'simple-residential': 'Simple residential alteration',
   addition: 'Addition',
+  'basement-excavation': 'Basement digging / underpinning',
   'gut-rehab': 'Gut rehab / whole interior',
   'ground-up': 'Ground-up construction',
   'commercial-industrial': 'Commercial / industrial',
@@ -65,7 +69,7 @@ const CONTRACTOR_ROLE_DISPLAY_NAMES: Record<string, string> = {
   'hvac/mechanical': 'HVAC / mechanical contractor',
   roofing: 'Roofing contractor',
   masonry: 'Masonry contractor',
-  carpentry: 'Carpentry contractor',
+  'carpentry/framing': 'Carpentry / framing contractor',
   tile: 'Tile contractor',
   concrete: 'Concrete contractor',
   elevator: 'Elevator contractor',
@@ -366,14 +370,14 @@ function ContractorCard({
                       </span>
                     )}
                   </div>
-                </div>
-              ))}
-            </div>
                   {project.rawContactTypes && project.rawContactTypes.length > 0 && (
                     <p className="text-[11px] text-muted-foreground mt-1">
                       City-listed type: {project.rawContactTypes.join(' · ')}
                     </p>
                   )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </CardContent>
