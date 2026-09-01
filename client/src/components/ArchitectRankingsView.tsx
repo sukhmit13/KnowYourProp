@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 
 interface ArchitectEntry {
   name: string;
+  citywideRank?: number;
   isSelfCert: boolean;
   hasSelfCert: boolean;
   totalProjects: number;
@@ -247,9 +248,11 @@ export function ArchitectRankingsView() {
   })();
 
   const { data, isLoading, error } = useQuery<ArchitectResponse>({
-    queryKey: ['/api/discovery/architects', sortBy],
+    queryKey: ['/api/discovery/architects', sortBy, highlightNorm],
     queryFn: async () => {
-      const res = await fetch(`/api/discovery/architects?sortBy=${sortBy}&limit=100`, { credentials: 'include' });
+      const params = new URLSearchParams({ sortBy, limit: '100' });
+      if (highlightNorm) params.set('search', new URLSearchParams(window.location.search).get('highlight') || highlightNorm);
+      const res = await fetch(`/api/discovery/architects?${params.toString()}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch architect rankings');
       return res.json();
     },
@@ -305,7 +308,7 @@ export function ArchitectRankingsView() {
       ) : (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2.5">
           {data?.architects.map((entry, i) => (
-            <ArchitectCard key={entry.name} entry={entry} rank={i + 1} sortBy={sortBy} highlighted={!!highlightNorm && normalizeFirmName(entry.name) === highlightNorm} />
+            <ArchitectCard key={entry.name} entry={entry} rank={entry.citywideRank ?? i + 1} sortBy={sortBy} highlighted={!!highlightNorm && normalizeFirmName(entry.name) === highlightNorm} />
           ))}
           {data && (
             <p className="text-xs text-[#8b8a84] text-center pt-2">

@@ -955,3 +955,14 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-permit .ptag.bad{background:var(--kyp-bad);color:#fff;border-color:var(--kyp-bad)}
 .kyp-permit .pcost u{font-family:var(--kyp-mono);font-size:11px;font-weight:700;text-decoration:none;
   margin-left:3px;color:var(--kyp-muted);vertical-align:baseline}
+
+/* A confirmed signed-out state locks the report as one surface. Applying the
+   filter to selected descendants produced a patchwork of clear and blurred
+   sections; one parent filter keeps the access state visually consistent. */
+.report-locked-uniform{
+  filter:blur(5px);
+  user-select:none;
+  pointer-events:none;
+  max-height:100vh;
+  overflow:hidden;
+}

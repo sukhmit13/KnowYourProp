@@ -182,8 +182,14 @@ function GCRow({ entry, rank, sortBy, highlighted }: { entry: GCEntry; rank: num
 }
 
 export function GeneralContractorRankingsView() {
-  const [sortBy, setSortBy] = useState<SortKey>('total_projects');
-  const [search, setSearch] = useState('');
+  const deepLinkedName = (() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('search') || params.get('highlight') || '';
+    } catch { return ''; }
+  })();
+  const [sortBy, setSortBy] = useState<SortKey>(() => deepLinkedName ? 'search_match' : 'total_projects');
+  const [search, setSearch] = useState(() => deepLinkedName);
   // Deep-link highlight: /discovery?view=gc-rankings&highlight=<firm name>
   const highlightNorm = (() => {
     try {

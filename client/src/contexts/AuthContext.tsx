@@ -42,26 +42,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch {}
     let cancelled = false;
+    let requestSequence = 0;
     const checkSession = () => {
+      const sequence = ++requestSequence;
       const headers: Record<string, string> = {};
       const storedToken = (() => { try { return localStorage.getItem(TOKEN_KEY); } catch { return null; } })();
       if (storedToken) headers["Authorization"] = `Bearer ${storedToken}`;
       fetch("/api/auth/me", { credentials: "include", headers })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (cancelled) return;
-          if (data) {
+        .then(async (res) => {
+          if (res.ok) return { kind: "authenticated" as const, data: await res.json() };
+          if (res.status === 401 || res.status === 403) return { kind: "unauthenticated" as const };
+          // A timeout, deploy restart, rate limit, or transient 5xx is not proof
+          // that the session ended. Preserve the last confirmed auth state.
+          return { kind: "transient-error" as const };
+        })
+        .then((result) => {
+          if (cancelled || sequence !== requestSequence) return;
+          if (result.kind === "authenticated") {
+            const data = result.data;
             setUser({ id: data.id, email: data.email, plan: data.plan, trialReportsRemaining: data.trialReportsRemaining ?? null });
-          } else {
-            // Session invalid — e.g. this account logged in on another device
-            // (single active session per account). Clear local auth state.
+          } else if (result.kind === "unauthenticated") {
+            // Only an explicit authentication rejection clears the durable
+            // bearer token and turns a report back into a locked report.
             setUser(null);
             setToken(null);
             try { localStorage.removeItem(TOKEN_KEY); } catch {}
           }
         })
         .catch(() => { /* network hiccup — keep current state */ })
-        .finally(() => { if (!cancelled) setIsLoading(false); });
+        .finally(() => { if (!cancelled && sequence === requestSequence) setIsLoading(false); });
     };
     checkSession();
     // Re-verify when the tab regains focus so a device that was signed out

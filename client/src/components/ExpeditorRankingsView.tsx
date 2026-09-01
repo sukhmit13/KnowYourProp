@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { normalizeFirmName } from '@/lib/firmName';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -28,6 +29,7 @@ import {
 
 interface ExpeditorEntry {
   name: string;
+  citywideRank?: number;
   totalProjects: number;
   totalValue: number;
   newConstructionCount: number;
@@ -86,7 +88,13 @@ function formatSortValue(entry: ExpeditorEntry, sortBy: SortKey): string {
   return getSortValue(entry, sortBy).toLocaleString();
 }
 
-function ExpeditorRow({ entry, rank, sortBy }: { entry: ExpeditorEntry; rank: number; sortBy: SortKey }) {
+function ExpeditorRow({ entry, rank, sortBy, highlighted }: { entry: ExpeditorEntry; rank: number; sortBy: SortKey; highlighted?: boolean }) {
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!highlighted || !rowRef.current) return;
+    const timeout = setTimeout(() => rowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+    return () => clearTimeout(timeout);
+  }, [highlighted]);
   const option = SORT_OPTIONS.find(o => o.key === sortBy)!;
   const Icon = option.icon;
 
@@ -103,6 +111,7 @@ function ExpeditorRow({ entry, rank, sortBy }: { entry: ExpeditorEntry; rank: nu
   const idbSearchUrl = `https://idfpr.illinois.gov/LicenseLookUp/LicenseLookup.asp`;
 
   return (
+    <div ref={rowRef} className={highlighted ? 'rounded-xl ring-2 ring-[#2b3a9e]/40' : undefined}>
     <RankedRow
       rank={rank}
       isFirst={rank === 1}
@@ -152,16 +161,26 @@ function ExpeditorRow({ entry, rank, sortBy }: { entry: ExpeditorEntry; rank: nu
         </div>
       }
     />
+    </div>
   );
 }
 
 export function ExpeditorRankingsView() {
   const [sortBy, setSortBy] = useState<SortKey>('total_projects');
+  const highlightName = (() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('highlight') || params.get('search') || '';
+    } catch { return ''; }
+  })();
+  const highlightNorm = highlightName ? normalizeFirmName(highlightName) : null;
 
   const { data, isLoading, error } = useQuery<ExpeditorResponse>({
-    queryKey: ['/api/discovery/expeditors', sortBy],
+    queryKey: ['/api/discovery/expeditors', sortBy, highlightNorm],
     queryFn: async () => {
-      const res = await fetch(`/api/discovery/expeditors?sortBy=${sortBy}&limit=100`, { credentials: 'include' });
+      const params = new URLSearchParams({ sortBy, limit: '100' });
+      if (highlightName) params.set('search', highlightName);
+      const res = await fetch(`/api/discovery/expeditors?${params.toString()}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch expeditor rankings');
       return res.json();
     },
@@ -207,7 +226,7 @@ export function ExpeditorRankingsView() {
           ) : (
             <motion.div key={sortBy} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               {data?.expeditors.map((entry, i) => (
-                <ExpeditorRow key={entry.name} entry={entry} rank={i + 1} sortBy={sortBy} />
+                <ExpeditorRow key={entry.name} entry={entry} rank={entry.citywideRank ?? i + 1} sortBy={sortBy} highlighted={!!highlightNorm && normalizeFirmName(entry.name) === highlightNorm} />
               ))}
               {data && (
                 <p className="text-xs text-center pt-2" style={{ color: MUTED }}>

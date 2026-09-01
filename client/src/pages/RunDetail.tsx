@@ -1613,9 +1613,12 @@ export default function RunDetail() {
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [labelDraft, setLabelDraft] = useState('');
   // Declare early so the geocode useEffect below can reference it
-  const { isSubscriber, user: authUser } = useAuth();
+  const { isSubscriber, user: authUser, isLoading: isAuthLoading } = useAuth();
   // Report is unlocked if user is a subscriber or the run has been purchased
   const isReportUnlocked = isSubscriber || !!run?.purchasedAt;
+  // Do not flash or partially blur a report while the initial session check is
+  // still in flight. Lock only after auth has reached a confirmed state.
+  const shouldLockReport = !isAuthLoading && !isReportUnlocked;
   // Project use locks after 90 days — subscribers are never locked
   const isProjectTypeLocked = !isSubscriber && !!run && (() => {
     const startDate = run.createdAt || run.purchasedAt;
@@ -4422,7 +4425,7 @@ export default function RunDetail() {
 
         {/* Scrollable Content Section */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden subsection-text relative" onScroll={handleReportScroll}>
-          {!isReportUnlocked && (
+          {shouldLockReport && (
             <div className="sticky top-0 z-20 bg-white border-b-2 border-black">
               <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
                 <div>
@@ -4458,7 +4461,7 @@ export default function RunDetail() {
               </div>
             </div>
           )}
-          <div className={!isReportUnlocked ? "report-locked" : ""}>
+          <div className={shouldLockReport ? "report-locked-uniform" : ""}>
           <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 space-y-8">
 
 
@@ -15892,7 +15895,7 @@ export default function RunDetail() {
                             ) : enr?.matched && enr.citywide ? (
                               <>
                                 <span><b>Citywide · 5 yr</b> — {enr.citywide.permits.toLocaleString()} permits{enr.citywide.lastActiveYear ? ` · last active ${enr.citywide.lastActiveYear}` : ''} · {enr.citywide.mix}</span>
-                                <a className="pview" href={`/discovery?view=${rankingView}&highlight=${encodeURIComponent(pro.name)}`} target="_blank" rel="noopener noreferrer">View in rankings →</a>
+                                <a className="pview" href={`/discovery?view=${rankingView}&highlight=${encodeURIComponent(pro.name)}&search=${encodeURIComponent(pro.name)}`} target="_blank" rel="noopener noreferrer">View this record →</a>
                               </>
                             ) : (
                               <span>No confident citywide match — showing this property's record only.</span>

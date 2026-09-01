@@ -9761,8 +9761,10 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
   app.get('/api/discovery/architects', async (req, res) => {
     try {
       const { getArchitectRankings } = await import('./architectRankings');
+      const { normalizeFirmName } = await import('./dobEnrichment');
       const all = await getArchitectRankings();
       const sortBy = (req.query.sortBy as string) || 'total_projects';
+      const search = typeof req.query.search === 'string' ? req.query.search.trim().slice(0, 200) : '';
       const limit = Math.min(parseInt(req.query.limit as string || '100'), 200);
       const offset = parseInt(req.query.offset as string || '0');
 
@@ -9780,10 +9782,20 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         }
       });
 
+      const ranked = sorted.map((entry, index) => ({ ...entry, citywideRank: index + 1 }));
+      const searchKey = normalizeFirmName(search);
+      const matching = searchKey
+        ? ranked.filter(entry => {
+            const entryKey = normalizeFirmName(entry.name);
+            return entryKey === searchKey || entryKey.includes(searchKey) || searchKey.includes(entryKey);
+          })
+        : ranked;
+
       res.json({
-        total: sorted.length,
-        architects: sorted.slice(offset, offset + limit),
+        total: matching.length,
+        architects: matching.slice(offset, offset + limit),
         sortBy,
+        search: search || null,
         dataWindow: 'Last 5 Years (2020–present)',
         source: 'Chicago Data Portal – Building Permits (ydr8-5enu)',
       });
@@ -9890,8 +9902,10 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
   app.get('/api/discovery/expeditors', async (req, res) => {
     try {
       const { getExpeditorRankings } = await import('./architectRankings');
+      const { normalizeFirmName } = await import('./dobEnrichment');
       const all = await getExpeditorRankings();
       const sortBy = (req.query.sortBy as string) || 'total_projects';
+      const search = typeof req.query.search === 'string' ? req.query.search.trim().slice(0, 200) : '';
       const limit = Math.min(parseInt(req.query.limit as string || '100'), 200);
       const offset = parseInt(req.query.offset as string || '0');
 
@@ -9908,10 +9922,20 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         }
       });
 
+      const ranked = sorted.map((entry, index) => ({ ...entry, citywideRank: index + 1 }));
+      const searchKey = normalizeFirmName(search);
+      const matching = searchKey
+        ? ranked.filter(entry => {
+            const entryKey = normalizeFirmName(entry.name);
+            return entryKey === searchKey || entryKey.includes(searchKey) || searchKey.includes(entryKey);
+          })
+        : ranked;
+
       res.json({
-        total: sorted.length,
-        expeditors: sorted.slice(offset, offset + limit),
+        total: matching.length,
+        expeditors: matching.slice(offset, offset + limit),
         sortBy,
+        search: search || null,
         dataWindow: 'Last 5 Years (2020–present)',
         source: 'Chicago Data Portal – Building Permits (ydr8-5enu)',
       });
