@@ -197,8 +197,11 @@ export function MinorityContractorDirectoryView() {
   const [sortBy, setSortBy] = useState<SortKey>('permit_count');
   const [certFilter, setCertFilter] = useState('');
   const [ethnicityFilter, setEthnicityFilter] = useState('');
-  const [search, setSearch] = useState('');
-  const [searchInput, setSearchInput] = useState('');
+  const initialSearch = (() => {
+    try { return new URLSearchParams(window.location.search).get('search') || ''; } catch { return ''; }
+  })();
+  const [search, setSearch] = useState(initialSearch);
+  const [searchInput, setSearchInput] = useState(initialSearch);
 
   const { data, isLoading, error } = useQuery<DirectoryResponse>({
     queryKey: ['/api/discovery/minority-contractors', sortBy, certFilter, ethnicityFilter, search],

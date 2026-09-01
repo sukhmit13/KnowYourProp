@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { SubscriberGate } from "@/components/SubscriberGate";
 import { EthnicMortgageTrends } from "@/components/EthnicMortgageTrends";
@@ -12,7 +12,7 @@ import { CTARankingsView } from "@/components/CTARankingsView";
 import { CommercialLenderRankingsView } from "@/components/CommercialLenderRankingsView";
 import { WestTownTaxDelinquencyView } from "@/components/WestTownTaxDelinquencyView";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useSearch } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { motion } from "framer-motion";
 import { 
   MapPin, 
@@ -43,13 +43,15 @@ import {
   ClipboardList,
   HardHat,
   Menu,
-  Train
+  Train,
+  Search
 } from "lucide-react";
 import { Sidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -129,10 +131,14 @@ function useTopZips() {
 }
 
 function useAttorneyDiscovery() {
+  const search = (() => {
+    try { return new URLSearchParams(window.location.search).get('search')?.trim() || ''; } catch { return ''; }
+  })();
   return useQuery<AttorneyDiscoveryResponse>({
-    queryKey: ['/api/discovery/attorneys'],
+    queryKey: ['/api/discovery/attorneys', search],
     queryFn: async () => {
-      const res = await fetch('/api/discovery/attorneys', { credentials: 'include' });
+      const params = search ? `?search=${encodeURIComponent(search)}` : '';
+      const res = await fetch(`/api/discovery/attorneys${params}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch attorney data');
       return res.json();
     }
@@ -661,7 +667,7 @@ function AttorneyView() {
   );
 }
 
-type ViewType = 'childcare' | 'attorneys' | 'evs' | 'ev-stations' | 'hotels' | 'grocery' | 'coffee' | 'gas-stations' | 'sbif' | 'nmtc' | 'tax-appeal-attorneys' | 'lender-rankings' | 'commercial-lender-rankings' | 'architect-rankings' | 'expeditor-rankings' | 'gc-rankings' | 'minority-contractors' | 'cta-rankings' | 'west-town-tax-delinquency';
+type ViewType = 'childcare' | 'attorneys' | 'evs' | 'ev-stations' | 'hotels' | 'grocery' | 'coffee' | 'gas-stations' | 'sbif' | 'nmtc' | 'ethnic-mortgage' | 'tax-appeal-attorneys' | 'lender-rankings' | 'commercial-lender-rankings' | 'architect-rankings' | 'expeditor-rankings' | 'gc-rankings' | 'minority-contractors' | 'cta-rankings' | 'west-town-tax-delinquency';
 
 const rankingViewConfig: Record<string, { icon: typeof Car; title: string; color: string; bgColor: string; countLabel?: string }> = {
   'evs': { icon: Car, title: 'EV Registrations', color: 'text-foreground', bgColor: 'bg-secondary' },
@@ -839,14 +845,27 @@ function RankingsView({ type }: { type: string }) {
   );
 }
 
-const validViewTypes: ViewType[] = ['childcare', 'attorneys', 'evs', 'ev-stations', 'hotels', 'grocery', 'coffee', 'gas-stations', 'sbif', 'nmtc', 'tax-appeal-attorneys', 'lender-rankings', 'commercial-lender-rankings', 'architect-rankings', 'expeditor-rankings', 'gc-rankings', 'minority-contractors', 'cta-rankings', 'west-town-tax-delinquency'];
+const validViewTypes: ViewType[] = ['childcare', 'attorneys', 'evs', 'ev-stations', 'hotels', 'grocery', 'coffee', 'gas-stations', 'sbif', 'nmtc', 'ethnic-mortgage', 'tax-appeal-attorneys', 'lender-rankings', 'commercial-lender-rankings', 'architect-rankings', 'expeditor-rankings', 'gc-rankings', 'minority-contractors', 'cta-rankings', 'west-town-tax-delinquency'];
+const professionalViewTypes: ViewType[] = ['attorneys', 'tax-appeal-attorneys', 'architect-rankings', 'expeditor-rankings', 'gc-rankings', 'minority-contractors'];
+
+const professionalSearchLabels: Partial<Record<ViewType, string>> = {
+  attorneys: 'Search zoning attorneys by name',
+  'tax-appeal-attorneys': 'Search tax appeal attorneys by name or firm',
+  'architect-rankings': 'Search architects by name or firm',
+  'expeditor-rankings': 'Search permit expeditors by name or firm',
+  'gc-rankings': 'Search contractors by name or project work',
+  'minority-contractors': 'Search contractors by name or capability',
+};
 
 export default function Discovery() {
   const { isSubscriber, isLoading: authLoading } = useAuth();
   const searchString = useSearch();
+  const [, setLocation] = useLocation();
   const urlParams = new URLSearchParams(searchString);
   const viewParam = urlParams.get('view');
+  const urlSearch = urlParams.get('search') || '';
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [professionalSearch, setProfessionalSearch] = useState(urlSearch);
   
   const [viewType, setViewType] = useState<ViewType>(
     validViewTypes.includes(viewParam as ViewType) ? (viewParam as ViewType) : 'childcare'
@@ -857,6 +876,21 @@ export default function Discovery() {
       setViewType(viewParam as ViewType);
     }
   }, [viewParam]);
+
+  useEffect(() => {
+    setProfessionalSearch(urlSearch);
+  }, [urlSearch]);
+
+  const submitProfessionalSearch = (event: FormEvent) => {
+    event.preventDefault();
+    const params = new URLSearchParams(searchString);
+    params.set('view', viewType);
+    const value = professionalSearch.trim();
+    if (value) params.set('search', value);
+    else params.delete('search');
+    params.delete('highlight');
+    setLocation(`/discovery?${params.toString()}`);
+  };
 
   if (!authLoading && !isSubscriber) return <SubscriberGate featureName="Market Discovery (Beta)" />;
 
@@ -1045,22 +1079,45 @@ export default function Discovery() {
                 Contractor Rankings
               </Button>
             </Link>
+            {professionalViewTypes.includes(viewType) && (
+              <form onSubmit={submitProfessionalSearch} className="flex min-w-[280px] flex-1 items-end gap-2 sm:max-w-xl" data-testid="form-professional-search">
+                <div className="min-w-0 flex-1">
+                  <label htmlFor="discovery-professional-search" className="font-jbmono text-[9.5px] font-bold uppercase tracking-[0.05em] text-muted-foreground">
+                    Find a person or firm
+                  </label>
+                  <div className="relative mt-1.5">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="discovery-professional-search"
+                      value={professionalSearch}
+                      onChange={(event) => setProfessionalSearch(event.target.value)}
+                      placeholder={professionalSearchLabels[viewType] || 'Search by name'}
+                      className="pl-9"
+                      data-testid="input-professional-search"
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="shrink-0" style={{ background: '#2b3a9e' }} data-testid="button-professional-search">
+                  Search
+                </Button>
+              </form>
+            )}
           </div>
         </motion.div>
 
         {viewType === 'childcare' && <ChildcareView />}
-        {viewType === 'attorneys' && <AttorneyView />}
+        {viewType === 'attorneys' && <AttorneyView key={`attorneys-${urlSearch}`} />}
         {(viewType === 'evs' || viewType === 'ev-stations' || viewType === 'hotels' || viewType === 'grocery' || viewType === 'coffee' || viewType === 'gas-stations' || viewType === 'sbif' || viewType === 'nmtc') && (
           <RankingsView type={viewType} />
         )}
         {viewType === 'ethnic-mortgage' && <EthnicMortgageTrends />}
-        {viewType === 'tax-appeal-attorneys' && <TaxAppealAttorneyView />}
+        {viewType === 'tax-appeal-attorneys' && <TaxAppealAttorneyView key={`tax-appeal-attorneys-${urlSearch}`} />}
         {viewType === 'lender-rankings' && <LenderRankingsView />}
         {viewType === 'commercial-lender-rankings' && <CommercialLenderRankingsView />}
-        {viewType === 'architect-rankings' && <ArchitectRankingsView />}
-        {viewType === 'expeditor-rankings' && <ExpeditorRankingsView />}
-        {viewType === 'gc-rankings' && <GeneralContractorRankingsView />}
-        {viewType === 'minority-contractors' && <MinorityContractorDirectoryView />}
+        {viewType === 'architect-rankings' && <ArchitectRankingsView key={`architect-rankings-${urlSearch}`} />}
+        {viewType === 'expeditor-rankings' && <ExpeditorRankingsView key={`expeditor-rankings-${urlSearch}`} />}
+        {viewType === 'gc-rankings' && <GeneralContractorRankingsView key={`gc-rankings-${urlSearch}`} />}
+        {viewType === 'minority-contractors' && <MinorityContractorDirectoryView key={`minority-contractors-${urlSearch}`} />}
         {viewType === 'west-town-tax-delinquency' && <WestTownTaxDelinquencyView />}
         {viewType === 'cta-rankings' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>

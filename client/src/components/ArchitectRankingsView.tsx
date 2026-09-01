@@ -239,19 +239,23 @@ function ArchitectCard({ entry, rank, sortBy, highlighted }: { entry: ArchitectE
 
 export function ArchitectRankingsView() {
   const [sortBy, setSortBy] = useState<SortKey>('total_projects');
-  // Deep-link highlight: /discovery?view=architect-rankings&highlight=<firm name>
+  // Both report deep-links and the Market Discovery search use this same path.
+  const searchName = (() => {
+    try { return new URLSearchParams(window.location.search).get('search') || ''; } catch { return ''; }
+  })();
   const highlightNorm = (() => {
     try {
-      const h = new URLSearchParams(window.location.search).get('highlight');
+      const params = new URLSearchParams(window.location.search);
+      const h = params.get('highlight') || params.get('search');
       return h ? normalizeFirmName(h) : null;
     } catch { return null; }
   })();
 
   const { data, isLoading, error } = useQuery<ArchitectResponse>({
-    queryKey: ['/api/discovery/architects', sortBy, highlightNorm],
+    queryKey: ['/api/discovery/architects', sortBy, searchName, highlightNorm],
     queryFn: async () => {
       const params = new URLSearchParams({ sortBy, limit: '100' });
-      if (highlightNorm) params.set('search', new URLSearchParams(window.location.search).get('highlight') || highlightNorm);
+      if (searchName) params.set('search', searchName);
       const res = await fetch(`/api/discovery/architects?${params.toString()}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch architect rankings');
       return res.json();

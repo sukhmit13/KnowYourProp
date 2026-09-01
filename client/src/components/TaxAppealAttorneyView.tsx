@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, TrendingDown, Award, Building2, Home, Users } from "lucide-react";
+import { Trophy, TrendingDown, Award, Building2, Home, Users, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface TaxAppealAttorney {
   rank: number;
@@ -101,6 +102,9 @@ const PROPERTY_TABS: { id: PropertyTab; label: string; icon: typeof Home; color:
 export function TaxAppealAttorneyView() {
   const [propertyTab, setPropertyTab] = useState<PropertyTab>('all');
   const [metricTab, setMetricTab] = useState<MetricTab>('wins');
+  const [search, setSearch] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get('search') || ''; } catch { return ''; }
+  });
 
   const { data, isLoading, error } = useQuery<TaxAppealData>({
     queryKey: ['/api/discovery/tax-appeal-attorneys'],
@@ -119,6 +123,10 @@ export function TaxAppealAttorneyView() {
 
   const source = getSource();
   const attorneys = metricTab === 'wins' ? source?.byWins : source?.byAvgReduction;
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredAttorneys = attorneys?.filter(attorney =>
+    !normalizedSearch || `${attorney.name} ${attorney.firm}`.toLowerCase().includes(normalizedSearch)
+  );
   const activeTabInfo = PROPERTY_TABS.find(t => t.id === propertyTab)!;
 
   return (
@@ -134,6 +142,22 @@ export function TaxAppealAttorneyView() {
           Cook County BOR
         </Badge>
       </div>
+        <div>
+          <label htmlFor="tax-appeal-attorney-search" className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+            Find an attorney or firm
+          </label>
+          <div className="relative mt-1.5">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="tax-appeal-attorney-search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search by name or firm"
+              className="pl-9"
+              data-testid="input-tax-appeal-attorney-search"
+            />
+          </div>
+        </div>
 
       {/* Property type tabs */}
       <div>
@@ -234,16 +258,18 @@ export function TaxAppealAttorneyView() {
       )}
 
       {/* Attorney list */}
-      {!isLoading && !error && attorneys && attorneys.length > 0 && (
+       {!isLoading && !error && filteredAttorneys && filteredAttorneys.length > 0 && (
         <div>
-          {attorneys.map(attorney => (
+           {filteredAttorneys.map(attorney => (
             <AttorneyCard key={`${attorney.name}-${attorney.firm}`} attorney={attorney} metric={metricTab} />
           ))}
         </div>
       )}
 
-      {!isLoading && !error && attorneys && attorneys.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center py-6">No data available for this category yet.</p>
+       {!isLoading && !error && filteredAttorneys && filteredAttorneys.length === 0 && (
+         <p className="text-sm text-muted-foreground text-center py-6">
+           {normalizedSearch ? `No tax appeal attorney or firm matched “${search.trim()}”.` : 'No data available for this category yet.'}
+         </p>
       )}
 
       <div className="flex items-center gap-2 pt-2 border-t border-border">

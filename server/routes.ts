@@ -8253,6 +8253,15 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
   // Attorney discovery endpoint - top attorneys by ward and citywide
   app.get('/api/discovery/attorneys', async (req, res) => {
     try {
+      const attorneySearch = typeof req.query.search === 'string'
+        ? req.query.search.trim().slice(0, 200)
+        : '';
+      const normalizedAttorneySearch = attorneySearch.toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
+      const attorneyMatches = (name: string) => {
+        if (!normalizedAttorneySearch) return true;
+        const normalizedName = name.toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
+        return normalizedName.includes(normalizedAttorneySearch) || normalizedAttorneySearch.includes(normalizedName);
+      };
       const indexReady = await isIndexBuilt();
       if (!indexReady) {
         return res.json({ 
@@ -8283,9 +8292,10 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         try {
           const summary = await getWardSummary(ward, 5);
           // Filter to likely attorneys (not self-rep) and take top 3
-          const topAttorneys = summary.representatives
+          const eligibleAttorneys = summary.representatives
             .filter(r => !r.isSelfRep && r.totalCases >= 2)
-            .slice(0, 3)
+            .filter(r => attorneyMatches(r.representativeDisplay));
+          const topAttorneys = (attorneySearch ? eligibleAttorneys : eligibleAttorneys.slice(0, 3))
             .map(r => ({
               name: r.representativeDisplay,
               totalCases: r.totalCases,
@@ -8311,9 +8321,10 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       wardSummaries.sort((a, b) => b.totalCases - a.totalCases);
 
       // Get citywide top attorneys (not self-rep, minimum 2 cases) - top 10
-      const citywideAttorneys = citySummary.representatives
+      const eligibleCitywideAttorneys = citySummary.representatives
         .filter(r => !r.isSelfRep && r.totalCases >= 2)
-        .slice(0, 10)
+        .filter(r => attorneyMatches(r.representativeDisplay));
+      const citywideAttorneys = (attorneySearch ? eligibleCitywideAttorneys : eligibleCitywideAttorneys.slice(0, 10))
         .map(r => ({
           name: r.representativeDisplay,
           totalCases: r.totalCases,
