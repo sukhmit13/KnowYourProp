@@ -1,0 +1,291 @@
+# KYP — Step 19: Development Potential
+
+**Section 11**, `DEVELOPMENT POTENTIAL — FAR, buildable envelope and rental potential.`
+
+**Files touched:** `client/src/pages/RunDetail.tsx` ·
+`client/src/kyp-base.css` (append `kyp-base-patch-19.css` — **49 rules, provisional**).
+
+---
+
+## ⚠️ 0. Read this before anything else
+
+**This spec was written without the source.** Every other step in this series was audited against
+`RunDetail.tsx`. This one was built from **seven screenshots of the live build 2026-09-01**, covering
+100% of what renders on 1126 W Bryn Mawr. Two consequences:
+
+**I do not know the field names.** Where this spec says `median asking rent, 2-bed, 0.75 mi` it means
+*the value that renders at that position today* — find the variable that produces it and keep using
+it. Do not create new state, and do not re-derive anything the code already computes.
+
+**I cannot see conditional branches.** The screenshots show one property: under-built, no commercial
+listings, RentCast and Airbnb both populated. Nothing here describes what happens when the lot size
+is missing, the property is **over-built**, FAR is unavailable for the district, or a feed returns
+nothing. §9 lists the branches that must be checked; treat it as a to-do, not a description.
+
+**The six commercial listings in the mock are invented.** LoopNet returned nothing for 60660, so
+there was no real data to draw. The addresses, sizes and rates are fabricated so the populated layout
+could be reviewed. **Do not hardcode them, and do not treat the rates as reference values.** The
+design is the deliverable there; the data is not.
+
+---
+
+## 1. What the section is today
+
+Seven blocks, each its own `<Collapsible>`: a `Rental Economics` summary card pair, `FAR Analysis`,
+`Fair Market Rent (HUD FY2026)`, `Real-Time Rental Data`, `Short-Term Rental Market (Airbnb)`,
+`Commercial Lease Market (LoopNet)`, `Hourly Space Market (Peerspace)`.
+
+Five defects, all visible in the screenshots:
+
+**The same comparison renders twice.** `Fair Market Rent` shows five FMR cards; `Real-Time Rental
+Data` then shows a `vs FMR` column against those same figures. One subject, two places, 300px apart.
+
+**The summary card sets up a comparison and abandons it.** `Rental Economics` puts long-term
+`$1,895/mo` beside short-term `~$22,667/yr` — monthly against annual. The reader is invited to
+compare and handed incomparable units.
+
+**`+3,459 sq ft` appears three times** — the bar legend, the `Additional Buildable` card, and
+`Remaining FAR: 0.31` in the meta strip.
+
+**The Airbnb table mixes denominators.** `Studio 9 · 6.4%` through `4+ Bedrooms 9 · 6.4%` are
+percentages of **140**; `Private Room 32 · 18.5%` and `Shared Room 1 · 0.6%` are percentages of
+**173**. Two bases in one column. Separately, the bedroom rows sum to **117** under a header reading
+`140 LISTINGS` — 23 listings vanish silently.
+
+**`Shared Room · $0/nt · 99%`.** A null rendered as a price, beside an occupancy figure derived from
+one listing's availability calendar.
+
+---
+
+## 2. Structure
+
+Four numbered subheads. **Every subsection opens with a three-block row**, so the section can be read
+from the twelve blocks alone.
+
+| | Subhead | Context slot |
+|---|---|---|
+| — | *(section blocks)* | envelope: unused sf · ceiling · height cap |
+| .1 | `THE BUILDABLE ENVELOPE` | `FAR {far} of {max} · {n} sq ft unused` |
+| .2 | `REAL-TIME RENTAL MARKET` | `RentCast · {n} listings in {zip} · {m} within 0.75 mi` |
+| .3 | `SHORT-TERM RENTAL (AIRBNB)` | `Inside Airbnb · {n} listings · {neighborhood}` |
+| .4 | `COMMERCIAL LEASE MARKET` | `LoopNet · {n} for-lease listings · within {r} mi` |
+
+Numbers come from the accordion's live `index` via `SectionNumberContext` — **never hardcode `04`**.
+They renumber over the subheads that actually render.
+
+**Name the feed, not the content.** `.2` is `REAL-TIME RENTAL MARKET` because RentCast is a live feed
+and HUD FMR is an annual static table; the merged table in `.2` carries both and the reader has to be
+able to tell them apart. Same reason the FMR column header reads `HUD FMR · FY2026` and the market
+overview header carries `· LIVE`.
+
+---
+
+## 3. Section blocks — the envelope
+
+Reuse `.kyp-blocks` / `.kyp-block`. No `.bclaim` chips; nothing here is a seller claim.
+
+| # | Class | `.bv` | `.bl` | `.bd` |
+|---|---|---|---|---|
+| 1 | `grn` | `{buildableSf}` + `<u>sf</u>` | `Unused floor area` | % of envelope built, and that no rezoning is needed |
+| 2 | `ind` | `{maxTotalSf}` + `<u>sf</u>` | `The zoning ceiling` | lot sf × FAR, and the height cap |
+| 3 | `dark` | `{maxHeightFt}` + `<u>ft</u>` | `Height cap` | storeys, and that it is a second cap independent of FAR |
+
+**Block 1 is green because unused FAR is the finding the section exists to report.** Blocks 2 and 3
+are limits, not verdicts — indigo and black.
+
+⚠️ **Height gets a block.** It was buried in the meta strip. On many Chicago lots the height cap binds
+before FAR does, and a reader who only sees `13,500 sq ft` will over-estimate what fits.
+
+---
+
+## 4. `.1` The buildable envelope
+
+**The FAR bar carries its own labels.** `.kyp-farbar` is a two-segment bar: indigo `BUILT · FAR {x}`,
+green `+{y} FAR`. The percentage sits above it in Instrument Serif. The separate legend row
+(`■ Built FAR 0.89  ■ Available headroom…`) is **cut** — the bar says it.
+
+**Six facts in `.kyp-recgrid.inline`**, three across, two rows, label left and value right on one
+line: Current FAR · Max allowed FAR · **Additional buildable** (indigo cell) · Existing building ·
+Max height · Lot size.
+
+This replaces both the four centred cards and the meta strip beneath them. `Remaining FAR: 0.31` is
+**cut** — it is the green bar segment restated.
+
+**What counts toward FAR** keeps all three rules, as `.kyp-yn` ✗/✗/✓ rows. The heading is cut; the
+rows read without it. A fourth row carries the zoning-attorney line and the point that
+**the buildable figure is an envelope, not a permit**.
+
+---
+
+## 5. `.2` Real-time rental market
+
+### 5.1 Blocks
+
+`ind` median 2-bed asking rent · `grn` percent over the HUD baseline · `dark` median days to lease.
+The green block is the only verdict in the subsection and the words carry it.
+
+### 5.2 The long-term vs short-term strip — `.kyp-vs`
+
+This is what the current `Rental Economics` card should have been. One unit, one period, and the
+delta stated:
+
+| Gross rent per year | Long-term | Short-term | Difference |
+|---|---|---|---|
+| 1 Bedroom | `{ltrMo} × 12` | `{nightly} × {nightsBooked}` | signed, plus a plain-word verdict |
+
+**Render a row only where both feeds report that bedroom count.** If fewer than two rows survive,
+do not render the strip at all — a comparison with one side missing is worse than no comparison.
+
+Each figure shows its derivation beneath it (`$1,895/mo × 12 · 136 listings`), including the listing
+count the median rests on.
+
+⚠️ **Pick one derivation for short-term annual revenue.** The current build computes it twice and
+disagrees with itself: the summary card shows `~$22,667` (rate × occupancy × 365) and the table
+reports 165 booked nights (rate × nights = `$22,770`). Use **rate × booked nights** and delete the
+other path.
+
+### 5.3 The merged rent table
+
+FMR folds in as a column. Six columns: bedroom · `HUD FMR · FY2026` · ZIP median · within 0.75 mi ·
+`vs FMR` · median sf. The five standalone FMR cards, the ZIP-vs-Chicago gradient meter, and the
+`Why FMR matters for underwriting` box are all **cut** — see §7.
+
+`vs FMR` renders as a `.vd` chip, green above the baseline and orange below. The market-overview
+table (median rent, average rent, days on market) follows as a second small table.
+
+**2-bedroom quality tiers** keep all four bands and the scale, restyled to `.kyp-tier`. The label is
+a `.kyp-subhead.sub` — a sub-label, not a numbered subhead.
+
+---
+
+## 6. `.3` Short-term and `.4` Commercial
+
+### 6.1 Short-term blocks and table
+
+`ind` median 2-bed nightly rate · `dark` 2-bed occupancy · `ind` implied gross per year.
+
+The table gains an **implied /yr** column — rate × booked nights, per row. Every value is computed
+from two numbers already in the table; nothing new is fetched.
+
+**Fix the denominators.** Drop the share percentages entirely and show raw counts. Counts carry the
+same information and cannot be read against the wrong base. Add an explicit
+`Bedroom count not reported — {n}` row so the entire-home column reconciles to its header.
+
+**`Shared room`** renders `no price listed` rather than `$0/nt`, dimmed with the room rows.
+
+**Seasonality survives** as a strip under the table: peak months, slow months, blended occupancy.
+This is currently the last line of the section and is easy to lose; for short-term underwriting a
+49% annual occupancy that is 80% in July and 20% in February is a different asset.
+
+### 6.2 Commercial blocks and table
+
+`ind` median retail asking $/sf/yr · `dark` spaces available in radius · `ind` **distance to the
+nearest available space**, naming it.
+
+Then one table: space · use · size · asking · lease type · distance. **No roll-up strip** — with a
+handful of listings, a summary of the rows directly above them is duplication.
+
+⚠️ The nearest-space block is the one to get right. The closest comparable lease is the single most
+useful thing this feed produces and it is currently buried mid-list.
+
+### 6.3 Peerspace is deleted
+
+`Hourly Space Market` comes out entirely — the subsection, the `useJBANearby`/Peerspace hook wiring
+if it serves nothing else, the source-line clause and the `Search Peerspace Chicago →` link.
+
+---
+
+## 7. What is cut, and why
+
+| Cut | Reason |
+|---|---|
+| `Rental Economics` card pair | Its own label says *detail in Rental Market below*. Replaced by the `.kyp-vs` strip, which does the comparison it set up. |
+| Five standalone FMR cards | The values survive as the `HUD FMR` column of the merged table. |
+| ZIP-vs-Chicago gradient meter | The rank and both figures survive in one sentence. The meter also ran a red→green gradient across a ZIP-level statistic, which is a verdict the palette does not allow. |
+| `Why FMR matters for underwriting` box | Compressed to one clause: FMR is a conservative baseline, not a forecast. |
+| FAR legend row | The bar labels its own segments. |
+| `Remaining FAR: 0.31` | The green bar segment restated. |
+| `What Counts Toward FAR` heading | The three rules read without it. |
+| Share percentages in the Airbnb table | Mixed denominators — §1. Counts replace them. |
+| `Seasonal booking` sentence | Same facts, as a labelled strip. |
+| Peerspace | Dropped at the owner's direction. |
+| `$0/nt` | A null is not a price. |
+
+**Every figure visible in the live section today has a destination above.** The restored ones worth
+naming: `136 & 69 active listings` (the sample behind each median), `47%` Edgewater blended
+occupancy, the `$1,840` Chicago median, `availability_365`, and the 23 unreported-bedroom listings.
+
+---
+
+## 8. Prose rule
+
+**A sentence earns its place only by naming a source, defining a unit, or stating a limit. If it
+restates a number already on screen, cut it.**
+
+Three notes survive the section, none longer than 45 words: both rent columns are *gross* and how
+each was derived · HUD FMR is a conservative baseline, not a forecast · Airbnb rates are what hosts
+*ask* and occupancy comes from `availability_365`. Plus one `.kyp-method` on how the envelope is
+figured, and one `.kyp-src`.
+
+Do not add a takeaway, a verdict paragraph, or an interpretation of a delta the table already shows.
+
+---
+
+## 9. Branches I could not see — check these
+
+- **Over-built** (`FAR ≥ max`). Block 1 must not read `Unused floor area` with a negative. Expect
+  `orange`, `0 sq ft`, and wording that says the envelope is used up.
+- **No lot size or no district FAR** — the whole of `.1` depends on it. Fall back to two blocks, then
+  one full-width; never one block at a third width.
+- **A feed returns nothing** — RentCast, Airbnb or LoopNet. Follow the Step 9c `not_found` pattern:
+  render no body, pass `collapsible={false}`, indigo `NONE ON RECORD` badge, and a takeaway that
+  states what was searched.
+- **Bedroom coverage gaps** — `4 Bedrooms` already shows `—` for the 0.75 mi column. Any derived
+  column must tolerate a missing operand rather than printing `$NaN`.
+- **The `Efficiency` / `Studio` merge.** HUD labels it *Efficiency*; RentCast labels it *Studio*. The
+  merged table puts them on one row. Confirm that is the same unit type before shipping.
+
+---
+
+## 10. CSS — `kyp-base-patch-19.css`, 49 rules, **provisional**
+
+Written blind. **Before appending, grep `kyp-base.css` for every selector in the patch and delete any
+that already exists** — an append at equal specificity silently overrides the live rule and would
+regress sections already shipped.
+
+26 rules were deliberately left out for that reason (`.kyp-blocks`, `.kyp-block` and its colour
+variants, `.kyp-subhead` and its children, `.kyp-recgrid` base, `.kyp-yn`, `.kyp-note`,
+`.kyp-method`, `.kyp-src`). The patch header lists them.
+
+**New families:** `.kyp-farhd` / `.kyp-farbar` / `.kyp-farscale` (the FAR bar), `.kyp-dtab` (the data
+table), `.kyp-vs` (the comparison strip), `.kyp-tier` / `.kyp-tiertrack` / `.kyp-tierfill` /
+`.kyp-tierscale` (quality bands).
+
+**Additions to live families, all new selectors:** `.kyp-block .bv u` (a mono unit suffix on a display
+numeral), `.kyp-subhead.sub` (sub-label), and `.kyp-recgrid.inline` (7 rules).
+
+⚠️ **`.kyp-recgrid.inline` is scoped for a reason.** `.kyp-recgrid` ships from Step 16b as a
+label-above-value grid in County Record. This section needs label-left / value-right. The modifier
+means Development Potential opts in and County Record is untouched. Do not unscope it.
+
+**Two reuse candidates I could not check:** `.kyp-hbar` (15 rules) may already do what `.kyp-farbar`
+does, and `.kyp-meter` (5 rules) may cover `.kyp-tiertrack`. If either fits, use it and drop the new
+family — one bar component is better than three.
+
+---
+
+## ✅ Done-when
+
+- [ ] Four subheads, numbered from `SectionNumberContext`, never hardcoded.
+- [ ] Four block rows; block 1 of the section row is green, and height has a block of its own.
+- [ ] `+3,459 sq ft` appears **once**.
+- [ ] FMR renders as a column of the rent table, not as a separate subsection.
+- [ ] The long-term / short-term strip is in one unit, shows its derivation, and renders only where both feeds report that bedroom count.
+- [ ] Short-term annual revenue has **one** derivation — rate × booked nights.
+- [ ] No share percentages in the Airbnb table; counts reconcile to the header; `$0/nt` is gone.
+- [ ] Seasonality and blended occupancy still render.
+- [ ] Peerspace is deleted, including its clause in the source line.
+- [ ] No commercial figure from the mock is hardcoded anywhere.
+- [ ] No prose that restates a number already on screen.
+- [ ] Patch appended only after grepping for collisions; `.kyp-recgrid.inline` left scoped.
+- [ ] Every branch in §9 has a rendered answer, not a crash.

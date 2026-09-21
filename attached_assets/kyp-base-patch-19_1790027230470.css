@@ -1,0 +1,97 @@
+/* ============================================================
+   KYP-BASE PATCH — Step 19: Development Potential.
+   APPEND to the end of client/src/kyp-base.css. Append-only.
+
+   ⚠️ PROVISIONAL. This was written without sight of the current
+   kyp-base.css. Before appending, grep the file for each selector
+   below. If any already exists, DELETE it from this patch — an
+   append at equal specificity silently overrides the live rule and
+   would regress every section already shipped.
+
+   Deliberately NOT included (they already ship, and re-declaring
+   them is exactly the regression above):
+     .kyp-blocks
+     .kyp-block
+     .kyp-block.ind
+     .kyp-block.grn
+     .kyp-block.dark
+     .kyp-block .bv
+     .kyp-block .bl
+     .kyp-block .bd
+     .kyp-subhead
+     .kyp-subhead .n
+     .kyp-subhead .lbl
+     .kyp-subhead .ct
+     .kyp-subhead .rule
+     .kyp-recgrid
+     .kyp-yn
+     .kyp-yn p
+     .kyp-yn .m
+     .kyp-yn .m.y
+     .kyp-yn b
+     .kyp-note
+     .kyp-note b
+     .kyp-note.tight
+     .kyp-method
+     .kyp-method b
+     .kyp-src
+     .kyp-src a
+   ============================================================ */
+
+/* ---------- new: opt-in one-line variant of the Step 16b stat grid ----------
+   .kyp-recgrid ships as label-above-value (County Record). This section needs
+   label-left / value-right so six facts fit without dead vertical space.
+   Scoped behind .inline so the live grid is untouched. */
+.kyp-recgrid.inline>div{background:var(--kyp-card);padding:12px 15px;display:flex;align-items:baseline; justify-content:space-between;gap:12px}
+.kyp-recgrid.inline .k{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em; text-transform:uppercase;color:var(--kyp-muted);white-space:nowrap}
+.kyp-recgrid.inline .v{font-size:15px;font-weight:600;color:var(--kyp-ink);white-space:nowrap}
+.kyp-recgrid.inline .v u{text-decoration:none;font-size:11px;font-weight:400;color:var(--kyp-ink2);margin-left:3px}
+.kyp-recgrid.inline>div.hi{background:var(--kyp-indigoSoft)}
+.kyp-recgrid.inline>div.hi .k{color:var(--kyp-indigo)}
+.kyp-recgrid.inline>div.hi .v{color:var(--kyp-indigo)}
+
+/* ---------- new: unit suffix on a display numeral, and a sub-label subhead ---------- */
+.kyp-block .bv u{font-family:var(--kyp-mono);font-size:12px;font-weight:700;text-decoration:none;margin-left:4px;opacity:.75}
+.kyp-subhead.sub .lbl{font-size:10px;color:var(--kyp-ink2)}
+.kyp-subhead.sub .ct{color:var(--kyp-muted)}
+
+/* ---------- new families ---------- */
+.kyp-farhd{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:9px}
+.kyp-farhd .l{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.07em; text-transform:uppercase;color:var(--kyp-muted)}
+.kyp-farhd .p{font-family:var(--kyp-disp);font-size:34px;line-height:1;color:var(--kyp-ink)}
+.kyp-farhd .p u{font-family:var(--kyp-mono);font-size:11px;font-weight:700;text-decoration:none; color:var(--kyp-muted);margin-left:4px}
+.kyp-farbar{display:flex;height:22px;border-radius:5px;overflow:hidden;background:var(--kyp-line)}
+.kyp-farbar .built{background:var(--kyp-indigoL);display:flex;align-items:center;padding-left:11px}
+.kyp-farbar .head{background:var(--kyp-green);display:flex;align-items:center;justify-content:flex-end;padding-right:11px}
+.kyp-farbar span{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.04em;color:#fff;white-space:nowrap}
+.kyp-farscale{display:flex;justify-content:space-between;font-family:var(--kyp-mono);font-size:9.5px; color:var(--kyp-muted);margin-top:6px}
+.kyp-dtab{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+.kyp-dtab th{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase; color:var(--kyp-muted);text-align:right;padding:0 0 8px;border-bottom:1px solid var(--kyp-line)}
+.kyp-dtab th:first-child{text-align:left}
+.kyp-dtab td{padding:10px 0;border-bottom:1px solid #f0eee7;text-align:right;color:var(--kyp-ink)}
+.kyp-dtab td:first-child{text-align:left;font-weight:600}
+.kyp-dtab td.base{color:var(--kyp-muted);font-weight:400}
+.kyp-dtab td.hero{font-family:var(--kyp-disp);font-size:18px}
+.kyp-dtab .sm{font-weight:400;color:var(--kyp-muted);font-size:11.5px;margin-left:6px}
+.kyp-dtab .vd{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;color:#fff; border-radius:5px;padding:3px 7px}
+.kyp-dtab .vd.g{background:var(--kyp-green)}
+.kyp-dtab tr.dim td{color:var(--kyp-muted)}
+.kyp-dtab tr.dim td:first-child{font-weight:400}
+.kyp-tier{display:grid;grid-template-columns:96px 1fr 92px;align-items:center;gap:14px;margin:10px 0}
+.kyp-tier .lab{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-ink2)}
+.kyp-tiertrack{display:block;height:8px;border-radius:999px;background:var(--kyp-line);position:relative}
+.kyp-tierfill{position:absolute;top:0;height:8px;border-radius:999px}
+.kyp-tier .rng{font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-ink2);text-align:right}
+.kyp-tierscale{display:flex;justify-content:space-between;font-family:var(--kyp-mono);font-size:9px;color:var(--kyp-muted); margin-top:10px;padding:0 92px 0 110px}
+.kyp-vs{border:1px solid var(--kyp-line);border-radius:11px;overflow:hidden;margin-bottom:20px}
+.kyp-vs .vh{display:grid;grid-template-columns:1.1fr 1fr 1fr 1.15fr;gap:12px;padding:10px 16px; background:var(--kyp-wash);border-bottom:1px solid var(--kyp-line)}
+.kyp-vs .vh span{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.06em; text-transform:uppercase;color:var(--kyp-muted);text-align:right}
+.kyp-vs .vh span:first-child{text-align:left;color:var(--kyp-ink2)}
+.kyp-vs .vr{display:grid;grid-template-columns:1.1fr 1fr 1fr 1.15fr;gap:12px;padding:12px 16px; align-items:baseline;border-top:1px solid #f0eee7}
+.kyp-vs .vr:first-of-type{border-top:0}
+.kyp-vs .vr .nm{font-size:13.5px;font-weight:600}
+.kyp-vs .vr .nm s{text-decoration:none;display:block;font-family:var(--kyp-mono);font-size:9px; font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-muted);margin-top:4px}
+.kyp-vs .vr .n{text-align:right;font-family:var(--kyp-disp);font-size:20px;line-height:1}
+.kyp-vs .vr .n s{text-decoration:none;font-family:var(--kyp-mono);font-size:9px;color:var(--kyp-muted); display:block;margin-top:4px;font-weight:700}
+.kyp-vs .vr .d{text-align:right;font-family:var(--kyp-mono);font-size:11px;font-weight:700;color:var(--kyp-ink2)}
+.kyp-vs .vr .d s{text-decoration:none;display:block;font-weight:400;color:var(--kyp-muted); font-size:9.5px;margin-top:4px;letter-spacing:.03em}

@@ -2867,12 +2867,11 @@ export default function RunDetail() {
     shouldFetchCrexi,
   );
 
-  const { data: peerspaceData, isLoading: isLoadingPeerspace } = usePeerspace(
-    geocode.data?.lat,
-    geocode.data?.lon,
-    facts?.zipCode,
-    shouldFetchCrexi,
-  );
+  // Peerspace was removed from Development Potential in the Step 19 redesign.
+  // Keep inert values only for the unreachable legacy JSX until that old block
+  // is removed separately; importantly, no Peerspace request is made.
+  const peerspaceData = null;
+  const isLoadingPeerspace = false;
 
   // Google Places only fires once a project use is explicitly set (non-daycare projects).
   // Term derivation lives in @shared/placesSearch so the insight-report evidence
@@ -12258,6 +12257,145 @@ export default function RunDetail() {
             const maxHeightStr = zoningInfo?.maxHeight || null;
             const maxStories = maxHeightStr ? parseInt(maxHeightStr.match(/(\d+)\s*stories/i)?.[1] || '0') || null : null;
             const maxFeet = maxHeightStr ? parseInt(maxHeightStr.match(/(\d+)\s*feet/i)?.[1] || '0') || null : null;
+            const isVacantLand = landSqFt > 0 && !buildingSqFt;
+            const currentFAR = landSqFt > 0 ? (buildingSqFt > 0 ? buildingSqFt / landSqFt : 0) : null;
+            const remainingFAR = maxFAR !== null && currentFAR !== null ? maxFAR - currentFAR : null;
+            const maxTotalSqFt = maxFAR !== null && landSqFt > 0 ? Math.floor(maxFAR * landSqFt) : null;
+            const additionalSqFt = remainingFAR !== null && landSqFt > 0 ? Math.max(0, Math.floor(remainingFAR * landSqFt)) : null;
+            const utilization = currentFAR !== null && maxFAR ? (currentFAR / maxFAR) * 100 : null;
+            const overbuilt = currentFAR !== null && maxFAR !== null && currentFAR >= maxFAR;
+            const farAvailable = landSqFt > 0 && currentFAR !== null && maxFAR !== null;
+            const hasRent = !!rentcastData;
+            const hasAirbnb = !!airbnbData;
+            const hasCommercial = !!(shouldFetchCrexi && (loopnetData || isLoadingLoopnet));
+            const subsection = buildSubsectionNumbers([
+              ['envelope', farAvailable],
+              ['rental', hasRent || isLoadingRentcast],
+              ['airbnb', hasAirbnb || isLoadingAirbnb],
+              ['commercial', hasCommercial],
+            ]);
+            const money = (value: number | string | null | undefined) => {
+              const number = typeof value === 'number' ? value : Number(value);
+              return Number.isFinite(number) ? `$${Math.round(number).toLocaleString()}` : '—';
+            };
+            const rentRows = rentcastData?.byBedroom || [];
+            const fmrFor = (bedrooms: number) => !fmrData ? null : bedrooms === 0 ? fmrData.rents.efficiency : bedrooms === 1 ? fmrData.rents.oneBed : bedrooms === 2 ? fmrData.rents.twoBed : bedrooms === 3 ? fmrData.rents.threeBed : fmrData.rents.fourBed;
+            const bedroomLabel = (bedrooms: number) => bedrooms === 0 ? 'Efficiency / Studio' : `${bedrooms} Bedroom${bedrooms === 1 ? '' : 's'}`;
+            const strRows = (airbnbData?.entireHome?.bedroomBreakdown || []).filter((row: any) => row?.count > 0);
+            const strBedroom = (bedrooms: number) => strRows.find((row: any) => new RegExp(`^${bedrooms}\\s*bed`, 'i').test(row.label));
+            const compareRows = [1, 2, 3, 4].map((bedrooms) => {
+              const longTerm = rentRows.find((row: any) => row.bedrooms === bedrooms);
+              const shortTerm = strBedroom(bedrooms);
+              return longTerm && shortTerm ? { bedrooms, longTerm, shortTerm } : null;
+            }).filter(Boolean) as Array<{ bedrooms: number; longTerm: any; shortTerm: any }>;
+            const commercialListings = loopnetData?.listings || [];
+            const nearestCommercial = commercialListings
+              .filter((listing: any) => listing.distanceMiles != null)
+              .sort((a: any, b: any) => a.distanceMiles - b.distanceMiles)[0];
+            const commercialRates = commercialListings
+              .map((listing: any) => Number(listing.pricePerSqFtYear))
+              .filter((rate: number) => Number.isFinite(rate) && rate > 0)
+              .sort((a: number, b: number) => a - b);
+            const commercialMedian = commercialRates.length === 0
+              ? null
+              : commercialRates.length % 2 === 1
+                ? commercialRates[Math.floor(commercialRates.length / 2)]
+                : (commercialRates[commercialRates.length / 2 - 1] + commercialRates[commercialRates.length / 2]) / 2;
+            const twoBedRent = rentRows.find((row: any) => row.bedrooms === 2);
+            const twoBedRadius = rentcastRadiusData?.byBedroom?.find((row: any) => row.bedrooms === 2);
+            const twoBedMarketRent = twoBedRadius?.medianRent ?? twoBedRent?.medianRent ?? null;
+            const twoBedFmr = fmrFor(2);
+            const twoBedVsFmr = twoBedMarketRent != null && twoBedFmr
+              ? Math.round(((twoBedMarketRent - twoBedFmr) / twoBedFmr) * 100)
+              : null;
+            return (
+              <>
+                {farAvailable && <div className="kyp-blocks" data-testid="development-potential-envelope-blocks">
+                  <div className={`kyp-block ${overbuilt ? 'orange' : 'grn'}`}>
+                    <div className="bv">{overbuilt ? 0 : (additionalSqFt ?? 0).toLocaleString()}<u>sf</u></div>
+                    <div><div className="bl">{overbuilt ? 'Envelope used up' : 'Unused floor area'}</div><div className="bd">{overbuilt ? 'Current building meets or exceeds the zoning ceiling' : 'Available under current zoning; no rezoning needed'}</div></div>
+                  </div>
+                  <div className="kyp-block ind">
+                    <div className="bv">{maxTotalSqFt == null ? '—' : maxTotalSqFt.toLocaleString()}<u>sf</u></div>
+                    <div><div className="bl">The zoning ceiling</div><div className="bd">{maxTotalSqFt == null ? 'District FAR is not available' : `${landSqFt.toLocaleString()} sq ft lot × FAR ${maxFAR}`}</div></div>
+                  </div>
+                  <div className="kyp-block dark">
+                    <div className="bv">{maxFeet ?? maxStories ?? '—'}<u>{maxFeet != null ? 'ft' : maxStories != null ? 'stories' : ''}</u></div>
+                    <div><div className="bl">Height cap</div><div className="bd">{maxHeightStr ? `${maxHeightStr}; independent of FAR` : 'Height limit not recorded'}</div></div>
+                  </div>
+                </div>}
+
+                {farAvailable && <section data-testid="development-envelope">
+                  <KypSubhead subsection={subsection.envelope}><span className="lbl">The buildable envelope</span><span className="ct">{currentFAR != null && maxFAR != null ? `FAR ${currentFAR.toFixed(2)} of ${maxFAR} · ${Math.max(0, additionalSqFt || 0).toLocaleString()} sq ft unused` : 'FAR inputs incomplete'}</span><span className="rule" /></KypSubhead>
+                  {currentFAR != null && maxFAR != null && <div className="kyp-far">
+                    <div className="kyp-farhd"><span className="l">FAR utilization</span><span className="p">{utilization?.toFixed(1)}<u>%</u></span></div>
+                    <div className="kyp-farbar"><span className="built" style={{ width: `${Math.min(100, Math.max(0, maxFAR ? currentFAR / maxFAR * 100 : 0))}%` }}><span>BUILT · FAR {currentFAR.toFixed(2)}</span></span><span className="head" style={{ width: `${Math.max(0, Math.min(100, maxFAR ? (maxFAR - currentFAR) / maxFAR * 100 : 0))}%` }}><span>{overbuilt ? 'OVER LIMIT' : `+${Math.max(0, maxFAR - currentFAR).toFixed(2)} FAR`}</span></span></div>
+                    <div className="kyp-farscale"><span>0</span><span>FAR {maxFAR} zoning limit</span></div>
+                  </div>}
+                  <div className="kyp-recgrid inline">
+                    <div><span className="k">Current FAR</span><span className="v">{currentFAR == null ? '—' : currentFAR.toFixed(2)}</span></div>
+                    <div><span className="k">Max allowed FAR</span><span className="v">{maxFAR ?? '—'}</span></div>
+                    <div className={additionalSqFt != null && additionalSqFt > 0 ? 'hi' : ''}><span className="k">Additional buildable</span><span className="v">{overbuilt ? '0' : additionalSqFt == null ? '—' : `+${additionalSqFt.toLocaleString()}`}<u>sf</u></span></div>
+                    <div><span className="k">Existing building</span><span className="v">{buildingSqFt ? buildingSqFt.toLocaleString() : '—'}<u>sf</u></span></div>
+                    <div><span className="k">Max height</span><span className="v">{maxHeightStr || '—'}</span></div>
+                    <div><span className="k">Lot size</span><span className="v">{landSqFt ? landSqFt.toLocaleString() : '—'}<u>sf</u></span></div>
+                  </div>
+                  <div className="kyp-yn">
+                    <div className="r n"><span className="m">✗</span><span><b>Basements</b> at or below 4 ft above grade do not count toward FAR.</span></div>
+                    <div className="r n"><span className="m">✗</span><span><b>Pilot houses / dog houses</b> at 33% or less of roof area do not count.</span></div>
+                    <div className="r y"><span className="m">✓</span><span><b>Garages and ADU spaces</b> count toward total FAR.</span></div>
+                    <div className="r"><span className="m">·</span><span>For exceptions or variances, consult a zoning attorney. This is an envelope, not a permit.</span></div>
+                  </div>
+                </section>}
+
+                {(hasRent || isLoadingRentcast) && <section data-testid="development-rental-market">
+                  <KypSubhead subsection={subsection.rental}><span className="lbl">Real-time rental market</span><span className="ct">RentCast · {rentcastData?.overall?.totalListings ?? '—'} listings in {facts?.zipCode || 'ZIP'} · {rentcastRadiusData?.totalListings ?? '—'} within 0.75 mi</span><span className="rule" /></KypSubhead>
+                  {isLoadingRentcast ? <div className="kyp-status-empty unknown">Rental market data is loading.</div> : !rentcastData ? <div className="kyp-status-empty">No rental market records found for {facts?.zipCode || 'this ZIP code'}.</div> : <>
+                    <div className="kyp-blocks" data-testid="development-rental-blocks">
+                      <div className="kyp-block ind">
+                        <div className="bv">{money(twoBedMarketRent)}<u>/mo</u></div>
+                        <div><div className="bl">Median 2-bed asking rent</div><div className="bd">{twoBedRadius ? 'Within 0.75 mi of the property' : `Across ZIP ${facts?.zipCode || ''}`}</div></div>
+                      </div>
+                      <div className={twoBedVsFmr != null && twoBedVsFmr >= 0 ? "kyp-block grn" : "kyp-block orange"}>
+                        <div className="bv">{twoBedVsFmr == null ? '—' : `${twoBedVsFmr >= 0 ? '+' : ''}${twoBedVsFmr}`}<u>%</u></div>
+                        <div><div className="bl">Vs. HUD baseline</div><div className="bd">{twoBedVsFmr == null ? 'Two-bedroom comparison unavailable' : `${money(twoBedMarketRent)} market rent vs ${money(twoBedFmr)} FMR`}</div></div>
+                      </div>
+                      <div className="kyp-block dark">
+                        <div className="bv">{rentcastData.overall.medianDaysOnMarket ?? '—'}<u>days</u></div>
+                        <div><div className="bl">Median days to lease</div><div className="bd">ZIP-level active rental listings</div></div>
+                      </div>
+                    </div>
+                    {compareRows.length >= 2 && <div className="kyp-vs" data-testid="rental-economics-comparison"><div className="vh"><span>Gross rent per year</span><span>Long-term</span><span>Short-term</span><span>Difference</span></div>{compareRows.map(({ bedrooms, longTerm, shortTerm }) => { const ltr = longTerm.medianRent * 12; const str = shortTerm.avgListedPrice && shortTerm.avgBookedNights ? shortTerm.avgListedPrice * shortTerm.avgBookedNights : null; const delta = str != null ? Math.round(((str - ltr) / ltr) * 100) : null; return <div className="vr" key={bedrooms}><span className="nm">{bedroomLabel(bedrooms)}<s>{longTerm.totalListings ?? '—'} listings · {shortTerm.count ?? '—'} listings</s></span><span className="n">{money(ltr)}<s>{money(longTerm.medianRent)}/mo × 12</s></span><span className="n">{money(str)}<s>{shortTerm.avgListedPrice ? money(shortTerm.avgListedPrice) : 'No price'} × {shortTerm.avgBookedNights ?? '—'} booked nights</s></span><span className="d">{delta == null ? '—' : `${delta >= 0 ? '+' : ''}${delta}%`}<s>{delta == null ? 'one side unavailable' : delta >= 0 ? 'short-term gross is higher' : 'long-term gross is higher'}</s></span></div>; })}</div>}
+                    <table className="kyp-dtab"><thead><tr><th>Bedroom</th><th>HUD FMR · FY{fmrData?.fiscalYear || '—'}</th><th>ZIP median</th><th>Within 0.75 mi</th><th>vs FMR</th><th>Median sf</th></tr></thead><tbody>{rentRows.map((row: any) => { const radius = rentcastRadiusData?.byBedroom?.find((item: any) => item.bedrooms === row.bedrooms); const fmr = fmrFor(row.bedrooms); const comp = radius?.medianRent ?? row.medianRent; const delta = fmr && comp ? Math.round((comp - fmr) / fmr * 100) : null; return <tr key={row.bedrooms}><td>{bedroomLabel(row.bedrooms)}</td><td className="base">{money(fmr)}</td><td className="hero">{money(row.medianRent)}</td><td>{money(radius?.medianRent)}</td><td><span className={`vd ${delta != null && delta >= 0 ? 'g' : ''}`}>{delta == null ? '—' : `${delta >= 0 ? '+' : ''}${delta}%`}</span></td><td>{(radius?.medianSqft ?? row.medianSqft)?.toLocaleString?.() || '—'}</td></tr>; })}</tbody></table>
+                    {rentcastData.qualityTiers?.length > 0 && <><KypSubhead className="sub" subsection={undefined}><span className="lbl">2-bedroom quality tiers</span><span className="ct">relative to HUD FMR</span><span className="rule" /></KypSubhead>{rentcastData.qualityTiers.map((tier: any) => <div className="kyp-tier" key={tier.tier}><span className="lab">{tier.label}</span><span className="kyp-tiertrack"><i className="kyp-tierfill" style={{ left: `${Math.max(0, (tier.minRent / (fmrData?.rents.twoBed * 2.4 || 1)) * 100)}%`, width: `${Math.max(4, ((tier.maxRent || tier.minRent * 1.2) - tier.minRent) / (fmrData?.rents.twoBed * 2.4 || 1) * 100)}%`, background: 'var(--kyp-indigo)' }} /></span><span className="rng">{money(tier.minRent)}{tier.maxRent ? `–${money(tier.maxRent)}` : '+'}</span></div>)}</>}
+                    <div className="kyp-method">RentCast medians are asking rents. HUD FMR is a conservative baseline, not a forecast; the table keeps the two sources visible without treating either as a guarantee.</div>
+                  </>}
+                </section>}
+
+                {(hasAirbnb || isLoadingAirbnb) && <section data-testid="development-airbnb-market">
+                  <KypSubhead subsection={subsection.airbnb}><span className="lbl">Short-term rental (Airbnb)</span><span className="ct">Inside Airbnb · {airbnbData?.totalListings ?? '—'} listings · {facts?.communityArea || 'neighborhood'}</span><span className="rule" /></KypSubhead>
+                  {isLoadingAirbnb ? <div className="kyp-status-empty unknown">Short-term rental data is loading.</div> : !airbnbData ? <div className="kyp-status-empty">No Airbnb records found for {facts?.communityArea || 'this neighborhood'}.</div> : (() => { const entire = airbnbData.entireHome; const two = strBedroom(2); const unreported = entire ? Math.max(0, (entire.count || 0) - strRows.reduce((sum: number, row: any) => sum + (row.count || 0), 0)) : 0; return <><div className="kyp-blocks"><div className="kyp-block ind"><div className="bv">{money(two?.medianListedPrice)}<u>/nt</u></div><div><div className="bl">Median 2-bed nightly rate</div><div className="bd">{two?.count ?? '—'} entire-home listings</div></div></div><div className="kyp-block dark"><div className="bv">{two?.avgOccupancyPct ?? '—'}<u>%</u></div><div><div className="bl">2-bed occupancy</div><div className="bd">Derived from availability_365</div></div></div><div className="kyp-block ind"><div className="bv">{two?.avgListedPrice && two?.avgBookedNights ? money(two.avgListedPrice * two.avgBookedNights) : '—'}<u>/yr</u></div><div><div className="bl">Implied gross per year</div><div className="bd">Listed rate × booked nights</div></div></div></div><table className="kyp-dtab"><thead><tr><th>Room / bedroom</th><th>Count</th><th>Asked / night</th><th>Booked nights</th><th>Implied / yr</th></tr></thead><tbody>{strRows.map((row: any) => <tr key={row.label} className={!row.avgListedPrice ? 'dim' : ''}><td>{row.label}</td><td>{row.count ?? 0}</td><td>{row.avgListedPrice ? money(row.avgListedPrice) : 'no price listed'}</td><td>{row.avgBookedNights ?? '—'}</td><td>{row.avgListedPrice && row.avgBookedNights ? money(row.avgListedPrice * row.avgBookedNights) : '—'}</td></tr>)}{unreported > 0 && <tr className="dim"><td>Bedroom count not reported</td><td>{unreported}</td><td>—</td><td>—</td><td>—</td></tr>}{(['privateRoom', 'sharedRoom', 'hotelRoom'] as const).map((key) => { const room = airbnbData[key]; return room && room.count > 0 && !room.bedroomBreakdown?.length ? <tr className={!room.avgListedPrice ? 'dim' : ''} key={key}><td>{key === 'privateRoom' ? 'Private room' : key === 'sharedRoom' ? 'Shared room' : 'Hotel room'}</td><td>{room.count}</td><td>{room.avgListedPrice ? money(room.avgListedPrice) : 'no price listed'}</td><td>{room.avgBookedNights ?? '—'}</td><td>{room.avgListedPrice && room.avgBookedNights ? money(room.avgListedPrice * room.avgBookedNights) : '—'}</td></tr> : null; })}</tbody></table>{(airbnbData.peakMonths?.length || airbnbData.slowMonths?.length || entire?.avgOccupancyPct != null) && <div className="kyp-method"><b>Seasonality</b>{airbnbData.peakMonths?.length ? ` · Peak: ${airbnbData.peakMonths.join(', ')}` : ''}{airbnbData.slowMonths?.length ? ` · Slow: ${airbnbData.slowMonths.join(', ')}` : ''}{entire?.avgOccupancyPct != null ? ` · Blended occupancy: ${entire.avgOccupancyPct}%` : ''}</div>}<div className="kyp-method">Airbnb rates are what hosts ask; occupancy comes from availability_365.</div></>; })()}
+                </section>}
+
+                {hasCommercial && <section data-testid="development-commercial-market">
+                  <KypSubhead subsection={subsection.commercial}><span className="lbl">Commercial lease market</span><span className="ct">LoopNet · {loopnetData?.count ?? '—'} for-lease listings · within {loopnetData?.radiusMilesUsed ?? '—'} mi</span><span className="rule" /></KypSubhead>
+                  {isLoadingLoopnet || loopnetData?.status === 'pending' ? <div className="kyp-status-empty unknown">Commercial lease records are loading.</div> : !loopnetData?.count ? <div className="kyp-status-empty">NONE ON RECORD · No active for-lease listings found in this search radius.</div> : <><div className="kyp-blocks"><div className="kyp-block ind"><div className="bv">{commercialMedian == null ? '—' : `$${commercialMedian}`}<u>/sf/yr</u></div><div><div className="bl">Median retail asking</div><div className="bd">Live LoopNet asking rates</div></div></div><div className="kyp-block dark"><div className="bv">{loopnetData.count}</div><div><div className="bl">Spaces available</div><div className="bd">Within {loopnetData.radiusMilesUsed ?? 'the search radius'} mi</div></div></div><div className="kyp-block ind"><div className="bv">{nearestCommercial?.distanceMiles == null ? '—' : nearestCommercial.distanceMiles}<u>mi</u></div><div><div className="bl">Nearest available space</div><div className="bd">{nearestCommercial?.address || 'Distance not reported'}</div></div></div></div><table className="kyp-dtab"><thead><tr><th>Space</th><th>Use</th><th>Size</th><th>Asking</th><th>Lease type</th><th>Distance</th></tr></thead><tbody>{commercialListings.map((listing: any, index: number) => <tr key={index}><td>{listing.address || 'Address unavailable'}</td><td>{listing.propertyType || '—'}</td><td>{listing.sizeSqFt ? `${listing.sizeSqFt.toLocaleString()} sf` : '—'}</td><td>{listing.pricePerSqFtYear ? `$${listing.pricePerSqFtYear}/sf/yr` : '—'}</td><td>{listing.leaseType || '—'}</td><td>{listing.distanceMiles != null ? `${listing.distanceMiles} mi` : '—'}</td></tr>)}</tbody></table></>}
+                </section>}
+
+                <div className="kyp-src">Sources: {[farAvailable && 'zoning records and assessor data for the envelope', fmrData && `HUD FY${fmrData.fiscalYear}`, rentcastData && 'RentCast', airbnbData && 'Inside Airbnb', loopnetData && 'LoopNet'].filter(Boolean).join(' · ') || 'No data sources available'}. Figures are live records and estimates, not permits or guarantees.</div>
+              </>
+            );
+          })()}
+          {false && (<>{(() => {
+            const buildingSqFt = run?.manualBuildingSqFt || propertyTaxData?.buildingSquareFeet || pinLookupData?.commercialData?.bldgSf || coParcelLookupData?.commercialData?.bldgSf || 0;
+            const primaryLandSqFt = run?.manualLandSqFt || propertyTaxData?.landSquareFeet || pinLookupData?.commercialData?.landSf || 0;
+            const coParcelLandSqFt = (!run?.manualLandSqFt && (coParcelTaxData?.landSquareFeet || coParcelLookupData?.commercialData?.landSf)) ? (coParcelTaxData?.landSquareFeet || coParcelLookupData?.commercialData?.landSf || 0) : 0;
+            const landSqFt = primaryLandSqFt + coParcelLandSqFt;
+            const currentStories = (run?.manualStories ? parseFloat(String(run.manualStories)) : null) || propertyTaxData?.stories || null;
+            const maxFAR = zoningInfo?.maxFAR || null;
+            const maxHeightStr = zoningInfo?.maxHeight || null;
+            const maxStories = maxHeightStr ? parseInt(maxHeightStr.match(/(\d+)\s*stories/i)?.[1] || '0') || null : null;
+            const maxFeet = maxHeightStr ? parseInt(maxHeightStr.match(/(\d+)\s*feet/i)?.[1] || '0') || null : null;
 
             // Vacant land: assessor returned lot size but no building. Treat currentFAR = 0
             const isVacantLand = landSqFt > 0 && !buildingSqFt;
@@ -13808,7 +13946,7 @@ export default function RunDetail() {
                 </Collapsible>
               </motion.div>
             );
-          })()}
+          })()}</>)}
           </AccordionSection>
 
           {/* Property Proximity Details Section - Contains Crime Statistics and Proximity Info */}
