@@ -104,7 +104,6 @@ agency_id,route_id,route_short_name,route_long_name,route_type,route_url,route_c
 50066,124,124,Navy Pier,3,http://www.transitchicago.com/bus/124/,99999C,ffffff
 50066,125,125,Water Tower Express,3,http://www.transitchicago.com/bus/125/,b71234,ffffff
 50066,126,126,Jackson,3,http://www.transitchicago.com/bus/126/,99999C,ffffff
-50066,130,130,Museum Campus,3,http://www.transitchicago.com/bus/130/,99999C,ffffff
 50066,134,134,Stockton/LaSalle Express,3,http://www.transitchicago.com/bus/134/,b71234,ffffff
 50066,135,135,Clarendon/LaSalle Express,3,http://www.transitchicago.com/bus/135/,b71234,ffffff
 50066,136,136,Sheridan/LaSalle Express,3,http://www.transitchicago.com/bus/136/,b71234,ffffff

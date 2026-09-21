@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, CheckCircle, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 export default function CheckoutSuccess() {
   const [, navigate] = useLocation();
@@ -18,6 +19,7 @@ export default function CheckoutSuccess() {
   const [isCreating, setIsCreating] = useState(false);
   const [accountCreated, setAccountCreated] = useState(false);
   const [showAccountForm, setShowAccountForm] = useState(false);
+  const conversionTracked = useRef(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["/api/stripe/session", sessionId],
@@ -35,6 +37,15 @@ export default function CheckoutSuccess() {
   const purchasedRunId = data?.runId ? Number(data.runId) : null;
   const purchasedAddress = data?.address || null;
 
+  useEffect(() => {
+    if (!data?.mode || conversionTracked.current) return;
+    conversionTracked.current = true;
+    trackEvent("purchase_completed", {
+      product: data.mode === "subscription" ? "subscription" : "report",
+      account_existed: Boolean(user),
+    });
+  }, [data?.mode, user]);
+
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
@@ -49,6 +60,10 @@ export default function CheckoutSuccess() {
     try {
       await register(customerEmail, password, data?.stripeCustomerId, data?.stripeSubscriptionId);
       setAccountCreated(true);
+      trackEvent("account_created", {
+        location: "checkout_success",
+        product: isSubscription ? "subscription" : "report",
+      });
       toast({ title: "Account created — you're signed in." });
     } catch (err: any) {
       toast({ title: err.message || "Could not create account.", variant: "destructive" });

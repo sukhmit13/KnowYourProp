@@ -55,6 +55,7 @@ import { computeValuationMetrics, computeNoiModel, computeDscrLoanRatio, type Va
 import StatTile from "@/components/StatTile";
 import InsightReportSection from "@/components/InsightReportSection";
 import { CountyRecordSection } from "@/components/report/CountyRecordSection";
+import { trackEvent } from "@/lib/analytics";
 
 function proRoleIcon(role: string) {
   const r = (role || '').toLowerCase();
@@ -1870,6 +1871,7 @@ export default function RunDetail() {
         ...(id ? { runId: String(id) } : {}),
         ...(address ? { address } : {}),
       });
+      trackEvent("checkout_started", { product: "report", location: "report_paywall" });
       navigateTo(`/checkout?${params.toString()}`);
       return null;
     },
@@ -4276,6 +4278,7 @@ export default function RunDetail() {
                       if (!run?.id) return;
                       const shareUrl = `${window.location.origin}/report/${run.id}`;
                       navigator.clipboard.writeText(shareUrl).then(() => {
+                        trackEvent("report_shared", { method: "copy_link" });
                         toast({
                           title: "Link copied to clipboard!",
                           description: "Anyone with this link can view this report.",
@@ -4292,7 +4295,10 @@ export default function RunDetail() {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => setPrintDialogOpen(true)}
+                    onClick={() => {
+                      trackEvent("report_export_started", { format: "pdf_or_print" });
+                      setPrintDialogOpen(true);
+                    }}
                     className="flex items-center gap-2 no-print border-[#ddd4c6] text-[#565651] hover:bg-[#f5f3ef] hover:border-[#141414] hover:text-[#141414]"
                     data-testid="button-print-detail"
                   >

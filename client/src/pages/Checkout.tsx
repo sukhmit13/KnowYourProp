@@ -3,6 +3,7 @@ import { useLocation, useSearch } from "wouter";
 import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { useAuth } from "@/contexts/AuthContext";
+import { trackEvent } from "@/lib/analytics";
 
 export default function Checkout() {
   const [, navigate] = useLocation();
@@ -18,6 +19,7 @@ export default function Checkout() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    trackEvent("checkout_viewed", { product: type === "subscription" ? "subscription" : "report" });
     fetch("/api/stripe/config")
       .then((r) => r.json())
       .then(({ publishableKey }) => {
@@ -49,10 +51,17 @@ export default function Checkout() {
     });
 
     if (!res.ok) {
+      trackEvent("checkout_init_failed", {
+        product: type === "subscription" ? "subscription" : "report",
+        status: res.status,
+      });
       throw new Error("Could not initialize checkout. Please try again.");
     }
 
     const data = await res.json();
+    trackEvent("checkout_initialized", {
+      product: type === "subscription" ? "subscription" : "report",
+    });
     return data.clientSecret as string;
   }, [type, runId, address, email, user?.email]);
 

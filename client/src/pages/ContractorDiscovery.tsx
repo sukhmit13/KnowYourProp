@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { trackEvent } from '@/lib/analytics';
 import { 
   Hammer, 
   MapPin, 
@@ -323,7 +324,15 @@ function ContractorCard({
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={() => setExpanded(!expanded)}
+            onClick={() => {
+              if (!expanded) {
+                trackEvent('contractor_projects_viewed', {
+                  result_context: 'contractor_discovery',
+                  has_recent_projects: contractor.recentProjects.length > 0,
+                });
+              }
+              setExpanded(!expanded);
+            }}
             data-testid={`button-expand-${contractor.id}`}
           >
             View Projects
@@ -501,7 +510,10 @@ export default function ContractorDiscovery() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <Label className="text-xs text-muted-foreground mb-1 block">Overall Permit Specialty</Label>
-                <Select value={specialty} onValueChange={setSpecialty}>
+                <Select value={specialty} onValueChange={(value) => {
+                  trackEvent('contractor_filter_changed', { filter: 'specialty', value });
+                  setSpecialty(value);
+                }}>
                   <SelectTrigger data-testid="select-specialty">
                     <SelectValue placeholder="All Specialties" />
                   </SelectTrigger>
@@ -523,7 +535,10 @@ export default function ContractorDiscovery() {
 
               <div>
                 <Label className="text-xs text-muted-foreground mb-1 block">Project Scope</Label>
-                <Select value={projectScope} onValueChange={setProjectScope}>
+                <Select value={projectScope} onValueChange={(value) => {
+                  trackEvent('contractor_filter_changed', { filter: 'project_scope', value });
+                  setProjectScope(value);
+                }}>
                   <SelectTrigger data-testid="select-project-scope">
                     <SelectValue placeholder="All Project Scopes" />
                   </SelectTrigger>
@@ -538,7 +553,10 @@ export default function ContractorDiscovery() {
 
               <div>
                 <Label className="text-xs text-muted-foreground mb-1 block">Listed Permit Role</Label>
-                <Select value={contractorRole} onValueChange={setContractorRole}>
+                <Select value={contractorRole} onValueChange={(value) => {
+                  trackEvent('contractor_filter_changed', { filter: 'contractor_role', value });
+                  setContractorRole(value);
+                }}>
                   <SelectTrigger data-testid="select-contractor-role">
                     <SelectValue placeholder="Any Listed Role" />
                   </SelectTrigger>
@@ -555,7 +573,10 @@ export default function ContractorDiscovery() {
 
               <div>
                 <Label className="text-xs text-muted-foreground mb-1 block">Property Context</Label>
-                <Select value={propertyContext} onValueChange={setPropertyContext}>
+                <Select value={propertyContext} onValueChange={(value) => {
+                  trackEvent('contractor_filter_changed', { filter: 'property_context', value });
+                  setPropertyContext(value);
+                }}>
                   <SelectTrigger data-testid="select-property-context">
                     <SelectValue placeholder="Any Property Context" />
                   </SelectTrigger>
@@ -574,7 +595,10 @@ export default function ContractorDiscovery() {
               
               <div>
                 <Label className="text-xs text-muted-foreground mb-1 block">Neighborhood</Label>
-                <Select value={neighborhood} onValueChange={setNeighborhood}>
+                <Select value={neighborhood} onValueChange={(value) => {
+                  trackEvent('contractor_filter_changed', { filter: 'neighborhood', value });
+                  setNeighborhood(value);
+                }}>
                   <SelectTrigger data-testid="select-neighborhood">
                     <SelectValue placeholder="All Neighborhoods" />
                   </SelectTrigger>
@@ -589,7 +613,10 @@ export default function ContractorDiscovery() {
               
               <div>
                 <Label className="text-xs text-muted-foreground mb-1 block">Sort By</Label>
-                <Select value={sortBy} onValueChange={setSortBy}>
+                <Select value={sortBy} onValueChange={(value) => {
+                  trackEvent('contractor_sort_changed', { value });
+                  setSortBy(value);
+                }}>
                   <SelectTrigger data-testid="select-sort">
                     <SelectValue />
                   </SelectTrigger>
@@ -608,7 +635,10 @@ export default function ContractorDiscovery() {
                   <Switch 
                     id="active-only" 
                     checked={activeOnly} 
-                    onCheckedChange={setActiveOnly}
+                    onCheckedChange={(checked) => {
+                      trackEvent('contractor_filter_changed', { filter: 'active_only', value: checked });
+                      setActiveOnly(checked);
+                    }}
                     data-testid="switch-active-only"
                   />
                   <Label htmlFor="active-only" className="text-sm cursor-pointer">

@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LandingHeader } from "@/components/LandingHeader";
 import { Logo } from "@/components/Logo";
 import { CloserSearchBar } from "@/components/CloserSearchBar";
+import { trackEvent } from "@/lib/analytics";
 
 interface AreaSuggestion {
   type: 'zip' | 'community';
@@ -513,6 +514,11 @@ export default function Home() {
           const run = await createRun.mutateAsync({ 
             address: runAddress 
           });
+          trackEvent("report_created", {
+            input_type: "listing_url",
+            listing_source: result.source || "unknown",
+            details_extracted: Boolean(result.propertyDetails),
+          });
           
           if (run.id) {
             try {
@@ -585,6 +591,11 @@ export default function Home() {
         const run = await createRun.mutateAsync({ 
           address: runAddress 
         });
+        trackEvent("report_created", {
+          input_type: "address",
+          listing_source: "none",
+          details_extracted: false,
+        });
         try {
           const funnelRaw = sessionStorage.getItem('funnelAnswers');
           sessionStorage.removeItem('funnelAnswers');
@@ -621,6 +632,10 @@ export default function Home() {
     if (typeof e !== 'string') e.preventDefault();
     const searchInput = (typeof e === 'string' ? e : address).trim();
     if (!searchInput) return;
+    trackEvent("report_search_started", {
+      input_type: isUrl(searchInput) ? "listing_url" : "address",
+      access_path: user && user.plan !== "free" ? "paid" : "preview",
+    });
 
     // Paid users skip the preview/paywall funnel entirely — create the run
     // directly and go straight to the report.
@@ -1357,7 +1372,10 @@ export default function Home() {
                   <Button
                     className="w-full h-12 rounded-[10px] font-jbmono text-xs font-bold uppercase tracking-[0.12em] bg-[#2b3a9e] text-white hover:bg-[#3446bd] transition-colors"
                     data-testid="button-cta-subscription"
-                    onClick={() => setLocation('/checkout?type=subscription')}
+                    onClick={() => {
+                      trackEvent("checkout_started", { product: "subscription", location: "pricing" });
+                      setLocation('/checkout?type=subscription');
+                    }}
                   >
                     Start Subscription →
                   </Button>
