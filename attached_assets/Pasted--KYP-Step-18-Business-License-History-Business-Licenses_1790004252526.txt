@@ -1,0 +1,320 @@
+# KYP — Step 18: Business License History → Business Licenses
+
+**Coverage: 100%.** Read `RunDetail.tsx` **9828–9946** (render, 119 lines), **3429–3485** (grouping
+and derived counts, 57 lines) and **2698** (the hook). 177 lines, all of it.
+
+**Files touched:** `client/src/pages/RunDetail.tsx` ·
+`client/src/kyp-base.css` (append `kyp-base-patch-18.css` — **3 rules**).
+
+**This is the address-scoped section.** Do not confuse it with `NewBusinessLicensesSection` at
+15851, which is the 1-mile nearby feed and is already in the new design language. Same subject, two
+languages, one report — that is the thing this step ends.
+
+---
+
+## 1. What is wrong today
+
+**It is nested.** The section lives inside `02 · Property Overview`, between a dead-coded
+Zoning History block (9597, wrapped in `{false && …}`) and Historic Landmark Status. It is **not in
+`ACC_DEFAULT_ORDER`**, so it cannot be reordered, cannot be hidden, and does not appear in the
+section jump list.
+
+**It is in the old language.** 45 classes render in this section and **zero** are `kyp-`. It borrows
+`.crm-take` — the Crime section's takeaway box — for its own summary, and `.bzl-flag` /
+`.bzl-caveat` use `--caution-text`, an **amber**. Amber is not in the palette.
+
+**It renders on every property.** There is no guard. A six-flat with no commercial space gets a
+permanent subsection reading "No business license records found for this address."
+
+**It splits one tenant into two.** The grouping key is:
+
+```js
+const key = (rec.businessName || '').trim().toUpperCase();
+```
+
+So `CROWN LIQUORS INC` and `CROWN LIQUORS, INC.` are two businesses. The file already imports
+`titleCaseBusiness` from `@shared/businessLicenses`; the key uses no normaliser at all. This inflates
+the headline count and shortens the longest tenancy — both numbers the section leads with.
+
+**Revoked and expired render identically.** A license the city ended for cause and one the holder
+let lapse both come out as the same grey pill. That is the single most consequential distinction in
+the dataset and the section flattens it.
+
+---
+
+## 2. What is right today — keep all of it
+
+Two things in the current code are better than they look and must survive:
+
+**Effective status is derived from the term dates, not the city's status field.** A record flagged
+`AAI` whose term ended reads as Expired, and the disagreement is surfaced. That is correct: the
+city's status column lags, and a stale "Active" would read as a sitting tenant.
+
+**One coherent "latest" record per business.** The code picks a single term key (expiry preferred,
+issued as fallback) and takes status and expiry together, so an old status is never paired with a new
+term. There is a comment saying exactly this. Do not refactor it away.
+
+---
+
+## 3. Pull it out into its own section
+
+Add `businessLicenses` to `ACC_DEFAULT_ORDER` (1049) and lift 9828–9946 out of the Property Overview
+subtree into its own `<AccordionSection {...accProps("businessLicenses")}>`. Add a `ACC_CUSTOM_META`
+entry:
+
+```js
+businessLicenses: {
+  title: "Business Licenses",
+  summary: "Every business ever licensed at this address.",
+  info: ["City of Chicago license records", "Operator, term and license class", "Active, expired and revoked"]
+},
+```
+
+Retitle it **Business Licenses**. "History" is redundant once the section leads with a date range,
+and it reads as an archive rather than a finding.
+
+---
+
+## 4. The trigger row
+
+**Takeaway** — the finding, not the category:
+
+> Five businesses since 1989 — one active, and a tavern that ran here 30 years.
+
+Build it from the data: `{n} businesses since {sinceYear} — {active} active`, then append the
+longest-tenancy clause only when the longest tenancy exceeds 10 years — naming the operator and its
+license class, because that is what the record says. **Never print a count that was not derived from
+the records.**
+
+**Badge** — `{n} RECORDS · {m} ACTIVE`, indigo. A license count is a state, not a verdict.
+
+**Verdict tone** — `context` (slate left border). This section reports; it does not grade.
+
+---
+
+## 5. Three hero blocks
+
+Reuse `.kyp-blocks` / `.kyp-block`. No `.bclaim` chips — nothing here is a seller claim.
+
+| # | Class | `.bv` | `.bl` | `.bd` |
+|---|---|---|---|---|
+| 1 | `ind` | `{groups.length}` | `Businesses licensed here` | `Since {sinceYear} — {n} years of city record, deduplicated by operator` |
+| 2 | `grn` / `orange` | `{bizActiveCount}` | `Holding a license today` | name + expiry, or the vacancy sentence |
+| 3 | `ind` | `{longestYears}` | `Years — longest tenancy` | `{name}, {from}–{to}` + one clause on churn |
+
+**Block 2 takes a verdict, deliberately.** Green when `bizActiveCount ≥ 1`, **orange when 0** — and
+the words must carry it: `No license in force. The commercial space is unlicensed today.` Zero active
+licenses at a mixed-use address means the storefront is producing nothing, which is a watch item for
+anyone underwriting in-place income. This is a considered exception to "a state is not a verdict";
+if you disagree, make it `slate`, not amber.
+
+**Blocks 1 and 3 are indigo.** They are counts, not judgements.
+
+⚠️ **Fall back to two blocks, then one full-width** when a figure cannot be computed — never one
+block at a third width. Same rule as Step 9c.
+
+---
+
+## 6. Each license record → `.kyp-permit`
+
+**Reuse `.kyp-permit`. Do not invent a new card.** A license is a dated public record with a status,
+a class and a term — structurally identical to a permit, which is what that component already
+renders. It ships `.ph` / `.pscope` / `.pcost` / `.ptags` / `.ptag` / `.pmeta` / `.pml` / `.pmv`.
+
+> **Naming debt, noted not fixed.** The component is called `kyp-permit` and this section is not
+> permits. Renaming it to something neutral touches the Permits section too, so it is a separate
+> refactor. Do not duplicate 15 rules under a new name to avoid the awkwardness.
+
+```html
+<div class="kyp-permit {good|bad|''}">
+  <div class="ph">
+    <span class="pscope">{businessName}</span>
+    <span class="pcost">{tenureYears}<u>yrs</u></span>
+  </div>
+  <div class="ptags">
+    <span class="ptag {good|bad|''}">{effectiveLabel}</span>
+    <span class="kyp-liccat">{licenseType}</span>   <!-- one per type -->
+  </div>
+  <div class="pmeta">
+    <div><div class="pml">Term</div><div class="pmv">{from} – {to}</div></div>
+    <div><div class="pml">City status</div><div class="pmv dim">{code} — {agrees|contradicts}</div></div>
+    <!-- both optional, render only when true -->
+    <div><div class="pml">Records merged</div><div class="pmv dim">{n} — the spellings</div></div>
+    <div><div class="pml">Licenses held</div><div class="pmv dim">{n} across {years} years</div></div>
+  </div>
+</div>
+```
+
+| `effectiveStatus` | card class | `.ptag` class | reads |
+|---|---|---|---|
+| `active` | `good` | `good` | `Active` |
+| `expired` | *(none — slate)* | *(none)* | `Expired` |
+| `cancelled`, code `REV` | `bad` | `bad` | `Revoked` |
+| `cancelled`, code `AAC`/`INV` | *(none — slate)* | *(none)* | the city's `statusLabel` |
+
+**Revoked gets red and cancelled does not.** A license the city ended for cause is a different fact
+from one the holder let go. `AAC` is usually a voluntary surrender; do not paint it as a finding.
+
+**`.kyp-liccat` already exists** and is already used by the 1-mile section for license-class tags.
+Use it here instead of `.bzl-type` — the two sections then speak the same language, which is the
+point of the step.
+
+**Order:** unchanged — sort descending by `latestExpiry || earliestIssued`, so anything live sits
+above anything lapsed. The existing comment explains it; keep the comment.
+
+---
+
+## 7. Fix the grouping key
+
+```js
+const norm = (s) => (s || '')
+  .toUpperCase()
+  .replace(/[.,]/g, ' ')
+  .replace(/\b(INC|LLC|L L C|CORP|CO|LTD|LP|LLP|COMPANY|INCORPORATED)\b/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+const key = norm(rec.businessName);
+```
+
+Keep the **longest** original spelling as the display name, and count the distinct raw spellings so
+the card can show `Records merged: 2`. **Surface the merge — never merge silently.** A reader who
+counted five rows in the city portal and sees four here needs to know why.
+
+⚠️ This changes `groups.length`, `bizActiveCount` and the longest tenancy. That is the fix, not a
+regression — but it means the headline numbers move, so eyeball one known property before shipping.
+
+---
+
+## 8. No subheads, and nothing trailing the records
+
+**This section has one substantive panel.** Subheads exist to divide; there is nothing here to
+divide. The record list runs directly under the three blocks, with no `.kyp-subhead` anywhere.
+
+**Nothing follows the records except one source line.** Three things that were in an earlier draft
+of this spec are cut, and should not come back:
+
+| Cut | Why |
+|---|---|
+| `.kyp-note` restating the status discrepancy | The card already says `AAI — contradicts the term; we show the term`. A paragraph repeating it is duplication. |
+| `.kyp-method` explaining status derivation | Compressed to one clause in the source line. The card shows the city code and our verdict side by side; the reader can see the rule being applied. |
+| Any reasoning about future licensing | §8.1 |
+
+The old `.bzl-caveat` is therefore **cut, not reworded** — its content now lives on the card that
+triggers it, which is where a caveat about one record belongs.
+
+### 8.1 What this section does not do
+
+**It does not say what could be licensed here next.** This is a record of what was approved at this
+address and when. Whether a new operator could obtain a license turns on the precinct vote-dry
+rolls, moratorium coverage and distance to schools, churches and other licensed premises — none of
+which this dataset contains and none of which we have checked. Do not add a paragraph reasoning
+about it, and do not let the copy imply it.
+
+The license classes are still on the record cards as `.kyp-liccat` tags, which is the honest form of
+that information: **a tavern license operated here from 1989 to 2019** is a fact. What it means for
+your plans is not this section's question.
+
+---
+
+## 9. One source line, carrying the method
+
+`.kyp-src`, and nothing else after the records:
+
+> Source: City of Chicago Business Licenses (r5kz-chrr), matched on the address of record · read
+> {date}. Status is read from the license term, not the city's status field, which lags; records are
+> grouped by operator, so a legal suffix does not split one tenant in two.
+
+Two sentences. It names the dataset, dates the read, and states the only two methodology facts a
+reader cannot infer from the cards — that we override the city's status field, and that we merge
+records. Do not expand it.
+
+---
+
+## 10. The empty state
+
+Follow Step 9c's `not_found` pattern exactly. When `bizLicenseGroups.length === 0`:
+
+- **Render no body**, pass `collapsible={false}` on `AccordionSection` (the prop added in the 9c delta).
+- **Badge:** `NONE ON RECORD`, indigo.
+- **Takeaway:** `No business license has ever been issued at this address.`
+
+That is a real finding, not an absence — on a property marketed as formerly-commercial, it
+contradicts the pitch. Do not suppress the row: a missing section reads as broken, and the negative
+is worth stating.
+
+---
+
+## 11. Every label and field
+
+**Static labels — 4 rendered today, all accounted for.**
+
+| Label today | Destination |
+|---|---|
+| `Business License History` | **Renamed** → `Business Licenses`, now an accordion eyebrow |
+| `Takeaway` (+ `.crm-take` box) | **Cut.** Replaced by the trigger-row takeaway and the three blocks. The box was borrowed from the Crime section; the accordion row is where a takeaway belongs now. |
+| `One active today.` / `No active licenses today.` / `{n} active today.` | **Moved** → block 2's `.bd` |
+| `The others have lapsed — …` | **Cut.** It named every lapsed business in a sentence; the records below list them with their terms. Restating them is duplication. |
+| `Status shown reflects the license term dates.` | **Cut as a block.** Its content moves onto the card it describes: `City status: AAI — contradicts the term; we show the term`. The amber goes with it. |
+| `No business license records found for this address.` | **Moved** → §10, the static-row takeaway |
+| `{n} total · {m} active` (count chip) | **Moved** → the accordion badge |
+
+**Record and group fields — 15 read today, all accounted for.**
+
+| Field | Destination |
+|---|---|
+| `businessName` | `.pscope`; **now normalised** for the group key (§7) |
+| `licenseType` / `licenseTypes` | `.kyp-liccat` tags, one per class |
+| `issuedDate` / `earliestIssued` | `.pmeta` Term start; drives `sinceYear` and tenancy |
+| `expirationDate` / `latestExpiry` | `.pmeta` Term end; drives sort and effective status |
+| `status` / `latestStatus` | `.pmeta` City status — **now shown**, previously only used to compute `discrepancy` |
+| `statusLabel` / `latestStatusLabel` | `.ptag` text for `AAC`/`INV`; `.pmeta` for the discrepancy line |
+| `latestTermKey` | internal, unchanged |
+| `effectiveStatus` | card + `.ptag` class |
+| `effectiveLabel` | `.ptag` text |
+| `discrepancy` | `.pmeta` City status wording on that card — `contradicts the term; we show the term` |
+
+**Derived counts — 6, all accounted for.** `bizLicenseGroups.length` → block 1 and badge ·
+`bizActiveCount` → block 2 and badge · `sinceYear` → block 1 · `total` / `single` → takeaway
+construction.
+
+⚠️ **`bizDiscrepancyCount` (3481) loses its only consumer.** It existed to gate the `.bzl-caveat`
+block, which §8 cuts. The per-record `discrepancy` flag now drives the wording on its own card, so
+the aggregate count is dead. **Delete the line** rather than leaving an unused computation behind.
+
+**New, derived from fields already read:** longest tenancy (block 3), license count per operator,
+distinct-spelling count. **No new API call.**
+
+**Cut: 3.** The `.crm-take` box, the lapsed-business sentence and the `.bzl-caveat` block — the last one relocated onto the card rather than deleted outright.
+**Nothing else is dropped.**
+
+---
+
+## 12. One open question for you
+
+`@shared/businessLicenses` exports `groupLicenseEstablishments` and a `comboLabel` classifier
+(`Retail Food`, `Liquor / Tavern`, and combinations) that the 1-mile section already uses to render
+short license-class labels. **I have not seen that file.**
+
+Raw `licenseType` strings are long — `Retail Food Establishment`, `Liquor - Consumption on Premises`
+— and will wrap badly in a `.kyp-liccat` tag. If that classifier accepts address-scoped records, use
+it for the tag labels so both sections name license classes the same way. Send
+`shared/businessLicenses.ts` and `client/src/hooks/use-runs.ts` and I will rewrite §6 and §7 against
+the real shapes. Until then, truncate sensibly and keep the full string in a `title` attribute.
+
+---
+
+## ✅ Done-when
+
+- [ ] `businessLicenses` is in `ACC_DEFAULT_ORDER` with `ACC_CUSTOM_META`; the subsection at 9828 is gone.
+- [ ] Zero `bzl-`, `crm-` or `seccard` classes remain in the section. **Zero amber.**
+- [ ] Three blocks, falling back to two then one full-width — never one at a third width.
+- [ ] Each record is a `.kyp-permit`; license types are `.kyp-liccat`.
+- [ ] `REV` renders red and `AAC` does not.
+- [ ] The grouping key is normalised, and any merge is disclosed on the card.
+- [ ] **No `.kyp-subhead` in the section at all** — one panel, nothing to divide.
+- [ ] No copy anywhere reasons about whether a new license could be obtained here.
+- [ ] **Nothing follows the record list but one `.kyp-src` line** — no note, no method block.
+- [ ] Empty state is a static row with `collapsible={false}`, indigo `NONE ON RECORD`.
+- [ ] Effective-status derivation and the one-coherent-latest-record logic are unchanged.
+- [ ] `bizDiscrepancyCount` is deleted, not orphaned.
+- [ ] 3 CSS rules appended. All 4 labels and 15 fields have a destination; the only cuts are the 3 in §11.
