@@ -196,7 +196,6 @@ async function seedTeamAccounts() {
 (async () => {
   const { pool } = await import("./db");
   await ensureSessionTable(pool).catch(err => log(`Session table init error: ${err.message}`, 'express'));
-  setupAuth(app);
 
   // One-time browser-cache purge for clients stuck on a stale cached bundle.
   // This must run for the document request itself, not only /api: a broken
@@ -226,13 +225,15 @@ async function seedTeamAccounts() {
     }
   }
 
+  // Public pages must not depend on the session store: a transient database
+  // outage should not turn the homepage (or deployment health check) into a 500.
+  if (process.env.NODE_ENV === "production") serveStatic(app, true);
+  setupAuth(app);
   registerAuthRoutes(app);
   await seedTeamAccounts();
   await registerRoutes(httpServer, app).catch(err => log(`Route registration error: ${err}`, 'express'));
 
-  if (process.env.NODE_ENV === "production") {
-    serveStatic(app);
-  } else {
+  if (process.env.NODE_ENV !== "production") {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }
