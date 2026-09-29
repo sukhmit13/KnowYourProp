@@ -5,7 +5,7 @@ type SectionMeta = Pick<ScanSection, "id" | "anchorId" | "title" | "summary" | "
 
 export const SECTION_ORDER = [
   "overview", "historic", "countyRecord", "permits", "ownership", "zoning", "valuation", "debt", "market", "transit", "newBusinessLicenses", "newConstruction",
-  "crime", "proximity", "corridor", "development", "people", "incentives", "news",
+  "crime", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news",
 ] as const;
 
 export const SECTION_META: Record<string, SectionMeta> = {
@@ -29,7 +29,7 @@ export const SECTION_META: Record<string, SectionMeta> = {
     info: ["Deal inputs — price & financing", "Income → NOI statement", "Cap rate & cash flow", "DSCR coverage", "Market rents (RentCast)", "Short-term rental (Airbnb)"] },
   ownership: { id: "ownership", anchorId: "section-ownership", title: "Ownership & Title",
      summary: "Sale history, recorded debt, liens, and title status.",
-     info: ["Chain of title", "Debt on title", "Title claims and filings", "Current owner & entity"] },
+     info: ["Chain of title", "Debt on title", "Title claims and filings", "Owner-name lien search", "Current owner & entity"] },
   debt: { id: "debt", anchorId: "print-section-pre-title-check", title: "Pre-Title Check",
      summary: "Property tax, financing readiness, and closing flags.",
      info: ["Property tax, exemptions & appeals", "Financing readiness", "Closing flags"] },
@@ -48,9 +48,15 @@ export const SECTION_META: Record<string, SectionMeta> = {
   crime: { id: "crime", anchorId: "section-crime", title: "Safety & Crime",
     summary: "Area crime levels, percentile vs the city, and trend.",
     info: ["Area crime statistics", "Tract percentile vs city", "Trend over time"] },
-  proximity: { id: "proximity", anchorId: "print-section-proximity-details", title: "Proximity & Amenities",
-    summary: "Parks, schools, hospitals, dining and other amenities.",
-    info: ["Proximity grid: parks, hospital, stadium, lake", "Rated schools", "Grocery access", "Dining (Michelin + notable)", "Landmarks & culture", "Vacant / city-owned nearby"] },
+  proximity: { id: "proximity", anchorId: "print-section-proximity-details", title: "Proximity",
+    summary: "Nearby parks, hospitals, landmarks of daily life, and vacant buildings.",
+    info: ["Nearest park, hospital, university and stadium", "Nearest highway, bike trail and lake", "Vacant buildings, land and foreclosures"] },
+  schools: { id: "schools", anchorId: "print-section-schools-daycare", title: "Schools & Childcare",
+    summary: "Licensed childcare supply and CPS schools within the nearby search radius.",
+    info: ["Childcare supply by ZIP or neighborhood", "Elementary, middle and high schools within 1.5 miles", "Attendance-boundary status of each school, not address assignment"] },
+  entCulture: { id: "entCulture", anchorId: "print-section-entertainment-culture", title: "Entertainment & Culture",
+    summary: "Michelin and James Beard dining, murals, landmarks and galleries within a mile.",
+    info: ["Michelin Guide and James Beard restaurants", "Registered murals and architectural landmarks", "Licensed art galleries"] },
   corridor: { id: "corridor", anchorId: "print-section-neighborhood-news", title: "Corridor Intelligence",
     summary: "New businesses and news on the nearby commercial corridors.",
     info: ["New business licenses on the corridor", "Corridor news coverage", "Neighborhood news"] },

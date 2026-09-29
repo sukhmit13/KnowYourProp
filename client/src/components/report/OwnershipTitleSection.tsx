@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { KypSubhead } from "@/components/report/AccordionSection";
+import { OwnerLiensSection } from "./OwnerLiensSection";
 
 // ---- Sale History derivation (spec: every flag computed in code, not an LLM) ----
 // Pure, exported helper carrying forward the proven saleVM/decoratedVM logic from the
@@ -415,7 +416,7 @@ const maturityRunway = (mortgage: any, isCleared: boolean): { progress: number; 
   };
 };
 
-export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, isDebtSnapshotFetched, lienDistress, isLoadingLiens, relatedParcels = [], address, saleDerivation }: {
+export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, isDebtSnapshotFetched, lienDistress, isLoadingLiens, relatedParcels = [], address, saleDerivation, pin, city }: {
   pinLookupData?: any;
   lienData?: any;
   debtSnapRec?: any;
@@ -425,6 +426,8 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
   relatedParcels?: any[];
   address?: string;
   saleDerivation?: SaleHistoryDerivation;
+  pin?: string | null;
+  city?: string | null;
 }) {
   // Proven sale derivation (recorder+CCAO dedupe, truncated-price correction, timezone-safe
   // date parsing, approx flags, provenance, shared-deed, non-arm's-length flags, sorted journey).
@@ -884,6 +887,13 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
             : <div className="kyp-status-empty unknown">{isLoadingLiens ? "Recorder instruments are loading." : "No other Recorder instruments were returned for this PIN."}</div>}
         </div>
       </details>
+      <OwnerLiensSection
+        pin={pin || pinLookupData?.pin || lienData?.pin || null}
+        city={city}
+        lienData={lienData}
+        DocRefComponent={DocRef}
+        subsection={(showTimeline ? (historicalLiens.length > 0 ? 6 : 5) : (historicalLiens.length > 0 ? 5 : 4)) + 1}
+      />
       <div className="kyp-src">
         Sources: Cook County Assessor transfer records and Cook County Recorder instruments. Sale prices are declared transfer amounts. Loan amounts are original recorded principal, not balances; positions and refinance relationships are inferred from recording evidence and must be confirmed at title.
       </div>

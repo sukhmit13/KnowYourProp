@@ -1269,7 +1269,7 @@ export default function RunDetail() {
 
   // ---- Step 5 accordion state: order / hidden / open (persisted per run) ----
   const ACC_PREVIOUS_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "businessLicenses", "ownership", "propertyTax", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
-  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "businessLicenses", "valuation", "listing", "crime", "transit", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "proximity", "corridor", "development", "people", "incentives", "news"];
+  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "businessLicenses", "valuation", "listing", "crime", "transit", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
@@ -2075,8 +2075,8 @@ export default function RunDetail() {
   const isDaycare = selectedProjectType === 'Day Care Center';
   const isDaycareOrSchool = isDaycare || selectedProjectType === 'School (Private)';
   // Childcare access fetches for EVERY search (also shown under Schools → Day Care for primary-residence buyers)
-  const { data: childcareData, isLoading: isLoadingChildcare } = useChildcareAccess(facts?.zipCode);
-  const { data: communityChildcareData, isLoading: isLoadingCommunityChildcare } = useCommunityAreaChildcareAccess(facts?.communityArea);
+  const { data: childcareData, isLoading: isLoadingChildcare, isError: isChildcareError } = useChildcareAccess(facts?.zipCode);
+  const { data: communityChildcareData, isLoading: isLoadingCommunityChildcare, isError: isCommunityChildcareError } = useCommunityAreaChildcareAccess(facts?.communityArea);
   const { data: childcareEnhancedData, isLoading: isLoadingChildcareEnhanced } = useChildcareEnhancedData(isDaycareOrSchool ? facts?.communityArea : undefined);
   const { data: childcareEnhancedZipData, isLoading: isLoadingChildcareEnhancedZip } = useChildcareEnhancedZipData(isDaycareOrSchool ? facts?.zipCode : undefined);
   const { data: childcareCapacityData, isLoading: isLoadingCapacity } = useChildcareCapacity(isDaycareOrSchool ? facts?.communityArea : undefined);
@@ -2660,27 +2660,27 @@ export default function RunDetail() {
     setTimeout(() => revealAnchor(document.getElementById('asmb-double-lot') ? 'asmb-double-lot' : 'section-ownership'), 100);
   }, [revealAnchor]);
 
-  const { data: michelinData, isLoading: isLoadingMichelin } = useMichelinNearby(
+  const { data: michelinData, isLoading: isLoadingMichelin, isError: isMichelinError } = useMichelinNearby(
     geocode.data?.lat,
     geocode.data?.lon
   );
 
-  const { data: jbaData, isLoading: isLoadingJBA } = useJBANearby(
+  const { data: jbaData, isLoading: isLoadingJBA, isError: isJBAError } = useJBANearby(
     geocode.data?.lat,
     geocode.data?.lon
   );
 
-  const { data: muralsData, isLoading: isLoadingMurals } = useMuralsNearby(
+  const { data: muralsData, isLoading: isLoadingMurals, isError: isMuralsError } = useMuralsNearby(
     geocode.data?.lat,
     geocode.data?.lon
   );
 
-  const { data: artGalleriesData, isLoading: isLoadingArtGalleries } = useNearbyArtGalleries(
+  const { data: artGalleriesData, isLoading: isLoadingArtGalleries, isError: isArtGalleriesError } = useNearbyArtGalleries(
     geocode.data?.lat,
     geocode.data?.lon
   );
 
-  const { data: designatedLandmarksData, isLoading: isLoadingDesignatedLandmarks } = useDesignatedLandmarksNearby(
+  const { data: designatedLandmarksData, isLoading: isLoadingDesignatedLandmarks, isError: isDesignatedLandmarksError } = useDesignatedLandmarksNearby(
     geocode.data?.lat,
     geocode.data?.lon
   );
@@ -2952,7 +2952,7 @@ export default function RunDetail() {
   const { data: upcomingDevsData, isLoading: isLoadingUpcomingDevs } = useUpcomingDevelopments((facts as any)?.neighborhood ?? undefined, facts?.communityArea ?? undefined, facts?.lat, facts?.lon ?? undefined, upcomingRadiusMi);
   const { data: hmdaData, isLoading: isLoadingHmda } = useHmdaStats(facts?.tractGeoid, facts?.communityArea);
   const { data: transactionTrendsData, isLoading: isLoadingTransactionTrends } = useTransactionTrends(facts?.zipCode);
-  const { data: schoolsData, isLoading: isLoadingSchools } = useSchoolsNearby(facts?.lat, facts?.lon);
+  const { data: schoolsData, isLoading: isLoadingSchools, isError: isSchoolsError } = useSchoolsNearby(facts?.lat, facts?.lon);
   const { data: sbaLoansData, isLoading: isLoadingSBALoans, isError: isSBALoansError, refetch: refetchSBALoans } = useSBALoans(facts?.zipCode);
   const compPropertyClass = propertyTaxData?.propertyClass || pinLookupData?.characteristicsData?.propertyClass;
 
@@ -3907,6 +3907,9 @@ export default function RunDetail() {
     zoningHistory: { title: "Zoning History", summary: "Recorded City Council and Zoning Board actions for this parcel.", info: ["City Council filings", "Zoning Board decisions", "Filing documents and named professionals"] },
     analysis: { title: "Project Use Analysis", summary: "Deep-dive analysis for your selected use.", info: ["Demand & demographics for your use", "Nearby competitors", "Use-specific estimators"] },
     potential: { title: "Development Potential", summary: "FAR, buildable envelope and rental potential.", info: ["FAR & buildable envelope", "Market rents (RentCast)", "Short-term rental (Airbnb)", "Commercial listings"] },
+    proximity: { title: "Proximity", summary: "Distances and nearby property conditions around this address.", info: ["Nearby destinations", "Vacant and abandoned buildings", "Data sources and search radii"] },
+    schools: { title: "Schools & Childcare", summary: "Nearby childcare resources and CPS schools within 1.5 miles.", info: ["INCCRRA childcare supply", "Chicago Public Schools", "Attendance boundaries are not yet checked against this address"] },
+    entCulture: { title: "Entertainment & Culture", summary: "Dining recognition, murals, landmarks and galleries within 1 mile.", info: ["Michelin Guide", "James Beard Foundation", "Chicago Mural Registry", "Chicago Landmarks", "Chicago business licences"] },
     historic: { title: "Historic Status", summary: "Chicago Historic Resources Survey rating and designation signals.", info: ["CHRS survey rating", "Municipal designation signals", "Demolition-hold rule", "Credit eligibility requirements"] },
     countyRecord: { title: "COUNTY RECORD", summary: "Cook County Assessor and Treasurer record for the subject parcel.", info: ["Parcel and structure facts", "Recorded unit configuration", "Assessor valuation inputs", "PIN and source links"] },
     propertyTax: { title: "Property Taxes", summary: "What this parcel is billed, assessed at, exempt from and has appealed.", info: ["Cook County Treasurer billing", "Assessor values and assessment history", "Board of Review appeals and outcomes"] },
@@ -4122,8 +4125,8 @@ export default function RunDetail() {
   const accProps = (rowId: string) => {
     const scan = accScanSections.find((s) => s.id === rowId);
     const custom = ACC_CUSTOM_META[rowId];
-    const title = scan?.title || custom?.title || rowId;
-    const summary = scan?.summary || custom?.summary || "";
+    const title = custom?.title || scan?.title || rowId;
+    const summary = custom?.summary || scan?.summary || "";
     const verdict: "good" | "watch" | "context" =
       scan?.verdict?.tone === "good" ? "good" : scan?.verdict?.tone === "attention" ? "watch" : "context";
     const pos = accOrder.indexOf(rowId);
@@ -4132,7 +4135,7 @@ export default function RunDetail() {
       index: (pos < 0 ? accOrder.length : pos) + 1,
       order: (pos < 0 ? accOrder.length : pos) + 1,
       eyebrow: title,
-      takeaway: rowId === "zoning" ? zoningTakeaway : rowId === "propertyTax" ? propertyTaxTakeaway : rowId === "listing" ? listingTakeaway : rowId === "businessLicenses" ? businessLicensesTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : scan?.takeaway ?? summary,
+      takeaway: rowId === "zoning" ? zoningTakeaway : rowId === "propertyTax" ? propertyTaxTakeaway : rowId === "listing" ? listingTakeaway : rowId === "businessLicenses" ? businessLicensesTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : rowId === "proximity" || rowId === "schools" || rowId === "entCulture" ? summary : scan?.takeaway ?? summary,
       verdict: rowId === "businessLicenses" ? "context" as const : verdict,
       badge: rowId === "zoning" ? zoningPermission === 'permitted' ? 'BY-RIGHT' : zoningPermission === 'special_use' ? 'SPECIAL USE' : zoningPermission ? 'REZONING' : facts?.zoning || undefined : rowId === "propertyTax" ? propertyTaxBadge : rowId === "listing" ? listingBadge : rowId === "businessLicenses" ? businessLicensesBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
       badgeTone: rowId === "zoning"
@@ -4214,7 +4217,7 @@ export default function RunDetail() {
           { label: 'Ownership & Title', icon: History, action: () => { setAccHidden((m) => ({ ...m, ownership: false })); setAccOpen((m) => ({ ...m, ownership: true })); return 'section-ownership'; } },
           { label: 'Property Tax Records', icon: Receipt, action: () => { setAccOpen((m) => ({ ...m, propertyTax: true })); return 'section-propertyTax'; } },
           { label: 'Pre-Title Check', icon: AlertTriangle, action: () => { setSectionOpen('preTitleCheck', true); return 'print-section-pre-title-check'; } },
-          { label: 'Lien Search', icon: Lock, action: () => { setSectionOpen('preTitleCheck', true); return 'print-section-pre-title-check'; } },
+          { label: 'Lien Search', icon: Lock, action: () => { setAccHidden((m) => ({ ...m, ownership: false })); setAccOpen((m) => ({ ...m, ownership: true })); return 'owner-liens'; } },
           { label: 'Area Transaction Trends', icon: BarChart3, action: () => { setSectionOpen('preTitleCheck', true); setSectionOpen('transactionTrends', true); return 'print-section-pre-title-check'; } },
           { label: 'Local Mortgage Market (HMDA)', icon: TrendingUp, action: () => { setSectionOpen('preTitleCheck', true); setSectionOpen('hmdaStats', true); return 'print-section-pre-title-check'; } },
           { label: 'SBA Commercial Loans', icon: CreditCard, action: () => { setSectionOpen('preTitleCheck', true); setSectionOpen('sbaLoans', true); return 'print-section-pre-title-check'; } },
@@ -4224,8 +4227,8 @@ export default function RunDetail() {
           { label: 'Demographics & Population', icon: Users, action: () => { setSectionOpen('demographics', true); return 'print-section-demographics'; } },
           { label: 'Crime Statistics', icon: AlertTriangle, action: () => 'section-crime' },
           { label: 'Election & Voting Data', icon: Vote, action: () => { setSectionOpen('voting', true); return 'print-section-political'; } },
-          { label: 'Schools Nearby', icon: GraduationCap, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('schools', true); return 'section-schools'; } },
-          { label: 'Day Care / Childcare Access', icon: Baby, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('schools', true); return 'print-section-schools-daycare'; } },
+          { label: 'Schools Nearby', icon: GraduationCap, action: () => { setAccOpen((m) => ({ ...m, schools: true })); setSectionOpen('schools', true); return 'print-section-schools-daycare'; } },
+          { label: 'Day Care / Childcare Access', icon: Baby, action: () => { setAccOpen((m) => ({ ...m, proximity: true, schools: true })); setSectionOpen('schools', true); return 'print-section-schools-daycare'; } },
           ...(isDaycareOrSchool ? [
             { label: 'Childcare Access (Project Analysis)', icon: Baby, action: () => { setSectionOpen('projectTypeInfo', true); setSectionOpen('childcareAccess', true); return 'print-section-childcare'; } },
             { label: 'Childcare Demographics', icon: Users, action: () => { setSectionOpen('projectTypeInfo', true); setSectionOpen('childcareDemographics', true); return 'print-section-childcare-demographics'; } },
@@ -4235,10 +4238,10 @@ export default function RunDetail() {
           { label: 'Upcoming Real Estate Developments', icon: HardHat, action: () => { setSectionOpen('upcomingDevelopments', true); return 'print-section-upcoming-developments'; } },
           { label: 'ZBA Activity', icon: Gavel, action: () => { setSectionOpen('upcomingDevelopments', true); setSectionOpen('zbaActivitySub', true); return 'print-section-upcoming-developments'; } },
             { label: 'New Construction', icon: HardHat, action: () => 'section-newConstruction' },
-          { label: 'Neighborhood Amenities', icon: Star, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('entertainment', true); return 'section-entertainment'; } },
-          { label: 'Michelin Star Restaurants', icon: Star, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('entertainment', true); return 'ec-michelin'; } },
-          { label: 'Public Art & Murals', icon: Palette, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('entertainment', true); return 'ec-murals'; } },
-          { label: 'Designated Landmarks Nearby', icon: Landmark, action: () => { setSectionOpen('proximityDetails', true); setSectionOpen('entertainment', true); return 'ec-landmarks'; } },
+          { label: 'Neighborhood Amenities', icon: Star, action: () => { setSectionOpen('entertainment', true); setAccOpen((m) => ({ ...m, entCulture: true })); return 'print-section-entertainment-culture'; } },
+          { label: 'Michelin Star Restaurants', icon: Star, action: () => { setAccOpen((m) => ({ ...m, entCulture: true })); setSectionOpen('entertainment', true); return 'ec-michelin'; } },
+          { label: 'Public Art & Murals', icon: Palette, action: () => { setAccOpen((m) => ({ ...m, entCulture: true })); setSectionOpen('entertainment', true); return 'ec-murals'; } },
+          { label: 'Designated Landmarks Nearby', icon: Landmark, action: () => { setAccOpen((m) => ({ ...m, entCulture: true })); setSectionOpen('entertainment', true); return 'ec-landmarks'; } },
           { label: 'Area News', icon: Newspaper, action: () => { setSectionOpen('addressNews', true); return 'print-section-address-news'; } },
           { label: 'Neighborhood News', icon: Newspaper, action: () => { setSectionOpen('neighborhoodNews', true); return 'print-section-neighborhood-news'; } },
           { label: 'LoopNet Listings', icon: Building, action: () => { setSectionOpen('developmentPotential', true); setSectionOpen('loopnetSection', true); return 'section-loopnet'; } },
@@ -13583,6 +13586,167 @@ export default function RunDetail() {
               </motion.div>
             );
           })()}</>)}
+          <KypSubhead subsection={buildSubsectionNumbers([["cityOwnedLots", true]]).cityOwnedLots}>
+            <span className="lbl">City-Owned Lots</span>
+            <span className="ct">City acquisition opportunities nearby</span>
+            <span className="rule" />
+          </KypSubhead>
+          <Collapsible open={isCityOwnedLotsOpen} onOpenChange={setIsCityOwnedLotsOpen}>
+            <CollapsibleTrigger asChild>
+              <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
+                <h3 className="chead chead-icon">
+                  <Building2 className="w-4 h-4" />
+                  City-Owned Lots
+                </h3>
+                <div className="flex items-center gap-2">
+                  {!isCityOwnedLotsOpen && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {isLoadingCityOwnedLots ? (
+                        <Badge variant="secondary" className="text-xs">Loading...</Badge>
+                      ) : cityOwnedLotsData ? (
+                        cityOwnedLotsData.count > 0 ? (
+                          <>
+                            <Badge variant="secondary" className="text-xs">
+                              {cityOwnedLotsData.count} within &frac12; mi
+                            </Badge>
+                            {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length > 0 && (
+                              <Badge variant="default" className="text-xs">
+                                {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length} within &frac14; mi
+                              </Badge>
+                            )}
+                            {cityOwnedLotsData.lots.some(l => l.salesStatus === 'For Sale') && (
+                              <Badge className="text-xs bg-green-600 text-white border-green-600">For Sale Available</Badge>
+                            )}
+                          </>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">None within &frac12; mi</Badge>
+                        )
+                      ) : (
+                        <Badge variant="secondary" className="text-xs">Not Available</Badge>
+                      )}
+                    </div>
+                  )}
+                  <span className="text-muted-foreground text-sm">{isCityOwnedLotsOpen ? '▼' : '▶'}</span>
+                </div>
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="px-4 pb-4 space-y-4">
+                {isLoadingCityOwnedLots ? (
+                  <p className="text-sm text-muted-foreground">Loading city-owned lot data...</p>
+                ) : cityOwnedLotsData && cityOwnedLotsData.count > 0 ? (
+                  <>
+                    <div className="dir-facts dir-facts-4">
+                      <div className="dir-fact">
+                        <div className="dir-fact-top"><span className="dir-fact-icon"><MapPin className="w-3 h-3" /></span><span className="dir-fact-label">&frac14; Mile Lots</span></div>
+                        <p className="dir-fact-value">{cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length} lots</p><p className="dir-fact-qualifier">within ¼ mile</p>
+                      </div>
+                      <div className="dir-fact">
+                        <div className="dir-fact-top"><span className="dir-fact-icon"><MapPin className="w-3 h-3" /></span><span className="dir-fact-label">&frac12; Mile Lots</span></div>
+                        <p className="dir-fact-value">{cityOwnedLotsData.count} lots</p><p className="dir-fact-qualifier">within ½ mile</p>
+                      </div>
+                      <div className="dir-fact">
+                        <div className="dir-fact-top"><span className="dir-fact-icon"><Ruler className="w-3 h-3" /></span><span className="dir-fact-label">Nearest</span></div>
+                        <p className="dir-fact-value">{Math.round(cityOwnedLotsData.lots[0].distanceFt).toLocaleString()} ft away</p><p className="dir-fact-qualifier">closest city-owned lot</p>
+                      </div>
+                      <div className="dir-fact">
+                        <div className="dir-fact-top"><span className="dir-fact-icon"><Tag className="w-3 h-3" /></span><span className="dir-fact-label">For Sale</span></div>
+                        <p className="dir-fact-value">{cityOwnedLotsData.lots.filter(l => l.salesStatus === 'For Sale').length} lots</p><p className="dir-fact-qualifier">currently available</p>
+                      </div>
+                    </div>
+
+                    {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length > 0 && (
+                      <div className="space-y-2">
+                        <div className="lot-lbl">Within &frac14; Mile <span className="lot-pill">{cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length} lot{cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length !== 1 ? 's' : ''}</span></div>
+                        <div className="space-y-2">
+                          {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).map((lot, i) => (
+                            <div key={i} className="dir-row" data-testid={`city-lot-quarter-${i}`}>
+                              <div className="dir-row-body">
+                                <div className="dir-name-line">
+                                  <a
+                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((lot.address || '') + ', Chicago, IL')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="dir-name hover:underline"
+                                  >
+                                    {lot.address || 'Unknown Address'}
+                                  </a>
+                                  <span className={`lot-st ${(lot.saleOfferingStatus || lot.salesStatus) === 'For Sale' ? 'avail' : ''}`}>{lot.saleOfferingStatus || lot.salesStatus}</span>
+                                </div>
+                                <p className="dir-meta">
+                                  {Math.round(lot.distanceFt).toLocaleString()} ft away
+                                  {lot.zoning ? ` · Zoned ${lot.zoning}` : ''}
+                                  {lot.sqFt ? ` · ${lot.sqFt.toLocaleString()} sq ft` : ''}
+                                </p>
+                              </div>
+                              {(lot.landValue || lot.applicationUrl) && (
+                                <div className="flex flex-col items-end gap-0.5 flex-none text-right">
+                                  {lot.landValue && <span className="lot-val">City est. ${lot.landValue.toLocaleString()}</span>}
+                                  {lot.applicationUrl && (
+                                    <a href={lot.applicationUrl} target="_blank" rel="noopener noreferrer" className="lot-apply hover:underline">
+                                      <ExternalLink className="w-3 h-3" /> Apply
+                                    </a>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).length > 0 && (
+                      <div className="space-y-2">
+                        <div className="lot-lbl">&frac14; – &frac12; Mile <span className="lot-pill">{cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).length} lot{cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).length !== 1 ? 's' : ''}</span></div>
+                        <div className="space-y-2">
+                          {cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).map((lot, i) => (
+                            <div key={i} className="dir-row" data-testid={`city-lot-half-${i}`}>
+                              <div className="dir-row-body">
+                                <div className="dir-name-line">
+                                  <a
+                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((lot.address || '') + ', Chicago, IL')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="dir-name hover:underline"
+                                  >
+                                    {lot.address || 'Unknown Address'}
+                                  </a>
+                                  <span className={`lot-st ${(lot.saleOfferingStatus || lot.salesStatus) === 'For Sale' ? 'avail' : ''}`}>{lot.saleOfferingStatus || lot.salesStatus}</span>
+                                </div>
+                                <p className="dir-meta">
+                                  {Math.round(lot.distanceFt).toLocaleString()} ft away
+                                  {lot.zoning ? ` · Zoned ${lot.zoning}` : ''}
+                                  {lot.sqFt ? ` · ${lot.sqFt.toLocaleString()} sq ft` : ''}
+                                </p>
+                              </div>
+                              {(lot.landValue || lot.applicationUrl) && (
+                                <div className="flex flex-col items-end gap-0.5 flex-none text-right">
+                                  {lot.landValue && <span className="lot-val">City est. ${lot.landValue.toLocaleString()}</span>}
+                                  {lot.applicationUrl && (
+                                    <a href={lot.applicationUrl} target="_blank" rel="noopener noreferrer" className="lot-apply hover:underline">
+                                      <ExternalLink className="w-3 h-3" /> Apply
+                                    </a>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <p className="text-xs text-muted-foreground pt-2 border-t border-border">
+                      Source: City of Chicago Open Data — City-Owned Land Inventory (DPD)
+                    </p>
+                  </>
+                ) : cityOwnedLotsData && cityOwnedLotsData.count === 0 ? (
+                  <p className="text-sm text-muted-foreground">No city-owned lots found within &frac12; mile of this property.</p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Unable to load city-owned lot data.</p>
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
           </AccordionSection>
 
           {/* Property Proximity Details Section - Contains Crime Statistics and Proximity Info */}
@@ -13594,643 +13758,6 @@ export default function RunDetail() {
             transition={{ delay: 0.187 }}
           >
                   <div className="space-y-6">
-
-                    {/* ── Parcel Proximity Takeaway ── */}
-                    {(() => {
-                      // Crime bullet
-                      const crimeParts: string[] = [];
-                      if (crimeData?.quarterMile) {
-                        crimeParts.push(`${crimeData.quarterMile.totalCrimes.toLocaleString()} crimes (¼mi, 12mo)`);
-                      }
-                      if (crimeTractData?.violent && crimeTractData?.property) {
-                        crimeParts.push(`violent: safer than ${crimeTractData.violent.saferThanPercent}%${crimeTractData.perCapita ? ' per capita' : ''} · property: safer than ${crimeTractData.property.saferThanPercent}%${crimeTractData.trend?.yoyPercent != null ? ` · ${crimeTractData.trend.yoyPercent <= 0 ? 'down' : 'up'} ${Math.abs(crimeTractData.trend.yoyPercent)}% YoY` : ''}`);
-                      } else if (crimeTractData) {
-                        crimeParts.push(`safer than ${crimeTractData.saferThanPercent}% of Chicago community areas · ${crimeTractData.tier}`);
-                      }
-
-                      // Business licenses bullet
-                      const bizParts: string[] = [];
-                      if (nearbyLicensesData && nearbyLicensesData.totalCount > 0) {
-                        bizParts.push(`${nearbyLicensesData.totalCount} new licenses (1mi)`);
-                        const cats: string[] = [];
-                        const liquorN = nearbyLicensesData.licenses.filter((l: any) => l.licenseCategory === 'liquor').length;
-                        const foodN = nearbyLicensesData.licenses.filter((l: any) => l.licenseCategory === 'food').length;
-                        const entN = nearbyLicensesData.licenses.filter((l: any) => l.licenseCategory === 'entertainment').length;
-                        const mfgN = nearbyLicensesData.licenses.filter((l: any) => l.licenseCategory === 'manufacturing').length;
-                        if (foodN > 0) cats.push(`${foodN} food`);
-                        if (liquorN > 0) cats.push(`${liquorN} liquor`);
-                        if (entN > 0) cats.push(`${entN} entertainment`);
-                        if (mfgN > 0) cats.push(`${mfgN} manufacturing`);
-                        if (cats.length > 0) bizParts.push(cats.join(' · '));
-                      }
-
-                      // Michelin bullet
-                      const michelinAll = michelinData?.restaurants ?? [];
-                      const michelinHalf = michelinAll.filter((r: any) => r.distanceMiles <= 0.5).length;
-                      const michelinOuter = michelinAll.filter((r: any) => r.distanceMiles > 0.5).length;
-                      const michelinStarred = michelinAll.filter((r: any) => r.rating?.includes('Star')).length;
-                      const michelinTotal = michelinData?.total ?? 0;
-
-                      // JBA bullet
-                      const jbaAll = jbaData?.restaurants ?? [];
-                      const jbaHalf = jbaAll.filter((r: any) => r.distanceMiles <= 0.5).length;
-                      const jbaOuter = jbaAll.filter((r: any) => r.distanceMiles > 0.5).length;
-                      const jbaTotal = jbaData?.total ?? 0;
-
-                      const hasCrime = crimeParts.length > 0;
-                      const hasBiz = bizParts.length > 0;
-                      const hasMichelin = michelinTotal > 0;
-                      const hasJBA = jbaTotal > 0;
-
-                      if (!hasCrime && !hasBiz && !hasMichelin && !hasJBA) return null;
-
-                      const michelinDistLabel = (() => {
-                        if (michelinHalf > 0 && michelinOuter > 0) return `${michelinHalf} within ½mi · ${michelinOuter} within ½–1mi`;
-                        if (michelinHalf > 0) return `${michelinHalf} within ½mi`;
-                        return `${michelinOuter} within ½–1mi`;
-                      })();
-
-                      const jbaDistLabel = (() => {
-                        if (jbaHalf > 0 && jbaOuter > 0) return `${jbaHalf} within ½mi · ${jbaOuter} within ½–1mi`;
-                        if (jbaHalf > 0) return `${jbaHalf} within ½mi`;
-                        return `${jbaOuter} within ½–1mi`;
-                      })();
-
-                      return (
-                        <ul className="space-y-1.5 text-sm pb-3 border-b">
-                          {hasCrime && (
-                            <li className="flex items-start gap-2" data-testid="proximity-takeaway-crime">
-                              <span className="mt-0.5 shrink-0 text-muted-foreground">•</span>
-                              <span><strong>Crime:</strong> {crimeParts.join(' · ')}</span>
-                            </li>
-                          )}
-                          {hasBiz && (
-                            <li className="flex items-start gap-2" data-testid="proximity-takeaway-biz">
-                              <span className="mt-0.5 shrink-0 text-muted-foreground">•</span>
-                              <span><strong>Business License Activity:</strong> {bizParts.join(' · ')}</span>
-                            </li>
-                          )}
-                          {hasMichelin && (
-                            <li className="flex items-start gap-2" data-testid="proximity-takeaway-michelin">
-                              <span className="mt-0.5 shrink-0 text-muted-foreground">•</span>
-                              <span><strong>Michelin:</strong> {michelinDistLabel}{michelinStarred > 0 ? ` · ${michelinStarred} starred` : ''}</span>
-                            </li>
-                          )}
-                          {hasJBA && (
-                            <li className="flex items-start gap-2" data-testid="proximity-takeaway-jba">
-                              <span className="mt-0.5 shrink-0 text-muted-foreground">•</span>
-                              <span><strong>James Beard:</strong> {jbaDistLabel}</span>
-                            </li>
-                          )}
-                          {muralsData && muralsData.total > 0 && (
-                            <li className="flex items-start gap-2" data-testid="proximity-takeaway-murals">
-                              <span className="mt-0.5 shrink-0 text-muted-foreground">•</span>
-                              <span><strong>Murals:</strong> {muralsData.total} public mural{muralsData.total !== 1 ? 's' : ''} within 1mi</span>
-                            </li>
-                          )}
-                        </ul>
-                      );
-                    })()}
-
-                    {/* New Construction Activity Sub-section */}
-                    {false && <Collapsible id="section-new-construction" open={isNewConstructionSectionOpen} onOpenChange={setIsNewConstructionSectionOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                          <h3 className="chead chead-icon">
-                            <HardHat className="w-4 h-4" />
-                            New Construction Activity
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            {!isNewConstructionSectionOpen && !isLoadingNewConstruction && newConstructionData && (
-                              <div className="flex flex-wrap gap-1.5">
-                                {newConstructionData.communityArea && (
-                                  <Badge className="text-xs">
-                                    {newConstructionData.communityArea.totalPermits} in {newConstructionData.communityAreaName}
-                                  </Badge>
-                                )}
-                                {newConstructionData.zipCode && (
-                                  <Badge className="text-xs">
-                                    {newConstructionData.zipCode.totalPermits} in ZIP {newConstructionData.zip}
-                                  </Badge>
-                                )}
-                                {nearbyConstructionData && nearbyConstructionData.totalCount > 0 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {nearbyConstructionData.totalCount} within 1 mi
-                                  </Badge>
-                                )}
-                                {newConstructionData.communityArea && (
-                                  <Badge className={`text-xs ${
-                                    newConstructionData.communityArea.trendDirection === 'increasing' ? '' :
-                                    newConstructionData.communityArea.trendDirection === 'decreasing' ? '' :
-                                    ''
-                                  }`}>
-                                    {newConstructionData.communityArea.trendDirection === 'increasing' ? 'Trending Up' :
-                                     newConstructionData.communityArea.trendDirection === 'decreasing' ? 'Trending Down' : 'Stable'}
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isNewConstructionSectionOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="px-4 space-y-4">
-                          {isLoadingNewConstruction ? (
-                            <div className="space-y-2">
-                              <Skeleton className="h-4 w-3/4" />
-                              <Skeleton className="h-4 w-2/3" />
-                              <Skeleton className="h-4 w-1/2" />
-                            </div>
-                          ) : newConstructionData ? (
-                            <>
-                            {(() => {
-                              type NcCatKey = 'singleFamily' | 'multifamily' | 'commercial';
-                              const fmtNcMoney = (v: number) => v >= 1000000 ? `$${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `$${Math.round(v / 1000)}K` : `$${Math.round(v)}`;
-                              const startYear = newConstructionData.periodStart ? newConstructionData.periodStart.substring(0, 4) : '';
-                              const scope = newConstructionViewMode as 'community' | 'zip' | 'nearby';
-
-                              // Nearby scope: build equivalent stats client-side from the permit list
-                              const nearbyPermits: any[] = nearbyConstructionData?.permits ?? [];
-                              const nearbyStats = (() => {
-                                if (!nearbyPermits.length) return null;
-                                const byCategory: Record<NcCatKey, { count: number; totalCost: number; avgCost: number; skewed?: boolean }> = {
-                                  singleFamily: { count: 0, totalCost: 0, avgCost: 0 }, multifamily: { count: 0, totalCost: 0, avgCost: 0 }, commercial: { count: 0, totalCost: 0, avgCost: 0 },
-                                };
-                                const costs: Record<NcCatKey, number[]> = { singleFamily: [], multifamily: [], commercial: [] };
-                                const byYear: Record<string, { total: number; singleFamily: number; multifamily: number; commercial: number }> = {};
-                                let latestIssueDate = '';
-                                for (const pm of nearbyPermits) {
-                                  const cat = (pm.category || 'commercial') as NcCatKey;
-                                  const yr = (pm.issueDate || '').substring(0, 4) || 'Unknown';
-                                  if (pm.issueDate && pm.issueDate > latestIssueDate) latestIssueDate = pm.issueDate;
-                                  if (!byYear[yr]) byYear[yr] = { total: 0, singleFamily: 0, multifamily: 0, commercial: 0 };
-                                  byYear[yr].total++; byYear[yr][cat]++;
-                                  byCategory[cat].count++;
-                                  if (pm.reportedCost > 1) { byCategory[cat].totalCost += pm.reportedCost; costs[cat].push(pm.reportedCost); }
-                                }
-                                (Object.keys(byCategory) as NcCatKey[]).forEach(k => {
-                                  const s = byCategory[k];
-                                  s.avgCost = s.count > 0 ? Math.round(s.totalCost / s.count) : 0;
-                                  const arr = [...costs[k]].sort((a, b) => a - b);
-                                  if (arr.length >= 3 && s.totalCost > 0) {
-                                    const median = arr[Math.floor(arr.length / 2)];
-                                    s.skewed = (median > 0 && (s.totalCost / arr.length) / median > 2) || arr[arr.length - 1] / s.totalCost > 0.5;
-                                  }
-                                });
-                                return { totalPermits: nearbyPermits.length, byCategory, byYear, latestIssueDate: latestIssueDate.substring(0, 10) };
-                              })();
-
-                              const stats: any = scope === 'community' ? newConstructionData.communityArea : scope === 'zip' ? newConstructionData.zipCode : nearbyStats;
-
-                              // The 1-mile "happening now" datum — its own scope, independent of the toggle.
-                              // Proxy for active: issued in the last 18 months (typical build duration).
-                              const cutoff18 = new Date(); cutoff18.setMonth(cutoff18.getMonth() - 18);
-                              const active1Mi = nearbyPermits.filter(pm => pm.issueDate && new Date(pm.issueDate) >= cutoff18).length;
-
-                              const ca = newConstructionData.communityArea;
-                              const headerCount = ca ? `${ca.totalPermits} permits · since ${startYear}` : nearbyStats ? `${nearbyStats.totalPermits} permits · since ${startYear}` : '';
-
-                              // Year rows (newest first), YTD derived from real max permit date
-                              const years = stats ? Object.keys(stats.byYear).filter(y => /^\d{4}$/.test(y)).sort((a, b) => b.localeCompare(a)) : [];
-                              const maxTotal = years.reduce((m, y) => Math.max(m, stats.byYear[y].total), 1);
-                              const latestIso: string = stats?.latestIssueDate || '';
-                              const latestDate = latestIso ? new Date(latestIso + 'T12:00:00') : null;
-                              const ytdYear = latestDate && years.length && years[0] === String(latestDate.getFullYear()) && latestIso < `${years[0]}-12-31` ? years[0] : null;
-                              const fullYears = years.filter(y => y !== ytdYear).sort();
-                              const ytdCount = ytdYear ? stats.byYear[ytdYear].total : 0;
-                              const dayOfYear = latestDate ? Math.floor((latestDate.getTime() - new Date(latestDate.getFullYear(), 0, 0).getTime()) / 86400000) : 0;
-                              const pace = ytdYear && dayOfYear > 0 ? Math.round(ytdCount / (dayOfYear / 365)) : 0;
-                              const paceMonth = latestDate ? latestDate.toLocaleDateString('en-US', { month: 'short' }) : '';
-
-                              // Trend from FULL years only
-                              const fullTotals = fullYears.map(y => stats?.byYear[y]?.total ?? 0);
-                              let trendWord: 'Rising' | 'Cooling' | 'Stable' = 'Stable';
-                              if (fullTotals.length >= 2) {
-                                const first = fullTotals[0], last = fullTotals[fullTotals.length - 1];
-                                const monoUp = fullTotals.every((v, i) => i === 0 || v >= fullTotals[i - 1] * 0.95);
-                                const monoDown = fullTotals.every((v, i) => i === 0 || v <= fullTotals[i - 1] * 1.05);
-                                if (last > first * 1.1 && monoUp) trendWord = 'Rising';
-                                else if (last < first * 0.9 && monoDown) trendWord = 'Cooling';
-                              }
-
-                              const scopeName = scope === 'community' ? newConstructionData.communityAreaName : scope === 'zip' ? `ZIP ${newConstructionData.zip}` : 'Within 1 mile';
-                              const cats: { key: NcCatKey; nm: string; cssVar: string }[] = [
-                                { key: 'singleFamily', nm: 'Single Family', cssVar: 'var(--sf)' },
-                                { key: 'multifamily', nm: 'Multifamily', cssVar: 'var(--mf)' },
-                                { key: 'commercial', nm: 'Commercial', cssVar: 'var(--comm)' },
-                              ];
-
-                              // Takeaway copy (computed, community backdrop + 1-mile lead)
-                              const caYears = ca ? Object.keys(ca.byYear).filter(y => /^\d{4}$/.test(y)).sort() : [];
-                              const caLatest: string = ca?.latestIssueDate || '';
-                              const caYtdYear = caLatest && caYears.length && caYears[caYears.length - 1] === caLatest.substring(0, 4) && caLatest < `${caYears[caYears.length - 1]}-12-31` ? caYears[caYears.length - 1] : null;
-                              const caFullYears = caYears.filter(y => y !== caYtdYear);
-                              const caRun = caFullYears.map(y => ca!.byYear[y].total).join(' → ');
-                              // Community-area trend for the takeaway backdrop — independent of the selected scope toggle
-                              const caFullTotals = caFullYears.map(y => ca!.byYear[y].total);
-                              let caTrendWord: 'Rising' | 'Cooling' | 'Stable' = 'Stable';
-                              if (caFullTotals.length >= 2) {
-                                const first = caFullTotals[0], last = caFullTotals[caFullTotals.length - 1];
-                                const monoUp = caFullTotals.every((v, i) => i === 0 || v >= caFullTotals[i - 1] * 0.95);
-                                const monoDown = caFullTotals.every((v, i) => i === 0 || v <= caFullTotals[i - 1] * 1.05);
-                                if (last > first * 1.1 && monoUp) caTrendWord = 'Rising';
-                                else if (last < first * 0.9 && monoDown) caTrendWord = 'Cooling';
-                              }
-                              const backdrop = caTrendWord === 'Rising' ? "that's been ramping up for years" : caTrendWord === 'Cooling' ? "that's been gradually cooling" : "that's been developing steadily for years";
-                              const mixSorted = ca ? (cats.map(c => ({ nm: c.nm.toLowerCase(), n: ca.byCategory[c.key].count })).sort((a, b) => b.n - a.n)) : [];
-                              const commAvg = ca ? ca.byCategory.commercial.avgCost : 0;
-
-                              const tgSvgs = {
-                                community: <svg viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>,
-                                zip: <svg viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>,
-                                nearby: <svg viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4z"/></svg>,
-                              };
-
-                              return (
-                                <div className="ncbox" data-testid="card-new-construction">
-                                  <div className="ssh">
-                                    <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg>
-                                    <span className="t">New Construction Activity</span>
-                                    {headerCount && <span className="count" data-testid="text-nc-count-chip">{headerCount}</span>}
-                                  </div>
-
-                                  {(ca || active1Mi > 0) && (
-                                    <div className="crm-take" data-testid="nc-takeaway">
-                                      <div className="crm-takeh"><svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Takeaway</div>
-                                      <div className="crm-taket">
-                                        {active1Mi > 0
-                                          ? <>Right around this property, building is happening now — {active1Mi} permit{active1Mi !== 1 ? 's' : ''} within a mile from the last 18 months — against a {newConstructionData.communityAreaName} backdrop {backdrop}.</>
-                                          : <>{newConstructionData.communityAreaName} has recorded {ca?.totalPermits ?? 0} new-building permits since {startYear} — a backdrop {backdrop}.</>}
-                                      </div>
-                                      <div className="crm-conn">
-                                      {active1Mi > 0 && (
-                                        <div className="crm-cn i"><span className="dt"></span><span className="tx"><b>{active1Mi} permit{active1Mi !== 1 ? 's' : ''} within 1 mile from the last 18 months — the closest read.</b> Most of these are under construction or just wrapping up. It signals demand and investment, but also means nearby building: noise, disruption, and new competing supply while it lasts.</span></div>
-                                      )}
-                                      {ca && caFullYears.length >= 2 && (
-                                        <div className="crm-cn i"><span className="dt"></span><span className="tx"><b>{caTrendWord === 'Rising' ? 'Building up.' : caTrendWord === 'Cooling' ? 'Slowing down.' : 'Steady, not spiking.'}</b> Zoom out to all of {newConstructionData.communityAreaName} and full years run {caRun}{caYtdYear ? ` (${caYtdYear} on pace)` : ''} — sustained development since {startYear}{caTrendWord === 'Stable' ? ', no boom-or-bust. That multi-year record is what makes the trend read as stable rather than a one-year blip' : ''}.</span></div>
-                                      )}
-                                      {ca && mixSorted.length > 0 && (
-                                        <div className="crm-cn i"><span className="dt"></span><span className="tx"><b>Mostly {mixSorted[0].nm === 'commercial' ? 'commercial' : 'residential'}.</b> {mixSorted[0].nm.charAt(0).toUpperCase() + mixSorted[0].nm.slice(1)} ({mixSorted[0].n}) and {mixSorted[1].nm} ({mixSorted[1].n}) lead by count; {mixSorted[2].nm} is just {mixSorted[2].n} permits{mixSorted[2].nm === 'commercial' && commAvg > 0 ? <> but a <b>{fmtNcMoney(commAvg)} average</b>{ca.byCategory.commercial.skewed ? ' — a few very large developments, not the typical project' : ''}</> : ''}.</span></div>
-                                      )}
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  <div className="toggle">
-                                    <div className={`tg ${scope === 'community' ? 'on' : ''}`} onClick={() => setNewConstructionViewMode('community')} data-testid="tab-nc-community">{tgSvgs.community}By Community Area</div>
-                                    <div className={`tg ${scope === 'zip' ? 'on' : ''}`} onClick={() => setNewConstructionViewMode('zip')} data-testid="tab-nc-zip">{tgSvgs.zip}By ZIP Code</div>
-                                    <div className={`tg ${scope === 'nearby' ? 'on' : ''}`} onClick={() => setNewConstructionViewMode('nearby')} data-testid="tab-nc-nearby">{tgSvgs.nearby}Nearby (1 mi)</div>
-                                  </div>
-
-                                  {scope === 'nearby' && isLoadingNearbyConstruction ? (
-                                    <div className="space-y-2"><Skeleton className="h-4 w-3/4" /><Skeleton className="h-4 w-2/3" /></div>
-                                  ) : !stats ? (
-                                    <p className="text-sm text-muted-foreground">{scope === 'nearby' ? 'No new construction permits found within 1 mile.' : scope === 'zip' ? 'No ZIP code data available.' : 'No community area data available.'}</p>
-                                  ) : (
-                                    <>
-                                      <div className="scopelbl">{tgSvgs[scope]}{scopeName} · since {startYear}</div>
-
-                                      <div className="g3">
-                                        {cats.map(c => {
-                                          const s = stats.byCategory[c.key];
-                                          return (
-                                            <div className="tcard" key={c.key} data-testid={`text-nc-${scope}-${c.key === 'singleFamily' ? 'sf' : c.key === 'multifamily' ? 'mf' : 'cm'}-count`}>
-                                              <div className="tchead"><span className="sw" style={{ background: c.cssVar }}></span><span className="nm">{c.nm}</span></div>
-                                              <div className="tcnum"><span className="n">{s.count}</span><span className="u">permits</span></div>
-                                              {s.avgCost > 0 && <div className="tcavg">Avg value <b>{fmtNcMoney(s.avgCost)}</b>{s.skewed ? <span style={{ color: 'var(--cautionText)' }}> · skewed</span> : null}</div>}
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-
-                                      {years.length > 0 && (
-                                        <>
-                                          <div className="ybhead">
-                                            <span className="ybtitle">Permits by year · bar length = volume</span>
-                                            <div className="legend">
-                                              <span className="lg"><span className="sw" style={{ background: 'var(--sf)' }}></span>Single Family</span>
-                                              <span className="lg"><span className="sw" style={{ background: 'var(--mf)' }}></span>Multifamily</span>
-                                              <span className="lg"><span className="sw" style={{ background: 'var(--comm)' }}></span>Commercial</span>
-                                            </div>
-                                          </div>
-                                          {years.map(y => {
-                                            const d = stats.byYear[y];
-                                            const barPct = Math.round((d.total / maxTotal) * 10000) / 100;
-                                            const isYtd = y === ytdYear;
-                                            return (
-                                              <div className="ybrow" key={y}>
-                                                <span className="ybyear">{y}{isYtd && <span className="yt">YTD</span>}</span>
-                                                <div className="ybtrack">
-                                                  <div className="ybbar" style={{ width: `${barPct}%` }}>
-                                                    {d.singleFamily > 0 && <i className="sfc" style={{ flex: d.singleFamily }} title={`Single Family: ${d.singleFamily}`}></i>}
-                                                    {d.multifamily > 0 && <i className="mfc" style={{ flex: d.multifamily }} title={`Multifamily: ${d.multifamily}`}></i>}
-                                                    {d.commercial > 0 && <i className="commc" style={{ flex: d.commercial }} title={`Commercial: ${d.commercial}`}></i>}
-                                                  </div>
-                                                </div>
-                                                <div className="ybend">
-                                                  <span className="ybtot">{d.total}</span>
-                                                  {isYtd && pace > 0 && <span className="ybpace">Through {paceMonth} · ~{pace}/yr pace</span>}
-                                                </div>
-                                              </div>
-                                            );
-                                          })}
-                                        </>
-                                      )}
-
-                                      {fullYears.length >= 2 && (
-                                        <div className="trend">
-                                          <span className="chip">
-                                            {trendWord === 'Rising' ? <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
-                                              : trendWord === 'Cooling' ? <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 7 6 6 4-4 8 8"/><path d="M21 10v7h-7"/></svg>
-                                              : <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18"/></svg>}
-                                            {trendWord}
-                                          </span>
-                                          <span className="tx">
-                                            <b>{fullYears.length} full year{fullYears.length !== 1 ? 's' : ''}{ytdYear ? `, then ${ytdYear} to date` : ''}.</b>{' '}
-                                            {fullTotals.join(' · ')} {trendWord === 'Stable' ? 'shows no real trend' : trendWord === 'Rising' ? 'shows a sustained climb' : 'shows a gradual decline'}
-                                            {ytdYear && pace > 0 ? <>, and {ytdYear}'s {ytdCount} through {paceMonth} {pace >= (fullTotals[fullTotals.length - 1] || 0) * 0.9 ? 'keeps pace' : 'runs behind'}. The ~{pace}/yr figure is a straight-line projection — since spring–summer is peak building season, the true full-year total may land a little lower.</> : '.'}
-                                          </span>
-                                        </div>
-                                      )}
-
-                                      <div className="src" data-testid="text-nc-source">
-                                        Source: City of Chicago Building Permits · excludes garages, stages &amp; other accessory structures · {newConstructionData.periodStart ? new Date(newConstructionData.periodStart + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''} – {newConstructionData.periodEnd ? new Date(newConstructionData.periodEnd + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}{ytdYear ? ` (${ytdYear} year-to-date)` : ''}
-                                      </div>
-                                    </>
-                                  )}
-                                </div>
-                              );
-                            })()}
-
-                            {newConstructionViewMode === 'nearby' && nearbyConstructionData && nearbyConstructionData.permits?.length > 0 && (
-                                    <div className="space-y-3">
-                                      <div className="nc-scope" data-testid="text-nc-nearby-scope">➤ {nearbyConstructionData.totalCount} permits within 1 mile{nearbyConstructionData.periodStart ? ` · since ${nearbyConstructionData.periodStart.substring(0, 4)}` : ''}</div>
-                                      <div className="grid grid-cols-3 gap-3">
-                                        {(['singleFamily', 'multifamily', 'commercial'] as const).map((cat) => {
-                                          const catPermits = nearbyConstructionData.permits.filter((p: any) => p.category === cat);
-                                          const priced = catPermits.filter((p: any) => p.reportedCost > 0);
-                                          const avg = priced.length > 0 ? priced.reduce((sum: number, p: any) => sum + p.reportedCost, 0) / priced.length : 0;
-                                          const dot = cat === 'singleFamily' ? 'var(--chart-sf)' : cat === 'multifamily' ? 'var(--chart-mf)' : 'var(--chart-commercial)';
-                                          const label = cat === 'singleFamily' ? 'Single Family' : cat === 'multifamily' ? 'Multifamily' : 'Commercial';
-                                          const tid = cat === 'singleFamily' ? 'sf' : cat === 'multifamily' ? 'mf' : 'cm';
-                                          return (
-                                            <div
-                                              key={cat}
-                                              className={`nc-stile ${nearbyPermitFilter === cat ? 'on' : ''}`}
-                                              onClick={() => setNearbyPermitFilter(nearbyPermitFilter === cat ? null : cat)}
-                                              data-testid={`button-nc-filter-${tid}`}
-                                            >
-                                              <div className="nc-n" data-testid={`text-nc-nearby-${tid}`}>{catPermits.length}</div>
-                                              <div className="nc-l"><span className="nc-dot" style={{ background: dot }} />{label}</div>
-                                              {avg > 0 && <div className="nc-avg">Avg ${avg >= 1000000 ? `${(avg / 1000000).toFixed(1)}M` : `${(avg / 1000).toFixed(0)}K`}</div>}
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                      {(() => {
-                                        const shownPermits = nearbyConstructionData.permits.filter((p: any) => nearbyPermitFilter === null || p.category === nearbyPermitFilter);
-                                        const filterLabel = nearbyPermitFilter === 'singleFamily' ? 'single-family ' : nearbyPermitFilter === 'multifamily' ? 'multifamily ' : nearbyPermitFilter === 'commercial' ? 'commercial ' : '';
-                                        return (
-                                        <>
-                                        <div className="nc-listlbl" data-testid="text-nc-nearby-listlbl">{shownPermits.length} {filterLabel}permit{shownPermits.length !== 1 ? 's' : ''} · nearest first</div>
-                                        <div className="space-y-2.5 max-h-80 overflow-y-auto">
-                                        {shownPermits.map((permit: any, idx: number) => (
-                                          <div key={permit.permitNumber || idx} className="nc-perm" data-testid={`row-nc-nearby-${idx}`}>
-                                            <div className="flex items-start justify-between gap-2.5">
-                                              <a
-                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(permit.address + ', Chicago, IL')}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="nc-addr hover:underline"
-                                                data-testid={`link-nc-nearby-address-${idx}`}
-                                              >
-                                                {permit.address}
-                                              </a>
-                                              <span className="nc-dist">{permit.distanceMiles} mi</span>
-                                            </div>
-                                            <div className="nc-meta mt-1.5">
-                                              <span className="nc-cat">
-                                                <span className="nc-dot" style={{
-                                                  background: permit.category === 'singleFamily' ? 'var(--chart-sf)' :
-                                                    permit.category === 'multifamily' ? 'var(--chart-mf)' : 'var(--chart-commercial)'
-                                                }} />
-                                                {permit.category === 'singleFamily' ? 'Single Family' : permit.category === 'multifamily' ? 'Multifamily' : 'Commercial'}
-                                              </span>
-                                              {permit.buildingUse && <span>· {permit.buildingUse}</span>}
-                                              {permit.issueDate && <span>· issued {permit.issueDate}</span>}
-                                            </div>
-                                            {(permit.reportedCost > 0 || permit.stories || permit.units || permit.parkingSpaces || permit.ownerName || permit.architectName || permit.contractorName) && (
-                                              <div className="nc-fields">
-                                                {permit.reportedCost > 0 && (
-                                                  <span className="nc-f" data-testid={`text-nc-nearby-value-${idx}`}><span className="nc-k">Value:</span> ${permit.reportedCost >= 1000000 ? `${(permit.reportedCost / 1000000).toFixed(1)}M` : `${(permit.reportedCost / 1000).toFixed(0)}K`}</span>
-                                                )}
-                                                {permit.stories && (
-                                                  <span className="nc-f" data-testid={`text-nc-nearby-stories-${idx}`}><span className="nc-k">Size:</span> {permit.stories} story</span>
-                                                )}
-                                                {(permit.units || permit.parkingSpaces) && (
-                                                  <span className="nc-f" data-testid={`text-nc-nearby-type-${idx}`}><span className="nc-k">Units:</span> {[permit.units ? `${permit.units}` : null, permit.parkingSpaces ? 'parking' : null].filter(Boolean).join(' · ')}</span>
-                                                )}
-                                                {permit.architectName && (
-                                                  <span className="nc-f" data-testid={`text-nc-nearby-architect-${idx}`}><span className="nc-k">Architect:</span> {permit.architectName}</span>
-                                                )}
-                                                {permit.contractorName && (
-                                                  <span className="nc-f" data-testid={`text-nc-nearby-contractor-${idx}`}><span className="nc-k">Contractor:</span> {permit.contractorName}</span>
-                                                )}
-                                                {permit.ownerName && (
-                                                  <span className="nc-f" data-testid={`text-nc-nearby-owner-${idx}`}><span className="nc-k">Owner:</span> {permit.ownerName}</span>
-                                                )}
-                                              </div>
-                                            )}
-                                          </div>
-                                        ))}
-                                        </div>
-                                        </>
-                                        );
-                                      })()}
-                                      <div className="flex gap-4 text-xs text-muted-foreground">
-                                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm inline-block" style={{ background: 'var(--chart-sf)' }} /> Single Family</span>
-                                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm inline-block" style={{ background: 'var(--chart-mf)' }} /> Multifamily</span>
-                                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm inline-block" style={{ background: 'var(--chart-commercial)' }} /> Commercial</span>
-                                      </div>
-                                    </div>
-                            )}
-                            </>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">New construction data unavailable</p>
-                          )}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>}
-
-                    {/* Recent Business Licenses */}
-                    {false && <Collapsible id="section-new-business-licenses" open={isRecentLicensesSectionOpen} onOpenChange={setIsRecentLicensesSectionOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                          <h3 className="chead chead-icon">
-                            <Briefcase className="w-4 h-4" />
-                            New Business Licenses
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            {!isRecentLicensesSectionOpen && !isLoadingNearbyLicenses && nearbyLicensesData && nearbyLicensesData.totalCount > 0 && (
-                              <div className="flex flex-wrap gap-1.5">
-                                <Badge variant="default" className="text-xs">
-                                  {groupLicenseEstablishments(nearbyLicensesData.licenses).length} businesses within 1 mi
-                                </Badge>
-                                <Badge variant="secondary" className="text-xs">
-                                  {nearbyLicensesData.totalCount} licenses
-                                </Badge>
-                              </div>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isRecentLicensesSectionOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="px-4 pb-4 space-y-3">
-                          {isLoadingNearbyLicenses ? (
-                            <div className="space-y-2">
-                              <Skeleton className="h-4 w-3/4" />
-                              <Skeleton className="h-4 w-2/3" />
-                              <Skeleton className="h-4 w-1/2" />
-                            </div>
-                          ) : nearbyLicensesData && nearbyLicensesData.licenses?.length > 0 ? (() => {
-                            const ests = groupLicenseEstablishments(nearbyLicensesData.licenses);
-                            const totalBiz = ests.length;
-                            const totalLic = nearbyLicensesData.totalCount;
-                            const fmtMonYr = (iso: string) => iso ? new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
-                            const tagsFor = (label: string) => label.replace(/ only$/, '').split(' + ');
-
-                            // Mix buckets (exact combination), sorted desc — counts sum to totalBiz
-                            const buckets = new Map<string, number>();
-                            for (const e of ests) buckets.set(e.comboLabel, (buckets.get(e.comboLabel) || 0) + 1);
-                            const ranked = Array.from(buckets.entries()).sort((a, b) => b[1] - a[1]);
-                            const maxBucket = ranked[0]?.[1] || 1;
-
-                            // Derived takeaway inputs
-                            const foodInvolved = ests.filter(e => e.comboLabel.includes('Retail Food')).length;
-                            const foodOnly = buckets.get('Retail Food only') || 0;
-                            const standaloneBars = buckets.get('Liquor / Tavern only') || 0;
-                            const liquorInvolved = ests.filter(e => e.comboLabel.includes('Liquor / Tavern')).length;
-                            const foodLed = foodInvolved > totalBiz / 2;
-                            const barsSmall = standaloneBars <= Math.max(2, Math.round(foodInvolved * 0.15));
-                            // deterministic tiebreak: count desc, then label asc
-                            const rankedStable = [...ranked].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-                            const topLabel = (rankedStable[0]?.[0] || '').replace(/ only$/, '').toLowerCase();
-                            const framing = totalBiz === 1
-                              ? `a single opening: ${topLabel}`
-                              : foodInvolved === 0
-                                ? (standaloneBars > totalBiz / 3 ? 'a bar-and-nightlife corridor, with no new food spots' : `led by ${topLabel}, with no new food spots`)
-                                : foodLed && barsSmall
-                                  ? 'a dining scene with a nightlife layer, not a bar district'
-                                  : foodLed
-                                    ? 'a dining scene with a real bar presence alongside it'
-                                    : standaloneBars > totalBiz / 3
-                                      ? 'a bar-and-nightlife corridor more than a dining one'
-                                      : `a mixed picture led by ${topLabel}`;
-                            const nearest3 = ests.slice(0, 3);
-                            const shown = ests.filter(e => licenseFilter === null || e.comboLabel === licenseFilter);
-                            const visible = licenseFilter === null && !showAllBiz ? shown.slice(0, 6) : shown;
-                            const divLabel = licenseFilter === null
-                              ? `${totalBiz} businesses \u00b7 nearest first`
-                              : `${shown.length} business${shown.length !== 1 ? 'es' : ''} \u00b7 ${licenseFilter.replace(/ only$/, '')}`;
-
-                            return (
-                              <div className="bizbox" data-testid="card-business-licenses">
-                                <div className="ssh">
-                                  <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M2 13h20"/></svg>
-                                  <span className="t">New Business Licenses</span>
-                                  <span className="count" data-testid="text-biz-count-chip">{totalBiz} businesses &middot; 1 mi &middot; 12 mo</span>
-                                </div>
-
-                                <div className="crm-take" data-testid="biz-takeaway-summary">
-                                  <div className="crm-takeh"><svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Takeaway</div>
-                                  <div className="crm-taket">{totalBiz} new business{totalBiz !== 1 ? 'es' : ''} opened within a mile of this property in the past year &mdash; {framing}.</div>
-                                  <div className="crm-conn">
-                                  {foodInvolved > 0 && (
-                                    <div className="crm-cn i"><span className="dt"></span><span className="tx"><b>{foodLed ? 'Food first, drinks second.' : 'The food-and-drink mix.'}</b> {foodInvolved} of the {totalBiz} serve food &mdash; {foodOnly} food-only{foodInvolved - foodOnly > 0 ? `, plus ${foodInvolved - foodOnly} that pair food with a liquor or entertainment license` : ''}. {standaloneBars > 0 ? <>{standaloneBars <= 3 ? <>Just <b>{standaloneBars}</b></> : <b>{standaloneBars}</b>} {standaloneBars === 1 ? 'is a' : 'are'} standalone bar{standaloneBars !== 1 ? 's' : ''}.</> : 'None are standalone bars.'} {foodLed && barsSmall && foodInvolved > 1 ? 'So it\u2019s restaurants and caf\u00e9s leading, with alcohol as an add-on: amenity value and foot traffic, and only a light late-night footprint.' : liquorInvolved > 0 ? `${liquorInvolved} in total hold a liquor license.` : ''}</span></div>
-                                  )}
-                                  {nearest3.length >= 2 && (
-                                    <div className="crm-cn i"><span className="dt"></span><span className="tx"><b>The closest are steps away.</b> {nearest3.map((e, i) => `${titleCaseBiz(e.name)} (${e.distanceMiles} mi)`).join(', ').replace(/, ([^,]*)$/, ' and $1')} all opened in the last year within a few blocks of the property.</span></div>
-                                  )}
-                                  {totalLic > totalBiz && (
-                                    <div className="crm-cn i"><span className="dt"></span><span className="tx"><b>Counted as real businesses, not raw licenses.</b> The {totalLic} licenses on file were grouped by establishment &mdash; a restaurant holding food + liquor + entertainment is one business. <b>{totalBiz}</b> is the true count of new openings.</span></div>
-                                  )}
-                                  </div>
-                                </div>
-
-                                <div className="mixhead"><span className="h">Businesses by license mix</span><span className="hint">&middot; click a row to filter the list</span></div>
-                                {ranked.map(([label, count]) => {
-                                  const tags = tagsFor(label);
-                                  const leadIdx = tags.indexOf('Retail Food') >= 0 ? tags.indexOf('Retail Food') : 0;
-                                  const isActive = licenseFilter === label;
-                                  return (
-                                    <div
-                                      key={label}
-                                      className={`mixrow ${isActive ? 'active' : ''}`}
-                                      onClick={() => setLicenseFilter(isActive ? null : label)}
-                                      data-testid={`button-license-filter-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
-                                    >
-                                      <div className="mixtags">
-                                        {tags.map((t, i) => <span key={t} className={`mixtag ${i === leadIdx && tags.length > 1 ? 'lead' : tags.length === 1 && t === 'Retail Food' ? 'lead' : ''}`}>{t}</span>)}
-                                      </div>
-                                      <div className="mixtrack"><i style={{ width: `${(count / maxBucket) * 100}%` }}></i></div>
-                                      <span className="mixcount" data-testid={`text-licenses-combo-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>{count}</span>
-                                    </div>
-                                  );
-                                })}
-
-                                <div className="divl"><span className="lbl" data-testid="text-license-listlbl">{divLabel}</span><span className="ln"></span></div>
-
-                                {visible.map((est, idx) => {
-                                  const distinctTypes = Array.from(new Set(est.licenses.map(l => l.licenseType)));
-                                  const earliest = est.licenses.reduce((m, l) => !m || (l.startDate && l.startDate < m) ? l.startDate : m, '');
-                                  return (
-                                    <div className="biz" key={`${est.name}|${est.address}`} data-testid={`row-license-${idx}`}>
-                                      <div className="biztop">
-                                        <span className="biznm"><span className="d"></span><span data-testid={`text-license-name-${idx}`}>{titleCaseBiz(est.name)}</span></span>
-                                        <span className="bizdist">{est.distanceMiles} mi</span>
-                                      </div>
-                                      <div className="bizaddr">
-                                        <a
-                                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(est.name + ', ' + est.address + ', Chicago, IL')}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          data-testid={`link-license-address-${idx}`}
-                                        >{titleCaseBiz(est.address)}</a>
-                                      </div>
-                                      <div className="bizmeta">
-                                        {distinctTypes.map((t, ti) => (
-                                          <span key={t} style={{ display: 'contents' }}>
-                                            {ti > 0 && <span className="dot">&middot;</span>}
-                                            <span className="lic">{t}</span>
-                                          </span>
-                                        ))}
-                                        {earliest && <><span className="dot">&middot;</span><span>{fmtMonYr(earliest)}</span></>}
-                                        {est.licenses.length > 1 && <span className="n2">{est.licenses.length} licenses</span>}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-
-                                {licenseFilter === null && !showAllBiz && shown.length > 6 && (
-                                  <button className="more" onClick={() => setShowAllBiz(true)} data-testid="button-biz-show-all">Show all {totalBiz} businesses within 1 mile &rarr;</button>
-                                )}
-                                {licenseFilter === null && showAllBiz && shown.length > 6 && (
-                                  <button className="more" onClick={() => setShowAllBiz(false)} data-testid="button-biz-show-less">Show fewer &uarr;</button>
-                                )}
-
-                                <div className="src" data-testid="text-biz-source">
-                                  Source: Chicago Business Licenses &mdash; new issuances only, excludes renewals (past 12 months). <b>{totalLic > totalBiz ? `${totalBiz} distinct businesses grouped from ${totalLic} licenses` : `${totalBiz} businesses`}</b> by establishment (name + address), so a spot holding food + liquor + entertainment counts once. Covers liquor/tavern, retail food, entertainment, late-hour and manufacturing establishments.
-                                </div>
-                              </div>
-                            );
-                          })() : (
-                            <p className="text-sm text-muted-foreground">No new business licenses found within 1 mile.</p>
-                          )}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>}
 
                     {/* Proximity Information */}
                     <Collapsible open={isProximitySectionOpen} onOpenChange={setIsProximitySectionOpen}>
@@ -14248,11 +13775,6 @@ export default function RunDetail() {
                                     {proximityData.park.name} ({(proximityData.park.distanceFt / 5280).toFixed(2)} mi)
                                   </Badge>
                                 )}
-                                {proximityData.schools && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {proximityData.schools.countInHalfMile} School{proximityData.schools.countInHalfMile !== 1 ? 's' : ''}
-                                  </Badge>
-                                )}
                                 {proximityData.hospital && (
                                   <Badge variant="outline" className="text-xs">
                                     {proximityData.hospital.name}
@@ -14267,17 +13789,14 @@ export default function RunDetail() {
                       <CollapsibleContent>
                       <div className="px-4">
                       {isLoadingProximity && pinLookupData?.pin ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <Skeleton key={i} className="h-20 w-full rounded-lg" />
-                          ))}
-                        </div>
+                        <p className="text-sm text-muted-foreground">Loading...</p>
                       ) : proximityData ? (
                         <div>
-                          <p className="text-xs text-muted-foreground mb-3">
-                            Data year: {proximityData.dataYear}
-                          </p>
-                          <div className="dir-facts">
+                          <div className="dir-facts pgrid">
+                            <div className="dir-fact">
+                              <div className="dir-fact-top"><span className="dir-fact-label">Data year</span></div>
+                              <p className="dir-fact-value">{proximityData.dataYear}</p>
+                            </div>
                             {proximityData.park && (
                               <div className="dir-fact">
                                 <div className="dir-fact-top">
@@ -14286,28 +13805,6 @@ export default function RunDetail() {
                                 </div>
                                 <p className="dir-fact-value" title={proximityData.park.name}>{proximityData.park.name}</p>
                                 <p className="dir-fact-qualifier">{(proximityData.park.distanceFt / 5280).toFixed(2)} mi · {Math.round(proximityData.park.distanceFt).toLocaleString()} ft</p>
-                              </div>
-                            )}
-
-                            {proximityData.schools && (
-                              <div
-                                className="dir-fact cursor-pointer transition-shadow hover:shadow-md"
-                                role="button"
-                                tabIndex={0}
-                                title="Jump to the Schools section"
-                                data-testid="fact-schools-nearby"
-                                onClick={() => {
-                                  setSectionOpen('schools', true);
-                                  revealAnchor('section-schools');
-                                }}
-                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') (e.currentTarget as HTMLElement).click(); }}
-                              >
-                                <div className="dir-fact-top">
-                                  <span className="dir-fact-icon"><Building2 className="w-3 h-3" /></span>
-                                  <span className="dir-fact-label">Schools Nearby</span>
-                                </div>
-                                <p className="dir-fact-value">{proximityData.schools.countInHalfMile} school{proximityData.schools.countInHalfMile !== 1 ? 's' : ''}</p>
-                                <p className="dir-fact-qualifier">within ½ mile · <span className="underline">see details</span></p>
                               </div>
                             )}
 
@@ -14351,7 +13848,7 @@ export default function RunDetail() {
                                   <span className="dir-fact-label">Nearest Highway</span>
                                 </div>
                                 <p className="dir-fact-value dir-fact-value-caps" title={proximityData.highway.name}>{proximityData.highway.name}</p>
-                                <p className="dir-fact-qualifier">{(proximityData.highway.distanceFt / 5280).toFixed(2)} mi · {proximityData.highway.dailyTraffic.toLocaleString()} ADT</p>
+                                <p className="dir-fact-qualifier">{(proximityData.highway.distanceFt / 5280).toFixed(2)} mi</p>
                               </div>
                             )}
 
@@ -14363,6 +13860,215 @@ export default function RunDetail() {
                                 </div>
                                 <p className="dir-fact-value">{proximityData.foreclosures.countInHalfMilePast5Years} in ½ mile</p>
                                 <p className="dir-fact-qualifier">Past 5 years · {proximityData.foreclosures.per1000Pins.toFixed(1)}/1000 PINs</p>
+                              </div>
+                            )}
+
+                            <div className="dir-fact" data-testid="fact-vacant-abandoned">
+                              <div className="dir-fact-top">
+                                <span className="dir-fact-icon"><Building2 className="w-3 h-3" /></span>
+                                <span className="dir-fact-label">Vacant &amp; abandoned</span>
+                              </div>
+                              <p className="dir-fact-value">
+                                {isLoadingVacantBuildings ? 'Loading...' : vacantBuildingsData ? vacantBuildingsData.totalViolations > 0 ? `${vacantBuildingsData.totalUniqueAddresses} buildings · ${vacantBuildingsData.totalViolations} violations` : 'None within ½ mi' : pinLookupData?.pin ? 'Not Available' : 'PIN lookup required'}
+                              </p>
+                              <p className="dir-fact-qualifier">
+                                {isLoadingVacantBuildings ? 'Loading vacant building data...' : vacantBuildingsData?.totalViolations ? 'Expand for nearby records · Chicago Data Portal' : vacantBuildingsData ? 'Chicago Data Portal · Vacant and Abandoned Buildings Violations' : 'Unable to load vacant building data'}
+                              </p>
+                            </div>
+                            {vacantBuildingsData?.totalViolations > 0 && (
+                              <div style={{ gridColumn: '1 / -1' }}>
+                              <Collapsible open={isVacantBuildingsOpen} onOpenChange={setIsVacantBuildingsOpen}>
+                                <CollapsibleTrigger asChild>
+                                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
+                                    <h3 className="chead chead-icon">
+                                      <Building2 className="w-4 h-4" />
+                                      Vacant &amp; Abandoned Buildings
+                                    </h3>
+                                    <div className="flex items-center gap-2">
+                                      {!isVacantBuildingsOpen && (
+                                        <div className="flex flex-wrap gap-1.5">
+                                          {isLoadingVacantBuildings ? (
+                                            <Badge variant="secondary" className="text-xs">Loading...</Badge>
+                                          ) : vacantBuildingsData ? (
+                                            vacantBuildingsData.totalViolations > 0 ? (
+                                              <>
+                                                <Badge variant="secondary" className="text-xs">
+                                                  {vacantBuildingsData.totalUniqueAddresses} Building{vacantBuildingsData.totalUniqueAddresses !== 1 ? 's' : ''}
+                                                </Badge>
+                                                <Badge variant="secondary" className="text-xs">
+                                                  {vacantBuildingsData.totalViolations} Violation{vacantBuildingsData.totalViolations !== 1 ? 's' : ''}
+                                                </Badge>
+                                                {vacantBuildingsData.quarterMile.totalViolations > 0 && (
+                                                  <Badge variant="default" className="text-xs">
+                                                    {vacantBuildingsData.quarterMile.uniqueAddresses} within &frac14; mi
+                                                  </Badge>
+                                                )}
+                                              </>
+                                            ) : (
+                                              <Badge variant="secondary" className="text-xs">None within &frac12; mi</Badge>
+                                            )
+                                          ) : (
+                                            <Badge variant="secondary" className="text-xs">Not Available</Badge>
+                                          )}
+                                        </div>
+                                      )}
+                                      <span className="text-muted-foreground text-sm">{isVacantBuildingsOpen ? '▼' : '▶'}</span>
+                                    </div>
+                                  </div>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent>
+                                  <div className="px-4 pb-4 space-y-4">
+                                    {isLoadingVacantBuildings ? (
+                                      <p className="text-sm text-muted-foreground">Loading vacant building data...</p>
+                                    ) : vacantBuildingsData && vacantBuildingsData.totalViolations > 0 ? (
+                                      <>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                          <div className="p-3 rounded-lg bg-secondary border border-orange-200 text-center" data-testid="metric-vacant-quarter-violations">
+                                            <p className="text-xs text-muted-foreground mb-1">&frac14; Mile Violations</p>
+                                            <p className="text-lg font-bold text-muted-foreground">{vacantBuildingsData.quarterMile.totalViolations}</p>
+                                          </div>
+                                          <div className="p-3 rounded-lg bg-secondary border border-orange-200 text-center" data-testid="metric-vacant-quarter-buildings">
+                                            <p className="text-xs text-muted-foreground mb-1">&frac14; Mile Buildings</p>
+                                            <p className="text-lg font-bold text-muted-foreground">{vacantBuildingsData.quarterMile.uniqueAddresses}</p>
+                                          </div>
+                                          <div className="p-3 rounded-lg bg-muted border border-border text-center" data-testid="metric-vacant-half-violations">
+                                            <p className="text-xs text-muted-foreground mb-1">&frac12; Mile Violations</p>
+                                            <p className="text-lg font-bold">{vacantBuildingsData.quarterMile.totalViolations + vacantBuildingsData.halfMile.totalViolations}</p>
+                                          </div>
+                                          <div className="p-3 rounded-lg bg-muted border border-border text-center" data-testid="metric-vacant-half-buildings">
+                                            <p className="text-xs text-muted-foreground mb-1">&frac12; Mile Buildings</p>
+                                            <p className="text-lg font-bold">{vacantBuildingsData.totalUniqueAddresses}</p>
+                                          </div>
+                                        </div>
+
+                                        {/* Quarter Mile Details */}
+                                        {vacantBuildingsData.quarterMile.violations.length > 0 && (
+                                          <div className="space-y-2">
+                                            <h4 className="chead">
+                                              <Badge variant="default" className="text-xs">Within &frac14; Mile</Badge>
+                                              <span className="text-muted-foreground font-normal">({vacantBuildingsData.quarterMile.totalViolations} violation{vacantBuildingsData.quarterMile.totalViolations !== 1 ? 's' : ''})</span>
+                                            </h4>
+                                            <div className="space-y-2">
+                                              {(() => {
+                                                const grouped = vacantBuildingsData.quarterMile.violations.reduce((acc: Record<string, typeof vacantBuildingsData.quarterMile.violations>, v) => {
+                                                  if (!acc[v.address]) acc[v.address] = [];
+                                                  acc[v.address].push(v);
+                                                  return acc;
+                                                }, {});
+                                                return Object.entries(grouped).map(([address, violations]) => (
+                                                  <div key={address} className="p-3 rounded-lg border bg-card text-card-foreground">
+                                                    <div className="flex items-start justify-between gap-2 flex-wrap">
+                                                      <div className="flex-1 min-w-0">
+                                                        <a
+                                                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address + ', Chicago, IL')}`}
+                                                          target="_blank"
+                                                          rel="noopener noreferrer"
+                                                          className="text-sm font-semibold text-primary hover:underline"
+                                                          data-testid={`link-vacant-address-${address.replace(/\s+/g, '-')}`}
+                                                        >
+                                                          {address}
+                                                        </a>
+                                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                                          {violations.length} violation{violations.length !== 1 ? 's' : ''} • Owner: {violations[0].entity || 'Unknown'}
+                                                        </p>
+                                                      </div>
+                                                      {violations.some(v => v.currentAmountDue > 0) && (
+                                                        <Badge variant="destructive" className="text-xs">
+                                                          ${violations.reduce((sum, v) => sum + Math.max(0, v.currentAmountDue), 0).toLocaleString()} due
+                                                        </Badge>
+                                                      )}
+                                                    </div>
+                                                    <div className="mt-2 space-y-1">
+                                                      {violations.slice(0, 3).map((v, i) => (
+                                                        <div key={i} className="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-0.5">
+                                                          <span>{v.issuedDate ? new Date(v.issuedDate).toLocaleDateString() : 'No date'}</span>
+                                                          <span className="truncate max-w-[250px]">{v.violationType.split('|')[0].trim()}</span>
+                                                          <span className={v.disposition.toLowerCase().includes('liable') ? 'text-foreground font-medium' : ''}>
+                                                            {v.disposition}
+                                                          </span>
+                                                        </div>
+                                                      ))}
+                                                      {violations.length > 3 && (
+                                                        <p className="text-xs text-muted-foreground">+{violations.length - 3} more violation{violations.length - 3 !== 1 ? 's' : ''}</p>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                ));
+                                              })()}
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        {/* Half Mile Details */}
+                                        {vacantBuildingsData.halfMile.violations.length > 0 && (
+                                          <div className="space-y-2">
+                                            <h4 className="chead">
+                                              <Badge variant="outline" className="text-xs">&frac14; - &frac12; Mile</Badge>
+                                              <span className="text-muted-foreground font-normal">({vacantBuildingsData.halfMile.totalViolations} violation{vacantBuildingsData.halfMile.totalViolations !== 1 ? 's' : ''})</span>
+                                            </h4>
+                                            <div className="space-y-2">
+                                              {(() => {
+                                                const grouped = vacantBuildingsData.halfMile.violations.reduce((acc: Record<string, typeof vacantBuildingsData.halfMile.violations>, v) => {
+                                                  if (!acc[v.address]) acc[v.address] = [];
+                                                  acc[v.address].push(v);
+                                                  return acc;
+                                                }, {});
+                                                return Object.entries(grouped).map(([address, violations]) => (
+                                                  <div key={address} className="p-3 rounded-lg border bg-card text-card-foreground">
+                                                    <div className="flex items-start justify-between gap-2 flex-wrap">
+                                                      <div className="flex-1 min-w-0">
+                                                        <a
+                                                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address + ', Chicago, IL')}`}
+                                                          target="_blank"
+                                                          rel="noopener noreferrer"
+                                                          className="text-sm font-semibold text-primary hover:underline"
+                                                          data-testid={`link-vacant-address-half-${address.replace(/\s+/g, '-')}`}
+                                                        >
+                                                          {address}
+                                                        </a>
+                                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                                          {violations.length} violation{violations.length !== 1 ? 's' : ''} • Owner: {violations[0].entity || 'Unknown'}
+                                                        </p>
+                                                      </div>
+                                                      {violations.some(v => v.currentAmountDue > 0) && (
+                                                        <Badge variant="destructive" className="text-xs">
+                                                          ${violations.reduce((sum, v) => sum + Math.max(0, v.currentAmountDue), 0).toLocaleString()} due
+                                                        </Badge>
+                                                      )}
+                                                    </div>
+                                                    <div className="mt-2 space-y-1">
+                                                      {violations.slice(0, 3).map((v, i) => (
+                                                        <div key={i} className="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-0.5">
+                                                          <span>{v.issuedDate ? new Date(v.issuedDate).toLocaleDateString() : 'No date'}</span>
+                                                          <span className="truncate max-w-[250px]">{v.violationType.split('|')[0].trim()}</span>
+                                                          <span className={v.disposition.toLowerCase().includes('liable') ? 'text-foreground font-medium' : ''}>
+                                                            {v.disposition}
+                                                          </span>
+                                                        </div>
+                                                      ))}
+                                                      {violations.length > 3 && (
+                                                        <p className="text-xs text-muted-foreground">+{violations.length - 3} more violation{violations.length - 3 !== 1 ? 's' : ''}</p>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                ));
+                                              })()}
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        <p className="text-xs text-muted-foreground pt-2 border-t border-border">
+                                          Source: Chicago Data Portal - Vacant and Abandoned Buildings Violations (bank-owned properties since 2011)
+                                        </p>
+                                      </>
+                                    ) : vacantBuildingsData && vacantBuildingsData.totalViolations === 0 ? (
+                                      <p className="text-sm text-muted-foreground">No vacant or abandoned building violations found within &frac12; mile of this property.</p>
+                                    ) : (
+                                      <p className="text-sm text-muted-foreground">Unable to load vacant building data</p>
+                                    )}
+                                  </div>
+                                </CollapsibleContent>
+                              </Collapsible>
                               </div>
                             )}
 
@@ -14421,13 +14127,18 @@ export default function RunDetail() {
                       </CollapsibleContent>
                     </Collapsible>
 
+                  </div>
+          </motion.div>
+          </AccordionSection>
+
+                    <AccordionSection {...accProps("schools")}>
                     {/* Schools */}
-                    <Collapsible id="section-schools" open={isSchoolsOpen} onOpenChange={setIsSchoolsOpen}>
+                    <Collapsible id="schools-content" open={isSchoolsOpen} onOpenChange={setIsSchoolsOpen}>
                       <CollapsibleTrigger asChild>
                         <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-schools-section">
                           <h3 className="chead chead-icon">
                             <GraduationCap className="w-4 h-4" />
-                            Schools
+                            Schools &amp; Childcare
                           </h3>
                           <div className="flex items-center gap-2">
                             {!isSchoolsOpen && (
@@ -14465,11 +14176,7 @@ export default function RunDetail() {
                       <CollapsibleContent>
                         <div className="px-4 pb-4 pt-1">
                           {isLoadingSchools ? (
-                            <div className="space-y-2">
-                              {[1, 2, 3].map(i => (
-                                <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
-                              ))}
-                            </div>
+                            <p className="text-sm text-muted-foreground">Loading...</p>
                           ) : (() => {
                             // ---- data prep ----
                             const otherIds = new Set<string>([
@@ -14486,38 +14193,17 @@ export default function RunDetail() {
                             const noSlotsDesert = dcData != null && cps == null && dcData.status === 'desert';
                             const dcCat: 'desert' | 'underserved' | 'adequate' | 'plentiful' | null =
                               cps != null ? (cps > 3.0 ? 'desert' : cps >= 1.5 ? 'underserved' : cps >= 1.0 ? 'adequate' : 'plentiful') : noSlotsDesert ? 'desert' : null;
-                            const dcTight = dcCat === 'desert' || dcCat === 'underserved';
                             const dcGap = dcData ? Math.round(dcData.childrenUnder5 / 1.5 - dcData.licensedSlots) : 0;
-                            const dcTierWord = dcCat === 'desert' ? 'a childcare desert' : dcCat === 'underserved' ? 'underserved' : dcCat === 'adequate' ? 'adequate' : 'plentiful';
+                            const schoolSubsections = buildSubsectionNumbers([
+                              ['childcare', true],
+                              ['elementary', elem.length > 0],
+                              ['middle', middle.length > 0],
+                              ['high', high.length > 0],
+                            ]);
                             const elemRate = levelRating(elem);
                             const highRate = levelRating(high);
                             const elemClosest = closestSchool(elem);
                             const highClosest = closestSchool(high);
-                            const elemStrongCount = elem.filter((s: any) => ratingScore(s.overallRating) >= 4).length;
-                            const schoolsStrong = elem.length > 0 && elemRate?.label === 'Strong';
-                            const jumpTo = (id: string) => revealAnchor(id);
-                            const jumpChip = (id: string, label: string) => (
-                              <button type="button" className="jump" onClick={() => jumpTo(id)}>
-                                <svg viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>{label}
-                              </button>
-                            );
-                            // ---- takeaway headline ----
-                            const headline = schoolsStrong && dcTight
-                              ? 'Strong schools all around — but licensed daycare is genuinely tight for the youngest families.'
-                              : schoolsStrong && dcCat && !dcTight
-                                ? 'Strong schools and daycare coverage that holds up — a solid setup for families.'
-                                : !schoolsStrong && elem.length > 0 && dcTight
-                                  ? 'Neither schools nor daycare is a slam dunk here — check both level by level.'
-                                  : schoolsStrong
-                                    ? 'Strong schools all around.'
-                                    : elem.length > 0 || high.length > 0
-                                      ? 'A mixed schools picture — worth a closer look level by level.'
-                                      : dcTight
-                                        ? 'Licensed daycare is tight here, and no CPS schools sit within 1.5 miles.'
-                                        : dcCat
-                                          ? 'Daycare coverage holds up, but no CPS schools sit within 1.5 miles.'
-                                          : null;
-                            const hasTakeaway = headline !== null && (dcCat !== null || elem.length > 0 || high.length > 0);
                             const gradIcon = <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 2 6 2s6-1 6-2v-5"/></svg>;
                             const glGradIcon = <svg viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 2 6 2s6-1 6-2v-5"/></svg>;
                             const rateClass = (b?: 'good' | 'caution' | 'bad') => b === 'caution' ? ' cau' : b === 'bad' ? ' bad' : '';
@@ -14539,6 +14225,14 @@ export default function RunDetail() {
                             );
                             return (
                               <div className="schbox" id="print-section-schools-daycare" data-testid="section-schools-daycare">
+                                <div className="kyp-blocks hero" data-testid="schools-childcare-facts">
+                                  <div className={`kyp-block ${dcCat === 'desert' ? 'red' : dcCat === 'underserved' ? 'orange' : dcCat ? 'grn' : 'ind'}`}>
+                                    <div className="bv">{cps != null ? cps.toFixed(1) : dcData?.status === 'desert' ? '0 slots' : '—'}</div>
+                                    <div><div className="bl">Children under 5 per licensed slot</div><div className="bd">ZIP {facts?.zipCode || 'unavailable'} · INCCRRA band: {dcCat || 'not available'}</div></div>
+                                  </div>
+                                  <div className="kyp-block dark"><div className="bv">{elem.length}</div><div><div className="bl">Elementary within {radius} mi</div><div className="bd">{elem.filter((s: any) => s.attendanceBoundary).length} attendance boundary · {elem.filter((s: any) => !s.attendanceBoundary).length} open enrollment</div></div></div>
+                                  <div className="kyp-block dark"><div className="bv">{high.length}</div><div><div className="bl">High schools within {radius} mi</div><div className="bd">{high.filter((s: any) => s.attendanceBoundary).length} with an attendance boundary in this radius</div></div></div>
+                                </div>
                                 <div className="sh">
                                   <span className="sq" />
                                   <span className="t">Schools &amp; Day Care</span>
@@ -14549,66 +14243,11 @@ export default function RunDetail() {
                                   </span>
                                 </div>
 
-                                {/* ---- Takeaway (derived, first) ---- */}
-                                {hasTakeaway && (
-                                  <div className="crm-take" data-testid="schools-takeaway">
-                                    <div className="crm-takeh">
-                                      <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V18h6v-1.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z"/><path d="M9 21h6"/></svg>
-                                      Takeaway
-                                    </div>
-                                    <div className="crm-taket">{headline}</div>
-                                    <div className="crm-conn">
-                                      {(!dcCat || !dcData) && (
-                                        <div className="crm-cn i">
-                                          <span className="dt" />
-                                          <span className="tx"><b>Daycare data unavailable.</b> Licensed childcare supply data isn't available for this {childcareViewMode === 'zip' ? 'ZIP code' : 'neighborhood'} — try the other view below.</span>{jumpChip('daycare', 'Day care')}
-                                        </div>
-                                      )}
-                                      {dcCat && dcData && (
-                                        <div className={`crm-cn ${dcCat === 'desert' || dcCat === 'underserved' ? 'c' : dcCat === 'plentiful' ? 'g' : 'i'}`}>
-                                          <span className="dt" />
-                                          <span className="tx">
-                                            {dcTight
-                                              ? <><b>Daycare is the weak spot.</b> The area is {dcTierWord} — about <b>{cps != null ? cps.toFixed(1) : dcData.childrenUnder5.toLocaleString()}</b>{cps != null ? ' children under 5 for every licensed slot' : ' children under 5 with no licensed slots'}{dcGap > 0 ? <>, a rough <b>{dcGap.toLocaleString()}-slot gap</b> to reach adequate coverage</> : null}. Families needing infant/toddler care should expect waitlists.</>
-                                              : <><b>Daycare holds up.</b> Coverage is {dcTierWord} — about {cps?.toFixed(1)} children under 5 per licensed slot, {dcCat === 'plentiful' ? 'more supply than demand on paper' : 'roughly in balance with demand'}.</>}
-                                           </span>{jumpChip('daycare', 'Day care')}
-                                        </div>
-                                      )}
-                                      {elem.length > 0 && (
-                                        <div className="crm-cn i">
-                                          <span className="dt" />
-                                          <span className="tx">
-                                            <b>{elem.length} elementary schools within {radius} mi.</b> {elem.filter((s: any) => s.attendanceBoundary).length} have an attendance boundary{elemStrongCount > 0 ? `; ${elemStrongCount} are rated Level 1 or 1+` : ''}. Whether this address falls within a boundary has not been checked.
-                                           </span>{jumpChip('elementary', 'Elementary')}
-                                        </div>
-                                      )}
-                                      {elem.length === 0 && (
-                                        <div className="crm-cn i">
-                                          <span className="dt" />
-                                          <span className="tx"><b>No elementary schools within {radius} mi.</b> This search does not determine which elementary school serves this address.</span>
-                                        </div>
-                                      )}
-                                      {high.length === 0 && (
-                                        <div className="crm-cn i">
-                                          <span className="dt" />
-                                          <span className="tx"><b>No high schools within {radius} mi.</b> This search does not determine which high school serves this address.</span>
-                                        </div>
-                                      )}
-                                      {high.length > 0 && (
-                                        <div className="crm-cn i">
-                                          <span className="dt" />
-                                          <span className="tx"><b>{high.length} high schools within {radius} mi.</b> {high.filter((s: any) => s.attendanceBoundary).length} have an attendance boundary in this radius. Whether this address falls within one has not been checked.</span>{jumpChip('highschools', 'High schools')}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-
                                 {/* ---- Day Care ---- */}
-                                <div className="subwrap" id="daycare" style={{ marginTop: hasTakeaway ? 2 : 0 }}>
+                                <div className="subwrap" id="daycare">
                                   <div className="ssh">
                                     <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="5" r="3"/><path d="M9 20v-5l-2 1v-4a5 5 0 0 1 10 0v4l-2-1v5"/></svg>
-                                    <span className="t">Day Care</span>
+                                    <KypSubhead subsection={schoolSubsections.childcare}><span className="lbl">Childcare</span></KypSubhead>
                                     <span className="sub">licensed early-childhood supply</span>
                                   </div>
                                   <div className="toggle">
@@ -14625,7 +14264,7 @@ export default function RunDetail() {
                                     ZIP <b>{facts?.zipCode || 'N/A'}</b> · Neighborhood <b>{facts?.communityArea || 'N/A'}</b>{facts?.ward ? <> · Ward <b>{facts.ward}</b></> : null} — boundaries differ, so metrics may vary between views.
                                   </div>
                                   {(childcareViewMode === 'zip' ? isLoadingChildcare : isLoadingCommunityChildcare) ? (
-                                    <div className="h-24 rounded-lg bg-muted animate-pulse" />
+                                    <p className="text-sm text-muted-foreground">Loading...</p>
                                   ) : dcData && dcCat ? (
                                     <div className="dcard" data-testid="childcare-demand-meter">
                                       <div className="dctop">
@@ -14660,13 +14299,15 @@ export default function RunDetail() {
                                       </div>
                                     </div>
                                   ) : (
-                                    <p className="text-sm text-muted-foreground">Childcare access data not available for this {childcareViewMode === 'zip' ? 'ZIP code' : 'neighborhood'}.</p>
+                            <p className="text-sm text-muted-foreground">{(childcareViewMode === 'zip' ? isChildcareError : isCommunityChildcareError) ? 'Daycare data unavailable: the source could not be reached.' : `Daycare data unavailable for this ${childcareViewMode === 'zip' ? 'ZIP code' : 'neighborhood'}.`}</p>
                                   )}
                                 </div>
 
                                 {/* ---- Schools at a glance ---- */}
                                 {!facts?.lat ? (
                                   <p className="text-sm text-muted-foreground mt-5">Geocoding required to find nearby schools.</p>
+                                ) : isSchoolsError || !schoolsData ? (
+                                  <p className="text-sm text-muted-foreground mt-5">Unable to load nearby schools. School coverage is unknown, not zero.</p>
                                 ) : elem.length + middle.length + high.length === 0 ? (
                                   <p className="text-sm text-muted-foreground mt-5">No CPS schools found within {radius} miles.</p>
                                 ) : (
@@ -14717,7 +14358,7 @@ export default function RunDetail() {
                                       <div className="subwrap" id="elementary">
                                         <div className="ssh">
                                           {gradIcon}
-                                          <span className="t">Elementary Schools</span>
+                                          <KypSubhead subsection={schoolSubsections.elementary}><span className="lbl">Elementary</span></KypSubhead>
                                           <span className="sub">{elem.length} within {radius} mi</span>
                                         </div>
                                         <div>{elem.map((s: any) => schoolRow(s))}</div>
@@ -14729,7 +14370,7 @@ export default function RunDetail() {
                                       <div className="subwrap" id="middleschools">
                                         <div className="ssh">
                                           {gradIcon}
-                                          <span className="t">Middle Schools</span>
+                                          <KypSubhead subsection={schoolSubsections.middle}><span className="lbl">Middle</span></KypSubhead>
                                           <span className="sub">{middle.length} within {radius} mi</span>
                                         </div>
                                         <div>{middle.map((s: any) => schoolRow(s))}</div>
@@ -14741,7 +14382,7 @@ export default function RunDetail() {
                                       <div className="subwrap" id="highschools">
                                         <div className="ssh">
                                           {gradIcon}
-                                          <span className="t">High Schools</span>
+                                          <KypSubhead subsection={schoolSubsections.high}><span className="lbl">High schools</span></KypSubhead>
                                           <span className="sub">{high.length} within {radius} mi</span>
                                         </div>
                                         <div>{high.map((s: any) => schoolRow(s))}</div>
@@ -14759,366 +14400,16 @@ export default function RunDetail() {
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
+                    </AccordionSection>
 
-                    {/* Vacant & Abandoned Buildings */}
-                    <Collapsible open={isVacantBuildingsOpen} onOpenChange={setIsVacantBuildingsOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                          <h3 className="chead chead-icon">
-                            <Building2 className="w-4 h-4" />
-                            Vacant & Abandoned Buildings
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            {!isVacantBuildingsOpen && (
-                              <div className="flex flex-wrap gap-1.5">
-                                {isLoadingVacantBuildings ? (
-                                  <Badge variant="secondary" className="text-xs">Loading...</Badge>
-                                ) : vacantBuildingsData ? (
-                                  vacantBuildingsData.totalViolations > 0 ? (
-                                    <>
-                                      <Badge variant="secondary" className="text-xs">
-                                        {vacantBuildingsData.totalUniqueAddresses} Building{vacantBuildingsData.totalUniqueAddresses !== 1 ? 's' : ''}
-                                      </Badge>
-                                      <Badge variant="secondary" className="text-xs">
-                                        {vacantBuildingsData.totalViolations} Violation{vacantBuildingsData.totalViolations !== 1 ? 's' : ''}
-                                      </Badge>
-                                      {vacantBuildingsData.quarterMile.totalViolations > 0 && (
-                                        <Badge variant="default" className="text-xs">
-                                          {vacantBuildingsData.quarterMile.uniqueAddresses} within &frac14; mi
-                                        </Badge>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <Badge variant="secondary" className="text-xs">None within &frac12; mi</Badge>
-                                  )
-                                ) : (
-                                  <Badge variant="secondary" className="text-xs">Not Available</Badge>
-                                )}
-                              </div>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isVacantBuildingsOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="px-4 pb-4 space-y-4">
-                          {isLoadingVacantBuildings ? (
-                            <p className="text-sm text-muted-foreground">Loading vacant building data...</p>
-                          ) : vacantBuildingsData && vacantBuildingsData.totalViolations > 0 ? (
-                            <>
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <div className="p-3 rounded-lg bg-secondary border border-orange-200 text-center" data-testid="metric-vacant-quarter-violations">
-                                  <p className="text-xs text-muted-foreground mb-1">&frac14; Mile Violations</p>
-                                  <p className="text-lg font-bold text-muted-foreground">{vacantBuildingsData.quarterMile.totalViolations}</p>
-                                </div>
-                                <div className="p-3 rounded-lg bg-secondary border border-orange-200 text-center" data-testid="metric-vacant-quarter-buildings">
-                                  <p className="text-xs text-muted-foreground mb-1">&frac14; Mile Buildings</p>
-                                  <p className="text-lg font-bold text-muted-foreground">{vacantBuildingsData.quarterMile.uniqueAddresses}</p>
-                                </div>
-                                <div className="p-3 rounded-lg bg-muted border border-border text-center" data-testid="metric-vacant-half-violations">
-                                  <p className="text-xs text-muted-foreground mb-1">&frac12; Mile Violations</p>
-                                  <p className="text-lg font-bold">{vacantBuildingsData.quarterMile.totalViolations + vacantBuildingsData.halfMile.totalViolations}</p>
-                                </div>
-                                <div className="p-3 rounded-lg bg-muted border border-border text-center" data-testid="metric-vacant-half-buildings">
-                                  <p className="text-xs text-muted-foreground mb-1">&frac12; Mile Buildings</p>
-                                  <p className="text-lg font-bold">{vacantBuildingsData.totalUniqueAddresses}</p>
-                                </div>
-                              </div>
-
-                              {/* Quarter Mile Details */}
-                              {vacantBuildingsData.quarterMile.violations.length > 0 && (
-                                <div className="space-y-2">
-                                  <h4 className="chead">
-                                    <Badge variant="default" className="text-xs">Within &frac14; Mile</Badge>
-                                    <span className="text-muted-foreground font-normal">({vacantBuildingsData.quarterMile.totalViolations} violation{vacantBuildingsData.quarterMile.totalViolations !== 1 ? 's' : ''})</span>
-                                  </h4>
-                                  <div className="space-y-2">
-                                    {(() => {
-                                      const grouped = vacantBuildingsData.quarterMile.violations.reduce((acc: Record<string, typeof vacantBuildingsData.quarterMile.violations>, v) => {
-                                        if (!acc[v.address]) acc[v.address] = [];
-                                        acc[v.address].push(v);
-                                        return acc;
-                                      }, {});
-                                      return Object.entries(grouped).map(([address, violations]) => (
-                                        <div key={address} className="p-3 rounded-lg border bg-card text-card-foreground">
-                                          <div className="flex items-start justify-between gap-2 flex-wrap">
-                                            <div className="flex-1 min-w-0">
-                                              <a
-                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address + ', Chicago, IL')}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-sm font-semibold text-primary hover:underline"
-                                                data-testid={`link-vacant-address-${address.replace(/\s+/g, '-')}`}
-                                              >
-                                                {address}
-                                              </a>
-                                              <p className="text-xs text-muted-foreground mt-0.5">
-                                                {violations.length} violation{violations.length !== 1 ? 's' : ''} • Owner: {violations[0].entity || 'Unknown'}
-                                              </p>
-                                            </div>
-                                            {violations.some(v => v.currentAmountDue > 0) && (
-                                              <Badge variant="destructive" className="text-xs">
-                                                ${violations.reduce((sum, v) => sum + Math.max(0, v.currentAmountDue), 0).toLocaleString()} due
-                                              </Badge>
-                                            )}
-                                          </div>
-                                          <div className="mt-2 space-y-1">
-                                            {violations.slice(0, 3).map((v, i) => (
-                                              <div key={i} className="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-0.5">
-                                                <span>{v.issuedDate ? new Date(v.issuedDate).toLocaleDateString() : 'No date'}</span>
-                                                <span className="truncate max-w-[250px]">{v.violationType.split('|')[0].trim()}</span>
-                                                <span className={v.disposition.toLowerCase().includes('liable') ? 'text-foreground font-medium' : ''}>
-                                                  {v.disposition}
-                                                </span>
-                                              </div>
-                                            ))}
-                                            {violations.length > 3 && (
-                                              <p className="text-xs text-muted-foreground">+{violations.length - 3} more violation{violations.length - 3 !== 1 ? 's' : ''}</p>
-                                            )}
-                                          </div>
-                                        </div>
-                                      ));
-                                    })()}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Half Mile Details */}
-                              {vacantBuildingsData.halfMile.violations.length > 0 && (
-                                <div className="space-y-2">
-                                  <h4 className="chead">
-                                    <Badge variant="outline" className="text-xs">&frac14; - &frac12; Mile</Badge>
-                                    <span className="text-muted-foreground font-normal">({vacantBuildingsData.halfMile.totalViolations} violation{vacantBuildingsData.halfMile.totalViolations !== 1 ? 's' : ''})</span>
-                                  </h4>
-                                  <div className="space-y-2">
-                                    {(() => {
-                                      const grouped = vacantBuildingsData.halfMile.violations.reduce((acc: Record<string, typeof vacantBuildingsData.halfMile.violations>, v) => {
-                                        if (!acc[v.address]) acc[v.address] = [];
-                                        acc[v.address].push(v);
-                                        return acc;
-                                      }, {});
-                                      return Object.entries(grouped).map(([address, violations]) => (
-                                        <div key={address} className="p-3 rounded-lg border bg-card text-card-foreground">
-                                          <div className="flex items-start justify-between gap-2 flex-wrap">
-                                            <div className="flex-1 min-w-0">
-                                              <a
-                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address + ', Chicago, IL')}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-sm font-semibold text-primary hover:underline"
-                                                data-testid={`link-vacant-address-half-${address.replace(/\s+/g, '-')}`}
-                                              >
-                                                {address}
-                                              </a>
-                                              <p className="text-xs text-muted-foreground mt-0.5">
-                                                {violations.length} violation{violations.length !== 1 ? 's' : ''} • Owner: {violations[0].entity || 'Unknown'}
-                                              </p>
-                                            </div>
-                                            {violations.some(v => v.currentAmountDue > 0) && (
-                                              <Badge variant="destructive" className="text-xs">
-                                                ${violations.reduce((sum, v) => sum + Math.max(0, v.currentAmountDue), 0).toLocaleString()} due
-                                              </Badge>
-                                            )}
-                                          </div>
-                                          <div className="mt-2 space-y-1">
-                                            {violations.slice(0, 3).map((v, i) => (
-                                              <div key={i} className="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-0.5">
-                                                <span>{v.issuedDate ? new Date(v.issuedDate).toLocaleDateString() : 'No date'}</span>
-                                                <span className="truncate max-w-[250px]">{v.violationType.split('|')[0].trim()}</span>
-                                                <span className={v.disposition.toLowerCase().includes('liable') ? 'text-foreground font-medium' : ''}>
-                                                  {v.disposition}
-                                                </span>
-                                              </div>
-                                            ))}
-                                            {violations.length > 3 && (
-                                              <p className="text-xs text-muted-foreground">+{violations.length - 3} more violation{violations.length - 3 !== 1 ? 's' : ''}</p>
-                                            )}
-                                          </div>
-                                        </div>
-                                      ));
-                                    })()}
-                                  </div>
-                                </div>
-                              )}
-
-                              <p className="text-xs text-muted-foreground pt-2 border-t border-border">
-                                Source: Chicago Data Portal - Vacant and Abandoned Buildings Violations (bank-owned properties since 2011)
-                              </p>
-                            </>
-                          ) : vacantBuildingsData && vacantBuildingsData.totalViolations === 0 ? (
-                            <p className="text-sm text-muted-foreground">No vacant or abandoned building violations found within &frac12; mile of this property.</p>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">Unable to load vacant building data</p>
-                          )}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-
-                    {/* City-Owned Lots */}
-                    <Collapsible open={isCityOwnedLotsOpen} onOpenChange={setIsCityOwnedLotsOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                          <h3 className="chead chead-icon">
-                            <Building2 className="w-4 h-4" />
-                            City-Owned Lots
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            {!isCityOwnedLotsOpen && (
-                              <div className="flex flex-wrap gap-1.5">
-                                {isLoadingCityOwnedLots ? (
-                                  <Badge variant="secondary" className="text-xs">Loading...</Badge>
-                                ) : cityOwnedLotsData ? (
-                                  cityOwnedLotsData.count > 0 ? (
-                                    <>
-                                      <Badge variant="secondary" className="text-xs">
-                                        {cityOwnedLotsData.count} within &frac12; mi
-                                      </Badge>
-                                      {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length > 0 && (
-                                        <Badge variant="default" className="text-xs">
-                                          {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length} within &frac14; mi
-                                        </Badge>
-                                      )}
-                                      {cityOwnedLotsData.lots.some(l => l.salesStatus === 'For Sale') && (
-                                        <Badge className="text-xs bg-green-600 text-white border-green-600">For Sale Available</Badge>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <Badge variant="secondary" className="text-xs">None within &frac12; mi</Badge>
-                                  )
-                                ) : (
-                                  <Badge variant="secondary" className="text-xs">Not Available</Badge>
-                                )}
-                              </div>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isCityOwnedLotsOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="px-4 pb-4 space-y-4">
-                          {isLoadingCityOwnedLots ? (
-                            <p className="text-sm text-muted-foreground">Loading city-owned lot data...</p>
-                          ) : cityOwnedLotsData && cityOwnedLotsData.count > 0 ? (
-                            <>
-                              <div className="dir-facts dir-facts-4">
-                                <div className="dir-fact">
-                                  <div className="dir-fact-top"><span className="dir-fact-icon"><MapPin className="w-3 h-3" /></span><span className="dir-fact-label">&frac14; Mile Lots</span></div>
-                                  <p className="dir-fact-value">{cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length} lots</p><p className="dir-fact-qualifier">within ¼ mile</p>
-                                </div>
-                                <div className="dir-fact">
-                                  <div className="dir-fact-top"><span className="dir-fact-icon"><MapPin className="w-3 h-3" /></span><span className="dir-fact-label">&frac12; Mile Lots</span></div>
-                                  <p className="dir-fact-value">{cityOwnedLotsData.count} lots</p><p className="dir-fact-qualifier">within ½ mile</p>
-                                </div>
-                                <div className="dir-fact">
-                                  <div className="dir-fact-top"><span className="dir-fact-icon"><Ruler className="w-3 h-3" /></span><span className="dir-fact-label">Nearest</span></div>
-                                  <p className="dir-fact-value">{Math.round(cityOwnedLotsData.lots[0].distanceFt).toLocaleString()} ft away</p><p className="dir-fact-qualifier">closest city-owned lot</p>
-                                </div>
-                                <div className="dir-fact">
-                                  <div className="dir-fact-top"><span className="dir-fact-icon"><Tag className="w-3 h-3" /></span><span className="dir-fact-label">For Sale</span></div>
-                                  <p className="dir-fact-value">{cityOwnedLotsData.lots.filter(l => l.salesStatus === 'For Sale').length} lots</p><p className="dir-fact-qualifier">currently available</p>
-                                </div>
-                              </div>
-
-                              {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length > 0 && (
-                                <div className="space-y-2">
-                                  <div className="lot-lbl">Within &frac14; Mile <span className="lot-pill">{cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length} lot{cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length !== 1 ? 's' : ''}</span></div>
-                                  <div className="space-y-2">
-                                    {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).map((lot, i) => (
-                                      <div key={i} className="dir-row" data-testid={`city-lot-quarter-${i}`}>
-                                        <div className="dir-row-body">
-                                          <div className="dir-name-line">
-                                            <a
-                                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((lot.address || '') + ', Chicago, IL')}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="dir-name hover:underline"
-                                            >
-                                              {lot.address || 'Unknown Address'}
-                                            </a>
-                                            <span className={`lot-st ${(lot.saleOfferingStatus || lot.salesStatus) === 'For Sale' ? 'avail' : ''}`}>{lot.saleOfferingStatus || lot.salesStatus}</span>
-                                          </div>
-                                          <p className="dir-meta">
-                                            {Math.round(lot.distanceFt).toLocaleString()} ft away
-                                            {lot.zoning ? ` · Zoned ${lot.zoning}` : ''}
-                                            {lot.sqFt ? ` · ${lot.sqFt.toLocaleString()} sq ft` : ''}
-                                          </p>
-                                        </div>
-                                        {(lot.landValue || lot.applicationUrl) && (
-                                          <div className="flex flex-col items-end gap-0.5 flex-none text-right">
-                                            {lot.landValue && <span className="lot-val">City est. ${lot.landValue.toLocaleString()}</span>}
-                                            {lot.applicationUrl && (
-                                              <a href={lot.applicationUrl} target="_blank" rel="noopener noreferrer" className="lot-apply hover:underline">
-                                                <ExternalLink className="w-3 h-3" /> Apply
-                                              </a>
-                                            )}
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).length > 0 && (
-                                <div className="space-y-2">
-                                  <div className="lot-lbl">&frac14; – &frac12; Mile <span className="lot-pill">{cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).length} lot{cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).length !== 1 ? 's' : ''}</span></div>
-                                  <div className="space-y-2">
-                                    {cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).map((lot, i) => (
-                                      <div key={i} className="dir-row" data-testid={`city-lot-half-${i}`}>
-                                        <div className="dir-row-body">
-                                          <div className="dir-name-line">
-                                            <a
-                                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((lot.address || '') + ', Chicago, IL')}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="dir-name hover:underline"
-                                            >
-                                              {lot.address || 'Unknown Address'}
-                                            </a>
-                                            <span className={`lot-st ${(lot.saleOfferingStatus || lot.salesStatus) === 'For Sale' ? 'avail' : ''}`}>{lot.saleOfferingStatus || lot.salesStatus}</span>
-                                          </div>
-                                          <p className="dir-meta">
-                                            {Math.round(lot.distanceFt).toLocaleString()} ft away
-                                            {lot.zoning ? ` · Zoned ${lot.zoning}` : ''}
-                                            {lot.sqFt ? ` · ${lot.sqFt.toLocaleString()} sq ft` : ''}
-                                          </p>
-                                        </div>
-                                        {(lot.landValue || lot.applicationUrl) && (
-                                          <div className="flex flex-col items-end gap-0.5 flex-none text-right">
-                                            {lot.landValue && <span className="lot-val">City est. ${lot.landValue.toLocaleString()}</span>}
-                                            {lot.applicationUrl && (
-                                              <a href={lot.applicationUrl} target="_blank" rel="noopener noreferrer" className="lot-apply hover:underline">
-                                                <ExternalLink className="w-3 h-3" /> Apply
-                                              </a>
-                                            )}
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              <p className="text-xs text-muted-foreground pt-2 border-t border-border">
-                                Source: City of Chicago Open Data — City-Owned Land Inventory (DPD)
-                              </p>
-                            </>
-                          ) : cityOwnedLotsData && cityOwnedLotsData.count === 0 ? (
-                            <p className="text-sm text-muted-foreground">No city-owned lots found within &frac12; mile of this property.</p>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">Unable to load city-owned lot data.</p>
-                          )}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-
+                    <AccordionSection {...accProps("entCulture")}>
                     {/* Entertainment & Culture */}
-                    <Collapsible id="section-entertainment" open={isEntertainmentSectionOpen} onOpenChange={setIsEntertainmentSectionOpen}>
+                    <Collapsible id="entertainment-content" open={isEntertainmentSectionOpen} onOpenChange={setIsEntertainmentSectionOpen}>
                       <CollapsibleTrigger asChild>
                         <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
                           <h3 className="chead chead-icon">
                             <Star className="w-4 h-4" />
-                            Entertainment & Culture
+                            Entertainment &amp; Culture
                           </h3>
                           <div className="flex items-center gap-2">
                             {!isEntertainmentSectionOpen && (
@@ -15173,106 +14464,48 @@ export default function RunDetail() {
                         </div>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                      <div className="ecbox seccard">
+                      <div className="ecbox seccard" id="print-section-entertainment-culture">
                       {(isLoadingMichelin || isLoadingJBA || isLoadingMurals || isLoadingDesignatedLandmarks || isLoadingArtGalleries) ? (
-                        <div className="space-y-2 pt-2">
-                          <Skeleton className="h-4 w-3/4" />
-                          <Skeleton className="h-4 w-1/2" />
-                          <Skeleton className="h-4 w-2/3" />
-                        </div>
+                        <p className="text-sm text-muted-foreground pt-2">Loading...</p>
                       ) : (() => {
                         const mich = michelinData?.restaurants ?? [];
                         const jba: any[] = jbaData?.restaurants ?? [];
                         const murals: any[] = muralsData?.murals ?? [];
                         const lms: any[] = designatedLandmarksData?.landmarks ?? [];
                         const gals: any[] = artGalleriesData?.galleries ?? [];
-                        const bibs = mich.filter((r: any) => r.rating === 'Bib Gourmand').length;
-                        const starred = mich.filter((r: any) => r.rating?.includes('Star')).length;
                         const jbaNames = new Set(jba.map((j: any) => j.name));
                         const muralRad = muralsData?.radiusMiles ?? 0.5;
                         const lmRad = designatedLandmarksData?.radiusMiles ?? 1;
                         const galRad = (artGalleriesData as any)?.radiusMiles ?? 1;
                         const nearestGal = gals.length ? gals[0] : null;
-                        const anyData = mich.length + jba.length + murals.length + lms.length + gals.length > 0;
-
-                        // Deterministic headline tiers
-                        const dense = mich.length >= 6 && (murals.length + lms.length) >= 3;
-                        const some = mich.length + jba.length > 0 && (murals.length + lms.length + gals.length) > 0;
-                        const headline = dense
-                          ? 'This is a destination dining-and-arts corridor — an unusually dense cluster of acclaimed restaurants, plus murals, landmarks and galleries, all within a mile.'
-                          : some
-                          ? 'A solid dining-and-culture mix — recognized restaurants plus public art and architecture within walking distance.'
-                          : mich.length + jba.length > 0
-                          ? 'Recognized dining nearby, with little registered public art or landmark architecture in the immediate area.'
-                          : murals.length + lms.length + gals.length > 0
-                          ? 'The draw here is culture over dining — public art and architecture nearby, but no guide-recognized restaurants within a mile.'
-                          : 'No guide-recognized restaurants, registered murals, landmarks or galleries within the search radius.';
-
-                        const rows: import('@/components/Takeaway').TakeawayRow[] = [];
-                        if (mich.length + jba.length > 0) {
-                          const topJba = jba[0];
-                          rows.push({
-                            tone: 'good',
-                            testId: 'jba-takeaway-summary',
-                            body: (
-                              <>
-                                <b>Dining is the standout.</b> {mich.length > 0 ? <>{mich.length} Michelin Guide restaurant{mich.length !== 1 ? 's' : ''} within a mile{bibs > 0 ? <> — {bibs} of them Bib Gourmand (the guide's great-value pick)</> : null}{starred > 0 ? <>, including {starred} starred</> : null}.</> : null}
-                                {topJba ? <> {topJba.name}, {topJba.distanceMiles} mi away, holds <b>{topJba.year} James Beard "{topJba.category}"</b> recognition.</> : null}
-                                {mich.length >= 6 ? <> That's a bona-fide food destination, not just a few good spots.</> : null}
-                              </>
-                            ),
-                            chip: mich.length > 0 ? { label: 'Restaurants', targetId: 'ec-michelin' } : jba.length > 0 ? { label: 'Restaurants', targetId: 'ec-jamesbeard' } : undefined,
-                          });
-                        }
-                        if (murals.length + lms.length + gals.length > 0) {
-                          rows.push({
-                            tone: 'insight',
-                            testId: 'murals-takeaway-summary',
-                            body: (
-                              <>
-                                <b>Culture beyond the table.</b>{' '}
-                                {murals.length > 0 ? <>{murals.length} registered public mural{murals.length !== 1 ? 's' : ''} within {muralRad === 0.5 ? 'a half-mile' : `${muralRad} mi`}</> : null}
-                                {murals.length > 0 && lms.length > 0 ? ', ' : null}
-                                {lms.length > 0 ? <>{lms.length} architectural landmark{lms.length !== 1 ? 's' : ''}{lms[0]?.dateBuilt ? <> (oldest built {lms[0].dateBuilt})</> : null}</> : null}
-                                {(murals.length > 0 || lms.length > 0) && nearestGal ? ', and ' : null}
-                                {nearestGal ? <>an art gallery at {nearestGal.distanceMiles} mi</> : null}
-                                {murals.length + lms.length + gals.length > 2 ? <> — an established creative neighborhood.</> : '.'}
-                              </>
-                            ),
-                            chip: murals.length > 0 ? { label: 'Culture', targetId: 'ec-murals' } : lms.length > 0 ? { label: 'Culture', targetId: 'ec-landmarks' } : undefined,
-                          });
-                        }
-                        if (anyData) {
-                          rows.push({
-                            tone: 'insight',
-                            testId: 'ec-take-meaning',
-                            body: dense || some ? (
-                              <>
-                                <b>What it means for the property.</b> This level of dining and culture is a real desirability and foot-traffic driver — a plus for residential appeal and for retail, hospitality or service uses. The trade-off of a dining hub is evening activity and parking pressure on the busiest blocks.
-                              </>
-                            ) : (
-                              <>
-                                <b>What it means for the property.</b> Nearby recognition adds some neighborhood appeal, but this isn't a dining-and-culture destination block — expect it to be a modest factor rather than a primary draw.
-                              </>
-                            ),
-                          });
-                        }
+                        const oldestLandmark = lms.filter((landmark: any) => landmark.dateBuilt).sort((a: any, b: any) => Number(a.dateBuilt) - Number(b.dateBuilt))[0];
+                        const notableArchitects = [...new Set(lms.map((landmark: any) => landmark.architect).filter(Boolean))].slice(0, 3);
+                        const cultureSubsections = buildSubsectionNumbers([
+                          ['michelin', true], ['jamesBeard', true], ['murals', true], ['landmarks', true], ['galleries', true],
+                        ]);
 
                         return (
                           <>
-                            {anyData && (
-                              <Takeaway
-                                testId="ec-takeaway"
-                                headline={headline}
-                                rows={rows}
-                              />
-                            )}
+                            <div className="kyp-blocks hero three" data-testid="ent-culture-facts">
+                              <div className="kyp-block ind">
+                                <div className="bv">{mich.length}</div>
+                                <div><div className="bl">Michelin Guide · 1 mi</div><div className="bd">{mich.length} of Chicago's {michelinData?.citywideTotal ?? '—'} listed restaurants</div></div>
+                              </div>
+                              <div className="kyp-block dark">
+                                <div className="bv">{lms.length}</div>
+                                <div><div className="bl">Landmarks · 1 mi</div><div className="bd">Oldest {oldestLandmark?.dateBuilt || 'year not reported'} · {notableArchitects.length ? notableArchitects.join(', ') : 'architects not reported'}</div></div>
+                              </div>
+                              <div className="kyp-block dark">
+                                <div className="bv">{gals.length}</div>
+                                <div><div className="bl">Art galleries · 1 mi</div><div className="bd">Nearest {nearestGal ? `${nearestGal.distanceMiles} mi` : 'none'} · City licence records</div></div>
+                              </div>
+                            </div>
 
                             {/* Michelin Guide Restaurants */}
-                            <div className="ec-sub" id="ec-michelin" style={{ marginTop: anyData ? undefined : 8 }}>
+                            <div className="ec-sub" id="ec-michelin" style={{ marginTop: mich.length + jba.length + murals.length + lms.length + gals.length > 0 ? undefined : 8 }}>
                               <div className="ssh" data-testid="trigger-michelin-sub">
                                 <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2s2-.9 2-2V2"/><path d="M5 11v11"/><path d="M13 2v20"/><path d="M13 8c0-3 1.8-6 4-6v20"/></svg>
-                                <span className="t">Michelin Guide Restaurants</span>
+                                <KypSubhead subsection={cultureSubsections.michelin}><span className="lbl">Michelin Guide</span></KypSubhead>
                                 <span className="rad">within 1 mi</span>
                                 {mich.length > 0 && <span className="chip">{michelinData!.total} recognized</span>}
                               </div>
@@ -15313,7 +14546,7 @@ export default function RunDetail() {
                                   <div className="src">Source: Michelin Guide Chicago</div>
                                 </div>
                               ) : (
-                                <p className="text-sm text-muted-foreground py-2">{!geocode.data?.lat ? 'Geocoding required for restaurant data' : 'No Michelin Guide restaurants found within 1 mile'}</p>
+                                <p className="text-sm text-muted-foreground py-2">{!geocode.data?.lat ? 'Geocoding required for restaurant data' : isMichelinError ? 'Unable to load Michelin Guide records.' : 'No Michelin Guide restaurants found within 1 mile'}</p>
                               )}
                             </div>
 
@@ -15321,9 +14554,9 @@ export default function RunDetail() {
                             <div className="ec-sub" id="ec-jamesbeard">
                               <div className="ssh" data-testid="trigger-jba-sub">
                                 <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9a6 6 0 0 0 12 0V4H6z"/><path d="M6 5H4a2 2 0 0 0 0 4h2"/><path d="M18 5h2a2 2 0 0 1 0 4h-2"/><path d="M12 15v4"/><path d="M8 22h8"/><path d="M10 19h4"/></svg>
-                                <span className="t">James Beard Award Winners</span>
+                                <KypSubhead subsection={cultureSubsections.jamesBeard}><span className="lbl">James Beard</span></KypSubhead>
                                 <span className="rad">within 1 mi</span>
-                                {jba.length > 0 && <span className="chip">{jbaData!.total} winner{jbaData!.total !== 1 ? 's' : ''}</span>}
+                                <span className="chip">{jba.length} of Chicago's {jbaData?.citywideTotal ?? '—'} citywide</span>
                               </div>
                               <div className="ssline" />
                               {jba.length > 0 ? (
@@ -15348,7 +14581,7 @@ export default function RunDetail() {
                                   <div className="src">Source: James Beard Foundation</div>
                                 </div>
                               ) : (
-                                <p className="text-sm text-muted-foreground py-2">{!geocode.data?.lat ? 'Geocoding required for restaurant data' : 'No James Beard Award winners found within 1 mile'}</p>
+                                <p className="text-sm text-muted-foreground py-2">{!geocode.data?.lat ? 'Geocoding required for restaurant data' : isJBAError ? 'Unable to load James Beard Foundation records.' : 'No James Beard Award winners within 1 mile.'}</p>
                               )}
                             </div>
 
@@ -15356,7 +14589,7 @@ export default function RunDetail() {
                             <div className="ec-sub" id="ec-murals">
                               <div className="ssh" data-testid="trigger-murals-sub">
                                 <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-.9-.5-1.3-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H16a5 5 0 0 0 5-5c0-5-4-9-9-9z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="10.5" r="1"/></svg>
-                                <span className="t">Registered Murals</span>
+                                <KypSubhead subsection={cultureSubsections.murals}><span className="lbl">Registered murals</span></KypSubhead>
                                 <span className="rad">within {muralRad} mi</span>
                                 {murals.length > 0 && <span className="chip">{muralsData!.total} mural{muralsData!.total !== 1 ? 's' : ''}</span>}
                               </div>
@@ -15384,7 +14617,7 @@ export default function RunDetail() {
                                   <div className="src">Source: Chicago Mural Registry (City of Chicago Data Portal)</div>
                                 </div>
                               ) : (
-                                <p className="text-sm text-muted-foreground py-2">{!geocode.data?.lat ? 'Geocoding required for mural data' : `No registered murals found within ${muralRad} miles`}</p>
+                                <p className="text-sm text-muted-foreground py-2">{!geocode.data?.lat ? 'Geocoding required for mural data' : isMuralsError ? 'Unable to load Chicago Mural Registry records.' : `No registered murals found within ${muralRad} miles`}</p>
                               )}
                             </div>
 
@@ -15392,7 +14625,7 @@ export default function RunDetail() {
                             <div className="ec-sub" id="ec-landmarks">
                               <div className="ssh" data-testid="trigger-landmarks-designated-sub">
                                 <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V10"/><path d="M9 21V10"/><path d="M15 21V10"/><path d="M19 21V10"/><path d="m3 10 9-7 9 7"/><path d="M3 10h18"/></svg>
-                                <span className="t">Architectural Landmarks</span>
+                                <KypSubhead subsection={cultureSubsections.landmarks}><span className="lbl">Architectural landmarks</span></KypSubhead>
                                 <span className="rad">within {lmRad} mi</span>
                                 {lms.length > 0 && <span className="chip">{designatedLandmarksData!.total} landmark{designatedLandmarksData!.total !== 1 ? 's' : ''}</span>}
                               </div>
@@ -15422,7 +14655,7 @@ export default function RunDetail() {
                                   <div className="src">Source: Chicago Landmarks (City of Chicago Data Portal)</div>
                                 </div>
                               ) : (
-                                <p className="text-sm text-muted-foreground py-2">{!geocode.data?.lat ? 'Geocoding required for landmark data' : 'No designated landmarks found within 1 mile'}</p>
+                                <p className="text-sm text-muted-foreground py-2">{!geocode.data?.lat ? 'Geocoding required for landmark data' : isDesignatedLandmarksError ? 'Unable to load Chicago Landmarks records.' : 'No designated landmarks found within 1 mile'}</p>
                               )}
                             </div>
 
@@ -15430,7 +14663,7 @@ export default function RunDetail() {
                             <div className="ec-sub" id="ec-galleries">
                               <div className="ssh" data-testid="trigger-art-galleries-sub">
                                 <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-4.5-4.5L6 21"/></svg>
-                                <span className="t">Art Galleries</span>
+                                <KypSubhead subsection={cultureSubsections.galleries}><span className="lbl">Art galleries</span></KypSubhead>
                                 <span className="rad">within {galRad} mi</span>
                                 {gals.length > 0 && <span className="chip">{artGalleriesData!.totalCount}{nearestGal ? ` · ${nearestGal.distanceMiles} mi` : ''}</span>}
                               </div>
@@ -15455,7 +14688,7 @@ export default function RunDetail() {
                                   <div className="src">Source: City of Chicago Business Licenses (Sale of Art)</div>
                                 </div>
                               ) : (
-                                <p className="text-sm text-muted-foreground py-2">{!geocode.data?.lat ? 'Geocoding required for gallery data' : 'No art galleries found within 1 mile'}</p>
+                                <p className="text-sm text-muted-foreground py-2">{!geocode.data?.lat ? 'Geocoding required for gallery data' : isArtGalleriesError ? 'Unable to load City of Chicago Business License records.' : 'No art galleries found within 1 mile'}</p>
                               )}
                             </div>
                           </>
@@ -15464,9 +14697,7 @@ export default function RunDetail() {
                       </div>
                       </CollapsibleContent>
                     </Collapsible>
-                  </div>
-          </motion.div>
-          </AccordionSection>
+                    </AccordionSection>
 
           {/* Transit Proximity Section */}
 
@@ -15803,7 +15034,7 @@ export default function RunDetail() {
           {/* 04 · Ownership & Title — one evidence-first surface for transfers, debt and claims. */}
           <AccordionSection {...accProps("ownership")}>
             <motion.div id="print-section-ownership" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }}>
-              <OwnershipTitleSection pinLookupData={pinLookupData} lienData={lienData} debtSnapRec={debtSnapRec} isDebtSnapshotFetched={debtSnapFetched} lienDistress={lienDistress} isLoadingLiens={isLoadingLiens} relatedParcels={relatedParcels} address={run?.address} saleDerivation={saleDerivation} />
+              <OwnershipTitleSection pin={submittedPin || pinLookupData?.pin || null} city={facts?.city} pinLookupData={pinLookupData} lienData={lienData} debtSnapRec={debtSnapRec} isDebtSnapshotFetched={debtSnapFetched} lienDistress={lienDistress} isLoadingLiens={isLoadingLiens} relatedParcels={relatedParcels} address={run?.address} saleDerivation={saleDerivation} />
             </motion.div>
           </AccordionSection>
 

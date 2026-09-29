@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { HardHat } from "lucide-react";
 import { KypSubhead } from "@/components/report/AccordionSection";
 
@@ -14,10 +14,14 @@ const money = (value: number | null | undefined) => value == null ? "—" : `$${
 
 export function NewConstructionSection({ data, isLoading, isError, subjectUnits }: Props) {
   const [filter, setFilter] = useState<string | null>(null);
+  const [showAllPermits, setShowAllPermits] = useState(false);
   const permits = useMemo(
     () => (data?.permits || []).filter((permit: any) => !filter || permit.category === filter),
     [data?.permits, filter],
   );
+  useEffect(() => {
+    setShowAllPermits(false);
+  }, [data?.permits]);
 
   if (isLoading) return <div className="kyp-biz-loading" aria-live="polite"><span /><span /><span /></div>;
   if (isError) return <div className="kyp-status-empty unknown">Construction permit records could not be loaded. The nearby construction result is unknown rather than zero.</div>;
@@ -53,7 +57,7 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits 
 
       <KypSubhead className="fam-green" subsection={1}><span className="lbl">Permit mix</span><span className="ct">select a type to filter records</span><span className="rule" /></KypSubhead>
       <div className="kyp-biz-mix">
-        {categories.map(([category, count]) => <button key={category} type="button" className={`kyp-hbar${filter === category ? " active" : ""}`} onClick={() => setFilter(filter === category ? null : category)}>
+        {categories.map(([category, count]) => <button key={category} type="button" className={`kyp-hbar${filter === category ? " active" : ""}`} onClick={() => { setFilter(filter === category ? null : category); setShowAllPermits(false); }}>
           <span className="hl">{label[category] || category}</span><span className="htrack"><i className="ind" style={{ width: `${Number(count) / maxCategory * 100}%` }}><b className="hbar-count">{count}</b></i></span>
         </button>)}
       </div>
@@ -67,11 +71,16 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits 
       </div>
 
       <KypSubhead className="fam-green" subsection={years.length > 0 ? 3 : 2}><span className="lbl">{permits.length} nearby permit{permits.length === 1 ? "" : "s"}</span><span className="ct">nearest first</span><span className="rule" /></KypSubhead>
-      <div className="kyp-biz-list">{permits.slice(0, 12).map((permit: any, index: number) => <article key={permit.permitNumber} className="kyp-biz-card" data-testid={`row-new-construction-${index}`}>
+      <div className="kyp-biz-list">{(showAllPermits ? permits : permits.slice(0, 12)).map((permit: any, index: number) => <article key={permit.permitNumber} className="kyp-biz-card" data-testid={`row-new-construction-${index}`}>
         <div><b>{permit.address}</b><span>{label[permit.category]} · issued {permit.issueDate || "date unavailable"}{permit.likelyStillBuilding ? " · likely still building" : ""}</span></div>
         <span className="kyp-biz-distance">{permit.distanceMiles.toFixed(2)} mi</span>
         <div className="kyp-biz-cardmeta">{permit.units ? <span>{permit.units} units</span> : null}{permit.stories ? <span>{permit.stories} stories</span> : null}{permit.reportedCost > 0 ? <span>{money(permit.reportedCost)}</span> : null}{permit.contractorName ? <span>Contractor: {permit.contractorName}</span> : null}</div>
       </article>)}</div>
+      {permits.length > 12 && (
+        <button type="button" className="more" data-testid="button-new-construction-show-more" aria-expanded={showAllPermits} onClick={() => setShowAllPermits((current) => !current)}>
+          {showAllPermits ? "Show fewer ↑" : `Show all ${permits.length} nearby permits →`}
+        </button>
+      )}
       <div className="kyp-src">Source: Chicago Building Permits. Only “Permit - New Construction” records within one mile are counted. Garages, temporary structures, and other accessory structures are excluded. “Likely still building” is an 18-month issued-permit proxy, not a construction-status verification.</div>
     </div>
   );

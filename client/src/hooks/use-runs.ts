@@ -2079,6 +2079,7 @@ export interface MichelinRestaurant {
 
 export interface MichelinResponse {
   total: number;
+  citywideTotal: number;
   radiusMiles: number;
   restaurants: MichelinRestaurant[];
 }

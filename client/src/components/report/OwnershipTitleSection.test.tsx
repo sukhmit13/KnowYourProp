@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SectionNumberContext } from "./AccordionSection";
 import { OwnershipTitleSection } from "./OwnershipTitleSection";
 
@@ -25,15 +26,23 @@ const snap = (schema_version: number) => ({
   combined_recorded_debt: 396000,
 });
 const render = (schema_version: number) => renderToStaticMarkup(
-  <SectionNumberContext.Provider value={7}>
-    <OwnershipTitleSection
-      pinLookupData={{ pin: subject, saleHistory: [] }}
-      lienData={{ pin: subject, ownerName: "Example Owner", liens: [], documents: [] }}
-      debtSnapRec={{ snap: snap(schema_version) }}
-      isDebtSnapshotFetched
-      relatedParcels={[{ pin: companion, formattedAddress: "520 N CLAREMONT AVE" }]}
-    />
-  </SectionNumberContext.Provider>,
+  <QueryClientProvider client={new QueryClient()}>
+    <SectionNumberContext.Provider value={7}>
+      <OwnershipTitleSection
+        pinLookupData={{ pin: subject, saleHistory: [] }}
+        lienData={{
+          pin: subject,
+          ownerName: "Example Owner",
+          liens: [],
+          documents: [],
+          ownerLiens: [{ documentNumber: "OWNER-LIEN-123", documentType: "Judgment lien", viewLink: "https://crs.cookcountyclerkil.gov/Search/ResultByPin?id1=17071170240000" }],
+        }}
+        debtSnapRec={{ snap: snap(schema_version) }}
+        isDebtSnapshotFetched
+        relatedParcels={[{ pin: companion, formattedAddress: "520 N CLAREMONT AVE" }]}
+      />
+    </SectionNumberContext.Provider>
+  </QueryClientProvider>,
 );
 
 const html = render(4);
@@ -44,5 +53,12 @@ assert.ok(!html.includes("Co-parcel title context"), "old explanatory banner is 
 assert.match(html, /Co-parcel detected/);
 assert.match(html, /ownership-loan-scope-SOLO[^]*?17-07-117-024[^]*?only this PIN identified for this loan/);
 assert.match(html, /ownership-loan-scope-BOTH[^]*?17-07-117-024 · 17-07-117-025[^]*?multiple parcels/);
+assert.ok(html.indexOf("Other Recorder instruments") < html.indexOf("Owner liens"), "owner liens follows the existing title subsections");
+assert.match(html, /<span class="n">07\.6<\/span><span class="lbl">Owner liens<\/span>/, "owner liens receives the next subsection number");
+assert.match(html, /button-owner-lien-search/);
+assert.match(html, /button-owner-name-edit/);
+assert.match(html, /Judgment lien/);
+assert.match(html, /OWNER-LIEN-123/);
+assert.match(html, /crs\.cookcountyclerkil\.gov\/Search\/ResultByPin\?id1=17071170240000/);
 assert.ok(!render(3).includes("ownership-loan-scope-SOLO"), "obsolete snapshots do not render loan scope claims");
-console.log("Ownership layout and per-loan PIN evidence checks passed");
+console.log("Ownership layout, owner liens, and per-loan PIN evidence checks passed");

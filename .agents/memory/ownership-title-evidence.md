@@ -14,3 +14,9 @@ Cross-collateralization must be a **loan-specific, valid-PIN evidence claim**, n
 **Why:** A single-parcel bank mortgage was depicted as blanket debt because the OCR extraction held a malformed second PIN; its companion parcel's Recorder index did not list that mortgage. Optional AI takeaways and old cached snapshots can repeat the error after the deterministic calculation is fixed.
 
 **How to apply:** Normalize and validate 10-/14-digit Cook County PINs before counting distinct collateral. Bind each loan's displayed PINs to its own instrument/index evidence; fail closed if a resolved blanket flag disagrees with the supported PIN set. Bump the snapshot schema when collateral rules change, and never reuse a takeaway against a changed or empty snapshot. If current loans have mixed scopes, suppress ambiguous cross-collateral language in the optional takeaway while per-loan records remain explicit.
+
+Owner-name lien searches belong with Ownership & Title, but they are separate from parcel-specific property claims and must not be counted as liens against the subject property.
+
+**Why:** The user wants owner liens in the ownership section; matching a recorded owner's name does not prove the lien attaches to this parcel or even that the person/entity is the same.
+
+**How to apply:** Keep the owner-name search and its identity/release caveats as a separate subsection; never roll its results into the property's active-lien count, title-clear badge, or payoff assertion.

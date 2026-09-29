@@ -6985,6 +6985,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
 
       res.json({
         total: nearby.length,
+        citywideTotal: michelinRestaurants.length,
         radiusMiles,
         restaurants: nearby
       });
@@ -7015,7 +7016,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         })
         .filter((r: any) => r.distanceMiles <= radiusMiles)
         .sort((a: any, b: any) => a.distanceMiles - b.distanceMiles);
-      res.json({ total: nearby.length, radiusMiles, restaurants: nearby });
+      res.json({ total: nearby.length, citywideTotal: jbaRestaurants.length, radiusMiles, restaurants: nearby });
     } catch (err) {
       console.error('JBA restaurants error:', err);
       res.status(500).json({ error: 'Failed to fetch JBA restaurant data' });
