@@ -290,7 +290,13 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-owner .olab{color:var(--kyp-indigo);background:#fff;border-radius:5px;padding:3px 8px}
 .kyp-owner .onm{font-size:16.5px;font-weight:700;color:var(--kyp-ink)} .kyp-owner .oent{color:var(--kyp-ink2);background:#fff;border:1px solid var(--kyp-line);border-radius:5px;padding:3px 7px}
 .kyp-owner .osince{margin-left:auto;font-size:12.5px;color:var(--kyp-ink2)} .kyp-owner .osince b{color:var(--kyp-ink)}
-.kyp-owner-banner{font-size:12px;color:var(--kyp-ink2);background:var(--kyp-wash);border:1px solid var(--kyp-line);border-radius:9px;padding:9px 12px;margin-bottom:10px}
+.kyp-ownership-coverage{margin:12px 0 22px;padding:12px 0 0;border-top:1px solid var(--kyp-line);font-size:12px;color:var(--kyp-ink2)}
+.kyp-ownership-coverage .coverage-label,.kyp-loan-scope span{display:block;font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-indigo)}
+.kyp-ownership-coverage .kyp-coparcel-summary{margin:7px 0 0;line-height:1.5}
+.kyp-ownership-coverage .kyp-coverage-rows{display:grid;gap:4px;margin-top:9px}
+.kyp-ownership-coverage .coverage-row{display:flex;gap:12px;flex-wrap:wrap;margin:0;font-size:11px}
+.kyp-loan-scope{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--kyp-line);font-size:11.5px;color:var(--kyp-ink2)}
+.kyp-loan-scope span{flex:none}.kyp-loan-scope b{font-weight:600;color:var(--kyp-ink)}
 .kyp-mt{display:inline-flex;border-radius:5px;padding:3px 7px;color:#fff;align-self:flex-start}.kyp-mt.paid{background:var(--kyp-indigo)} .kyp-mt.borrowed{background:var(--kyp-debt)} .kyp-mt.claimed{background:var(--kyp-bad)} .kyp-mt.cleared{background:var(--kyp-slate)}
 .kyp-block .bbreak{border-top:1px solid rgba(255,255,255,.28);padding-top:9px;margin-top:9px}.kyp-xact{border:1px solid var(--kyp-line);border-left:5px solid var(--kyp-indigo);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--kyp-card)}.kyp-xact.loan{border-left-color:var(--kyp-debt)}.kyp-xact.loan.cleared,.kyp-xact.claim.cleared{border-left-color:var(--kyp-muted);background:#f7f7f4}.kyp-xact.claim{border-left-color:var(--kyp-bad)}
 .kyp-target-flash{animation:kyp-target-flash 1.4s ease-out}
@@ -313,12 +319,6 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-timeline-event.claimed{border-left-color:var(--kyp-bad)}
 .kyp-timeline-event.prior-debt{border-left-color:var(--kyp-muted)}
 .kyp-scope-change{margin-top:10px;padding:9px 12px;border-radius:8px;background:var(--kyp-debtSoft);border:1px solid var(--kyp-debtLine);font-size:11.5px;line-height:1.45;color:var(--kyp-ink2)}
-.kyp-timeline-coverage{display:flex;align-items:flex-start;gap:16px;margin-top:12px;padding:11px 13px;border:1px solid var(--kyp-debtLine);border-radius:9px;background:var(--kyp-debtSoft)}
-.kyp-timeline-coverage .coverage-label{flex:0 0 auto;font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-debt)}
-.kyp-timeline-coverage div{display:grid;gap:4px}
-.kyp-timeline-coverage p{margin:0;font-size:11.5px;line-height:1.45;color:var(--kyp-ink2)}
-.kyp-timeline-coverage .coverage-row{display:grid;grid-template-columns:minmax(155px,auto) 1fr;gap:14px}
-.kyp-timeline-coverage .coverage-row span{color:var(--kyp-ink2)}
 .kyp-subhead-minor{margin-top:14px}
 .kyp-coverage{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-top:11px;padding:10px 12px;border-radius:8px;background:var(--kyp-debtSoft);border:1px solid var(--kyp-debtLine)}
 .kyp-coverage span{font-family:var(--kyp-mono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-debt)}
@@ -349,13 +349,12 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
   .kyp-blocks{grid-template-columns:1fr}
   .kyp-terms{grid-template-columns:1fr 1fr}
   .kyp-owner .osince{margin-left:0;width:100%}
-  .kyp-coverage,.kyp-owner-lien-tools,.kyp-timeline-coverage{align-items:flex-start;flex-direction:column}
+  .kyp-coverage,.kyp-owner-lien-tools{align-items:flex-start;flex-direction:column}
   .kyp-coverage b{text-align:left}
   .kyp-owner-lien-actions{justify-content:flex-start}
-  .kyp-timeline-coverage .coverage-row{grid-template-columns:1fr;gap:2px}
 }
 @media print{
-  .kyp-xact,.kyp-block,.kyp-loc,.kyp-owner,.kyp-owner-banner,.kyp-status-empty,.kyp-owner-liens{break-inside:avoid}
+  .kyp-xact,.kyp-block,.kyp-loc,.kyp-owner,.kyp-ownership-coverage,.kyp-status-empty,.kyp-owner-liens{break-inside:avoid}
   .kyp-block,.kyp-mt,.kyp-pill{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .kyp-timeline-events{display:grid;grid-template-columns:repeat(3,1fr)}
 }

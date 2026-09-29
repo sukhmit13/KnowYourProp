@@ -24,10 +24,26 @@ import { sanitizeRowHtml } from "./takeaway";
 // ---------------------------------------------------------------------------
 // Snapshot shape sent to BOTH the card and the takeaway model
 export interface DebtSnap extends ResolvedState {
-  schema_version: 3;
+  schema_version: 4;
   docs_total: number;                       // all indexed recorder docs for the PIN
   report_estimated_value?: number | null;   // whitelisted cross-reference
   subject_is_commercial?: boolean | null;   // whitelisted cross-reference
+}
+
+/** Fail closed before persisting or narrating a collateral claim. */
+export function assertCollateralEvidence(snap: DebtSnap, subjectPin: string): void {
+  const pin = subjectPin.replace(/\D/g, "");
+  for (const mortgage of [...snap.active, ...snap.satisfied, ...snap.cleared_by_sale]) {
+    const pins = mortgage.documented_pins || [];
+    const siblings = mortgage.blanket_pins || [];
+    const valid = pins.every(p => /^\d{14}$/.test(p))
+      && new Set(pins).size === pins.length
+      && (pins.length === 0 || pins.includes(pin))
+      && mortgage.blanket === (pins.length > 1)
+      && siblings.every(p => pins.includes(p) && p !== pin)
+      && (mortgage.blanket ? siblings.length === pins.length - 1 : siblings.length === 0);
+    if (!valid) throw new Error(`Recorder parcel-scope evidence is inconsistent for document ${mortgage.doc_number}`);
+  }
 }
 
 export interface DebtTakeawayRow { tone: "good" | "caution" | "insight" | "bad"; html: string; chip: string | null }
@@ -41,6 +57,17 @@ export interface DebtSnapshotRecord {
   takeawayHash: string | null;   // hash the takeaway (or null sentinel) was generated for
   generatedAt: string | null;
   updatedAt: string;
+}
+
+export function reusableDebtTakeaway(cached: DebtSnapshotRecord | null, snapHash: string, docsTotal: number) {
+  // The hash binds the narrative to the exact resolved loan and PIN evidence.
+  // No documents means no safe narrative, even if an older cache had one.
+  const current = docsTotal > 0 && cached?.takeawayHash === snapHash;
+  return {
+    takeaway: current ? cached?.takeaway ?? null : null,
+    takeawayHash: current ? cached?.takeawayHash ?? null : null,
+    generatedAt: current ? cached?.generatedAt ?? null : null,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -175,7 +202,7 @@ export async function buildDebtSnap(
   });
   return {
     ...resolved,
-    schema_version: 3,
+    schema_version: 4,
     docs_total: lienData.documents?.length ?? docs.length,
     report_estimated_value: ctx?.estimatedValue ?? null,
     subject_is_commercial: ctx?.isCommercial ?? null,
@@ -193,7 +220,7 @@ DEBT-SENSITIVITY GUARDRAILS:
 2. Recorded amounts are not balances. Frame effective_amount as the recorded loan, never "the owner owes X today". No equity or payoff claims beyond snap.
 3. Position is derived, not certified. Say "first position by recording order", never "guaranteed first lien". If extraction_gap==true, say so and soften — never a confident position beside a blank lender/amount.
 4. Maturity uses the effective (modified) date. Never call a loan past due when a modification extended it. maturity_status at_maturity/past_maturity = calm caution watch-out; current = fine. maturity_source=="estimated" = the date is a term-based ESTIMATE, not a recorded maturity — always hedge with "est." and never assert past-due; maturity_status=="estimated_balloon_may_have_passed" = say the estimated balloon MAY have passed and to confirm the actual maturity — never a hard "past maturity". revolving==true = a line of credit with no fixed maturity ("revolving — renews; verify"), never a balloon date.
-5. Blanket loans: suppress per-parcel leverage AND surface the cross-collateral fact. If blanket/suppress_ltv, never state a per-parcel LTV as meaningful or say "over-leveraged" — say the loan is cross-collateralized and, when blanket_pins is non-empty, that it also encumbers those parcels (a material condition: a buyer may not get a clean release of this parcel alone). You may note the per-parcel figure ONLY as an artifact that is not meaningful. Cite pool_ltv (combined loan-to-value across the pool) only if present; if pool_ltv is null, say combined leverage isn't computed rather than inventing one. Never sum a blanket loan as separate debt per parcel.
+5. Parcel scope: only call a loan cross-collateralized if its own validated Recorder document/index names multiple distinct PINs (blanket=true AND blanket_pins non-empty). The owner's companion parcel by itself does not prove that loan covers it. When blanket, suppress per-parcel leverage and surface the cross-collateral fact; never say "over-leveraged". Cite pool_ltv only if present; otherwise say combined leverage isn't computed. Never sum a blanket loan as separate debt per parcel. If no additional PIN is documented for a loan, do not suggest that it covers another parcel.
 6. Judicial clearing is by court order with no recorded release — frame cleared_by_sale loans as extinguished by the sale AND note no recorded release exists (confirm at title).
 7. Never mention property-tax liens — the report handles taxes elsewhere.
 8. Multiple active liens: state the count and cite combined_recorded_debt (when present) as the combined RECORDED total. A lien_kind=="junior" loan ADDS to the debt (a second/home-equity) — never call it a refinance and never assume the first was paid off. A refi_suspect==true loan may have been replaced by the later similar-size loan but has NO recorded release — say "may be a refinance; confirm payoff", never assert it is gone. Debt is read from the anchor sale forward (anchor.date); a non_sale_transfers entry (e.g. a quit-claim) is a title/ownership change, NOT a sale — it cleared nothing and reset nothing. Never treat it as a sale or as clearing debt.
@@ -282,6 +309,13 @@ export function validateDebtTakeaway(snap: DebtSnap, parsed: any): { ok: boolean
   // when a pooled LTV actually exists in snap (then it must cite the pool).
   const primaryLien = snap.active[0];
   const isBlanket = !!(primaryLien?.suppress_ltv || primaryLien?.blanket);
+  // If any active loan is single-PIN or unresolved, generic cross-collateral
+  // wording is ambiguous about WHICH loan it describes. The individual loan
+  // records still show verified collateral; suppress the optional AI summary.
+  if (!(snap.active.length > 0 && snap.active.every(m => m.blanket && (m.blanket_pins?.length ?? 0) > 0))
+    && /\bcross[- ]collateral(?:ized|isation|ization)?\b|\bblanket (?:loan|mortgage)\b|\bsecured by (?:both|multiple|two) parcels\b/i.test(fullText)) {
+    return { ok: false, reason: "ambiguous multi-parcel claim across active loans" };
+  }
   if (isBlanket && /over-?leverag/i.test(fullText)) {
     return { ok: false, reason: "over-leveraged claim on blanket loan" };
   }
@@ -413,12 +447,11 @@ export async function refreshDebtSnapshot(
 ): Promise<DebtSnapshotRecord> {
   const normalizedPin = pin.replace(/\D/g, "");
   const snap = await buildDebtSnap(normalizedPin, ctx);
+  assertCollateralEvidence(snap, normalizedPin);
   const snapHash = hashSnap(snap);
   const cached = await getCachedDebtSnapshot(normalizedPin);
 
-  let takeaway = cached?.takeaway ?? null;
-  let takeawayHash = cached?.takeawayHash ?? null;
-  let generatedAt = cached?.generatedAt ?? null;
+  let { takeaway, takeawayHash, generatedAt } = reusableDebtTakeaway(cached, snapHash, snap.docs_total);
   const needsGeneration = takeawayHash !== snapHash && snap.docs_total > 0;
   if (needsGeneration) {
     takeaway = await generateDebtTakeaway(snap); // null = fail-closed sentinel for this hash

@@ -6466,9 +6466,13 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     try {
       const normalizedPin = String(req.params.pin || '').replace(/\D/g, '');
       if (normalizedPin.length !== 14) return res.status(400).json({ message: 'PIN must be 14 digits' });
-      const { getCachedDebtSnapshot } = await import('./debtSnapshot');
+      const { getCachedDebtSnapshot, assertCollateralEvidence } = await import('./debtSnapshot');
       const rec = await getCachedDebtSnapshot(normalizedPin);
-      return res.json(rec ?? null);
+      // Never serve pre-evidence parcel-scope claims from an older snapshot.
+      // The report will rebuild it from the Recorder cache when authenticated.
+      if (rec?.snap?.schema_version !== 4) return res.json(null);
+      assertCollateralEvidence(rec.snap, normalizedPin);
+      return res.json(rec);
     } catch (err) {
       console.error('[debtSnapshot] GET failed:', err);
       return res.status(500).json({ message: err instanceof Error ? err.message : String(err) });

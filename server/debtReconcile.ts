@@ -108,7 +108,9 @@ export function reconcile(docs: ExtractedRecorderDoc[], todayISO?: string): Lien
       effective_amount: m.amount ?? null,
       effective_maturity_date: m.maturity_date ?? null,
       effective_interest_rate: m.interest_rate ?? null,
-      is_blanket: m.is_blanket || (m.pins?.length ?? 0) > 1,
+      // The extracted flag is advisory; the resolver requires distinct valid
+      // Recorder-supported PINs before calling a mortgage cross-collateralized.
+      is_blanket: m.is_blanket,
       extraction_confidence: m.extraction_confidence,
       satisfied: false, satisfied_by: null, satisfy_match: null,
       modified: false, modifications: [], assigned_to: null,

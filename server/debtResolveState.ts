@@ -20,7 +20,6 @@ import type { LienStack, ReconciledMortgage } from "./debtReconcile";
 const NOMINAL_CONSIDERATION = 1000;  // <= this => not arms-length (gift / quitclaim)
 const MECHANICS_ENFORCE_YEARS = 2;   // IL mechanics-lien window (verify)
 const JUDGMENT_LIEN_YEARS = 7;       // IL judgment-lien life, revivable (verify)
-const BLANKET_VALUE_MULT = 1.3;
 
 const daysBetween = (a: string, b: string): number =>
   Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
@@ -70,6 +69,8 @@ export interface ResolvedMortgage extends ReconciledMortgage {
   verify_senior_survival?: boolean;
   blanket?: boolean;
   blanket_pins?: string[];
+  /** Validated PINs named by this instrument or its Recorder index, not an owner's other parcels. */
+  documented_pins?: string[];
   suppress_ltv?: boolean;
   pool_value?: number | null;
   pool_ltv?: number | null;
@@ -357,19 +358,23 @@ export function resolveState(
     // blanket_pins only stores OTHER-than-subject pins; scope change needs the full set.
     const fullPoolByDocNumber = new Map<string, Set<string>>();
     for (const m of allMortgages) {
-      const pool = new Set<string>([
+      const evidencedPins = new Set<string>([
         ...(m.pins || []).map(normPin),
         ...Array.from(docPins.get(m.doc_number) || []),
-        ...(thisPin ? [thisPin] : []),
       ].filter(Boolean));
+      // The instrument was returned by the subject-PIN Recorder search. Keep
+      // that index association only when at least one usable PIN is present.
+      const pool = new Set<string>([
+        ...Array.from(evidencedPins),
+        ...(thisPin && evidencedPins.size > 0 ? [thisPin] : []),
+      ]);
+      m.documented_pins = Array.from(pool);
       const otherPins = Array.from(pool).filter(p => p !== thisPin);
 
-      // SIGNAL 1 (strong, free): loan names / is indexed under >1 PIN
-      let blanket = m.is_blanket || pool.size > 1;
-      // SIGNAL 2 (soft fallback): amount >> this parcel's value AND owner holds another parcel
-      if (!blanket && m.effective_amount && parcel?.value
-        && m.effective_amount > parcel.value * BLANKET_VALUE_MULT && otherPins.length > 0)
-        blanket = true;   // "likely" — suppress LTV, flag to confirm
+      // Raw PIN counts and the extractor's blanket flag can be wrong (e.g. a
+      // malformed second PIN). Only distinct valid PINs in this loan's document
+      // or the matching Recorder index support a multi-parcel claim.
+      const blanket = pool.size > 1;
 
       m.blanket = blanket;
       m.blanket_pins = blanket ? otherPins : [];
@@ -394,7 +399,7 @@ export function resolveState(
       // Only track when the doc has explicit pins beyond the subject (pool.size > 1),
       // or was derived from the doc body itself (m.pins had entries). This prevents
       // loans with no PIN information from appearing to have a known empty set.
-      const hasExplicitPins = (m.pins || []).length > 0 || (docPins.get(m.doc_number)?.size ?? 0) > 0;
+      const hasExplicitPins = evidencedPins.size > 0;
       if (hasExplicitPins) fullPoolByDocNumber.set(m.doc_number, pool);
     }
 

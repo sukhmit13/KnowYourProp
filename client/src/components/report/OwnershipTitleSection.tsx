@@ -354,8 +354,6 @@ const mortgageDate = (mortgage: any): string | null =>
   mortgage?.recording_date ?? mortgage?.recordingDate ?? mortgage?.recordedDate ?? null;
 const mortgageLink = (mortgage: any): string | null =>
   mortgage?.viewLink ?? mortgage?.docUrl ?? null;
-const additionalPins = (mortgage: any): string[] =>
-  Array.from(new Set((mortgage?.blanket_pins ?? []).map((pin: unknown) => String(pin)).filter(Boolean)));
 const targetToken = (value: unknown): string =>
   String(value || "record").replace(/[^A-Za-z0-9_-]/g, "-");
 const formatPin = (pin: string): string => {
@@ -437,7 +435,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
   );
   const sales = derived.decoratedVM;
   const latest = derived.recentSale || undefined;
-  const snap = debtSnapRec?.snap;
+  const snap = debtSnapRec?.snap?.schema_version === 4 ? debtSnapRec.snap : null;
   const debtSnapshotReady = !!snap;
   // Debt facts are snapshot-only. Raw recorder mortgages are intentionally not
   // used here because they have not gone through release/sale reconciliation.
@@ -546,36 +544,20 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
       };
     }),
   ].sort((a, b) => a.ms - b.ms);
-  const coverageLoans = [...active, ...released]
-    .map((mortgage: any) => ({ mortgage, pins: additionalPins(mortgage) }))
-    .filter(({ pins }) => pins.length > 0);
+  const coverageLoans = [...active, ...released].filter((mortgage: any) => mortgage.blanket && mortgage.blanket_pins?.length > 0);
   const coverageByPin = new Map<string, string[]>();
-  coverageLoans.forEach(({ mortgage, pins }: any) => {
+  coverageLoans.forEach((mortgage: any) => {
     const documentNumber = normalizedDocNumber(mortgage);
-    const namedPins = Array.from(new Set([subjectPin, ...pins.map((pin: string) => pin.replace(/\D/g, ""))].filter(Boolean)));
+    const namedPins: string[] = Array.isArray(mortgage.documented_pins) ? mortgage.documented_pins : [];
     namedPins.forEach((pin) => {
       coverageByPin.set(pin, [...(coverageByPin.get(pin) || []), documentNumber]);
     });
   });
   const coverageRows = Array.from(coverageByPin.entries());
-  const showTimeline = timelineEvents.length > 0 || scopeChanges.length > 0 || coverageLoans.length > 0;
+  const showTimeline = timelineEvents.length > 0 || scopeChanges.length > 0;
 
   return (
     <div id="section-ownership" data-testid="section-ownership" className="kyp-ownership">
-      {relatedParcels.length > 0 && (
-        <div className="kyp-owner-banner" id="asmb-double-lot">
-          <b>Co-parcel title context.</b> This view covers {address || "the subject parcel"} and {relatedParcels.length} matched companion parcel{relatedParcels.length === 1 ? "" : "s"}
-          {relatedParcels[0]?.formattedAddress ? `, including ${relatedParcels[0].formattedAddress}` : ""}. Debt stays tied to the document and PINs that name it.
-        </div>
-      )}
-
-      <div className="kyp-owner">
-        <span className="olab">Owner</span>
-        <span className="onm">{owner}</span>
-        {entity && <span className="oent">Entity</span>}
-        <span className="osince">Held since <b>{since}</b></span>
-      </div>
-
       <div className="kyp-blocks">
         <div className="kyp-block ind">
           <span className="kyp-mt paid">Paid</span>
@@ -613,9 +595,38 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         </div>
       )}
 
+      <KypSubhead subsection={1}><span className="lbl">Ownership details</span><span className="rule" /></KypSubhead>
+      <div className="kyp-owner">
+        <span className="olab">Owner</span>
+        <span className="onm">{owner}</span>
+        {entity && <span className="oent">Entity</span>}
+        <span className="osince">Held since <b>{since}</b></span>
+      </div>
+      {(relatedParcels.length > 0 || coverageRows.length > 0) && (
+        <div className="kyp-ownership-coverage" id={relatedParcels.length > 0 ? "asmb-double-lot" : undefined} data-testid="ownership-parcel-coverage">
+          <span className="coverage-label">Parcel coverage</span>
+          {relatedParcels.length > 0 && (
+            <p className="kyp-coparcel-summary">
+              <b>Co-parcel detected</b>
+              {relatedParcels.map((parcel: any) => parcel.formattedAddress || (parcel.pin ? `PIN ${formatPin(String(parcel.pin))}` : null)).filter(Boolean).map((label: string) => ` · ${label}`).join("")}
+            </p>
+          )}
+          {coverageRows.length > 0 && (
+            <div className="kyp-coverage-rows">
+              {coverageRows.map(([pin, documentNumbers]) => (
+                <p className="coverage-row" key={`coverage-${pin}`}>
+                  <b>PIN {formatPin(pin)}</b>
+                  <span>{documentNumbers.length === 1 ? "Loan" : "Loans"} {documentNumbers.map(doc => `#${doc}`).join(", ")}</span>
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {showTimeline && (
         <div className="kyp-otl" data-testid="ownership-timeline">
-          <KypSubhead subsection={1}><span className="lbl">Ownership &amp; debt timeline</span><span className="ct">{timelineEvents.length > 12 ? `Latest 12 of ${timelineEvents.length} events · complete instrument index below` : `${timelineEvents.length} recorded event${timelineEvents.length === 1 ? "" : "s"}`}</span><span className="rule" /></KypSubhead>
+          <KypSubhead subsection={2}><span className="lbl">Ownership &amp; debt timeline</span><span className="ct">{timelineEvents.length > 12 ? `Latest 12 of ${timelineEvents.length} events · complete instrument index below` : `${timelineEvents.length} recorded event${timelineEvents.length === 1 ? "" : "s"}`}</span><span className="rule" /></KypSubhead>
           <div className="kyp-otlplot">
             <div className="kyp-timeline-line" />
             <div className="kyp-timeline-events">
@@ -647,19 +658,6 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
               })}
             </div>
           </div>
-          {coverageLoans.length > 0 && (
-            <div className="kyp-timeline-coverage" data-testid="ownership-parcel-coverage">
-              <span className="coverage-label">Parcel coverage</span>
-              <div>
-                {coverageRows.map(([pin, documentNumbers]) => (
-                  <p className="coverage-row" key={`coverage-${pin}`}>
-                    <b>PIN {formatPin(pin)}</b>
-                    <span>{documentNumbers.length === 1 ? "Loan" : "Loans"} {documentNumbers.map(doc => `#${doc}`).join(", ")}</span>
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
           {scopeChanges.map((change: any, index: number) => (
             <div className="kyp-scope-change" key={`${change.atDocNumber}-${index}`}>
               <b>Parcel scope changed at document #{change.atDocNumber}.</b>{" "}
@@ -680,7 +678,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         </div>
       ))}
 
-      <KypSubhead subsection={showTimeline ? 2 : 1}>
+      <KypSubhead subsection={showTimeline ? 3 : 2}>
         <span className="lbl">Chain of title</span>
         <span className="ct">{sales.length} qualifying transfer{sales.length === 1 ? "" : "s"}</span>
         <span className="rule" />
@@ -718,7 +716,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         </div>
       </details>
 
-      <KypSubhead subsection={showTimeline ? 3 : 2}>
+      <KypSubhead subsection={showTimeline ? 4 : 3}>
         <span className="lbl">Debt on title</span>
         <span className="ct">{debtSnapshotReady ? `current owner · ${active.length} unreleased · ${released.length} historical/cleared` : "resolved snapshot required"}</span>
         <span className="rule" />
@@ -762,6 +760,12 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
               <div><span className="tk">Maturity</span><span className="tv sm">{maturity.value}</span>{maturity.note && <span className="tn">{maturity.note}</span>}</div>
               <div><span className="tk">Position</span><span className="tv sm">{mortgage.position ? `${mortgage.position}` : isCleared ? "Historical" : "Not resolved"}</span></div>
             </div>
+            <div className="kyp-loan-scope" data-testid={`ownership-loan-scope-${normalizedDocNumber(mortgage)}`}>
+              <span>Recorder PINs</span>
+              {mortgage.documented_pins?.length > 0
+                ? <b>{mortgage.documented_pins.map(formatPin).join(" · ")}{mortgage.documented_pins.length === 1 ? " · only this PIN identified for this loan" : " · multiple parcels"}</b>
+                : <b>Not confirmed in the available document or index</b>}
+            </div>
             {runway && (
               <div className="kyp-runway" data-testid="ownership-maturity-runway">
                 <div className="runway-head"><span>Recorded maturity runway</span><b>{runway.status}</b></div>
@@ -786,7 +790,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         <div className="kyp-method">A maturity runway needs a reliably extracted, recorded maturity date. Estimated dates, credit lines, and uncertain extractions do not produce a runway; check the instrument and any modifications for the actual terms.</div>
       )}
 
-      <KypSubhead subsection={showTimeline ? 4 : 3}>
+      <KypSubhead subsection={showTimeline ? 5 : 4}>
         <span className="lbl">Title status</span>
         <span className={`kyp-pill ${titleBadge[0]}`}>{titleBadge[1]}</span>
         <span className="rule" />

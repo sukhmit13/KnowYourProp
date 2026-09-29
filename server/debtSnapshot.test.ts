@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 import { reconcile } from "./debtReconcile";
 import { resolveState } from "./debtResolveState";
-import { hashSnap, collectSnapNumbers, validateDebtTakeaway, type DebtSnap } from "./debtSnapshot";
+import { assertCollateralEvidence, hashSnap, collectSnapNumbers, reusableDebtTakeaway, validateDebtTakeaway, type DebtSnap } from "./debtSnapshot";
 import { buildDebtCardModel, fmtDateUS } from "@shared/debtCardModel";
 import type { ExtractedRecorderDoc } from "./recorderDocIngest";
 
@@ -19,7 +19,7 @@ const base = (o: Partial<ExtractedRecorderDoc>): ExtractedRecorderDoc => ({
 });
 const toSnap = (docs: ExtractedRecorderDoc[], today = "2026-08-12", extras: Partial<DebtSnap> = {}): DebtSnap => ({
   ...resolveState(reconcile(docs, today), docs, null, null, today),
-  schema_version: 3,
+  schema_version: 4,
   docs_total: docs.length, report_estimated_value: null, subject_is_commercial: null, ...extras,
 });
 
@@ -220,6 +220,54 @@ const toSnap = (docs: ExtractedRecorderDoc[], today = "2026-08-12", extras: Part
   const s5 = resolve([soloBig], { pin: P1, value: 1000000 }, {});
   assert.equal(s5.active[0].blanket, false, "big loan + NO other parcel ⇒ not blanket");
   assert.deepEqual(s5.active[0].blanket_pins, []);
+
+  // A real-world failure mode: an OCR mortgage had a valid subject PIN and a
+  // malformed 13-digit "second PIN". Raw PIN count made reconcile set
+  // is_blanket=true even though the companion Recorder index did not list it.
+  const subject = "17071170240000", companion = "17071170250000";
+  const malformed = base({ ...loan, doc_number: "2524011012", pins: ["17-07-117-024-0000", "17-07-117-07-0000"], is_blanket: false });
+  const solo = resolve([malformed], { pin: subject, value: 1000000 }, { indexByPin: { [companion]: [{ docNumber: "UNRELATED" }] } });
+  assert.doesNotThrow(() => assertCollateralEvidence(solo, subject));
+  assert.equal(solo.active[0].blanket, false, "invalid second PIN and unrelated sibling index cannot establish cross-collateral");
+  assert.deepEqual(solo.active[0].documented_pins, [subject]);
+  assert.deepEqual(solo.active[0].blanket_pins, []);
+  assert.equal(solo.active[0].suppress_ltv, undefined);
+  assert.equal(buildDebtCardModel(solo, "2026-08-12").crossCollateral, null);
+  const unsupportedClaim = {
+    title: "The loan is cross-collateralized.",
+    rows: [
+      { tone: "caution" as const, html: "A <b>blanket loan</b> covers both parcels.", chip: null },
+      { tone: "insight" as const, html: "Confirm the Recorder documents.", chip: null },
+    ],
+  };
+  assert.match(validateDebtTakeaway(solo, unsupportedClaim).reason || "", /ambiguous multi-parcel/, "AI must not claim multiple parcels without supported PINs");
+  const indexed = resolve([malformed], { pin: subject, value: 1000000 }, { indexByPin: { [companion]: [{ docNumber: "2524011012" }] } });
+  assert.doesNotThrow(() => assertCollateralEvidence(indexed, subject));
+  assert.equal(indexed.active[0].blanket, true, "matching sibling Recorder index establishes the second PIN");
+  assert.deepEqual(indexed.active[0].documented_pins, [subject, companion]);
+  const mixed = { ...solo, satisfied: indexed.active };
+  assert.match(validateDebtTakeaway(mixed, unsupportedClaim).reason || "", /ambiguous multi-parcel/, "historical blanket debt cannot imply the active single-PIN loan is blanket");
+  assert.throws(() => assertCollateralEvidence({
+    ...solo,
+    active: [{ ...solo.active[0], blanket: true, blanket_pins: [companion] }],
+  }, subject), /parcel-scope evidence is inconsistent/, "future inconsistent collateral claims cannot be cached");
+  const flagOnly = resolve([base({ ...loan, is_blanket: true, pins: [subject] })], { pin: subject, value: 1000000 }, {});
+  assert.equal(flagOnly.active[0].blanket, false, "extractor blanket flag alone cannot establish a second parcel");
+  const noPins = resolve([base({ ...loan, pins: [], is_blanket: true })], { pin: subject, value: 1000000 }, {});
+  assert.deepEqual(noPins.active[0].documented_pins, [], "unknown parcel scope must not invent the subject PIN");
+}
+
+// Old cached prose must not survive a changed or empty resolved snapshot.
+{
+  const stale = {
+    pin: "17071170240000", snap: toSnap([]), snapHash: "old",
+    takeaway: { title: "Cross-collateralized", rows: [] },
+    takeawayHash: "old", generatedAt: "2026-08-01T00:00:00Z", updatedAt: "2026-08-01T00:00:00Z",
+  };
+  assert.deepEqual(reusableDebtTakeaway(stale, "new", 0), { takeaway: null, takeawayHash: null, generatedAt: null });
+  assert.deepEqual(reusableDebtTakeaway(stale, "old", 0), { takeaway: null, takeawayHash: null, generatedAt: null });
+  assert.equal(reusableDebtTakeaway(stale, "new", 2).takeaway, null);
+  assert.equal(reusableDebtTakeaway(stale, "old", 2).takeaway?.title, "Cross-collateralized");
 }
 
 // ── 7. 3014 W Irving Park end-to-end from the live cache ──

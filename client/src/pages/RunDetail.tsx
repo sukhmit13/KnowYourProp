@@ -2408,7 +2408,7 @@ export default function RunDetail() {
     // regenerates; unchanged docs → cheap cache hit, no LLM call).
     const recordStale = !!(debtSnapRec && lienData.scrapedAt && (debtSnapRec as any).updatedAt
       && new Date(lienData.scrapedAt).getTime() > new Date((debtSnapRec as any).updatedAt).getTime());
-    const snapshotSchemaIsCurrent = debtSnapRec?.snap?.schema_version === 3;
+    const snapshotSchemaIsCurrent = debtSnapRec?.snap?.schema_version === 4;
     if (debtSnapRec && !recordStale && snapshotSchemaIsCurrent) return;
     // Don't consume the per-pin attempt before the related-parcels lookup
     // settles — otherwise blanket detection routinely misses its co-parcel
