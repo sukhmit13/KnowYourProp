@@ -14,7 +14,11 @@ export function useRuns() {
   return useQuery({
     queryKey: [api.runs.list.path],
     queryFn: async () => {
-      const res = await fetch(api.runs.list.path, { credentials: "include" });
+      const token = localStorage.getItem("kyp_auth_token");
+      const res = await fetch(api.runs.list.path, {
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!res.ok) throw new Error('Failed to fetch runs');
       return api.runs.list.responses[200].parse(await res.json());
     },
@@ -28,7 +32,11 @@ export function useRun(id: number | null) {
     queryFn: async () => {
       if (!id) return null;
       const url = buildUrl(api.runs.get.path, { id });
-      const res = await fetch(url, { credentials: "include" });
+      const token = localStorage.getItem("kyp_auth_token");
+      const res = await fetch(url, {
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (res.status === 404) return null;
       if (!res.ok) throw new Error('Failed to fetch run');
       return api.runs.get.responses[200].parse(await res.json());

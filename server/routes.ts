@@ -1318,7 +1318,9 @@ export async function registerRoutes(
   // === RUNS ===
 
   app.get(api.runs.list.path, async (req, res) => {
-    const userId = req.user?.email ?? null;
+    const bearer = req.headers.authorization?.startsWith("Bearer ")
+      ? await resolveUserFromToken(req.headers.authorization.slice(7).trim()) : null;
+    const userId = req.user?.email ?? bearer?.email ?? null;
     if (!userId) return res.json([]);
     const runs = await storage.getRuns(userId);
     res.json(runs);
@@ -1330,6 +1332,12 @@ export async function registerRoutes(
 
     let run = await storage.getRun(id);
     if (!run) return res.status(404).json({ message: "Run not found" });
+    const bearer = req.headers.authorization?.startsWith("Bearer ")
+      ? await resolveUserFromToken(req.headers.authorization.slice(7).trim()) : null;
+    const email = req.user?.email ?? bearer?.email;
+    if (!email || (run.userId ?? "").toLowerCase() !== email.toLowerCase()) {
+      return res.status(404).json({ message: "Run not found" });
+    }
 
     // Auto-unlock for trial users who still have reports remaining
     const trialUser = req.user && typeof req.user.trialReportsRemaining === 'number' && req.user.trialReportsRemaining > 0;
@@ -1415,6 +1423,10 @@ export async function registerRoutes(
   app.delete(api.runs.delete.path, async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(404).json({ message: "Invalid ID" });
+    const run = await storage.getRun(id);
+    if (!req.user || !run || (run.userId ?? "").toLowerCase() !== req.user.email.toLowerCase()) {
+      return res.status(404).json({ message: "Run not found" });
+    }
     await storage.deleteRun(id);
     res.status(204).send();
   });
