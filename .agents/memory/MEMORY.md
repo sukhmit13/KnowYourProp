@@ -32,6 +32,7 @@
 - [JSX comment placement](jsx-comment-placement.md) — a {/* comment */} directly inside a .map() arrow parenthesized return breaks the Babel build; put comments above the map call.
 - [Ownership & Title evidence](ownership-title-evidence.md) — debt is resolved-snapshot-only; failed recorder searches stay unknown; historical releases remain visible and hedged.
 - [Treasurer cache safety](treasurer-cache-safety.md) — empty Treasurer refreshes must never erase a previously verified bill or payment history.
+- [Property tax interpretation](property-tax-interpretation.md) — a first installment is not a full-year bill; assessor class, not zoning, controls implied value, and ambiguous classes suppress the ratio.
 - [West Town pilot isolation](west-town-pilot-isolation.md) — Market Discovery scans are lazy, self-contained, and must never share individual report tax data.
 - [GitHub sync with oversized history](github-sync-large-history.md) — old non-LFS blobs can block normal pushes even after current files move to LFS.
 - [Historic status legal framing](historic-status-legal-framing.md) — CHRS survey ratings are not designations or credit eligibility; only Red/Orange automatically trigger a 90-day demolition hold.

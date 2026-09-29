@@ -18,7 +18,7 @@ import { resolveDistress } from "@shared/lienDistress";
 import { buildListingChecks, classifyDisclosures, daysOnMarketVerdict, hasValidatedArmLengthSaleAfterFinding, listingClaimLabel } from "@shared/listingChecks";
 import { Leaf, Printer, Menu, X, Search, ClipboardList } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import { Sidebar } from "@/components/Sidebar";
 import { FunnelModal, ROLES, TRANSACTION_TYPES, REFERRAL_OPTIONS, type FunnelAnswers } from "@/components/FunnelModal";
 import { PrintSettingsDialog, type PrintSection } from "@/components/PrintSettingsDialog";
@@ -588,10 +588,6 @@ interface SectionStates {
   recentLicenses: boolean;
   landmark: boolean;
   parcel: boolean;
-  assessedValue: boolean;
-  exemptionHistory: boolean;
-  appealHistory: boolean;
-  propertyTaxInfo: boolean;
   crime: boolean;
   proximity: boolean;
   entertainment: boolean;
@@ -798,8 +794,7 @@ const DEFAULT_SECTION_STATES: SectionStates = {
   farAnalysis: true, fmrSubsection: true, vacantBuildings: false, cityOwnedLots: false,
   proximityDetails: false, transitAccess: false, projectTypeInfo: false,
   dob: false, newConstruction: false, recentLicenses: false, landmark: false,
-  parcel: false, assessedValue: false, exemptionHistory: false, appealHistory: false,
-  propertyTaxInfo: false, crime: false, proximity: false, entertainment: false,
+  parcel: false, crime: false, proximity: false, entertainment: false,
   michelinSub: false, jbaSub: false, muralsSub: false, artGalleriesSub: false,
   landmarksDesignatedSub: false, tod: false, sbif: false, nmtc: false,
   mmrp: false, enterpriseZone: false, nof: false, investSw: false, hubzone: false, qct: false, chaOpportunity: false, class6b: false, class7: false, cdg: false, adu: false, ctaRail: false, ctaRidership: false, metra: false,
@@ -1260,7 +1255,7 @@ export default function RunDetail() {
   const incentiveEligibilityRef = useRef<Record<string, boolean>>({});
 
   // ---- Step 5 accordion state: order / hidden / open (persisted per run) ----
-  const ACC_DEFAULT_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "businessLicenses", "ownership", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
+  const ACC_DEFAULT_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "businessLicenses", "ownership", "propertyTax", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
@@ -1464,14 +1459,6 @@ export default function RunDetail() {
   const setIsLandmarkSectionOpen = useCallback((v: boolean) => setSectionOpen('landmark', v), [setSectionOpen]);
   const isParcelSectionOpen = sectionStates.parcel;
   const setIsParcelSectionOpen = useCallback((v: boolean) => setSectionOpen('parcel', v), [setSectionOpen]);
-  const isAssessedValueSectionOpen = sectionStates.assessedValue;
-  const setIsAssessedValueSectionOpen = useCallback((v: boolean) => setSectionOpen('assessedValue', v), [setSectionOpen]);
-  const isExemptionHistorySectionOpen = sectionStates.exemptionHistory;
-  const setIsExemptionHistorySectionOpen = useCallback((v: boolean) => setSectionOpen('exemptionHistory', v), [setSectionOpen]);
-  const isAppealHistorySectionOpen = sectionStates.appealHistory;
-  const setIsAppealHistorySectionOpen = useCallback((v: boolean) => setSectionOpen('appealHistory', v), [setSectionOpen]);
-  const isPropertyTaxInfoSectionOpen = sectionStates.propertyTaxInfo;
-  const setIsPropertyTaxInfoSectionOpen = useCallback((v: boolean) => setSectionOpen('propertyTaxInfo', v), [setSectionOpen]);
   const [crimeRadius, setCrimeRadius] = useState<'nearby' | 'quarterMile'>('quarterMile');
   // Favorability tier for crime badges/rank tiles: color follows the data, never blanket-red
   const crimeFavor = (saferThanPercent: number) => saferThanPercent >= 75 ? 'good' : saferThanPercent >= 30 ? 'neu' : 'bad';
@@ -2218,9 +2205,9 @@ export default function RunDetail() {
   // ── Linked takeaway jump chips: anchor id → display label + collapsible opener ──
   const jumpTargets: Record<string, { label: string; open?: () => void }> = {
     'ptax-bill': { label: 'Tax Bill' },
-    'ptax-assess': { label: 'Assessed Value', open: () => setSectionOpen('assessedValue', true) },
-    'ptax-exempt': { label: 'Exemptions', open: () => setSectionOpen('exemptionHistory', true) },
-    'ptax-appeal': { label: 'Appeal History', open: () => setSectionOpen('appealHistory', true) },
+    'ptax-assess': { label: 'Assessed Value', open: () => setAccOpen((m) => ({ ...m, propertyTax: true })) },
+    'ptax-exempt': { label: 'Exemptions', open: () => setAccOpen((m) => ({ ...m, propertyTax: true })) },
+    'ptax-appeal': { label: 'Appeal History', open: () => setAccOpen((m) => ({ ...m, propertyTax: true })) },
     'far-analysis': { label: 'FAR Analysis', open: () => setSectionOpen('farAnalysis', true) },
     'section-rentcast': { label: 'Rental Market', open: () => setSectionOpen('rentcast', true) },
     'section-airbnb': { label: 'Short-Term Rental', open: () => setSectionOpen('airbnb', true) },
@@ -3874,7 +3861,108 @@ export default function RunDetail() {
     potential: { title: "Development Potential", summary: "FAR, buildable envelope and rental potential.", info: ["FAR & buildable envelope", "Market rents (RentCast)", "Short-term rental (Airbnb)", "Commercial listings"] },
     historic: { title: "Historic Status", summary: "Chicago Historic Resources Survey rating and designation signals.", info: ["CHRS survey rating", "Municipal designation signals", "Demolition-hold rule", "Credit eligibility requirements"] },
     countyRecord: { title: "COUNTY RECORD", summary: "Cook County Assessor and Treasurer record for the subject parcel.", info: ["Parcel and structure facts", "Recorded unit configuration", "Assessor valuation inputs", "PIN and source links"] },
+    propertyTax: { title: "Property Taxes", summary: "What this parcel is billed, assessed at, exempt from and has appealed.", info: ["Cook County Treasurer billing", "Assessor values and assessment history", "Board of Review appeals and outcomes"] },
   };
+  const propertyTaxYears = propertyTaxData?.taxYears ?? [];
+  const completeTaxYears = propertyTaxYears
+    .filter((taxYear) => taxYear.installment1 > 0 && taxYear.installment2 > 0 && taxYear.billed > 0)
+    .slice()
+    .sort((a, b) => Number(b.year) - Number(a.year));
+  const lastCompleteTaxYear = completeTaxYears[0] ?? null;
+  const propertyAssessments = pinLookupData?.assessedValues ?? [];
+  const latestPropertyAssessment = propertyAssessments[0] ?? null;
+  const finalAssessedTotal = latestPropertyAssessment
+    ? (latestPropertyAssessment.boardTotal ?? latestPropertyAssessment.certifiedTotal)
+    : null;
+  const landAssessedValue = latestPropertyAssessment
+    ? (latestPropertyAssessment.boardLand ?? latestPropertyAssessment.certifiedLand)
+    : null;
+  const buildingAssessedValue = latestPropertyAssessment
+    ? (latestPropertyAssessment.boardBuilding ?? latestPropertyAssessment.certifiedBuilding)
+    : null;
+  const assessorClassCode = String(latestPropertyAssessment?.propertyClass ?? "").trim();
+  const assessorClassPrefix = /^\d{3}$/.test(assessorClassCode) ? assessorClassCode[0] : null;
+  const assessmentLevelPercent = assessorClassPrefix === "2"
+    ? 10
+    : assessorClassPrefix === "5"
+      ? 25
+      : null;
+  const assessorImpliedMarketValue = finalAssessedTotal !== null && finalAssessedTotal > 0 && assessmentLevelPercent !== null
+    ? finalAssessedTotal / (assessmentLevelPercent / 100)
+    : null;
+  const effectiveTaxRate = lastCompleteTaxYear && assessorImpliedMarketValue
+    ? lastCompleteTaxYear.billed / assessorImpliedMarketValue * 100
+    : null;
+  const landSharePercent = finalAssessedTotal && landAssessedValue !== null
+    ? landAssessedValue / finalAssessedTotal * 100
+    : null;
+  const propertyAppeals = (pinLookupData?.appealHistory ?? [])
+    .slice()
+    .sort((a, b) => Number(b.taxYear) - Number(a.taxYear));
+  const successfulAppeals = propertyAppeals.filter((appeal) => appeal.borTotalValue < appeal.assessorTotalValue);
+  const currentExemptionRecord = pinLookupData?.exemptionHistory?.[0] ?? null;
+  const currentExemptionTypes: Array<[keyof NonNullable<typeof currentExemptionRecord>, string]> = [
+    ["homeowner", "Homeowner"],
+    ["longtimeHomeowner", "Longtime homeowner"],
+    ["senior", "Senior"],
+    ["seniorFreeze", "Senior freeze"],
+    ["disabledPersons", "Persons with disabilities"],
+    ["disabledVeterans", "Disabled veteran"],
+    ["returningVeterans", "Returning veteran"],
+    ["homeImprovement", "Home improvement"],
+  ];
+  const onFileExemptions = currentExemptionRecord
+    ? currentExemptionTypes.filter(([key]) => Number(currentExemptionRecord[key] ?? 0) > 0)
+    : [];
+  const hasOwnerOccupancyEvidence = onFileExemptions.some(([key]) =>
+    ["homeowner", "longtimeHomeowner", "senior", "seniorFreeze", "disabledPersons", "disabledVeterans", "returningVeterans"].includes(String(key))
+  );
+  const normalizedOwnerName = (derivedOwnerName ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const currentOwnerAppeals = normalizedOwnerName.length >= 6
+    ? propertyAppeals.filter((appeal) => {
+      const appellant = String(appeal.appellant ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      // Board of Review appellant names are sometimes truncated at the end.
+      return appellant === normalizedOwnerName ||
+        (appellant.length >= 16 &&
+          normalizedOwnerName.startsWith(appellant) &&
+          normalizedOwnerName.length - appellant.length <= 4);
+    })
+    : [];
+  const currentOwnerAppealWins = currentOwnerAppeals.filter((appeal) => appeal.borTotalValue < appeal.assessorTotalValue).length;
+  const priorWinningAppeal = successfulAppeals.find((appeal) => !currentOwnerAppeals.includes(appeal));
+  const propertyTaxStatusLabel = propertyTaxData?.paymentStatus === "current"
+    ? "Taxes current"
+    : propertyTaxData?.paymentStatus === "delinquent"
+      ? "Delinquent balance"
+      : propertyTaxData?.paymentStatus === "sold"
+        ? "Tax sale recorded"
+        : propertyTaxData?.paymentStatus === "unknown"
+          ? "Status unverified"
+          : null;
+  const propertyTaxTakeaway = propertyTaxData?.paymentStatus === "delinquent"
+    ? "Delinquent balance reported — verify the payoff with the Treasurer before closing."
+    : propertyTaxData?.paymentStatus === "sold"
+      ? "A tax sale is reported — confirm redemption status with the County Clerk."
+      : propertyTaxData?.paymentStatus === "unknown"
+        ? "The Treasurer could not verify the bill; confirm the current amount and status directly."
+        : lastCompleteTaxYear
+          ? `Last complete bill: TY${lastCompleteTaxYear.year} · $${lastCompleteTaxYear.billed.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${propertyTaxData?.paymentStatus === "current" ? " · paid/current" : ""}.`
+          : propertyTaxData?.isStale
+            ? "The last Treasurer refresh did not return a complete bill; confirm current tax details directly."
+            : "Cook County Treasurer billing and Assessor valuation records for this parcel.";
+  const propertyTaxBadgeTone = propertyTaxData?.paymentStatus === "delinquent" || propertyTaxData?.paymentStatus === "sold"
+    ? "r" as const
+    : propertyTaxData?.paymentStatus === "current"
+      ? "g" as const
+      : "indigo" as const;
+  const propertyTaxBadge = propertyTaxStatusLabel
+    ?? (propertyTaxData ? undefined : isLoadingPropertyTax ? "Loading" : undefined);
+  const propertyTaxSubsections = buildSubsectionNumbers([
+    ["bill", !!propertyTaxData || isLoadingPropertyTax],
+    ["assessed", !!latestPropertyAssessment],
+    ["exemptions", !!pinLookupData],
+    ["appeals", !!pinLookupData],
+  ]);
   const listingChecking = generateListingSnapshot.isPending;
   const listingNeverChecked = !listingSnapshot && !isListingSnapshotError && !listingChecking;
   const listingStillChecking = listingChecking || listingNeverChecked;
@@ -3986,9 +4074,9 @@ export default function RunDetail() {
       index: (pos < 0 ? accOrder.length : pos) + 1,
       order: (pos < 0 ? accOrder.length : pos) + 1,
       eyebrow: title,
-      takeaway: rowId === "listing" ? listingTakeaway : rowId === "businessLicenses" ? businessLicensesTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : scan?.takeaway ?? summary,
+      takeaway: rowId === "propertyTax" ? propertyTaxTakeaway : rowId === "listing" ? listingTakeaway : rowId === "businessLicenses" ? businessLicensesTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : scan?.takeaway ?? summary,
       verdict: rowId === "businessLicenses" ? "context" as const : verdict,
-      badge: rowId === "listing" ? listingBadge : rowId === "businessLicenses" ? businessLicensesBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
+      badge: rowId === "propertyTax" ? propertyTaxBadge : rowId === "listing" ? listingBadge : rowId === "businessLicenses" ? businessLicensesBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
       badgeTone: rowId === "listing"
         ? listingSnapshot?.status === "not_found"
           ? "indigo" as const
@@ -3999,7 +4087,9 @@ export default function RunDetail() {
             : listingChecks.length > 0 && listingChecks.every((check) => check.result === "match")
               ? "g" as const
               : undefined
-        : rowId === "businessLicenses"
+        : rowId === "propertyTax"
+          ? propertyTaxBadgeTone
+          : rowId === "businessLicenses"
           ? "indigo" as const
           : undefined,
       collapsible: rowId === "listing"
@@ -4062,7 +4152,7 @@ export default function RunDetail() {
           { label: 'Permits & Violations', icon: ClipboardCheck, action: () => 'section-permits' },
           { label: 'Historic Status', icon: Landmark, action: () => { setAccHidden((m) => ({ ...m, historic: false })); setAccOpen((m) => ({ ...m, historic: true })); return 'print-section-historic-status'; } },
           { label: 'Ownership & Title', icon: History, action: () => { setAccHidden((m) => ({ ...m, ownership: false })); setAccOpen((m) => ({ ...m, ownership: true })); return 'section-ownership'; } },
-          { label: 'Property Tax Records', icon: Receipt, action: () => { setSectionOpen('propertyDetails', true); setSectionOpen('propertyTaxInfo', true); return 'print-section-property-info'; } },
+          { label: 'Property Tax Records', icon: Receipt, action: () => { setAccOpen((m) => ({ ...m, propertyTax: true })); return 'section-propertyTax'; } },
           { label: 'Pre-Title Check', icon: AlertTriangle, action: () => { setSectionOpen('preTitleCheck', true); return 'print-section-pre-title-check'; } },
           { label: 'Lien Search', icon: Lock, action: () => { setSectionOpen('preTitleCheck', true); return 'print-section-pre-title-check'; } },
           { label: 'Area Transaction Trends', icon: BarChart3, action: () => { setSectionOpen('preTitleCheck', true); setSectionOpen('transactionTrends', true); return 'print-section-pre-title-check'; } },
@@ -11232,965 +11322,480 @@ export default function RunDetail() {
                       </CollapsibleContent>
                      </Collapsible>
                      )}
-
-                    {/* Property Tax Information Sub-section */}
-                    {((pinLookupData?.assessedValues && pinLookupData.assessedValues.length > 0) || propertyTaxData) && (
-                      <Collapsible id="section-property-tax-info" open={isPropertyTaxInfoSectionOpen} onOpenChange={setIsPropertyTaxInfoSectionOpen}>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                            <h3 className="chead chead-icon">
-                              <Receipt className="w-4 h-4" />
-                              Property Tax Information
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              {!isPropertyTaxInfoSectionOpen && (
-                                <div className="flex flex-wrap gap-1.5">
-                                  {(() => {
-                                    if (!pinLookupData?.assessedValues?.length) return null;
-                                    const latest = pinLookupData.assessedValues[0];
-                                    const finalTotal = latest.boardTotal || latest.certifiedTotal;
-                                    return (
-                                      <>
-                                        <Badge variant="outline" className="text-xs">
-                                          {latest.year} Assessed: ${finalTotal.toLocaleString()}
-                                        </Badge>
-                                        <Badge variant="outline" className="text-xs">
-                                          Est. Market: ${(finalTotal * 10).toLocaleString()}
-                                        </Badge>
-                                      </>
-                                    );
-                                  })()}
-                                  {(() => {
-                                    const fullYr = propertyTaxData?.taxYears?.find(t => t.installment1 > 0 && t.installment2 > 0);
-                                    if (!fullYr) return null;
-                                    const amt = fullYr.billed.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                    return (
-                                      <Badge variant="outline" className="text-xs">
-                                        TY{fullYr.year} Tax: ${amt}
-                                      </Badge>
-                                    );
-                                  })()}
-                                  {pinLookupData?.appealHistory && pinLookupData.appealHistory.length > 0 ? (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {pinLookupData.appealHistory.length} Appeal{pinLookupData.appealHistory.length !== 1 ? 's' : ''}
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant="secondary" className="text-xs text-muted-foreground">
-                                      Appeals: None
-                                    </Badge>
-                                  )}
-                                  {propertyTaxData?.paymentStatus && propertyTaxData.paymentStatus !== 'unknown' && (
-                                    <Badge className={`text-xs ${
-                                      propertyTaxData.paymentStatus === 'delinquent'
-                                        ? 'bg-red-600 text-white border-red-600'
-                                        : propertyTaxData.paymentStatus === 'sold'
-                                        ? 'bg-red-700 text-white border-red-700 font-bold'
-                                        : 'bg-green-600 text-white border-green-600'
-                                    }`}>
-                                      {propertyTaxData.paymentStatus === 'delinquent' && (() => {
-                                        const yr = propertyTaxData.taxYears?.find(t => t.status === 'partial')?.year;
-                                        return `⚠ Delinquent${yr ? ` · TY${yr}` : ''}`;
-                                      })()}
-                                      {propertyTaxData.paymentStatus === 'sold' && '🚨 Tax Sold'}
-                                      {propertyTaxData.paymentStatus === 'current' && '✓ Taxes Current'}
-                                    </Badge>
-                                  )}
-                                  {propertyTaxData && !propertyTaxData.paymentStatus && (
-                                    <Badge variant="outline" className="text-xs text-muted-foreground animate-pulse">
-                                      Fetching tax status…
-                                    </Badge>
-                                  )}
-                                  {propertyTaxData?.paymentStatus === 'unknown' && (
-                                    <Badge variant="outline" className="text-xs text-muted-foreground">
-                                      Check manually
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
-                              <span className="text-muted-foreground text-sm">{isPropertyTaxInfoSectionOpen ? '▼' : '▶'}</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="seccard space-y-4 mt-2">
-                            {/* Property address label — shown only when co-parcel is detected */}
-                            {coParcelAddress && (
-                              <div className="flex items-center gap-2">
-                                <span className="liens-pill">Primary</span>
-                                <span className="text-xs" style={{color:'#565651'}}>{run?.address?.split(',')[0].toUpperCase()}</span>
-                              </div>
-                            )}
-                            {/* THE TAKEAWAY — deterministic property-tax verdict with jump links */}
-                            {propertyTaxData?.paymentStatus && propertyTaxData.paymentStatus !== 'unknown' && (() => {
-                              const tyArr = propertyTaxData.taxYears ?? [];
-                              const ty0 = tyArr[0]; const ty1 = tyArr[1];
-                              const status = propertyTaxData.paymentStatus;
-                              const isFirstInstOnly = !!(ty0 && ty0.installment1 > 0 && ty0.installment2 === 0);
-                              const bill0 = ty0 ? (isFirstInstOnly ? ty0.installment1 : ty0.billed) : null;
-                              const bill1 = ty1 ? (isFirstInstOnly ? ty1.installment1 : ty1.billed) : null;
-                              const billPct = bill0 && bill1 && bill1 > 0 ? ((bill0 - bill1) / bill1) * 100 : null;
-                              const avs = pinLookupData?.assessedValues ?? [];
-                              const at0 = avs[0] ? (avs[0].boardTotal || avs[0].certifiedTotal) : null;
-                              const at1 = avs[1] ? (avs[1].boardTotal || avs[1].certifiedTotal) : null;
-                              const assessPct = at0 && at1 && at1 > 0 ? ((at0 - at1) / at1) * 100 : null;
-                              const appeals = pinLookupData?.appealHistory ?? [];
-                              const wins = appeals.filter(a => a.borTotalValue < a.assessorTotalValue).length;
-                              const exLatest = pinLookupData?.exemptionHistory?.[0] ?? null;
-                              const exNames: string[] = [];
-                              if (exLatest) {
-                                if (exLatest.homeowner !== null) exNames.push('Homeowner');
-                                if (exLatest.longtimeHomeowner !== null) exNames.push('Longtime Homeowner');
-                                if (exLatest.senior !== null) exNames.push('Senior');
-                                if (exLatest.seniorFreeze !== null) exNames.push('Senior Freeze');
-                                if (exLatest.disabledPersons !== null) exNames.push('Disabled Persons');
-                                if (exLatest.disabledVeterans !== null) exNames.push('Disabled Veterans');
-                              }
-                              const rateDriven = billPct !== null && billPct > 2 && assessPct !== null && assessPct <= 0.5;
-                              const assessDriven = billPct !== null && billPct > 2 && assessPct !== null && assessPct > 0.5;
-                              const headline = status === 'delinquent'
-                                ? 'There is a delinquent balance on this parcel — verify the payoff before any closing.'
-                                : status === 'sold'
-                                ? 'Taxes on this parcel were sold at a tax sale — a redemption issue that needs immediate attention.'
-                                : rateDriven
-                                ? "Taxes are paid and current — the bill rose even though this property's assessment stayed flat."
-                                : assessDriven
-                                ? 'Taxes are paid and current — the bill rose alongside a higher assessment.'
-                                : 'Taxes are paid and current, with no red flags in the bill history.';
-                              return (
-                                <div className="crm-take" data-testid="ptax-takeaway">
-                                  <div className="crm-takeh"><svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>Takeaway</div>
-                                  <div className="crm-taket">{headline}</div>
-                                  <div className="crm-conn">
-                                    <div className={`crm-cn ${status === 'current' ? 'g' : 'b'}`} data-testid="ptax-takeaway-bill">
-                                      <span className="dt" />
-                                      <span className="txt">
-                                        {status === 'current' && <><b>Paid and current</b> — no delinquent balance on record with the Cook County Treasurer.</>}
-                                        {status === 'delinquent' && <><b>Delinquent balance on record</b>{ty0 && ty0.amountDue > 0 ? <> — ${ty0.amountDue.toLocaleString('en-US', { minimumFractionDigits: 2 })} currently due</> : null}.</>}
-                                        {status === 'sold' && <><b>Taxes sold</b> — the parcel appears in a tax sale; redemption status must be confirmed with the County Clerk.</>}
-                                      </span>
-                                      {renderJump('ptax-bill')}
-                                    </div>
-                                    {billPct !== null && (
-                                      <div className={`crm-cn ${billPct > 2 ? 'c' : 'g'}`} data-testid="ptax-takeaway-assess">
-                                        <span className="dt" />
-                                        <span className="txt">
-                                          {rateDriven && <><b>Bill up ~{Math.round(billPct)}% while the assessment stayed flat</b>{isFirstInstOnly ? ' (comparing 1st installments)' : ''} — consistent with rate or levy changes rather than a reassessment of this property.</>}
-                                          {assessDriven && <><b>Bill up ~{Math.round(billPct)}% alongside a higher assessment</b> — assessed value rose ~{Math.round(assessPct!)}% year over year.</>}
-                                          {billPct > 2 && assessPct === null && <><b>Bill up ~{Math.round(billPct)}% year over year</b> — no assessment history available to compare against.</>}
-                                          {billPct <= 2 && <><b>Bill roughly {billPct < -2 ? 'down' : 'flat'} year over year</b>{billPct < -2 ? ` (~${Math.abs(Math.round(billPct))}% lower)` : ''} — no unusual movement in the tax bill.</>}
-                                        </span>
-                                        {renderJump('ptax-assess')}
-                                      </div>
-                                    )}
-                                    {pinLookupData && (
-                                      <div className="crm-cn n" data-testid="ptax-takeaway-appeal">
-                                        <span className="dt" />
-                                        <span className="txt">
-                                          {appeals.length > 0
-                                            ? <><b>Actively appealed</b> — {appeals.length} appeal{appeals.length !== 1 ? 's' : ''} on record, {wins} won a reduction.</>
-                                            : <><b>Never appealed</b> — no assessment appeals on record for this parcel.</>}
-                                        </span>
-                                        {renderJump('ptax-appeal')}
-                                      </div>
-                                    )}
-                                    {pinLookupData && (
-                                      <div className="crm-cn n" data-testid="ptax-takeaway-exempt">
-                                        <span className="dt" />
-                                        <span className="txt">
-                                          {exNames.length > 0
-                                            ? <><b>{exNames.join(', ')} exemption{exNames.length !== 1 ? 's' : ''} on file</b> — reduces the taxable value.</>
-                                            : <><b>No exemptions on file</b> — normal for a property that isn't owner-occupied.</>}
-                                        </span>
-                                        {renderJump('ptax-exempt')}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })()}
-
-                            {/* Tax Bill sub-section — loading placeholder while background scrape runs */}
-                            {propertyTaxData && !propertyTaxData.paymentStatus && (
-                              <div className="p-4 rounded-lg border border-border bg-muted">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <DollarSign className="h-4 w-4" style={{color:'#2b3a9e'}} />
-                                  <span className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651]">Property Tax Bill</span>
-                                  <span className="text-xs text-muted-foreground animate-pulse">Fetching from Cook County Treasurer…</span>
-                                </div>
-                                <div className="space-y-2">
-                                  <div className="h-3 bg-muted rounded w-1/2 animate-pulse" />
-                                  <div className="h-3 bg-muted rounded w-1/3 animate-pulse" />
-                                </div>
-                              </div>
-                            )}
-                            {/* Tax Bill sub-section (from Treasurer scraper) */}
-                            {propertyTaxData && (
-                              propertyTaxData.totalAnnualTaxAmount !== null
-                              || (propertyTaxData.taxYears && propertyTaxData.taxYears.length > 0)
-                              || propertyTaxData.paymentStatus === 'unknown'
-                            ) && (() => {
-                              const tyArr = propertyTaxData.taxYears ?? [];
-                              const ty0 = tyArr[0];
-                              const fmtAmt = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                              const isFirstInstOnly = !!(ty0 && ty0.installment1 > 0 && ty0.installment2 === 0);
-                              return (
-                              <div id="ptax-bill" className="p-4 rounded-lg border bg-card" style={{borderColor:'var(--sb-line)'}}>
-                                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                                  <div className="flex items-center gap-2">
-                                    <DollarSign className="h-4 w-4" style={{color:'#2b3a9e'}} />
-                                    <span className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651]">Property Tax Bill</span>
-                                    {propertyTaxData.isStale && (
-                                      <span className="text-xs text-muted-foreground animate-pulse">Updating…</span>
-                                    )}
-                                  </div>
-                                  {propertyTaxData.paymentStatus && (
-                                    <Badge
-                                      data-testid="badge-payment-status-ptinfo"
-                                      className={
-                                        propertyTaxData.paymentStatus === 'current'
-                                          ? 'tax-status cur'
-                                          : propertyTaxData.paymentStatus === 'delinquent'
-                                          ? 'tax-status del'
-                                          : propertyTaxData.paymentStatus === 'sold'
-                                          ? 'tax-status sold'
-                                          : 'tax-status unk'
-                                      }
-                                    >
-                                      {propertyTaxData.paymentStatus === 'current' && '✓ Taxes Current'}
-                                      {propertyTaxData.paymentStatus === 'delinquent' && '⚠ Delinquent'}
-                                      {propertyTaxData.paymentStatus === 'sold' && '🚨 Tax Sold'}
-                                      {propertyTaxData.paymentStatus === 'unknown' && 'Status Unknown'}
-                                    </Badge>
-                                  )}
-                                </div>
-                                {propertyTaxData.totalAnnualTaxAmount !== null && (
-                                  <div className="mb-3">
-                                    <p className="tax-big" data-testid="text-total-tax-amount">
-                                      ${fmtAmt(propertyTaxData.totalAnnualTaxAmount)} <small>· Tax Year {ty0?.year ?? ''}{isFirstInstOnly ? ' · 1st installment only' : ''}</small>
-                                    </p>
-                                    {isFirstInstOnly && (
-                                      <p className="tax-note mt-1.5">
-                                        2nd installment not yet billed — full year total will be higher.
-                                      </p>
-                                    )}
-                                  </div>
-                                )}
-                                  {propertyTaxData.paymentStatus === 'unknown' && tyArr.length === 0 && propertyTaxData.totalAnnualTaxAmount === null && (
-                                    <p className="tax-note mb-3" data-testid="text-tax-status-unavailable">
-                                      The Cook County Treasurer did not return a bill or payment status for this parcel. Verify directly with the County before relying on this record.
-                                    </p>
-                                  )}
-                                {tyArr.length > 0 && (
-                                  <div className="space-y-1.5">
-                                    {tyArr.slice(0, 3).map((ty, idx) => {
-                                      const priorTy = tyArr[idx + 1];
-                                      const isThisFirstInst = ty.installment1 > 0 && ty.installment2 === 0;
-                                      let pctChange: number | null = null;
-                                      let pctVsInst1 = false;
-                                      if (isThisFirstInst && priorTy && priorTy.installment1 > 0) {
-                                        pctChange = (ty.installment1 - priorTy.installment1) / priorTy.installment1 * 100;
-                                        pctVsInst1 = true;
-                                      } else if (!isThisFirstInst && priorTy && priorTy.billed > 0) {
-                                        pctChange = (ty.billed - priorTy.billed) / priorTy.billed * 100;
-                                      }
-                                      return (
-                                        <div
-                                          key={ty.year}
-                                          data-testid={`row-tax-year-${ty.year}`}
-                                          className="tax-yr"
-                                        >
-                                          <span className="tax-yr-y">
-                                            {ty.year}
-                                            {isThisFirstInst && <span className="tax-b inst">1st Inst.</span>}
-                                          </span>
-                                          <div className="flex items-center gap-2.5 ml-auto">
-                                            <span className="tax-yr-amt">
-                                              {pctChange !== null && (
-                                                <span className="tax-yoy">
-                                                  {pctChange > 0 ? '+' : ''}{pctChange.toFixed(1)}%{pctVsInst1 ? ' vs prior 1st' : ''}
-                                                </span>
-                                              )}
-                                              {!isThisFirstInst && ty.installment1 > 0 && (
-                                                <span className="tax-yoy hidden sm:inline">${fmtAmt(ty.installment1)} + ${fmtAmt(ty.installment2)}</span>
-                                              )}
-                                              <b>${fmtAmt(ty.billed)}</b>
-                                            </span>
-                                            {(() => {
-                                              const notYetDue = ty.status === 'unpaid' && isThisFirstInst && idx === 0 && new Date() < new Date(`${ty.year + 1}-04-01`);
-                                              const badgeCls = ty.status === 'paid'
-                                                ? 'tax-b paid'
-                                                : ty.status === 'partial'
-                                                ? 'tax-b due'
-                                                : ty.status === 'unpaid' && notYetDue
-                                                ? 'tax-b pend'
-                                                : ty.status === 'unpaid'
-                                                ? 'tax-b due'
-                                                : 'tax-b inst';
-                                              return (
-                                                <Badge className={`shrink-0 ${badgeCls}`}>
-                                                  {ty.status === 'paid' && 'Paid'}
-                                                  {ty.status === 'partial' && `$${ty.amountDue.toLocaleString('en-US', { minimumFractionDigits: 2 })} Due`}
-                                                  {ty.status === 'unpaid' && notYetDue && 'Due Apr 1'}
-                                                  {ty.status === 'unpaid' && !notYetDue && 'Unpaid'}
-                                                  {ty.status === 'unknown' && '—'}
-                                                </Badge>
-                                              );
-                                            })()}
-                                          </div>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                )}
-                                <a
-                                  href={propertyTaxData.treasurerBillUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  data-testid="link-treasurer-site"
-                                  className="tax-link mt-3 hover:opacity-80 transition-opacity"
-                                >
-                                  <ExternalLink className="h-3.5 w-3.5" />
-                                  Full details at Cook County Treasurer
-                                </a>
-                              </div>
-                              );
-                            })()}
-
-                            {/* Assessed Value sub-section */}
-                            {pinLookupData?.assessedValues && pinLookupData.assessedValues.length > 0 && (() => {
-                              const latest = pinLookupData.assessedValues[0];
-                              const finalTotal = latest.boardTotal || latest.certifiedTotal;
-                              const estimatedMarketValue = finalTotal * 10;
-
-                              return (
-                                <Collapsible id="ptax-assess" open={isAssessedValueSectionOpen} onOpenChange={setIsAssessedValueSectionOpen}>
-                                  <CollapsibleTrigger asChild>
-                                    <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                                      <h3 className="chead chead-icon">
-                                        <DollarSign className="w-4 h-4" />
-                                        {latest.year} Assessed Value
-                                      </h3>
-                                      <div className="flex items-center gap-2">
-                                        {!isAssessedValueSectionOpen && (
-                                          <div className="flex flex-wrap gap-1.5">
-                                            <Badge variant="outline" className="text-xs">
-                                              ${finalTotal.toLocaleString()}
-                                            </Badge>
-                                            <Badge variant="outline" className="text-xs">
-                                              Est. Market: ${estimatedMarketValue.toLocaleString()}
-                                            </Badge>
-                                            <Badge variant="secondary" className="text-xs">
-                                              {getCookCountyClassLabel(latest.propertyClass)}
-                                            </Badge>
-                                          </div>
-                                        )}
-                                        <span className="text-muted-foreground text-sm">{isAssessedValueSectionOpen ? '▼' : '▶'}</span>
-                                      </div>
-                                    </div>
-                                  </CollapsibleTrigger>
-                                  <CollapsibleContent>
-                                    <div className="px-4">
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
-                                      <div className="parcel-fact">
-                                        <p className="parcel-fact-l">Assessed Total</p>
-                                        <p className="parcel-fact-v">${finalTotal.toLocaleString()}</p>
-                                        <p className="parcel-fact-q">
-                                          assessed at 10% of market{latest.boardTotal && latest.boardTotal !== latest.certifiedTotal ? ` · reduced from $${latest.certifiedTotal.toLocaleString()} by BOR` : ''}
-                                        </p>
-                                      </div>
-                                      <div className="parcel-fact">
-                                        <p className="parcel-fact-l">Est. Market Value</p>
-                                        <p className="parcel-fact-v">${estimatedMarketValue.toLocaleString()}</p>
-                                      </div>
-                                      <div className="parcel-fact col-span-2 md:col-span-1">
-                                        <p className="parcel-fact-l">Breakdown</p>
-                                        <p className="parcel-fact-v" style={{fontSize:'14px'}}>Land ${(latest.boardLand || latest.certifiedLand).toLocaleString()}</p>
-                                        <p className="parcel-fact-q">Building ${(latest.boardBuilding || latest.certifiedBuilding).toLocaleString()}</p>
-                                      </div>
-                                    </div>
-
-                                    {pinLookupData?.assessedValues && pinLookupData.assessedValues.length > 1 && (
-                                      <div className="mt-4">
-                                        <p className="tax-chartcap mb-3">Assessment Value Trend · Last 20 Years</p>
-                                        <div className="h-64 w-full">
-                                          <ResponsiveContainer width="100%" height="100%">
-                                            <LineChart
-                                              data={pinLookupData.assessedValues
-                                                .slice(0, 20)
-                                                .map(av => ({
-                                                  year: av.year,
-                                                  assessed: av.boardTotal || av.certifiedTotal,
-                                                  land: av.boardLand || av.certifiedLand,
-                                                  building: av.boardBuilding || av.certifiedBuilding,
-                                                }))
-                                                .reverse()
-                                              }
-                                              margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
-                                            >
-                                              <CartesianGrid stroke="#eae8e2" strokeWidth={1} vertical={false} />
-                                              <XAxis
-                                                dataKey="year"
-                                                tick={{ fontSize: 10, fontFamily: 'var(--font-jbmono)', fill: '#8b8a84' }}
-                                                tickLine={false}
-                                                axisLine={{ stroke: '#eae8e2' }}
-                                                interval="preserveStartEnd"
-                                              />
-                                              <YAxis
-                                                tick={{ fontSize: 10, fontFamily: 'var(--font-jbmono)', fill: '#8b8a84' }}
-                                                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                                                tickLine={false}
-                                                axisLine={false}
-                                                width={55}
-                                              />
-                                              <Tooltip
-                                                formatter={(value: number, name: string) => [
-                                                  `$${value.toLocaleString()}`,
-                                                  name === 'assessed' ? 'Total Assessed' : name === 'land' ? 'Land' : 'Building'
-                                                ]}
-                                                labelFormatter={(label) => `Year: ${label}`}
-                                                contentStyle={{
-                                                  backgroundColor: 'hsl(var(--card))',
-                                                  border: '1px solid hsl(var(--border))',
-                                                  borderRadius: '8px',
-                                                  fontSize: '12px'
-                                                }}
-                                              />
-                                              <Legend
-                                                wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
-                                                formatter={(value) => value === 'assessed' ? 'Total Assessed' : value === 'land' ? 'Land' : 'Building'}
-                                              />
-                                              <Line
-                                                type="monotone"
-                                                dataKey="assessed"
-                                                stroke="#2f6fd0"
-                                                strokeWidth={2.7}
-                                                dot={{ r: 2.4, fill: '#2f6fd0', strokeWidth: 0 }}
-                                                activeDot={{ r: 5 }}
-                                              />
-                                              <Line
-                                                type="monotone"
-                                                dataKey="land"
-                                                stroke="#2f9e46"
-                                                strokeWidth={2.2}
-                                                dot={{ r: 2, fill: '#2f9e46', strokeWidth: 0 }}
-                                                strokeDasharray="5 4"
-                                              />
-                                              <Line
-                                                type="monotone"
-                                                dataKey="building"
-                                                stroke="#e07b2e"
-                                                strokeWidth={2.7}
-                                                dot={{ r: 2, fill: '#e07b2e', strokeWidth: 0 }}
-                                              />
-                                            </LineChart>
-                                          </ResponsiveContainer>
-                                        </div>
-                                        <p className="tax-src">
-                                          Values shown are final assessed amounts (after Board of Review adjustments if applicable).
-                                        </p>
-                                      </div>
-                                    )}
-                                    </div>
-                                  </CollapsibleContent>
-                                </Collapsible>
-                              );
-                            })()}
-
-                            {/* Exemption History sub-section */}
-                            {pinLookupData && (
-                              <Collapsible id="ptax-exempt" open={isExemptionHistorySectionOpen} onOpenChange={setIsExemptionHistorySectionOpen}>
-                                <CollapsibleTrigger asChild>
-                                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                                    <h3 className="chead chead-icon">
-                                      <Receipt className="w-4 h-4" />
-                                      Exemption History
-                                    </h3>
-                                    <div className="flex items-center gap-2">
-                                      {!isExemptionHistorySectionOpen && (() => {
-                                        const latest = pinLookupData.exemptionHistory?.[0];
-                                        if (!latest) {
-                                          return (
-                                            <Badge variant="secondary" className="text-xs text-muted-foreground">
-                                              None on Record
-                                            </Badge>
-                                          );
-                                        }
-                                        const hasAny = latest.homeowner !== null || latest.senior !== null || latest.seniorFreeze !== null || latest.disabledPersons !== null || latest.disabledVeterans !== null || latest.longtimeHomeowner !== null;
-                                        if (!hasAny) {
-                                          return (
-                                            <Badge variant="secondary" className="text-xs text-muted-foreground">
-                                              {latest.year}: None Applied
-                                            </Badge>
-                                          );
-                                        }
-                                        const applied: string[] = [];
-                                        if (latest.homeowner !== null) applied.push('Homeowner');
-                                        if (latest.longtimeHomeowner !== null) applied.push('Longtime HO');
-                                        if (latest.senior !== null) applied.push('Senior');
-                                        if (latest.seniorFreeze !== null) applied.push('Sr. Freeze');
-                                        if (latest.disabledPersons !== null) applied.push('Disabled');
-                                        if (latest.disabledVeterans !== null) applied.push('Vet');
-                                        return (
-                                          <div className="flex flex-wrap gap-1">
-                                            {applied.slice(0, 2).map(name => (
-                                              <Badge key={name} variant="secondary" className="text-xs">
-                                                {name} ✓
-                                              </Badge>
-                                            ))}
-                                            {applied.length > 2 && (
-                                              <Badge variant="secondary" className="text-xs text-muted-foreground">
-                                                +{applied.length - 2}
-                                              </Badge>
-                                            )}
-                                          </div>
-                                        );
-                                      })()}
-                                      <span className="text-muted-foreground text-sm">{isExemptionHistorySectionOpen ? '▼' : '▶'}</span>
-                                    </div>
-                                  </div>
-                                </CollapsibleTrigger>
-                                <CollapsibleContent>
-                                  <div className="px-4 pb-2">
-                                    {(!pinLookupData.exemptionHistory || pinLookupData.exemptionHistory.length === 0) ? (
-                                      <p className="text-sm text-muted-foreground py-2">No exemption history on record for this PIN.</p>
-                                    ) : (() => {
-                                      const years = pinLookupData.exemptionHistory.slice(0, 6);
-                                      const types: { key: keyof typeof years[0]; label: string }[] = [
-                                        { key: 'homeowner', label: 'Homeowner' },
-                                        { key: 'longtimeHomeowner', label: 'Longtime HO' },
-                                        { key: 'senior', label: 'Senior' },
-                                        { key: 'seniorFreeze', label: 'Sr. Freeze' },
-                                        { key: 'disabledPersons', label: 'Disabled' },
-                                        { key: 'disabledVeterans', label: 'Disabled Vet' },
-                                        { key: 'returningVeterans', label: 'Returning Vet' },
-                                        { key: 'homeImprovement', label: 'Home Impr.' },
-                                      ].filter(t => years.some(y => (y as any)[t.key] !== null));
-                                      if (types.length === 0) {
-                                        return <p className="text-sm text-muted-foreground py-2">No exemptions applied in recent years.</p>;
-                                      }
-                                      return (
-                                        <div className="overflow-x-auto">
-                                          <table className="w-full text-xs border-collapse mt-1">
-                                            <thead>
-                                              <tr className="border-b border-border">
-                                                <th className="text-left py-1.5 pr-3 font-jbmono font-bold uppercase tracking-wider text-[11.5px] text-[#141414]">Year</th>
-                                                {types.map(t => (
-                                                  <th key={t.key} className="text-right py-1.5 px-2 font-jbmono font-bold uppercase tracking-wider text-[11.5px] text-[#141414] whitespace-nowrap">{t.label}</th>
-                                                ))}
-                                              </tr>
-                                            </thead>
-                                            <tbody>
-                                              {years.map((row, i) => (
-                                                <tr key={row.year} className={i % 2 === 0 ? '' : 'bg-secondary'}>
-                                                  <td className="py-1.5 pr-3 font-semibold text-foreground">{row.year}</td>
-                                                  {types.map(t => {
-                                                    const val = (row as any)[t.key] as number | null;
-                                                    return (
-                                                      <td key={t.key} className={`py-1.5 px-2 text-right tabular-nums ${val !== null ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
-                                                        {val !== null ? `$${val.toLocaleString()}` : '—'}
-                                                      </td>
-                                                    );
-                                                  })}
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                          </table>
-                                          <p className="text-xs text-muted-foreground mt-2">Source: Cook County Assessor. Values are EAV reductions applied to assessed value.</p>
-                                        </div>
-                                      );
-                                    })()}
-                                    {/* Exemption Eligibility Checker */}
-                                    {(() => {
-                                      const latest = pinLookupData.exemptionHistory?.[0] ?? null;
-                                      const propClass = String(compPropertyClass || '');
-                                      const isResidential = propClass.startsWith('2');
-                                      const isActive = (key: string) => latest !== null && (latest as any)[key] !== null;
-                                      const hasHomeowner = isActive('homeowner');
-
-                                      const exemptions: { key: string; name: string; eav: string; requirement: string; show: boolean }[] = [
-                                        {
-                                          key: 'homeowner',
-                                          name: 'Homeowner Exemption',
-                                          eav: '~$10,000 EAV reduction',
-                                          requirement: 'Owner-occupied primary residence',
-                                          show: isResidential,
-                                        },
-                                        {
-                                          key: 'longtimeHomeowner',
-                                          name: 'Longtime Homeowner',
-                                          eav: 'Varies (EAV increase-based)',
-                                          requirement: '10+ yrs ownership, primary residence, EAV risen ≥10%',
-                                          show: isResidential && hasHomeowner,
-                                        },
-                                        {
-                                          key: 'senior',
-                                          name: 'Senior Citizen Exemption',
-                                          eav: '~$8,000 EAV reduction',
-                                          requirement: 'Age 65+, primary residence',
-                                          show: isResidential,
-                                        },
-                                        {
-                                          key: 'seniorFreeze',
-                                          name: 'Senior Assessment Freeze',
-                                          eav: 'Freezes assessed value',
-                                          requirement: 'Age 65+, household income ≤ $65,000',
-                                          show: isResidential,
-                                        },
-                                        {
-                                          key: 'disabledPersons',
-                                          name: 'Persons with Disabilities',
-                                          eav: '~$2,000 EAV reduction',
-                                          requirement: 'Documented disability, primary residence',
-                                          show: isResidential,
-                                        },
-                                        {
-                                          key: 'disabledVeterans',
-                                          name: 'Disabled Veterans',
-                                          eav: '$2,500–$250,000 EAV reduction',
-                                          requirement: 'VA disability rating 30%+, primary residence',
-                                          show: true,
-                                        },
-                                        {
-                                          key: 'returningVeterans',
-                                          name: 'Returning Veterans',
-                                          eav: '$5,000 EAV reduction (one-time)',
-                                          requirement: 'Returning from active duty deployment',
-                                          show: true,
-                                        },
-                                        {
-                                          key: 'homeImprovement',
-                                          name: 'Home Improvement',
-                                          eav: 'Up to $75,000 EAV, 4 years',
-                                          requirement: 'Qualifying improvements made in last 4 years',
-                                          show: isResidential,
-                                        },
-                                      ].filter(e => e.show);
-
-                                      if (exemptions.length === 0) return null;
-
-                                      return (
-                                        <div className="mt-4 border-t border-border pt-4">
-                                          <h4 className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651] mb-3">Exemption Eligibility</h4>
-                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            {exemptions.map(ex => {
-                                              const active = isActive(ex.key);
-                                              return (
-                                                <div key={ex.key} className={`tax-ex ${active ? 'on' : ''}`}>
-                                                  <div className="min-w-0">
-                                                    <p className="tax-ex-nm">{ex.name}</p>
-                                                    <p className="tax-ex-eav">{ex.eav}</p>
-                                                    <p className="tax-ex-cri">{ex.requirement}</p>
-                                                  </div>
-                                                  <span className={`tax-ex-st ${active ? 'on' : ''}`}>
-                                                    {active ? '✓ On file' : 'Not on file'}
-                                                  </span>
-                                                </div>
-                                              );
-                                            })}
-                                          </div>
-                                          <p className="tax-src">Apply at <span className="font-semibold" style={{color:'#565651'}}>cookcountyassessor.com</span>. Deadlines are typically late winter/early spring each year.</p>
-                                        </div>
-                                      );
-                                    })()}
-                                  </div>
-                                </CollapsibleContent>
-                              </Collapsible>
-                            )}
-
-                            {/* Appeal History sub-section */}
-                            {pinLookupData && (
-                              <Collapsible id="ptax-appeal" open={isAppealHistorySectionOpen} onOpenChange={setIsAppealHistorySectionOpen}>
-                                <CollapsibleTrigger asChild>
-                                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                                    <h3 className="chead chead-icon">
-                                      <Scale className="w-4 h-4" />
-                                      Appeal History
-                                    </h3>
-                                    <div className="flex items-center gap-2">
-                                      {!isAppealHistorySectionOpen && (
-                                        <div className="flex flex-wrap gap-1.5">
-                                          {pinLookupData?.appealHistory && pinLookupData.appealHistory.length > 0 ? (
-                                            <>
-                                              <Badge variant="secondary" className="text-xs">
-                                                {pinLookupData.appealHistory.length} Appeal{pinLookupData.appealHistory.length !== 1 ? 's' : ''}
-                                              </Badge>
-                                              {pinLookupData.appealHistory[0]?.result && (
-                                                <Badge variant="outline" className="text-xs">
-                                                  Latest: {pinLookupData.appealHistory[0].result}
-                                                </Badge>
-                                              )}
-                                            </>
-                                          ) : (
-                                            <Badge variant="secondary" className="text-xs text-muted-foreground">
-                                              None
-                                            </Badge>
-                                          )}
-                                        </div>
-                                      )}
-                                      <span className="text-muted-foreground text-sm">{isAppealHistorySectionOpen ? '▼' : '▶'}</span>
-                                    </div>
-                                  </div>
-                                </CollapsibleTrigger>
-                                <CollapsibleContent>
-                                  <div className="px-4 space-y-3">
-                                    {(!pinLookupData.appealHistory || pinLookupData.appealHistory.length === 0) ? (
-                                      <p className="text-sm text-muted-foreground py-2">No appeal history on record for this PIN.</p>
-                                    ) : pinLookupData.appealHistory.map((appeal, index) => (
-                                      <div key={index} className="tax-appeal">
-                                        <div className="flex flex-wrap items-center gap-2.5 mb-3">
-                                          <span className="tax-ay">
-                                            Tax Year {appeal.taxYear}
-                                          </span>
-                                          <Badge
-                                            variant="outline"
-                                            className={
-                                              appeal.result === 'Decrease'
-                                                ? 'tax-outc dec'
-                                                : appeal.result === 'Increase'
-                                                ? 'tax-outc inc'
-                                                : 'tax-outc no'
-                                            }
-                                          >
-                                            {appeal.result}
-                                          </Badge>
-                                          <span className="tax-reason">
-                                            {appeal.appealReason}
-                                          </span>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                          <div>
-                                            <p className="tax-avr-l">Assessor value</p>
-                                            <p className="tax-avr-v">${appeal.assessorTotalValue.toLocaleString('en-US')}</p>
-                                            <p className="tax-avr-sub">
-                                              Land ${appeal.assessorLandValue.toLocaleString()} · Bldg ${appeal.assessorImprovementValue.toLocaleString()}
-                                            </p>
-                                          </div>
-                                          <div>
-                                            <p className="tax-avr-l">Board of Review value</p>
-                                            <p className="tax-avr-v">
-                                              ${appeal.borTotalValue.toLocaleString('en-US')}
-                                              {appeal.borTotalValue !== appeal.assessorTotalValue && (
-                                                <span className={`tax-cut ${appeal.borTotalValue > appeal.assessorTotalValue ? 'up' : ''}`}>
-                                                  {appeal.borTotalValue < appeal.assessorTotalValue ? '−' : '+'}${Math.abs(appeal.borTotalValue - appeal.assessorTotalValue).toLocaleString()}
-                                                </span>
-                                              )}
-                                            </p>
-                                            <p className="tax-avr-sub">
-                                              {appeal.borTotalValue < appeal.assessorTotalValue
-                                                ? 'appeal succeeded'
-                                                : appeal.result === 'No Change'
-                                                ? 'no reduction granted'
-                                                : `Land $${appeal.borLandValue.toLocaleString()} · Bldg $${appeal.borImprovementValue.toLocaleString()}`}
-                                            </p>
-                                          </div>
-                                        </div>
-
-                                        {appeal.changeReason && (
-                                          <p className="tax-avr-sub italic mt-2">
-                                            {appeal.changeReason}
-                                          </p>
-                                        )}
-
-                                        <div className="tax-who flex flex-wrap gap-x-4 gap-y-1">
-                                          {appeal.appellant && (
-                                            <span>
-                                              <b>Appellant:</b> {appeal.appellant}
-                                            </span>
-                                          )}
-                                          {(appeal.attorneyFirstName || appeal.attorneyLastName) && (
-                                            <span>
-                                              <b>Attorney:</b> {appeal.attorneyFirstName} {appeal.attorneyLastName}
-                                              {appeal.attorneyFirmName && ` (${appeal.attorneyFirmName})`}
-                                            </span>
-                                          )}
-                                        </div>
-                                      </div>
-                                    ))}
-                                    {/* Who filed these appeals — parcel-only representation record */}
-                                    {pinLookupData.appealHistory && pinLookupData.appealHistory.length > 0 && (() => {
-                                      const groups = new Map<string, { name: string; firm: string | null; total: number; wins: number; reduced: number; winYears: string[] }>();
-                                      for (const a of pinLookupData.appealHistory) {
-                                        const name = [a.attorneyFirstName, a.attorneyLastName].filter(Boolean).join(' ').trim();
-                                        if (!name && !a.attorneyFirmName) continue;
-                                        const key = (name || a.attorneyFirmName || '').toUpperCase();
-                                        const g = groups.get(key) ?? { name: name || a.attorneyFirmName || '', firm: name ? (a.attorneyFirmName ?? null) : null, total: 0, wins: 0, reduced: 0, winYears: [] };
-                                        g.total += 1;
-                                        if (a.borTotalValue < a.assessorTotalValue) {
-                                          g.wins += 1;
-                                          g.reduced += a.assessorTotalValue - a.borTotalValue;
-                                          g.winYears.push(a.taxYear);
-                                        }
-                                        groups.set(key, g);
-                                      }
-                                      if (groups.size === 0) return null;
-                                      return (
-                                        <div className="space-y-3 pt-2">
-                                          <h4 className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651]">Who Filed These Appeals</h4>
-                                          {Array.from(groups.values()).map(g => {
-                                            const noChange = g.total - g.wins;
-                                            const initials = g.name.split(/\s+/).filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
-                                            return (
-                                              <div key={g.name} className="tacard" data-testid={`tacard-${g.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
-                                                <div className="tatop">
-                                                  <div className="taav">{initials}</div>
-                                                  <div className="min-w-0">
-                                                    <div className="tanm">{g.name}</div>
-                                                    {g.firm && <div className="tafirm">{g.firm}</div>}
-                                                  </div>
-                                                  <div className="tarec">
-                                                    <div className="big"><b>{g.wins}</b>–{noChange}</div>
-                                                    <div className="lab">Won · No change</div>
-                                                  </div>
-                                                </div>
-                                                <div className="tawl">
-                                                  {g.wins > 0 && <span className="win" style={{ flex: g.wins }} />}
-                                                  {noChange > 0 && <span className="no" style={{ flex: noChange }} />}
-                                                </div>
-                                                <div className="tafoot">
-                                                  <span><span className="b">{g.total}</span> filing{g.total !== 1 ? 's' : ''} on this parcel</span>
-                                                  {g.reduced > 0 && <span><span className="b">${g.reduced.toLocaleString()}</span> assessed value reduced</span>}
-                                                  {g.winYears.map(y => <span key={y} className="tayl">{y} ✓</span>)}
-                                                </div>
-                                                <p className="tadisc">
-                                                  This record reflects appeals filed on this parcel only — not this representative's overall record. To research other representatives, see the <a href="https://www.cookcountyboardofreview.com/" target="_blank" rel="noopener noreferrer">Board of Review's public filings</a>.
-                                                </p>
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      );
-                                    })()}
-                                  </div>
-                                </CollapsibleContent>
-                              </Collapsible>
-                            )}
-
-                            {/* Co-parcel tax block — shown when a related parcel is detected */}
-                            {coParcelAddress && (
-                              <div className="border-t border-border pt-4 space-y-3">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs font-medium font-body bg-secondary text-foreground/70 border [border-color:hsl(var(--tag-line))] rounded-full px-2.5 py-0.5">Co-Parcel</span>
-                                  <span className="text-xs text-muted-foreground">{coParcelAddress}</span>
-                                  {coParcelPin && (
-                                    <span className="text-xs font-jbmono text-muted-foreground/60">PIN {coParcelPin.replace(/(\d{2})(\d{3})(\d{3})(\d{3})(\d{4})/, '$1-$2-$3-$4-$5')}</span>
-                                  )}
-                                </div>
-                                {isLoadingCoParcelTax && (
-                                  <div className="space-y-2">
-                                    <div className="h-4 bg-muted rounded w-1/3 animate-pulse" />
-                                    <div className="h-4 bg-muted rounded w-1/2 animate-pulse" />
-                                  </div>
-                                )}
-                                {coParcelTaxData && (coParcelTaxData.totalAnnualTaxAmount !== null || (coParcelTaxData.taxYears && coParcelTaxData.taxYears.length > 0)) && (() => {
-                                  const tyArr = coParcelTaxData.taxYears ?? [];
-                                  const ty0 = tyArr[0];
-                                  const fmtAmt = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                  const isFirstInstOnly = !!(ty0 && ty0.installment1 > 0 && ty0.installment2 === 0);
-                                  return (
-                                    <div className="p-4 rounded-lg border bg-card" style={{borderColor:'var(--sb-line)'}}>
-                                      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                                        <div className="flex items-center gap-2">
-                                          <DollarSign className="h-4 w-4" style={{color:'#2b3a9e'}} />
-                                          <span className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651]">Property Tax Bill</span>
-                                        </div>
-                                        {coParcelTaxData.paymentStatus && (
-                                          <Badge className={
-                                            coParcelTaxData.paymentStatus === 'current'
-                                              ? 'tax-status cur'
-                                              : coParcelTaxData.paymentStatus === 'delinquent'
-                                              ? 'tax-status del'
-                                              : coParcelTaxData.paymentStatus === 'sold'
-                                              ? 'tax-status sold'
-                                              : 'tax-status unk'
-                                          }>
-                                            {coParcelTaxData.paymentStatus === 'current' && '✓ Taxes Current'}
-                                            {coParcelTaxData.paymentStatus === 'delinquent' && '⚠ Delinquent'}
-                                            {coParcelTaxData.paymentStatus === 'sold' && '🚨 Tax Sold'}
-                                            {coParcelTaxData.paymentStatus === 'unknown' && 'Status Unknown'}
-                                          </Badge>
-                                        )}
-                                      </div>
-                                      {coParcelTaxData.totalAnnualTaxAmount !== null && (
-                                        <div className="mb-3">
-                                          <p className="tax-big" style={{fontSize:'24px'}}>
-                                            ${fmtAmt(coParcelTaxData.totalAnnualTaxAmount)} <small>· TY{ty0?.year ?? ''}{isFirstInstOnly ? ' · 1st inst.' : ''}</small>
-                                          </p>
-                                        </div>
-                                      )}
-                                      {tyArr.length > 0 && (
-                                        <div className="space-y-1.5">
-                                          {tyArr.slice(0, 3).map((ty, idx) => {
-                                            const priorTy = tyArr[idx + 1];
-                                            const isThisFirstInst = ty.installment1 > 0 && ty.installment2 === 0;
-                                            let pctChange: number | null = null;
-                                            if (isThisFirstInst && priorTy && priorTy.installment1 > 0) {
-                                              pctChange = (ty.installment1 - priorTy.installment1) / priorTy.installment1 * 100;
-                                            } else if (!isThisFirstInst && priorTy && priorTy.billed > 0) {
-                                              pctChange = (ty.billed - priorTy.billed) / priorTy.billed * 100;
-                                            }
-                                            const notYetDue = ty.status === 'unpaid' && isThisFirstInst && idx === 0 && new Date() < new Date(`${ty.year + 1}-04-01`);
-                                            const badgeCls = ty.status === 'paid'
-                                              ? 'tax-b paid'
-                                              : ty.status === 'partial'
-                                              ? 'tax-b due'
-                                              : ty.status === 'unpaid' && notYetDue
-                                              ? 'tax-b pend'
-                                              : ty.status === 'unpaid'
-                                              ? 'tax-b due'
-                                              : 'tax-b inst';
-                                            return (
-                                              <div key={ty.year} className="tax-yr">
-                                                <span className="tax-yr-y">
-                                                  {ty.year}
-                                                  {isThisFirstInst && <span className="tax-b inst">1st Inst.</span>}
-                                                </span>
-                                                <div className="flex items-center gap-2.5 ml-auto">
-                                                  <span className="tax-yr-amt">
-                                                    {pctChange !== null && (
-                                                      <span className="tax-yoy">{pctChange > 0 ? '+' : ''}{pctChange.toFixed(1)}%</span>
-                                                    )}
-                                                    <b>${fmtAmt(ty.billed)}</b>
-                                                  </span>
-                                                  <Badge className={`shrink-0 ${badgeCls}`}>
-                                                    {ty.status === 'paid' && 'Paid'}
-                                                    {ty.status === 'partial' && `$${ty.amountDue.toLocaleString('en-US', { minimumFractionDigits: 2 })} Due`}
-                                                    {ty.status === 'unpaid' && notYetDue && 'Due Apr 1'}
-                                                    {ty.status === 'unpaid' && !notYetDue && 'Unpaid'}
-                                                    {ty.status === 'unknown' && '—'}
-                                                  </Badge>
-                                                </div>
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      )}
-                                      {coParcelTaxData.treasurerBillUrl && (
-                                        <a
-                                          href={coParcelTaxData.treasurerBillUrl}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="tax-link mt-3 hover:opacity-80 transition-opacity"
-                                        >
-                                          <ExternalLink className="h-3.5 w-3.5" />
-                                          Full details at Cook County Treasurer
-                                        </a>
-                                      )}
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                            )}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    )}
-
                   </CardContent>
                 </CollapsibleContent>
               </Card>
             </Collapsible>
           </motion.div>
+          </AccordionSection>
+
+          <AccordionSection {...accProps("propertyTax")}>
+            <div className="kyp-tax" data-testid="section-property-tax-body">
+              {coParcelAddress && (
+                <div className="kyp-tax-parcel">
+                  <span className="liens-pill">Primary parcel</span>
+                  <span>{run?.address?.split(",")[0]}</span>
+                </div>
+              )}
+
+              {(lastCompleteTaxYear || assessorImpliedMarketValue !== null || propertyAppeals.length > 0) && (
+                <div className="kyp-blocks hero kyp-tax-hero" data-testid="property-tax-summary">
+                  <div className="kyp-block ind">
+                    <div>
+                      <div className="bv">
+                        {lastCompleteTaxYear
+                          ? `$${lastCompleteTaxYear.billed.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
+                          : "—"}
+                      </div>
+                      <div className="bl">Last full-year bill</div>
+                      <div className="bd">
+                        {lastCompleteTaxYear
+                          ? `TY${lastCompleteTaxYear.year} · both installments`
+                          : "No complete two-installment year on record"}
+                        {propertyTaxYears.some((year) => Number(year.year) > Number(lastCompleteTaxYear?.year ?? 0) && year.installment1 > 0 && !(year.installment2 > 0)) ? " · latest year part-billed" : ""}
+                        {propertyTaxData?.paymentStatus === "current" ? " · paid/current" : ""}
+                        {propertyTaxData?.paymentStatus === "delinquent" ? " · balance due" : ""}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="kyp-block dark">
+                    <div>
+                      <div className="bv">
+                        {effectiveTaxRate !== null ? <>{effectiveTaxRate.toFixed(2)}<u>%</u></> : "—"}
+                      </div>
+                      <div className="bl">Bill ÷ assessor-implied market value</div>
+                      <div className="bd">
+                        {effectiveTaxRate !== null
+                          ? `TY${lastCompleteTaxYear!.year} bill ${lastCompleteTaxYear!.billed.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })} ÷ TY${latestPropertyAssessment?.year} value ${assessorImpliedMarketValue!.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })}; not a sale-price tax rate`
+                          : "Unavailable without a complete bill and confirmed assessor class"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="kyp-block ind">
+                    <div>
+                      <div className="bv">
+                        {propertyAppeals.length > 0
+                          ? <>{successfulAppeals.length}<u> of {propertyAppeals.length}</u></>
+                          : "—"}
+                      </div>
+                      <div className="bl">Appeals with reductions</div>
+                      <div className="bd">
+                        {successfulAppeals.length > 0
+                          ? `${successfulAppeals.map((appeal) => `TY${appeal.taxYear} −$${(appeal.assessorTotalValue - appeal.borTotalValue).toLocaleString("en-US")}`).join(", ")}${priorWinningAppeal?.appellant ? ` · filed by ${priorWinningAppeal.appellant}` : ""}`
+                          : propertyAppeals.length > 0 ? "No assessor-value reductions recorded" : "No appeal record returned"}
+                        {currentOwnerAppeals.length > 0 ? ` · current owner ${currentOwnerAppealWins} of ${currentOwnerAppeals.length}` : ""}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!isLoadingPropertyTax && !propertyTaxData && !pinLookupData && (
+                <div className="kyp-tax-state" data-testid="property-tax-no-data">
+                  Enter a Cook County PIN to load Treasurer bills, Assessor values, exemptions and appeal history.
+                </div>
+              )}
+              {!isLoadingPropertyTax && !propertyTaxData && !!pinLookupData && (
+                <div className="kyp-tax-state" data-testid="tax-bill-unavailable">
+                  No Treasurer bill or payment status was returned for this PIN. Verify directly with Cook County.
+                </div>
+              )}
+
+              {propertyTaxSubsections.bill !== undefined && (
+                <section id="ptax-bill" className="kyp-tax-part">
+                  <KypSubhead subsection={propertyTaxSubsections.bill}>
+                    <span className="lbl">The bill</span>
+                    <span className="ct">
+                      Cook County Treasurer
+                      {lastCompleteTaxYear ? ` · last complete year TY${lastCompleteTaxYear.year}` : ""}
+                      {propertyTaxData?.paymentStatus === "current" ? " · taxes current" : ""}
+                    </span>
+                  </KypSubhead>
+
+                  {isLoadingPropertyTax && !propertyTaxData && (
+                    <div className="kyp-tax-state" data-testid="tax-bill-loading">Loading the Treasurer record…</div>
+                  )}
+                  {propertyTaxData && (
+                    <>
+                      <div className="kyp-tax-statusline">
+                        <span className={`kyp-tax-status ${propertyTaxData.paymentStatus ?? "unknown"}`}>
+                          {propertyTaxData.paymentStatus === "current" ? "Paid and current" :
+                            propertyTaxData.paymentStatus === "delinquent" ? "Delinquent balance" :
+                              propertyTaxData.paymentStatus === "sold" ? "Tax sale recorded" :
+                                propertyTaxData.paymentStatus === "unknown" ? "Status unverified" : "Status pending"}
+                        </span>
+                        {propertyTaxData.isStale && <span className="kyp-tax-muted">Refreshing the Treasurer record…</span>}
+                      </div>
+                      {propertyTaxData.paymentStatus === "delinquent" && (
+                        <p className="kyp-note kyp-tax-alert" data-testid="tax-delinquent-note">
+                          Delinquent taxes are reported{propertyTaxYears[0]?.amountDue > 0 ? `; $${propertyTaxYears[0].amountDue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} is currently due` : ""}. Verify the payoff and any payment plan directly with the Treasurer before closing; a plan is not confirmed by this record.
+                        </p>
+                      )}
+                      {propertyTaxData.paymentStatus === "sold" && (
+                        <p className="kyp-note kyp-tax-alert" data-testid="tax-sale-note">A tax sale is reported. Confirm redemption status with the County Clerk before relying on this record.</p>
+                      )}
+                      {propertyTaxData.paymentStatus === "unknown" && (
+                        <p className="kyp-note" data-testid="text-tax-status-unavailable">
+                          The Treasurer did not return a verifiable bill or payment status. Confirm the current amount and status directly with Cook County.
+                        </p>
+                      )}
+                      {propertyTaxYears.length === 0 && propertyTaxData.totalAnnualTaxAmount == null && propertyTaxData.paymentStatus !== "unknown" && (
+                        <div className="kyp-tax-state" data-testid="tax-bill-no-data">
+                          No bill history was returned. Verify directly with the Cook County Treasurer.
+                        </div>
+                      )}
+                      {propertyTaxYears.length === 0 && propertyTaxData.totalAnnualTaxAmount != null && (
+                        <div className="kyp-tax-state" data-testid="tax-bill-unclassified-amount">
+                          Treasurer-reported amount: {propertyTaxData.totalAnnualTaxAmount.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                          {propertyTaxData.taxYearMostRecent ? ` · TY${propertyTaxData.taxYearMostRecent}` : ""}. Installment completeness is unavailable, so this amount is not treated as a full-year bill.
+                        </div>
+                      )}
+                      {propertyTaxYears.length > 0 && (() => {
+                        const orderedYears = propertyTaxYears.slice().sort((a, b) => Number(b.year) - Number(a.year)).slice(0, 20);
+                        const partYear = orderedYears.find((year) => year.installment1 > 0 && !(year.installment2 > 0));
+                        const priorFullYear = partYear
+                          ? completeTaxYears.find((year) => Number(year.year) < Number(partYear.year))
+                          : null;
+                        const ratio = partYear && priorFullYear ? partYear.installment1 / priorFullYear.billed : null;
+                        const confirmsStatutoryAdvance = ratio !== null && Math.round(ratio * 1000) / 1000 === 0.55;
+                        return (
+                          <>
+                            <div className="overflow-x-auto">
+                              <table className="kyp-dtab kyp-tax-table" data-testid="tax-year-table">
+                                <thead>
+                                  <tr>
+                                    <th>Tax year</th>
+                                    <th>Installments</th>
+                                    <th>Billed</th>
+                                    <th>Change</th>
+                                    <th>Status</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {orderedYears.map((year) => {
+                                    const complete = year.installment1 > 0 && year.installment2 > 0 && year.billed > 0;
+                                    const previousFull = completeTaxYears.find((candidate) => Number(candidate.year) < Number(year.year));
+                                    const change = complete && previousFull && previousFull.billed > 0
+                                      ? (year.billed - previousFull.billed) / previousFull.billed * 100
+                                      : null;
+                                    const amountShown = complete ? year.billed : year.installment1 > 0 ? year.installment1 : year.billed;
+                                    const installmentText = complete
+                                      ? `${year.installment1.toLocaleString("en-US", { style: "currency", currency: "USD" })} + ${year.installment2.toLocaleString("en-US", { style: "currency", currency: "USD" })}`
+                                      : year.installment1 > 0 ? "First installment only" : "Installment detail unavailable";
+                                    return (
+                                      <tr key={year.year} className={!complete ? "dim" : undefined} data-testid={`row-tax-year-${year.year}`}>
+                                        <td>
+                                          {year.year}
+                                          {!complete && <span className="sm">{installmentText}</span>}
+                                        </td>
+                                        <td>{installmentText}</td>
+                                        <td className="hero">
+                                          {amountShown > 0 ? amountShown.toLocaleString("en-US", { style: "currency", currency: "USD" }) : "—"}
+                                        </td>
+                                        <td className="base">
+                                          {change === null ? "—" : `${change > 0 ? "+" : ""}${change.toFixed(1)}%`}
+                                        </td>
+                                        <td>
+                                          <span className={`kyp-tax-year-status ${year.status}`}>
+                                            {year.status === "paid" ? "Paid" :
+                                              year.status === "partial" ? `${year.amountDue.toLocaleString("en-US", { style: "currency", currency: "USD" })} due` :
+                                                year.status === "unpaid" ? "Unpaid" : "Unknown"}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                            {partYear && priorFullYear && confirmsStatutoryAdvance && (
+                              <p className="kyp-note">
+                                <b>The first installment is not a signal.</b> Cook County's first installment for TY{partYear.year} equals 55% of the prior complete TY{priorFullYear.year} bill ({partYear.installment1.toLocaleString("en-US", { style: "currency", currency: "USD" })} ÷ {priorFullYear.billed.toLocaleString("en-US", { style: "currency", currency: "USD" })} = 55%). It is an advance, not a year-over-year change. Only complete-year bills are compared above.
+                              </p>
+                            )}
+                            {partYear && !confirmsStatutoryAdvance && (
+                              <p className="kyp-note">
+                                TY{partYear.year} is part-billed. Its first installment is shown without a year-over-year change; the installment does not establish the full-year movement.
+                              </p>
+                            )}
+                          </>
+                        );
+                      })()}
+                      {propertyTaxData.treasurerBillUrl && (
+                        <a href={propertyTaxData.treasurerBillUrl} target="_blank" rel="noopener noreferrer" className="tax-link mt-3 hover:opacity-80 transition-opacity" data-testid="link-treasurer-site">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Full details at Cook County Treasurer
+                        </a>
+                      )}
+                    </>
+                  )}
+                </section>
+              )}
+
+              {propertyTaxSubsections.assessed !== undefined && latestPropertyAssessment && (
+                <section id="ptax-assess" className="kyp-tax-part">
+                  <KypSubhead subsection={propertyTaxSubsections.assessed}>
+                    <span className="lbl">Assessed value</span>
+                    <span className="ct">
+                      Cook County Assessor · TY{latestPropertyAssessment.year}
+                      {assessorClassCode ? ` · Class ${assessorClassCode}` : ""}
+                    </span>
+                  </KypSubhead>
+                  {(() => {
+                    const assessmentHistory = propertyAssessments
+                      .slice(0, 20)
+                      .map((assessment) => ({
+                        year: Number(assessment.year),
+                        assessed: assessment.boardTotal ?? assessment.certifiedTotal,
+                        land: assessment.boardLand ?? assessment.certifiedLand,
+                        building: assessment.boardBuilding ?? assessment.certifiedBuilding,
+                      }))
+                      .filter((assessment) => Number.isFinite(assessment.year))
+                      .reverse();
+                    const trendEvents = assessmentHistory.slice(1).map((assessment, index) => {
+                      const previous = assessmentHistory[index];
+                      const delta = previous.assessed > 0 ? (assessment.assessed - previous.assessed) / previous.assessed : 0;
+                      return { year: assessment.year, delta };
+                    }).filter((event) => event.delta >= 0.15).sort((a, b) => b.delta - a.delta);
+                    const assessmentStepYear = trendEvents[0]?.year ?? null;
+                    const winChartYear = successfulAppeals
+                      .map((appeal) => Number(appeal.taxYear))
+                      .filter((year) => Number.isFinite(year) && assessmentHistory.some((assessment) => assessment.year === year))
+                      .sort((a, b) => a - b)[0] ?? null;
+                    const chartYears = assessmentHistory.filter((assessment, index) => index % 3 === 0 || index === assessmentHistory.length - 1).map((assessment) => assessment.year);
+                    return (
+                      <>
+                        <div className="kyp-recgrid inline kyp-tax-facts" data-testid="assessed-value-facts">
+                          <div className="hi"><span className="k">Assessed total</span><span className="v">{finalAssessedTotal !== null ? `$${finalAssessedTotal.toLocaleString("en-US")}` : "—"}</span></div>
+                          <div><span className="k">Assessment level</span><span className="v">{assessmentLevelPercent !== null ? <>{assessmentLevelPercent}<u>%</u></> : "Unavailable"}</span></div>
+                          <div><span className="k">Assessor-implied market</span><span className="v">{assessorImpliedMarketValue !== null ? `$${assessorImpliedMarketValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}` : "Unavailable"}</span></div>
+                          <div><span className="k">Land</span><span className="v">{landAssessedValue !== null ? `$${landAssessedValue.toLocaleString("en-US")}` : "—"}</span></div>
+                          <div><span className="k">Building</span><span className="v">{buildingAssessedValue !== null ? `$${buildingAssessedValue.toLocaleString("en-US")}` : "—"}</span></div>
+                          <div><span className="k">Land share</span><span className="v">{landSharePercent !== null ? `${landSharePercent.toFixed(0)}%` : "—"}</span></div>
+                        </div>
+                        {assessmentLevelPercent === null && (
+                          <p className="kyp-note" data-testid="assessment-level-unavailable">
+                            The reported assessor class does not confirm a standard assessment level. An implied market value and effective rate are withheld rather than inferred from zoning.
+                          </p>
+                        )}
+                        {assessorImpliedMarketValue !== null && (
+                          <p className="kyp-note">
+                            The market figure is implied by the Assessor's final value and Class {assessorClassCode} assessment level; it is not a sale-price estimate. The bill-to-market ratio is not the buyer's actual rate on a future transaction.
+                          </p>
+                        )}
+                        {propertyTaxData?.assessorUrl && (
+                          <a href={propertyTaxData.assessorUrl} target="_blank" rel="noopener noreferrer" className="tax-link mt-3 hover:opacity-80 transition-opacity" data-testid="link-assessor-detail">
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            Verify on Assessor Site
+                          </a>
+                        )}
+                        <p className="kyp-src">Source: Cook County Assessor. Certified and Board of Review values are shown where reported.</p>
+                        {assessmentHistory.length > 1 && (
+                          <div className="kyp-tax-chart" data-testid="assessment-history-chart">
+                            <p className="kyp-charttitle">Assessment value trend · recorded years</p>
+                            <div className="h-64 w-full">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={assessmentHistory} margin={{ top: 16, right: 20, left: 10, bottom: 5 }}>
+                                  <CartesianGrid stroke="#eae8e2" strokeWidth={1} vertical={false} />
+                                  <XAxis dataKey="year" ticks={chartYears} tick={{ fontSize: 10, fontFamily: "var(--font-jbmono)", fill: "#8b8a84" }} tickLine={false} axisLine={{ stroke: "#eae8e2" }} />
+                                  <YAxis tick={{ fontSize: 10, fontFamily: "var(--font-jbmono)", fill: "#8b8a84" }} tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} tickLine={false} axisLine={false} width={55} />
+                                  <Tooltip formatter={(value: number, name: string) => [`$${value.toLocaleString("en-US")}`, name === "assessed" ? "Total assessed" : name === "land" ? "Land" : "Building"]} labelFormatter={(label) => `Tax year ${label}`} />
+                                  <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} formatter={(value) => value === "assessed" ? "Total assessed" : value === "land" ? "Land" : "Building"} />
+                                  {assessmentStepYear !== null && <ReferenceLine x={assessmentStepYear} stroke="#8b8a84" strokeDasharray="4 3" label={{ value: "Recorded assessment step", position: "insideTop", fontSize: 9 }} />}
+                                  {winChartYear !== null && winChartYear !== assessmentStepYear && <ReferenceLine x={winChartYear} stroke="#2b3a9e" strokeDasharray="4 3" label={{ value: "Appeal reduction", position: "insideTop", fontSize: 9 }} />}
+                                  <Line type="monotone" dataKey="assessed" stroke="#2f6fd0" strokeWidth={2.7} dot={{ r: 2.4, fill: "#2f6fd0", strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                                  <Line type="monotone" dataKey="land" stroke="#2f9e46" strokeWidth={2.2} dot={{ r: 2, fill: "#2f9e46", strokeWidth: 0 }} strokeDasharray="5 4" />
+                                  <Line type="monotone" dataKey="building" stroke="#e07b2e" strokeWidth={2.7} dot={{ r: 2, fill: "#e07b2e", strokeWidth: 0 }} />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
+                            {assessmentHistory[0].land !== assessmentHistory[assessmentHistory.length - 1].land && (
+                              <p className="kyp-note">
+                                Recorded land assessment changed from ${assessmentHistory[0].land.toLocaleString("en-US")} in TY{assessmentHistory[0].year} to ${assessmentHistory[assessmentHistory.length - 1].land.toLocaleString("en-US")} in TY{assessmentHistory[assessmentHistory.length - 1].year}. Amounts are final assessed values, after Board of Review adjustments where reported.
+                              </p>
+                            )}
+                            <p className="kyp-src">Source: Cook County Assessor. Chart markers are shown only where the assessment history or recorded appeal outcome supports them.</p>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </section>
+              )}
+
+              {propertyTaxSubsections.exemptions !== undefined && pinLookupData && (
+                <section id="ptax-exempt" className="kyp-tax-part">
+                  <KypSubhead subsection={propertyTaxSubsections.exemptions}>
+                    <span className="lbl">Exemptions</span>
+                    <span className="ct">
+                      Cook County Assessor · {onFileExemptions.length} on file
+                    </span>
+                  </KypSubhead>
+                  <div className="kyp-recgrid inline kyp-tax-facts" data-testid="exemption-facts">
+                    <div className="hi"><span className="k">On file</span><span className="v">{onFileExemptions.length ? onFileExemptions.map(([, name]) => name).join(", ") : "None recorded"}</span></div>
+                    <div><span className="k">History</span><span className="v">{pinLookupData.exemptionHistory?.length ? `${pinLookupData.exemptionHistory.length} tax years` : "No history"}</span></div>
+                    <div><span className="k">Recorded EAV reduction</span><span className="v">{onFileExemptions.length && currentExemptionRecord ? `$${onFileExemptions.reduce((sum, [key]) => sum + Number(currentExemptionRecord[key] ?? 0), 0).toLocaleString("en-US")}` : "None recorded"}</span></div>
+                  </div>
+                  {pinLookupData.exemptionHistory?.length ? (
+                    <div className="overflow-x-auto">
+                      <table className="kyp-dtab kyp-tax-table" data-testid="exemption-history-table">
+                        <thead><tr><th>Year</th>{currentExemptionTypes.filter(([key]) => pinLookupData.exemptionHistory!.some((row) => Number((row as any)[key]) > 0)).map(([, label]) => <th key={label}>{label}</th>)}</tr></thead>
+                        <tbody>
+                          {pinLookupData.exemptionHistory.slice(0, 6).map((row) => (
+                            <tr key={row.year}>
+                              <td>{row.year}</td>
+                              {currentExemptionTypes.filter(([key]) => pinLookupData.exemptionHistory!.some((historyRow) => Number((historyRow as any)[key]) > 0)).map(([key]) => {
+                                const value = Number((row as any)[key] ?? 0);
+                                return <td key={String(key)} className="base">{value > 0 ? `$${value.toLocaleString("en-US")}` : "—"}</td>;
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="kyp-tax-state" data-testid="exemption-history-empty">No exemption history on record for this PIN.</div>
+                  )}
+                  {hasOwnerOccupancyEvidence ? (
+                    <div className="kyp-tax-eligibility" data-testid="exemption-eligibility">
+                      <p className="kyp-note"><b>Primary-residence exemption on record.</b> This is evidence of owner occupancy for the recorded year, not confirmation of current eligibility or transferability.</p>
+                      <div className="kyp-recgrid inline">
+                        <div><span className="k">Homeowner</span><span className="v">Primary residence required</span></div>
+                        <div><span className="k">Senior / freeze</span><span className="v">Age and income rules apply</span></div>
+                        <div><span className="k">Veteran / disability</span><span className="v">Eligibility and occupancy rules apply</span></div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="kyp-note" data-testid="exemption-eligibility-not-assessed">
+                      Potential owner-occupant eligibility is not assessed: this record does not establish primary-residence occupancy. A seller's personal exemption, if any, does not transfer to a buyer.
+                    </p>
+                  )}
+                  <p className="kyp-src">Source: Cook County Assessor. Exemption amounts are recorded EAV reductions, not dollar-for-dollar tax savings. Confirm application status and deadlines directly with the Assessor.</p>
+                </section>
+              )}
+
+              {propertyTaxSubsections.appeals !== undefined && pinLookupData && (
+                <section id="ptax-appeal" className="kyp-tax-part">
+                  <KypSubhead subsection={propertyTaxSubsections.appeals}>
+                    <span className="lbl">Appeal history</span>
+                    <span className="ct">Board of Review · {propertyAppeals.length} filings · {successfulAppeals.length} reductions</span>
+                  </KypSubhead>
+                  {propertyAppeals.length === 0 ? (
+                    <div className="kyp-tax-state" data-testid="appeal-history-empty">No appeal history on record for this PIN.</div>
+                  ) : (
+                    <>
+                      <div className="overflow-x-auto">
+                        <table className="kyp-dtab kyp-tax-table kyp-appeal-table" data-testid="appeal-history-table">
+                          <thead><tr><th>Tax year / reason</th><th>Assessor</th><th>Board of Review</th><th>Outcome</th><th>Filed by</th></tr></thead>
+                          <tbody>
+                            {propertyAppeals.map((appeal, index) => {
+                              const reduced = appeal.borTotalValue < appeal.assessorTotalValue;
+                              return (
+                                <tr key={`${appeal.taxYear}-${index}`}>
+                                  <td className="base">
+                                    <b>TY{appeal.taxYear}</b>
+                                    {appeal.appealReason && <span className="why">{appeal.appealReason}</span>}
+                                    {appeal.changeReason && <span className="why">{appeal.changeReason}</span>}
+                                    {appeal.appealType && <span className="sm">{appeal.appealType}</span>}
+                                  </td>
+                                  <td>
+                                    <b>{appeal.assessorTotalValue.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })}</b>
+                                    <span className="sm">Land {appeal.assessorLandValue.toLocaleString("en-US")} · Bldg {appeal.assessorImprovementValue.toLocaleString("en-US")}</span>
+                                  </td>
+                                  <td>
+                                    <b>{appeal.borTotalValue.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })}</b>
+                                    <span className="sm">Land {appeal.borLandValue.toLocaleString("en-US")} · Bldg {appeal.borImprovementValue.toLocaleString("en-US")}</span>
+                                  </td>
+                                  <td><span className={`kyp-tax-outcome ${reduced ? "reduced" : appeal.result === "Increase" ? "increase" : ""}`}>{reduced ? `Reduced ${ (appeal.assessorTotalValue - appeal.borTotalValue).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })}` : appeal.result}</span></td>
+                                  <td className="base">
+                                    {appeal.appellant || "Not recorded"}
+                                    {(appeal.attorneyFirstName || appeal.attorneyLastName) && <span className="sm">{[appeal.attorneyFirstName, appeal.attorneyLastName].filter(Boolean).join(" ")}{appeal.attorneyFirmName ? ` · ${appeal.attorneyFirmName}` : ""}</span>}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                      {currentOwnerAppeals.length > 0 && (
+                        <p className="kyp-note" data-testid="current-owner-appeal-record">
+                          The recorded current owner, {derivedOwnerName}, matches {currentOwnerAppeals.length} appellant record{currentOwnerAppeals.length === 1 ? "" : "s"} on this parcel; {currentOwnerAppealWins} resulted in a reduction. Older filings may belong to prior owners.
+                        </p>
+                      )}
+                      <div className="kyp-tax-filer-list">
+                        <h4 className="kyp-charttitle">Appeal representatives on this parcel</h4>
+                        {(() => {
+                          const groups = new Map<string, { name: string; firm: string | null; total: number; wins: number; years: number[] }>();
+                          for (const appeal of propertyAppeals) {
+                            const name = [appeal.attorneyFirstName, appeal.attorneyLastName].filter(Boolean).join(" ").trim();
+                            const firm = appeal.attorneyFirmName || null;
+                            const label = name || firm;
+                            if (!label) continue;
+                            const key = label.toLowerCase();
+                            const record = groups.get(key) ?? { name: label, firm: name ? firm : null, total: 0, wins: 0, years: [] };
+                            record.total += 1;
+                            if (appeal.borTotalValue < appeal.assessorTotalValue) {
+                              record.wins += 1;
+                              record.years.push(Number(appeal.taxYear));
+                            }
+                            groups.set(key, record);
+                          }
+                          return groups.size > 0 ? Array.from(groups.values()).map((record) => (
+                            <div className="kyp-rep" key={record.name}>
+                              <span><b>{record.name}</b>{record.firm && <span className="sm">{record.firm}</span>}</span>
+                              <span>{record.wins} of {record.total} reductions{record.years.length ? ` · TY${record.years.join(", TY")}` : ""}</span>
+                            </div>
+                          )) : <p className="kyp-tax-muted">No representative is named in the filings.</p>;
+                        })()}
+                        <p className="kyp-src">These results count filings on this parcel only and are not a representative's overall record. PTAB outcomes and later corrections are not verified here. For broader history, see the <a href="https://www.cookcountyboardofreview.com/" target="_blank" rel="noopener noreferrer">Board of Review's public filings</a>.</p>
+                      </div>
+                    </>
+                  )}
+                </section>
+              )}
+
+              {coParcelAddress && (
+                <section className="kyp-tax-coparcel" data-testid="co-parcel-tax">
+                  <div className="kyp-tax-coparcel-title">
+                    <b>Related parcel bill</b>
+                    <span>{coParcelAddress}{coParcelPin ? ` · PIN ${coParcelPin.replace(/(\d{2})(\d{3})(\d{3})(\d{3})(\d{4})/, "$1-$2-$3-$4-$5")}` : ""}</span>
+                  </div>
+                  {isLoadingCoParcelTax && <div className="kyp-tax-state">Loading related parcel bill…</div>}
+                  {coParcelTaxData ? (
+                    <>
+                      <div className={`kyp-tax-status ${coParcelTaxData.paymentStatus ?? "unknown"}`}>
+                        {coParcelTaxData.paymentStatus === "current" ? "Paid and current" :
+                          coParcelTaxData.paymentStatus === "delinquent" ? "Delinquent balance" :
+                            coParcelTaxData.paymentStatus === "sold" ? "Tax sale recorded" :
+                              coParcelTaxData.paymentStatus === "unknown" ? "Status unverified" : "Status pending"}
+                      </div>
+                      {coParcelTaxData.paymentStatus === "delinquent" && <p className="kyp-note kyp-tax-alert">A delinquent balance is reported on this related parcel. Confirm the amount due with the Treasurer.</p>}
+                      {coParcelTaxData.paymentStatus === "sold" && <p className="kyp-note kyp-tax-alert">A tax sale is reported on this related parcel. Confirm redemption status with the County Clerk.</p>}
+                      {coParcelTaxData.paymentStatus === "unknown" && <p className="kyp-note">The Treasurer could not verify the related parcel's current status.</p>}
+                      {coParcelTaxData.taxYears?.length ? (
+                        <div className="overflow-x-auto">
+                          <table className="kyp-dtab kyp-tax-table" data-testid="co-parcel-tax-years">
+                            <thead><tr><th>Tax year</th><th>Installments</th><th>Billed</th><th>Status</th></tr></thead>
+                            <tbody>{coParcelTaxData.taxYears.slice().sort((a, b) => Number(b.year) - Number(a.year)).slice(0, 3).map((year) => {
+                              const complete = year.installment1 > 0 && year.installment2 > 0;
+                              const billed = complete ? year.billed : year.installment1 > 0 ? year.installment1 : year.billed;
+                              return <tr key={year.year} className={!complete ? "dim" : undefined}><td>{year.year}</td><td>{complete ? `${year.installment1.toLocaleString("en-US", { style: "currency", currency: "USD" })} + ${year.installment2.toLocaleString("en-US", { style: "currency", currency: "USD" })}` : year.installment1 > 0 ? "First installment only" : "Unavailable"}</td><td className="hero">{billed > 0 ? billed.toLocaleString("en-US", { style: "currency", currency: "USD" }) : "—"}</td><td>{year.status === "paid" ? "Paid" : year.status === "partial" ? `${year.amountDue.toLocaleString("en-US", { style: "currency", currency: "USD" })} due` : year.status === "unpaid" ? "Unpaid" : "Unknown"}</td></tr>;
+                            })}</tbody>
+                          </table>
+                        </div>
+                      ) : coParcelTaxData.totalAnnualTaxAmount === null ? (
+                        <div className="kyp-tax-state">No related-parcel bill was returned.</div>
+                      ) : (
+                        <div className="kyp-tax-state">Latest Treasurer amount: {coParcelTaxData.totalAnnualTaxAmount.toLocaleString("en-US", { style: "currency", currency: "USD" })}{coParcelTaxData.taxYears?.[0]?.year ? ` · TY${coParcelTaxData.taxYears[0].year}` : ""}</div>
+                      )}
+                      {coParcelTaxData.treasurerBillUrl && <a href={coParcelTaxData.treasurerBillUrl} target="_blank" rel="noopener noreferrer" className="tax-link mt-3 hover:opacity-80 transition-opacity"><ExternalLink className="h-3.5 w-3.5" />Full details at Cook County Treasurer</a>}
+                    </>
+                  ) : !isLoadingCoParcelTax ? (
+                    <div className="kyp-tax-state">No bill data returned for the related parcel.</div>
+                  ) : null}
+                </section>
+              )}
+            </div>
           </AccordionSection>
 
           <AccordionSection {...accProps("countyRecord")}>
@@ -17446,9 +17051,9 @@ export default function RunDetail() {
                 onIsOpenChange={(v) => setSectionOpen('preTitleCheck', v)}
                 onScrollToSection={(section) => {
                   if (section === 'propertyTax') {
-                    setIsPropertyDetailsOpen(true);
-                    setIsPropertyTaxInfoSectionOpen(true);
-                    revealAnchor('section-property-tax-info');
+                    setAccHidden((m) => ({ ...m, propertyTax: false }));
+                    setAccOpen((m) => ({ ...m, propertyTax: true }));
+                    revealAnchor('section-propertyTax');
                   } else if (section === 'ownership') {
                     setAccHidden((m) => ({ ...m, ownership: false }));
                     setAccOpen((m) => ({ ...m, ownership: true }));
@@ -21253,7 +20858,7 @@ export default function RunDetail() {
                                   <div>
                                     <div className="grid grid-cols-2 gap-2">
                                       <div>
-                                        <Label htmlFor="annual-taxes" className="text-[11px] font-semibold text-[#54544f]">Property Taxes</Label>
+                                        <Label htmlFor="annual-taxes" className="text-[11px] font-semibold text-[#54544f]">Tax expense assumption</Label>
                                         <div className="relative mt-1">
                                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                                           <Input
@@ -21286,9 +20891,9 @@ export default function RunDetail() {
                                       </div>
                                     </div>
                                     <p className="text-[10.5px] text-muted-foreground mt-1.5">
-                                      {propertyTaxData?.taxYears?.find(ty => (ty.installment2 || 0) > 0)
-                                        ? `Taxes auto-filled · TY${propertyTaxData.taxYears.find(ty => (ty.installment2 || 0) > 0)!.year}`
-                                        : 'Annual real estate tax bill'}
+                                      {lastCompleteTaxYear
+                                        ? `Model input prefilled from the TY${lastCompleteTaxYear.year} complete bill in Property Taxes; edit it for your scenario.`
+                                        : 'Enter a modeling assumption; no complete Treasurer bill is available.'}
                                     </p>
                                     <p className="text-[10.5px] text-muted-foreground mt-1" data-testid="text-insurance-helper">
                                       {insuranceEstimated

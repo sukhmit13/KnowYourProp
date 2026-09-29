@@ -1,0 +1,329 @@
+# KYP — Step 20: Property Tax Information → Property Taxes
+
+**Files touched:** `client/src/pages/RunDetail.tsx` · `client/src/kyp-base.css`.
+
+---
+
+## ⚠️ 0. Read this first
+
+**Written from screenshots, not source.** Eight captures of build `2026-09-01 18:09 UTC` on
+1126 W. Bryn Mawr, covering 100% of what renders. I did not have `RunDetail.tsx` or `kyp-base.css`.
+
+Two consequences, same as Step 19:
+
+**Field names are unknown.** Where this says *the figure at this position today*, find the variable
+that produces it and keep using it. Create no new state; re-derive nothing the code already computes.
+
+**Conditional branches are invisible.** One property: taxes paid, no exemptions, twelve appeals, a
+full assessment history. §8 lists the branches that need answers.
+
+**No CSS patch ships with this step.** Every component here already exists — `.kyp-blocks`,
+`.kyp-subhead`, `.kyp-recgrid.inline`, `.kyp-note`, `.kyp-method`, `.kyp-src`, plus the `.kyp-dtab`
+data table and `.kyp-cht` chart introduced in Step 19. If Step 19 has not landed, land it first.
+Two small additions are listed in §8 and **must be diffed against the live file before appending**.
+
+---
+
+## 1. What is wrong today
+
+**The headline is half a bill.** `PROPERTY TAX BILL` leads with **$38,352.40**, which is the 2025
+*first installment*. The last complete year was **$69,731.60**. An underwriter skimming the section
+takes away a number that is 55% of the real one.
+
+**And 55% is exactly the problem.** Cook County fixes the first installment at **55% of the prior
+year's total bill**, by statute:
+
+```
+38,352.40 ÷ 69,731.60 = 0.5500      (2025 1st ÷ 2024 total)
+39,690.79 ÷ 72,165.07 = 0.5500      (2024 1st ÷ 2023 total)
+```
+
+So the **"−3.4% vs prior 1st"** chip on the 2025 row is not a 2025 movement. Both installments are
+0.55 × their prior-year totals, so the ratio between them *is* the 2023→2024 change — which is also
+−3.4%. **The report shows a two-year-old movement under a current-year heading**, and the takeaway
+reads it as "no unusual movement in the tax bill."
+
+**Twelve appeal cards, each ~6 lines, mostly identical.** Nine of the twelve render the same
+assessor and Board of Review value with `NO CHANGE`. The genuinely interesting content — *why* each
+failed — is buried in an italic line inside each card.
+
+**Exemption eligibility shows two veteran exemptions**, both `NOT ON FILE`, on a tenanted commercial
+building. Both require primary residence. Neither can ever apply.
+
+**The takeaway box duplicates the trigger row.** Four bullets with jump links, restating what the
+four subsections below say. The owner is removing it; its job collapses into the one-liner.
+
+---
+
+## 2. Structure
+
+Cut the takeaway box entirely. Four numbered subheads, one three-block row.
+
+| | Subhead | Context slot |
+|---|---|---|
+| — | *(section blocks)* | last full-year bill · effective rate · appeal record |
+| .1 | `THE BILL` | `Cook County Treasurer · paid through {latest installment}` |
+| .2 | `ASSESSED VALUE` | `Cook County Assessor · tax year {year}` |
+| .3 | `EXEMPTIONS` | `Cook County Assessor · {n} on file` |
+| .4 | `APPEAL HISTORY` | `Board of Review · {n} filings · {m} reductions` |
+
+Numbers from `SectionNumberContext` — **never hardcode `05`**.
+
+**Exemptions sits above appeals, deliberately.** Exemptions answer a forward question: is this bill
+the unsubsidised number, and will it survive the sale? Cook County exemptions do not transfer to a
+buyer, so a seller's exemption means a step-up the year after closing. Appeals answer a backward
+question about a previous owner's behaviour. The short consequential block goes before the long
+archival one.
+
+> ⚠️ **If an EAV walk is ever added** — $321,000 → equalizer → EAV → minus exemptions → × rate →
+> billed — this order must flip back. Appeals act on the assessed value; exemptions act later on the
+> EAV. That walk would be a strong addition to this section, and it is the one change that reverses §2.
+
+---
+
+## 3. One section, four subsections inside it
+
+**Exactly one new top-level row: `propertyTax`.** The bill, assessed value, exemptions and appeal
+history stay *inside* it as numbered subheads — the same shape as Development Potential, which is one
+row containing the envelope, real-time rental, short-term rental and commercial lease.
+
+⚠️ **Do not give any of the four a row of its own.** They are facets of one subject: what this parcel
+costs in tax and why. One authority chain — Treasurer, Assessor, Board of Review — one row, four
+subheads.
+
+⚠️ **This section is not currently a top-level row.** The `ACC_DEFAULT_ORDER` array I read in the
+August file was:
+
+```js
+["overview","permits","listing","ownership","zoning","zoningHistory","analysis","potential",
+ "valuation","newBusinessLicenses","newConstruction","debt","transit","crime","proximity",
+ "corridor","development","people","incentives","news"]
+```
+
+**There is no tax entry.** `valuation` and `debt` are there; property tax is not — which means it
+renders as a nested `<Collapsible>`, almost certainly inside `02 · Property Overview`, the same place
+Business Licenses, Historic Landmark Status and Parcel Information were found. **Confirm this against
+the current file before moving anything** — that array is three weeks stale.
+
+Add `propertyTax` to `ACC_DEFAULT_ORDER` and lift **the whole block, subheads and all**, out of the
+Property Overview subtree into a single `<AccordionSection {...accProps("propertyTax")}>`. Add the
+meta entry:
+
+```js
+propertyTax: {
+  title: "Property Taxes",
+  summary: "What this parcel is billed, assessed at, exempt from and has appealed.",
+  info: ["Cook County Treasurer billing", "Assessor values and 20-year trend",
+         "Board of Review appeals and outcomes"]
+},
+```
+
+**Suggested position: directly after `ownership`.** Who owns it, then what they pay on it. But this
+is only a default — the row carries the standard drag handle and eye toggle, so the reader reorders
+or hides it themselves, and `mergeAccOrder` preserves their choice.
+
+Retitle it **Property Taxes**. "Information" is filler; every section is information.
+
+⚠️ **Watch for a second tax block.** Parcel Information and Valuation & Cashflow both touch tax
+figures. If either renders its own annual-tax line, that is a duplicate and it belongs here — the
+same way `Listing Details` had to be merged into Active Listing in Step 9c.
+
+---
+
+## 4. Section blocks
+
+| # | Class | `.bv` | `.bl` | `.bd` |
+|---|---|---|---|---|
+| 1 | `ind` | `{lastFullYearTotal}` | `Last full-year bill` | which tax year, both installments, and that the current year is part-billed |
+| 2 | `dark` | `{effectiveRate}` + `<u>%</u>` | `Of assessed market value` | the two operands, and that the buyer's own price will move it |
+| 3 | `ind` | `{won}` + `<u>of {filed}</u>` | `Appeals won` | when, how much, and under which ownership |
+
+**Block 1 must be the last *complete* year, not the current part-billed one.** When the second
+installment posts, it becomes the current year automatically.
+
+**Block 2 is new** — annual tax ÷ the assessor's implied market value. Both operands are already on
+the page; nothing is fetched. For this parcel, $69,732 ÷ $3,210,000 = **2.17%**. It is the number
+that ports straight into an underwriting model and the section does not currently produce it.
+
+**Block 3 is a record, not a count.** `12` alone says the owner disputes their assessment. `1 of 12`
+says the assessor's number has been tested eleven times and held — which is what a buyer wondering
+"can I get this down?" actually needs. Go further in `.bd`: the single win was **2014**, under the
+prior owner (Vassilopoulos / Moran). The current owner (West Bryn Mawr Owner LLC, via Bass and
+Field) is **0 for 8**. That distinction is in the data and is invisible today.
+
+All three blocks are indigo or black. **No verdict colour in this row** — a tax bill is a fact, not
+a grade. Paid status rides on the accordion badge instead.
+
+---
+
+## 5. `.1` The bill
+
+One `.kyp-dtab`: tax year · installments · billed · change · status.
+
+**Delete the change figure for any part-billed year.** There is no year-over-year change until both
+installments post. Render `—`.
+
+**Show the change only between complete years.** 2024 vs 2023 = −3.4%.
+
+One `.kyp-note` beneath, and it is the most important sentence in the section:
+
+> **The first installment is not a signal.** Cook County sets it at **55% of the prior year's total
+> bill**, by statute — {amount} is exactly 0.55 × the {prior} total. It carries no information about
+> the {year} assessment or rate. The only real year-over-year change here is **{y1} to {y2}, {pct}**.
+
+⚠️ **Assert the 0.55 relationship only after computing it.** If a future bill does not come out at
+exactly 0.55 × prior total — a certificate of error, a prior-year adjustment, a divided parcel —
+the sentence is false. Compute the ratio; if it is not 0.550, drop the note and show the figure plain.
+
+Keep the Treasurer deep link.
+
+---
+
+## 6. `.2` Assessed value
+
+Six facts in `.kyp-recgrid.inline`: assessed total (indigo cell) · assessment level · implied market
+value · land · building · **land share**.
+
+Land share is new and computed — $140,625 ÷ $321,000 = 44%. It is what makes the trend chart legible.
+
+⚠️ **Verify the assessment level against the property class.** The section states *assessed at 10%
+of market*. That is the Cook County **residential** level; commercial is **25%**. This is a B3-5
+parcel. If the class is wrong the implied market value is out by 2.5× — and block 2's effective rate
+with it. Do not change the figure on my say-so; confirm it against the class code and fix the source
+if it is wrong.
+
+### 6.1 The chart
+
+**Keep the existing colours.** Blue total assessed, orange building, green dashed land. These are
+chart series, not verdict chips, and the palette rule does not reach them — do not "correct" orange
+to something in the verdict scale.
+
+Two changes only: **label the two events** the data actually shows — the 2014 appeal win and the 2022
+reassessment step — with dashed vertical rules, and **thin the x-axis** to every third year so the
+labels stop crowding.
+
+One `.kyp-note` on what the shape means: land has risen from $75,937 to $140,625 since 2013 while the
+building assessment fell and recovered — the assessor has reweighted toward the ground. Cook County
+reassesses on a three-year cycle, so the steps matter more than the flat stretches.
+
+---
+
+## 7. `.3` Exemptions and `.4` Appeals
+
+### 7.1 Exemptions
+
+Three facts in `.kyp-recgrid.inline`: on file · history for this PIN · **effect on the bill**.
+
+**Cut both eligibility cards.** Every Cook County exemption — homeowner, senior, senior freeze,
+veteran — requires the parcel to be the claimant's **primary residence**. None can attach to a
+tenanted building, so listing two of them as `NOT ON FILE` states a structural impossibility as
+though it were a gap. One note says so, and keeps the cookcountyassessor.com pointer for the case
+where occupancy changes.
+
+⚠️ **Only cut them where the property cannot qualify.** On an owner-occupied parcel the eligibility
+list is genuinely useful and must still render. The filter is occupancy, not property tax class.
+
+### 7.2 Appeals
+
+Twelve cards become one `.kyp-dtab`: tax year · assessor · Board of Review · outcome · filed by.
+**The reason moves to a dimmed second line under the year** — it is the interesting part and it
+survives at full detail.
+
+Reading the reasons as a column surfaces something the cards hide: **three of the eleven failures are
+procedural, not valuational** — no evidence filed, Board of Review rules not met, nothing beyond the
+complaint form. That is a pattern about how this owner appeals.
+
+`DECREASE` renders green; `NO CHANGE` renders neutral. Sort newest first.
+
+**Who filed them** keeps its win-loss records and its caveat, compressed to three rows. The caveat is
+required: these count filings **on this parcel only**, not a representative's overall record.
+
+---
+
+## 8. CSS
+
+**No patch file.** Everything reuses Step 19's vocabulary. Two additions, both to be **grepped
+against the live `kyp-base.css` before appending** — an append at equal specificity silently
+overrides a live rule:
+
+```css
+/* the appeal reason, under the year, inside a data table */
+.kyp-dtab td .why{display:block;font-weight:400;font-size:11.5px;color:var(--kyp-muted);
+  margin-top:4px;line-height:1.45;max-width:46ch}
+/* a filer's parcel-only record */
+.kyp-rep{display:grid;grid-template-columns:1fr auto;gap:6px 16px;padding:12px 0;border-top:1px solid #f0eee7}
+.kyp-rep:first-of-type{border-top:0}
+```
+
+Plus the chart-marker rules (`.kyp-cht .mk`, `.kyp-cht .mkt`) if Step 19's `.kyp-cht` shipped without
+them.
+
+⚠️ **`.kyp-dtab` is Step 19's.** If Step 19 has not landed, this section has no table component and
+must wait.
+
+---
+
+## 9. Branches I could not see
+
+- **Delinquent or unpaid.** Every row here reads `PAID`. What renders on an unpaid balance, a sold
+  tax lien, or a payment plan? That is the single most consequential state this section has and I
+  have never seen it. It needs a red badge and a place in the one-liner.
+- **A part-billed year with no prior full year** — a new PIN, a divided parcel. Block 1 has no value.
+- **Exemptions present.** The whole of §6.1 inverts: the eligibility cards must render, and the
+  one-liner should say what the exemption is worth and that it does not transfer.
+- **No appeal history.** `.4` should not render an empty table; follow the Step 9c `not_found`
+  pattern.
+- **Assessment history shorter than the chart window** — a recently created PIN.
+- **A certificate of error or PTAB decision** changing a prior year after the fact. Two of the cards
+  mention PTAB; nothing shows its outcome.
+
+---
+
+## 10. Every label and figure
+
+| Today | Destination |
+|---|---|
+| `TAKEAWAY` box, 4 bullets, 4 jump chips | **Cut.** Collapses into the accordion one-liner. |
+| `Taxes Current` pill | **Moved** → accordion badge |
+| `$38,352.40 · 1st installment only` | **Demoted** → a row in `.1`; block 1 carries the full year |
+| `2nd installment not yet billed` | **Kept** → the dimmed line under the 2025 row |
+| `−3.4% vs prior 1st` | **Cut.** §5 — it is the 2023→2024 change mislabelled |
+| Installment splits, totals, PAID chips | **Kept** → `.1` table |
+| `Full details at Cook County Treasurer` | **Kept** |
+| Assessed total / market value / breakdown | **Kept** → `.2` grid, plus land share |
+| `assessed at 10% of market` | **Kept as its own cell** — and flagged for verification |
+| 20-year trend chart, 3 series, legend | **Kept**, original colours, two event markers |
+| `Values shown are final assessed amounts…` | **Kept** → merged into the chart note |
+| `No exemption history on record for this PIN` | **Kept** → `.3` grid |
+| `EXEMPTION ELIGIBILITY` + 2 veteran cards | **Cut** where the property cannot qualify — §7.1 |
+| `Apply at cookcountyassessor.com…` | **Kept** → `.3` note |
+| 12 appeal cards: year, status, grounds, both values, splits, reason, appellant, attorney | **Kept, all of it** → `.4` table rows; reason as the dimmed second line |
+| `WHO FILED THESE APPEALS`, 3 cards, W–L, bars, caveat | **Kept**, compressed; bars cut, records kept |
+
+**New, computed from figures already on the page:** effective tax rate, land share, won-of-filed
+ratio, current-owner record. **No new API call.**
+
+**Cut: 4** — the takeaway box, the mislabelled change chip, the two eligibility cards, the filer
+progress bars.
+
+---
+
+## ✅ Done-when
+
+- [ ] Takeaway box gone; its content is the accordion one-liner.
+- [ ] Block 1 is the last **complete** tax year.
+- [ ] No change figure renders against a part-billed year.
+- [ ] The 0.55 relationship is **computed**, not assumed, before the note asserts it.
+- [ ] Effective rate and land share are derived, not hardcoded.
+- [ ] Assessment level checked against the property class code.
+- [ ] Chart keeps blue / orange / green-dashed; two event markers added.
+- [ ] Exemptions renders **above** appeals.
+- [ ] Eligibility cards render on owner-occupied parcels and are suppressed otherwise.
+- [ ] 12 appeal cards are one table; every reason string survives.
+- [ ] Filer records keep the parcel-only caveat.
+- [ ] `businessLicenses`-style ownership distinction: block 3 names the winning owner and the current owner's record.
+- [ ] **One** new id, `propertyTax`, in `ACC_DEFAULT_ORDER` with `ACC_CUSTOM_META`; the nested block is gone.
+- [ ] The four facets render as numbered subheads inside it, not as rows of their own.
+- [ ] The row carries the drag handle and eye toggle, and a saved user order still wins.
+- [ ] No second annual-tax figure survives in Parcel Information or Valuation & Cashflow.
+- [ ] Every branch in §8 has a rendered answer.
