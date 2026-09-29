@@ -2154,6 +2154,14 @@ export default function RunDetail() {
       return ctaLineColorMap[name]?.hex || '#6b7280';
     });
   };
+  const getRailPillTextColor = (hex: string) => {
+    const channels = [1, 3, 5].map((offset) => {
+      const channel = parseInt(hex.slice(offset, offset + 2), 16) / 255;
+      return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+    });
+    const luminance = channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+    return luminance > 0.179 ? "#171717" : "#fff";
+  };
   const getRouteGradientStyle = (routes: string[], opacity = 0.12) => {
     const hexColors = getRouteHexColors(routes);
     if (hexColors.length === 0) return {};
@@ -16157,19 +16165,26 @@ export default function RunDetail() {
                                 hybridInc ? (
                                 <div key={idx} className="kyp-row" data-testid={`rail-station-row-${idx}`}>
                                   <span className="kyp-rbar" style={{ background: getRouteHexColors([stop.routes[0]])[0] }} />
-                                  <span className="kyp-rn">{stop.stopName}{" "}
-                                    {stop.routes.map((r, ri) => (
-                                      <span key={ri} className="kyp-linepill" style={{ background: getRouteHexColors([r])[0] }}>{r}</span>
-                                    ))}
+                                  <span className="kyp-rn kyp-station-lines">
+                                    <span>{stop.stopName}</span>
+                                    <span className="kyp-route-pills">
+                                      {stop.routes.map((r, ri) => {
+                                        const color = getRouteHexColors([r])[0];
+                                        return <span key={ri} className="kyp-linepill" style={{ background: color, color: getRailPillTextColor(color) }}>{r}</span>;
+                                      })}
+                                    </span>
                                   </span>
                                   <span className="kyp-rd">{stop.distance} mi</span>
                                 </div>
                                 ) : (
-                                <div key={idx} className="transit-station-row" data-testid={`rail-station-row-${idx}`}>
+                                <div key={idx} className="transit-station-row rail-multiline" data-testid={`rail-station-row-${idx}`}>
                                   <span className="transit-name">{stop.stopName}</span>
-                                  {stop.routes.map((r, ri) => (
-                                    <span key={ri} className="transit-line-pill" style={{ background: getRouteHexColors([r])[0] }}>{r}</span>
-                                  ))}
+                                  <span className="kyp-route-pills">
+                                    {stop.routes.map((r, ri) => {
+                                      const color = getRouteHexColors([r])[0];
+                                      return <span key={ri} className="transit-line-pill" style={{ background: color, color: getRailPillTextColor(color) }}>{r}</span>;
+                                    })}
+                                  </span>
                                   <span className="transit-distance">{stop.distance} mi</span>
                                 </div>
                                 )
@@ -16392,19 +16407,26 @@ export default function RunDetail() {
                                 hybridInc ? (
                                 <div key={idx} className="kyp-row">
                                   <span className="kyp-rbar" style={{ background: getMetraRouteHex(stop.routes[0]) }} />
-                                  <span className="kyp-rn">{stop.stopName}{" "}
-                                    {stop.routes.map((r: string, ri: number) => (
-                                      <span key={ri} className="kyp-linepill" style={{ background: getMetraRouteHex(r) }}>{r}</span>
-                                    ))}
+                                  <span className="kyp-rn kyp-station-lines">
+                                    <span>{stop.stopName}</span>
+                                    <span className="kyp-route-pills">
+                                      {stop.routes.map((r: string, ri: number) => {
+                                        const color = getMetraRouteHex(r);
+                                        return <span key={ri} className="kyp-linepill" style={{ background: color, color: getRailPillTextColor(color) }}>{r}</span>;
+                                      })}
+                                    </span>
                                   </span>
                                   <span className="kyp-rd">{stop.distance} mi</span>
                                 </div>
                                 ) : (
-                                <div key={idx} className="transit-station-row">
+                                <div key={idx} className="transit-station-row rail-multiline">
                                   <span className="transit-name">{stop.stopName}</span>
-                                  {stop.routes.map((r: string, ri: number) => (
-                                    <span key={ri} className="transit-line-pill" style={{ background: getMetraRouteHex(r) }}>{r}</span>
-                                  ))}
+                                  <span className="kyp-route-pills">
+                                    {stop.routes.map((r: string, ri: number) => {
+                                      const color = getMetraRouteHex(r);
+                                      return <span key={ri} className="transit-line-pill" style={{ background: color, color: getRailPillTextColor(color) }}>{r}</span>;
+                                    })}
+                                  </span>
                                   <span className="transit-distance">{stop.distance} mi</span>
                                 </div>
                                 )
