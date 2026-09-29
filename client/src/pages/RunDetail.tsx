@@ -10,7 +10,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { levelRating, closestSchool, closestBoundarySchool, ratingFavor, ratingScore, ratingTier } from "@/lib/schoolsDisplay";
+import { levelRating, closestSchool, ratingScore, ratingTier } from "@/lib/schoolsDisplay";
 import { useListingSnapshot, useGenerateListingSnapshot, useUpdateRunLabel, useRun, usePublicRun, useGeocodeLookup, useZoningInfo, useBusinessUses, useZoningCompatibility, useChildcareAccess, useCommunityAreaChildcareAccess, useGroceryAccess, useCommunityAreaGroceryAccess, useSbifEligibility, useNmtcEligibility, useMmrpEligibility, useHubZoneEligibility, useQctEligibility, useChaOpportunityArea, useTransitProximity, useTODStatus, useEvStations, useGasStations, useHotels, useRestaurants, useCoffeeShops, useBars, useNearbyDayCares, usePropertyTax, useRefreshPropertyTax, useLienSearch, usePinLookup, useProximityData, useMichelinNearby, useMuralsNearby, useDesignatedLandmarksNearby, useZbaWardSummary, useZbaCitySummary, useEVRegistrations, useCannabisDispensariesByZip, useUpdateProjectType, useUpdateFunnelAnswers, useUpdateManualProperty, useCensusACS, useCombinedPermitViolations, useCrimeStats, useCrimeTractRanking, useCrimeTakeaway, useGenerateCrimeTakeaway, useHmdaTakeaway, useGenerateHmdaTakeaway, useNewsTakeaway, useGenerateNewsTakeaway, useNeighborhoodNewsTakeaway, useGenerateNeighborhoodNewsTakeaway, usePeopleTakeaway, useGeneratePeopleTakeaway, useTransitTakeaway, useGenerateTransitTakeaway, useElectionData, useVehicleOwnership, useSeniorsData, useSeniorsZipData, useLanguageData, useLanguageZipData, useChildcareEnhancedData, useChildcareEnhancedZipData, useLandmarkStatus, useChildcareCapacity, useChildcareCapacityZip, useFairMarketRent, useCtaRidership, useCtaBusRidership, useMetraRidership, useMetraLineRidership, useNewConstruction, useNearbyNewConstruction, useNearbyBusinessLicenses, useNearbyArtGalleries, useAddressNews, useNeighborhoodNews, useCorridorNews, useVacantBuildingsNearby, useMortgageRate, useToggleFavorite, useHmdaStats, usePlacesOfWorship, useUpcomingDevelopments, useComparableSales, useSBALoans, useSchoolsNearby, useAirbnbStats, useRentcast, useRentcastRadius, useJBANearby, useLocationIncentives, useZbaApprovals, useRelatedParcels, useCityOwnedLots, useLoopNet, usePeerspace, useZoningHistory, useTransactionTrends, useSidewalkCafe, useBusinessLicenseHistory, useGooglePlaces, useTrafficCount, useLodesData, useListingData, useIncentivesCheck, useSbaRates, useDebtSnapshot, useBuildDebtSnapshot } from "@/hooks/use-runs";
 import { buildDebtCardModel } from "@shared/debtCardModel";
 import { withoutRepeatedNews } from "@/components/report/newsArticleDedup";
@@ -14489,14 +14489,12 @@ export default function RunDetail() {
                             const dcTight = dcCat === 'desert' || dcCat === 'underserved';
                             const dcGap = dcData ? Math.round(dcData.childrenUnder5 / 1.5 - dcData.licensedSlots) : 0;
                             const dcTierWord = dcCat === 'desert' ? 'a childcare desert' : dcCat === 'underserved' ? 'underserved' : dcCat === 'adequate' ? 'adequate' : 'plentiful';
-                            const elemAssigned = closestBoundarySchool(elem);
-                            const elemRate = levelRating(elem, elemAssigned);
-                            const highAssigned = closestBoundarySchool(high);
-                            const highRate = levelRating(high, highAssigned);
+                            const elemRate = levelRating(elem);
+                            const highRate = levelRating(high);
                             const elemClosest = closestSchool(elem);
                             const highClosest = closestSchool(high);
                             const elemStrongCount = elem.filter((s: any) => ratingScore(s.overallRating) >= 4).length;
-                            const schoolsStrong = elemRate?.label === 'Strong' && !!elemAssigned && ratingScore(elemAssigned.overallRating) >= 4;
+                            const schoolsStrong = elem.length > 0 && elemRate?.label === 'Strong';
                             const jumpTo = (id: string) => revealAnchor(id);
                             const jumpChip = (id: string, label: string) => (
                               <button type="button" className="jump" onClick={() => jumpTo(id)}>
@@ -14522,10 +14520,9 @@ export default function RunDetail() {
                             const hasTakeaway = headline !== null && (dcCat !== null || elem.length > 0 || high.length > 0);
                             const gradIcon = <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 2 6 2s6-1 6-2v-5"/></svg>;
                             const glGradIcon = <svg viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 2 6 2s6-1 6-2v-5"/></svg>;
-                            const favorDot = (r?: string) => { const f = ratingFavor(r); return f === 'good' ? '' : f === 'cau' || f === 'bad' ? (f === 'cau' ? 'cau' : 'bad') : 'cau'; };
                             const rateClass = (b?: 'good' | 'caution' | 'bad') => b === 'caution' ? ' cau' : b === 'bad' ? ' bad' : '';
                             const lvlClass = (r?: string) => { const t = ratingTier(r); return t === 'good' ? '' : t === 'caution' ? ' cau' : t === 'bad' ? ' bad' : ' neu'; };
-                            const schoolRow = (school: any, assignedId?: string | null) => (
+                            const schoolRow = (school: any) => (
                               <div key={school.schoolId} className="srow" data-testid={`card-school-${school.schoolId}`}>
                                 <div className="stop">
                                   <div className="snm">
@@ -14534,9 +14531,6 @@ export default function RunDetail() {
                                     </span>
                                     {school.overallRating && <span className={`lvl${lvlClass(school.overallRating)}`} data-testid={`badge-school-rating-${school.schoolId}`}>{school.overallRating}</span>}
                                     <span className={`acc ${school.attendanceBoundary ? 'boundary' : 'enroll'}`}>{school.attendanceBoundary ? 'Boundary' : 'Open Enrollment'}</span>
-                                    {assignedId && school.schoolId === assignedId && (
-                                      <span className="assigned"><svg viewBox="0 0 24 24"><path d="m12 2 3 6.5 7 .8-5.2 4.8 1.4 7L12 17.8 5.4 21l1.4-7L1.6 9.3l7-.8z"/></svg>Assigned</span>
-                                    )}
                                   </div>
                                   <span className="sdist">{school.distanceMiles?.toFixed(2)} mi</span>
                                 </div>
@@ -14581,37 +14575,29 @@ export default function RunDetail() {
                                         </div>
                                       )}
                                       {elem.length > 0 && (
-                                        <div className={`crm-cn ${elemAssigned && ratingScore(elemAssigned.overallRating) >= 4 ? 'g' : 'i'}`}>
+                                        <div className="crm-cn i">
                                           <span className="dt" />
                                           <span className="tx">
-                                            {elemAssigned && ratingScore(elemAssigned.overallRating) >= 4
-                                              ? <><b>Elementary is a real strength.</b> The assigned school — {elemAssigned.name} ({elemAssigned.overallRating}, {elemAssigned.distanceMiles?.toFixed(2)} mi) — is a solid default, and {elemStrongCount === elem.length ? `all ${elem.length}` : `${elemStrongCount} of the ${elem.length}`} elementary schools within {radius} mi are rated Level 1 or 1+.</>
-                                              : elemAssigned
-                                                ? <><b>Check the assigned elementary closely.</b> {elemAssigned.name}{elemAssigned.overallRating ? ` (${elemAssigned.overallRating}, ${elemAssigned.distanceMiles?.toFixed(2)} mi)` : ''} is the boundary default; {elem.length} elementary schools sit within {radius} mi{elemStrongCount > 0 ? `, ${elemStrongCount} rated Level 1 or 1+` : ''}.</>
-                                                : <><b>No boundary elementary nearby</b> — all {elem.length} within {radius} mi are application/lottery{elemStrongCount > 0 ? `, ${elemStrongCount} rated Level 1 or 1+` : ''}.</>}
+                                            <b>{elem.length} elementary schools within {radius} mi.</b> {elem.filter((s: any) => s.attendanceBoundary).length} have an attendance boundary{elemStrongCount > 0 ? `; ${elemStrongCount} are rated Level 1 or 1+` : ''}. Whether this address falls within a boundary has not been checked.
                                            </span>{jumpChip('elementary', 'Elementary')}
                                         </div>
                                       )}
                                       {elem.length === 0 && (
                                         <div className="crm-cn i">
                                           <span className="dt" />
-                                          <span className="tx"><b>No elementary schools within {radius} mi.</b> Families would be looking at CPS options farther out or the choice process.</span>
+                                          <span className="tx"><b>No elementary schools within {radius} mi.</b> This search does not determine which elementary school serves this address.</span>
                                         </div>
                                       )}
                                       {high.length === 0 && (
                                         <div className="crm-cn i">
                                           <span className="dt" />
-                                          <span className="tx"><b>No high schools within {radius} mi.</b> High school would run through the CPS choice process at schools farther out.</span>
+                                          <span className="tx"><b>No high schools within {radius} mi.</b> This search does not determine which high school serves this address.</span>
                                         </div>
                                       )}
                                       {high.length > 0 && (
                                         <div className="crm-cn i">
                                           <span className="dt" />
-                                          <span className="tx">
-                                            {highAssigned
-                                              ? <><b>High school has a boundary default.</b> {highAssigned.name}{highAssigned.overallRating ? ` (${highAssigned.overallRating}, ${highAssigned.distanceMiles?.toFixed(2)} mi)` : ''} is assigned, with {high.length - 1 > 0 ? `${high.length - 1} more` : 'no other'} high school{high.length - 1 !== 1 ? 's' : ''} within {radius} mi.</>
-                                              : <><b>High school is choice-based.</b> No high school is assigned to this address — all {high.length} nearby{highClosest ? ` (closest: ${highClosest.name}, ${highClosest.distanceMiles?.toFixed(2)} mi)` : ''} are application/lottery. The options are {highRate?.label === 'Strong' ? 'strong' : 'mixed'}, but plan for the CPS choice process.</>}
-                                           </span>{jumpChip('highschools', 'High schools')}
+                                          <span className="tx"><b>{high.length} high schools within {radius} mi.</b> {high.filter((s: any) => s.attendanceBoundary).length} have an attendance boundary in this radius. Whether this address falls within one has not been checked.</span>{jumpChip('highschools', 'High schools')}
                                         </div>
                                       )}
                                     </div>
@@ -14697,13 +14683,7 @@ export default function RunDetail() {
                                             </div>
                                             <div className="glnum"><span className="n">{elem.length}</span><span className="u">school{elem.length !== 1 ? 's' : ''} nearby</span></div>
                                             {elemClosest && <div className="glclose">Closest — <b>{elemClosest.name}</b> · {elemClosest.distanceMiles?.toFixed(2)} mi</div>}
-                                            {elemAssigned && (
-                                              <div className="glassign">
-                                                <div className="k">Assigned · Boundary</div>
-                                                <div className="nm">{elemAssigned.name}</div>
-                                                <div className="lv"><span className={`d ${favorDot(elemAssigned.overallRating)}`} />{elemAssigned.overallRating ? <>{elemAssigned.overallRating} · </> : null}{elemAssigned.distanceMiles?.toFixed(2)} mi</div>
-                                              </div>
-                                            )}
+                                            <div className="glnote">{elem.filter((s: any) => s.attendanceBoundary).length} with an attendance boundary in this radius. Address-level assignment not verified.</div>
                                           </div>
                                         )}
                                         {high.length > 0 && (
@@ -14715,15 +14695,7 @@ export default function RunDetail() {
                                             </div>
                                             <div className="glnum"><span className="n">{high.length}</span><span className="u">school{high.length !== 1 ? 's' : ''} nearby</span></div>
                                             {highClosest && <div className="glclose">Closest — <b>{highClosest.name}</b> · {highClosest.distanceMiles?.toFixed(2)} mi</div>}
-                                            {highAssigned ? (
-                                              <div className="glassign">
-                                                <div className="k">Assigned · Boundary</div>
-                                                <div className="nm">{highAssigned.name}</div>
-                                                <div className="lv"><span className={`d ${favorDot(highAssigned.overallRating)}`} />{highAssigned.overallRating ? <>{highAssigned.overallRating} · </> : null}{highAssigned.distanceMiles?.toFixed(2)} mi</div>
-                                              </div>
-                                            ) : (
-                                              <div className="glnote"><b>No assigned high school</b> at this address — all {high.length} are application / lottery. Plan for the CPS choice process.</div>
-                                            )}
+                                            <div className="glnote">{high.length} high schools within {radius} mi · {high.filter((s: any) => s.attendanceBoundary).length} with an attendance boundary in this radius.</div>
                                           </div>
                                         )}
                                         {middle.length > 0 && (
@@ -14731,7 +14703,7 @@ export default function RunDetail() {
                                             <div className="gltop">
                                               <span className="glic">{glGradIcon}</span>
                                               <span className="gllab">Middle</span>
-                                              {levelRating(middle, closestBoundarySchool(middle)) && <span className={`glrate${rateClass(levelRating(middle, closestBoundarySchool(middle))!.badge)}`}><span className="d" />{levelRating(middle, closestBoundarySchool(middle))!.label}</span>}
+                                              {levelRating(middle) && <span className={`glrate${rateClass(levelRating(middle)!.badge)}`}><span className="d" />{levelRating(middle)!.label}</span>}
                                             </div>
                                             <div className="glnum"><span className="n">{middle.length}</span><span className="u">school{middle.length !== 1 ? 's' : ''} nearby</span></div>
                                             {closestSchool(middle) && <div className="glclose">Closest — <b>{closestSchool(middle)!.name}</b> · {closestSchool(middle)!.distanceMiles?.toFixed(2)} mi</div>}
@@ -14748,7 +14720,7 @@ export default function RunDetail() {
                                           <span className="t">Elementary Schools</span>
                                           <span className="sub">{elem.length} within {radius} mi</span>
                                         </div>
-                                        <div>{elem.map((s: any) => schoolRow(s, elemAssigned?.schoolId))}</div>
+                                        <div>{elem.map((s: any) => schoolRow(s))}</div>
                                       </div>
                                     )}
 
@@ -14760,7 +14732,7 @@ export default function RunDetail() {
                                           <span className="t">Middle Schools</span>
                                           <span className="sub">{middle.length} within {radius} mi</span>
                                         </div>
-                                        <div>{middle.map((s: any) => schoolRow(s, closestBoundarySchool(middle)?.schoolId))}</div>
+                                        <div>{middle.map((s: any) => schoolRow(s))}</div>
                                       </div>
                                     )}
 
@@ -14770,14 +14742,14 @@ export default function RunDetail() {
                                         <div className="ssh">
                                           {gradIcon}
                                           <span className="t">High Schools</span>
-                                          <span className="sub">{high.length} within {radius} mi{!highAssigned ? ' · all lottery' : ''}</span>
+                                          <span className="sub">{high.length} within {radius} mi</span>
                                         </div>
-                                        <div>{high.map((s: any) => schoolRow(s, highAssigned?.schoolId))}</div>
+                                        <div>{high.map((s: any) => schoolRow(s))}</div>
                                       </div>
                                     )}
 
                                     <div className="src">
-                                      Within {radius} mi · Source: {schoolsData?.dataSource} · <b>Boundary</b> = students in the area may attend; <b>Open Enrollment</b> = application / lottery. Ratings are CPS School Quality Rating Policy (SQRP) levels — Level 1+ highest, then Level 1.
+                                      Within {radius} mi · Source: {schoolsData?.dataSource} · <b>Boundary</b> = the school has an attendance area, not that this address falls inside it; address-level assignment has not been checked. <b>Open Enrollment</b> = application / lottery. Ratings are CPS School Quality Rating Policy (SQRP) levels — Level 1+ highest, then Level 1.
                                     </div>
                                   </>
                                 )}

@@ -1,0 +1,389 @@
+# Step 23 — split §Proximity & Amenities into three
+
+Read against commit `a6c0ad8`. Section markup: `RunDetail.tsx` **13572–15483** — 1,911 lines, the
+largest section in the file.
+
+**Run it as four prompts (§9).** Step 0 is a correctness fix and should go out ahead of the rest.
+
+---
+
+## 0. 🔴 Ship this first, on its own — the report states something that cannot be true
+
+`RunDetail.tsx:14708`:
+
+```jsx
+<div className="glnote"><b>No assigned high school</b> at this address — all {high.length} are
+  application / lottery. Plan for the CPS choice process.</div>
+```
+
+Chicago Public Schools:
+
+> "Every address in Chicago is assigned a neighborhood high school where students are guaranteed a
+> seat without going through the GoCPS application process."
+> — [cps.edu/gocps/high-school/explore/neighborhood-programs](https://www.cps.edu/gocps/high-school/explore/neighborhood-programs/)
+
+**There is no Chicago address without an assigned high school.** So this callout is false on every
+property, not just this one, and it tells a family the most alarming possible version of a situation
+that does not exist.
+
+### Why it fires
+
+```ts
+// client/src/lib/schoolsDisplay.ts:81
+export function closestBoundarySchool(schools) {
+  return closestSchool(schools.filter(s => s.attendanceBoundary));
+}
+// RunDetail.tsx:14477
+const highAssigned = closestBoundarySchool(high);
+```
+
+"Assigned" is inferred as *the nearest school in the results that happens to carry an attendance
+boundary*. Two faults:
+
+1. **The search is capped at 1.5 miles** (`routes.ts:9539`, `radius = 1.5`, `Math.min(radius, 3)`).
+   High-school attendance areas are much larger than elementary ones, so the assigned school is
+   routinely outside the radius. It never enters the array, the filter returns nothing, and the
+   callout fires.
+2. **Carrying a boundary is not the same as this address being inside it.** Nothing tests the
+   address against a polygon.
+
+`school.attendanceBoundary` itself is sound — `schoolsNearby.ts:104` reads the CPS
+`attendance_boundaries` field. The per-school `Boundary` / `Open Enrollment` chips are correct. Only
+the leap from those to *"assigned to this address"* is unsupported.
+
+### The fix now
+
+Delete the `glnote` block. Replace the high-school card's assigned line with the fact that is
+actually in hand:
+
+> `4 high schools within 1.5 mi · 0 with an attendance boundary in this radius`
+
+**Remove the word "assigned" from the high-school card entirely.**
+
+🔴 **The elementary card has the same defect and it was not in the first draft of this spec.**
+`RunDetail.tsx:14574`:
+
+```jsx
+: <><b>No boundary elementary nearby</b> — all {elem.length} within {radius} mi are application/lottery…
+```
+
+`elemAssigned = closestBoundarySchool(elem)` — the identical inference, the identical 1.5-mile cap.
+It fires less often only because elementary catchments are smaller. Drop it too.
+
+Both cards have a *true* branch as well — `High school has a boundary default` (`:14595`) and
+`Elementary is a real strength` / `Check the assigned elementary closely` (`:14571`, `:14573`). Those
+name a specific school as assigned on the same unsound basis, so they go with the rest. Every claim
+about assignment leaves in this step and returns in Step 24 from the boundary polygons.
+
+⚠ Do not "fix" this by widening the radius. A wider search finds a nearer boundary school, not the
+*correct* one. The real fix is CPS attendance-boundary polygons, which is Step 24.
+
+---
+
+## 1. What's wrong structurally
+
+**1,911 lines, seven subsections, five that render.** Two are dead:
+
+```jsx
+{/* New Construction Activity Sub-section */}
+{false && <Collapsible id="section-new-construction" …>   // 371 lines
+
+{/* Recent Business Licenses */}
+{false && <Collapsible id="section-new-business-licenses" …>   // 169 lines
+```
+
+Both were promoted to top-level rows — `newConstruction` and `newBusinessLicenses` are in
+`ACC_DEFAULT_ORDER` — and the originals were never deleted. **540 lines that render nothing**,
+invisible to a screenshot, surviving every refactor.
+
+**The section summarises other sections.** Its opening bullets lead with Crime and Business License
+Activity, both now their own top-level rows. `crimeData` and `crimeTractData` render in §crime *and*
+here.
+
+**Three levels of nesting before a school name.** Section → collapsible subsection → level group →
+row.
+
+---
+
+## 2. The split
+
+| | keeps |
+|---|---|
+| **§ Proximity** | the distance cards, plus vacant-and-abandoned reduced to one card |
+| **§ Schools & Childcare** | childcare, elementary, middle, high |
+| **§ Entertainment & Culture** | Michelin, James Beard, murals, landmarks, galleries |
+| → **Development Potential** | city-owned lots moves there |
+
+`ACC_DEFAULT_ORDER`: replace `"proximity"` with `"proximity", "schools", "entCulture"`.
+
+**Why these two and not others.** The test is not size and it is not "has a takeaway" — takeaways
+are being removed. It is: **would a user reorder or hide it independently?** A family drags Schools
+up; an industrial buyer hides it. A restaurant operator wants Entertainment & Culture near the top;
+a warehouse buyer does not. Proximity Information, vacant buildings and city lots have no such
+audience split — nobody wants "distance to the nearest hospital" as its own row.
+
+**Michelin and James Beard stay inside Entertainment & Culture** as numbered subheads. Individually
+they are one datum each (7 and 0); together with murals, landmarks and galleries they are a section.
+Promoting Michelin alone would add a row that is empty or near-empty on most properties.
+
+---
+
+## 3. No takeaways — and one place colour is earned
+
+Delete the takeaway boxes from both promoted subsections. The section one-liner states what was
+found and over what radius; what it means is the user's, driven by their project use.
+
+**Colour rule for this step:** a block takes a verdict colour **only when an outside authority has
+already classified the value and set its polarity.** Otherwise it is `ind` or `dark`.
+
+### Childcare — coloured, because the bands are INCCRRA's
+
+Desert / underserved / adequate / plentiful are published thresholds from the Illinois Network of
+Child Care Resource and Referral Agencies. "Childcare desert" is a term of art with a defined
+cutoff, and INCCRRA has already decided which end is bad. Rendering *their* classification in colour
+is legibility, not interpretation.
+
+| band | children under 5 per licensed slot | block |
+|---|---|---|
+| plentiful | < 1.0 | **`grn`** |
+| adequate | 1.0 – 1.5 | **`grn`** |
+| underserved | 1.5 – 3.0 | **`orange`** |
+| desert | > 3.0 | **`red`** |
+
+The band scale below it marks the active band in the same colour. Derive the colour from the ratio
+against the published thresholds — do not hardcode it per property.
+
+### Counts — a citywide share, not colour, and not a percentile
+
+Michelin, landmarks and galleries stay **`ind` / `dark`**. No authority has said whether a dense
+restaurant cluster is good, and the polarity flips with the use: 6 Michelin restaurants within a
+mile is an amenity to a residential buyer, a competitive set to a restaurateur, irrelevant to a
+warehouse. That judgement is the user's.
+
+**But a bare count is unreadable — a reader has no idea whether 6 is a lot.** Give it a denominator:
+
+> **6** · `MICHELIN GUIDE · 1 MI` · *6 of Chicago's 105 listed restaurants*
+> **0** · `JAMES BEARD · 1 MI` · *0 of 11 citywide*
+
+Computed from `server/data/chicago_michelin_restaurants.json` (105 rows) and
+`chicago_jba_restaurants.json` (11). Exact, no proxy, no banding.
+
+⚠ **A percentile was considered and rejected.** Ranking the 1-mile count against all 77
+community-area centroids gives a badly skewed scale — 57 of 77 areas have zero Michelin
+restaurants, so **a single restaurant already scores the 74th percentile**, two scores 84th and
+seven scores 91st. Nearly the whole range is consumed by the gap between "none" and "any," and for
+James Beard, with 11 restaurants citywide, it collapses entirely. Do not add percentile banding.
+
+⚠ **The share only works where a bounded citywide list exists.** Michelin and James Beard are
+curated, published lists, so the denominator is real. **Landmarks and galleries have no usable
+denominator** — `chicago_landmarks.geojson` holds 9,291 features because it includes every
+contributing building in all 59 districts, not individual designations, and galleries come from
+rolling business-licence records. For those two, give a qualifying fact instead of a fraction:
+oldest year and notable architects for landmarks, nearest distance and source for galleries.
+**Do not invent a citywide total.**
+
+---
+
+## 4. § Proximity
+
+Blocks: none. This section is a grid of facts, and there is no headline among them.
+
+One `.pgrid` of cards, each `{label} / {value} / {qualifier}`:
+
+nearest park · nearest hospital · nearest university · nearest stadium · nearest highway ·
+bike trail · Lake Michigan · airport noise · vacant land · foreclosures · **vacant & abandoned** ·
+data year.
+
+⚠ **Nothing in this section may reference transit.** §transit is its own top-level row and already
+carries CTA rail and bus ridership, Metra, closest mode of transport, and **Annual Average Daily
+Traffic** with a city rank. So: keep the *distance* to the nearest highway — that is a proximity
+fact — but **drop the ADT figure from that card**, because traffic volume is §transit's. The section
+one-liner must not mention transit or corridors either.
+
+**Vacant & Abandoned Buildings collapses from 194 lines to one card.** On a property with none it is
+currently 194 lines to say so. Keep the expandable list **only when the count is non-zero**; at zero
+it is the single card `None within ½ mi`.
+
+**Cut the opening bullets.** Crime and Business License Activity are their own sections; Michelin and
+murals are now §21. Nothing in the bullets survives that is not better stated where it lives.
+
+---
+
+## 5. § Schools & Childcare
+
+| block | fill | value | label | caption |
+|---|---|---|---|---|
+| 1 | **band colour, §3** | `{ratio}` | `CHILDREN UNDER 5 PER LICENSED SLOT` | ZIP {zip} · INCCRRA band: {band} |
+| 2 | `dark` | `{n}` | `ELEMENTARY WITHIN 1.5 MI` | {a} attendance boundary · {b} open enrollment |
+| 3 | `dark` | `{n}` | `HIGH SCHOOLS WITHIN 1.5 MI` | {c} with an attendance boundary in this radius |
+
+- `20.1 Childcare` — the four-band scale with the active band marked, then
+  `.kyp-recgrid.inline.three`: children under 5 · licensed slots · centre / home. Keep the
+  ZIP / neighbourhood toggle and its existing caveat that boundaries differ between views.
+- `20.2 Elementary` · `20.3 Middle` · `20.4 High schools` — one row per school: name, SQRP level,
+  Boundary / Open enrollment chip, grades, distance. Subheads renumber over the levels that render;
+  if no middle schools are found, high schools becomes `20.3`.
+
+**The source note must say what is not known:** whether this address falls inside any school's
+attendance area is not determined until Step 24.
+
+⚠ **Do not reuse copy from Project Use Analysis.** `isDaycareOrSchool` gates an operator view there —
+CCAP slots, competitive supply. The same 1.3 means "you will likely find a place" to a family and
+"this market is served" to someone opening a centre. Same number, opposite readings. The two
+sections share a dataset and must not share a sentence.
+
+---
+
+## 6. § Entertainment & Culture
+
+| block | fill | value | label | caption |
+|---|---|---|---|---|
+| 1 | `ind` | `{n}` | `MICHELIN GUIDE · 1 MI` | {n} of Chicago's {total} listed restaurants |
+| 2 | `dark` | `{n}` | `LANDMARKS · 1 MI` | oldest {year} · notable architects |
+| 3 | `dark` | `{n}` | `ART GALLERIES · 1 MI` | nearest {d} mi · city licence records |
+
+`21.1` Michelin Guide · `21.2` James Beard · `21.3` Registered murals · `21.4` Architectural
+landmarks · `21.5` Art galleries.
+
+Each row keeps everything it renders today — Bib Gourmand / Selected, cuisine and price band,
+architect and designation date, licence status and address, distance. Keep the existing
+`Show all N within 1 mile →` expanders and every source line.
+
+Empty states stay as sentences, not empty tables: *"No James Beard Award winners within 1 mile."*
+
+---
+
+## 7. City-owned lots → Development Potential
+
+158 lines, no takeaway, and not an amenity. It renders per-lot zoning, square footage, distance, a
+city price estimate and an **Apply** link — an acquisition tool. It answers "what could I build here"
+by way of "what could I buy next door", so it belongs in `potential`, as a numbered subhead at the
+end. Move it whole; change nothing inside it.
+
+---
+
+## 7b. Loading, error and empty states — carry all of them across
+
+A restructure is where these get silently dropped, because they do not render on a healthy property
+and so never appear in a screenshot. Every one below exists in the section today and must land in
+whichever new section inherits its data.
+
+| State | Today's copy | Goes to |
+|---|---|---|
+| No PIN resolved | `PIN lookup required for proximity information` | §19 |
+| Fetch failed | `Unable to load proximity information` | §19 |
+| Fetch failed | `Unable to load vacant building data` | §19 |
+| No data | `Not Available` (vacant buildings, city lots) | §19 / Development Potential |
+| No boundary school | `No boundary elementary nearby` | **Cut** — §0, same false claim |
+| No schools found | `None within 1.5 mi` (`schoolsData.total === 0`) | §20 |
+| No geocode | `Geocoding required to find nearby schools.` | §20 |
+| Childcare fetch failed | `Daycare data unavailable.` | §20 |
+| Michelin / murals / landmarks / galleries empty | `No Michelin Nearby`, `No Murals Nearby`, `No Landmarks Nearby`, `No Art Galleries Nearby` | §21 |
+| James Beard empty | `No James Beard Award winners found within 1 mile` | §21 |
+| Loading | `Loading...`, `Loading vacant building data...`, `Loading city-owned lot data...` — literal strings, not skeletons | all three |
+
+Two rules for them:
+
+- **An empty result is a sentence, not an empty table.** The section still renders with a line saying
+  what was searched and over what radius.
+- **A failed fetch and an empty result are different, and must stay different.** "No galleries within
+  1 mile" and "we could not reach the licence records" mean opposite things to a reader. Do not
+  collapse them into one message.
+
+If a section's every subsection is empty, suppress the section rather than render a heading over
+nothing — the Step 9c `not_found` pattern.
+
+---
+
+## 8. Field table
+
+| Renders today | Destination |
+|---|---|
+| Opening bullets: Crime | **Cut** — §crime is its own top-level section |
+| Opening bullets: Business License Activity | **Cut** — §newBusinessLicenses renders a richer `License mix` |
+| Opening bullets: Michelin, Murals | **Cut** — restated in §21's blocks |
+| `Nearest Park / Hospital / University / Stadium / Highway` | **Kept** → §19 cards |
+| `Bike Trail`, `Lake Michigan`, `Airport Noise`, `Vacant Land` | **Kept** → §19 cards |
+| `Foreclosures` (4 in ½ mi, 1.5/1000 PINs) | **Kept** → §19 card |
+| `Schools Nearby` card | **Cut** — §20 states it properly |
+| `Data year: 2025` | **Kept** → §19 card |
+| Vacant & Abandoned Buildings, 194 lines | **Collapsed** → one §19 card; list only when count > 0 |
+| Day Care: ratio, bands, slots, centre/home, ZIP toggle, slot gap | **Kept** → `20.1` |
+| `Schools at a Glance` cards | **Merged** into §20's block row |
+| `Closest — {school} · {n} mi` per level | **Kept** → §20 block captions; it is the one at-a-glance fact not otherwise stated |
+| Takeaway bullets, all 6+ conditional variants | **Cut** — §3. More branches exist than a screenshot shows |
+| `No assigned high school…` callout | **Cut** — §0, false on every address |
+| Elementary / Middle / High lists, SQRP, chips, grades, distance | **Kept** → `20.2`–`20.4` |
+| `Assigned` star | **Cut** for now; returns in Step 24 from boundary polygons |
+| City-Owned Lots, all of it | **Moved** → Development Potential |
+| Michelin, James Beard, murals, landmarks, galleries | **Kept** → `21.1`–`21.5` |
+| `{false && …}` New Construction Activity, 371 lines | **Deleted** — already a top-level row |
+| `{false && …}` New Business Licenses, 169 lines | **Deleted** — already a top-level row |
+
+**The licence bullet is a duplicate after all — cut it cleanly.** An earlier draft of this spec
+claimed the food / liquor / entertainment split existed nowhere else. That was wrong.
+`NewBusinessLicensesSection.tsx:68–83` renders a **License mix** subsection: the top eight licence
+types as ranked horizontal bars with counts, clickable to filter the openings list. It is a richer
+treatment than the bullet, not a thinner one.
+
+The only thing the bullet does that the section does not is roll `licenseType` up into three coarse
+buckets via `licenseCategory` — *23 food · 11 liquor · 2 entertainment*. The underlying information
+is all present in the section at finer grain. **Nothing moves. Cut the bullet with the others.**
+
+**Cut: 6.** The crime bullet, the licence bullet, the Michelin/murals bullets, the schools-nearby
+card, both false assignment callouts, the assigned star, and 540 dead lines. **Nothing else leaves
+the report.**
+
+---
+
+## 9. Run order
+
+Four prompts. Every one leaves a working report.
+
+1. **§0 — the false high-school claim.** One-line correctness fix. Ship ahead of everything else.
+2. **Delete the 540 dead lines.** Pure subtraction; nothing on screen changes. Easy to verify — the
+   section should render identically and lose a third of its length.
+3. **Promote Schools & Childcare**, with childcare into the block row and the takeaway removed.
+4. **Promote Entertainment & Culture**, move city-owned lots to Development Potential, collapse
+   vacant-and-abandoned, cut the opening bullets, rename the row to `Proximity`.
+
+`mergeAccOrder` drops saved ids that are no longer in `ACC_DEFAULT_ORDER` and splices new ones in at
+their defaults, so renaming and adding rows needs no migration.
+
+---
+
+## 10. Afterwards — not in this step
+
+- **Step 24 — CPS attendance boundaries.** `xg7c-d8rm` (high), `pmnz-yn6w` (elementary),
+  `fyff-53xy` (middle) on the Chicago Data Portal, same Socrata host the permits already use.
+  Fetch the GeoJSON, cache it, point-in-polygon the parcel. Then "assigned" means the school whose
+  polygon contains this address, and the 1.5-mile truncation stops mattering. Check whether an
+  SY2627 release exists before pinning SY2526, and label the school year wherever it renders.
+- **Dining into §09.** The Project Use Analysis concept scan counts generic Google Maps competitors
+  and has never seen `michelinData` — it lives only in this section, 41 references. For a food use,
+  *"7 Michelin Guide restaurants within 1 mile, 2 Bib Gourmand"* is a better competitive read than a
+  raw count, and the food-licence split you already carry (23 food, 11 liquor) belongs beside it.
+
+---
+
+## ✅ Done-when
+
+- [ ] Both false assignment callouts are gone — high school **and** `No boundary elementary nearby`.
+- [ ] No card names a school as assigned, on any branch.
+- [ ] `{false &&}` blocks deleted; §proximity is roughly 400 lines.
+- [ ] Three top-level rows: `proximity`, `schools`, `entCulture`.
+- [ ] The childcare block and band scale take the INCCRRA band colour, derived from the ratio.
+- [ ] Every other block is `ind` or `dark` — no invented verdict colours.
+- [ ] Michelin and James Beard show a share of the citywide list, computed from the local files.
+- [ ] Landmarks and galleries carry a qualifying fact, **not** an invented citywide denominator.
+- [ ] No percentile banding anywhere.
+- [ ] No takeaway box in any of the three.
+- [ ] Nothing in §19 references transit; the highway card shows distance but not ADT.
+- [ ] §20 copy shares no sentence with the Project Use Analysis childcare view.
+- [ ] Vacant-and-abandoned renders one card at zero, the list above zero.
+- [ ] City-owned lots renders inside Development Potential, unchanged internally.
+- [ ] Subheads renumber from the live index when a level returns no schools.
+- [ ] Every loading, error and empty state in §7b renders in its new home.
+- [ ] A failed fetch still reads differently from an empty result.
+- [ ] Every source line survives — Michelin Guide, James Beard, Mural Registry, Chicago Landmarks,
+      Business Licenses, CPS, ACS, INCCRRA.
