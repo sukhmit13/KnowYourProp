@@ -118,26 +118,6 @@ function RecordField({
   );
 }
 
-function HeroBlock({
-  value,
-  label,
-  children,
-  tone = "indigo",
-}: {
-  value: React.ReactNode;
-  label: string;
-  children?: React.ReactNode;
-  tone?: "indigo" | "dark";
-}) {
-  return (
-    <div className={`kyp-block count ${tone === "dark" ? "dark" : "ind-deep"}`}>
-      <div className="bv">{value ?? "—"}</div>
-      <div className="bl">{label}</div>
-      {children ? <div className="bbreak">{children}</div> : null}
-    </div>
-  );
-}
-
 function Tile({ label, value, sub, tone = "dark" }: { label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: "ind" | "dark" }) {
   return (
     <div className={`kyp-tile ${tone}`}>
@@ -354,30 +334,14 @@ export function CountyRecordSection({
     return <div id="print-section-county-record">{caveats}{provenance}</div>;
   }
 
-  const heroBlocks = (
-    <div className={`kyp-blocks hero ${units === null && isCommercial ? "two" : ""}`} data-testid="county-record-hero">
-      {(units !== null || !isCommercial) && (
-        <HeroBlock value={units ?? "—"} label={isCommercial ? "Total units" : "Apartments on the county record"}>
-          {classDescription && <div className="br"><b>Class</b><span>{classCode} · {classDescription}</span></div>}
-          {commercial?.marketValue != null && <div className="br"><b>Assessed at</b><span>{fmtMoney(commercial.marketValue)} market value</span></div>}
-          {hasResidential && <div className="br"><b>Record</b><span>{propertyTaxData?.apartments ? "apartments reported" : "unit count not recorded"}</span></div>}
-        </HeroBlock>
-      )}
-      <HeroBlock value={buildingSf !== null ? fmtNumber(buildingSf) : "—"} label={`${buildingSf === null ? "Building sf" : "Building sf"}${run?.manualBuildingSqFt && numberValue(run.manualBuildingSqFt) === buildingSf && !propertyTaxData?.buildingSquareFeet ? " (manual)" : ""}${landSf !== null ? ` on a ${fmtNumber(landSf)} sf lot` : ""}`} tone={units === null && isCommercial ? "dark" : "dark"}>
-        {coverage && <div className="br"><b>Coverage</b><span>{coverage}</span></div>}
-        {perUnit && <div className="br"><b>Per unit</b><span>{perUnit}</span></div>}
-      </HeroBlock>
-      <HeroBlock value={yearBuilt ?? "—"} label={yearBuilt !== null ? `Built — ${age} years old` : "Year built"} tone="dark">
-        {cd.repairCondition || propertyTaxData?.repairCondition ? <div className="br"><b>Condition</b><span>{cd.repairCondition || propertyTaxData?.repairCondition}</span></div> : null}
-        {taxYear && <div className="br"><b>As of</b><span>the {taxYear} assessment</span></div>}
-      </HeroBlock>
-    </div>
-  );
-
   const recordGrid = (
     <div className="kyp-recgrid" data-testid="county-record-fields">
       <RecordField label="Land" value={landSf !== null ? `${fmtNumber(landSf)} sq ft` : null} reason="land size is not recorded" sub={run?.manualLandSqFt && numberValue(run.manualLandSqFt) === landSf ? "manual value" : undefined} />
-      <RecordField label="Building" value={buildingSf !== null ? `${fmtNumber(buildingSf)} sq ft` : null} reason="building size is not recorded" sub={run?.manualBuildingSqFt && numberValue(run.manualBuildingSqFt) === buildingSf ? "manual value" : undefined} />
+      <RecordField label="Building" value={buildingSf !== null ? `${fmtNumber(buildingSf)} sq ft` : null} reason="building size is not recorded" sub={[
+        run?.manualBuildingSqFt && numberValue(run.manualBuildingSqFt) === buildingSf ? "manual value" : null,
+        coverage,
+        perUnit,
+      ].filter(Boolean).join(" · ") || undefined} />
       <RecordField label="Use" value={hasResidential ? propertyTaxData?.buildingUse || cd.use : commercial?.propertyTypeUse || pinLookupData?.propertyType} reason="use is not recorded" sub={cd.isMixedUse !== undefined ? <>{cd.isMixedUse ? "Mixed use" : "Residential-only"}{cd.nonResidentialUnits ? ` · ${cd.nonResidentialUnits} non-residential units` : ""}</> : undefined} />
       <RecordField label="Rooms" value={cd.rooms != null ? cd.rooms : null} reason="room count is not carried" sub={cd.fireplaces ? `${cd.fireplaces} fireplace${cd.fireplaces === 1 ? "" : "s"}` : undefined} />
       <RecordField label="Basement" value={hasResidential ? propertyTaxData?.basement || cd.basement : cd.basement} reason="basement type is not recorded" sub={cd.basementFinish ? `Finish / ${cd.basementFinish}` : undefined} />
@@ -388,6 +352,7 @@ export function CountyRecordSection({
       <RecordField label="Heating" value={cd.heating || null} reason="heating type is not carried" sub={cd.airConditioning ? `A/C / ${cd.airConditioning}` : undefined} />
       <RecordField label="Stories" value={propertyTaxData?.stories ?? (run?.manualStories ? `${run.manualStories} (manual)` : null)} reason="stories are not recorded" />
       <RecordField label="Property class" value={classCode || null} reason="property class is not recorded" sub={classDescription} />
+      {(cd.repairCondition || propertyTaxData?.repairCondition) && <RecordField label="Condition" value={cd.repairCondition || propertyTaxData?.repairCondition} />}
       {isCommercial ? <RecordField label="Township" value={commercial?.township || null} reason="township is not carried" sub={commercial?.classEstimate ? `Class estimate / ${commercial.classEstimate}` : undefined} /> : null}
       {isCommercial ? <RecordField label="Associated PINs" value={commercial?.pins || null} reason="associated PINs are not recorded" className="w2" sub={commercial?.pins ? "assessment covers both listed PINs" : undefined} /> : null}
       {condo ? <RecordField label="Condominium record" value={cd.isCondo ? "Yes" : null} reason="condominium status is not recorded" sub={cd.prorationRate != null ? `Proration / ${(cd.prorationRate * 100).toFixed(2)}%` : undefined} /> : null}
@@ -446,7 +411,6 @@ export function CountyRecordSection({
       {caveats}
       {provenance}
       <KypSubhead subsection={isCommercial ? 1 : undefined}><span className="lbl">What the county records</span>{taxYear && <span className="ct">assessment year {taxYear}</span>}</KypSubhead>
-      {heroBlocks}
       <div className="kyp-tiles">
         <Tile label="Land" value={landSf !== null ? fmtNumber(landSf) : "—"} sub={landSf !== null ? "sq ft" : "not recorded"} tone="ind" />
         <Tile label="Building" value={buildingSf !== null ? fmtNumber(buildingSf) : "—"} sub={buildingSf !== null ? "sq ft" : "not recorded"} />
