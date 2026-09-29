@@ -1,0 +1,352 @@
+# Step 22A — News foundations
+
+**Scope boundary — read this first.**
+
+This step changes **numbers and assets. It does not change structure.**
+
+| Changes in this step | Does *not* change in this step |
+|---|---|
+| Displayed unit totals (they are wrong today — see §3) | Section order, names or ids |
+| Which source the headline unit figure comes from | Any subhead, heading or card layout |
+| Publisher logos (real SVGs instead of favicons) | Which articles appear, or how they are split |
+| Article-level unit parsing | The 120/90-day windows — those move to Step 1 |
+
+An earlier draft of this step claimed the report would render identically. **That was wrong.**
+Correcting a unit count that is currently inflated by double-counting necessarily changes a number
+on screen — that is the point of the fix. What stays frozen is the *shape* of the report: no JSX is
+moved, no section is renamed, and `classifyArticle()` is created but not called. Three fixes that the two new news sections
+depend on. Ship this first and on its own — each item is independently verifiable.
+
+Read against commit `0237f95`.
+
+---
+
+## 1. The bundled publisher logos do not exist
+
+`RunDetail.tsx:990` maps seven domains to SVG files:
+
+```js
+const SOURCE_LOGOS: Record<string, string> = {
+  'blockclubchicago.org': '/logos/block-club.svg',
+  'chicagobusiness.com':  '/logos/crains.svg',
+  'therealdeal.com':      '/logos/trd.svg',
+  'chicagoyimby.com':     '/logos/yimby.svg',
+  'chicagotribune.com':   '/logos/tribune.svg',
+  'suntimes.com':         '/logos/sun-times.svg',
+  'chicago.eater.com':    '/logos/eater.svg',
+};
+```
+
+**There is no `client/public/logos/` directory.** `client/public` contains only `favicon.svg`,
+`og-image.png` and `sample-report.pdf`. All seven paths 404.
+
+What happens today, in `LogoTile` (`RunDetail.tsx:1056`): `src` is set to the bundled path, the
+request 404s, `onError` swaps in `https://www.google.com/s2/favicons?domain=…&sz=128`, and that is
+what renders. So every article logo in the report is a Google favicon, and the seven "bundled"
+publishers each cost a wasted 404 first.
+
+Three consequences worth fixing before this component carries two more sections:
+
+- **A third-party request per article row**, from the reader's browser, disclosing to Google which
+  publishers appear in a paid property report.
+- **`Print / Save PDF` is in the report header.** Externally-fetched images are the standard cause
+  of blank logos in a generated PDF. Test this specifically.
+- Favicon art at 128px is often a bare glyph rather than a masthead, so quality varies per publisher
+  for reasons nobody controls.
+
+### What to do
+
+1. Create `client/public/logos/` and add the seven SVGs named above. Use each publisher's own
+   wordmark or icon at roughly 120×120 with transparent or white ground — `.kyp-archlogo` is a 72px
+   white tile with 10px padding and `object-fit:contain`, so a square-ish asset sits correctly.
+2. Extend `SOURCE_LOGOS` to cover the most frequent publishers that only appear in `SOURCE_DOMAINS`
+   today. That map already names 30; the ones worth bundling next, by how often Chicago
+   property coverage hits them: `chicagoreader.com`, `chicago.urbanize.city`, `wbez.org`,
+   `chicagomag.com`, `timeout.com`, `theinfatuation.com`, `bisnow.com`, `archpaper.com`.
+3. Leave the favicon fallback in place as the third rung — it is correct as a fallback. Only the
+   *silent* dependence on it is wrong.
+4. Leave the `.kyp-archthumb` gradient plate as the final rung. It is well designed and means a row
+   is never blank.
+
+⚠ **Do not delete entries from `SOURCE_LOGOS` to "fix" the 404s.** That would make the Google
+dependency permanent and invisible again.
+
+---
+
+## 2. Articles are classified by publisher, not by subject
+
+`RunDetail.tsx:17503` and, identically, `18406`:
+
+```js
+const CULTURE_SOURCES = ['eater', 'infatuation', 'what now', 'timeout', 'chicago reader'];
+const isCulture = (src: string) => CULTURE_SOURCES.some(s => src.toLowerCase().includes(s));
+const cultureArticles    = (neighborhoodNewsData.articles || []).filter(a => isCulture(a.source || ''));
+const realEstateArticles = (neighborhoodNewsData.articles || []).filter(a => !isCulture(a.source || ''));
+```
+
+The split is by masthead. So a Block Club story about a new taco shop is filed under **Real Estate &
+Development**, because Block Club is not one of the five food publications. A Crain's piece on a
+restaurant group's expansion is likewise real estate. And "real estate" is defined by negation —
+*not one of five food blogs* — so it is a catch-all holding zoning, sales, parks and anything else.
+
+The same eight lines are duplicated verbatim in two sections, so both inherit the same behaviour.
+
+### The classifier to use instead
+
+`server/upcomingDevelopments.ts:40` already has `isDevelopmentArticle()`, but its keyword list is
+tuned for "is this about the built environment at all" and **includes `'restaurant'`, `'hotel'` and
+`'retail'`** — the exact terms that should send an article the other way. Split it:
+
+```ts
+// server/articleSubject.ts  (new file, shared by the news endpoints)
+
+// Affirmative signals that an article is about SUPPLY — something being built,
+// approved, permitted or rezoned.
+const DEVELOPMENT_TERMS = [
+  'unit', 'units', 'apartment', 'apartments', 'condo', 'condos',
+  'mixed-use', 'mixed use', 'tower', 'stories', 'story building',
+  'development', 'developer', 'new construction', 'construction starts',
+  'breaks ground', 'groundbreaking', 'rendering', 'new building',
+  'residential building', 'affordable housing', 'demolition', 'adaptive reuse',
+  'permit filed', 'building permit', 'zoning', 'rezoning', 'upzoning',
+  'map amendment', 'transit-oriented', 'plans revealed', 'plans for',
+  'city council approved', 'alderman approved', 'square feet', 'sq ft',
+];
+
+export type ArticleSubject = 'development' | 'culture';
+
+/** One-sided test: development must be positively evidenced; everything else is culture. */
+export function classifyArticle(title: string, summary = '', url = ''): ArticleSubject {
+  const hay = `${title} ${summary} ${url}`.toLowerCase();
+  return DEVELOPMENT_TERMS.some(t => hay.includes(t)) ? 'development' : 'culture';
+}
+```
+
+**Why one-sided rather than two keyword lists.** A two-list test leaves articles matching neither
+list unclassified, and "New Thai spot takes the old bakery space" matches no obvious culture keyword
+— it would vanish. More importantly the risk is asymmetric: filing a culture story under
+development puts it next to a unit count and implies supply that does not exist, while filing a
+development story under culture is merely a miss. So development requires evidence; culture is the
+default. No article can fall through.
+
+**Precedence is handled for free.** "Developer pays $14.2M for the Milwaukee Ave retail strip"
+contains both `developer` and `retail` — it classifies as development, correctly, because the
+culture side has no veto.
+
+**Keep the publisher as a display fact, not a filter.** Eater rarely writes unit counts, so the
+one-sided test sends Eater to culture without anyone hardcoding it.
+
+⚠ **Create `classifyArticle()` in this step. Do not wire it in, and do not delete
+`CULTURE_SOURCES` yet.** This step is server and assets only — the report must look identical when
+it is done. Swapping the filter is Step 1 of the run order, on its own, so that if the
+classification needs tuning you are debugging one function rather than one function plus a pile of
+asset and parser changes. `CULTURE_SOURCES` dies in Step 1.
+
+⚠ `'zoning'` stays on the development side. A rezoning is the first step of the supply pipeline.
+Zoning *records* keep their existing homes — §zoningHistory for this parcel and the Ward table in
+§09.2 — and do not get a third surface.
+
+---
+
+## 3. The unit count cannot be trusted yet
+
+This is the figure you most want, and three separate defects inflate it.
+
+### 3.1 One source
+
+```ts
+export async function getUpcomingDevelopments() {
+  const bc = await fetchBlockClubDevelopments();   // ← the only fetch
+  all.push(...bc);
+```
+
+`fetchBlockClubDevelopments()` reads Block Club's RSS and takes `feed.items.slice(0, 80)`. So
+"units coming to the area" currently means "units Block Club mentioned in its last 80 posts."
+
+**Fix — additive, not a replacement.** Keep `fetchBlockClubDevelopments()`. Block Club's own RSS is
+a *different retrieval path* from the Google News `site:blockclubchicago.org` search the corridor
+feed uses, and the two return different items. Dropping it would lose coverage.
+
+Instead: pool the articles the three news endpoints already gathered, run `classifyArticle()` over
+them, and merge the development half **with** the Block Club RSS items, deduplicated by URL. The
+articles are already in memory, so this widens the unit-parsing input without a new fetch.
+
+### 3.1b 🔴 The two feeds do not query the same publishers
+
+Worth knowing before pooling, because it means pooling *gains* coverage rather than merely tidying:
+
+| Publisher | Neighborhood feed | Corridor feed |
+|---|---|---|
+| ArchDaily, Chicago Reader, Crain's, Dezeen, Dwell, Infatuation, The Real Deal, Time Out, YIMBY | ✓ | ✓ |
+| **Block Club Chicago** | — | ✓ |
+| **Bisnow** | ✓ | — |
+| **Urbanize Chicago** | ✓ | — |
+
+`findRelevantArticles()` uses 11 builders; `findCorridorArticles()` uses 10; only nine overlap.
+There is no `buildBlockClubNeighborhoodSearchUrl` in the file at all.
+
+**So a property with `is_near_corridor: false` currently receives no Block Club coverage whatsoever**
+— arguably the most important local source for Chicago neighbourhood news — and no corridor-scoped
+search ever reaches Bisnow or Urbanize. Pooling the three feeds before classifying fixes both, and
+is the reason to pool rather than simply relabel.
+
+If you would rather fix it at the source, add `buildBlockClubNeighborhoodSearchUrl` alongside the
+other ten and include Bisnow and Urbanize in the corridor set. Pooling makes that optional rather
+than urgent.
+
+### 3.2 `parseUnits()` returns the first match, not the right one
+
+```ts
+const patterns = [ /(\d+)[\s-]*(?:unit|apartment|condo|residence)s?(?:\s|,|\.)/i, … ];
+for (const p of patterns) { const m = text.match(p); if (m) { … return n; } }
+```
+
+`"replacing a 6-unit building with a 200-unit tower"` returns **6** — the building being demolished.
+
+**Fix:** collect every match from every pattern, return the maximum, and report ambiguity:
+
+```ts
+export function parseUnits(text: string): { units?: number; ambiguous: boolean } {
+  const found = new Set<number>();
+  for (const p of PATTERNS_GLOBAL) {           // same patterns, with the /g flag
+    for (const m of text.matchAll(p)) {
+      const n = parseInt(m[1]);
+      if (n >= 1 && n <= 2000) found.add(n);
+    }
+  }
+  const vals = [...found];
+  if (!vals.length) return { ambiguous: false };
+  return { units: Math.max(...vals), ambiguous: vals.length > 1 };
+}
+```
+
+The maximum is the defensible choice: an article about a project names the new building's size as
+its largest figure, and what is being replaced is smaller. `ambiguous` lets the UI caveat the row
+rather than silently guessing. **Keep the 1–2000 bound** — it is doing real work.
+
+This changes the return type. Update the two call sites in `fetchBlockClubDevelopments()`.
+
+### 3.3 Dedup is per article, not per project
+
+```ts
+id: `blockclub-${url || title}`
+```
+
+Dedup keys on the article. Three outlets covering one 212-unit tower contribute 636 units. The UI
+already detects the overlap and says *"likely the same project"* — then does not subtract it:
+
+```js
+const articleUnits = stage2Devs.reduce((sum, d) => sum + (d.units ? Number(d.units) : 0), 0);
+```
+
+**Fix:** group before summing. `parseAddress()` already exists in the same file.
+
+```ts
+// one entry per project address; unknown-address items are never summed
+const byAddress = new Map<string, UpcomingDevelopment[]>();
+for (const d of devs) {
+  if (!d.address || !d.units) continue;
+  const key = normalizeAddress(d.address);
+  (byAddress.get(key) ?? byAddress.set(key, []).get(key)!).push(d);
+}
+const coverageUnits = [...byAddress.entries()]
+  .filter(([key]) => !permitAddresses.has(key))      // already permitted → counted in the permit total
+  .reduce((sum, [, group]) => sum + Math.max(...group.map(d => d.units!)), 0);
+```
+
+Three rules the sum must obey:
+
+1. **One address, one count** — the largest reported for that address, not the sum of coverage.
+2. **An article with no parseable address is never added to the total.** It renders with
+   *"location not specified — not matched"*, which the UI already does via `p.matchable`.
+3. **An address that matches a building permit is excluded from the coverage figure** and counted in
+   the permit total instead. `p.inPermitData` already computes this.
+
+### 3.4 🔴 Correction — permits do not carry unit counts
+
+An earlier draft of this step said the headline unit figure should be permit-derived. **That was
+wrong, and I checked it.** The Chicago permits dataset (`ydr8-5enu`) is read in `server/permits.ts`
+and only these fields are used: `permit_type`, `permit_status`, `work_description`, `reported_cost`.
+There is no dwelling-unit field. The only `number_of_units` in the codebase is in `server/philly/*`,
+a different city's tax data. The permit query is also **address-scoped** — street number, direction
+and name, 15 years back — so "units permitted within ½ mile" is not a query that exists today.
+
+**What each source can actually answer:**
+
+| Source | Gives | Grade |
+|---|---|---|
+| **DPD Plan Commission applications** — `dpdApplications.ts:132` | `units`, parsed from the official proposal text | **Record.** Best available. Covers only projects large enough to need Plan Commission review. |
+| **Article text** — `parseUnits()` | a number a reporter wrote | Leading indicator. Unreliable; see 3.2. |
+| **Building permits** — `permits.ts` | `work_description`, `permit_type`, `reported_cost` | **No unit count.** Confirms a project is real and filed; cannot size it. |
+
+So the roles are:
+
+- **DPD is the headline unit figure.** It is a filed application with an official proposal document,
+  not journalism. It is what `§23` block 1 should carry.
+- **Articles are the leading edge** — what has been announced but has not reached the Plan Commission.
+- **Permits are the confirmation flag on a row**, not a total. Where a permit exists at an article's
+  address, mark the row *"a permit has been filed at this address"*. That tells the reader the
+  project is real without pretending to know its size.
+
+⚠ **`dpdApplications.ts:120` has the same first-match bug as `parseUnits`:**
+`description.match(/\b(\d[\d,]*)\s*(?:dwelling\s+)?units?\b/i)` takes the first number in a
+1,200-character proposal. Apply the same max-of-all-matches fix, and the same `ambiguous` flag.
+
+### 3.5 There is no shared time window
+
+Five pipelines, five different windows, two of them undefined:
+
+| Pipeline | Window | Where |
+|---|---|---|
+| Neighborhood news | **120 days** | `routes.ts:9382` |
+| Corridor news | **90 days** (180 for supplemental sources) | `routes.ts:9419`, `newsMonitor.ts:1005` |
+| Block Club development articles | **none** — `feed.items.slice(0, 80)` | `upcomingDevelopments.ts:190` |
+| DPD applications | **none** — whatever the scraped Plan Commission pages hold, cached 12h | `dpdApplications.ts` |
+| Building permits | **15 years**, address-scoped only | `permits.ts:249` |
+
+`fetchBlockClubDevelopments()` stores `publishDate` but never compares it to a cutoff. Its window is
+"however far back the last 80 RSS posts reach", which moves with Block Club's posting rate. That is
+the window feeding your unit count.
+
+**Set two explicit windows and pass them everywhere:**
+
+- **Culture — 90 days.** A bar that opened eight months ago is not news, it is the neighbourhood.
+- **Development — 365 days.** Announcement to opening is 9–18 months for a bar and 2–4 years for a
+  tower. At 120 days the announcement leaves the report long before the thing exists.
+
+Label the window wherever a count renders. `9 culture stories · 90 days` is checkable;
+`9 culture stories` is not.
+
+⚠ **These two windows are Step 1 work, not this step.** A per-subject window is meaningless until
+articles carry a subject, and `classifyArticle()` is not wired in until Step 1. Ship the windows in
+the same prompt as the classifier swap. Record them here so the reasoning is not lost; do not
+implement them yet.
+
+## Deferred to Step 1 — do not implement here
+
+- The 90-day culture / 365-day development windows, and `publishDate` filtering in
+  `fetchBlockClubDevelopments()`. Both need articles to carry a subject.
+- Labelling each rendered count with its window.
+- Deleting `CULTURE_SOURCES` and calling `classifyArticle()`.
+
+---
+
+## ✅ Done-when
+
+- [ ] `client/public/logos/` exists with all seven SVGs; no 404s in the network panel on a report load.
+- [ ] `Print / Save PDF` renders publisher logos.
+- [ ] `server/articleSubject.ts` exists and exports `classifyArticle()`; nothing calls it yet.
+- [ ] `CULTURE_SOURCES` and `isCulture` are still in place and still in use — they are removed in Step 1, not here.
+- [ ] `'restaurant'`, `'hotel'` and `'retail'` no longer appear in any development keyword list.
+- [ ] `parseUnits()` returns `{units, ambiguous}` and picks the maximum; both call sites updated.
+- [ ] A test case: `"replacing a 6-unit building with a 200-unit tower"` → `{units: 200, ambiguous: true}`.
+- [ ] Unit totals group by address, take the max per address, and exclude permit-matched addresses.
+- [ ] An article with no parseable address contributes 0 to the total.
+- [ ] The headline unit figure comes from **DPD applications**, not permits.
+- [ ] Permits are used as a per-row confirmation flag only; no permit-derived unit total exists.
+- [ ] `dpdApplications.ts` unit parsing takes the max match, not the first.
+- [ ] `fetchBlockClubDevelopments()` still runs — it is merged with the pooled articles, not replaced.
+- [ ] Every publisher reachable today is still reachable: ArchDaily, Bisnow, Block Club, Chicago Reader,
+      Crain's, Dezeen, Dwell, Infatuation, The Real Deal, Time Out, Urbanize, YIMBY, plus the address query.
+- [ ] Section order, names, ids, subheads and card layout are untouched.
+- [ ] Unit totals changed — verify they went *down*, not up (double-counting removed).

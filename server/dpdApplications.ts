@@ -20,6 +20,7 @@ export interface DpdApplication {
   latitude: number | null;
   longitude: number | null;
   units: number | null;
+  unitsAmbiguous: boolean;
   stories: number | null;
   ward: number | null;
 }
@@ -64,6 +65,24 @@ function parseHearingDate(text: string, year: number, monthIndex: number): strin
 function parseApplicant(description: string): string | null {
   const match = description.match(/\bsubmitted by\s+(.+?)(?:,?\s+for (?:the )?property|,?\s+for the site|,?\s+to |,?\s+which)/i);
   return match ? clean(match[1]).replace(/[,.]$/, "") : null;
+}
+
+function parseUnits(description: string): { units: number | null; ambiguous: boolean } {
+  const counts = new Set<number>();
+  const pattern = /\b(\d[\d,]*)[\s-]*(?:dwelling[\s-]+)?units?\b/gi;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(description)) !== null) {
+    const count = Number(match[1].replace(/,/g, ""));
+    if (count >= 1 && count <= 2_000) counts.add(count);
+  }
+  let maximum: number | null = null;
+  counts.forEach(count => {
+    maximum = maximum === null ? count : Math.max(maximum, count);
+  });
+  return {
+    units: maximum,
+    ambiguous: counts.size > 1,
+  };
 }
 
 async function geocode(address: string): Promise<{ latitude: number; longitude: number } | null> {
@@ -117,7 +136,7 @@ async function parseHearingPage(year: number, monthIndex: number): Promise<DpdAp
     const applicationUrl = absoluteUrl(applicationAnchor.attr("href"));
     const applicationLinkText = clean(applicationAnchor.text());
     const wardMatch = addressCell.match(/(\d{1,2})(?:st|nd|rd|th)?\s+Ward/i);
-    const unitMatch = description.match(/\b(\d[\d,]*)\s*(?:dwelling\s+)?units?\b/i);
+    const unitCounts = parseUnits(description);
     const storyMatch = description.match(/\b(\d{1,3})\s*[- ]?stor(?:y|ies)\b/i);
     rows.push({
       id: `dpd-${year}-${monthIndex + 1}-${address.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
@@ -129,7 +148,8 @@ async function parseHearingPage(year: number, monthIndex: number): Promise<DpdAp
       hearingDate,
       hearingUrl,
       applicationUrl,
-      units: unitMatch ? Number(unitMatch[1].replace(/,/g, "")) : null,
+      units: unitCounts.units,
+      unitsAmbiguous: unitCounts.ambiguous,
       stories: storyMatch ? Number(storyMatch[1]) : null,
       ward: wardMatch ? Number(wardMatch[1]) : null,
     });

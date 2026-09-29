@@ -7,13 +7,14 @@ const rssParser = new Parser({
 
 export interface UpcomingDevelopment {
   id: string;
-  source: 'blockclub';
+  source: string;
   stage: 2;
   title: string;
   url: string;
   publishDate: string;
   address?: string;
   units?: number;
+  unitsAmbiguous?: boolean;
   stories?: number;
   developer?: string;
   status: string;
@@ -42,20 +43,21 @@ export function isDevelopmentArticle(title: string, summary = ''): boolean {
   return DEVELOPMENT_KEYWORDS.some(kw => combined.includes(kw));
 }
 
-export function parseUnits(text: string): number | undefined {
+export function parseUnits(text: string): { units?: number; ambiguous: boolean } {
   const patterns = [
-    /(\d+)[\s-]*(?:unit|apartment|condo|residence)s?(?:\s|,|\.)/i,
-    /(?:contain(?:ing)?|with|of|totaling)\s+(\d+)\s+(?:unit|apartment|condo|residence)/i,
-    /(\d+)[\s-]*(?:affordable|market[\s-]rate|rental|new)?\s*(?:residential\s+)?units?/i,
+    /\b(\d[\d,]*)[\s-]*(?:unit|apartment|condo|residence)s?\b/gi,
+    /\b(?:contain(?:ing)?|with|of|totaling)\s+(\d[\d,]*)\s+(?:unit|apartment|condo|residence)s?\b/gi,
+    /\b(\d[\d,]*)[\s-]*(?:affordable|market[\s-]rate|rental|new)?\s*(?:residential\s+)?units?\b/gi,
   ];
+  const found = new Set<number>();
   for (const p of patterns) {
-    const m = text.match(p);
-    if (m) {
-      const n = parseInt(m[1]);
-      if (n >= 1 && n <= 2000) return n;
+    for (const match of Array.from(text.matchAll(p))) {
+      const n = Number(match[1].replace(/,/g, ''));
+      if (n >= 1 && n <= 2000) found.add(n);
     }
   }
-  return undefined;
+  const values = Array.from(found);
+  return { units: values.length ? Math.max(...values) : undefined, ambiguous: values.length > 1 };
 }
 
 export function parseStories(text: string): number | undefined {
@@ -196,6 +198,7 @@ async function fetchBlockClubDevelopments(): Promise<UpcomingDevelopment[]> {
     // Check both article text AND the URL slug for neighborhood names and development keywords
     if (!isDevelopmentArticle(title, summary) && !isDevelopmentArticle(title, url)) continue;
     const combined = `${title} ${summary}`;
+    const unitCount = parseUnits(combined);
     items.push({
       id: `blockclub-${url || title}`,
       source: 'blockclub',
@@ -204,7 +207,8 @@ async function fetchBlockClubDevelopments(): Promise<UpcomingDevelopment[]> {
       url,
       publishDate: item.pubDate || item.isoDate || '',
       address: parseAddress(title) || parseAddress(summary.substring(0, 600)),
-      units: parseUnits(combined),
+      units: unitCount.units,
+      unitsAmbiguous: unitCount.ambiguous,
       stories: parseStories(combined),
       developer: parseDeveloper(combined),
       status: extractStatus(title),
@@ -233,7 +237,7 @@ export async function getUpcomingDevelopments(): Promise<UpcomingDevelopment[]> 
 
   const seen = new Set<string>();
   const deduped = all.filter(item => {
-    const key = item.id;
+    const key = item.url || item.id;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

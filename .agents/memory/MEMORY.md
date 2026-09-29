@@ -19,6 +19,7 @@
 - [RunDetail hook placement](rundetail-hooks-order.md) — new hooks must sit above the page's early returns; bearer token from localStorage on authed fetches.
 - [Report PDF export](report-pdf-export.md) — Playwright-rendered document; srcdoc hardening, host allowlist, render semaphore, measure insight page height (never assume 1056px).
 - [News coverage takeaway](news-coverage-takeaway.md) — site-specific news AI takeaway: <b>-only HTML sanitizer, parcel-tier verification rules, prod column ALTER at republish.
+- [News foundation scope](news-foundation-scope.md) — preparatory unit/logo work freezes article selection; pool feeds and change the subject split together later.
 - [Listing snapshot lookup](listing-snapshot-lookup.md) — AI listing-status search: stale MLS aggregator trap, highest-MLS-wins prompt rules, Redfin blocks all our fetch routes.
 - [Maturity estimation rules](maturity-estimation.md) — recorded date always wins; LOCs never ballooned; legacy cached docs (no is_credit_line flag) suppress estimates; estimates never assert past-due.
 - [Recorder doc ingest](recorder-doc-ingest.md) — session-scoped recorder tokens, dId base64 identity check, per-page OCR heuristic, db:push blocked by legacy tables.

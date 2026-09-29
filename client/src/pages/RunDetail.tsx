@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { levelRating, closestSchool, closestBoundarySchool, ratingFavor, ratingScore, ratingTier } from "@/lib/schoolsDisplay";
 import { useListingSnapshot, useGenerateListingSnapshot, useUpdateRunLabel, useRun, usePublicRun, useGeocodeLookup, useZoningInfo, useBusinessUses, useZoningCompatibility, useChildcareAccess, useCommunityAreaChildcareAccess, useGroceryAccess, useCommunityAreaGroceryAccess, useSbifEligibility, useNmtcEligibility, useMmrpEligibility, useHubZoneEligibility, useQctEligibility, useChaOpportunityArea, useTransitProximity, useTODStatus, useEvStations, useGasStations, useHotels, useRestaurants, useCoffeeShops, useBars, useNearbyDayCares, usePropertyTax, useRefreshPropertyTax, useLienSearch, usePinLookup, useProximityData, useMichelinNearby, useMuralsNearby, useDesignatedLandmarksNearby, useZbaWardSummary, useZbaCitySummary, useEVRegistrations, useCannabisDispensariesByZip, useUpdateProjectType, useUpdateFunnelAnswers, useUpdateManualProperty, useCensusACS, useCombinedPermitViolations, useCrimeStats, useCrimeTractRanking, useCrimeTakeaway, useGenerateCrimeTakeaway, useHmdaTakeaway, useGenerateHmdaTakeaway, useNewsTakeaway, useGenerateNewsTakeaway, useNeighborhoodNewsTakeaway, useGenerateNeighborhoodNewsTakeaway, usePeopleTakeaway, useGeneratePeopleTakeaway, useTransitTakeaway, useGenerateTransitTakeaway, useElectionData, useVehicleOwnership, useSeniorsData, useSeniorsZipData, useLanguageData, useLanguageZipData, useChildcareEnhancedData, useChildcareEnhancedZipData, useLandmarkStatus, useChildcareCapacity, useChildcareCapacityZip, useFairMarketRent, useCtaRidership, useCtaBusRidership, useMetraRidership, useMetraLineRidership, useNewConstruction, useNearbyNewConstruction, useNearbyBusinessLicenses, useNearbyArtGalleries, useAddressNews, useNeighborhoodNews, useCorridorNews, useVacantBuildingsNearby, useMortgageRate, useToggleFavorite, useHmdaStats, usePlacesOfWorship, useUpcomingDevelopments, useComparableSales, useSBALoans, useSchoolsNearby, useAirbnbStats, useRentcast, useRentcastRadius, useJBANearby, useLocationIncentives, useZbaApprovals, useRelatedParcels, useCityOwnedLots, useLoopNet, usePeerspace, useZoningHistory, useTransactionTrends, useSidewalkCafe, useBusinessLicenseHistory, useGooglePlaces, useTrafficCount, useLodesData, useListingData, useIncentivesCheck, useSbaRates, useDebtSnapshot, useBuildDebtSnapshot } from "@/hooks/use-runs";
 import { buildDebtCardModel } from "@shared/debtCardModel";
+import { normalizeDevelopmentAddress, summarizeDevelopmentUnits } from "@shared/developmentUnitCoverage";
 import { detectAssemblage, buildAssemblageTakeaway } from "@shared/assemblage";
 import { resolveDistress } from "@shared/lienDistress";
 import { buildListingChecks, classifyDisclosures, daysOnMarketVerdict, hasValidatedArmLengthSaleAfterFinding, listingClaimLabel } from "@shared/listingChecks";
@@ -995,6 +996,14 @@ const SOURCE_LOGOS: Record<string, string> = {
   'chicagotribune.com':   '/logos/tribune.svg',
   'suntimes.com':         '/logos/sun-times.svg',
   'chicago.eater.com':    '/logos/eater.svg',
+  'chicagoreader.com':    '/logos/chicago-reader.svg',
+  'chicago.urbanize.city': '/logos/urbanize.svg',
+  'wbez.org':             '/logos/wbez.svg',
+  'chicagomag.com':       '/logos/chicago-magazine.svg',
+  'timeout.com':          '/logos/time-out.svg',
+  'theinfatuation.com':   '/logos/infatuation.svg',
+  'bisnow.com':           '/logos/bisnow.svg',
+  'archpaper.com':        '/logos/archpaper.svg',
 };
 // deterministic colored-plate tone for the fallback, by source name
 const PLATE_TONES = ['s-indigo', 's-green', 's-slate'];
@@ -1068,7 +1077,10 @@ function LogoTile({ url, source, date, lead }: { url?: string; source: string; d
     );
   }
   return (
-    <div className="kyp-archlogo" style={lead ? { width: 88, height: 88 } : undefined}>
+    <div className="kyp-archlogo" style={{
+      ...(lead ? { width: 88, height: 88 } : {}),
+      ...((dom === 'timeout.com' || dom === 'theinfatuation.com') && bundled ? { backgroundColor: '#171717' } : {}),
+    }}>
       <img src={src} alt={source}
         onError={() => { if (src !== favicon && favicon) setSrc(favicon); else setFailed(true); }} />
     </div>
@@ -17981,19 +17993,13 @@ export default function RunDetail() {
                         };
 
                         // ── KPI totals (deduped across corridors) ──
-                        let _totalPermits = 0, _totalUnits = 0, _totalLicenses = 0, _totalArticles = 0, _totalZba = 0;
-                        let _residUnits = 0, _mixUnits = 0, _comUnits = 0;
+                        let _totalPermits = 0, _totalLicenses = 0, _totalArticles = 0, _totalZba = 0;
                         {
                           const _seenP = new Set<string>(), _seenL = new Set<string>(), _seenA = new Set<string>(), _seenZ = new Set<string>();
                           for (const key of Object.keys(corridorPermitMap)) {
                             for (const p of (corridorPermitMap[key] || [])) {
                               if (_seenP.has(p.permitNumber)) continue;
                               _seenP.add(p.permitNumber); _totalPermits++;
-                              const u = p.units || 0; _totalUnits += u;
-                              const use = (p.buildingUse || '').toLowerCase();
-                              if (use.includes('commercial') || use.includes('retail') || use.includes('office')) _comUnits += u;
-                              else if (use.includes('mix')) _mixUnits += u;
-                              else _residUnits += u;
                             }
                           }
                           for (const key of Object.keys(corridorLicenseMap)) {
@@ -18013,13 +18019,7 @@ export default function RunDetail() {
                             }
                           }
                         }
-                        const _unitParts: string[] = [];
-                        if (_residUnits > 0) _unitParts.push(`${_residUnits} residential`);
-                        if (_mixUnits > 0) _unitParts.push(`${_mixUnits} mixed-use`);
-                        if (_comUnits > 0) _unitParts.push(`${_comUnits} commercial`);
-                        const _permitUnits = _totalUnits > 0
-                          ? `${_totalUnits} unit${_totalUnits !== 1 ? 's' : ''}${_unitParts.length ? ` · ${_unitParts.join(' / ')}` : ''}`
-                          : null;
+                        const _permitUnits = null; // permits confirm filing, not a unit total
 
                         const _fmtMonYr = (d: string | null | undefined) => {
                           if (!d) return null;
@@ -18586,9 +18586,14 @@ export default function RunDetail() {
                         const stage2Devs = (upcomingDevsData?.developments || []).filter((d: any) => d.stage === 2);
                         const stage1Count = upcomingDevsData?.stage1Count || 0;
                         const zbaCount = (zbaApprovalsData?.approvals?.length || 0) + (zbaApprovalsData?.upcoming?.length || 0);
-                        if (stage1Count === 0 && stage2Devs.length === 0 && zbaCount === 0) return null;
-                        const un = upcomingDevsData?.unitsNearby;
-                        const overlapCount: number = upcomingDevsData?.articlePermitOverlapCount || 0;
+                        const dpdApplications = upcomingDevsData?.dpdApplications || [];
+                        if (stage1Count === 0 && stage2Devs.length === 0 && zbaCount === 0 && dpdApplications.length === 0) return null;
+                        const permitAddresses: string[] = (nearbyConstructionData?.permits || [])
+                          .map((permit: any) => permit.address).filter(Boolean);
+                        const normalizedPermits = new Set(permitAddresses.map(normalizeDevelopmentAddress));
+                        const overlapCount = stage2Devs.filter((article: any) =>
+                          article.address && normalizedPermits.has(normalizeDevelopmentAddress(article.address))
+                        ).length;
 
                         // Parse unit counts from ZBA subject text
                         const zbaUnitPattern = /(\d[\d,]*)\s*(?:[-–]\s*)?(?:dwelling\s+)?unit/i;
@@ -18637,33 +18642,28 @@ export default function RunDetail() {
                         type SummaryBullet = { label: string; content: string; source: string; warning?: string };
                         const bullets: SummaryBullet[] = [];
 
+                        if (dpdApplications.length > 0) {
+                          const official = upcomingDevsData?.dpdUnitsNearby;
+                          bullets.push({
+                            label: 'Filed DPD applications',
+                            content: official?.total > 0
+                              ? `${official.total} dwelling units proposed at ${official.projects} distinct address${official.projects !== 1 ? 'es' : ''}${official.ambiguousProjects ? ` · ${official.ambiguousProjects} proposal${official.ambiguousProjects !== 1 ? 's have' : ' has'} multiple reported counts` : ''} (Plan Commission records; not a count of all area construction)`
+                              : 'Unit counts not specified in nearby Plan Commission application text',
+                            source: 'Chicago DPD Plan Commission',
+                          });
+                        }
+
                         // --- PERMIT BULLET: merge ½mi + neighborhood, explicitly show subset ---
-                        if (stage1Count > 0 || (un && un.nearbyPermitCount > 0)) {
-                          const nearbyCount = un?.nearbyPermitCount ?? 0;
-                          // Use un.total which counts ALL unit types from permit descriptions
-                          // (SFR, 2-flat, multi-unit — whatever the permit work description says)
-                          const totalUnits = un ? un.total : 0;
-                          const typeParts: string[] = [];
-                          if (un) {
-                            if (un.rental > 0) typeParts.push(`${un.rental} rental`);
-                            if (un.condo > 0) typeParts.push(`${un.condo} condo`);
-                            if (un.mixedUse > 0) typeParts.push(`${un.mixedUse} in mixed-use`);
-                            if (un.commercial > 0) typeParts.push(`${un.commercial} commercial`);
-                            if (un.unknown > 0) typeParts.push(`${un.unknown} type unspecified`);
-                          }
-                          const unitStr = totalUnits > 0
-                            ? `${totalUnits} dwelling unit${totalUnits !== 1 ? 's' : ''} referenced in permit descriptions${typeParts.length > 0 ? ` (${typeParts.join(' · ')})` : ''} — may include single-family, 2-flat, or multi-unit`
-                            : null;
+                        if (stage1Count > 0 || (upcomingDevsData?.nearbyPermitCount || 0) > 0) {
+                          const nearbyCount = upcomingDevsData?.nearbyPermitCount ?? 0;
 
                           let content = '';
                           if (stage1Count > 0 && nearbyCount > 0 && nearbyCount < stage1Count) {
                             content = `${stage1Count} permit${stage1Count !== 1 ? 's' : ''} in ${facts?.neighborhood || 'neighborhood'}, ${nearbyCount} of which are within ½mi of this address`;
-                            if (unitStr) content += ` · ${unitStr}`;
-                          } else if (stage1Count > 0 && (nearbyCount === 0 || !un)) {
+                          } else if (stage1Count > 0 && nearbyCount === 0) {
                             content = `${stage1Count} new construction permit${stage1Count !== 1 ? 's' : ''} in ${facts?.neighborhood || 'neighborhood'}`;
                           } else if (nearbyCount > 0) {
                             content = `${nearbyCount} permit${nearbyCount !== 1 ? 's' : ''} within ½mi of this address`;
-                            if (unitStr) content += ` · ${unitStr}`;
                           }
 
                           if (content) {
@@ -18671,13 +18671,12 @@ export default function RunDetail() {
                           }
                         }
 
-                        // --- BLOCK CLUB ARTICLES: show unit counts, flag permit + ZBA overlaps ---
+                        // --- ARTICLES: one count per known address, excluding permit matches ---
                         if (stage2Devs.length > 0) {
-                          const articleUnits = stage2Devs.reduce((sum: number, d: any) => sum + (d.units ? Number(d.units) : 0), 0);
-                          const articlesWithUnits = stage2Devs.filter((d: any) => d.units).length;
-                          const unitNote = articleUnits > 0
-                            ? ` · ${articleUnits} dwelling unit${articleUnits !== 1 ? 's' : ''} referenced across ${articlesWithUnits} article${articlesWithUnits !== 1 ? 's' : ''} (parsed from article text — may be proposals/approvals not yet permitted)`
-                            : ' · Unit counts not parseable from article headlines';
+                          const coverage = summarizeDevelopmentUnits(stage2Devs, permitAddresses);
+                          const unitNote = coverage.total > 0
+                            ? ` · ${coverage.total} dwelling unit${coverage.total !== 1 ? 's' : ''} referenced at ${coverage.projects} unmatched project address${coverage.projects !== 1 ? 'es' : ''} (largest count per address; articles without an address or with a matching permit are excluded${coverage.ambiguousProjects ? `; ${coverage.ambiguousProjects} ambiguous` : ''})`
+                            : ' · No article unit counts at known addresses without a matching permit';
 
                           const totalArticleOverlap = overlapCount + articleZbaOverlapCount;
                           const overlapParts: string[] = [];
@@ -18694,7 +18693,7 @@ export default function RunDetail() {
                           bullets.push({
                             label: `${stage2Devs.length} development article${stage2Devs.length !== 1 ? 's' : ''} in ${facts?.neighborhood || 'neighborhood'}`,
                             content: `Projects in planning, approval, or construction stage${unitNote}${overlapNote}`,
-                            source: 'Block Club Chicago / Development News',
+                            source: 'Development News',
                             warning: warningParts.length > 0
                               ? `${warningParts.join(' · ')} — do not add these unit counts to the others above`
                               : undefined,
@@ -18815,7 +18814,12 @@ export default function RunDetail() {
                                             {dev.title}
                                           </a>
                                           {dev.address && (
-                                            <p className="text-xs text-muted-foreground mt-0.5">{dev.address}</p>
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                              {dev.address}
+                                              {(nearbyConstructionData?.permits || []).some((permit: any) =>
+                                                permit.address && normalizeDevelopmentAddress(permit.address) === normalizeDevelopmentAddress(dev.address)
+                                              ) && <span> · A permit has been filed at this address</span>}
+                                            </p>
                                           )}
                                         </div>
                                         <div className="flex flex-col items-end gap-1 shrink-0">

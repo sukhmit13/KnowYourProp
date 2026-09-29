@@ -9705,6 +9705,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       const radiusMi = requestedRadius === 1 ? 1 : 0.5;
 
       const { getUpcomingDevelopments, filterDevelopmentsByNeighborhood, isDevelopmentArticle, parseUnits, parseStories, extractStatus, parseUseType, parseDeveloper, detectNeighborhoods, parseAddress } = await import('./upcomingDevelopments');
+      const { summarizeDevelopmentUnits } = await import('@shared/developmentUnitCoverage');
       const { getBorderingAreas, findRelevantArticles } = await import('./newsMonitor');
 
       const [all, dpdResult] = await Promise.all([
@@ -9723,7 +9724,9 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
           for (const article of newsArticles) {
             if (!article.url || existingUrls.has(article.url)) continue;
             if (!isDevelopmentArticle(article.title, article.summary || '')) continue;
+            existingUrls.add(article.url);
             const combined = `${article.title} ${article.summary || ''}`;
+            const unitCount = parseUnits(combined);
             augmented.push({
               id: `news-${article.url}`,
               source: 'blockclub',
@@ -9732,7 +9735,8 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
               url: article.url,
               publishDate: article.published || new Date().toISOString(),
               address: parseAddress(article.title) || parseAddress((article.summary || '').substring(0, 600)),
-              units: parseUnits(combined),
+              units: unitCount.units,
+              unitsAmbiguous: unitCount.ambiguous,
               stories: parseStories(combined),
               developer: parseDeveloper(combined),
               status: extractStatus(article.title),
@@ -9813,23 +9817,10 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         if (overlaps) articlePermitOverlapCount++;
       }
 
-      // Build units-near-subject breakdown from permits with coordinates
-      let unitsNearby: { radiusMi: number; total: number; rental: number; condo: number; commercial: number; mixedUse: number; unknown: number; count: number; nearbyPermitCount: number } | null = null;
-      if (subjectLat && subjectLon) {
-        const nearbyPermits = stage1.filter((d: any) => d.distanceMi !== undefined && d.distanceMi <= radiusMi);
-        const nearbyAll = filteredWithDistance.filter((d: any) => d.distanceMi !== undefined && d.distanceMi <= radiusMi);
-        let rental = 0, condo = 0, commercial = 0, mixedUse = 0, unknown = 0, total = 0;
-        for (const d of nearbyAll) {
-          const u = d.units || 0;
-          total += u;
-          if (d.useType === 'rental') rental += u;
-          else if (d.useType === 'condo') condo += u;
-          else if (d.useType === 'commercial') commercial += u;
-          else if (d.useType === 'mixed-use') mixedUse += u;
-          else unknown += u;
-        }
-        unitsNearby = { radiusMi, total, rental, condo, commercial, mixedUse, unknown, count: nearbyAll.length, nearbyPermitCount: nearbyPermits.length };
-      }
+      // Official proposal totals come only from nearby Plan Commission applications.
+      // Article counts remain a separate leading indicator; permits carry no unit total.
+      const dpdUnitsNearby = summarizeDevelopmentUnits(dpdApplications);
+      const nearbyPermitCount = stage1.filter((d: any) => d.distanceMi !== undefined && d.distanceMi <= radiusMi).length;
 
       res.json({
         total: filtered.length,
@@ -9839,7 +9830,8 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         dpdApplications,
         dpdCoverage: dpdResult.coverage,
         citywideFallback,
-        unitsNearby,
+        dpdUnitsNearby,
+        nearbyPermitCount,
         articlePermitOverlapCount,
       });
     } catch (err) {
