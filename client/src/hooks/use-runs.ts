@@ -4213,6 +4213,7 @@ export function useGenerateNewsTakeaway(runId: number | null | undefined) {
 }
 
 export interface NeighborhoodNewsTakeaway {
+  window_days?: number;
   takeaway: { title: string; rows: Array<{ tone: 'insight' | 'caution' | 'good'; html: string; chip: { label: string; href: string } | null }> } | null;
   kpis?: { momentumScore: number; articleCount: number; momentumLabel: string };
   culture: Array<{ id: string; title: string; source: string; date: string; url: string }>;

@@ -27,6 +27,7 @@ import {
   scheduleWestTownTaxPilot,
 } from "./westTownTaxPilot";
 import { getLienData, searchOwnerLiensOnly } from "./lienSearch";
+import { NEIGHBORHOOD_NEWS_DAYS, hasCurrentNeighborhoodWindow } from "@shared/newsWindows";
 import { resolvePinFromAddress, getAssociatedAddresses, fetchProximityData } from "./pinResolver";
 import { createPropertyContext, getPropertyContext, resolvePropertyIdForAddress, validateContextObject } from "./propertyContext";
 import { extractPropertyContext } from "./propertyContextExtraction";
@@ -2299,7 +2300,8 @@ export async function registerRoutes(
   app.get('/api/runs/:id/neighborhood-news-takeaway', async (req, res) => {
     const run = await loadOwnedRun(req, res);
     if (!run) return;
-    return res.json((run as any).neighborhoodNewsTakeaway ?? null);
+    const cached = (run as any).neighborhoodNewsTakeaway;
+    return res.json(hasCurrentNeighborhoodWindow(cached) ? cached : null);
   });
 
   app.post('/api/runs/:id/neighborhood-news-takeaway', async (req, res) => {
@@ -2321,7 +2323,7 @@ export async function registerRoutes(
     }
     if (!neighborhood) return res.status(400).json({ message: 'No neighborhood found for this address' });
     const { findRelevantArticles, calculateMomentumScore } = await import('./newsMonitor');
-    const rawArticles = await findRelevantArticles(neighborhood, 120).catch(() => []);
+    const rawArticles = await findRelevantArticles(neighborhood, NEIGHBORHOOD_NEWS_DAYS).catch(() => []);
     if (rawArticles.length === 0) {
       return res.json({ takeaway: null, culture: [], dev: [], meta: [], generatedAt: new Date().toISOString() });
     }
@@ -2343,14 +2345,14 @@ export async function registerRoutes(
     }
     const { createHash } = await import('crypto');
     const dataHash = createHash('sha256').update(JSON.stringify({
-      pv: 1,
+      pv: 2,
       arts: articles.map(a => [a.url, a.date]),
       perms: permitRecords.map(p => p.address),
       ms: momentumScore,
     })).digest('hex').slice(0, 24);
     const cached = (run as any).neighborhoodNewsTakeaway;
-    if (cached && cached.dataHash === dataHash && cached.takeaway) return res.json(cached);
-    if (cached?.generatedAt && Date.now() - new Date(cached.generatedAt).getTime() < 10 * 60 * 1000) {
+    if (hasCurrentNeighborhoodWindow(cached) && cached.dataHash === dataHash && cached.takeaway) return res.json(cached);
+    if (hasCurrentNeighborhoodWindow(cached) && cached?.generatedAt && Date.now() - new Date(cached.generatedAt).getTime() < 10 * 60 * 1000) {
       return res.json(cached);
     }
     if (nnTakeawayInFlight.has(run.id)) {
@@ -2386,7 +2388,7 @@ export async function registerRoutes(
       const matchedProjects = projects.filter(p => p.matchable);
       const facts = {
         neighborhood,
-        window_days: 120,
+        window_days: NEIGHBORHOOD_NEWS_DAYS,
         article_count: rawArticles.length,
         culture_count: culture.length,
         dev_article_count: devArticleIds.size,
@@ -2406,6 +2408,7 @@ export async function registerRoutes(
         culture,
         dev,
         neighborhood,
+        window_days: NEIGHBORHOOD_NEWS_DAYS,
         sources_line: "Block Club Chicago, Eater Chicago, The Infatuation, WhatNow Chicago, Timeout Chicago, Chicago Reader, Chicago YIMBY, Crain's Chicago Business, The Real Deal, Dwell, Dezeen",
         dataHash,
         generatedAt: new Date().toISOString(),
@@ -9383,8 +9386,8 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       }
       const { findRelevantArticles, calculateMomentumScore, findRelevantPodcasts } = await import('./newsMonitor');
       const [articles, podcasts] = await Promise.all([
-        findRelevantArticles(neighborhood, 120),
-        findRelevantPodcasts(neighborhood, 120),
+        findRelevantArticles(neighborhood, NEIGHBORHOOD_NEWS_DAYS),
+        findRelevantPodcasts(neighborhood, NEIGHBORHOOD_NEWS_DAYS),
       ]);
       const score = calculateMomentumScore(articles);
       const label = score >= 75 ? 'High Activity' : score >= 50 ? 'Moderate Activity' : 'Low Activity';

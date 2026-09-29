@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { levelRating, closestSchool, closestBoundarySchool, ratingFavor, ratingScore, ratingTier } from "@/lib/schoolsDisplay";
 import { useListingSnapshot, useGenerateListingSnapshot, useUpdateRunLabel, useRun, usePublicRun, useGeocodeLookup, useZoningInfo, useBusinessUses, useZoningCompatibility, useChildcareAccess, useCommunityAreaChildcareAccess, useGroceryAccess, useCommunityAreaGroceryAccess, useSbifEligibility, useNmtcEligibility, useMmrpEligibility, useHubZoneEligibility, useQctEligibility, useChaOpportunityArea, useTransitProximity, useTODStatus, useEvStations, useGasStations, useHotels, useRestaurants, useCoffeeShops, useBars, useNearbyDayCares, usePropertyTax, useRefreshPropertyTax, useLienSearch, usePinLookup, useProximityData, useMichelinNearby, useMuralsNearby, useDesignatedLandmarksNearby, useZbaWardSummary, useZbaCitySummary, useEVRegistrations, useCannabisDispensariesByZip, useUpdateProjectType, useUpdateFunnelAnswers, useUpdateManualProperty, useCensusACS, useCombinedPermitViolations, useCrimeStats, useCrimeTractRanking, useCrimeTakeaway, useGenerateCrimeTakeaway, useHmdaTakeaway, useGenerateHmdaTakeaway, useNewsTakeaway, useGenerateNewsTakeaway, useNeighborhoodNewsTakeaway, useGenerateNeighborhoodNewsTakeaway, usePeopleTakeaway, useGeneratePeopleTakeaway, useTransitTakeaway, useGenerateTransitTakeaway, useElectionData, useVehicleOwnership, useSeniorsData, useSeniorsZipData, useLanguageData, useLanguageZipData, useChildcareEnhancedData, useChildcareEnhancedZipData, useLandmarkStatus, useChildcareCapacity, useChildcareCapacityZip, useFairMarketRent, useCtaRidership, useCtaBusRidership, useMetraRidership, useMetraLineRidership, useNewConstruction, useNearbyNewConstruction, useNearbyBusinessLicenses, useNearbyArtGalleries, useAddressNews, useNeighborhoodNews, useCorridorNews, useVacantBuildingsNearby, useMortgageRate, useToggleFavorite, useHmdaStats, usePlacesOfWorship, useUpcomingDevelopments, useComparableSales, useSBALoans, useSchoolsNearby, useAirbnbStats, useRentcast, useRentcastRadius, useJBANearby, useLocationIncentives, useZbaApprovals, useRelatedParcels, useCityOwnedLots, useLoopNet, usePeerspace, useZoningHistory, useTransactionTrends, useSidewalkCafe, useBusinessLicenseHistory, useGooglePlaces, useTrafficCount, useLodesData, useListingData, useIncentivesCheck, useSbaRates, useDebtSnapshot, useBuildDebtSnapshot } from "@/hooks/use-runs";
 import { buildDebtCardModel } from "@shared/debtCardModel";
+import { withoutRepeatedNews } from "@/components/report/newsArticleDedup";
 import { normalizeDevelopmentAddress, summarizeDevelopmentUnits } from "@shared/developmentUnitCoverage";
 import { detectAssemblage, buildAssemblageTakeaway } from "@shared/assemblage";
 import { resolveDistress } from "@shared/lienDistress";
@@ -3053,6 +3054,17 @@ export default function RunDetail() {
   // Cached takeaway for Neighborhood News — trigger-only; the server derives
   // neighborhood, feeds, and permit records from the run's own address.
   const { data: nnTakeaway, isFetched: nnTakeawayFetched } = useNeighborhoodNewsTakeaway(id);
+  const visibleCorridorArticles = withoutRepeatedNews<{
+    title: string; url: string; summary: string; published: string; source: string;
+    corridorKeys?: string[]; mentionsNeighborhood?: boolean;
+  }>(corridorNewsData?.articles || [], [
+    ...(addressNewsData?.articles || []),
+    ...(coParcelAddressNewsData?.articles || []),
+    ...(newsTakeaway?.meta || []),
+    ...(neighborhoodNewsData?.articles || []),
+    ...(nnTakeaway?.culture || []),
+    ...(nnTakeaway?.dev || []),
+  ]);
   const generateNnTakeaway = useGenerateNeighborhoodNewsTakeaway(id);
   const nnTakeawayAttemptedRef = useRef<number | null>(null);
   useEffect(() => {
@@ -17470,7 +17482,7 @@ export default function RunDetail() {
                             {/* ── Subsection 2: Neighborhood News ── */}
                             {hasNeighborhood && (
                               <>
-                                <KypSubhead className="fam-slate" subsection={2} id="print-section-neighborhood-news" style={{ marginTop: 34 }}><span className="lbl">Neighborhood News</span><span className="ct">{facts?.communityArea} · 120 days</span><span className="rule" /></KypSubhead>
+                                <KypSubhead className="fam-slate" subsection={2} id="print-section-neighborhood-news" style={{ marginTop: 34 }}><span className="lbl">Neighborhood News</span><span className="ct">{facts?.communityArea} · past year</span><span className="rule" /></KypSubhead>
                                 {isLoadingNeighborhoodNews ? (
                                   <div className="space-y-2">
                                     <Skeleton className="h-4 w-3/4" />
@@ -17487,7 +17499,7 @@ export default function RunDetail() {
                                         </div>
                                         <div className="kyp-block count slate">
                                           <div className="bv" data-testid="text-news-articles">{nn.kpis.articleCount}</div>
-                                          <div><div className="bl">Articles found</div><div className="bd">last 120 days</div></div>
+                                          <div><div className="bl">Articles found</div><div className="bd">past year</div></div>
                                         </div>
                                       </div>
                                     )}
@@ -17508,7 +17520,7 @@ export default function RunDetail() {
                                       </div>
                                       <div className="kyp-block count slate">
                                         <div className="bv" data-testid="text-news-articles">{neighborhoodNewsData.article_count}</div>
-                                        <div><div className="bl">Articles found</div><div className="bd">last 120 days</div></div>
+                                        <div><div className="bl">Articles found</div><div className="bd">past year</div></div>
                                       </div>
                                     </div>
                                     {(() => {
@@ -17743,9 +17755,9 @@ export default function RunDetail() {
                               {c.corridorName} ({isOnCorridor(c.corridorName, c.distanceMiles) ? 'On corridor' : `${c.distanceMiles} mi`})
                             </span>
                           ))}
-                          {corridorNewsData.news_count > 0 && (
+                          {visibleCorridorArticles.length > 0 && (
                             <Badge variant="outline" className="text-xs" data-testid="badge-corridor-articles">
-                              {corridorNewsData.news_count} Articles (90 days)
+                              {visibleCorridorArticles.length} Articles (90 days)
                             </Badge>
                           )}
                           {(() => {
@@ -17805,8 +17817,8 @@ export default function RunDetail() {
                             );
                           })()}
                           {(() => {
-                            if (!corridorNewsData?.articles?.length || !corridorNewsData?.corridors?.length) return null;
-                            const matchedCount = corridorNewsData.articles.filter((a: any) => a.corridorKeys?.length > 0).length;
+                            if (!visibleCorridorArticles.length || !corridorNewsData?.corridors?.length) return null;
+                            const matchedCount = visibleCorridorArticles.filter((a: any) => a.corridorKeys?.length > 0).length;
                             if (matchedCount === 0) return null;
                             return (
                               <Badge variant="outline" className="text-xs" data-testid="badge-corridor-total-articles">
@@ -17869,8 +17881,8 @@ export default function RunDetail() {
                         const corridorLicenseMap: Record<string, { name: string; address: string; licenses: string[]; categories: string[]; startDate: string; lat: number; lng: number }[]> = {};
                         const corridorPermitMap: Record<string, { address: string; category: string; workDescription: string; issueDate: string; reportedCost: number; distanceMiles: number; permitNumber: string; architectName?: string; contractorName?: string; stories?: number; units?: number; parkingSpaces?: number; buildingUse?: string }[]> = {};
                         const corridorArticleMap: Record<string, { title: string; url: string; summary: string; published: string; source: string }[]> = {};
-                        if (corridorNewsData?.articles?.length) {
-                          for (const article of corridorNewsData.articles) {
+                        if (visibleCorridorArticles.length) {
+                          for (const article of visibleCorridorArticles) {
                             for (const key of (article.corridorKeys || [])) {
                               if (!corridorArticleMap[key]) corridorArticleMap[key] = [];
                               corridorArticleMap[key].push({ title: article.title, url: article.url, summary: article.summary, published: article.published, source: article.source });
@@ -18112,7 +18124,7 @@ export default function RunDetail() {
 
 
                       {(() => {
-                        const neighborhoodArticles = (corridorNewsData.articles || []).filter((a: any) => a.mentionsNeighborhood && !a.corridorKeys?.length);
+                        const neighborhoodArticles = visibleCorridorArticles.filter((a: any) => a.mentionsNeighborhood && !a.corridorKeys?.length);
                         if (neighborhoodArticles.length === 0) return null;
                         const neighborhoodLabel = facts?.neighborhood || facts?.communityArea || 'Neighborhood';
                         return (
@@ -18246,7 +18258,7 @@ export default function RunDetail() {
                                 {neighborhoodNewsData.momentum_label}
                               </Badge>
                               <Badge variant="outline" className="text-xs" data-testid="badge-news-count">
-                                {neighborhoodNewsData.article_count} articles (120 days)
+                                {neighborhoodNewsData.article_count} articles (past year)
                               </Badge>
                               <Badge variant="outline" className="text-xs">
                                 Score: {neighborhoodNewsData.momentum_score}/100
@@ -18259,7 +18271,7 @@ export default function RunDetail() {
                       )}
                       {isNeighborhoodNewsOpen && (
                         <p className="text-sm text-muted-foreground mt-1">
-                          Recent development signals from local news sources for {facts.communityArea} (last 120 days)
+                          Development and cultural coverage from local news sources for {facts.communityArea} (past year)
                         </p>
                       )}
                     </CardHeader>

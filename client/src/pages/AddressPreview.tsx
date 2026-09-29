@@ -32,7 +32,7 @@ const SECTION_BADGES: Record<string, string[]> = {
   "Can I Finance This Property?":  ["LIKELY FINANCEABLE", "Score: 100/100", "SBA Active"],
   "Site-Specific Coverage":        ["6 Articles Found", "Recent 120-Day Coverage"],
   "Corridor Intelligence":         ["Milwaukee Ave (On corridor)", "3 Nearby Corridors", "16 New Permits", "8 New Business Licenses"],
-  "Neighborhood News":             ["High Activity", "12 articles (120 days)", "Score: 100/100"],
+  "Neighborhood News":             ["High Activity", "12 articles (past year)", "Score: 100/100"],
   "Upcoming Real Estate Developments": ["1 Project with Details", "19 Zoning Appeals"],
   "Neighborhood People Profile":   ["Pop: -3.0%", "Median Income: $119,796", "Moderate Diversity", "2BR FMR: $2,220/mo"],
   "Valuation Calculator":          ["Enter purchase price", "DSCR", "Cap Rate", "ROI"],

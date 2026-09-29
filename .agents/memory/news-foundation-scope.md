@@ -3,8 +3,8 @@ name: News foundation scope
 description: Why news source pooling and subject classification were deferred while fixing numbers and assets.
 ---
 
-In the preparatory news pass, preserve the existing visible article selection, publisher-based split, and time windows while correcting unit evidence and local logos. Treat a positive-evidence subject classifier as prepared but inactive.
+The preparatory news pass froze article selection and the publisher-based split while correcting unit evidence and local logos. That freeze was local to that pass, not a standing restriction: a later request widened Neighborhood News to a rolling year without shortening the longer property-specific search. Corridor Intelligence remains separate but must not repeat articles visible in News.
 
 **Why:** The authoritative scope boundary explicitly froze which articles appear and how they split, even though its source-pooling and keyword-removal checklist would change that set. The top-level boundary takes precedence over those conflicting checklist items.
 
-**How to apply:** When the later news behavior pass intentionally changes article selection, pool the already available feeds, replace the publisher filter with subject classification, remove restaurant/hotel/retail from development filtering, and apply the per-subject windows together. Then retire this constraint.
+**How to apply:** Do not undo the newer, distinct window lengths or merge Corridor Intelligence into News merely to prevent duplication. When a later behavior pass changes article selection, pool available feeds, replace the publisher filter with subject classification, remove restaurant/hotel/retail from development filtering, and review window-specific retrieval together. Then retire the preparatory freeze.

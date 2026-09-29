@@ -133,15 +133,18 @@
 .kyp-cap{font-size:12px;color:var(--kyp-ink2);margin-top:26px;line-height:1.4}
 
 /* ===== MODE TILES (walk time as a left marker panel) — replaces the old .kyp-mtile ===== */
-.kyp-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kyp-modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
 .kyp-mtile{display:flex;border:1px solid var(--kyp-line);border-radius:13px;overflow:hidden;background:var(--kyp-card)}
 .kyp-mtw{flex:none;width:74px;background:var(--kyp-indigoSoft);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;border-right:1px solid var(--kyp-line)}
 .kyp-mtw .big{font-family:var(--kyp-disp);font-size:38px;line-height:.85;color:var(--kyp-indigo)}
 .kyp-mtw .u{font-family:var(--kyp-mono);font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo);opacity:.82;margin-top:4px;text-align:center}
-.kyp-mtbody{padding:13px 15px;min-width:0}
+.kyp-mtbody{flex:1;padding:13px 15px;min-width:0}
 .kyp-mth{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo);margin-bottom:5px}
 .kyp-mtn{font-size:15px;font-weight:700;color:var(--kyp-ink)}
-.kyp-mtpills{margin-top:6px}
+.kyp-mtpills{display:flex;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-top:8px}
+.kyp-mtpills .kyp-linepill{display:inline-flex;max-width:100%;white-space:normal;line-height:1.25;padding:4px 7px}
+.kyp-mtn .tz-dir,.kyp-mts .tz-dir{margin-left:7px;vertical-align:middle}
+.kyp-mts .tz-dir{margin-right:3px}
 .kyp-mts{font-size:11px;color:var(--kyp-ink2);margin-top:7px;line-height:1.35}
 
 /* ========== METRA CARD ========== */

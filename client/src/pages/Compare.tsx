@@ -2094,7 +2094,7 @@ function PropertyColumn({ runId, address, label, initialProjectType, onRemove, o
                 {isLoadingNeighborhoodNews ? <Skeleton className="h-10 w-full" /> : neighborhoodNewsData ? (
                   <div className="bg-white border border-[#eae8e2] rounded-lg p-2 text-xs space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Articles (120 days):</span>
+                      <span className="text-muted-foreground">Articles (past year):</span>
                       <span className="font-medium">{neighborhoodNewsData.article_count || 0}</span>
                     </div>
                     <div className="flex justify-between">
