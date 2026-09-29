@@ -465,6 +465,11 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
   const subjectPin = String(pinLookupData?.pin || lienData?.pin || "").replace(/\D/g, "");
   const recorderSearchUrl = lienData?.recorderUrl
     || (subjectPin ? `https://crs.cookcountyclerkil.gov/Search/ResultByPin?id1=${subjectPin}` : null);
+  const recorderInstruments = [...(lienData?.documents || [])].sort((a: any, b: any) => {
+    const aTime = Date.parse(a.recordedDate || a.recordingDate || "") || 0;
+    const bTime = Date.parse(b.recordedDate || b.recordingDate || "") || 0;
+    return bTime - aTime;
+  });
 
   const timelineEvents = [
     ...sales.map((sale: DerivedSale) => ({
@@ -508,7 +513,6 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
       };
     }),
   ].sort((a, b) => a.ms - b.ms);
-  const hasRefinanceRelationship = [...active, ...released].some((mortgage: any) => mortgage?.refi_suspect);
   const coverageLoans = [...active, ...released]
     .map((mortgage: any) => ({ mortgage, pins: additionalPins(mortgage) }))
     .filter(({ pins }) => pins.length > 0);
@@ -521,11 +525,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
     });
   });
   const coverageRows = Array.from(coverageByPin.entries());
-  const showTimeline = sales.length >= 2
-    || active.length + released.length >= 2
-    || hasRefinanceRelationship
-    || scopeChanges.length > 0
-    || coverageLoans.length > 0;
+  const showTimeline = timelineEvents.length > 0 || scopeChanges.length > 0 || coverageLoans.length > 0;
 
   return (
     <div id="section-ownership" data-testid="section-ownership" className="kyp-ownership">
@@ -582,11 +582,11 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
 
       {showTimeline && (
         <div className="kyp-otl" data-testid="ownership-timeline">
-          <KypSubhead subsection={showTimeline ? 1 : undefined}><span className="lbl">Ownership &amp; debt timeline</span><span className="rule" /></KypSubhead>
+          <KypSubhead subsection={1}><span className="lbl">Ownership &amp; debt timeline</span><span className="ct">{timelineEvents.length > 12 ? `Latest 12 of ${timelineEvents.length} events · complete instrument index below` : `${timelineEvents.length} recorded event${timelineEvents.length === 1 ? "" : "s"}`}</span><span className="rule" /></KypSubhead>
           <div className="kyp-otlplot">
             <div className="kyp-timeline-line" />
             <div className="kyp-timeline-events">
-              {timelineEvents.slice(0, 12).map((event) => {
+              {timelineEvents.slice(-12).map((event) => {
                 const content = (
                   <>
                   <b>{event.date}</b>
@@ -739,6 +739,9 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
           </div>
         );
       })}
+      {active.length > 0 && !active.some((mortgage: any) => maturityRunway(mortgage, false)) && (
+        <div className="kyp-method">A maturity runway needs a reliably extracted, recorded maturity date. Estimated dates, credit lines, and uncertain extractions do not produce a runway; check the instrument and any modifications for the actual terms.</div>
+      )}
 
       <KypSubhead subsection={showTimeline ? 4 : 3}>
         <span className="lbl">Title status</span>
@@ -819,6 +822,35 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         </>
       )}
 
+      <KypSubhead subsection={showTimeline ? (historicalLiens.length > 0 ? 6 : 5) : (historicalLiens.length > 0 ? 5 : 4)}>
+        <span className="lbl">Recorder instrument index</span>
+        <span className="ct">{lienData?.searchFailed ? "Search unavailable" : `${recorderInstruments.length} indexed instrument${recorderInstruments.length === 1 ? "" : "s"}`}</span>
+        <span className="rule" />
+      </KypSubhead>
+      <div className="kyp-method">All instruments returned for this PIN are listed below, including releases, modifications, and older deeds. An index entry alone does not establish current debt or title status.</div>
+      {lienData?.searchFailed ? (
+        <div className="kyp-status-empty unknown">The Recorder search failed; the instrument index may be incomplete.</div>
+      ) : recorderInstruments.length === 0 ? (
+        <div className="kyp-status-empty unknown">{isLoadingLiens ? "Recorder instruments are loading." : "No Recorder instruments were returned for this PIN."}</div>
+      ) : (
+        <div style={{ overflowX: "auto" }} data-testid="ownership-recorder-index">
+          <table className="kyp-dtab">
+            <thead><tr><th>Recorded</th><th>Instrument</th><th>Category</th><th>Document</th></tr></thead>
+            <tbody>{recorderInstruments.map((doc: any, index: number) => {
+              const number = normalizedDocNumber(doc);
+              const link = recorderDocumentUrl(number, doc.viewLink, recorderSearchUrl);
+              return (
+                <tr key={`${number}-${index}`}>
+                  <td>{formatRecordedDate(doc.recordedDate || doc.recordingDate)}</td>
+                  <td>{doc.documentType || "Type not recorded"}</td>
+                  <td>{doc.category || "—"}</td>
+                  <td>{number ? link ? <a href={link} target="_blank" rel="noopener noreferrer" title={`Find document #${number} in Cook County Recorder results`}>#{number} ↗</a> : `#${number}` : "—"}</td>
+                </tr>
+              );
+            })}</tbody>
+          </table>
+        </div>
+      )}
       <div className="kyp-src">
         Sources: Cook County Assessor transfer records and Cook County Recorder instruments. Sale prices are declared transfer amounts. Loan amounts are original recorded principal, not balances; positions and refinance relationships are inferred from recording evidence and must be confirmed at title.
       </div>
