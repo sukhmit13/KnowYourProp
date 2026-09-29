@@ -1968,9 +1968,7 @@ a.cmp-nm{text-decoration:underline}
 .secthead{display:flex;align-items:center;gap:10px;font-family:var(--font-jbmono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:14px}
 .secthead .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
 .secthead .scope{margin-left:auto;font-family:var(--font-jbmono);font-size:10px;font-weight:700;letter-spacing:.01em;text-transform:none;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 11px;white-space:nowrap}
-.seccard{border:1px solid var(--line);border-radius:16px;padding:24px 26px;box-shadow:0 1px 3px rgba(20,20,20,.03);background:#fff}
-@media(max-width:640px){.seccard{padding:16px 14px}}
-@media print{.seccard{border:none;box-shadow:none;padding:0;border-radius:0}}
+.seccard{border:0;border-radius:0;padding:0;box-shadow:none;background:transparent}
 .datalabel{font-family:var(--font-jbmono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin:22px 0 12px}
 .datalabel .hint{color:var(--muted,#8b8a84);font-weight:400;text-transform:none;letter-spacing:0;margin-left:8px}
 /* Scope chip variant for existing collapsible header rows */
