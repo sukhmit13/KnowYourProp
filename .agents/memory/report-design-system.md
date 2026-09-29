@@ -15,6 +15,8 @@ Restyles must reuse the shared primitives already in the global stylesheet (sect
 
 **How to apply (after any design-subagent pass):** subagents have repeatedly broken the build (mismatched JSX tags, lucide imports shadowing UI components, unimported icons). Always: run tsc and compare against the pre-existing error baseline (do not expect zero); check the workflow actually reloaded; visually verify each touched section with a headless-browser screenshot (expand all sections first; some headings need text locators, not h3).
 
+**Orange summary tiles:** Use Syracuse's dark-orange variant for tiles with white numbers and small white labels, rather than the brighter standard orange. **Why:** the standard Syracuse orange offers only about 3:1 contrast with white, insufficient for small tile labels; the dark-orange variant reaches about 4.5:1 and keeps all summary-tile text consistent. **How to apply:** check computed foreground and background on any new orange stat tile, including its caption, instead of assuming inherited white text survives a variant override.
+
 ## Specificity trap: .subsection-text
 Report sections wrap content in `.subsection-text`, whose `.subsection-text p, .subsection-text li` font-size rule (0-1-1) silently beats single-class primitives (0-1-0) on `<p>` elements — the rule parses fine and font-family may still show, so it looks like a partial CSS failure. Fix by adding `.subsection-text p.<class>` variants to the primitive selector, never `!important`. Also: verify custom tokens exist before using (`var(--sb-paper)` was referenced before being defined; undefined vars fail silently to transparent).
 

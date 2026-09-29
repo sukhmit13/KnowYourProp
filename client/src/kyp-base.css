@@ -10,7 +10,7 @@
   --kyp-paper:#faf9f6; --kyp-card:#fff; --kyp-wash:#f4f2ec;
   --kyp-ink:#141414; --kyp-ink2:#565651; --kyp-muted:#8b8a84; --kyp-line:#e7e5df;
   --kyp-indigo:#2b3a9e; --kyp-indigoL:#3f51cf; --kyp-indigoSoft:#eef0fb;
-  --kyp-green:#2f7d3f; --kyp-orange:#e07a2e; --kyp-bad:#c0392b; --kyp-slate:#3a3a36;
+  --kyp-green:#2f7d3f; --kyp-orange:#e07a2e; --kyp-orange-deep:#d74100; --kyp-bad:#c0392b; --kyp-slate:#3a3a36;
   --kyp-disp:'Instrument Serif'; --kyp-mono:'JetBrains Mono'; --kyp-sans:'Inter';
    --kyp-debt:#0a93b8; --kyp-debtSoft:#e6f5f9; --kyp-debtLine:#b9e2ee;
 }
@@ -245,7 +245,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-inc.na .in{color:var(--kyp-ink2)}
 
 /* ── incentives: orange StatBlock + warn group divider (Needs-confirmation state) ── */
-.kyp-block.orange{background:var(--kyp-orange);color:var(--kyp-ink)}
+.kyp-block.orange{background:var(--kyp-orange-deep);color:#fff}
 .kyp-group.warn .kyp-gcount{background:var(--kyp-orange)} .kyp-group.warn .kyp-glabel{color:var(--kyp-ink)}
 
 /* ── rich incentive program card (expandable) ── */
