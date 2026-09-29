@@ -11475,12 +11475,6 @@ export default function RunDetail() {
                       )}
                       {propertyTaxYears.length > 0 && (() => {
                         const orderedYears = propertyTaxYears.slice().sort((a, b) => Number(b.year) - Number(a.year)).slice(0, 20);
-                        const partYear = orderedYears.find((year) => year.installment1 > 0 && !(year.installment2 > 0));
-                        const priorFullYear = partYear
-                          ? completeTaxYears.find((year) => Number(year.year) < Number(partYear.year))
-                          : null;
-                        const ratio = partYear && priorFullYear ? partYear.installment1 / priorFullYear.billed : null;
-                        const confirmsStatutoryAdvance = ratio !== null && Math.round(ratio * 1000) / 1000 === 0.55;
                         return (
                           <>
                             <div className="overflow-x-auto">
@@ -11531,16 +11525,6 @@ export default function RunDetail() {
                                 </tbody>
                               </table>
                             </div>
-                            {partYear && priorFullYear && confirmsStatutoryAdvance && (
-                              <p className="kyp-note">
-                                <b>The first installment is not a signal.</b> Cook County's first installment for TY{partYear.year} equals 55% of the prior complete TY{priorFullYear.year} bill ({partYear.installment1.toLocaleString("en-US", { style: "currency", currency: "USD" })} ÷ {priorFullYear.billed.toLocaleString("en-US", { style: "currency", currency: "USD" })} = 55%). It is an advance, not a year-over-year change. Only complete-year bills are compared above.
-                              </p>
-                            )}
-                            {partYear && !confirmsStatutoryAdvance && (
-                              <p className="kyp-note">
-                                TY{partYear.year} is part-billed. Its first installment is shown without a year-over-year change; the installment does not establish the full-year movement.
-                              </p>
-                            )}
                           </>
                         );
                       })()}
@@ -11601,18 +11585,12 @@ export default function RunDetail() {
                             The reported assessor class does not confirm a standard assessment level. An implied market value and effective rate are withheld rather than inferred from zoning.
                           </p>
                         )}
-                        {assessorImpliedMarketValue !== null && (
-                          <p className="kyp-note">
-                            The market figure is implied by the Assessor's final value and Class {assessorClassCode} assessment level; it is not a sale-price estimate. The bill-to-market ratio is not the buyer's actual rate on a future transaction.
-                          </p>
-                        )}
                         {propertyTaxData?.assessorUrl && (
                           <a href={propertyTaxData.assessorUrl} target="_blank" rel="noopener noreferrer" className="tax-link mt-3 hover:opacity-80 transition-opacity" data-testid="link-assessor-detail">
                             <ExternalLink className="h-3.5 w-3.5" />
                             Verify on Assessor Site
                           </a>
                         )}
-                        <p className="kyp-src">Source: Cook County Assessor. Certified and Board of Review values are shown where reported.</p>
                         {assessmentHistory.length > 1 && (
                           <div className="kyp-tax-chart" data-testid="assessment-history-chart">
                             <p className="kyp-charttitle">Assessment value trend · recorded years</p>
@@ -11632,12 +11610,6 @@ export default function RunDetail() {
                                 </LineChart>
                               </ResponsiveContainer>
                             </div>
-                            {assessmentHistory[0].land !== assessmentHistory[assessmentHistory.length - 1].land && (
-                              <p className="kyp-note">
-                                Recorded land assessment changed from ${assessmentHistory[0].land.toLocaleString("en-US")} in TY{assessmentHistory[0].year} to ${assessmentHistory[assessmentHistory.length - 1].land.toLocaleString("en-US")} in TY{assessmentHistory[assessmentHistory.length - 1].year}. Amounts are final assessed values, after Board of Review adjustments where reported.
-                              </p>
-                            )}
-                            <p className="kyp-src">Source: Cook County Assessor. Chart markers are shown only where the assessment history or recorded appeal outcome supports them.</p>
                           </div>
                         )}
                       </>
@@ -11659,7 +11631,7 @@ export default function RunDetail() {
                     <div><span className="k">History</span><span className="v">{pinLookupData.exemptionHistory?.length ? `${pinLookupData.exemptionHistory.length} tax years` : "No history"}</span></div>
                     <div><span className="k">Recorded EAV reduction</span><span className="v">{onFileExemptions.length && currentExemptionRecord ? `$${onFileExemptions.reduce((sum, [key]) => sum + Number(currentExemptionRecord[key] ?? 0), 0).toLocaleString("en-US")}` : "None recorded"}</span></div>
                   </div>
-                  {pinLookupData.exemptionHistory?.length ? (
+                  {!!pinLookupData.exemptionHistory?.length && (
                     <div className="overflow-x-auto">
                       <table className="kyp-dtab kyp-tax-table" data-testid="exemption-history-table">
                         <thead><tr><th>Year</th>{currentExemptionTypes.filter(([key]) => pinLookupData.exemptionHistory!.some((row) => Number((row as any)[key]) > 0)).map(([, label]) => <th key={label}>{label}</th>)}</tr></thead>
@@ -11676,24 +11648,16 @@ export default function RunDetail() {
                         </tbody>
                       </table>
                     </div>
-                  ) : (
-                    <div className="kyp-tax-state" data-testid="exemption-history-empty">No exemption history on record for this PIN.</div>
                   )}
-                  {hasOwnerOccupancyEvidence ? (
+                  {hasOwnerOccupancyEvidence && (
                     <div className="kyp-tax-eligibility" data-testid="exemption-eligibility">
-                      <p className="kyp-note"><b>Primary-residence exemption on record.</b> This is evidence of owner occupancy for the recorded year, not confirmation of current eligibility or transferability.</p>
                       <div className="kyp-recgrid inline">
                         <div><span className="k">Homeowner</span><span className="v">Primary residence required</span></div>
                         <div><span className="k">Senior / freeze</span><span className="v">Age and income rules apply</span></div>
                         <div><span className="k">Veteran / disability</span><span className="v">Eligibility and occupancy rules apply</span></div>
                       </div>
                     </div>
-                  ) : (
-                    <p className="kyp-note" data-testid="exemption-eligibility-not-assessed">
-                      Potential owner-occupant eligibility is not assessed: this record does not establish primary-residence occupancy. A seller's personal exemption, if any, does not transfer to a buyer.
-                    </p>
                   )}
-                  <p className="kyp-src">Source: Cook County Assessor. Exemption amounts are recorded EAV reductions, not dollar-for-dollar tax savings. Confirm application status and deadlines directly with the Assessor.</p>
                 </section>
               )}
 
@@ -11740,11 +11704,6 @@ export default function RunDetail() {
                           </tbody>
                         </table>
                       </div>
-                      {currentOwnerAppeals.length > 0 && (
-                        <p className="kyp-note" data-testid="current-owner-appeal-record">
-                          The recorded current owner, {derivedOwnerName}, matches {currentOwnerAppeals.length} appellant record{currentOwnerAppeals.length === 1 ? "" : "s"} on this parcel; {currentOwnerAppealWins} resulted in a reduction. Older filings may belong to prior owners.
-                        </p>
-                      )}
                       <div className="kyp-tax-filer-list">
                         <h4 className="kyp-charttitle">Appeal representatives on this parcel</h4>
                         {(() => {

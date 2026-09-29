@@ -8,6 +8,7 @@ A public web application for Chicago-only eligibility screening, designed to hel
 
 Preferred communication style: Simple, everyday language.
 Property info display: Hide fields entirely if data cannot be populated (don't show "Not available").
+Report copy: Do not add pale or gray explanation boxes that restate figures, charts, or section headings. Keep distinct data, source links, and warnings only when they materially change how a figure should be interpreted.
 Deployment: Always suggest publishing to production at the end of every task/change.
 UI/UX parity: There are NO account-level UI/UX differences. Every account sees the identical interface and flow; the ONLY difference is that non-subscribers (non-team members) hit the payment step. Subscribers/team accounts must never see paywalls, preview funnels, or reduced UI.
 
