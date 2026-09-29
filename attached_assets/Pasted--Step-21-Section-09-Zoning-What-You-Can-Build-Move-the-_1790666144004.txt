@@ -1,0 +1,427 @@
+# Step 21 — Section 09 · Zoning & What You Can Build
+
+Move the project-use section onto the bold hybrid language. **Verified against the real code**, not
+screenshots.
+
+---
+
+## 0. What this was read against
+
+| | |
+|---|---|
+| Section markup | `client/src/pages/RunDetail.tsx` **4933–5259** |
+| Section styles | `client/src/index.css` **2232–2276** — the `cyp-` family |
+| Design system | `client/src/kyp-base.css` — 982 rules, 99,275 bytes, 0 parse errors |
+| Accordion id | `zoning`, position 9 in `ACC_DEFAULT_ORDER` (line 1258) |
+
+**The section is already a top-level row.** No pull-out needed — `zoning` and `zoningHistory` are
+both already in `ACC_DEFAULT_ORDER`. That part is done.
+
+**Ships after the density fix.** The separate one-rule change to `.kyp-block` (line 98) should land
+first — it is independent of this step and affects every section.
+
+**The section predates the design system.** Every class in it is `cyp-`, defined in `index.css` with
+hardcoded hex, using `--sb-line` and `--font-jbmono` rather than `--kyp-*`. That is why it looks
+unlike §08. This step migrates it.
+
+---
+
+## 1. 🔴 There are three verdicts, not two
+
+`RunDetail.tsx:4961` branches on `effectiveCompatibility.permission`:
+
+| value | line | renders as |
+|---|---|---|
+| `permitted` | 4985 | `cyp-verdict ok` — green |
+| `special_use` | 5013 | `cyp-verdict **bad**` — red |
+| *(else, rezoning)* | 5029 | `cyp-verdict **bad**` — red |
+
+**Special Use is painted as a denial.** Its own copy, on line 5019, reads:
+
+> *"That's a defined, winnable path, not a denial."*
+
+…inside a card whose background is `#fbeeee` with a `#ecc9c4` border and a `#c0392b` icon — the
+identical treatment given to "not permitted, rezoning required". The sentence argues with its own
+styling, and the two genuinely different outcomes are indistinguishable at a glance.
+
+This is the substantive fix in this step. A Special Use is a ZBA hearing — months, a defined
+standard, no parcel rezoning. A Map Amendment is City Council — far longer, politically contingent.
+They are not the same answer.
+
+**They split across the scale — they do not both go orange, and they do not both stay red:**
+
+| | verdict | chip | headline | block 1 |
+|---|---|---|---|---|
+| `permitted` | **green** | `ALLOWED BY RIGHT` | *No zoning relief needed* | green · `By right` |
+| `special_use` | **orange** | `SPECIAL USE REQUIRED` | *A defined path, not a denial* | orange · `Special use` · Zoning Board of Appeals |
+| rezoning | **red** | `NOT PERMITTED AS-OF-RIGHT` | *A map amendment, not a variance* | red · `Rezoning` · City Council, not the ZBA |
+
+Red stays where it is today for the use that is genuinely not compliant — a Gas Station is not a
+listed use in B1-3, and rezoning the parcel is a different order of undertaking. What changes is that
+**Special Use stops borrowing that red.** The ordinance contemplates the use in the district; it just
+wants a hearing. The section's own Ward 1 table makes the case: 97 cases, **zero denials**. That is
+not a `bad` verdict, and the copy on line 5019 already says so.
+
+This uses the full scale — green / orange / red across three genuinely different answers — rather
+than collapsing two of them into one colour, which is what happens today.
+
+---
+
+## 2. 🔴 The amber is real and it is in `index.css`
+
+```css
+/* index.css:2260 */
+.cyp-cond.watch{color:#96600a;border-color:#e6cfa0}
+.cyp-cond.watch svg{color:#96600a}
+```
+
+`#96600a` on `#e6cfa0` is amber. It is not in the palette. It is fed by
+`useLicenseChip(selectedProjectType)` at line 5001 — so the chip **is** already keyed to the
+selected use, which answers the question I had from the screenshots. Good. It just needs to be
+orange and to have room to say something.
+
+---
+
+## 3. Structure
+
+| Subhead | A · none | B · permitted | C · special_use | D · rezoning |
+|---|---|---|---|---|
+| blocks | 1 · district | 3 | 3 | 3 |
+| `.1` | `WHAT {zone} ALLOWS` | `THE RULING` | `THE RULING` + path | `THE RULING` + path |
+| `.2` | — | `COMPETITION` | `WHO FILES IN WARD {n}` | `WHO FILES IN WARD {n}` |
+| `.3` | — | — | `COMPETITION` | `COMPETITION` |
+
+Numbers from `SectionNumberContext`, over the subheads that actually render.
+
+**Accordion one-liner and badge:**
+
+| State | One-liner | Badge |
+|---|---|---|
+| none | `{zone} — pick a use and it is tested against the district.` | indigo `{zone}` |
+| permitted | `A {use} is allowed by right in {zone}.` | green `BY-RIGHT` |
+| special_use | `A {use} needs Special Use approval in {zone} — a ZBA hearing, not a rezoning.` | orange `SPECIAL USE` |
+| rezoning | `A {use} is not allowed in {zone} — it needs a City Council map amendment.` | orange `REZONING` |
+
+**Both relief states get the identical Ward attorney panel.** `requiresZoningChange` is defined at
+line 2790 as `permission !== 'permitted'`, so the gate at line 5052 already covers `special_use` and
+rezoning alike — and it should, because both need a zoning attorney to file and argue the case. The
+only difference is the forum: ZBA hearing versus City Council ordinance. Leave the gate exactly as
+it is; `09.2 WHO FILES IN WARD {n}` and `09.3 COMPETITION` render identically in C and D.
+
+Line 2794 also auto-expands the panel (`setZbaExpanded(true)`) whenever relief is needed. Keep that.
+
+---
+
+## 4. Blocks
+
+All four states use the live `.kyp-blocks` / `.kyp-block` families unchanged.
+
+⚠ **Child order is `.bv` first, then the label group.** This is the existing app convention —
+`.kyp-block .bl` carries `margin-top:8px`, which only makes sense below the numeral. Both markup
+patterns below are already in use in `RunDetail.tsx`; either is fine, but do not invert them.
+
+```jsx
+{/* wrapped — the pattern in Business Licenses */}
+<div className="kyp-block ind">
+  <div className="bv">{zone}</div>
+  <div>
+    <div className="bl">Zoning district</div>
+    <div className="bd">{use} is a listed use</div>
+  </div>
+</div>
+```
+
+**A** — `.kyp-blocks.hero.one` with `.kyp-block.ind.count`: `{zone}` / `ZONING DISTRICT` / district
+name. Both modifiers already exist (`kyp-base.css:688`, `:392`). No new CSS.
+
+**B / C / D** — three `.kyp-block`s each:
+
+| | fill | value (`.bv`) | label (`.bl`) | caption (`.bd`) |
+|---|---|---|---|---|
+| **B** 1 | `grn` | `By right` | `ZONING CHECK` | No ZBA hearing, no City Council |
+| **C** 1 | `orange` | `Special use` | `ZONING CHECK` | Zoning Board of Appeals |
+| **D** 1 | `red` | `Rezoning` | `ZONING CHECK` | City Council, not the ZBA |
+| all 2 | `ind` | `{zone}` | `ZONING DISTRICT` | whether the use is listed |
+| B 3 | `dark` | `{n}` | `SAME USE WITHIN ½ MI` | `{use}` · Google Maps |
+| C/D 3 | `dark` | `{n}` | `WARD {n} · LAST 5 YEARS` | zoning cases on public record |
+
+`.kyp-block.orange` exists at `kyp-base.css:248` and `.red` at `:390`. Do not add `.org`.
+
+📐 **These cards assume the density fix has shipped** — the separate one-rule change to
+`.kyp-block` (line 98: `min-height:0`, `justify-content:flex-start`, `padding:14px 15px`). Land that
+first. Without it these cards render at 164px with a hole in the middle, same as everywhere else.
+
+---
+
+## 5. `.1` The ruling
+
+`.cyp-verdict` → **`.kyp-verdict`**. White card, `--kyp-line` border, 4px left border in the verdict
+colour, verdict as a filled `.vk` chip. The serif headline carries the *consequence*; the chip
+already carried the verdict.
+
+**`permitted` — the three `.cyp-cond` chips become `.kyp-yn` rows.** Live structure is
+`.kyp-yn > .r.y|.r.n > .m` (`kyp-base.css:910–916`), not `<p>`. The watch row uses a new `.r.w`.
+
+```
+✓  Standard business license — no zoning-relief application
+✓  No ZBA hearing, no aldermanic sign-off
+!  {useLicenseChip(use)} — expanded to a sentence, orange marker
+```
+
+**`special_use` / rezoning — `.cyp-steps` → `.kyp-path`,** inside the ruling card. Drop the nested
+white card; a bordered card inside a bordered card buys nothing. All three steps survive verbatim
+from lines 5022–5024 and 5038–5040 respectively, including the `{wardLabel}` interpolation.
+
+⚠ **`.kyp-step` is not this.** `kyp-base.css:484–495` is the three-step setup funnel with 30px
+numbered circles and CTA buttons. Different component. Hence `.kyp-path`.
+
+---
+
+## 6. `.2` Who files in Ward {n}
+
+Renamed from `Zoning Change History & Representation (Last 5 Years)` — it is not this parcel's
+history.
+
+### 6.1 The table does not reconcile
+
+On 1254 N. Milwaukee, `total − (approved + denied + withdrawn)`:
+
+| | total | appr | den | wdrn | **unaccounted** |
+|---|---|---|---|---|---|
+| Nicholas Ftikas | 16 | 13 | 0 | 1 | **2** |
+| Thomas Moore | 16 | 14 | 0 | 1 | **1** |
+| Patrick Thompson | 2 | 1 | 0 | 0 | **1** |
+
+Four cases sit in a total and in no column. The callout names the missing disposition itself —
+*"withdrawn or **continued**"* — and there is no continued column. **And the ten rows sum to 67 of
+97**, with nothing saying the table is a top-ten.
+
+### 6.2 What to render
+
+Header → `.kyp-recgrid.inline.three`: `CASES, 5 YRS 97` (hi) · `IN THE 10 BELOW 67` ·
+`SELF-REPRESENTED 2`.
+
+Columns: **Representative · Cases · Approved · Other · Last filed**, as `.kyp-dtab`.
+
+- **`DENIED` cut.** Ten rows, ten zeros, and a paragraph explaining why to ignore it.
+- **`Other` = cases − approved**, computed, so nothing vanishes. Split on a `.sm` sub-line
+  (`kyp-base.css:1035` already does `display:block;margin:4px 0 0;font-size:10px`). `—` at zero.
+- **`Last filed`** gets `.kyp-dtab .vd` — already orange by default at `:1009` — when the date is
+  more than 24 months before the report date. Only Mark Kupiec (2023-04-21) trips it here.
+
+Keep every name, every `Check ARDC ↗`, the `Self-Rep` marker, the sort control and its order
+(volume then recency — the live sort is already correct).
+
+Footnote keeps its **"not endorsements, rankings, or predictions of outcome"** clause and gains one
+sentence defining `Unrecorded`.
+
+---
+
+## 7. State A
+
+`09.1 WHAT {zone} ALLOWS` → `.kyp-usechip` chips (`kyp-base.css:496`, already a green
+permitted-use chip — exactly this), then the prompt and `Choose Project Use` below a rule.
+
+**The list must come from the same lookup that answers the check** — `businessUsesData`, which the
+section already holds at line 4945. Do not hardcode. If it is not enumerable, leave State A as the
+prompt alone and tell me.
+
+---
+
+## 8. CSS
+
+**22 rules, 3,070 bytes, 0 parse errors, every `var()` resolves against a live token, one raw hex
+(`#fff`), and zero selector collisions** with the 937 live selectors. **Append to the end of
+`client/src/kyp-base.css`.**
+
+New families: `.kyp-verdict` (11, carrying `.ok` / `.watch` / `.no`), `.kyp-path` (5),
+`.kyp-checkbar` (3). Additions to live families: `.kyp-yn .r.w .m`, `.kyp-recgrid.three`,
+`.kyp-dtab td a`.
+
+<details>
+<summary><b>The full patch — paste this at the end of kyp-base.css</b></summary>
+
+```css
+/* ============================================================
+   kyp-base.css — append-only patch, Step 21
+   Section 09 · Zoning & What You Can Build
+   Verified against the live kyp-base.css (982 rules, 99,387 bytes).
+   Everything that already existed is reused, not redeclared.
+   ============================================================ */
+
+/* --- the ruling. Replaces .cyp-verdict (index.css 2243-2255).
+       White card; the verdict lives on the chip and a 4px left border,
+       never on the fill. --- */
+.kyp-verdict{border:1px solid var(--kyp-line);border-left:4px solid var(--kyp-slate);border-radius:12px;
+ padding:18px 20px;background:var(--kyp-card)}
+.kyp-verdict.ok{border-left-color:var(--kyp-green)}
+.kyp-verdict.watch{border-left-color:var(--kyp-orange)}
+.kyp-verdict.no{border-left-color:var(--kyp-bad)}
+.kyp-verdict .vk{display:inline-block;font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;
+ letter-spacing:.07em;text-transform:uppercase;color:#fff;border-radius:5px;padding:3px 8px;
+ background:var(--kyp-slate)}
+.kyp-verdict.ok .vk{background:var(--kyp-green)}
+.kyp-verdict.watch .vk{background:var(--kyp-orange)}
+.kyp-verdict.no .vk{background:var(--kyp-bad)}
+.kyp-verdict .vh{font-family:var(--kyp-disp);font-size:24px;color:var(--kyp-ink);line-height:1.08;
+ margin:10px 0 7px}
+.kyp-verdict .vp{font-size:12.5px;color:var(--kyp-ink2);line-height:1.55;margin:0}
+.kyp-verdict .vp b{color:var(--kyp-ink);font-weight:600}
+
+/* --- the relief path. Replaces .cyp-steps / .cyp-stp (index.css 2261-2265).
+       Compact and numbered; not .kyp-step, which is the setup stepper with CTAs. --- */
+.kyp-path{margin:13px 0 0;padding:12px 0 0;border-top:1px solid var(--kyp-line);list-style:none}
+.kyp-path li{display:flex;gap:10px;font-size:12px;line-height:1.5;color:var(--kyp-ink2);padding:5px 0}
+.kyp-path li i{flex:none;font-style:normal;font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;
+ color:var(--kyp-orange);width:17px;padding-top:1px}
+.kyp-path li b{color:var(--kyp-ink);font-weight:600}
+
+/* --- "checking <use>" bar --- */
+.kyp-checkbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:2px 0 4px}
+.kyp-checkbar .l{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.06em;
+ text-transform:uppercase;color:var(--kyp-muted)}
+.kyp-checkbar .l b{color:var(--kyp-ink);font-family:var(--kyp-sans);font-size:13.5px;letter-spacing:0;
+ text-transform:none;font-weight:600;margin-left:7px}
+
+/* --- one addition to a live family: a "watch" marker beside .r.y / .r.n --- */
+.kyp-yn .r.w .m{color:var(--kyp-orange)}
+
+/* --- three-up variant of the live 4-column recgrid --- */
+.kyp-recgrid.three{grid-template-columns:repeat(3,1fr)}
+
+/* --- .kyp-dtab has no link style; the ARDC check is a link, not a caption --- */
+.kyp-dtab td a{display:block;margin-top:3px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;
+ color:var(--kyp-indigo);text-decoration:none}
+
+/* --- the path's step numerals follow the verdict --- */
+.kyp-verdict.no .kyp-path li i{color:var(--kyp-bad)}
+```
+
+</details>
+
+**Reused rather than reinvented** — I had drafted new families for all of these before reading the
+real stylesheet:
+
+| I was going to add | Already exists |
+|---|---|
+| `.kyp-block.org` | `.kyp-block.orange` — `:248` |
+| `.kyp-blocks.one` / `.two` | `.kyp-blocks.hero.one` / `.hero.two` — `:688`, `:687` |
+| wide-short block layout | `.kyp-block.count` — `:392` |
+| `.kyp-usechips` | `.kyp-usechip` — `:496` |
+| `.kyp-dtab td .sub` | `.kyp-dtab td .sm` — `:1035` |
+| `.kyp-dtab .ch.o` | `.kyp-dtab .vd` (orange by default) — `:1009` |
+| a `.kyp-steps` list | `.kyp-step` exists but is the setup funnel — kept separate as `.kyp-path` |
+
+**Also in this pass, two edits to existing rules** (not appends):
+
+```css
+/* kyp-base.css:1034 — the appeal reason is content, not a footnote */
+.kyp-dtab td .why{ ... color:var(--kyp-ink2) }   /* was --kyp-muted */
+
+/* kyp-base.css:1011-1012 — delete both. This is what greys out §08.4's tax years. */
+.kyp-dtab tr.dim td{color:var(--kyp-muted)}
+.kyp-dtab tr.dim td:first-child{font-weight:400}
+```
+
+Deleting `tr.dim` will break any row currently carrying `class="dim"` — grep `RunDetail.tsx` for
+`dim` in a `<tr>` and remove those too. Row-level dimming is not in the language; neutrality goes on
+the chip.
+
+**`index.css` cleanup:** once `.kyp-verdict` / `.kyp-path` land, `.cyp-verdict`, `.cyp-badge`,
+`.cyp-vbd`, `.cyp-k`, `.cyp-h`, `.cyp-p`, `.cyp-conds`, `.cyp-cond`, `.cyp-steps`, `.cyp-sl`,
+`.cyp-stp` (index.css 2243–2265) are dead. Delete them in the same PR or they will drift.
+`.cyp-scan` and `.cyp-tie` go too — see §9. Keep `.cyp-inbar`, `.cyp-txt`, `.cyp-upd` and friends;
+those are the modal.
+
+---
+
+## 9. Competition and the insight note
+
+`.cyp-scan` → `.kyp-recgrid.inline.three`: same concept `{n}` (hi) · radius ½ mi · source Google Maps,
+with the `Nearby Competitors ↓` jump link in the subhead. `.cyp-tie` → `.kyp-note`.
+
+Cut *"Nearby-competition scan · Google Maps · sharpened by your concept — add a concept above to
+narrow it."* The grid names the source; the rest describes a control that is not on screen.
+
+🔴 **Verify the count first.** `Day Care Center` and `Gas Station` both returned **2** within ½ mile
+on the same parcel. Two unrelated uses, same radius, same number, is more likely a cache or a
+fallback ignoring the concept than a coincidence. If the scan is not re-running per use, this block
+is worse than nothing, because it looks specific.
+
+---
+
+## 10. Branches still unread
+
+- **No ward history / `!zbaWardData?.indexBuilt`** (line 5063) currently renders an admin message to
+  the end user: *"ZBA history index not built yet—run Refresh ZBA index from admin."* That is an
+  internal string in a customer-facing report. Replace with the Step 9c `not_found` pattern.
+- **Fewer than ten reps**, or one rep holding most of the volume.
+- **A planned development (PD) overlay**, which overrides the base district entirely. If this parcel
+  were in a PD, every answer in this section is wrong. Is that checked anywhere?
+- **`isProjectTypeLocked`** (line 4970) — the 90-day lock. Its copy is fine; it just needs to survive
+  the restyle.
+
+---
+
+## 11. Field table
+
+| Renders today | Destination |
+|---|---|
+| `What the zoning lets you build, by-right or with approvals.` | **Rewritten** → state-specific one-liner, §3 |
+| `Pick your intended use…` | **Kept**, shortened → prompt under the use chips |
+| `Choose` / `Edit Project Use` (`cyp-upd`) | **Kept**; Edit demoted to a quiet mono button |
+| `Checking: {use}` + `— "{confirmedFreeform}"` | **Kept** → `.kyp-checkbar`, freeform on the same line |
+| print-only `Selected Use:` fallback | **Kept**, untouched |
+| `isProjectTypeLocked` lock notice | **Kept**, untouched |
+| `cyp-k` "Zoning check" eyebrow | **Replaced** by the `.vk` chip |
+| `cyp-h` headline, all three | **Split** → chip carries the verdict, headline the consequence |
+| `cyp-p` body, all three | **Kept**; special_use and rezoning gain one clause naming the deciding body |
+| `isAduProjectType` second paragraph | **Kept** → second `.vp` |
+| `.cyp-cond` × 3 | **Kept** → `.kyp-yn` rows, expanded; watch chip **amber → orange** |
+| `The path` × 3 steps, both branches | **Kept verbatim** → `.kyp-path`; nested card dropped |
+| ZBA panel title | **Renamed** → `WHO FILES IN WARD {n}` |
+| `Ward 1 · 97 total cases · 2 self-represented` | **Kept + extended** → adds `IN THE 10 BELOW 67` |
+| `Sort by: Case volume / Most recent` | **Kept**, right-aligned in the subhead |
+| "Worth knowing as you read these columns…" | **Kept**, shortened → `.kyp-note`, ends by naming `Other` |
+| cols `TOTAL` / `APPROVED` / `LAST CASE` | **Kept** → `Cases` / `Approved` / `Last filed` |
+| col `DENIED` | **Cut** — ten rows, ten zeros |
+| col `WITHDRAWN` | **Folded** into `Other` with a `.sm` split line |
+| `Check ARDC ↗`, `Self-Rep` pill | **Kept** |
+| ZBA footnote | **Kept** + `Unrecorded` definition |
+| `ZBA history index not built yet—run Refresh…` | **Replaced** — internal string, §10 |
+| `cyp-scan` count, label, `Nearby Competitors ↓` | **Kept** → `.kyp-recgrid.inline.three` + jump link |
+| `Nearby-competition scan · Google Maps · sharpened…` | **Cut** — §9 |
+| `cyp-tie` insight note | **Kept** → `.kyp-note` |
+
+**New, computed from data already present:** `Other` per rep, the 67-of-97 figure, the staleness age.
+**No new API call.**
+
+**Cut: 3** — the `DENIED` column, the scan instruction line, the admin string.
+
+---
+
+## 12. Outside this section
+
+The global chip bar renders `ZONING · B1-3: Day Care Center`. The district is zoning; the selected
+use is not. Either show `B1-3` alone or relabel the chip `ZONING · USE`.
+
+---
+
+## ✅ Done-when
+
+- [ ] The `.kyp-block` density fix has already shipped.
+- [ ] All four states render; `special_use` is visually distinct from rezoning.
+- [ ] Every `.kyp-block` puts `.bv` first, label group second.
+- [ ] `special_use` is **orange**; rezoning stays **red**. They no longer share a treatment.
+- [ ] No amber anywhere; `.cyp-cond.watch` is gone with the rest of the `cyp-` verdict family.
+- [ ] No tinted card fills — verdict on the chip and the 4px left border only.
+- [ ] Subheads renumber from the live index; B shows `.1 .2`, C and D show `.1 .2 .3`.
+- [ ] The Ward attorney panel renders for `special_use`, not only for rezoning.
+- [ ] `Other` = `cases − approved`, computed. No case is in a total and in no column.
+- [ ] `67 of 97` derived, not hardcoded.
+- [ ] Staleness measured from the report date, not the server clock.
+- [ ] Concept-scan count verified to change with the selected use.
+- [ ] State A's use list comes from `businessUsesData`, not an array.
+- [ ] The admin "Refresh ZBA index" string cannot reach an end user.
+- [ ] `.kyp-dtab td .why` → `--kyp-ink2`; `tr.dim` rules deleted and any `<tr class="dim">` with them.
+- [ ] Dead `cyp-` rules removed from `index.css` in the same PR.

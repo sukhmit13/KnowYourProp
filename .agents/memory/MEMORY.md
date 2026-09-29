@@ -29,6 +29,7 @@
 - [Valuation NOI model](valuation-noi-model.md) — transparent NOI build-up; one NOI everywhere; dual DSCR (economic + rent÷PITIA); never rent−taxes−insurance.
 - [mapbox-gl v3 upgrade](mapbox-gl-v3.md) — v2.15 marker occlusion timer crashes after style teardown; stay on v3, never reinstall @types/mapbox-gl.
 - [Zoning history lookup](zoning-history-lookup.md) — ordinance titles use range addresses ("520-22"); search street-only + range-aware number match; Legistar API itself can be down.
+- [Project-use zoning evidence](project-use-zoning-evidence.md) — a use category is not a by-right verdict; PD matrix results are not ordinance-specific approvals.
 - [JSX comment placement](jsx-comment-placement.md) — a {/* comment */} directly inside a .map() arrow parenthesized return breaks the Babel build; put comments above the map call.
 - [Ownership & Title evidence](ownership-title-evidence.md) — debt is resolved-snapshot-only; failed recorder searches stay unknown; historical releases remain visible and hedged.
 - [Treasurer cache safety](treasurer-cache-safety.md) — empty Treasurer refreshes must never erase a previously verified bill or payment history.

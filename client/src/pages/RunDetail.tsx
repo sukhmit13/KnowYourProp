@@ -2766,10 +2766,14 @@ export default function RunDetail() {
   const isAduProjectType =
     selectedProjectType === 'Accessory Dwelling Unit (ADU)' ||
     selectedProjectType === 'Additional Dwelling Unit';
+  const isPlannedDevelopment = /^PD(?:\d|\b|-)/i.test(facts?.zoning?.trim() || '');
 
   // For ADU types on RS zoning, override the compatibility result using the
   // pre-computed aduZone polygon lookup — RS is only permitted inside ADU-Allowed areas.
   const effectiveCompatibility = (() => {
+    // PD permissions depend on the adopted ordinance; the generic use matrix
+    // returns "special_use" for every PD use and is not a ZBA determination.
+    if (isPlannedDevelopment) return null;
     if (!isAduProjectType || !compatibility) return compatibility;
     const zoning = facts?.zoning?.toUpperCase() || '';
     if (zoning.startsWith('RS')) {
@@ -2812,6 +2816,13 @@ export default function RunDetail() {
   const { data: zbaCityData, isLoading: isLoadingZbaCity } = useZbaCitySummary(
     requiresZoningChange && showCitywideContext
   );
+  const zbaTopReps = zbaWardData?.representatives ? sortZbaReps(zbaWardData.representatives) : [];
+  const zbaTopCases = zbaTopReps.reduce((sum, rep) => sum + rep.totalCases, 0);
+  const zbaReportDate = run?.createdAt ? new Date(run.createdAt) : null;
+  const zbaStaleCutoff = zbaReportDate && !Number.isNaN(zbaReportDate.getTime())
+    ? new Date(Date.UTC(zbaReportDate.getUTCFullYear(), zbaReportDate.getUTCMonth() - 24, zbaReportDate.getUTCDate())) : null;
+  const isZbaLastFiledOld = (date: string | null) =>
+    !!date && !!zbaStaleCutoff && !Number.isNaN(Date.parse(date)) && Date.parse(date) < zbaStaleCutoff.getTime();
 
   // Census ACS three-tier demographics (tract + ZIP from Census Bureau API)
   const { data: censusACSData, isLoading: isLoadingCensusACS } = useCensusACS(
@@ -4069,6 +4080,16 @@ export default function RunDetail() {
       ? "LANDMARK DISTRICT"
       : "DESIGNATED"
     : undefined;
+  const zoningPermission = selectedProjectType ? effectiveCompatibility?.permission : null;
+  const zoningTakeaway = isPlannedDevelopment
+    ? `${facts?.zoning} — use permissions depend on the adopted Planned Development ordinance.`
+    : !zoningPermission
+    ? `${facts?.zoning || 'Zoning'} — pick a use and it is tested against the district.`
+    : zoningPermission === 'permitted'
+      ? `A ${selectedProjectType} is allowed by right in ${facts?.zoning}.`
+      : zoningPermission === 'special_use'
+        ? `A ${selectedProjectType} needs Special Use approval in ${facts?.zoning} — a ZBA hearing, not a rezoning.`
+        : `A ${selectedProjectType} is not allowed in ${facts?.zoning} — it needs a City Council map amendment.`;
   const accProps = (rowId: string) => {
     const scan = accScanSections.find((s) => s.id === rowId);
     const custom = ACC_CUSTOM_META[rowId];
@@ -4082,10 +4103,12 @@ export default function RunDetail() {
       index: (pos < 0 ? accOrder.length : pos) + 1,
       order: (pos < 0 ? accOrder.length : pos) + 1,
       eyebrow: title,
-      takeaway: rowId === "propertyTax" ? propertyTaxTakeaway : rowId === "listing" ? listingTakeaway : rowId === "businessLicenses" ? businessLicensesTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : scan?.takeaway ?? summary,
+      takeaway: rowId === "zoning" ? zoningTakeaway : rowId === "propertyTax" ? propertyTaxTakeaway : rowId === "listing" ? listingTakeaway : rowId === "businessLicenses" ? businessLicensesTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : scan?.takeaway ?? summary,
       verdict: rowId === "businessLicenses" ? "context" as const : verdict,
-      badge: rowId === "propertyTax" ? propertyTaxBadge : rowId === "listing" ? listingBadge : rowId === "businessLicenses" ? businessLicensesBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
-      badgeTone: rowId === "listing"
+      badge: rowId === "zoning" ? zoningPermission === 'permitted' ? 'BY-RIGHT' : zoningPermission === 'special_use' ? 'SPECIAL USE' : zoningPermission ? 'REZONING' : facts?.zoning || undefined : rowId === "propertyTax" ? propertyTaxBadge : rowId === "listing" ? listingBadge : rowId === "businessLicenses" ? businessLicensesBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
+      badgeTone: rowId === "zoning"
+        ? zoningPermission === 'permitted' ? "g" as const : zoningPermission ? "o" as const : "indigo" as const
+        : rowId === "listing"
         ? listingSnapshot?.status === "not_found"
           ? "indigo" as const
           : listingWrongChecks.length > 0
@@ -4940,20 +4963,20 @@ export default function RunDetail() {
                 <div className="space-y-4">
                   {businessUsesData && (
                     <div className="space-y-2">
-                      <div className="screen-only flex items-center justify-between gap-3 flex-wrap" data-testid="trigger-project-type">
-                        <div className="text-sm min-w-0">
+                      <div className="kyp-checkbar screen-only" data-testid="trigger-project-type">
+                        <div className="l">
                           {selectedProjectType ? (
                             <span data-testid="text-selected-project-type">
                               Checking: <b>{selectedProjectType}</b>
-                              {confirmedFreeform && <span className="text-muted-foreground"> — "{confirmedFreeform}"</span>}
+                              {confirmedFreeform && <span> — "{confirmedFreeform}"</span>}
                             </span>
                           ) : (
-                            <span className="text-muted-foreground">Pick your intended use to see whether it's permitted here — it also drives incentives and the competition scan.</span>
+                            <span>Pick your intended use to test it against this district.</span>
                           )}
                         </div>
                         <button
                           type="button"
-                          className="cyp-upd"
+                          className={`cyp-upd${selectedProjectType ? " quiet" : ""}`}
                           onClick={() => setCypModalOpen(true)}
                           disabled={isProjectTypeLocked}
                           data-testid="button-open-project-type"
@@ -4978,104 +5001,128 @@ export default function RunDetail() {
                     </div>
                   )}
 
+                  {!selectedProjectType ? (
+                    <>
+                      <div className="kyp-blocks hero one">
+                        <div className="kyp-block ind count"><div className="bv">{facts.zoning}</div><div><div className="bl">Zoning district</div><div className="bd">{zoningInfo?.name || facts.zoning}</div></div></div>
+                      </div>
+                      <KypSubhead subsection={1}><span className="lbl">What {facts.zoning} allows</span></KypSubhead>
+                      <p className="kyp-tax-muted">Choose Project Use to check whether your intended use is allowed here. The district’s listed uses are shown in the Zoning Details card above.</p>
+                    </>
+                  ) : isPlannedDevelopment ? (
+                    <>
+                      <KypSubhead subsection={1}><span className="lbl">The ruling</span></KypSubhead>
+                      <div className="kyp-status-empty unknown">This parcel is in a Planned Development. The adopted PD ordinance controls allowed uses; this report cannot determine whether {selectedProjectType} is permitted without that ordinance.</div>
+                    </>
+                  ) : effectiveCompatibility && (() => {
+                    const permission = effectiveCompatibility.permission;
+                    const zone = facts.zoning;
+                    const scanData = isDaycare ? googlePlacesDaycareData : googlePlacesData;
+                    const nearbyCount = placesConfirmed && scanData?.status !== 'pending' && Array.isArray(scanData?.places)
+                      ? scanData.places.filter((p: any) => p.distanceMiles != null && p.distanceMiles <= 0.5).length : '—';
+                    return (
+                      <>
+                        <div className="kyp-blocks">
+                          <div className={`kyp-block ${permission === 'permitted' ? 'grn' : permission === 'special_use' ? 'orange' : 'red'}`}>
+                            <div className="bv">{permission === 'permitted' ? 'By right' : permission === 'special_use' ? 'Special use' : 'Rezoning'}</div>
+                            <div><div className="bl">Zoning check</div><div className="bd">{permission === 'permitted' ? 'No ZBA hearing, no City Council' : permission === 'special_use' ? 'Zoning Board of Appeals' : 'City Council, not the ZBA'}</div></div>
+                          </div>
+                          <div className="kyp-block ind"><div className="bv">{zone}</div><div><div className="bl">Zoning district</div><div className="bd">{permission === 'permitted' || permission === 'special_use' ? 'Use listed in this district' : 'Use not listed in this district'}</div></div></div>
+                          <div className="kyp-block dark">
+                            <div className="bv">{permission === 'permitted' ? nearbyCount : zbaWardData?.totalCases ?? '—'}</div>
+                            <div><div className="bl">{permission === 'permitted' ? 'Same use within ½ mi' : `Ward ${wardNumber ?? '—'} · last 5 years`}</div><div className="bd">{permission === 'permitted' ? `${selectedProjectType} · Google Maps` : 'Zoning cases on public record'}</div></div>
+                          </div>
+                        </div>
+                        <KypSubhead subsection={1}><span className="lbl">The ruling</span><span className="ct">{selectedProjectType}</span></KypSubhead>
+                      </>
+                    );
+                  })()}
+
                   {effectiveCompatibility && selectedProjectType && (() => {
                     const zone = facts?.zoning || 'this zoning district';
                     const wardLabel = facts?.ward ? `Ward ${facts.ward}` : 'your ward';
                     if (effectiveCompatibility.permission === 'permitted') {
                       return (
-                        <div className="cyp-verdict ok" data-testid="verdict-permitted">
-                          <span className="cyp-badge"><CheckCircle2 /></span>
-                          <div className="cyp-vbd">
-                            <div className="cyp-k">Zoning check</div>
-                            <div className="cyp-h">Allowed by right</div>
-                            <p className="cyp-p">
+                        <div className="kyp-verdict ok" data-testid="verdict-permitted">
+                            <span className="vk">Allowed by right</span>
+                            <div className="vh">No zoning relief needed</div>
+                            <p className="vp">
                               A <b>{selectedProjectType}</b> is permitted <b>as-of-right</b> in {zone} — no special-use approval or variance. Pursue it through standard permitting.
                             </p>
-                            {isAduProjectType && <p className="cyp-p mt-1">{effectiveCompatibility.message}</p>}
-                            <div className="cyp-conds">
-                              <span className="cyp-cond"><CheckCircle2 />Standard business license</span>
-                              <span className="cyp-cond info"><CheckCircle2 />No zoning relief needed</span>
-                              {useLicenseChip(selectedProjectType) && (
-                                <span className="cyp-cond watch"><AlertTriangle />{useLicenseChip(selectedProjectType)}</span>
-                              )}
+                            {isAduProjectType && <p className="vp mt-1">{effectiveCompatibility.message}</p>}
+                            <div className="kyp-yn">
+                              {!isAduProjectType && <div className="r y"><span className="m">✓</span><span>If a business license is required, no zoning-relief application is needed for this use.</span></div>}
+                              <div className="r y"><span className="m">✓</span><span>No ZBA hearing or City Council zoning approval needed.</span></div>
+                              {!isAduProjectType && useLicenseChip(selectedProjectType) && <div className="r w"><span className="m">!</span><span>Check applicable licensing: {useLicenseChip(selectedProjectType)}.</span></div>}
                             </div>
-                          </div>
                         </div>
                       );
                     }
                     if (effectiveCompatibility.permission === 'special_use') {
                       return (
-                        <div className="cyp-verdict bad" data-testid="verdict-special-use">
-                          <span className="cyp-badge"><AlertTriangle /></span>
-                          <div className="cyp-vbd">
-                            <div className="cyp-k">Zoning check</div>
-                            <div className="cyp-h">Special Use approval required</div>
-                            <p className="cyp-p">
-                              A <b>{selectedProjectType}</b> is <b>not by-right</b> in {zone} — it needs Special Use approval. That's a defined, winnable path, not a denial.
+                        <div className="kyp-verdict watch" data-testid="verdict-special-use">
+                            <span className="vk">Special use required</span>
+                            <div className="vh">A defined path, not a denial</div>
+                            <p className="vp">
+                              A <b>{selectedProjectType}</b> is <b>not by-right</b> in {zone} — it needs Special Use approval from the Zoning Board of Appeals. That's a defined, winnable path, not a denial.
                             </p>
-                            <div className="cyp-steps">
-                              <div className="cyp-sl">The path</div>
-                              <div className="cyp-stp"><span className="no">1</span><span><b>Public hearing before the Zoning Board of Appeals (ZBA)</b> — the Special Use is granted or denied here.</span></div>
-                              <div className="cyp-stp"><span className="no">2</span><span><b>Aldermanic support ({wardLabel})</b> is typically decisive — line it up early.</span></div>
-                              <div className="cyp-stp"><span className="no">3</span><span><b>Engage a zoning attorney</b> to file and represent you at the hearing — see below, we have the history for this ward.</span></div>
-                            </div>
-                          </div>
+                            <ol className="kyp-path">
+                              <li><i>1</i><span><b>Public hearing before the Zoning Board of Appeals (ZBA)</b> — the Special Use is granted or denied here.</span></li>
+                              <li><i>2</i><span><b>Aldermanic support ({wardLabel})</b> is typically decisive — line it up early.</span></li>
+                              <li><i>3</i><span><b>Engage a zoning attorney</b> to file and represent you at the hearing — see below, we have the history for this ward.</span></li>
+                            </ol>
                         </div>
                       );
                     }
                     return (
-                      <div className="cyp-verdict bad" data-testid="verdict-not-permitted">
-                        <span className="cyp-badge"><XCircle /></span>
-                        <div className="cyp-vbd">
-                          <div className="cyp-k">Zoning check</div>
-                          <div className="cyp-h">Not permitted as-of-right — rezoning required</div>
-                          <p className="cyp-p">
-                            A <b>{selectedProjectType}</b> is not an allowed use in {zone}; it would require a <b>Map Amendment (rezoning)</b>.
+                      <div className="kyp-verdict no" data-testid="verdict-not-permitted">
+                          <span className="vk">Not permitted as-of-right</span>
+                          <div className="vh">A map amendment, not a variance</div>
+                          <p className="vp">
+                            A <b>{selectedProjectType}</b> is not an allowed use in {zone}; it would require a <b>Map Amendment (rezoning)</b> decided by City Council, not a ZBA variance.
                           </p>
-                          {isAduProjectType && <p className="cyp-p mt-1">{effectiveCompatibility.message}</p>}
-                          <div className="cyp-steps">
-                            <div className="cyp-sl">The path</div>
-                            <div className="cyp-stp"><span className="no">1</span><span><b>Map Amendment (rezoning) ordinance</b> — introduced in City Council and referred to the Committee on Zoning.</span></div>
-                            <div className="cyp-stp"><span className="no">2</span><span><b>Aldermanic support ({wardLabel})</b> is effectively required — rezonings rarely pass without it.</span></div>
-                            <div className="cyp-stp"><span className="no">3</span><span><b>Engage a zoning attorney</b> to draft, file, and shepherd the amendment — see below, we have the history for this ward.</span></div>
-                          </div>
-                        </div>
+                          {isAduProjectType && <p className="vp mt-1">{effectiveCompatibility.message}</p>}
+                          <ol className="kyp-path">
+                            <li><i>1</i><span><b>Map Amendment (rezoning) ordinance</b> — introduced in City Council and referred to the Committee on Zoning.</span></li>
+                            <li><i>2</i><span><b>Aldermanic support ({wardLabel})</b> is effectively required — rezonings rarely pass without it.</span></li>
+                            <li><i>3</i><span><b>Engage a zoning attorney</b> to draft, file, and shepherd the amendment — see below, we have the history for this ward.</span></li>
+                          </ol>
                       </div>
                     );
                   })()}
 
                   {/* ZBA History & Representation — collapsible, shown when zoning relief is needed */}
                   {requiresZoningChange && wardNumber && (
-                    <div id="print-section-zba" className="border border-border rounded-lg">
-                      <div
-                        className="px-4 py-3 cursor-pointer hover-elevate rounded-t-lg flex items-center justify-between gap-2"
+                    <div id="print-section-zba">
+                      <KypSubhead subsection={2}><span className="lbl">Who files in Ward {wardNumber}</span><span className="ct">last 5 years</span></KypSubhead>
+                      <button
+                        type="button"
+                        className="kyp-zba-toggle"
                         onClick={() => setZbaExpanded(!zbaExpanded)}
+                        aria-expanded={zbaExpanded}
+                        aria-controls={`zba-ward-panel-${wardNumber}`}
                         data-testid="trigger-zba-history"
                       >
-                        <div className="chead flex items-center gap-2">
-                          Zoning Change History & Representation (Last 5 Years)
-                        </div>
-                        <span className="text-muted-foreground text-sm">{zbaExpanded ? '\u25bc' : '\u25b6'}</span>
-                      </div>
+                        <span>Ward case records and representatives</span>
+                        <span aria-hidden="true">{zbaExpanded ? '▾' : '▸'}</span>
+                      </button>
                 {zbaExpanded && (
-                  <CardContent>
+                  <CardContent id={`zba-ward-panel-${wardNumber}`}>
                     {isLoadingZbaWard ? (
                       <div className="space-y-3">
                         <Skeleton className="h-6 w-2/3" />
                         <Skeleton className="h-32 w-full" />
                       </div>
                     ) : !zbaWardData?.indexBuilt ? (
-                      <div className="p-4 rounded-lg bg-secondary border border-border">
-                        <p className="text-sm text-muted-foreground">
-                          ZBA history index not built yet—run Refresh ZBA index from admin.
-                        </p>
-                      </div>
+                      <div className="kyp-status-empty unknown">Ward case history is not available right now. No filing outcome can be inferred.</div>
                     ) : zbaWardData.representatives.length > 0 ? (
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between gap-3 flex-wrap">
-                          <div className="zba-sub">
-                            Ward {wardNumber} · <b>{zbaWardData.totalCases} total cases</b> · {zbaWardData.selfRepCaseCount} self-represented
-                          </div>
+                        <div className="kyp-recgrid inline three">
+                          <div className="hi"><span className="k">Cases, 5 yrs</span><span className="v">{zbaWardData.totalCases}</span></div>
+                          <div><span className="k">In the {zbaTopReps.length} below</span><span className="v">{zbaTopCases}</span></div>
+                          <div><span className="k">Self-represented</span><span className="v">{zbaWardData.selfRepCaseCount}</span></div>
+                        </div>
+                        <div className="flex justify-end">
                           <div className="flex items-center gap-1 no-print" data-testid="zba-sort-toggle">
                             <span className="text-xs text-muted-foreground mr-1">Sort by</span>
                             <button
@@ -5097,53 +5144,42 @@ export default function RunDetail() {
                           </div>
                         </div>
 
-                        <div className="zba-note" data-testid="zba-denials-note">
-                          <b>Worth knowing as you read these columns:</b> ZBA denials are genuinely rare — most applications that would fail get withdrawn or continued instead of formally denied. So a rep with all approvals isn't unusual; the volume and recency columns tell you more than the denial count.
+                        <div className="kyp-note" data-testid="zba-denials-note">
+                          ZBA denials are rare; some applications are withdrawn, continued, or have no recorded outcome. <b>Other</b> includes all cases not recorded as approved.
                         </div>
 
                         <div className="overflow-x-auto">
-                          <table className="w-full text-sm" data-testid="zba-ward-table">
+                          <table className="kyp-dtab kyp-zba-table" data-testid="zba-ward-table">
                             <thead>
-                              <tr className="border-b">
-                                <th className="text-left py-2 px-2 liens-th">Representative</th>
-                                <th className="text-right py-2 px-1 liens-th">Total</th>
-                                <th className="text-right py-2 px-1 liens-th">Approved</th>
-                                <th className="text-right py-2 px-1 liens-th">Denied</th>
-                                <th className="text-right py-2 px-1 liens-th">Withdrawn</th>
-                                <th className="text-right py-2 px-1 liens-th">Last Case</th>
-                              </tr>
+                              <tr><th>Representative</th><th>Cases</th><th>Approved</th><th>Other</th><th>Last case</th></tr>
                             </thead>
                             <tbody>
-                              {sortZbaReps(zbaWardData.representatives).map((rep) => (
-                                <tr key={rep.representativeNorm} className="border-b hover:bg-muted">
-                                  <td className="py-2 px-2">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <span className="font-medium">{rep.representativeDisplay}</span>
-                                      {rep.isSelfRep && (
-                                        <Badge className="text-xs">Self-Rep</Badge>
-                                      )}
-                                      {!rep.isSelfRep && (
+                              {zbaTopReps.map((rep) => {
+                                const other = Math.max(0, rep.totalCases - rep.approvedCount);
+                                const unrecorded = Math.max(0, other - rep.deniedCount - rep.withdrawnCount);
+                                return (
+                                <tr key={rep.representativeNorm}>
+                                  <td>
+                                    <b>{rep.representativeDisplay}</b>
+                                    {rep.isSelfRep ? <span className="sm">Self-Rep</span> : (
                                         <a
                                           href={`https://www.iardc.org/Lawyer/Search?LastName=${encodeURIComponent(rep.representativeDisplay.split(' ').pop() || '')}&FirstName=${encodeURIComponent(rep.representativeDisplay.split(' ')[0] || '')}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="text-xs font-semibold underline text-[#2b3a9e]"
                                           onClick={(e) => e.stopPropagation()}
                                         >
                                           Check ARDC ↗
                                         </a>
-                                      )}
-                                    </div>
+                                    )}
                                   </td>
-                                  <td className="text-right py-2 px-1 font-medium tabular-nums">{rep.totalCases}</td>
-                                  <td className="text-right py-2 px-1 tabular-nums">{rep.approvedCount}</td>
-                                  <td className="text-right py-2 px-1 tabular-nums">{rep.deniedCount}</td>
-                                  <td className="text-right py-2 px-1 tabular-nums">{rep.withdrawnCount}</td>
-                                  <td className="text-right py-2 px-1 text-muted-foreground text-xs tabular-nums">
-                                    {rep.mostRecentCaseDate || '—'}
+                                  <td>{rep.totalCases}</td>
+                                  <td>{rep.approvedCount}</td>
+                                  <td>{other || '—'}{other > 0 && <span className="sm">{[rep.withdrawnCount && `${rep.withdrawnCount} withdrawn`, rep.deniedCount && `${rep.deniedCount} denied`, unrecorded && `${unrecorded} unrecorded`].filter(Boolean).join(' · ')}</span>}</td>
+                                  <td>
+                                    {rep.mostRecentCaseDate || '—'}{isZbaLastFiledOld(rep.mostRecentCaseDate) && <span className="vd">Over 2 years ago</span>}
                                   </td>
                                 </tr>
-                              ))}
+                              );})}
                             </tbody>
                           </table>
                         </div>
@@ -5155,48 +5191,35 @@ export default function RunDetail() {
                               Citywide · <b>{zbaCityData.totalCases} total cases</b> · {zbaCityData.selfRepCaseCount} self-represented
                             </div>
                             <div className="overflow-x-auto">
-                              <table className="w-full text-sm" data-testid="zba-city-table">
+                              <table className="kyp-dtab kyp-zba-table" data-testid="zba-city-table">
                                 <thead>
-                                  <tr className="border-b">
-                                    <th className="text-left py-2 px-2 liens-th">Representative</th>
-                                    <th className="text-right py-2 px-1 liens-th">Total</th>
-                                    <th className="text-right py-2 px-1 liens-th">Approved</th>
-                                    <th className="text-right py-2 px-1 liens-th">Denied</th>
-                                    <th className="text-right py-2 px-1 liens-th">Withdrawn</th>
-                                    <th className="text-right py-2 px-1 liens-th">Last Case</th>
-                                  </tr>
+                                  <tr><th>Representative</th><th>Cases</th><th>Approved</th><th>Other</th><th>Last case</th></tr>
                                 </thead>
                                 <tbody>
-                                  {sortZbaReps(zbaCityData.representatives).map((rep) => (
-                                    <tr key={rep.representativeNorm} className="border-b hover:bg-muted">
-                                      <td className="py-2 px-2">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                          <span className="font-medium">{rep.representativeDisplay}</span>
-                                          {rep.isSelfRep && (
-                                            <Badge className="text-xs">Self-Rep</Badge>
-                                          )}
-                                          {!rep.isSelfRep && (
+                                  {sortZbaReps(zbaCityData.representatives).map((rep) => {
+                                    const other = Math.max(0, rep.totalCases - rep.approvedCount);
+                                    const unrecorded = Math.max(0, other - rep.deniedCount - rep.withdrawnCount);
+                                    return (
+                                    <tr key={rep.representativeNorm}>
+                                      <td>
+                                        <b>{rep.representativeDisplay}</b>
+                                        {rep.isSelfRep ? <span className="sm">Self-Rep</span> : (
                                             <a
                                               href={`https://www.iardc.org/Lawyer/Search?LastName=${encodeURIComponent(rep.representativeDisplay.split(' ').pop() || '')}&FirstName=${encodeURIComponent(rep.representativeDisplay.split(' ')[0] || '')}`}
                                               target="_blank"
                                               rel="noopener noreferrer"
-                                              className="text-xs font-semibold underline text-[#2b3a9e]"
                                               onClick={(e) => e.stopPropagation()}
                                             >
                                               Check ARDC ↗
                                             </a>
-                                          )}
-                                        </div>
+                                        )}
                                       </td>
-                                      <td className="text-right py-2 px-1 font-medium tabular-nums">{rep.totalCases}</td>
-                                      <td className="text-right py-2 px-1 tabular-nums">{rep.approvedCount}</td>
-                                      <td className="text-right py-2 px-1 tabular-nums">{rep.deniedCount}</td>
-                                      <td className="text-right py-2 px-1 tabular-nums">{rep.withdrawnCount}</td>
-                                      <td className="text-right py-2 px-1 text-muted-foreground text-xs tabular-nums">
-                                        {rep.mostRecentCaseDate || '—'}
-                                      </td>
+                                      <td>{rep.totalCases}</td>
+                                      <td>{rep.approvedCount}</td>
+                                      <td>{other || '—'}{other > 0 && <span className="sm">{[rep.withdrawnCount && `${rep.withdrawnCount} withdrawn`, rep.deniedCount && `${rep.deniedCount} denied`, unrecorded && `${unrecorded} unrecorded`].filter(Boolean).join(' · ')}</span>}</td>
+                                      <td>{rep.mostRecentCaseDate || '—'}{isZbaLastFiledOld(rep.mostRecentCaseDate) && <span className="vd">Over 2 years ago</span>}</td>
                                     </tr>
-                                  ))}
+                                  );})}
                                 </tbody>
                               </table>
                             </div>
@@ -5204,7 +5227,7 @@ export default function RunDetail() {
                         )}
 
                         <p className="cmp-src mt-4">
-                          Public ZBA resolutions{wardNumber ? `, Ward ${wardNumber}` : ''} (last 5 years). Counts are factual public records — <b className="text-[#565651] font-semibold">not endorsements, rankings, or predictions of outcome</b>. Sorted by {zbaSort === 'latest' ? 'most recent case' : 'case volume'}. Click "Check ARDC" to verify an attorney's license status on IARDC.
+                          Public ZBA resolutions, Ward {wardNumber} (last 5 years). Top {zbaTopReps.length} of {zbaWardData.totalRepresentatives} representatives shown. Other includes withdrawn, denied, and unrecorded outcomes (including continued cases). Counts are factual public records — <b className="text-[#565651] font-semibold">not endorsements, rankings, or predictions of outcome</b>. Sorted by {zbaSort === 'latest' ? 'most recent case' : 'case volume'}. Click "Check ARDC" to verify an attorney's license status on IARDC.
                         </p>
                       </div>
                     ) : (
@@ -5236,23 +5259,21 @@ export default function RunDetail() {
                       }
                     };
                     return (
-                      <div className="cyp-scan cursor-pointer" data-testid="concept-scan" onClick={goToCompetitors} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToCompetitors(); } }}>
-                        <span className="big">{halfMileCount}</span>
-                        <div>
-                          <div className="l"><Search />Concept scan · "{conceptLabel}"</div>
-                          <span className="st"><b>{conceptLabel}</b> within ½ mile — the specific concept{confirmedFreeform ? <>, not just "{selectedProjectType}" broadly</> : null}.</span>
-                          <div className="hint">Nearby-competition scan · Google Maps · sharpened by your concept{!confirmedFreeform ? ' — add a concept above to narrow it' : ''}</div>
+                      <>
+                        <KypSubhead subsection={requiresZoningChange ? 3 : 2}><span className="lbl">Competition</span><span className="ct screen-only" data-testid="link-concept-to-competitors">Nearby Competitors ↓</span></KypSubhead>
+                        <div className="kyp-recgrid inline three cursor-pointer" data-testid="concept-scan" onClick={goToCompetitors} role="button" tabIndex={0} aria-label={`View nearby competitors for ${conceptLabel}`} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToCompetitors(); } }}>
+                          <div className="hi"><span className="k">{conceptLabel}</span><span className="v">{halfMileCount}</span></div>
+                          <div><span className="k">Radius</span><span className="v">½ mi</span></div>
+                          <div><span className="k">Source</span><span className="v">Google Maps</span></div>
                         </div>
-                        <span className="see screen-only" data-testid="link-concept-to-competitors">Nearby Competitors ↓</span>
-                      </div>
+                      </>
                     );
                   })()}
 
                   {/* Tailoring hook — one source feeding Insight Report + valuation */}
                   {selectedProjectType && (
-                    <div className="cyp-tie" data-testid="tie-note">
-                      <FileText />
-                      <span>This use selection also <b>tailors your Insight Report</b> and sets the <b>valuation calculator's mode</b>.</span>
+                    <div className="kyp-note" data-testid="tie-note">
+                      This use selection also <b>tailors your Insight Report</b> and sets the <b>valuation calculator's mode</b>.
                     </div>
                   )}
                 </div>
@@ -15450,16 +15471,9 @@ export default function RunDetail() {
 
           <AccordionSection {...accProps("permits")}>
             <div id="print-section-permits" className="space-y-5">
-              {coParcelAddress && (
-                <div className="records-banner flex items-center gap-2">
-                  <Info className="w-3.5 h-3.5 shrink-0" />
-                  <span>Showing permits and violations for <span className="font-medium text-foreground">{run?.address?.split(',')[0].toUpperCase()}</span> (primary) and <span className="font-medium text-foreground">{coParcelAddress}</span> (co-parcel)</span>
-                </div>
-              )}
-
               {/* ---- A. Permit History ---- */}
               <div id="dob-permits">
-                <KypSubhead subsection={permitSubsections.history}>
+                <KypSubhead className="first" subsection={permitSubsections.history}>
                   <span className="lbl">Permit History</span>
                   {dobDerived && dobDerived.allPermits.length > 0 && (
                     <span className="ct" data-testid="badge-dob-count">{dobDerived.allPermits.length}{dobDerived.permitYears ? ` · ${dobDerived.permitYears.earliest}–${dobDerived.permitYears.latest}` : ''}</span>

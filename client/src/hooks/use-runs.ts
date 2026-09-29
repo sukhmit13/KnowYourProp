@@ -2210,6 +2210,7 @@ export interface ZbaSummaryResponse {
   representatives: RepresentativeSummary[];
   totalCases: number;
   totalRepresentatives: number;
+  selfRepCaseCount: number;
   indexBuilt: boolean;
 }
 
@@ -2224,7 +2225,7 @@ export function useZbaWardSummary(ward: number | null | undefined) {
       });
       if (res.status === 503) {
         const data = await res.json();
-        return { representatives: [], totalCases: 0, totalRepresentatives: 0, indexBuilt: false };
+        return { representatives: [], totalCases: 0, totalRepresentatives: 0, selfRepCaseCount: 0, indexBuilt: false };
       }
       if (!res.ok) throw new Error('Failed to fetch ZBA ward summary');
       return await res.json();
@@ -2243,7 +2244,7 @@ export function useZbaCitySummary(enabled: boolean = true) {
         credentials: "include",
       });
       if (res.status === 503) {
-        return { representatives: [], totalCases: 0, totalRepresentatives: 0, indexBuilt: false };
+        return { representatives: [], totalCases: 0, totalRepresentatives: 0, selfRepCaseCount: 0, indexBuilt: false };
       }
       if (!res.ok) throw new Error('Failed to fetch ZBA city summary');
       return await res.json();

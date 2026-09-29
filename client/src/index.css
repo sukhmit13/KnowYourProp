@@ -2240,40 +2240,6 @@ a.cmp-nm{text-decoration:underline}
 .cyp-upd{background:#2b3a9e;color:#fff;border:1px solid #2b3a9e;border-radius:9px;padding:9px 18px;font-size:12.5px;font-weight:600;margin-top:19px;cursor:pointer}
 .cyp-upd:hover{background:#22307f}
 @media (max-width:860px){.cyp-upd{margin-top:0;width:100%}}
-.cyp-verdict{border-radius:13px;padding:18px 20px;display:flex;gap:15px;align-items:flex-start}
-.cyp-verdict.ok{background:#e9f4ec;border:1px solid #cfe6d6}
-.cyp-verdict.bad{background:#fbeeee;border:1px solid #ecc9c4}
-.cyp-badge{width:44px;height:44px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff}
-.cyp-verdict.ok .cyp-badge{border:1px solid #cfe6d6;color:#2f7d3f}
-.cyp-verdict.bad .cyp-badge{border:1px solid #ecc9c4;color:#c0392b}
-.cyp-badge svg{width:24px;height:24px}
-.cyp-vbd{flex:1;min-width:0}
-.cyp-k{font-family:var(--font-jbmono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
-.cyp-verdict.ok .cyp-k{color:#2f7d3f}.cyp-verdict.bad .cyp-k{color:#c0392b}
-.cyp-h{font-family:"Instrument Serif",Georgia,serif;font-size:24px;color:#141414;line-height:1.05;margin-bottom:7px}
-.cyp-p{font-size:12.5px;color:#54544f;line-height:1.55}
-.cyp-p b{color:#141414;font-weight:600}
-.cyp-conds{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
-.cyp-cond{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#54544f;background:#fff;border:1px solid var(--sb-line);border-radius:7px;padding:5px 10px}
-.cyp-cond svg{width:11px;height:11px;color:#2f7d3f;flex:none}
-.cyp-cond.info svg{color:#2b3a9e}
-.cyp-cond.watch{color:#96600a;border-color:#e6cfa0}.cyp-cond.watch svg{color:#96600a}
-.cyp-steps{margin-top:13px;background:#fff;border:1px solid #ecc9c4;border-radius:10px;padding:12px 14px}
-.cyp-sl{font-family:var(--font-jbmono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#c0392b;margin-bottom:9px}
-.cyp-stp{display:flex;gap:10px;font-size:12px;color:#54544f;line-height:1.45;padding:5px 0}
-.cyp-stp .no{width:17px;height:17px;border-radius:5px;background:#fbeeee;border:1px solid #ecc9c4;color:#c0392b;font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
-.cyp-stp b{color:#141414;font-weight:600}
-.cyp-scan{background:#faf9f6;border:1px solid var(--sb-line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:13px;margin-top:14px}
-.cyp-scan .big{font-family:"Instrument Serif",Georgia,serif;font-size:34px;color:#2b3a9e;line-height:1;flex:none}
-.cyp-scan .l{font-family:var(--font-jbmono);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#8b8a84;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.cyp-scan .l svg{width:12px;height:12px;color:#2b3a9e}
-.cyp-scan .st{font-size:11.5px;color:#54544f;line-height:1.45}.cyp-scan .st b{color:#141414;font-weight:600}
-.cyp-scan .hint{font-size:9.5px;color:#8b8a84;margin-top:4px}
-.cyp-scan .see{margin-left:auto;flex:none;font-size:11.5px;font-weight:600;color:#2b3a9e;white-space:nowrap}
-.cyp-scan:hover .see{text-decoration:underline}
-.cyp-tie{display:flex;align-items:center;gap:9px;background:#eef0fb;border:1px solid #dfe3f7;border-radius:10px;padding:11px 14px;font-size:11.5px;color:#54544f;line-height:1.45;margin-top:12px}
-.cyp-tie svg{width:15px;height:15px;color:#2b3a9e;flex:none}
-.cyp-tie b{color:#141414;font-weight:600}
 
 /* ============================================================
    News & Media Coverage (site-specific) — spec-verbatim styles

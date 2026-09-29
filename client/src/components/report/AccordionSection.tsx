@@ -25,7 +25,7 @@ export function KypSubhead({ subsection, children, className, ...props }: KypSub
     : null;
 
   return (
-    <div {...props} className={["kyp-subhead", className].filter(Boolean).join(" ")}>
+    <div {...props} className={["kyp-subhead", subsection === 1 && "first", className].filter(Boolean).join(" ")}>
       {number && <span className="n">{number}</span>}
       {children}
     </div>
