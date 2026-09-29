@@ -1033,6 +1033,11 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-appeal-table td{vertical-align:top}
 .kyp-dtab td .why{display:block;font-weight:400;font-size:11.5px;color:var(--kyp-muted);margin-top:4px;line-height:1.45;max-width:46ch}
 .kyp-dtab td .sm{display:block;margin:4px 0 0;font-size:10px}
+.kyp-appeal-table th{color:var(--kyp-ink2);font-size:9px}
+.kyp-appeal-table td{border-bottom-color:var(--kyp-line)}
+.kyp-appeal-table td.base{color:var(--kyp-ink2)}
+.kyp-appeal-table td:first-child b{color:var(--kyp-indigo);font-family:var(--kyp-mono);font-size:12px}
+.kyp-appeal-table td .why,.kyp-appeal-table td .sm{color:var(--kyp-ink2);font-size:11.5px}
 .kyp-tax-statusline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
 .kyp-tax-status{display:inline-flex;align-items:center;border:1px solid var(--kyp-line);border-radius:6px;padding:4px 8px;font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--kyp-ink2)}
 .kyp-tax-status.current{color:var(--kyp-green);border-color:var(--kyp-green)}

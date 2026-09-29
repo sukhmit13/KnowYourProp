@@ -11683,7 +11683,6 @@ export default function RunDetail() {
                                     <b>TY{appeal.taxYear}</b>
                                     {appeal.appealReason && <span className="why">{appeal.appealReason}</span>}
                                     {appeal.changeReason && <span className="why">{appeal.changeReason}</span>}
-                                    {appeal.appealType && <span className="sm">{appeal.appealType}</span>}
                                   </td>
                                   <td>
                                     <b>{appeal.assessorTotalValue.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })}</b>
