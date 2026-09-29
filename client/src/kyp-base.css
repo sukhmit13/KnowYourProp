@@ -1021,20 +1021,19 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-vs .vr .d{text-align:right;font-family:var(--kyp-mono);font-size:11px;font-weight:700;color:var(--kyp-ink2)}
 .kyp-vs .vr .d s{text-decoration:none;display:block;font-weight:400;color:var(--kyp-muted);font-size:9.5px;margin-top:4px;letter-spacing:.03em}
 
-/* Ownership & Title: complete Recorder history, grouped without implying active debt. */
-.kyp-recorder-details{border:1px solid var(--kyp-line);border-radius:10px;background:var(--kyp-card);margin:12px 0 22px;overflow:hidden}
-.kyp-recorder-details summary{cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 16px;color:var(--kyp-ink);font-weight:700;list-style:none}
-.kyp-recorder-details summary::-webkit-details-marker{display:none}
-.kyp-recorder-details summary::before{content:"+";font-family:var(--kyp-mono);font-size:17px;color:var(--kyp-indigo);width:18px}
-.kyp-recorder-details[open] summary::before{content:"−"}
-.kyp-recorder-details summary span{margin-left:auto;font-family:var(--kyp-mono);font-size:10px;font-weight:600;color:var(--kyp-muted)}
-.kyp-recorder-details summary:focus-visible{outline:2px solid var(--kyp-indigo);outline-offset:-3px}
-.kyp-recorder-content{border-top:1px solid var(--kyp-line);padding:12px 16px 18px}
-.kyp-recorder-content p{font-size:12px;color:var(--kyp-ink2);margin:0 0 12px;line-height:1.5}
-.kyp-recorder-table{overflow-x:auto}
-.kyp-recorder-table .kyp-dtab{min-width:480px}
-.kyp-recorder-table a{color:var(--kyp-indigo);text-decoration:underline;text-underline-offset:2px}
-.kyp-recorder-table a:focus-visible{outline:2px solid var(--kyp-indigo);outline-offset:2px}
+/* Ownership & Title: disclosure uses the section's mono labels and record cards. */
+.kyp-ownership .kyp-recorder-details{border-top:1px solid var(--kyp-line);border-bottom:1px solid var(--kyp-line);margin:12px 0 22px}
+.kyp-ownership .kyp-recorder-details summary{cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 2px;list-style:none}
+.kyp-ownership .kyp-recorder-details summary::-webkit-details-marker{display:none}
+.kyp-ownership .kyp-recorder-details .kyp-recorder-label{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--kyp-indigo)}
+.kyp-ownership .kyp-recorder-details .kyp-recorder-count{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted);margin-left:auto;text-align:right}
+.kyp-ownership .kyp-recorder-details .kyp-recorder-chevron{font-family:var(--kyp-mono);font-size:18px;line-height:1;color:var(--kyp-indigo);transition:transform .15s}
+.kyp-ownership .kyp-recorder-details[open] .kyp-recorder-chevron{transform:rotate(180deg)}
+.kyp-ownership .kyp-recorder-details summary:focus-visible{outline:2px solid var(--kyp-indigo);outline-offset:2px}
+.kyp-ownership .kyp-recorder-content{padding:3px 0 16px}
+.kyp-ownership .kyp-recorder-content .kyp-method{margin:0 0 13px}
+.kyp-ownership .kyp-recorder-list .kyp-xact{margin-bottom:8px}
+.kyp-ownership .kyp-recorder-list .kyp-xact:last-child{margin-bottom:0}
 @media (max-width:760px){
   .kyp-recgrid.inline{grid-template-columns:1fr 1fr}
   .kyp-vs .vh,.kyp-vs .vr{grid-template-columns:1.05fr 1fr 1fr}

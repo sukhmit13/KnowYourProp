@@ -316,30 +316,29 @@ export function DocRef({ documentNumber, viewLink, recorderUrl, recordedDate, da
   );
 }
 
-function RecorderInstrumentTable({ documents, recorderSearchUrl, testId }: {
+function RecorderInstrumentList({ documents, recorderSearchUrl, testId, deeds = false }: {
   documents: any[];
   recorderSearchUrl: string | null;
   testId: string;
+  deeds?: boolean;
 }) {
   return (
-    <div className="kyp-recorder-table" data-testid={testId}>
-      <table className="kyp-dtab">
-        <thead><tr><th>Recorded</th><th>Instrument</th><th>Document</th></tr></thead>
-        <tbody>{documents.map((doc, index) => {
+    <div className="kyp-recorder-list" data-testid={testId}>
+      {documents.map((doc, index) => {
           const number = normalizedDocNumber(doc);
-          const link = recorderDocumentUrl(number, doc.viewLink, recorderSearchUrl);
           return (
-            <tr key={`${number}-${index}`}>
-              <td>{formatRecordedDate(doc.recordedDate || doc.recordingDate)}</td>
-              <td>{doc.documentType || "Type not recorded"}</td>
-              <td>{number ? link
-                ? <a href={link} target="_blank" rel="noopener noreferrer" title={`Open Recorder results and find document #${number}`}>#{number} ↗</a>
-                : `#${number}`
-                : "—"}</td>
-            </tr>
+            <div className="kyp-xact" key={`${number}-${index}`}>
+              <div className="xtop"><span className="xttl">{doc.documentType || "Recorded instrument"}</span></div>
+              {deeds && (doc.grantor || doc.grantee) && (
+                <div className="xgrid">
+                  <div className="xf"><span className="k">From</span><span className="v">{doc.grantor || "Not recorded"}</span></div>
+                  <div className="xf"><span className="k">To</span><span className="v">{doc.grantee || "Not recorded"}</span></div>
+                </div>
+              )}
+              <DocRef documentNumber={number || null} viewLink={doc.viewLink} recorderUrl={recorderSearchUrl} recordedDate={doc.recordedDate || doc.recordingDate} />
+            </div>
           );
-        })}</tbody>
-      </table>
+      })}
     </div>
   );
 }
@@ -709,12 +708,12 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         </div>
       ))}
       <details className="kyp-recorder-details" data-testid="ownership-deed-history">
-        <summary>Deed history <span>{lienData?.searchFailed ? "Search incomplete" : `${deedInstruments.length} recorded instrument${deedInstruments.length === 1 ? "" : "s"}`}</span></summary>
+        <summary><span className="kyp-recorder-label">Deed history</span><span className="kyp-recorder-count">{lienData?.searchFailed ? "Search incomplete" : `${deedInstruments.length} recorded instrument${deedInstruments.length === 1 ? "" : "s"}`}</span><span className="kyp-recorder-chevron" aria-hidden="true">⌄</span></summary>
         <div className="kyp-recorder-content">
-          <p>Every deed returned for this PIN, including transfers that are not qualifying sales. Document links open the Recorder results; find the listed number there because direct document links expire.</p>
+          <div className="kyp-method">Every deed returned for this PIN, including transfers that are not qualifying sales. Document links open Recorder results; locate the listed number there because direct document links expire.</div>
           {lienData?.searchFailed && <div className="kyp-status-empty unknown">The Recorder search failed; this history may be incomplete.</div>}
           {deedInstruments.length > 0
-            ? <RecorderInstrumentTable documents={deedInstruments} recorderSearchUrl={recorderSearchUrl} testId="ownership-deed-documents" />
+            ? <RecorderInstrumentList documents={deedInstruments} recorderSearchUrl={recorderSearchUrl} testId="ownership-deed-documents" deeds />
             : <div className="kyp-status-empty unknown">{isLoadingLiens ? "Deed records are loading." : "No deed instruments were returned for this PIN."}</div>}
         </div>
       </details>
@@ -872,12 +871,12 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         <span className="rule" />
       </KypSubhead>
       <details className="kyp-recorder-details" data-testid="ownership-other-instruments">
-        <summary>View complete non-deed index <span>{otherInstruments.length} record{otherInstruments.length === 1 ? "" : "s"}</span></summary>
+        <summary><span className="kyp-recorder-label">View complete non-deed index</span><span className="kyp-recorder-count">{otherInstruments.length} record{otherInstruments.length === 1 ? "" : "s"}</span><span className="kyp-recorder-chevron" aria-hidden="true">⌄</span></summary>
         <div className="kyp-recorder-content">
-          <p>Mortgages, releases, modifications, and other filings returned for this PIN. An index entry alone does not establish current debt or title status. Document links open the Recorder results by PIN.</p>
+          <div className="kyp-method">Mortgages, releases, modifications, and other filings returned for this PIN. An index entry alone does not establish current debt or title status. Document links open Recorder results by PIN.</div>
           {lienData?.searchFailed && <div className="kyp-status-empty unknown">The Recorder search failed; this index may be incomplete.</div>}
           {otherInstruments.length > 0
-            ? <RecorderInstrumentTable documents={otherInstruments} recorderSearchUrl={recorderSearchUrl} testId="ownership-recorder-index" />
+            ? <RecorderInstrumentList documents={otherInstruments} recorderSearchUrl={recorderSearchUrl} testId="ownership-recorder-index" />
             : <div className="kyp-status-empty unknown">{isLoadingLiens ? "Recorder instruments are loading." : "No other Recorder instruments were returned for this PIN."}</div>}
         </div>
       </details>
