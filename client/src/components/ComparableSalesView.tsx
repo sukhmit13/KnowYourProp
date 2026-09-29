@@ -44,6 +44,11 @@ interface CompsData {
   marketAnalysis: MarketAnalysis;
   searchParams: { radiusMiles: number; monthsBack: number; propertyClass: string };
   totalCandidates: number;
+  rawSalesCount: number;
+  matchedCharacteristics: number;
+  geocodedSalesCount: number;
+  nearbySalesCount: number;
+  error: string | null;
 }
 
 function fmt(n: number): string {
@@ -225,6 +230,7 @@ export function ComparableSalesView({ compsData, isLoading, subjectSqft }: Props
 
   const { comparables, marketAnalysis, searchParams, totalCandidates } = compsData;
   const displayComps = showAll ? comparables : comparables.slice(0, 5);
+  const suppressIndicatedValue = marketAnalysis.confidence === 'Low' || searchParams.radiusMiles > 1.5;
 
   return (
     <div className="space-y-3 pt-1">
@@ -239,42 +245,64 @@ export function ComparableSalesView({ compsData, isLoading, subjectSqft }: Props
           </span>
         </div>
 
-        {marketAnalysis.estimatedValue ? (
-          <>
-            <div className="cmp-stats">
-              <div>
-                <div className="cmp-st-l">Indicated Value</div>
-                <div className="cmp-st-n" data-testid="text-comps-indicated-value">
-                  {fmtFull(marketAnalysis.estimatedValue)}
-                </div>
-                <div className="cmp-st-s">median $/sqft × subject sqft</div>
-              </div>
-              {marketAnalysis.medianSalePrice && (
-                <div>
-                  <div className="cmp-st-l">Median Sale Price</div>
-                  <div className="cmp-st-n">{fmt(marketAnalysis.medianSalePrice)}</div>
-                </div>
-              )}
-              {marketAnalysis.medianPricePerSqft && (
-                <div>
-                  <div className="cmp-st-l">Median $/Sqft</div>
-                  <div className="cmp-st-n">${marketAnalysis.medianPricePerSqft}</div>
-                </div>
+        {(marketAnalysis.estimatedValue || marketAnalysis.medianSalePrice || marketAnalysis.medianPricePerSqft) && (
+          <div className="cmp-stats">
+            <div>
+              {suppressIndicatedValue ? (
+                <>
+                  <div className="cmp-st-l">Indicated Value</div>
+                  <div className="cmp-st-s">No value estimate — comps are {searchParams.radiusMiles} mi out, too far to support one.</div>
+                </>
+              ) : marketAnalysis.estimatedValue ? (
+                <>
+                  <div className="cmp-st-l">Indicated Value</div>
+                  <div className="cmp-st-n" data-testid="text-comps-indicated-value">
+                    {fmtFull(marketAnalysis.estimatedValue)}
+                  </div>
+                  <div className="cmp-st-s">median $/sqft × subject sqft</div>
+                </>
+              ) : (
+                <>
+                  <div className="cmp-st-l">Indicated Value</div>
+                  <div className="cmp-st-s">Insufficient data for a value estimate — sqft data unavailable for comps.</div>
+                </>
               )}
             </div>
-            {marketAnalysis.priceRange && (
-              <div className="cmp-range">
-                Range: {fmt(marketAnalysis.priceRange.low)} – {fmt(marketAnalysis.priceRange.high)}
-                {' · '}{searchParams.radiusMiles} mi radius · last {searchParams.monthsBack} months · {totalCandidates} total nearby sales
+            {marketAnalysis.medianSalePrice && (
+              <div>
+                <div className="cmp-st-l">Median Sale Price</div>
+                <div className="cmp-st-n">{fmt(marketAnalysis.medianSalePrice)}</div>
               </div>
             )}
-          </>
-        ) : (
+            {marketAnalysis.medianPricePerSqft && (
+              <div>
+                <div className="cmp-st-l">Median $/Sqft</div>
+                <div className="cmp-st-n">${marketAnalysis.medianPricePerSqft}</div>
+              </div>
+            )}
+          </div>
+        )}
+        {marketAnalysis.priceRange && (
+          <div className="cmp-range">
+            Range: {fmt(marketAnalysis.priceRange.low)} – {fmt(marketAnalysis.priceRange.high)}
+            {' · '}{searchParams.radiusMiles} mi radius · last {searchParams.monthsBack} months · {totalCandidates} total nearby sales
+          </div>
+        )}
+        {compsData.error ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <AlertTriangle className="w-4 h-4" />
-            {marketAnalysis.basedOnComps === 0
-              ? `No sales found within ${searchParams.radiusMiles} mi for class ${searchParams.propertyClass} in the last ${searchParams.monthsBack} months.`
-              : 'Insufficient data for a value estimate — sqft data unavailable for comps.'}
+            {compsData.error}
+          </div>
+        ) : marketAnalysis.basedOnComps === 0 && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <AlertTriangle className="w-4 h-4" />
+            {compsData.rawSalesCount === 0
+              ? `No sales of class ${searchParams.propertyClass} were returned in the countywide recent-sales query for the last ${searchParams.monthsBack} months. This does not confirm that none occurred near this address.`
+              : compsData.matchedCharacteristics === 0
+                ? `${compsData.rawSalesCount} countywide class ${searchParams.propertyClass} sales were returned in the recent-sales sample, but the county characteristics file has no record for them. Their distance from this address cannot be confirmed; this affects commercial and recently-assessed parcels.`
+                : compsData.geocodedSalesCount === 0
+                  ? `${compsData.rawSalesCount} countywide candidate sales were returned; characteristics matched ${compsData.matchedCharacteristics}, but none had usable coordinates to establish proximity to this address.`
+                  : `None of the ${compsData.geocodedSalesCount} geocoded sales among ${compsData.rawSalesCount} countywide class ${searchParams.propertyClass} candidates in the recent-sales sample fell within ${searchParams.radiusMiles} mi. Sales outside the sample or without usable characteristics cannot be ruled out.`}
           </div>
         )}
       </div>
@@ -318,7 +346,7 @@ export function ComparableSalesView({ compsData, isLoading, subjectSqft }: Props
         </div>
       )}
 
-      {comparables.length === 0 && marketAnalysis.basedOnComps === 0 && (
+      {comparables.length === 0 && marketAnalysis.basedOnComps === 0 && !compsData.error && (
         <div className="text-center py-6 text-muted-foreground text-sm">
           <Home className="w-8 h-8 mx-auto mb-2 opacity-40" />
           <p>No comparable sales found within the search parameters.</p>

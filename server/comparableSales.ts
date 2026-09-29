@@ -36,6 +36,11 @@ export interface CompsResult {
   marketAnalysis: MarketAnalysis;
   searchParams: { radiusMiles: number; monthsBack: number; propertyClass: string };
   totalCandidates: number;
+  rawSalesCount: number; // Countywide rows in the recent-sales candidate sample (query limit applies).
+  matchedCharacteristics: number; // Unique PINs in that sample with a characteristics row.
+  geocodedSalesCount: number; // Candidate sales with matched characteristics and usable coordinates.
+  nearbySalesCount: number; // Geocoded candidate sales within the selected search radius.
+  error: string | null;
 }
 
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -50,7 +55,8 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
 
 function median(arr: number[]): number {
   const s = [...arr].sort((a, b) => a - b);
-  return s[Math.floor(s.length / 2)];
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 === 0 ? (s[mid - 1] + s[mid]) / 2 : s[mid];
 }
 
 async function soqlFetch(url: string): Promise<any[]> {
@@ -61,12 +67,17 @@ async function soqlFetch(url: string): Promise<any[]> {
   return data;
 }
 
-function emptyResult(propertyClass: string, radiusMiles: number, monthsBack: number): CompsResult {
+function emptyResult(propertyClass: string, radiusMiles: number, monthsBack: number, rawSalesCount = 0, matchedCharacteristics = 0, error: string | null = null): CompsResult {
   return {
     comparables: [],
     marketAnalysis: { estimatedValue: null, medianSalePrice: null, medianPricePerSqft: null, priceRange: null, basedOnComps: 0, confidence: 'None' },
     searchParams: { radiusMiles, monthsBack, propertyClass },
     totalCandidates: 0,
+    rawSalesCount,
+    matchedCharacteristics,
+    geocodedSalesCount: 0,
+    nearbySalesCount: 0,
+    error,
   };
 }
 
@@ -101,17 +112,19 @@ export async function getComparableSales(
     salesData = await soqlFetch(salesUrl);
   } catch (err) {
     console.error('[COMPS] Sales fetch error:', err);
-    return emptyResult(propertyClass, radiusMiles, monthsBack);
+    const message = err instanceof Error ? err.message : String(err);
+    return emptyResult(propertyClass, radiusMiles, monthsBack, 0, 0, `Sales data could not be retrieved: ${message}`);
   }
 
   console.log(`[COMPS] ${salesData.length} raw sales for class ${propertyClass}`);
 
-  if (salesData.length === 0) return emptyResult(propertyClass, radiusMiles, monthsBack);
+  if (salesData.length === 0) return emptyResult(propertyClass, radiusMiles, monthsBack, 0);
 
   const pins = [...new Set<string>(salesData.map((s: any) => s.pin))];
 
   const CHUNK = 80;
   const charsMap = new Map<string, any>();
+  let charsFetchError: string | null = null;
 
   for (let i = 0; i < pins.length; i += CHUNK) {
     const chunk = pins.slice(i, i + CHUNK);
@@ -125,6 +138,10 @@ export async function getComparableSales(
       }
     } catch (err) {
       console.error(`[COMPS] Chars chunk ${i} error:`, err);
+      if (!charsFetchError) {
+        const message = err instanceof Error ? err.message : String(err);
+        charsFetchError = `County characteristics could not be fully retrieved: ${message}`;
+      }
     }
   }
 
@@ -137,7 +154,7 @@ export async function getComparableSales(
     if (!c) continue;
     const compLat = parseFloat(c.centroid_y);
     const compLng = parseFloat(c.centroid_x);
-    if (isNaN(compLat) || isNaN(compLng)) continue;
+    if (!Number.isFinite(compLat) || !Number.isFinite(compLng)) continue;
     const dist = haversine(lat, lng, compLat, compLng);
     const compSqft = c.bldg_sf ? parseInt(c.bldg_sf) : null;
     const compBeds = c.beds ? parseInt(c.beds) : null;
@@ -233,6 +250,11 @@ export async function getComparableSales(
     },
     searchParams: { radiusMiles: searchRadius, monthsBack, propertyClass },
     totalCandidates: joined.length,
+    rawSalesCount: salesData.length,
+    matchedCharacteristics: charsMap.size,
+    geocodedSalesCount: candidates.length,
+    nearbySalesCount: candidates.filter(c => c._dist <= searchRadius).length,
+    error: charsFetchError,
   };
 
   compsCache.set(cacheKey, { data: result, ts: Date.now() });

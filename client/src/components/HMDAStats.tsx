@@ -9,11 +9,17 @@ import {
   Building2, TrendingUp, Users, DollarSign,
   ShieldAlert, CreditCard, BarChart3, Home, Landmark, Banknote
 } from "lucide-react";
-import type { HmdaStats, HmdaSubStats, HmdaBreakdownItem, HmdaLenderItem, HmdaData, HmdaCommunityRank } from "@/hooks/use-runs";
-import { useMortgageRate } from "@/hooks/use-runs";
+import type { HmdaStats, HmdaSubStats, HmdaBreakdownItem, HmdaLenderItem, HmdaData, HmdaCommunityRank, HmdaYear } from "@/hooks/use-runs";
+import { getHmdaYearRateForScope, useMortgageRate } from "@/hooks/use-runs";
 
-const YEARS = [2025, 2024] as const;
-type HmdaYear = typeof YEARS[number];
+const YEARS = [2025, 2024, 2023] as const;
+
+function availableHmdaYears(hmdaData: HmdaData | null | undefined): HmdaYear[] {
+  return YEARS.filter((year) => {
+    const data = hmdaData?.[year];
+    return !!(data?.community || data?.tract);
+  });
+}
 
 interface HMDAFinancingProps {
   hmdaData: HmdaData | null | undefined;
@@ -136,9 +142,9 @@ function MiniPieChart({ items, colorMap, fallbackColors, title, icon: Icon, note
   }));
 
   return (
-    <div className="hmda-card">
-      <div className="hmda-mhd"><Icon className="w-3.5 h-3.5" />{title}</div>
-      <div className="flex items-center gap-4">
+    <div className="kyp-mixcard">
+      <div className="mh"><Icon className="w-3.5 h-3.5" />{title}</div>
+      <div className="kyp-donut">
         <PieChart width={88} height={88}>
           <Pie data={data} cx={40} cy={40} innerRadius={24} outerRadius={40} paddingAngle={1.5} dataKey="pct" isAnimationActive={false} nameKey="label">
             {data.map((entry, i) => <Cell key={i} fill={entry.fill} stroke="none" />)}
@@ -149,12 +155,12 @@ function MiniPieChart({ items, colorMap, fallbackColors, title, icon: Icon, note
             itemStyle={{ margin: 0 }}
           />
         </PieChart>
-        <div className="space-y-1.5 flex-1 min-w-0">
+        <div className="dlegend">
           {data.map((entry) => (
-            <div key={entry.key} className="hmda-legrow">
-              <span className="hmda-d" style={{ backgroundColor: entry.fill }} />
-              <span className="truncate min-w-0">{entry.label}</span>
-              <span className="hmda-p">{entry.pct}%</span>
+            <div key={entry.key} className="kyp-mixrow">
+              <span className="sw" style={{ backgroundColor: entry.fill }} />
+              <span className="nm">{entry.label}</span>
+              <span className="pc">{entry.pct}%</span>
             </div>
           ))}
         </div>
@@ -177,14 +183,13 @@ function HmdaBarBlock({ items, ramp, title, icon: Icon, headNote, ranked = false
   const rows = ranked ? [...items].sort((a, b) => b.pct - a.pct) : items;
   const maxPct = Math.max(...rows.map(r => r.pct), 0.1);
   return (
-    <div className="hmda-card">
-      <div className="hmda-mhd"><Icon className="w-3.5 h-3.5" />{title}{headNote && <span className="hmda-mhd-note">· {headNote}</span>}</div>
-      <div className="hmda-bars">
+    <div className="kyp-mixcard">
+      <div className="mh"><Icon className="w-3.5 h-3.5" />{title}{headNote && <span className="note"> · {headNote}</span>}</div>
+      <div>
         {rows.map((item, i) => (
-          <div key={item.key} className="hmda-brow">
-            <span className="hmda-bl">{item.label}</span>
-            <span className="hmda-bt"><span style={{ width: item.pct > 0 ? `${Math.max((item.pct / maxPct) * 100, 2)}%` : '0%', background: ramp[Math.min(i, ramp.length - 1)] }} /></span>
-            <span className="hmda-bv">{item.pct}%</span>
+          <div key={item.key} className={`kyp-hbar${ranked ? '' : ' ind'}`}>
+            <span className="hl"><i className="tick ind" />{item.label}</span>
+            <span className="htrack"><i style={{ width: item.pct > 0 ? `${Math.max((item.pct / maxPct) * 100, 2)}%` : '0%', background: ranked ? 'var(--kyp-indigoL)' : ramp[Math.min(i, ramp.length - 1)] }}><span className="hbar-count">{item.pct}%</span></i></span>
           </div>
         ))}
       </div>
@@ -215,13 +220,10 @@ function LenderTable({ lenders, view = 'all' }: { lenders: HmdaLenderItem[]; vie
     const barWidth = view === 'all' ? Math.round((l.pct / maxBar) * 100) : Math.round((metric / maxVal) * 100);
     const label = view === 'all' ? `${l.pct}% (${l.count})` : `${metric} ${view === 'closed' ? 'closed' : 'denied'}`;
     return (
-      <div key={l.lei} className="hmda-lrow" data-testid={`row-hmda-lender-${l.lei}`}>
-        <span className="hmda-nm">{l.name}</span>
-        <span className="hmda-rt">
-          {hasRates ? (l.avgFirstLienRate ? `${l.avgFirstLienRate.toFixed(2)}%` : '—') : ''}
-        </span>
-        <span className="hmda-lbt"><span style={{ width: metric > 0 ? `${Math.max(barWidth, 2)}%` : '0%' }} /></span>
-        <span className="hmda-shr">{label}</span>
+      <div key={l.lei} className="kyp-hbar wide" data-testid={`row-hmda-lender-${l.lei}`}>
+        <span className="hl" title={l.name}><i className="tick ind" />{l.name}</span>
+        {hasRates && <span style={{ width: 52, flex: 'none', fontSize: 10, color: 'var(--kyp-muted)', textAlign: 'right' }}>{l.avgFirstLienRate ? `${l.avgFirstLienRate.toFixed(2)}%` : '—'}</span>}
+        <span className="htrack"><i className="ind" style={{ width: metric > 0 ? `${Math.max(barWidth, 2)}%` : '0%' }}><span className="hbar-count">{label}</span></i></span>
       </div>
     );
   };
@@ -230,7 +232,7 @@ function LenderTable({ lenders, view = 'all' }: { lenders: HmdaLenderItem[]; vie
     <div>
       {sorted.slice(0, 10).map(renderRow)}
       {sorted.length > 10 && (
-        <div className="hmda-lscroll" data-testid="scroll-hmda-lenders">
+        <div data-testid="scroll-hmda-lenders">
           {sorted.slice(10).map(renderRow)}
         </div>
       )}
@@ -254,43 +256,46 @@ function StatsPanel({ stats, label, view = 'all', onViewChange }: { stats: HmdaS
   return (
     <div className="space-y-5">
       {/* Summary stat boxes — clickable view switchers */}
-      <div className="hmda-kpis">
+      <div className="kyp-blocks">
         <button
+          type="button"
           onClick={() => onViewChange?.('all')}
-          className={`hmda-kpi ${onViewChange ? 'cursor-pointer' : 'cursor-default'} ${view === 'all' ? 'hmda-kpi-on' : ''}`}
+          className="kyp-block ind text-left border-0 cursor-pointer"
           data-testid="stat-hmda-total"
         >
-          <div className="hmda-kpi-n">{stats.total.toLocaleString()}</div>
-          <div className="hmda-kpi-l">All Applications</div>
+          <div className="bv">{stats.total.toLocaleString()}</div>
+          <div className="bl">All Applications</div>
         </button>
         <button
+          type="button"
           onClick={() => onViewChange?.('closed')}
-          className={`hmda-kpi ${onViewChange ? 'cursor-pointer' : 'cursor-default'} ${view === 'closed' ? 'hmda-kpi-on' : ''}`}
+          className="kyp-block grn text-left border-0 cursor-pointer"
           data-testid="stat-hmda-originated"
         >
-          <div className="hmda-kpi-n">{closedCount.toLocaleString()}</div>
-          <div className="hmda-kpi-l">Originated · {closedPct}%</div>
+          <div className="bv">{closedCount.toLocaleString()}</div>
+          <div className="bl">Originated · {closedPct}%</div>
         </button>
         <button
+          type="button"
           onClick={() => onViewChange?.('denied')}
-          className={`hmda-kpi ${onViewChange ? 'cursor-pointer' : 'cursor-default'} ${view === 'denied' ? 'hmda-kpi-on' : ''}`}
+          className="kyp-block slate text-left border-0 cursor-pointer"
           data-testid="stat-hmda-denied"
         >
-          <div className="hmda-kpi-n">{deniedCount.toLocaleString()}</div>
-          <div className="hmda-kpi-l">Denied · {deniedPct}%</div>
+          <div className="bv">{deniedCount.toLocaleString()}</div>
+          <div className="bl">Denied · {deniedPct}%</div>
         </button>
       </div>
 
       {/* ALL view */}
       {view === 'all' && (
         <>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="kyp-mix">
             <MiniPieChart items={[fha, conventional, va].filter(Boolean) as HmdaBreakdownItem[]} colorMap={LOAN_TYPE_HEX} title="Loan Type" icon={Home} />
             <MiniPieChart items={[principalRes, investment].filter(Boolean) as HmdaBreakdownItem[]} colorMap={OCCUPANCY_HEX} title="Occupancy" icon={Building2} />
           </div>
 
           {((stats.byProductType?.length ?? 0) > 0 || (stats.byDwellingCategory?.length ?? 0) > 0) && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="kyp-mix">
               {(stats.byProductType?.length ?? 0) > 0 && (
                 <MiniPieChart items={stats.byProductType} colorMap={PRODUCT_TYPE_HEX} title="Loan Product Type" icon={BarChart3} />
               )}
@@ -301,7 +306,7 @@ function StatsPanel({ stats, label, view = 'all', onViewChange }: { stats: HmdaS
           )}
 
           {((stats.byPropertyValueBin?.length ?? 0) > 0 || (stats.byDenialReason?.length ?? 0) > 0) && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="kyp-mix">
               {(stats.byPropertyValueBin?.length ?? 0) > 0 && (
                 <HmdaBarBlock items={stats.byPropertyValueBin} ramp={PROP_VALUE_RAMP} title="Property Value" icon={DollarSign} headNote="distribution" />
               )}
@@ -312,8 +317,8 @@ function StatsPanel({ stats, label, view = 'all', onViewChange }: { stats: HmdaS
           )}
 
           {(stats.byLender?.length ?? 0) > 0 && (
-            <div className="hmda-card" id="hmda-lenders">
-              <div className="hmda-clbl">Active Lenders · top by application volume</div>
+            <div className="kyp-mixcard" id="hmda-lenders">
+              <div className="mh">Active Lenders · top by application volume</div>
               <LenderTable lenders={stats.byLender} view="all" />
             </div>
           )}
@@ -332,7 +337,7 @@ function StatsPanel({ stats, label, view = 'all', onViewChange }: { stats: HmdaS
             const origInv = orig.byOccupancy?.find(a => a.key === '3');
             return (
               <>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="kyp-mix">
                   {[origFha, origConv, origVa].filter(Boolean).length > 0 && (
                     <MiniPieChart items={[origFha, origConv, origVa].filter(Boolean) as HmdaBreakdownItem[]} colorMap={LOAN_TYPE_HEX} title="Loan Type" icon={Home} />
                   )}
@@ -342,7 +347,7 @@ function StatsPanel({ stats, label, view = 'all', onViewChange }: { stats: HmdaS
                 </div>
 
                 {(orig.byProductType?.length || orig.byDwellingCategory?.length) ? (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="kyp-mix">
                     {orig.byProductType && orig.byProductType.length > 0 && (
                       <MiniPieChart items={orig.byProductType} colorMap={PRODUCT_TYPE_HEX} title="Loan Product Type" icon={BarChart3} />
                     )}
@@ -353,7 +358,7 @@ function StatsPanel({ stats, label, view = 'all', onViewChange }: { stats: HmdaS
                 ) : null}
 
                 {orig.byPropertyValueBin && orig.byPropertyValueBin.length > 0 && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="kyp-mix">
                     <HmdaBarBlock items={orig.byPropertyValueBin} ramp={PROP_VALUE_RAMP} title="Property Value at Origination" icon={DollarSign} headNote="distribution" />
                   </div>
                 )}
@@ -364,8 +369,8 @@ function StatsPanel({ stats, label, view = 'all', onViewChange }: { stats: HmdaS
           })()}
 
           {(stats.byLender?.length ?? 0) > 0 && (
-            <div className="hmda-card">
-              <div className="hmda-clbl">Active Lenders · ranked by loans originated</div>
+            <div className="kyp-mixcard">
+              <div className="mh">Active Lenders · ranked by loans originated</div>
               <LenderTable lenders={stats.byLender} view="closed" />
             </div>
           )}
@@ -381,7 +386,7 @@ function StatsPanel({ stats, label, view = 'all', onViewChange }: { stats: HmdaS
             const deniedInv = denied.byOccupancy?.find(a => a.key === '3');
             return (
               <>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="kyp-mix">
                   {(deniedPri || deniedInv) && (
                     <MiniPieChart items={[deniedPri, deniedInv].filter(Boolean) as HmdaBreakdownItem[]} colorMap={OCCUPANCY_HEX} title="Occupancy of Denied Apps" icon={Building2} />
                   )}
@@ -396,8 +401,8 @@ function StatsPanel({ stats, label, view = 'all', onViewChange }: { stats: HmdaS
           })()}
 
           {(stats.byLender?.length ?? 0) > 0 && (
-            <div className="hmda-card">
-              <div className="hmda-clbl">Active Lenders · ranked by applications denied</div>
+            <div className="kyp-mixcard">
+              <div className="mh">Active Lenders · ranked by applications denied</div>
               <LenderTable lenders={stats.byLender} view="denied" />
             </div>
           )}
@@ -425,7 +430,7 @@ function DemographicsPanel({ sub, colorPrefix, year, showDemographics = true }: 
   return (
     <div className="space-y-4">
       {showDemographics && (sub.bySex?.length || sub.byRace?.length) ? (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="kyp-mix">
           {sub.bySex && sub.bySex.length > 0 && (
             <MiniPieChart items={sub.bySex} colorMap={SEX_HEX} title="Sex / Gender" icon={Users} note="Joint = co-applicants of different sex." />
           )}
@@ -436,7 +441,7 @@ function DemographicsPanel({ sub, colorPrefix, year, showDemographics = true }: 
       ) : null}
 
       {showDemographics && (sub.byEthnicity?.length || sortedAge.length) ? (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="kyp-mix">
           {sub.byEthnicity && sub.byEthnicity.length > 0 && (
             <MiniPieChart items={sub.byEthnicity.filter(e => e.label !== 'Ethnicity Not Available' && e.label !== 'Free Form Text Only')} colorMap={ETHNICITY_HEX} title="Ethnicity" icon={Users} />
           )}
@@ -447,7 +452,7 @@ function DemographicsPanel({ sub, colorPrefix, year, showDemographics = true }: 
       ) : null}
 
       {showDemographics && (sub.byIncomeBin?.length || sub.byDti?.length) ? (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="kyp-mix">
           {sub.byIncomeBin && sub.byIncomeBin.length > 0 && (
             <MiniPieChart items={sub.byIncomeBin} fallbackColors={incomeColors} title="Income" icon={Banknote} />
           )}
@@ -475,18 +480,17 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
   const [scope, setScope] = useState<'community' | 'tract'>('community');
   const [view, setView] = useState<BuyerView>('all');
 
-  const yearData = hmdaData?.[year];
+  const availableYears = availableHmdaYears(hmdaData);
+  const activeYear = availableYears.includes(year) ? year : availableYears[0] ?? year;
+  const yearData = hmdaData?.[activeYear];
   const hasCommunity = !!yearData?.community;
   const hasTract = !!yearData?.tract;
   const stats = scope === 'community' ? (yearData?.community ?? yearData?.tract) : (yearData?.tract ?? yearData?.community);
 
-  const has2024 = !!(hmdaData?.[2024]?.community || hmdaData?.[2024]?.tract);
-  const has2025 = !!(hmdaData?.[2025]?.community || hmdaData?.[2025]?.tract);
-
   if (!stats) return null;
 
-  const originatedAction = stats.byAction.find(a => a.key === '1');
-  const deniedAction = stats.byAction.find(a => a.key === '3');
+  const originatedAction = stats.byAction.find((a: HmdaBreakdownItem) => a.key === '1');
+  const deniedAction = stats.byAction.find((a: HmdaBreakdownItem) => a.key === '3');
   const closedCount = originatedAction?.count ?? 0;
   const closedPct = originatedAction?.pct ?? 0;
   const deniedCount = deniedAction?.count ?? 0;
@@ -508,32 +512,32 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
       {/* Year + scope controls */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         {hasCommunity && hasTract ? (
-          <div className="hmda-seg">
+          <div className="kyp-seg">
             <button
               onClick={() => setScope('community')}
-              className={scope === 'community' ? 'hmda-seg-on' : ''}
+              className={scope === 'community' ? 'on' : ''}
               data-testid="button-hmda-buyer-scope-community"
             >
               {communityArea || 'Community Area'}
             </button>
             <button
               onClick={() => setScope('tract')}
-              className={scope === 'tract' ? 'hmda-seg-on' : ''}
+              className={scope === 'tract' ? 'on' : ''}
               data-testid="button-hmda-buyer-scope-tract"
             >
               Census Tract {tractGeoid?.slice(-6)}
             </button>
           </div>
         ) : (
-          <span className="text-xs text-muted-foreground">{stats.total.toLocaleString()} applications in {year}</span>
+          <span className="text-xs text-muted-foreground">{stats.total.toLocaleString()} applications in {activeYear}</span>
         )}
-        {has2024 && has2025 && (
-          <div className="hmda-seg ml-auto">
-            {YEARS.map(y => (
+        {availableYears.length > 1 && (
+          <div className="kyp-seg ml-auto">
+            {availableYears.map(y => (
               <button
                 key={y}
                 onClick={() => setYear(y)}
-                className={year === y ? 'hmda-seg-on' : ''}
+                className={activeYear === y ? 'on' : ''}
                 data-testid={`button-hmda-buyer-year-${y}`}
               >
                 {y}
@@ -544,43 +548,46 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
       </div>
 
       {/* Clickable stat boxes as view switcher */}
-      <div className="hmda-kpis">
+      <div className="kyp-blocks">
         <button
+          type="button"
           onClick={() => setView('all')}
-          className={`hmda-kpi cursor-pointer ${view === 'all' ? 'hmda-kpi-on' : ''}`}
+          className="kyp-block ind text-left border-0 cursor-pointer"
           data-testid="button-hmda-buyer-view-all"
         >
-          <div className="hmda-kpi-n">{stats.total.toLocaleString()}</div>
-          <div className="hmda-kpi-l">All Applications</div>
+          <div className="bv">{stats.total.toLocaleString()}</div>
+          <div className="bl">All Applications</div>
         </button>
         <button
+          type="button"
           onClick={() => setView('closed')}
-          className={`hmda-kpi cursor-pointer ${view === 'closed' ? 'hmda-kpi-on' : ''}`}
+          className="kyp-block grn text-left border-0 cursor-pointer"
           data-testid="button-hmda-buyer-view-closed"
         >
-          <div className="hmda-kpi-n">{closedCount.toLocaleString()}</div>
-          <div className="hmda-kpi-l">Originated · {closedPct}%</div>
+          <div className="bv">{closedCount.toLocaleString()}</div>
+          <div className="bl">Originated · {closedPct}%</div>
         </button>
         <button
+          type="button"
           onClick={() => setView('denied')}
-          className={`hmda-kpi cursor-pointer ${view === 'denied' ? 'hmda-kpi-on' : ''}`}
+          className="kyp-block slate text-left border-0 cursor-pointer"
           data-testid="button-hmda-buyer-view-denied"
         >
-          <div className="hmda-kpi-n">{deniedCount.toLocaleString()}</div>
-          <div className="hmda-kpi-l">Denied · {deniedPct}%</div>
+          <div className="bv">{deniedCount.toLocaleString()}</div>
+          <div className="bl">Denied · {deniedPct}%</div>
         </button>
       </div>
 
       {/* Demographics panel */}
-      {view === 'all' && <DemographicsPanel sub={allSubStats} year={year} />}
+      {view === 'all' && <DemographicsPanel sub={allSubStats} year={activeYear} />}
       {view === 'closed' && stats.originated && (
-        <DemographicsPanel sub={stats.originated} year={year} />
+        <DemographicsPanel sub={stats.originated} year={activeYear} />
       )}
       {view === 'closed' && !stats.originated && (
         <p className="text-sm text-muted-foreground py-2">Breakdown not available.</p>
       )}
       {view === 'denied' && stats.denied && (
-        <DemographicsPanel sub={stats.denied} colorPrefix="red" year={year} />
+        <DemographicsPanel sub={stats.denied} colorPrefix="red" year={activeYear} />
       )}
       {view === 'denied' && !stats.denied && (
         <p className="text-sm text-muted-foreground py-2">Breakdown not available.</p>
@@ -588,8 +595,8 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
 
       {/* Lender table */}
       {(stats.byLender?.length ?? 0) > 0 && (
-        <div className="hmda-card">
-          <div className="hmda-clbl">
+        <div className="kyp-mixcard">
+          <div className="mh">
             Active Lenders · {view === 'closed' ? 'ranked by loans originated' : view === 'denied' ? 'ranked by applications denied' : 'top by application volume'}
           </div>
           <LenderTable lenders={stats.byLender} view={view === 'denied' ? 'denied' : view === 'closed' ? 'closed' : 'all'} />
@@ -616,13 +623,13 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
     );
   }
 
-  const yearData = hmdaData?.[year];
+  const availableYears = availableHmdaYears(hmdaData);
+  const activeYear = availableYears.includes(year) ? year : availableYears[0] ?? year;
+  const yearData = hmdaData?.[activeYear];
   const tractStats = yearData?.tract ?? null;
   const communityStats = yearData?.community ?? null;
   const hasCommunity = !!communityStats;
   const hasTract = !!tractStats;
-  const has2024 = !!(hmdaData?.[2024]?.tract || hmdaData?.[2024]?.community);
-  const has2025 = !!(hmdaData?.[2025]?.tract || hmdaData?.[2025]?.community);
 
   if (!hasCommunity && !hasTract && !isLoading && hmdaData !== undefined) {
     return (
@@ -634,37 +641,39 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
 
   if (!hmdaData && !isLoading) return null;
 
-  const activeStats = scope === 'community' ? communityStats : tractStats;
-
+  const activeScope = scope === 'community'
+    ? (communityStats ? 'community' : 'tract')
+    : (tractStats ? 'tract' : 'community');
+  const activeStats = activeScope === 'community' ? communityStats : tractStats;
   return (
         <div className="pl-6 pb-2 space-y-4">
           {/* Scope + year controls */}
           <div className="flex items-center justify-between flex-wrap gap-2">
             {hasCommunity && hasTract && (
-              <div className="hmda-seg">
+              <div className="kyp-seg">
                 <button
                   onClick={() => setScope('community')}
-                  className={scope === 'community' ? 'hmda-seg-on' : ''}
+                  className={scope === 'community' ? 'on' : ''}
                   data-testid="button-hmda-scope-community"
                 >
                   {communityArea || 'Community Area'}
                 </button>
                 <button
                   onClick={() => setScope('tract')}
-                  className={scope === 'tract' ? 'hmda-seg-on' : ''}
+                  className={scope === 'tract' ? 'on' : ''}
                   data-testid="button-hmda-scope-tract"
                 >
                   Census Tract {tractGeoid?.slice(-6)}
                 </button>
               </div>
             )}
-            {has2024 && has2025 && (
-              <div className="hmda-seg ml-auto">
-                {YEARS.map(y => (
+            {availableYears.length > 1 && (
+              <div className="kyp-seg ml-auto">
+                {availableYears.map(y => (
                   <button
                     key={y}
                     onClick={() => setYear(y)}
-                    className={year === y ? 'hmda-seg-on' : ''}
+                    className={activeYear === y ? 'on' : ''}
                     data-testid={`button-hmda-year-${y}`}
                   >
                     {y}
@@ -683,58 +692,71 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
               rank ? `#${rank} of ${outOf}` : '—';
             const trendIcon = (curr: number | null, prev: number | null) => {
               if (!curr || !prev) return null;
-              if (curr < prev) return <span className="hmda-up ml-1">▲</span>;
-              if (curr > prev) return <span className="hmda-dn ml-1">▼</span>;
+              if (curr < prev) return <span className="up ml-1">▲</span>;
+              if (curr > prev) return <span className="dn ml-1">▼</span>;
               return null;
             };
             return (
-              <div className="hmda-card">
-                <div className="hmda-clbl">
+              <div className="kyp-rankcard">
+                <div className="rl">
                   City Ranking — {communityArea || 'Community Area'} vs. 77 Community Areas
                 </div>
-                <div className="hmda-rankgrid">
+                <div className="kyp-rankgrid">
                   <span />
-                  <span className="hmda-h">2025</span>
-                  <span className="hmda-h">2024</span>
+                  <span className="h">2025</span>
+                  <span className="h">2024</span>
 
-                  <span className="hmda-lb">Applications</span>
-                  <span className="hmda-v">
+                  <span className="k">Applications</span>
+                  <span className="v">
                     {rankLabel(r2024?.byTotal.rank ?? null, r2024?.byTotal.outOf ?? 77)}
                     {trendIcon(r2024?.byTotal.rank ?? null, r2023?.byTotal.rank ?? null)}
                   </span>
-                  <span className="hmda-v hmda-v-old">
+                  <span className="v prior">
                     {rankLabel(r2023?.byTotal.rank ?? null, r2023?.byTotal.outOf ?? 77)}
                   </span>
 
-                  <span className="hmda-lb">Closed Loans</span>
-                  <span className="hmda-v">
+                  <span className="k">Closed Loans</span>
+                  <span className="v">
                     {rankLabel(r2024?.byOriginated.rank ?? null, r2024?.byOriginated.outOf ?? 77)}
                     {trendIcon(r2024?.byOriginated.rank ?? null, r2023?.byOriginated.rank ?? null)}
                   </span>
-                  <span className="hmda-v hmda-v-old">
+                  <span className="v prior">
                     {rankLabel(r2023?.byOriginated.rank ?? null, r2023?.byOriginated.outOf ?? 77)}
                   </span>
                 </div>
-                <div className="hmda-ranknote"><span className="hmda-up">▲</span> improved rank vs. prior year · <span className="hmda-dn">▼</span> declined</div>
+                <div className="kyp-rankfoot"><span className="up">▲</span> improved rank vs. prior year · <span className="dn">▼</span> declined</div>
               </div>
             );
           })()}
 
           {/* Avg Interest Rate Block */}
           {(() => {
-            const rates = (hmdaData as any)?.rates as { tract: any; community: any } | undefined;
-            if (!rates) return null;
-            const rateSource = rates.tract || rates.community;
-            if (!rateSource) return null;
-            const yearKey = `y${year}` as 'y2025' | 'y2024';
-            const rYear = (rates.tract?.[yearKey] || rates.community?.[yearKey]) as { avgFirstLienRate: number | null; firstLienRateCount: number } | null | undefined;
-            const rCombined = rateSource;
-            const r = rYear || rCombined;
-            if (!r?.avgFirstLienRate) return null;
-            const isYearSpecific = !!rYear?.avgFirstLienRate;
-            const locationLabel = rates.tract ? 'this census tract' : 'this community area';
-            const areaRate = r.avgFirstLienRate!;
-            const yearLabel = isYearSpecific ? `${year}` : '2024–2025';
+            const r = getHmdaYearRateForScope(hmdaData?.rates, activeScope, activeYear);
+            const locationLabel = activeScope === 'tract'
+              ? `Census Tract ${tractGeoid?.slice(-6) || 'selected'}`
+              : `Community Area ${communityArea || 'selected'}`;
+            const yearLabel = `${activeYear}`;
+            if (
+              typeof r?.avgFirstLienRate !== 'number' ||
+              !Number.isFinite(r.avgFirstLienRate) ||
+              r.avgFirstLienRate <= 0 ||
+              r.firstLienRateCount <= 0
+            ) {
+              return (
+                <div className="kyp-ratecmp" data-testid="hmda-ratecard">
+                  <div className="rh">Avg Interest Rate — {activeYear} Closed First-Lien Loans</div>
+                  <div className="side">
+                    <span className="lab">Selected scope · {locationLabel}</span>
+                    <span className="v" data-testid={`stat-hmda-avg-rate-${activeYear}`}>Not available</span>
+                    <span className="s" data-testid="hmda-rate-unavailable">
+                      Year-specific first-lien rates are not available for {locationLabel} in {activeYear}. No other year or combined average is substituted.
+                    </span>
+                  </div>
+                  <div className="fine">Includes conventional, FHA, and VA first-lien originations reported in HMDA. Excludes HELOCs and second mortgages.</div>
+                </div>
+              );
+            }
+            const areaRate = r.avgFirstLienRate;
 
             // Today's rate — same react-query cache entry the valuation calculator uses (Freddie Mac PMMS 30-yr
             // via FRED, percent units). Fail closed: no fresh benchmark → no comparison, fall back to simple card.
@@ -748,17 +770,17 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
 
             if (!todayInfo) {
               return (
-                <div className="hmda-card">
-                  <div className="hmda-clbl">
-                    Avg Interest Rate — {isYearSpecific ? `${year} Closed First-Lien Loans` : 'Closed First-Lien Loans (2024–2025)'}
+                <div className="kyp-ratecmp">
+                  <div className="rh">
+                    Avg Interest Rate — {activeYear} Closed First-Lien Loans
                   </div>
-                  <div className="hmda-rate">
-                    <span className="hmda-rate-n" data-testid={`stat-hmda-avg-rate-${year}`}>{areaRate.toFixed(3)}%</span>
-                    <span className="hmda-rate-x">
+                  <div className="side">
+                    <span className="v" data-testid={`stat-hmda-avg-rate-${activeYear}`}>{areaRate.toFixed(3)}%</span>
+                    <span className="s">
                       avg rate across {r.firstLienRateCount.toLocaleString()} closed first-lien loans in {locationLabel}
                     </span>
                   </div>
-                  <div className="hmda-ratenote">Includes conventional, FHA, and VA first-lien originations reported in HMDA. Excludes HELOCs and second mortgages.</div>
+                  <div className="fine">Includes conventional, FHA, and VA first-lien originations reported in HMDA. Excludes HELOCs and second mortgages.</div>
                 </div>
               );
             }
@@ -779,34 +801,29 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
                   ? <><b>Loans here closed just below today's market.</b> The {yearLabel} average (a full-year blend of conventional, FHA and VA first-lien loans) is about {bps} bps under the current 30-year benchmark — so a buyer financing now would likely pay a touch more than recent closings here.</>
                   : <><b>Loans here closed just above today's market.</b> The {yearLabel} average (a full-year blend of conventional, FHA and VA first-lien loans) is about {bps} bps over the current 30-year benchmark — so a buyer financing now would likely pay a bit less than recent closings here.</>;
             return (
-              <div className="ratecard" data-testid="hmda-ratecard">
-                <div className="rchd">
+              <div className="kyp-ratecmp" data-testid="hmda-ratecard">
+                <div className="rh">
                   <svg viewBox="0 0 24 24" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                   Interest rates — this area vs. today
                 </div>
-                <div className="rccmp">
-                  <div className="rcside area">
-                    <span className="lab"><span className="d"></span>This area · {yearLabel} closed</span>
-                    <div className="val" data-testid={`stat-hmda-avg-rate-${year}`}>{areaRate.toFixed(2)}%</div>
-                    <div className="sub">Avg across {r.firstLienRateCount.toLocaleString()} closed first-lien loans in {locationLabel}</div>
+                <div className="cmp">
+                  <div className="side">
+                    <span className="lab">This area · {yearLabel} closed</span>
+                    <div className="v" data-testid={`stat-hmda-avg-rate-${activeYear}`}>{areaRate.toFixed(2)}%</div>
+                    <div className="s">Avg across {r.firstLienRateCount.toLocaleString()} closed first-lien loans in {locationLabel}</div>
                   </div>
-                  <div className={`rcdelta${isCaution ? ' caution' : ''}`} data-testid="hmda-rate-delta">
-                    <div className="ar">
-                      <svg viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        {inLine || higher ? <><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></> : <><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></>}
-                      </svg>
-                    </div>
+                  <div className="delta" data-testid="hmda-rate-delta">
                     <div className="amt">{signedDelta} pts</div>
                     <div className="lbl">{inLine ? <>in line<br/>today</> : <>{higher ? 'higher' : 'lower'}<br/>today</>}</div>
                   </div>
-                  <div className="rcside today">
-                    <span className="lab"><span className="d"></span>Today · market benchmark</span>
-                    <div className="val" data-testid="hmda-rate-today">{todayInfo.rate.toFixed(2)}%</div>
-                    <div className="sub">30-yr fixed · <b>Freddie Mac PMMS</b>, as of {todayInfo.asOfLabel}</div>
+                  <div className="side today">
+                    <span className="lab">Today · market benchmark</span>
+                    <div className="v" data-testid="hmda-rate-today">{todayInfo.rate.toFixed(2)}%</div>
+                    <div className="s">30-yr fixed · <b>Freddie Mac PMMS</b>, as of {todayInfo.asOfLabel}</div>
                   </div>
                 </div>
-                <div className="rcexplain">{explain}</div>
-                <div className="rcfine">HMDA first-lien originations only · excludes HELOCs and second mortgages. Today's benchmark is a national 30-yr snapshot, not a local quote.</div>
+                <div className="kyp-body">{explain}</div>
+                <div className="fine">HMDA first-lien originations only · excludes HELOCs and second mortgages. Today's benchmark is a national 30-yr snapshot, not a local quote.</div>
               </div>
             );
           })()}

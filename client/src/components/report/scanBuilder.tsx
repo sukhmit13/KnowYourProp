@@ -39,7 +39,7 @@ export interface ScanCtx {
   crimeTakeaway?: { headline?: string | null } | null;
   crimeTractData?: { violent?: { saferThanPercent?: number }; trend?: { yoyPercent?: number }; saferThanPercent?: number } | null;
   hmdaTakeaway?: { headline?: string | null } | null;
-  compsData?: { sales?: unknown[] } | null;
+  compsData?: { comparables?: unknown[] } | null;
   effectiveCompatibility?: { permission?: "permitted" | "special_use" | string } | null;
   assemblage?: { common_control?: "exact" | "likely" | "unclear" } | null;
   incMeta?: { counts?: { likely?: number; confirm?: number; na?: number } } | null;
@@ -117,7 +117,7 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
   if (ctx.debtSnap?.takeaway?.title) dyn.debt = { takeaway: mdEmph(ctx.debtSnap.takeaway.title) };
 
   // 6 · Local Market — HMDA takeaway headline + comps count hero
-  const comps = ctx.compsData?.sales?.length;
+  const comps = ctx.compsData?.comparables?.length;
   if (ctx.hmdaTakeaway?.headline || comps) dyn.market = {
     takeaway: mdEmph(ctx.hmdaTakeaway?.headline),
     hero: comps ? { value: String(comps), label: "comps" } : undefined,

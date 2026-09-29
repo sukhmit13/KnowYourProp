@@ -25,3 +25,9 @@ description: Field names, API behaviors, and pitfalls for Chicago Data Portal da
 - **Quotes in WHERE**: `city='CHICAGO'` works; `city = 'CHICAGO'` (with spaces) also works
 
 **Why:** These were discovered through HTTP 400 failures. Invalid ordering, escaping, or even one nonexistent selected field causes the whole dataset request to fail rather than omitting that field.
+
+## Cook County sale/parcel neighborhood joins
+The parcel-sales feed exposes neighborhood identifiers with a township prefix; the parcel-universe feed exposes the neighborhood's short numeric identifier separately from its township name. Probe both live feeds before changing a ZIP-to-sales join, and do not compare their raw neighborhood strings directly.
+
+**Why:** A citywide sales query timed out, while a superficially successful ZIP-level join could otherwise yield all-zero charts by silently mismatching the two identifiers.
+**How to apply:** For sales trends or comparable-sales geography changes, verify the actual identifiers and filter to the requested ZIP before computing counts or prices. Treat undocumented assessor class codes as unknown rather than guessing their housing category.

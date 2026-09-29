@@ -1147,3 +1147,253 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
   .kyp-checkbar{align-items:flex-start;flex-direction:column}
   .kyp-recgrid.inline.three{grid-template-columns:1fr}
 }
+
+/* ============================================================
+   Step 24 — Mortgage & Lending Market
+   Append-only design-system components for HMDA, SBA and market
+   activity panels.
+   ============================================================ */
+
+/* --- 1. Segmented control (scope + year) ------------------- */
+.kyp-segrow {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap; margin: 4px 0 16px;
+}
+.kyp-segrow .spacer { margin-left: auto; }
+.kyp-seg {
+  display: inline-flex; padding: 3px; gap: 2px;
+  background: var(--kyp-wash); border-radius: 9px;
+}
+.kyp-seg button {
+  font-family: var(--kyp-mono); font-size: 10.5px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  padding: 7px 13px; border: 0; border-radius: 7px; cursor: pointer;
+  background: transparent; color: var(--kyp-ink2);
+}
+.kyp-seg button:hover { color: var(--kyp-ink); }
+.kyp-seg button.on { background: var(--kyp-indigo); color: #fff; }
+
+/* --- 2. Scope caveat above scoped figures ------------------ */
+.kyp-scopenote {
+  font-family: var(--kyp-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--kyp-muted); margin: 0 0 9px;
+}
+.kyp-scopenote b { color: var(--kyp-indigo); font-weight: 700; }
+
+/* --- 3. City ranking grid ---------------------------------- */
+.kyp-rankcard {
+  border: 1px solid var(--kyp-line); border-radius: 12px;
+  padding: 15px 17px; margin: 14px 0;
+}
+.kyp-rankcard .rl {
+  font-family: var(--kyp-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--kyp-ink2); margin-bottom: 11px;
+}
+.kyp-rankgrid {
+  display: grid; grid-template-columns: 1fr auto auto;
+  gap: 7px 22px; align-items: baseline;
+}
+.kyp-rankgrid .h {
+  font-family: var(--kyp-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .05em; color: var(--kyp-muted); text-align: right;
+}
+.kyp-rankgrid .k { font-size: 13px; color: var(--kyp-ink); }
+.kyp-rankgrid .v {
+  font-family: var(--kyp-disp); font-size: 21px; line-height: 1;
+  color: var(--kyp-ink); text-align: right; white-space: nowrap;
+}
+.kyp-rankgrid .v.prior { font-size: 15px; color: var(--kyp-muted); }
+.kyp-rankgrid .v .up { color: var(--kyp-green); font-size: 12px; margin-left: 4px; }
+.kyp-rankgrid .v .dn { color: var(--kyp-bad); font-size: 12px; margin-left: 4px; }
+.kyp-rankfoot {
+  font-size: 10.5px; color: var(--kyp-muted); margin-top: 10px;
+  padding-top: 9px; border-top: 1px solid var(--kyp-line);
+}
+.kyp-rankfoot .up { color: var(--kyp-green); }
+.kyp-rankfoot .dn { color: var(--kyp-bad); }
+
+/* --- 4. Rate comparison ------------------------------------ */
+.kyp-ratecmp {
+  border: 1px solid var(--kyp-line); border-radius: 12px;
+  padding: 16px 18px; margin: 14px 0;
+}
+.kyp-ratecmp .rh {
+  font-family: var(--kyp-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--kyp-ink2); margin-bottom: 14px;
+}
+.kyp-ratecmp .cmp {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 16px; align-items: center;
+}
+.kyp-ratecmp .side .lab {
+  font-family: var(--kyp-mono); font-size: 9px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  color: var(--kyp-muted); display: block; margin-bottom: 6px;
+}
+.kyp-ratecmp .side .v {
+  font-family: var(--kyp-disp); font-size: 38px; line-height: .95;
+  color: var(--kyp-ink);
+}
+.kyp-ratecmp .side.today .v { color: var(--kyp-indigo); }
+.kyp-ratecmp .side .s {
+  font-size: 10.5px; color: var(--kyp-muted); margin-top: 5px; line-height: 1.35;
+}
+.kyp-ratecmp .side.today { text-align: right; }
+.kyp-ratecmp .delta { text-align: center; }
+.kyp-ratecmp .delta .amt {
+  font-family: var(--kyp-mono); font-size: 13px; font-weight: 700;
+  color: var(--kyp-ink);
+}
+.kyp-ratecmp .delta .lbl {
+  font-family: var(--kyp-mono); font-size: 8.5px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  color: var(--kyp-muted); margin-top: 3px; line-height: 1.3;
+}
+.kyp-ratecmp .fine {
+  font-size: 10px; color: var(--kyp-muted); margin-top: 13px;
+  padding-top: 11px; border-top: 1px solid var(--kyp-line); line-height: 1.45;
+}
+
+/* --- 5. Mix grid (donuts / distributions) ------------------ */
+.kyp-mix { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin: 12px 0; }
+.kyp-mixcard {
+  border: 1px solid var(--kyp-line); border-radius: 11px; padding: 13px 15px;
+}
+.kyp-mixcard .mh {
+  font-family: var(--kyp-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--kyp-ink2); margin-bottom: 11px;
+}
+.kyp-mixcard .mh .note { font-weight: 400; color: var(--kyp-muted); letter-spacing: .02em; }
+.kyp-mixrow {
+  display: flex; align-items: center; gap: 9px; padding: 4px 0; font-size: 12.5px;
+}
+.kyp-mixrow .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.kyp-mixrow .nm {
+  color: var(--kyp-ink); flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.kyp-mixrow .pc {
+  font-family: var(--kyp-mono); font-size: 12px; font-weight: 700;
+  color: var(--kyp-ink); flex: none;
+}
+
+/* --- 6. SBA borrower rows ---------------------------------- */
+.kyp-loanrow {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 11px 0; border-bottom: 1px solid var(--kyp-line);
+}
+.kyp-loanrow:last-of-type { border-bottom: 0; }
+.kyp-loanrow .lmain { flex: 1; min-width: 0; }
+.kyp-loanrow .lnm {
+  font-size: 13.5px; font-weight: 600; color: var(--kyp-ink);
+  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.kyp-loanrow a.lnm { color: var(--kyp-indigo); text-decoration: none; }
+.kyp-loanrow a.lnm:hover { text-decoration: underline; }
+.kyp-loanrow .lmeta {
+  font-size: 11.5px; color: var(--kyp-ink2); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.kyp-loanrow .lvia {
+  font-family: var(--kyp-mono); font-size: 10px; color: var(--kyp-muted); margin-top: 3px;
+}
+.kyp-loanrow .lright { text-align: right; flex: none; }
+.kyp-loanrow .lamt {
+  font-family: var(--kyp-disp); font-size: 21px; line-height: 1; color: var(--kyp-ink);
+}
+.kyp-loanrow .laux {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 7px; margin-top: 5px;
+}
+.kyp-loanrow .ljobs {
+  font-family: var(--kyp-mono); font-size: 9.5px; font-weight: 700;
+  padding: 2px 6px; border-radius: 4px;
+  background: var(--kyp-indigoSoft); color: var(--kyp-indigo);
+}
+.kyp-loanrow .ldate {
+  font-family: var(--kyp-mono); font-size: 10px; color: var(--kyp-muted);
+}
+
+/* --- 7. Transaction-trends grouped bar chart --------------- */
+.kyp-ttchart { display: flex; gap: 11px; margin: 12px 0 6px; }
+.kyp-ttchart .yax {
+  display: flex; flex-direction: column; justify-content: space-between;
+  height: 190px; text-align: right; flex: none;
+  font-family: var(--kyp-mono); font-size: 9.5px; color: var(--kyp-muted);
+}
+.kyp-ttchart .plot { flex: 1; min-width: 0; }
+.kyp-ttchart .area {
+  position: relative; height: 190px;
+  border-bottom: 1px solid var(--kyp-ink);
+  display: flex; align-items: flex-end; justify-content: space-around; gap: 6px;
+}
+.kyp-ttchart .area .grid {
+  position: absolute; left: 0; right: 0; height: 1px;
+  background: var(--kyp-line); pointer-events: none;
+}
+.kyp-ttchart .grp {
+  display: flex; align-items: flex-end; gap: 3px;
+  flex: 1; height: 100%; justify-content: center;
+}
+.kyp-ttchart .grp i { display: block; width: 15px; border-radius: 3px 3px 0 0; }
+.kyp-ttchart .xlab {
+  display: flex; justify-content: space-around; margin-top: 7px;
+  font-family: var(--kyp-mono); font-size: 10px; font-weight: 700; color: var(--kyp-ink2);
+}
+.kyp-ttchart .xlab span { flex: 1; text-align: center; }
+.kyp-ttlegend {
+  display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0;
+  font-family: var(--kyp-mono); font-size: 10px; color: var(--kyp-ink2);
+}
+.kyp-ttlegend span { display: inline-flex; align-items: center; gap: 6px; }
+.kyp-ttlegend i { width: 9px; height: 9px; border-radius: 2px; display: block; }
+
+/* --- 8. Median-price row (most recent year) ---------------- */
+.kyp-medrow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0; }
+.kyp-medcard {
+  border: 1px solid var(--kyp-line); border-radius: 11px; padding: 12px 13px;
+}
+.kyp-medcard .ml {
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--kyp-mono); font-size: 9px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--kyp-ink2);
+}
+.kyp-medcard .ml i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.kyp-medcard .mv {
+  font-family: var(--kyp-disp); font-size: 25px; line-height: 1;
+  color: var(--kyp-ink); margin-top: 8px;
+}
+.kyp-medcard .ms { font-size: 10.5px; color: var(--kyp-muted); margin-top: 4px; }
+.kyp-medcard.empty .mv { color: var(--kyp-muted); }
+
+/* --- 9. Empty state ---------------------------------------- */
+.kyp-emptypanel {
+  border: 1px dashed var(--kyp-line); border-radius: 12px;
+  padding: 22px 20px; margin: 12px 0; text-align: center;
+}
+.kyp-emptypanel .et {
+  font-family: var(--kyp-mono); font-size: 10.5px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--kyp-ink2);
+}
+.kyp-emptypanel .es { font-size: 12px; color: var(--kyp-muted); margin-top: 7px; }
+
+@media (max-width: 720px) {
+  .kyp-mix,
+  .kyp-medrow { grid-template-columns: 1fr; }
+  .kyp-ratecmp .cmp { grid-template-columns: 1fr; }
+  .kyp-ratecmp .side.today { text-align: left; }
+}
+
+/* --- 10. Donut + legend ------------------------------------ */
+.kyp-donut { display: flex; align-items: center; gap: 16px; }
+.kyp-donut svg,
+.kyp-donut .recharts-wrapper { flex: none; }
+.kyp-donut .dlegend { flex: 1; min-width: 0; }
+
+/* --- 11. Lender labels and button link reset ---------------- */
+.kyp-hbar.wide .hl { width: 230px; }
+button.kyp-morelink { background: none; border: 0; padding: 0; }

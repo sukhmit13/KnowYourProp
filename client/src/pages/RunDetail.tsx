@@ -28,7 +28,6 @@ import { ReportChat } from "@/components/ReportChat";
 import { PropertyMap } from "@/components/PropertyMap";
 import { PreTitleCheck } from "@/components/PreTitleCheck";
 import { HMDAFinancingStats, HMDABuyerProfile } from "@/components/HMDAStats";
-import Takeaway from "@/components/Takeaway";
 import { ComparableSalesView } from "@/components/ComparableSalesView";
 import { IncentiveCheckerCards, checkerAvail, checkerTypeGroup } from "@/components/IncentivesCheckerSection";
 import { INC_STATE, IncentiveTypeLabel, IncentiveTifChip as SectionDetailChip } from "@/components/incentivePrimitives";
@@ -538,9 +537,11 @@ const PRINT_SECTIONS: PrintSection[] = [
   { id: 'ownership', label: 'Ownership & Title', defaultChecked: true, group: 'Ownership & Title' },
   { id: 'property-info', label: 'Property Details', defaultChecked: true, group: 'Property Details' },
   { id: 'pre-title-check', label: 'Pre-Title Check (Liens & Flags)', defaultChecked: true, level: 1, group: 'Property Details' },
-  { id: 'hmda-stats', label: 'Local Mortgage Market (HMDA)', defaultChecked: true, level: 1, group: 'Property Details' },
-  { id: 'sba-loans', label: 'SBA Commercial Loans', defaultChecked: true, level: 1, group: 'Property Details' },
-  { id: 'comparable-sales', label: 'Recently Sold Comps', defaultChecked: true, level: 1, group: 'Property Details' },
+  { id: 'mortgage-lending', label: 'Mortgage & Lending Market', defaultChecked: true, group: 'Mortgage & Lending' },
+  { id: 'hmda-stats', label: 'Residential Mortgage Market (HMDA)', defaultChecked: true, level: 1, group: 'Mortgage & Lending' },
+  { id: 'transaction-trends', label: 'Area Transaction Trends', defaultChecked: true, level: 1, group: 'Mortgage & Lending' },
+  { id: 'comparable-sales', label: 'Recently Sold Comps', defaultChecked: true, level: 1, group: 'Mortgage & Lending' },
+  { id: 'sba-loans', label: 'Commercial Lending (SBA)', defaultChecked: true, level: 1, group: 'Mortgage & Lending' },
 
   // Development Potential
   { id: 'development-potential', label: 'Development Potential / FAR', defaultChecked: true, group: 'Development Potential' },
@@ -1269,7 +1270,7 @@ export default function RunDetail() {
 
   // ---- Step 5 accordion state: order / hidden / open (persisted per run) ----
   const ACC_PREVIOUS_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "businessLicenses", "ownership", "propertyTax", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
-  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "businessLicenses", "valuation", "listing", "crime", "transit", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
+  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "businessLicenses", "valuation", "listing", "crime", "transit", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
@@ -3424,10 +3425,14 @@ export default function RunDetail() {
     // disabled so no Radix slide delay is needed — extra time is for charts only.
     setTimeout(() => {
       // Apply user-selected include/exclude for top-level sections
+      const selectedMarketChild = ['hmda-stats', 'transaction-trends', 'comparable-sales', 'sba-loans']
+        .some(sectionId => selectedSections.includes(sectionId));
       allSectionIds.forEach(sectionId => {
         const el = document.getElementById(`print-section-${sectionId}`);
         if (el) {
-          if (selectedSections.includes(sectionId)) {
+          const includeSection = selectedSections.includes(sectionId)
+            || (sectionId === 'mortgage-lending' && selectedMarketChild);
+          if (includeSection) {
             el.classList.remove('print-exclude');
           } else {
             el.classList.add('print-exclude');
@@ -3913,6 +3918,7 @@ export default function RunDetail() {
     historic: { title: "Historic Status", summary: "Chicago Historic Resources Survey rating and designation signals.", info: ["CHRS survey rating", "Municipal designation signals", "Demolition-hold rule", "Credit eligibility requirements"] },
     countyRecord: { title: "COUNTY RECORD", summary: "Cook County Assessor and Treasurer record for the subject parcel.", info: ["Parcel and structure facts", "Recorded unit configuration", "Assessor valuation inputs", "PIN and source links"] },
     propertyTax: { title: "Property Taxes", summary: "What this parcel is billed, assessed at, exempt from and has appealed.", info: ["Cook County Treasurer billing", "Assessor values and assessment history", "Board of Review appeals and outcomes"] },
+    market: { title: "Mortgage & Lending Market", summary: "Who lends here, on what terms, and what has been changing hands.", info: ["Residential mortgage market (HMDA)", "Area transaction trends", "Recently sold comps", "Commercial lending — SBA 504", "Commercial lending — SBA 7(a)"] },
   };
   const propertyTaxYears = propertyTaxData?.taxYears ?? [];
   const completeTaxYears = propertyTaxYears
@@ -4218,10 +4224,10 @@ export default function RunDetail() {
           { label: 'Property Tax Records', icon: Receipt, action: () => { setAccOpen((m) => ({ ...m, propertyTax: true })); return 'section-propertyTax'; } },
           { label: 'Pre-Title Check', icon: AlertTriangle, action: () => { setSectionOpen('preTitleCheck', true); return 'print-section-pre-title-check'; } },
           { label: 'Lien Search', icon: Lock, action: () => { setAccHidden((m) => ({ ...m, ownership: false })); setAccOpen((m) => ({ ...m, ownership: true })); return 'owner-liens'; } },
-          { label: 'Area Transaction Trends', icon: BarChart3, action: () => { setSectionOpen('preTitleCheck', true); setSectionOpen('transactionTrends', true); return 'print-section-pre-title-check'; } },
-          { label: 'Local Mortgage Market (HMDA)', icon: TrendingUp, action: () => { setSectionOpen('preTitleCheck', true); setSectionOpen('hmdaStats', true); return 'print-section-pre-title-check'; } },
-          { label: 'SBA Commercial Loans', icon: CreditCard, action: () => { setSectionOpen('preTitleCheck', true); setSectionOpen('sbaLoans', true); return 'print-section-pre-title-check'; } },
-          { label: 'Recently Sold Comps', icon: Home, action: () => { setSectionOpen('recentlySoldComps', true); return 'print-section-comparable-sales'; } },
+          { label: 'Area Transaction Trends', icon: BarChart3, action: () => { setAccHidden((m) => ({ ...m, market: false })); setAccOpen((m) => ({ ...m, market: true })); return 'print-section-mortgage-lending'; } },
+          { label: 'Local Mortgage Market (HMDA)', icon: TrendingUp, action: () => { setAccHidden((m) => ({ ...m, market: false })); setAccOpen((m) => ({ ...m, market: true })); return 'print-section-mortgage-lending'; } },
+          { label: 'SBA Commercial Loans', icon: CreditCard, action: () => { setAccHidden((m) => ({ ...m, market: false })); setAccOpen((m) => ({ ...m, market: true })); return 'print-section-mortgage-lending'; } },
+          { label: 'Recently Sold Comps', icon: Home, action: () => { setAccHidden((m) => ({ ...m, market: false })); setAccOpen((m) => ({ ...m, market: true })); return 'print-section-mortgage-lending'; } },
           { label: 'Location Incentives', icon: DollarSign, action: () => { setSectionOpen('locationIncentives', true); return 'print-section-location-incentives'; } },
           { label: 'Transit & Access', icon: Train, action: () => { setSectionOpen('transitAccess', true); return 'print-section-transit'; } },
           { label: 'Demographics & Population', icon: Users, action: () => { setSectionOpen('demographics', true); return 'print-section-demographics'; } },
@@ -16301,15 +16307,65 @@ export default function RunDetail() {
                     revealAnchor('section-ownership');
                   }
                 }}
-              >
+              />
+            </motion.div>
+          </AccordionSection>
+          )}
+
+          <AccordionSection {...accProps("market")}>
+            <motion.div
+              id="print-section-mortgage-lending"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.192 }}
+            >
+              <div>
+                {(facts?.tractGeoid || facts?.communityArea) && (
+                  <div id="print-section-hmda-stats">
+                    <Collapsible open={isHmdaStatsOpen} onOpenChange={setIsHmdaStatsOpen}>
+                      <CollapsibleTrigger asChild>
+                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-hmda-stats-subsection">
+                          <KypSubhead subsection={1}><span className="lbl">Residential Mortgage Market</span><span className="ct">HMDA loan-level records</span></KypSubhead>
+                          <div className="flex items-center gap-2">
+                            {!isHmdaStatsOpen && (
+                              <Badge variant="outline" className="text-xs">HMDA</Badge>
+                            )}
+                            <span className="text-muted-foreground text-sm">{isHmdaStatsOpen ? '▼' : '▶'}</span>
+                          </div>
+                        </div>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="seccard">
+                          <p className="kyp-scopenote">Figures below describe <b>{facts?.tractGeoid && facts?.communityArea ? `Census Tract ${facts.tractGeoid} or Community Area ${facts.communityArea}, as selected below` : facts?.tractGeoid ? `Census Tract ${facts.tractGeoid}` : `Community Area ${facts?.communityArea}`}</b>, not this address</p>
+                          <HMDAFinancingStats
+                            hmdaData={hmdaData}
+                            communityArea={facts?.communityArea}
+                            tractGeoid={facts?.tractGeoid}
+                            isLoading={isLoadingHmda}
+                          />
+                          <div className="kyp-src">Source: FFIEC HMDA loan-level disclosure, 2023–2025. Tract and community-area figures describe area lending, not this address; reported rates are historical, not a current quote.</div>
+                          {hmdaData && (
+                            <div className="pt-3">
+                              <HMDABuyerProfile
+                                hmdaData={hmdaData}
+                                label={facts?.communityArea || 'This Area'}
+                                communityArea={facts?.communityArea}
+                                tractGeoid={facts?.tractGeoid}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </div>
+                )}
+
                 {facts?.zipCode && (
+                  <div id="print-section-transaction-trends">
                   <Collapsible open={isTransactionTrendsOpen} onOpenChange={setIsTransactionTrendsOpen}>
                     <CollapsibleTrigger asChild>
                       <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-transaction-trends-subsection">
-                        <h3 className="chead chead-icon">
-                          <BarChart3 className="w-4 h-4" />
-                          Area Transaction Trends
-                        </h3>
+                        <KypSubhead subsection={2}><span className="lbl">Area Transaction Trends</span><span className="ct">Cook County transfer records</span></KypSubhead>
                         <div className="flex items-center gap-2">
                           {!isTransactionTrendsOpen && (
                             <Badge variant="outline" className="text-xs">ZIP {facts.zipCode}</Badge>
@@ -16320,6 +16376,7 @@ export default function RunDetail() {
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <div className="px-4 pt-2 pb-4">
+                        <p className="kyp-scopenote">Figures below describe <b>ZIP {facts.zipCode}</b>, not this address</p>
                         {isLoadingTransactionTrends ? (
                           <div className="space-y-3">
                             <Skeleton className="h-52 w-full" />
@@ -16333,6 +16390,9 @@ export default function RunDetail() {
                         ) : transactionTrendsData?.years?.length > 0 ? (() => {
                           const td = transactionTrendsData;
                           const years = (td.years || []) as any[];
+                          if (years.every((year: any) => ['singleFamily', 'unit2to4', 'condo', 'commercial'].every(key => Number(year[key] ?? 0) === 0))) {
+                            return <div className="kyp-emptypanel">No qualifying property sales were recorded for ZIP {facts?.zipCode} in the four-year source period.</div>;
+                          }
                           const latestYear = years[years.length - 1];
                           const prevYear = years[years.length - 2];
                           const TT_TYPES = [
@@ -16370,89 +16430,12 @@ export default function RunDetail() {
                             else text = `${Math.abs(pct).toFixed(1)}% ${delta > 0 ? 'more' : 'fewer'}`;
                             return { delta, pct, smallBase, text };
                           };
-                          const resKeys = ['singleFamily', 'unit2to4', 'condo'] as const;
-                          const resChanges = resKeys.map(k => ttChange(k));
-                          // "Down across the board" only when all three residential comparisons exist and each fell
-                          const allResDown = resChanges.every(c => c !== null && c.delta < 0);
-                          const validDeltas = TT_TYPES.map(t => ttChange(t.key)).filter((c): c is NonNullable<ReturnType<typeof ttChange>> => c !== null);
-                          const totalDelta = validDeltas.reduce((s, c) => s + c.delta, 0);
-                          const latestVals = TT_TYPES.map(t => ttVal(latestYear, t.key));
-                          const totalLatest = latestVals.reduce((s: number, v) => s + (v ?? 0), 0);
-                          const allLatestKnown = latestVals.every(v => v !== null);
-                          const condoCount = ttVal(latestYear, 'condo');
-                          const condoShare = allLatestKnown && totalLatest > 0 && condoCount !== null ? condoCount / totalLatest : null;
-                          const commCount = ttVal(latestYear, 'commercial');
-                          const commSmall = commCount !== null && commCount > 0 && commCount < 50;
-                          // When allResDown, every residential prev count is > 0 (a drop from 0 is impossible), so all three pcts are defined.
-                          const avgResPct = (() => { const ps = resChanges.filter(c => c && c.pct !== null).map(c => c!.pct as number); return ps.length ? ps.reduce((a, b) => a + b, 0) / ps.length : 0; })();
-                          const ttHeadline = !prevYear || validDeltas.length === 0
-                            ? "A snapshot of sales volume — how many properties changed hands, not what they sold for."
-                            : allResDown
-                              ? (avgResPct <= -15
-                                ? "Sales activity has cooled sharply — but that's fewer transactions, not falling prices."
-                                : "Sales activity has cooled — but that's fewer transactions, not falling prices.")
-                              : totalDelta > 0
-                                ? "Sales activity is picking up — more properties are changing hands."
-                                : "Sales activity is mixed by property type — this tracks volume, not price.";
-                          const ttRows: any[] = [];
-                          // Row 1 — volume (always present; explicit insufficient-history fallback keeps the Chart chip)
-                          if (prevYear && resChanges.some(c => c !== null)) {
-                            const listPcts = resKeys.map((k, i) => {
-                              const label = ({ singleFamily: 'single-family', unit2to4: '2–4 unit', condo: 'condo' } as Record<string, string>)[k];
-                              const c = resChanges[i];
-                              return c ? `${label} ${c.pct !== null ? `${c.pct < 0 ? '−' : '+'}${Math.abs(c.pct).toFixed(1)}%` : `${c.delta >= 0 ? '+' : '−'}${Math.abs(c.delta).toLocaleString()} sales`}` : null;
-                            }).filter(Boolean).join(', ');
-                            ttRows.push({
-                              tone: allResDown ? 'caution' : 'insight',
-                              body: <>{allResDown
-                                ? <><b>Volume is down across the board.</b> In {latestYear.year}, sales fell for every residential type year-over-year — {listPcts}. A broad drop in how many properties changed hands.</>
-                                : <><b>Year-over-year volume shifted.</b> In {latestYear.year} versus {prevYear.year}: {listPcts}. This measures how many properties changed hands.</>}</>,
-                              chip: { label: 'Chart', targetId: 'tt-chart' },
-                              testId: 'tt-take-volume',
-                            });
-                          } else {
-                            ttRows.push({
-                              tone: 'plain',
-                              body: <><b>Not enough history for a year-over-year read.</b> Only {years.length === 1 ? `one year (${latestYear.year})` : 'partial data'} is available, so no volume trend is claimed — the chart shows the counts on record.</>,
-                              chip: { label: 'Chart', targetId: 'tt-chart' },
-                              testId: 'tt-take-volume',
-                            });
-                          }
-                          // Row 2 — count-not-price framing (always present)
-                          ttRows.push({
-                            tone: 'insight',
-                            body: allResDown
-                              ? <><b>This is transaction count, not price.</b> A drop in the number of sales usually means higher mortgage rates and owners staying put — not declining values. Read it as a slower, less-liquid market, not a price correction. (Harder for a seller; less competition for a buyer.)</>
-                              : <><b>This is transaction count, not price.</b> These figures track how many properties sold, not what they sold for — a shift in volume says more about liquidity and rates than about property values.</>,
-                            testId: 'tt-take-count',
-                          });
-                          // Row 3 — market mix (condo-heavy / thin commercial, else dominant type; skipped only if latest-year counts are unknown)
-                          if ((condoShare !== null && condoShare >= 0.4) || commSmall) {
-                            const bits: any[] = [];
-                            if (condoShare !== null && condoShare >= 0.4) bits.push(<><b>A condo-heavy ZIP{commSmall ? ' with a thin commercial market' : ''}.</b> Condos are about {condoShare >= 0.45 && condoShare <= 0.55 ? 'half' : `${Math.round(condoShare * 100)}%`} of all {latestYear.year} sales ({(condoCount ?? 0).toLocaleString()} of ~{totalLatest.toLocaleString()}).</>);
-                            else if (commSmall) bits.push(<><b>A thin commercial market.</b></>);
-                            if (commSmall) bits.push(<> Commercial is tiny — roughly <b>{commCount} sales a year</b> — so comparable sales for a commercial property here are sparse, and a big-looking percentage move is a handful of extra transactions, not a trend.</>);
-                            ttRows.push({ tone: 'insight', body: <>{bits.map((b, i) => <span key={i}>{b}</span>)}</>, testId: 'tt-take-mix' });
-                          } else if (allLatestKnown && totalLatest > 0) {
-                            const dom = TT_TYPES.map((t, i) => ({ t, v: latestVals[i] ?? 0 })).sort((a, b) => b.v - a.v)[0];
-                            ttRows.push({
-                              tone: 'insight',
-                              body: <><b>{dom.t.label} leads the mix.</b> {dom.t.label} sales are the largest slice of {latestYear.year} activity ({dom.v.toLocaleString()} of ~{totalLatest.toLocaleString()} total sales) — the mix shapes which comps you'll find nearby.</>,
-                              testId: 'tt-take-mix',
-                            });
-                          }
                           return (
                             <div className="ttbox">
-                              <Takeaway
-                                headline={ttHeadline}
-                                rows={ttRows}
-                                testId="takeaway-transaction-trends"
-                              />
-
                               {/* Grouped bar chart */}
                               <div id="tt-chart">
                                 <div className="chtitle">Property sale transactions in ZIP {facts?.zipCode} by type · {years[0]?.year}–{latestYear.year}</div>
-                                <div className="chart">
+                                <div className="chart kyp-ttchart">
                                   <div className="yax">
                                     <span>{ttAxisMax.toLocaleString()}</span>
                                     <span>{(ttAxisMax * 0.75).toLocaleString()}</span>
@@ -16461,7 +16444,7 @@ export default function RunDetail() {
                                     <span>0</span>
                                   </div>
                                   <div className="plot">
-                                    <div className="plotarea">
+                                    <div className="plotarea area">
                                       <div className="grid" style={{ bottom: '25%' }}></div>
                                       <div className="grid" style={{ bottom: '50%' }}></div>
                                       <div className="grid" style={{ bottom: '75%' }}></div>
@@ -16486,12 +16469,27 @@ export default function RunDetail() {
                                     <div className="xlab">{years.map((y: any) => <span key={y.year}>{y.year}</span>)}</div>
                                   </div>
                                 </div>
-                                <div className="legend">
+                                <div className="legend kyp-ttlegend">
                                   {TT_TYPES.map(t => (
                                     <span className="lg" key={t.key}><span className="sw" style={{ background: t.color }} />{t.label}</span>
                                   ))}
                                 </div>
                               </div>
+
+                              {latestYear?.medianPrice && (
+                                <div className="kyp-medrow" aria-label={`Median sale prices in ${latestYear.year}`}>
+                                  {TT_TYPES.map(t => {
+                                    const median = latestYear.medianPrice?.[t.key];
+                                    return (
+                                      <div className={`kyp-medcard${typeof median === 'number' ? '' : ' empty'}`} key={t.key}>
+                                        <div className="ml"><i style={{ background: t.color }} />{t.label}</div>
+                                        <div className="mv">{typeof median === 'number' ? median.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : '—'}</div>
+                                        <div className="ms">Median · {latestYear.year}</div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
 
                               {/* YoY change cards — neutral directional (volume change is not good/bad) */}
                               {prevYear && (
@@ -16527,72 +16525,54 @@ export default function RunDetail() {
 
                               {/* ZIP ranking intentionally removed: only render a rank when benchmarked against N>1 real ZIPs (backend currently compares the ZIP against itself). */}
 
-                              <p className="ttfoot">Change figures reflect the <b>number of sales</b> (transaction volume), not sale prices. Source: county transfer records, ZIP {facts?.zipCode}, {years[0]?.year}–{latestYear.year}.</p>
+                              <p className="ttfoot">Counts are transaction volume, not price. Median price is the most recent complete year only. Source: Cook County Assessor parcel sales.</p>
                             </div>
                           );
                         })() : (
-                          <p className="text-sm text-muted-foreground">Transaction data not available for this ZIP code.</p>
+                          <p className="kyp-emptypanel">Transaction data not available for this ZIP code.</p>
                         )}
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
+                  </div>
                 )}
 
-                {(facts?.tractGeoid || facts?.communityArea) && (
-                  <Collapsible open={isHmdaStatsOpen} onOpenChange={setIsHmdaStatsOpen}>
-                    <CollapsibleTrigger asChild>
-                      <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-hmda-stats-subsection">
-                        <h3 className="chead chead-icon">
-                          <TrendingUp className="w-4 h-4" />
-                          Local Mortgage Market Activity
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          {!isHmdaStatsOpen && (
-                            <Badge variant="outline" className="text-xs">HMDA</Badge>
-                          )}
-                          <span className="text-muted-foreground text-sm">{isHmdaStatsOpen ? '▼' : '▶'}</span>
-                        </div>
-                      </div>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="seccard">
-                        {/* THE TAKEAWAY — cached AI summary (never generated on render) */}
-                        {hmdaTakeaway?.headline && (
-                          <div className="crm-take mb-4" data-testid="hmda-takeaway">
-                            <div className="crm-takeh">
-                              <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .9 1.6l.1.7h6l.1-.7c.1-.6.4-1.2.9-1.6A7 7 0 0 0 12 2z"/></svg>
-                              Takeaway
-                            </div>
-                            <div className="crm-taket">{hmdaTakeaway.headline}</div>
-                            <div className="crm-conn">
-                              {hmdaTakeaway.bullets.map((b, i) => (
-                                <div key={i} className={`crm-cn ${b.tone === 'good' ? 'g' : b.tone === 'bad' ? 'c' : 'i'}`}>
-                                  <span className="dt" /><span className="txt">{b.text.split('**').map((part, j) => j % 2 === 1 ? <b key={j}>{part}</b> : part)}</span>
-                                  {renderJump(hmdaMetricAnchor(b.metric))}
-                                </div>
-                              ))}
-                            </div>
+                {(compsData || isLoadingComps) && compPropertyClass && (
+                  <div id="print-section-comparable-sales">
+                    <Collapsible open={isRecentlySoldCompsOpen} onOpenChange={setIsRecentlySoldCompsOpen}>
+                      <CollapsibleTrigger asChild>
+                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-recently-sold-comps">
+                          <KypSubhead subsection={3}><span className="lbl">Recently Sold Comps</span><span className="ct">class-matched sales</span></KypSubhead>
+                          <div className="flex items-center gap-2">
+                            {!isRecentlySoldCompsOpen && compsData && (
+                              <Badge variant="outline" className="text-xs">
+                                {compsData.comparables?.length > 0 ? `${compsData.comparables.length} comps` : 'Class ' + compPropertyClass}
+                              </Badge>
+                            )}
+                            <span className="text-muted-foreground text-sm">{isRecentlySoldCompsOpen ? '▼' : '▶'}</span>
                           </div>
-                        )}
-                        <HMDAFinancingStats
-                          hmdaData={hmdaData}
-                          communityArea={facts?.communityArea}
-                          tractGeoid={facts?.tractGeoid}
-                          isLoading={isLoadingHmda}
-                        />
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
+                        </div>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="pt-2 pb-3 pl-4">
+                          <p className="kyp-scopenote">Figures below describe sales within <b>{compsData?.searchParams?.radiusMiles ?? 0.75} miles</b>, not this address</p>
+                          <ComparableSalesView
+                            compsData={compsData}
+                            isLoading={isLoadingComps}
+                            subjectSqft={pinLookupData?.characteristicsData?.buildingSf ?? null}
+                          />
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </div>
                 )}
 
                 {facts?.zipCode && (
+                  <div id="print-section-sba-loans">
                   <Collapsible open={isSBALoansOpen} onOpenChange={setIsSBALoansOpen}>
                     <CollapsibleTrigger asChild>
                       <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-sba-loans-subsection">
-                        <h3 className="chead chead-icon">
-                          <TrendingUp className="w-4 h-4" />
-                          Commercial Lending Activity
-                        </h3>
+                        <KypSubhead subsection={4}><span className="lbl">Commercial Lending — SBA 504</span><span className="ct">owner-occupied CRE</span></KypSubhead>
                         <div className="flex items-center gap-2">
                           {!isSBALoansOpen && (
                             <>
@@ -16606,6 +16586,7 @@ export default function RunDetail() {
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <div className="seccard">
+                        <p className="kyp-scopenote">Figures below describe <b>ZIP {facts.zipCode}</b>, not this address</p>
                         <SBALoansView
                           data={sbaLoansData}
                           isLoading={isLoadingSBALoans}
@@ -16618,11 +16599,11 @@ export default function RunDetail() {
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
+                  </div>
                 )}
-              </PreTitleCheck>
+              </div>
             </motion.div>
           </AccordionSection>
-          )}
 
           {/* Site-Specific Coverage — address-level news, only shown when articles exist.
               The wrapper div is a stable scroll anchor for the scan view even when no articles render. */}
@@ -19014,74 +18995,6 @@ export default function RunDetail() {
                     </p>
                   )}
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          )}
-
-          {/* Whose Buying Right Now? - HMDA buyer profile subsection */}
-          {hmdaData && (
-            <div>
-              <Collapsible open={isHmdaBuyerOpen} onOpenChange={setIsHmdaBuyerOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="button-hmda-buyers-toggle">
-                    <h3 className="chead chead-icon">
-                      <TrendingUp className="w-4 h-4" />
-                      Who's Buying Right Now?
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isHmdaBuyerOpen && (
-                        <Badge variant="outline" className="text-xs">
-                          HMDA
-                        </Badge>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isHmdaBuyerOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="pt-3 pb-2 pl-4">
-                    <HMDABuyerProfile
-                      hmdaData={hmdaData}
-                      label={facts?.communityArea || 'This Area'}
-                      communityArea={facts?.communityArea}
-                      tractGeoid={facts?.tractGeoid}
-                    />
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          )}
-
-
-          {/* Recently Sold Comps */}
-          {(compsData || isLoadingComps) && compPropertyClass && (
-            <div id="print-section-comparable-sales">
-              <Collapsible open={isRecentlySoldCompsOpen} onOpenChange={setIsRecentlySoldCompsOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-recently-sold-comps">
-                    <h3 className="chead chead-icon">
-                      <Home className="w-4 h-4" />
-                      Recently Sold Comps
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isRecentlySoldCompsOpen && compsData && (
-                        <Badge variant="outline" className="text-xs">
-                          {compsData.comparables?.length > 0 ? `${compsData.comparables.length} comps` : 'Class ' + compPropertyClass}
-                        </Badge>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isRecentlySoldCompsOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="pt-2 pb-3 pl-4">
-                    <ComparableSalesView
-                      compsData={compsData}
-                      isLoading={isLoadingComps}
-                      subjectSqft={pinLookupData?.characteristicsData?.buildingSf ?? null}
-                    />
-                  </div>
                 </CollapsibleContent>
               </Collapsible>
             </div>

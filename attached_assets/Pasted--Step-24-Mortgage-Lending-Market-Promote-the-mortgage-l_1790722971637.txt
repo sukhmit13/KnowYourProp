@@ -1,0 +1,945 @@
+# Step 24 — Mortgage & Lending Market
+
+Promote the mortgage/lending surface out of **Pre-Title Check** into its own top-level accordion
+row, absorb the two panels stranded in **Neighbourhood & People**, restyle everything into the bold
+hybrid language, and fix Area Transaction Trends.
+
+**Run this as 6 prompts.** Every step below leaves a working report. The destructive one is last.
+Prompts 1–4 are the move and restyle; 5 fixes Area Transaction Trends; 6 fixes what Recently Sold
+Comps says when it finds nothing.
+
+---
+
+## 0. Audit — what was read
+
+| Source | Lines | Labels | Fields |
+|---|---|---|---|
+| `RunDetail.tsx` §debt (Pre-Title Check row) | 17055–17408 | 13 | 8 |
+| `RunDetail.tsx` §people — Who's Buying + Recently Sold Comps | 19790–19854 | 2 | 3 |
+| `components/HMDAStats.tsx` | 1–818 | 33 | 26 |
+| `components/SBALoansView.tsx` | 1–305 | 18 | 16 |
+| `components/ComparableSalesView.tsx` | 1–331 | 12 | 1 |
+| `components/PreTitleCheck.tsx` | 1–689 | 28 | 9 |
+| **Total** | **2,562 lines** | **106** | **63** |
+
+**Coverage: 100%** of the five panels being moved, plus the whole of `PreTitleCheck.tsx` (read to
+confirm it needs no edit — see §2).
+
+> ⚠️ **Working-copy warning.** This was audited against `a6c0ad8` (2026-09-29 17:01 UTC), which is
+> *newer* than the deployed build in the screenshots (2026-09-29 16:53 UTC). But
+> `PreTitleCheck.tsx` still contains the owner-lien block at lines 86, 492, 553–558
+> (`Owner liens`, `Searching owner-name records…`, `Pre-title review · follows the owner, not this
+> parcel`), and `OwnershipTitleSection.tsx` has no `ownerLien*` reference at all. **So the owner-lien
+> move is not in GitHub.** Either it is unpushed or it landed after `a6c0ad8`.
+>
+> This spec is written so that does not matter: **it never edits `PreTitleCheck.tsx`.** See §2.
+
+---
+
+## 1. The problem, stated once
+
+The mortgage surface is split across two parents and buried two levels deep.
+
+```
+16  PRE-TITLE CHECK                         ← accordion row, id "debt"
+    └─ <PreTitleCheck>  "Can I Finance This Property?"   ← collapsible #1
+        └─ children:
+            ├─ Area Transaction Trends       ← collapsible #2   (broken)
+            ├─ Local Mortgage Market Activity ← collapsible #2
+            └─ Commercial Lending Activity    ← collapsible #2
+
+22  NEIGHBOURHOOD & PEOPLE                  ← accordion row, id "people"
+    ├─ Who's Buying Right Now?              ← HMDA, filed under demographics
+    └─ Recently Sold Comps                  ← comps, filed under demographics
+```
+
+The three under Pre-Title Check are passed as the `children` prop and render **inside** the
+Pre-Title Check collapsible (`PreTitleCheck.tsx:626–630`), so the user must open a title-risk check
+before they can reach the mortgage market.
+
+**The registry already declares the fix and nobody built it.**
+`client/src/components/report/sectionRegistry.tsx:36`:
+
+```js
+market: { id: "market", anchorId: "print-section-comparable-sales", title: "The Local Market",
+  summary: "Comps, price trends and mortgage-lending activity nearby.",
+  info: ["Recently sold comps", "Area transaction trends", "HMDA — who's borrowing",
+         "HMDA — what's getting funded", "Commercial lending (SBA)"] }
+```
+
+`market` is in `SECTION_ORDER` (:7) and `scanBuilder.tsx:121` populates `dyn.market` — but `market`
+is **absent from `ACC_DEFAULT_ORDER`** (`RunDetail.tsx:1270`). It exists as a scan card that jumps
+into the middle of §People. This step finally builds the row it points at, renamed
+**Mortgage & Lending Market**.
+
+---
+
+## 2. Why `PreTitleCheck.tsx` is not edited
+
+`PreTitleCheck` renders `children` only when they are passed:
+
+```jsx
+{children && (
+  <div className="border-t border-border/40 pt-4 mt-2">{children}</div>
+)}
+```
+
+Stop passing children and that block never renders. **Zero edits to `PreTitleCheck.tsx`.** This is
+deliberate: it makes the step safe against whatever owner-lien work exists in Replit but not in
+GitHub.
+
+---
+
+## 3. Every label and field has a destination
+
+### Moved — Pre-Title Check → Mortgage & Lending Market
+
+| Renders today | Source | Destination |
+|---|---|---|
+| `Area Transaction Trends` | RunDetail 17086 | **16.2**, restyled |
+| grouped bar chart, YoY change cards, axis, legend | RunDetail 17113–17300 | **16.2** `.kyp-ttchart` |
+| `Transaction data not available for this ZIP code.` | RunDetail 17317 | **16.2** `.kyp-emptypanel` |
+| `Local Mortgage Market Activity` | RunDetail 17326 | **16.1**, restyled |
+| Community Area ↔ Census Tract toggle | HMDAStats 641–660 | **16.1** `.kyp-seg` |
+| 2025 / 2024 year toggle | HMDAStats 661–672 | **16.1** `.kyp-seg` — **+ 2023, see §5** |
+| `City Ranking — {CA} vs. 77 Community Areas`, Applications / Closed Loans, ▲▼ | HMDAStats 675–718 | **16.1** `.kyp-rankcard` |
+| `Interest rates — this area vs. today`, both sides, delta, explainer, fine print | HMDAStats 782–812 | **16.1** `.kyp-ratecmp` |
+| `All Applications` / `Originated · n%` / `Denied · n%` clickable filters | HMDAStats 257–281 | **16.1** `.kyp-blocks` + `.kyp-seg` (see §4) |
+| `Loan Type`, `Occupancy`, `Loan Product Type`, `Property Type` donuts | HMDAStats 288–299 | **16.1** — **donuts kept exactly as they are**, `<MiniPieChart>` untouched; only the card and legend type change (`.kyp-mix` / `.kyp-donut`) |
+| `Property Value · distribution` | HMDAStats 306 | **16.1** `.kyp-hbar.ind` |
+| `Denial Reasons · % of applications` | HMDAStats 309 | **16.1** `.kyp-hbar` neutral — **not orange, see §6** |
+| `Active Lenders · top by application volume` / `· ranked by loans originated` / `· ranked by applications denied` | HMDAStats 312, 373, 406 | **16.1** `.kyp-hbar.wide` |
+| `Property Value at Origination` | HMDAStats 357 | **16.1**, closed view |
+| `Occupancy of Denied Apps`, `Loan Product Type Applied For`, `Top Denial Reasons` | HMDAStats 386–461 | **16.1**, denied view |
+| `Commercial Lending Activity` | RunDetail 17371 | **16.4 / 16.5**, split by programme |
+| `7(a) Loans` / `504 · CRE` / `Total Deployed` / `Active Lenders` tiles | SBALoansView 193–199 | **16.4** `.kyp-cxtiles` |
+| `SBA 504 — Commercial Real Estate` + `CRE Financing` + count chip + note | SBALoansView 205–210 | **16.4** `.kyp-subhead` + `.kyp-loan-scope` |
+| 504 borrower rows: name, NAICS, `via {CDC}`, amount, date | SBALoansView 213–238 | **16.4** `.kyp-loanrow` |
+| `+ n more 504 loans →` | SBALoansView 241 | **16.4** `button.kyp-morelink` |
+| `Top 504 lenders (CDCs)` ranked bars | SBALoansView 246–251 | **16.4** `.kyp-hbar.wide` |
+| `SBA 7(a) — Small Business` + `Business Financing` + chip + note | SBALoansView 258–263 | **16.5** |
+| 7(a) borrower rows: name, address, `via {bank}`, amount, jobs, date | SBALoansView 266–292 | **16.5** `.kyp-loanrow` |
+| `+ n more 7(a) loans →`, `Top 7(a) lenders` | SBALoansView 295–301 | **16.5** |
+| `Source: SBA FOIA 7(a) & 504 loan data · FY2020–present · ZIP {zip}` | SBALoansView 303 | **16.5** `.kyp-src` |
+
+### Moved — Neighbourhood & People → Mortgage & Lending Market
+
+| Renders today | Source | Destination |
+|---|---|---|
+| `Who's Buying Right Now?` + HMDA badge | RunDetail 19793–19808 | **16.1**, merged as the demographics view of the same panel |
+| `<HMDABuyerProfile>` — sex, race, ethnicity, age, income, DTI donuts, denial reasons | HMDAStats 473–600 | **16.1**, third segment |
+| `Recently Sold Comps` + `{n} comps` badge | RunDetail 19827–19845 | **16.3** |
+| `Indicated Value`, `Median Sale Price`, `Median $/Sqft` | ComparableSalesView 246–261 | **16.3** `.kyp-blocks` |
+| comp cards: address, price, $/sqft, distance, class, buyer, match %, `View on Assessor` | ComparableSalesView, `.cmp-*` | **16.3**, kept as-is this step (`.cmp-*` restyle is out of scope — say so) |
+| `No comparable sales found within the search parameters.` / `No comps found within 0.75 mi — expanded search to …` | ComparableSalesView | **16.3**, kept verbatim |
+
+### Stays in Pre-Title Check — nothing moves
+
+`Can I Finance This Property?` · `Financing Assessment` · `Score: n/100` · issue list ·
+`What we checked:` / `What we CANNOT check:` · `Cook County Treasurer (Property Tax)` ·
+`Cook County Recorder (Liens & Deeds)` · `Cook County Circuit Court (Foreclosures)` ·
+`Important Disclaimer` · `Owner liens` and the owner-name search · `Verify manually` ·
+`View in Property Details`.
+
+### Cut
+
+| Cut | Reason |
+|---|---|
+| HMDA `Takeaway` box (`crm-take`, headline + bullets + jump chips) | **No takeaways.** The subhead states what was measured; the user reads the data. `hmdaTakeaway` stays in the API and still feeds the accordion row one-liner via `scanBuilder` — only the in-section box goes. |
+| SBA `Takeaway` box (`.take`, 4 rows + `504 LOANS ↓` / `7(A) LOANS ↓` / `LENDERS ↓` chips) | Same rule. The one row worth keeping is the 504 address caveat — it is a **scope statement**, not a takeaway, and moves to `.kyp-loan-scope` above the 504 rows. |
+| Transaction-trends takeaway rows (`tt-take-volume`, `tt-take-count`, `tt-take-mix`) and `ttHeadline` | Same rule. ~110 lines of branching prose. The `.kyp-src` line keeps the one factual point: counts are volume, not price. |
+| `ranking` object in the `/api/transaction-trends` response | Already dead. `zipTotalsCache` is process-local, so rank is "#1 of 1" on a cold server; the client already hides it with a comment saying exactly that (`RunDetail.tsx`, "ZIP ranking intentionally removed"). Delete it server-side rather than leave a lying field. |
+
+**Nothing else is cut.** 106 labels, 63 fields, all accounted for.
+
+---
+
+## 4. Prompt 1 — create the row, move the three children
+
+Paste as one prompt:
+
+> In `client/src/pages/RunDetail.tsx`:
+>
+> 1. Add `"market"` to `ACC_DEFAULT_ORDER` (line ~1270), immediately after `"debt"`. Do not remove
+>    anything from that array. `mergeAccOrder` splices new default ids in at their default position,
+>    so saved per-run orders need no migration.
+> 2. Add a `market` entry to `ACC_CUSTOM_META` (line ~3887):
+>    `market: { title: "Mortgage & Lending Market", summary: "Who lends here, on what terms, and what has been changing hands.", info: ["Residential mortgage market (HMDA)", "Area transaction trends", "Recently sold comps", "Commercial lending — SBA 504", "Commercial lending — SBA 7(a)"] }`
+> 3. Create a new `<AccordionSection {...accProps("market")}>` **immediately after** the closing
+>    `</AccordionSection>` of the `debt` row (after line ~17408). Give its inner wrapper
+>    `id="print-section-mortgage-lending"`.
+> 4. **Move** — do not copy — the three `<Collapsible>` blocks currently passed as `children` to
+>    `<PreTitleCheck>` (Area Transaction Trends ~17086–17319, Local Mortgage Market Activity
+>    ~17320–17368, Commercial Lending Activity ~17369–17406) into the new section.
+> 5. Remove the `children` from the `<PreTitleCheck>` call so it becomes self-closing-with-props.
+>    **Do not edit `PreTitleCheck.tsx`** — its `{children && …}` block simply stops rendering.
+> 6. In `client/src/components/report/sectionRegistry.tsx`, change the `market` entry's `anchorId`
+>    from `"print-section-comparable-sales"` to `"print-section-mortgage-lending"` and its `title`
+>    to `"Mortgage & Lending Market"`. Leave `SECTION_ORDER` alone — `market` is already in it.
+>
+> Change nothing else. The three panels should render identically, one level shallower, under a new
+> row. Verify: the new row appears after Pre-Title Check; Pre-Title Check still renders its verdict,
+> score and lien content; no console errors.
+
+---
+
+## 5. Prompt 2 — move the two stranded panels, expose 2023
+
+> In `client/src/pages/RunDetail.tsx`:
+>
+> 1. **Move** the `Who's Buying Right Now?` collapsible (~19791–19825, the one wrapping
+>    `<HMDABuyerProfile>`) out of the `people` section and into the new `market` section, directly
+>    after Local Mortgage Market Activity.
+> 2. **Move** the `Recently Sold Comps` block (~19827–19853, `id="print-section-comparable-sales"`,
+>    wrapping `<ComparableSalesView>`) into the `market` section, after Area Transaction Trends.
+>    Keep its `id` exactly as-is — `PRINT_SECTIONS` and `jumpSections` both reference it.
+> 3. In `client/src/components/HMDAStats.tsx` line 15, change
+>    `const YEARS = [2025, 2024] as const;` to `const YEARS = [2025, 2024, 2023] as const;`
+>    and widen `type HmdaYear` accordingly.
+>
+> Nothing else changes.
+
+**Why (3) works with no server change:** `routes.ts:4639` computes
+`const suffix = year === 2024 ? '' : '_' + year`, and `server/data/` already holds
+`hmda_by_tract_2023.json` (17.1 MB) and `hmda_by_community_2023.json`. `loadHmdaYear(2023)` reads
+them today. The UI is the only thing hiding the third year.
+
+Guard: `HMDAFinancingStats` gates the year toggle on `has2024 && has2025`. Extend that to render
+whichever years actually returned data rather than requiring all three, so an address with no 2023
+record does not lose the toggle.
+
+---
+
+## 6. Prompt 3 — restyle
+
+Append `kyp-base-patch-24.css` (§9 below) to the **end** of `client/src/kyp-base.css`, then restyle
+the five panels. **This is a class swap, not a rewrite — the information and its arrangement stay
+exactly as they are.**
+
+### 6.1 Classes I nearly invented — check this table before writing any new CSS
+
+Every one of these already exists. Six were caught by the mechanical collision check, one by
+rendering the mock.
+
+| I was about to write | Already exists as | Where |
+|---|---|---|
+| `.kyp-block.green` | **`.kyp-block.grn`** | kyp-base.css |
+| `.kyp-block.indigo` | **`.kyp-block.ind`** | kyp-base.css |
+| `.kyp-morelink` (new) | **`.kyp-morelink`** — mono/10px/700/indigo/margin-top:13px | kyp-base.css |
+| `.kyp-kpitiles` | **`.kyp-cxtiles` / `.kyp-cxtile`** with `.dark` / `.slate`, `.l` `.n` `.s` | kyp-base.css |
+| `.kyp-rankbar` | **`.kyp-hbar`** with `.hl` / `.tick` / `.htrack > i` / `.hbar-count`, variants `.ind` `.att` `.red` | kyp-base.css |
+| `.kyp-scopeline` | **`.kyp-loan-scope`** with `span` (mono indigo eyebrow) + `b` | kyp-base.css |
+| `--kyp-good` | **`--kyp-green`** | kyp-base.css tokens |
+
+The real token set is exactly: `--kyp-bad --kyp-card --kyp-debt --kyp-debtLine --kyp-debtSoft
+--kyp-disp --kyp-green --kyp-indigo --kyp-indigoL --kyp-indigoSoft --kyp-ink --kyp-ink2 --kyp-line
+--kyp-mono --kyp-muted --kyp-orange --kyp-paper --kyp-sans --kyp-slate --kyp-wash`. Nothing else.
+
+### 6.2 Chart forms do not change
+
+**No chart is replaced, removed or converted to another form.** The four donuts stay donuts, the
+distribution bars stay bars, the ranked lender bars stay ranked bars, the grouped column chart stays
+a grouped column chart.
+
+`MiniPieChart` (`HMDAStats.tsx:124–165`) keeps its Recharts `<PieChart width={88} height={88}>` with
+`cx=40 cy=40 innerRadius={24} outerRadius={40} paddingAngle={1.5}` and its right-hand legend. Do not
+touch the component's render. What changes is the card around it and the legend's type:
+
+```jsx
+<div className="kyp-mixcard">
+  <div className="mh">Loan type</div>
+  <div className="kyp-donut">
+    <PieChart width={88} height={88}>…unchanged…</PieChart>
+    <div className="dlegend">
+      <div className="kyp-mixrow"><span className="sw" style={{background: fill}} />
+        <span className="nm">{label}</span><span className="pc">{pct}%</span></div>
+    </div>
+  </div>
+</div>
+```
+
+`.hmda-legrow` → `.kyp-mixrow`, `.hmda-d` → `.sw`, `.hmda-p` → `.pc`, `.hmda-mhd` → `.mh`. The ring
+itself is Recharts output and is not restyled.
+
+**Slice order is `[fha, conventional, va]`** (`HMDAStats.tsx:288`) — FHA first, not Conventional.
+Keep it; the legend order in the live report depends on it.
+
+> **Caveat on the side-by-side.** Recharts is a React component and the mock is a static HTML file,
+> so both panels draw the donuts as inline SVG arcs at the identical geometry (88×88, r24→r40,
+> 1.5° padding, counter-clockwise from 3 o'clock) rather than by running Recharts. Rings, radii,
+> colours and slice order match the product; hover tooltips do not exist in the mock.
+
+### 6.3 Block markup order
+
+`.kyp-block .bl` carries `margin-top:8px`, which only makes sense below the numeral. Correct order:
+
+```jsx
+<div className="kyp-block ind">
+  <div className="bv">129</div>
+  <div className="bl">All applications</div>
+</div>
+```
+
+`.bv` **first**, label group second. Never the reverse.
+
+### 6.4 Subheads
+
+Five numbered subheads, derived from the live accordion index via `SectionNumberContext` — never
+hard-coded:
+
+| # | Label | Counter-text |
+|---|---|---|
+| 16.1 | Residential Mortgage Market | HMDA loan-level records |
+| 16.2 | Area Transaction Trends | Cook County transfer records |
+| 16.3 | Recently Sold Comps | class-matched sales |
+| 16.4 | Commercial Lending — SBA 504 | owner-occupied CRE |
+| 16.5 | Commercial Lending — SBA 7(a) | small business |
+
+The first carries `.kyp-subhead.first` (kills the top border).
+
+### 6.5 Scope notes — above the figures, not below
+
+This section has **four different geographies** and currently states none of them up front:
+
+| Panel | Geography |
+|---|---|
+| 16.1 Residential | census tract **or** community area (user-selected) |
+| 16.2 Transaction Trends | ZIP |
+| 16.3 Comps | 0.75-mile radius |
+| 16.4 / 16.5 SBA | ZIP |
+
+Each sub-section opens with a `.kyp-scopenote`:
+
+```jsx
+<p className="kyp-scopenote">Figures below describe <b>Census Tract 242900</b>, not this address</p>
+<p className="kyp-scopenote">Figures below describe <b>ZIP 60612</b>, not this address</p>
+<p className="kyp-scopenote">Figures below describe sales within <b>0.75 miles</b>, not this address</p>
+```
+
+**Do not build a unified ZIP ↔ tract toggle across the section.** HMDA has no ZIP key — the index is
+`byTract` / `byCommunity`, built from FFIEC records that carry census tract. Tracts and ZIPs do not
+nest, so a crosswalk would silently misattribute loans. The scope label is the honest answer.
+
+### 6.6 Colour
+
+- `.kyp-block ind` — All applications (a count, no claim)
+- `.kyp-block grn` — Originated (an authority closed these loans; the polarity is real)
+- `.kyp-block slate` — Denied (context: 8.5% is not "bad" until an authority sets the band)
+- `.kyp-block dark` — Avg rate
+- **Denial reasons: neutral `.kyp-hbar`, not `.att`.** A distribution among denied applications is
+  not a verdict on this property. Orange would read as "watch" with nothing behind it.
+- Rank ▲ uses `--kyp-green`, ▼ uses `--kyp-bad` — an actual year-over-year direction, not a verdict
+  on the address.
+- **No amber anywhere.** Verified: zero occurrences in the patch.
+
+### 6.7 What the restyle replaces
+
+Every class this section renders today lives in `index.css`, **none in `kyp-base.css`** — verified by
+parsing both sheets (969 selectors in kyp-base, 2,046 in index.css):
+
+| Family | Rules in index.css | Rules in kyp-base.css |
+|---|---|---|
+| `.hmda-*` | 38 | **0** |
+| `.cmp-*` | 46 | **0** |
+| `.ratecard` / `.rc*` | 6 | **0** |
+| `.ttbox` / `.chart` / `.yoy` / `.yc` | 8 | **0** |
+| `.sbawrap` / `.kpis` / `.ssh` / `.lb` / `.loans` | 12 | **0** |
+
+That is why this section looks like the old design: it was built entirely outside the design system.
+Leave the `index.css` rules in place this step (`.cmp-*` is still used by 16.3) and delete them in
+Prompt 5.
+
+---
+
+## 7. Prompt 4 — print and scan
+
+> 1. In `RunDetail.tsx` `PRINT_SECTIONS` (~line 488): add
+>    `{ id: 'mortgage-lending', label: 'Mortgage & Lending Market', defaultChecked: true, group: 'Mortgage & Lending' }`
+>    and move `hmda-stats`, `sba-loans` and `comparable-sales` under that group as `level: 1`.
+>    Add `{ id: 'transaction-trends', label: 'Area Transaction Trends', defaultChecked: true, level: 1, group: 'Mortgage & Lending' }`.
+> 2. **Give each sub-panel the print anchor its checkbox already assumes.** `handlePrint` toggles
+>    `document.getElementById('print-section-' + id)`. Today `print-section-hmda-stats` and
+>    `print-section-sba-loans` **do not exist anywhere in the DOM**, so those two checkboxes are dead
+>    — unchecking them does nothing. Add `id="print-section-hmda-stats"`,
+>    `id="print-section-sba-loans"` and `id="print-section-transaction-trends"` to the three
+>    wrappers. `print-section-comparable-sales` already exists; keep it.
+> 3. In the `jumpSections` list (~4199–4204), repoint `Area Transaction Trends`,
+>    `Local Mortgage Market (HMDA)`, `SBA Commercial Loans` and `Recently Sold Comps` from
+>    `setSectionOpen('preTitleCheck', true)` to the new row, returning
+>    `'print-section-mortgage-lending'`. Leave `Pre-Title Check` and `Lien Search` pointing at
+>    `print-section-pre-title-check`.
+
+---
+
+## 8. Prompt 5 — Area Transaction Trends: the data fix
+
+**Separate prompt, server only, no UI change.** Run it after 1–4 so a data-layer bug never rides
+along with a 1,400-line JSX move.
+
+### 8.1 Diagnosis
+
+The panel is **not** showing "no data for this ZIP." `getTransactionTrends` builds
+`years` as `TARGET_YEARS.map(...)` — always four entries, even when every count is zero. The client
+renders its fallback only when `transactionTrendsData?.years?.length > 0` is falsy, which requires a
+**non-OK HTTP response**. The route returns:
+
+- `400` — only for a malformed ZIP, and the client applies the same `/^\d{5}$/` guard, so unreachable
+- `503` — when `getTransactionTrends` returns `null`
+- `500` — on a throw, but `getNbhdsForZip` and `buildSaleHistCache` both catch internally
+
+`null` is returned at exactly one line: `if (!saleHistCache) return null`. **So
+`buildSaleHistCache()` is failing.** It swallows the error into:
+
+```
+[TransactionTrends] Sale history cache failed: <message>
+```
+
+**That line is in the Replit console right now and names the cause.** Read it before changing
+anything.
+
+The likely cause is the query itself. It fetches **every Chicago sale since 2022**, grouped by
+year × nbhd × class, `$limit=200000`, on a 30-second `AbortSignal.timeout` — to answer a question
+about one ZIP. React Query retries 3×, so the empty state appears ~90 s after load.
+
+### 8.2 The second bug, which the first one is hiding
+
+The neighbourhood join key is built two different ways:
+
+```ts
+// getNbhdsForZip — reads nbhd from the ASSESSOR UNIVERSE (c49d-89sn), then pads and prefixes
+const nbhdPadded  = String(row.nbhd || '').padStart(3, '0');
+const saleHistNbhd = tc + nbhdPadded;          // e.g. "74" + "011" = "74011"
+
+// buildSaleHistCache — reads nbhd from PARCEL SALES (wvhk-k5uv) and uses it RAW
+const nbhd = String(row.nbhd || '');
+```
+
+Both are Cook County Assessor datasets and almost certainly use the same convention. If they do,
+one side is wrong and **every ZIP matches zero neighbourhoods**. Fix the fetch alone and the panel
+renders four zero-height bars instead of an error — which looks like working code. **Both must be
+fixed together.** Confirm the convention with one probe before writing the fix:
+
+```
+https://datacatalog.cookcountyil.gov/resource/wvhk-k5uv.json?$select=nbhd,township_code&$limit=3
+https://datacatalog.cookcountyil.gov/resource/c49d-89sn.json?$select=nbhd,township_name&$limit=3
+```
+
+If `wvhk-k5uv.nbhd` is already 5 digits, drop the `tc +` concatenation. If it is 3 digits, apply the
+same `township_code + pad(nbhd,3)` on **both** sides.
+
+### 8.3 Third bug
+
+`getNbhdsForZip` uses `$limit=500` with **no `$group`** against a ZIP holding tens of thousands of
+parcels, so it samples 500 arbitrary rows and can miss neighbourhoods. Add
+`$group=township_name,nbhd` (or `$select=distinct township_name,nbhd`) and drop the limit to
+something small.
+
+### 8.4 The prompt
+
+> In `server/transactionTrends.ts`:
+>
+> 1. First read the Replit console for `[TransactionTrends] Sale history cache failed:` and report
+>    the message before changing code.
+> 2. Probe both Socrata datasets for the real shape of `nbhd` (the two URLs above) and report what
+>    you find. Do not guess.
+> 3. **Scope the sale-history query to the ZIP's neighbourhoods instead of the whole city.** Resolve
+>    `getNbhdsForZip(zip)` first, then fetch sales filtered to `nbhd in (…)` for that ZIP only.
+>    Delete the global `saleHistCache` / `saleHistPromise` machinery and cache per ZIP with the
+>    existing 7-day TTL. This is the fix for both the timeout and the wasted work.
+> 4. Make the two `nbhd` key constructions agree, per what step 2 found.
+> 5. **Add median sale price for the most recent complete year only.** SoQL has no `median()` — this
+>    codebase already hand-rolls it in `comparableSales.ts:51`, `airbnbStats.ts:117` and
+>    `newConstruction.ts`. Do the same: for the latest year, fetch the individual sale rows for that
+>    ZIP's neighbourhoods with `$select=class,sale_price`, keep the existing
+>    `sale_filter_less_than_10k=false` and `sale_filter_deed_type=false` filters, bucket by
+>    `classifyClass`, and compute a median per bucket in JS. **Median, not average** — the dataset
+>    contains $1 family transfers and portfolio deals that wreck a mean. Counts stay across all four
+>    years; price is the latest year only.
+> 6. Extend `YearSnapshot` with `medianPrice?: Partial<Record<CatKey, number | null>>`, populated for
+>    the latest year and omitted for the rest.
+> 7. **Delete the `ranking` object** from `TransactionTrendsResult` and from `getTransactionTrends`,
+>    along with `zipTotalsCache` and `computeZipTotals`. It is process-local, so it ranks the ZIP
+>    against itself; the client already hides it with a comment saying exactly that.
+> 8. Keep the route's 503 path, but log the underlying failure message into the response body in
+>    development so the next failure is not silent.
+>
+> Do not touch any client file in this prompt.
+
+### 8.5 UI once the data returns
+
+`.kyp-ttchart` for the grouped bars, `.kyp-ttlegend` for the key, `.kyp-medrow` / `.kyp-medcard` for
+the four median-price cards, `.kyp-emptypanel` for the empty state. All in the patch.
+
+Footer, verbatim:
+
+> Counts are transaction volume, not price. Median price is the most recent complete year only.
+> Source: Cook County Assessor parcel sales.
+
+---
+
+## 9. The CSS — append to the end of `client/src/kyp-base.css`
+
+**Parser-verified** (`tinycss2`, walking qualified-rules and recursing into `@media`):
+
+- 83 rules, 81 unique selectors, **0 parse errors**
+- **0 selector collisions** against the 969 selectors already in `kyp-base.css`
+- 11 `var()` references, **0 unresolved** against the 20 defined `--kyp-*` tokens
+- **0 amber occurrences**
+- `kyp-base.css` 102,133 → 113,501 bytes (+11,368)
+
+Append-only. It redefines nothing, so nothing live can regress.
+
+```css
+/* ============================================================
+   Step 24 — Mortgage & Lending Market
+   Append to the END of client/src/kyp-base.css. Append-only:
+   every selector below is new (verified: zero collisions against
+   the 969 selectors already in kyp-base.css).
+
+   These replace index.css families that were never in the design
+   system: .hmda-*, .ratecard/.rc*, .ttbox/.chart/.yoy/.yc,
+   .sbawrap/.kpis/.kpi/.ssh/.lb/.lbars/.loans/.loan.
+   ============================================================ */
+
+/* --- 1. Segmented control (scope + year) ------------------- */
+/* Replaces .hmda-seg / .hmda-seg-on */
+.kyp-segrow {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap; margin: 4px 0 16px;
+}
+.kyp-segrow .spacer { margin-left: auto; }
+.kyp-seg {
+  display: inline-flex; padding: 3px; gap: 2px;
+  background: var(--kyp-wash); border-radius: 9px;
+}
+.kyp-seg button {
+  font-family: var(--kyp-mono); font-size: 10.5px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  padding: 7px 13px; border: 0; border-radius: 7px; cursor: pointer;
+  background: transparent; color: var(--kyp-ink2);
+}
+.kyp-seg button:hover { color: var(--kyp-ink); }
+.kyp-seg button.on { background: var(--kyp-indigo); color: #fff; }
+
+/* --- 2. Scope caveat above scoped figures ------------------ */
+/* "Where figures describe something other than this address, say so ABOVE them." */
+.kyp-scopenote {
+  font-family: var(--kyp-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--kyp-muted); margin: 0 0 9px;
+}
+.kyp-scopenote b { color: var(--kyp-indigo); font-weight: 700; }
+
+/* --- 3. City ranking grid ---------------------------------- */
+/* Replaces .hmda-card + .hmda-rankgrid + .hmda-clbl */
+.kyp-rankcard {
+  border: 1px solid var(--kyp-line); border-radius: 12px;
+  padding: 15px 17px; margin: 14px 0;
+}
+.kyp-rankcard .rl {
+  font-family: var(--kyp-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--kyp-ink2); margin-bottom: 11px;
+}
+.kyp-rankgrid {
+  display: grid; grid-template-columns: 1fr auto auto;
+  gap: 7px 22px; align-items: baseline;
+}
+.kyp-rankgrid .h {
+  font-family: var(--kyp-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .05em; color: var(--kyp-muted); text-align: right;
+}
+.kyp-rankgrid .k { font-size: 13px; color: var(--kyp-ink); }
+.kyp-rankgrid .v {
+  font-family: var(--kyp-disp); font-size: 21px; line-height: 1;
+  color: var(--kyp-ink); text-align: right; white-space: nowrap;
+}
+.kyp-rankgrid .v.prior { font-size: 15px; color: var(--kyp-muted); }
+.kyp-rankgrid .v .up { color: var(--kyp-green); font-size: 12px; margin-left: 4px; }
+.kyp-rankgrid .v .dn { color: var(--kyp-bad);   font-size: 12px; margin-left: 4px; }
+.kyp-rankfoot {
+  font-size: 10.5px; color: var(--kyp-muted); margin-top: 10px;
+  padding-top: 9px; border-top: 1px solid var(--kyp-line);
+}
+.kyp-rankfoot .up { color: var(--kyp-green); }
+.kyp-rankfoot .dn { color: var(--kyp-bad); }
+
+/* --- 4. Rate comparison ------------------------------------ */
+/* Replaces .ratecard/.rchd/.rccmp/.rcside/.rcdelta/.rcexplain/.rcfine */
+.kyp-ratecmp {
+  border: 1px solid var(--kyp-line); border-radius: 12px;
+  padding: 16px 18px; margin: 14px 0;
+}
+.kyp-ratecmp .rh {
+  font-family: var(--kyp-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--kyp-ink2); margin-bottom: 14px;
+}
+.kyp-ratecmp .cmp {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 16px; align-items: center;
+}
+.kyp-ratecmp .side .lab {
+  font-family: var(--kyp-mono); font-size: 9px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  color: var(--kyp-muted); display: block; margin-bottom: 6px;
+}
+.kyp-ratecmp .side .v {
+  font-family: var(--kyp-disp); font-size: 38px; line-height: .95;
+  color: var(--kyp-ink);
+}
+.kyp-ratecmp .side.today .v { color: var(--kyp-indigo); }
+.kyp-ratecmp .side .s {
+  font-size: 10.5px; color: var(--kyp-muted); margin-top: 5px; line-height: 1.35;
+}
+.kyp-ratecmp .side.today { text-align: right; }
+.kyp-ratecmp .delta { text-align: center; }
+.kyp-ratecmp .delta .amt {
+  font-family: var(--kyp-mono); font-size: 13px; font-weight: 700;
+  color: var(--kyp-ink);
+}
+.kyp-ratecmp .delta .lbl {
+  font-family: var(--kyp-mono); font-size: 8.5px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  color: var(--kyp-muted); margin-top: 3px; line-height: 1.3;
+}
+.kyp-ratecmp .fine {
+  font-size: 10px; color: var(--kyp-muted); margin-top: 13px;
+  padding-top: 11px; border-top: 1px solid var(--kyp-line); line-height: 1.45;
+}
+
+/* --- 5. Mix grid (donuts / distributions) ------------------ */
+.kyp-mix { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin: 12px 0; }
+.kyp-mixcard {
+  border: 1px solid var(--kyp-line); border-radius: 11px; padding: 13px 15px;
+}
+.kyp-mixcard .mh {
+  font-family: var(--kyp-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--kyp-ink2); margin-bottom: 11px;
+}
+.kyp-mixcard .mh .note { font-weight: 400; color: var(--kyp-muted); letter-spacing: .02em; }
+.kyp-mixrow {
+  display: flex; align-items: center; gap: 9px; padding: 4px 0; font-size: 12.5px;
+}
+.kyp-mixrow .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.kyp-mixrow .nm { color: var(--kyp-ink); flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kyp-mixrow .pc {
+  font-family: var(--kyp-mono); font-size: 12px; font-weight: 700;
+  color: var(--kyp-ink); flex: none;
+}
+
+/* --- 6. SBA borrower rows ---------------------------------- */
+/* Replaces .loans/.loan/.main/.right/.nm/.meta/.via/.amt/.aux/.jobs/.date */
+.kyp-loanrow {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 11px 0; border-bottom: 1px solid var(--kyp-line);
+}
+.kyp-loanrow:last-of-type { border-bottom: 0; }
+.kyp-loanrow .lmain { flex: 1; min-width: 0; }
+.kyp-loanrow .lnm {
+  font-size: 13.5px; font-weight: 600; color: var(--kyp-ink);
+  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.kyp-loanrow a.lnm { color: var(--kyp-indigo); text-decoration: none; }
+.kyp-loanrow a.lnm:hover { text-decoration: underline; }
+.kyp-loanrow .lmeta {
+  font-size: 11.5px; color: var(--kyp-ink2); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.kyp-loanrow .lvia {
+  font-family: var(--kyp-mono); font-size: 10px; color: var(--kyp-muted); margin-top: 3px;
+}
+.kyp-loanrow .lright { text-align: right; flex: none; }
+.kyp-loanrow .lamt {
+  font-family: var(--kyp-disp); font-size: 21px; line-height: 1; color: var(--kyp-ink);
+}
+.kyp-loanrow .laux {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 7px; margin-top: 5px;
+}
+.kyp-loanrow .ljobs {
+  font-family: var(--kyp-mono); font-size: 9.5px; font-weight: 700;
+  padding: 2px 6px; border-radius: 4px;
+  background: var(--kyp-indigoSoft); color: var(--kyp-indigo);
+}
+.kyp-loanrow .ldate {
+  font-family: var(--kyp-mono); font-size: 10px; color: var(--kyp-muted);
+}
+/* .kyp-morelink is NOT redefined here — it already exists in kyp-base.css
+   (mono / 10px / 700 / indigo / margin-top:13px). The "+14 more 504 loans"
+   and "+65 more 7(a) loans" links reuse it as-is. Nearly reinventing it is
+   exactly what the collision check caught. */
+
+/* --- 7. Transaction-trends grouped bar chart --------------- */
+/* Replaces .ttbox/.chart/.yax/.plot/.plotarea/.grp/.xlab/.legend/.yoy/.yc */
+.kyp-ttchart { display: flex; gap: 11px; margin: 12px 0 6px; }
+.kyp-ttchart .yax {
+  display: flex; flex-direction: column; justify-content: space-between;
+  height: 190px; text-align: right; flex: none;
+  font-family: var(--kyp-mono); font-size: 9.5px; color: var(--kyp-muted);
+}
+.kyp-ttchart .plot { flex: 1; min-width: 0; }
+.kyp-ttchart .area {
+  position: relative; height: 190px;
+  border-bottom: 1px solid var(--kyp-ink);
+  display: flex; align-items: flex-end; justify-content: space-around; gap: 6px;
+}
+.kyp-ttchart .area .grid {
+  position: absolute; left: 0; right: 0; height: 1px;
+  background: var(--kyp-line); pointer-events: none;
+}
+.kyp-ttchart .grp {
+  display: flex; align-items: flex-end; gap: 3px;
+  flex: 1; height: 100%; justify-content: center;
+}
+.kyp-ttchart .grp i { display: block; width: 15px; border-radius: 3px 3px 0 0; }
+.kyp-ttchart .xlab {
+  display: flex; justify-content: space-around; margin-top: 7px;
+  font-family: var(--kyp-mono); font-size: 10px; font-weight: 700; color: var(--kyp-ink2);
+}
+.kyp-ttchart .xlab span { flex: 1; text-align: center; }
+.kyp-ttlegend {
+  display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0;
+  font-family: var(--kyp-mono); font-size: 10px; color: var(--kyp-ink2);
+}
+.kyp-ttlegend span { display: inline-flex; align-items: center; gap: 6px; }
+.kyp-ttlegend i { width: 9px; height: 9px; border-radius: 2px; display: block; }
+
+/* --- 8. Median-price row (new data, most recent year) ------ */
+.kyp-medrow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0; }
+.kyp-medcard {
+  border: 1px solid var(--kyp-line); border-radius: 11px; padding: 12px 13px;
+}
+.kyp-medcard .ml {
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--kyp-mono); font-size: 9px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--kyp-ink2);
+}
+.kyp-medcard .ml i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.kyp-medcard .mv {
+  font-family: var(--kyp-disp); font-size: 25px; line-height: 1;
+  color: var(--kyp-ink); margin-top: 8px;
+}
+.kyp-medcard .ms { font-size: 10.5px; color: var(--kyp-muted); margin-top: 4px; }
+.kyp-medcard.empty .mv { color: var(--kyp-muted); }
+
+/* --- 9. Empty state ---------------------------------------- */
+.kyp-emptypanel {
+  border: 1px dashed var(--kyp-line); border-radius: 12px;
+  padding: 22px 20px; margin: 12px 0; text-align: center;
+}
+.kyp-emptypanel .et {
+  font-family: var(--kyp-mono); font-size: 10.5px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--kyp-ink2);
+}
+.kyp-emptypanel .es { font-size: 12px; color: var(--kyp-muted); margin-top: 7px; }
+
+@media (max-width: 720px) {
+  .kyp-mix,
+  .kyp-medrow { grid-template-columns: 1fr; }
+  .kyp-ratecmp .cmp { grid-template-columns: 1fr; }
+  .kyp-ratecmp .side.today { text-align: left; }
+}
+
+/* --- 10. Donut + legend -------------------------------------
+   The donut form is KEPT from the current design (MiniPieChart,
+   88x88, innerRadius 24, outerRadius 40). Only the type, colour
+   and card around it change. Recharts still draws the ring; these
+   rules style its container and legend. */
+.kyp-donut { display: flex; align-items: center; gap: 16px; }
+.kyp-donut svg,
+.kyp-donut .recharts-wrapper { flex: none; }
+.kyp-donut .dlegend { flex: 1; min-width: 0; }
+
+/* --- 11. Additions found by rendering the mock --------------- */
+/* Long lender names wrap at the 150px default .kyp-hbar label column. */
+.kyp-hbar.wide .hl { width: 230px; }
+/* .kyp-morelink was written for a span/anchor; the SBA "+14 more" control is a
+   <button>, which brings UA border/background. New selector, higher specificity,
+   the existing .kyp-morelink rule is untouched. */
+button.kyp-morelink { background: none; border: 0; padding: 0; }
+```
+
+---
+
+## 10. Prompt 6 — Recently Sold Comps: stop stating something false
+
+**Client + a small server addition. No data-source change** — replacing the characteristics file is
+a separate step (§11).
+
+### 10.1 The one false statement in the section
+
+`ComparableSalesView.tsx` renders, when no comps survive:
+
+```jsx
+`No sales found within ${searchParams.radiusMiles} mi for class ${searchParams.propertyClass} in the last ${searchParams.monthsBack} months.`
+```
+
+For a commercial subject that sentence is **factually wrong**. Trace it:
+
+| Step | What happens | Line |
+|---|---|---|
+| 1 | `wvhk-k5uv` returns sales for the class — often 100+ rows | `comparableSales.ts:97` |
+| 2 | Count is logged and then discarded | `:107` |
+| 3 | Characteristics fetched from `bcnq-qi2z` | `:119` |
+| 4 | `if (!c) continue;` drops every sale with no characteristics row | `:136` |
+| 5 | `candidates` empty → radius expands 0.75 → 3.0 mi finding nothing | `:163–195` |
+| 6 | `totalCandidates: joined.length` — counted **after** the join, so `0` | `:235` |
+
+`bcnq-qi2z` is titled *"Assessor **[Archived 05-11-2022]** — Residential Property Characteristics"*
+and the selected fields are `beds`, `fbath`, `hbath` — residential-only concepts. So for commercial
+classes the join almost certainly returns nothing and all the sales die at step 4.
+
+**A genuinely empty area and a total join failure produce byte-identical responses.** The number
+that tells them apart is computed at step 2 and thrown away.
+
+### 10.2 What is NOT wrong — do not remove anything
+
+The comps themselves are sound and already disclosed honestly. `ComparableSalesView` renders a
+confidence pill, the comp count, `{radius} mi radius · last {months} months · {n} total nearby
+sales`, an expanded-radius warning above 0.75 mi, and *"Same property class required for matching.
+Informational only — not a certified appraisal."* Sale prices, dates, distances and class matches
+are all real county records. **Keep the section. Keep the comp cards. Keep the medians.**
+
+### 10.3 The prompt
+
+> **Step 1 — probe before changing anything, and report what you find.** Do not write code until
+> both answers are in hand.
+>
+> a. Does the characteristics dataset cover commercial parcels?
+>    `https://datacatalog.cookcountyil.gov/resource/bcnq-qi2z.json?$select=pin,class&$where=class>='300'&$limit=1`
+>    An empty array confirms residential-only.
+>
+> b. Is `buyer_name` a real column on the sales dataset?
+>    `https://datacatalog.cookcountyil.gov/resource/wvhk-k5uv.json?$select=buyer_name&$limit=1`
+>    A 400 means `comparableSales.ts:97` is selecting a column that does not exist — which would
+>    make `soqlFetch` throw, the catch return `emptyResult`, and comps render empty **for every
+>    property, residential included**. If it 400s, find the correct field name (likely
+>    `sale_buyer_name`) and fix the `$select`. Report before and after.
+>
+> **Step 2 — `server/comparableSales.ts`: return the counts that distinguish the two failures.**
+>
+> Add to `CompsResult`:
+> ```ts
+> rawSalesCount: number;          // rows returned by the sales query, before any join
+> matchedCharacteristics: number; // PINs that found a characteristics record
+> ```
+> Populate both in `getComparableSales` (`rawSalesCount = salesData.length`,
+> `matchedCharacteristics = charsMap.size`) **and in `emptyResult`**, which currently takes no counts
+> — give it optional parameters defaulting to `0` so the early returns stay honest.
+>
+> **Step 3 — `ComparableSalesView.tsx`: branch the empty state on those counts.**
+>
+> Replace the single `No sales found within…` string with:
+>
+> - `rawSalesCount === 0` →
+>   `No sales of class {propertyClass} were recorded within {radiusMiles} mi in the last {monthsBack} months.`
+> - `rawSalesCount > 0 && matchedCharacteristics === 0` →
+>   `{rawSalesCount} sales of class {propertyClass} were found nearby, but the county characteristics
+>   file has no record for them — so no comparables could be scored. This affects commercial and
+>   recently-assessed parcels.`
+> - `rawSalesCount > 0 && matchedCharacteristics > 0 && basedOnComps === 0` →
+>   `{rawSalesCount} sales were found nearby but none fell within {radiusMiles} mi of this address.`
+>
+> Keep the existing `AlertTriangle` icon and `text-muted-foreground` styling. This is a message
+> change, not a layout change.
+>
+> **Step 4 — gate Indicated Value.**
+>
+> `Indicated Value` is `median $/sqft × subject sqft` over at most 10 unadjusted county comps. When
+> the search expanded a long way it crosses neighbourhoods with very different price levels, and the
+> figure still renders as a confident dollar amount. Suppress it — and only it — when
+> `marketAnalysis.confidence === 'Low' || searchParams.radiusMiles > 1.5`. In that case render the
+> other two stats and this line in its place:
+>
+> `No value estimate — comps are {radiusMiles} mi out, too far to support one.`
+>
+> **Keep `Median Sale Price` and `Median $/Sqft` in every case.** Those describe sales that actually
+> happened; Indicated Value is an estimate about *this* property and is the only number here making
+> a claim the data cannot carry at that radius.
+>
+> **Step 5 — fix the dead scan hero count.**
+>
+> `client/src/components/report/scanBuilder.tsx:42` declares `compsData?: { sales?: unknown[] }` and
+> `:120` reads `ctx.compsData?.sales?.length`. The API returns **`comparables`**, not `sales`, so the
+> comp count on the scan card is permanently `undefined`. Change the type to
+> `{ comparables?: unknown[] }` and the read to `ctx.compsData?.comparables?.length`.
+>
+> **Step 6 — `median()` on an even count.**
+>
+> `comparableSales.ts:51` returns `s[Math.floor(s.length / 2)]`, which on 10 comps takes the 6th
+> value rather than averaging the 5th and 6th — a small upward bias. Average the two middle values
+> when the length is even. Same fix in `airbnbStats.ts:117` if you touch it; leave
+> `newConstruction.ts` alone this step.
+
+### 10.4 Verify
+
+- A residential address still renders comps, medians and Indicated Value exactly as before.
+- A commercial address (class 3xx) now says how many sales were found and why none could be scored,
+  instead of claiming none exist.
+- An address whose radius expanded past 1.5 mi shows Median Sale Price and Median $/Sqft but no
+  Indicated Value.
+- The scan card for Mortgage & Lending Market shows a comp count instead of nothing.
+
+---
+
+## 11. Deferred — commercial comps need a different characteristics source
+
+Prompt 6 makes the commercial case **honest**. It does not make it **work**. That needs the join to
+move off the archived residential file.
+
+The candidate is `c49d-89sn` (Assessor – Parcel Universe): current, covers every class, and your code
+already reads `char_bldg_sf, char_land_sf, char_yrblt, char_type_resd` from it at `routes.ts:178`.
+`char_bldg_sf` is the sqft the scoring needs, and beds/baths going null is harmless — the scoring
+already guards `if (beds !== null && comp.beds !== null)`, so those terms simply drop out and
+distance, sqft and recency carry the score.
+
+**The open question is coordinates.** Nothing in the codebase reads a centroid or lat/lng from
+`c49d-89sn` — every coordinate in comps comes from `bcnq-qi2z`. If the universe carries a centroid,
+this is an endpoint swap plus a field rename. If it does not, a second geocode source is needed and
+this becomes real work rather than a swap. Check that first:
+
+```
+https://datacatalog.cookcountyil.gov/api/views/c49d-89sn/columns.json
+```
+
+Do this as its own step, after Prompts 1–6 are in and verified.
+
+---
+
+## ✅ Done when
+
+- [ ] `Mortgage & Lending Market` is a top-level row directly after Pre-Title Check.
+- [ ] Pre-Title Check still renders its verdict, score, issues, disclaimers and owner-lien search —
+      and `PreTitleCheck.tsx` has **no diff**.
+- [ ] `Who's Buying Right Now?` and `Recently Sold Comps` no longer appear under Neighbourhood & People.
+- [ ] Five numbered subheads, 16.1–16.5, renumbering when the row is dragged.
+- [ ] A `.kyp-scopenote` above every sub-section, naming tract / ZIP / radius.
+- [ ] Year toggle offers 2025, 2024 **and 2023**.
+- [ ] No takeaway box in any of the five. The 504 address caveat survives as `.kyp-loan-scope`.
+- [ ] All four donuts still render as donuts; `MiniPieChart`'s Recharts call is unchanged.
+- [ ] No amber. Denial reasons are neutral, not orange. Rank arrows use `--kyp-green` / `--kyp-bad`.
+- [ ] `print-section-hmda-stats`, `print-section-sba-loans` and `print-section-transaction-trends`
+      exist in the DOM and their print checkboxes actually hide something.
+- [ ] Area Transaction Trends renders four years of counts and four median-price cards, and the
+      `ranking` field is gone from the API response.
+- [ ] A commercial address says how many sales were found and why none could be scored — it no
+      longer claims no sales exist.
+- [ ] Indicated Value is suppressed at `confidence === 'Low'` or radius > 1.5 mi; the two medians
+      always render.
+- [ ] The scan card shows a comp count (`comparables`, not `sales`).
+
+---
+
+## Not in this step
+
+- `.cmp-*` (46 rules) — the comp cards keep their current styling. 16.3 gets the design-system
+  wrapper, blocks and source line only. Restyling the cards is its own step.
+- Deleting the now-dead `index.css` families (`.hmda-*`, `.ratecard`, `.ttbox`, `.sbawrap`…) —
+  Prompt 5 cleanup, after the new styling is confirmed in a real report.
+- `Places of Worship` is also filed under Neighbourhood & People and is also mis-parented. Out of
+  scope; flagging it so it is not forgotten.
+- Moving the comps characteristics join off the archived `bcnq-qi2z` file — see §11. Prompt 6
+  makes the commercial case honest; §11 is what makes it work.

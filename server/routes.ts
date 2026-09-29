@@ -4713,13 +4713,15 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
 
     const data2025 = getHmdaForLocation(2025, tract, communityArea);
     const data2024 = getHmdaForLocation(2024, tract, communityArea);
+    const data2023 = getHmdaForLocation(2023, tract, communityArea);
 
-    if (!data2025.tract && !data2025.community && !data2024.tract && !data2024.community) {
+    if (!data2025.tract && !data2025.community && !data2024.tract && !data2024.community && !data2023.tract && !data2023.community) {
       return res.status(404).json({ message: "No HMDA data available for this location" });
     }
 
     const rank2025 = communityArea ? getCommunityRankings(2025, communityArea) : null;
     const rank2024 = communityArea ? getCommunityRankings(2024, communityArea) : null;
+    const rank2023 = communityArea ? getCommunityRankings(2023, communityArea) : null;
 
     loadHmdaRates();
     const tractRates = tract ? (hmdaRatesByTract?.[tract] || null) : null;
@@ -4728,6 +4730,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     res.json({
       2025: { ...data2025, communityRank: rank2025 },
       2024: { ...data2024, communityRank: rank2024 },
+      2023: { ...data2023, communityRank: rank2023 },
       rates: { tract: tractRates, community: communityRates },
     });
   });
@@ -9497,7 +9500,12 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       res.json(result);
     } catch (err) {
       console.error('[TransactionTrends] Error:', err);
-      res.status(500).json({ error: 'Failed to fetch transaction trends' });
+      res.status(503).json({
+        error: 'Transaction data not yet available',
+        ...(process.env.NODE_ENV === 'development'
+          ? { detail: err instanceof Error ? err.message : String(err) }
+          : {}),
+      });
     }
   });
 

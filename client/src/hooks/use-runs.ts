@@ -3464,10 +3464,23 @@ export interface HmdaRates {
   y2023?: HmdaYearRate | null;
 }
 
+export type HmdaYear = 2025 | 2024 | 2023;
+export type HmdaRateScope = 'tract' | 'community';
+
 export interface HmdaData {
   2025: HmdaYearData;
   2024: HmdaYearData;
+  2023?: HmdaYearData | null;
   rates?: { tract: HmdaRates | null; community: HmdaRates | null };
+}
+
+export function getHmdaYearRateForScope(
+  rates: HmdaData['rates'] | null | undefined,
+  scope: HmdaRateScope,
+  year: HmdaYear,
+): HmdaYearRate | null {
+  const yearKey = `y${year}` as const;
+  return rates?.[scope]?.[yearKey] ?? null;
 }
 
 export function useHmdaStats(tract: string | null | undefined, communityArea: string | null | undefined) {
