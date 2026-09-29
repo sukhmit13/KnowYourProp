@@ -356,6 +356,9 @@ export function CountyRecordSection({
       {isCommercial ? <RecordField label="Township" value={commercial?.township || null} reason="township is not carried" sub={commercial?.classEstimate ? `Class estimate / ${commercial.classEstimate}` : undefined} /> : null}
       {isCommercial ? <RecordField label="Associated PINs" value={commercial?.pins || null} reason="associated PINs are not recorded" className="w2" sub={commercial?.pins ? "assessment covers both listed PINs" : undefined} /> : null}
       {condo ? <RecordField label="Condominium record" value={cd.isCondo ? "Yes" : null} reason="condominium status is not recorded" sub={cd.prorationRate != null ? `Proration / ${(cd.prorationRate * 100).toFixed(2)}%` : undefined} /> : null}
+      {condo && numberValue(cd.unitSf) !== null && <RecordField label="Condo unit size" value={`${fmtNumber(cd.unitSf)} sq ft`} />}
+      {condo && numberValue(cd.buildingUnits) !== null && <RecordField label="Units in building" value={fmtNumber(cd.buildingUnits)} sub={cd.nonResidentialUnits ? `${cd.nonResidentialUnits} non-residential` : undefined} />}
+      {condo && (cd.isParkingSpace || cd.isCommonArea) && <RecordField label="Condo unit type" value={cd.isParkingSpace ? "Parking space" : "Common area"} />}
     </div>
   );
 
