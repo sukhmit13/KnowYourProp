@@ -95,7 +95,7 @@
 
 /* ========== FILLED STAT BLOCK ========== */
 .kyp-blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
-.kyp-block{border-radius:12px;padding:16px;color:#fff;min-height:132px;display:flex;flex-direction:column;justify-content:space-between}
+.kyp-block{border-radius:12px;padding:14px 15px;color:#fff;min-height:0;display:flex;flex-direction:column;justify-content:flex-start}
 .kyp-block.ind{background:var(--kyp-indigoL)} .kyp-block.grn{background:var(--kyp-green)}
 .kyp-block.debt{background:var(--kyp-debt)}
 .kyp-block.dark{background:#16171b} .kyp-block.slate{background:var(--kyp-slate)}

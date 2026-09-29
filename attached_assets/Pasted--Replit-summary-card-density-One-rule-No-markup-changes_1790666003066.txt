@@ -1,0 +1,79 @@
+# Replit — summary card density
+
+**One rule. No markup changes. Affects every section that uses summary cards.**
+
+Ship this on its own, before Step 21, so you can see it across the whole report in isolation.
+
+---
+
+## The problem
+
+`client/src/kyp-base.css`, **line 98**:
+
+```css
+.kyp-block{border-radius:12px;padding:16px;color:#fff;min-height:132px;
+           display:flex;flex-direction:column;justify-content:space-between}
+```
+
+A typical card's content is about **74px** tall. `min-height:132px` forces the card to **164px**,
+and `justify-content:space-between` then takes all 58px of surplus and puts it *between the numeral
+and the label* — a hole in the middle of every card in the report.
+
+Measured on the live stylesheet: content 74px, rendered height 164px, internal gap 58px.
+
+---
+
+## The change
+
+Edit the existing rule. **Do not append a new one** — an append at equal specificity is harder to
+find later, and this is a correction to the base component, not a variant.
+
+```css
+.kyp-block{
+  border-radius:12px;
+  padding:14px 15px;          /* was 16px */
+  color:#fff;
+  min-height:0;               /* was 132px */
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start; /* was space-between */
+}
+```
+
+**164px → 102px.** Nothing is removed; the card is sized by its content.
+
+---
+
+## What is deliberately *not* changing
+
+- **No `gap`.** Two markup patterns are in use — some sections wrap `.bl`+`.bd` in a div, some put
+  them as flat children. A `gap` would blow out the flat pattern's internal rhythm. The existing
+  child margins (`.bl` `margin-top:8px`, `.bd` `2px`, `.bclaim` `margin-bottom:9px`,
+  `.bbreak` `margin-top:9px`) already produce the right spacing for both. Leave them alone.
+- **The numeral stays 36px.** Dropping it to 32px saves ~4px and costs the card its impact.
+- **No other `.kyp-block` rule changes.** `.count` sets its own `min-height`, `flex-direction`,
+  `gap` and `padding`, so it is unaffected. `.wash`, `.chrs-*`, `.debt`, `.red`, `.bad`, `.slate`,
+  `.ind-deep` and `.kyp-blocks.hero` only set colours or grid columns.
+
+---
+
+## Verified against
+
+Rendered and measured under four content patterns, all unbroken:
+
+| Pattern | Result |
+|---|---|
+| standard three-up, one-line captions | 164 → 102px |
+| one caption wrapping to two lines | row sizes to content instead of a fixed floor |
+| cards carrying a `.bclaim` chip (Listing) | chip spacing preserved |
+| flat children + a `.bbreak` divider (Permits) | divider rhythm preserved |
+
+---
+
+## ✅ Done-when
+
+- [ ] Line 98 edited in place; no duplicate `.kyp-block` rule added.
+- [ ] No `gap` property on `.kyp-block`.
+- [ ] `.bv` still 36px.
+- [ ] Spot-check a section with `.bclaim` cards (Listing) and one with `.bbreak` (Permits).
+- [ ] Spot-check the print stylesheet — cards should shrink there too, not overlap.
