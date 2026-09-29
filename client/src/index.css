@@ -1565,6 +1565,7 @@ a.cmp-nm{text-decoration:underline}
 .crm-jump{flex:none;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-family:var(--font-jbmono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--indigo);background:#fff;border:1px solid #dde1f6;border-radius:8px;padding:6px 11px;text-decoration:none;white-space:nowrap;cursor:pointer}
 .crm-jump svg{width:11px;height:11px;stroke:var(--indigo);fill:none}
 #ptax-bill,#ptax-assess,#ptax-exempt,#ptax-appeal,#far-analysis,#section-rentcast,#section-airbnb,#crime-breakdown,#crime-area-ranking,#transit-glance,#transit-ridership,#print-section-schools-daycare{scroll-margin-top:90px}
+#section-google-places-inline,#section-google-places-daycare{scroll-margin-top:90px}
 @media(max-width:520px){.crm-cn{flex-wrap:wrap}.crm-cn .crm-jump{margin-left:14px}}
 @media print{.crm-jump{display:none}}
 

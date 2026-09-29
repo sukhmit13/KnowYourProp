@@ -4190,7 +4190,13 @@ export default function RunDetail() {
           { label: 'Area News', icon: Newspaper, action: () => { setSectionOpen('addressNews', true); return 'print-section-address-news'; } },
           { label: 'Neighborhood News', icon: Newspaper, action: () => { setSectionOpen('neighborhoodNews', true); return 'print-section-neighborhood-news'; } },
           { label: 'LoopNet Listings', icon: Building, action: () => { setSectionOpen('developmentPotential', true); setSectionOpen('loopnetSection', true); return 'section-loopnet'; } },
-          { label: 'Nearby Competitors (Google Maps)', icon: MapPin, action: () => { setSectionOpen('developmentPotential', true); setSectionOpen('googlePlacesSection', true); return 'section-google-places'; } },
+          ...((googlePlacesSearchTerm || (isDaycare && placesConfirmed)) ? [{ label: 'Nearby Competitors (Google Maps)', icon: MapPin, action: () => {
+            setAccOpen((m) => ({ ...m, analysis: true }));
+            setAccHidden((m) => ({ ...m, analysis: false }));
+            setSectionOpen('projectTypeInfo', true);
+            setSectionOpen(isDaycare ? 'googlePlacesDaycareSection' : 'googlePlacesSection', true);
+            return isDaycare ? 'section-google-places-daycare' : 'section-google-places-inline';
+          } }] : []),
           { label: 'Development Potential & FAR', icon: Building2, action: () => { setSectionOpen('developmentPotential', true); return 'print-section-development-potential'; } },
         ];
         const q = sectionSearchQuery.toLowerCase();
@@ -5218,12 +5224,15 @@ export default function RunDetail() {
                     const halfMileCount = scanData.places.filter((p: any) => p.distanceMiles != null && p.distanceMiles <= 0.5).length;
                     const conceptLabel = confirmedFreeform || selectedProjectType;
                     const goToCompetitors = () => {
+                      setAccOpen((m) => ({ ...m, analysis: true }));
+                      setAccHidden((m) => ({ ...m, analysis: false }));
+                      setSectionOpen('projectTypeInfo', true);
                       if (isDaycare) {
-                        revealAnchor('print-section-daycare-estimator');
+                        setSectionOpen('googlePlacesDaycareSection', true);
+                        revealAnchor('section-google-places-daycare');
                       } else {
-                        setSectionOpen('developmentPotential', true);
                         setSectionOpen('googlePlacesSection', true);
-                        revealAnchor('section-google-places');
+                        revealAnchor('section-google-places-inline');
                       }
                     };
                     return (
@@ -5882,7 +5891,7 @@ export default function RunDetail() {
             </motion.div>
           </AccordionSection>
           {/* Project Use Specific Analysis - Collapsible Section */}
-          {(isDaycareOrSchool || isGrocery || isGasStation || isAutoService || isSeniorCare || isHotel || isRestaurant || isCoffeeShop || isBar || isCannabis) && (
+          {(isDaycareOrSchool || isGrocery || isGasStation || isAutoService || isSeniorCare || isHotel || isRestaurant || isCoffeeShop || isBar || isCannabis || !!googlePlacesSearchTerm) && (
           <AccordionSection {...accProps("analysis")}>
           <motion.div
             initial={{ opacity: 0 }}
@@ -6791,7 +6800,7 @@ export default function RunDetail() {
 
           {/* Nearby Day Care Centers (Google Maps) */}
           {isDaycare && (
-          <div>
+          <div id="section-google-places-daycare">
             <Collapsible open={isGooglePlacesDaycareOpen} onOpenChange={setIsGooglePlacesDaycareOpen}>
               <CollapsibleTrigger asChild>
                 <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="button-google-places-daycare-toggle">
@@ -6825,6 +6834,9 @@ export default function RunDetail() {
                 <div className="px-4 mt-1 pb-3">
                   {(isLoadingGooglePlacesDaycare || (googlePlacesDaycareData && googlePlacesDaycareData.status === 'pending')) && (
                     <p className="text-sm text-muted-foreground animate-pulse">Searching Google Maps for nearby day care centers — updates in ~90s…</p>
+                  )}
+                  {!isLoadingGooglePlacesDaycare && !googlePlacesDaycareData && (
+                    <p className="text-sm text-muted-foreground">Nearby day care competitors could not be loaded. Try again later.</p>
                   )}
                   {googlePlacesDaycareData && !isLoadingGooglePlacesDaycare && googlePlacesDaycareData.status !== 'pending' && (() => {
                     if (!googlePlacesDaycareData.count || googlePlacesDaycareData.count === 0) {
@@ -8195,7 +8207,7 @@ export default function RunDetail() {
           )}
 
           {/* Nearby Competitors (Google Maps) — inside project use analysis for all applicable types */}
-          {!isDaycare && googlePlacesSearchTerm && (googlePlacesData || isLoadingGooglePlaces) && (
+          {!isDaycare && googlePlacesSearchTerm && (
             <div id="section-google-places-inline">
               <Collapsible open={isGooglePlacesOpen} onOpenChange={setIsGooglePlacesOpen}>
                 <CollapsibleTrigger asChild>
@@ -8230,6 +8242,9 @@ export default function RunDetail() {
                   <div className="px-4 pb-3">
                     {(isLoadingGooglePlaces || googlePlacesData?.status === 'pending') && (
                       <p className="text-sm text-muted-foreground animate-pulse">Searching Google Maps for "{googlePlacesSearchTerm}"…</p>
+                    )}
+                    {!isLoadingGooglePlaces && !googlePlacesData && (
+                      <p className="text-sm text-muted-foreground">Nearby competitors could not be loaded. Try again later.</p>
                     )}
                     {googlePlacesData && !isLoadingGooglePlaces && googlePlacesData.status !== 'pending' && (() => {
                       if (!googlePlacesData.count) return <p className="text-sm text-muted-foreground">No "{googlePlacesSearchTerm}" found within 1 mile.</p>;
