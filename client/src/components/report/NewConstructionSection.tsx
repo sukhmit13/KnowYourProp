@@ -34,7 +34,7 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits 
 
   return (
     <div id="print-section-new-construction" className="kyp-biz" data-testid="card-new-construction">
-      <div className="kyp-biz-topline"><HardHat aria-hidden="true" /><span>New construction</span><span className="kyp-biz-radius">1 mile · issued permits</span></div>
+      <div className="kyp-biz-topline"><span className="kyp-biz-radius">1 mile · issued permits</span></div>
       <div className="kyp-blocks kyp-biz-heroes">
         <div className="kyp-block ind"><div className="bv">{stats.totalPermits}</div><div><div className="bl">Nearby permits</div><div className="bd">issued in the past 3 years</div></div></div>
         <div className="kyp-block slate"><div className="bv">{data.activePermitCount}</div><div><div className="bl">Likely still building</div><div className="bd">issued within 18 months</div></div></div>

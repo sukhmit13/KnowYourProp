@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { BriefcaseBusiness } from "lucide-react";
 import {
   groupLicenseEstablishments,
   titleCaseBusiness,
@@ -45,8 +44,6 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
   return (
     <div id="print-section-new-business-licenses" className="kyp-biz" data-testid="card-business-licenses">
       <div className="kyp-biz-topline">
-        <BriefcaseBusiness aria-hidden="true" />
-        <span>New business licenses</span>
         <span className="kyp-biz-radius">1 mile · new issuances only</span>
       </div>
 
