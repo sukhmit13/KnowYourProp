@@ -316,6 +316,34 @@ export function DocRef({ documentNumber, viewLink, recorderUrl, recordedDate, da
   );
 }
 
+function RecorderInstrumentTable({ documents, recorderSearchUrl, testId }: {
+  documents: any[];
+  recorderSearchUrl: string | null;
+  testId: string;
+}) {
+  return (
+    <div className="kyp-recorder-table" data-testid={testId}>
+      <table className="kyp-dtab">
+        <thead><tr><th>Recorded</th><th>Instrument</th><th>Document</th></tr></thead>
+        <tbody>{documents.map((doc, index) => {
+          const number = normalizedDocNumber(doc);
+          const link = recorderDocumentUrl(number, doc.viewLink, recorderSearchUrl);
+          return (
+            <tr key={`${number}-${index}`}>
+              <td>{formatRecordedDate(doc.recordedDate || doc.recordingDate)}</td>
+              <td>{doc.documentType || "Type not recorded"}</td>
+              <td>{number ? link
+                ? <a href={link} target="_blank" rel="noopener noreferrer" title={`Open Recorder results and find document #${number}`}>#{number} ↗</a>
+                : `#${number}`
+                : "—"}</td>
+            </tr>
+          );
+        })}</tbody>
+      </table>
+    </div>
+  );
+}
+
 const formatMoney = (value: number): string => `$${Math.round(value).toLocaleString("en-US")}`;
 const normalizedDocNumber = (doc: any): string =>
   String(doc?.doc_number ?? doc?.documentNumber ?? doc?.docNo ?? "");
@@ -470,6 +498,12 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
     const bTime = Date.parse(b.recordedDate || b.recordingDate || "") || 0;
     return bTime - aTime;
   });
+  const isDeedInstrument = (doc: any) =>
+    doc.category === "deed" || (doc.category !== "mortgage"
+      && !/deed\s+of\s+trust|trust\s+deed|mortgage|release|satisfact/i.test(doc.documentType || "")
+      && /\bdeed\b|conveyance/i.test(doc.documentType || ""));
+  const deedInstruments = recorderInstruments.filter(isDeedInstrument);
+  const otherInstruments = recorderInstruments.filter((doc: any) => !isDeedInstrument(doc));
 
   const timelineEvents = [
     ...sales.map((sale: DerivedSale) => ({
@@ -674,6 +708,16 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
           <DocRef documentNumber={sale.docNo} viewLink={sale.docUrl} recorderUrl={recorderSearchUrl} recordedDate={sale.dateLabel} dateIsApprox={sale.approx} />
         </div>
       ))}
+      <details className="kyp-recorder-details" data-testid="ownership-deed-history">
+        <summary>Deed history <span>{lienData?.searchFailed ? "Search incomplete" : `${deedInstruments.length} recorded instrument${deedInstruments.length === 1 ? "" : "s"}`}</span></summary>
+        <div className="kyp-recorder-content">
+          <p>Every deed returned for this PIN, including transfers that are not qualifying sales. Document links open the Recorder results; find the listed number there because direct document links expire.</p>
+          {lienData?.searchFailed && <div className="kyp-status-empty unknown">The Recorder search failed; this history may be incomplete.</div>}
+          {deedInstruments.length > 0
+            ? <RecorderInstrumentTable documents={deedInstruments} recorderSearchUrl={recorderSearchUrl} testId="ownership-deed-documents" />
+            : <div className="kyp-status-empty unknown">{isLoadingLiens ? "Deed records are loading." : "No deed instruments were returned for this PIN."}</div>}
+        </div>
+      </details>
 
       <KypSubhead subsection={showTimeline ? 3 : 2}>
         <span className="lbl">Debt on title</span>
@@ -823,34 +867,20 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
       )}
 
       <KypSubhead subsection={showTimeline ? (historicalLiens.length > 0 ? 6 : 5) : (historicalLiens.length > 0 ? 5 : 4)}>
-        <span className="lbl">Recorder instrument index</span>
-        <span className="ct">{lienData?.searchFailed ? "Search unavailable" : `${recorderInstruments.length} indexed instrument${recorderInstruments.length === 1 ? "" : "s"}`}</span>
+        <span className="lbl">Other Recorder instruments</span>
+        <span className="ct">{lienData?.searchFailed ? "Search incomplete" : `${otherInstruments.length} indexed instrument${otherInstruments.length === 1 ? "" : "s"}`}</span>
         <span className="rule" />
       </KypSubhead>
-      <div className="kyp-method">All instruments returned for this PIN are listed below, including releases, modifications, and older deeds. An index entry alone does not establish current debt or title status.</div>
-      {lienData?.searchFailed ? (
-        <div className="kyp-status-empty unknown">The Recorder search failed; the instrument index may be incomplete.</div>
-      ) : recorderInstruments.length === 0 ? (
-        <div className="kyp-status-empty unknown">{isLoadingLiens ? "Recorder instruments are loading." : "No Recorder instruments were returned for this PIN."}</div>
-      ) : (
-        <div style={{ overflowX: "auto" }} data-testid="ownership-recorder-index">
-          <table className="kyp-dtab">
-            <thead><tr><th>Recorded</th><th>Instrument</th><th>Category</th><th>Document</th></tr></thead>
-            <tbody>{recorderInstruments.map((doc: any, index: number) => {
-              const number = normalizedDocNumber(doc);
-              const link = recorderDocumentUrl(number, doc.viewLink, recorderSearchUrl);
-              return (
-                <tr key={`${number}-${index}`}>
-                  <td>{formatRecordedDate(doc.recordedDate || doc.recordingDate)}</td>
-                  <td>{doc.documentType || "Type not recorded"}</td>
-                  <td>{doc.category || "—"}</td>
-                  <td>{number ? link ? <a href={link} target="_blank" rel="noopener noreferrer" title={`Find document #${number} in Cook County Recorder results`}>#{number} ↗</a> : `#${number}` : "—"}</td>
-                </tr>
-              );
-            })}</tbody>
-          </table>
+      <details className="kyp-recorder-details" data-testid="ownership-other-instruments">
+        <summary>View complete non-deed index <span>{otherInstruments.length} record{otherInstruments.length === 1 ? "" : "s"}</span></summary>
+        <div className="kyp-recorder-content">
+          <p>Mortgages, releases, modifications, and other filings returned for this PIN. An index entry alone does not establish current debt or title status. Document links open the Recorder results by PIN.</p>
+          {lienData?.searchFailed && <div className="kyp-status-empty unknown">The Recorder search failed; this index may be incomplete.</div>}
+          {otherInstruments.length > 0
+            ? <RecorderInstrumentTable documents={otherInstruments} recorderSearchUrl={recorderSearchUrl} testId="ownership-recorder-index" />
+            : <div className="kyp-status-empty unknown">{isLoadingLiens ? "Recorder instruments are loading." : "No other Recorder instruments were returned for this PIN."}</div>}
         </div>
-      )}
+      </details>
       <div className="kyp-src">
         Sources: Cook County Assessor transfer records and Cook County Recorder instruments. Sale prices are declared transfer amounts. Loan amounts are original recorded principal, not balances; positions and refinance relationships are inferred from recording evidence and must be confirmed at title.
       </div>
