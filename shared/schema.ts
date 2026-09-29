@@ -1,10 +1,22 @@
 
-import { pgTable, text, serial, integer, boolean, timestamp, numeric, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, numeric, jsonb, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
 // === TABLE DEFINITIONS ===
+
+export const neighborhoodNewsArchive = pgTable("neighborhood_news_archive", {
+  neighborhood: text("neighborhood").notNull(),
+  urlHash: text("url_hash").notNull(),
+  url: text("url").notNull(),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  source: text("source").notNull(),
+  publishedAt: timestamp("published_at", { withTimezone: true }).notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.neighborhood, table.urlHash] }),
+]);
 
 export const runs = pgTable("runs", {
   id: serial("id").primaryKey(),

@@ -1229,7 +1229,7 @@ async function fetchFeed(feedName: string, url: string): Promise<NewsArticle[]> 
   }
 }
 
-export async function findRelevantArticles(neighborhood: string, days = 90): Promise<NewsArticle[]> {
+export async function findRelevantArticles(neighborhood: string, days = 90, limit = 12): Promise<NewsArticle[]> {
   const neighborhoodLower = neighborhood.toLowerCase().trim();
 
   const feedNames = new Set<string>(NEIGHBORHOOD_FEED_MAP[neighborhoodLower] || []);
@@ -1514,7 +1514,7 @@ export async function findRelevantArticles(neighborhood: string, days = 90): Pro
   }
 
   filtered.sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime());
-  return filtered.slice(0, 12);
+  return filtered.slice(0, limit);
 }
 
 export function calculateMomentumScore(articles: NewsArticle[]): number {

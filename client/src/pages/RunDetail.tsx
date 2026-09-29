@@ -1268,11 +1268,15 @@ export default function RunDetail() {
   const incentiveEligibilityRef = useRef<Record<string, boolean>>({});
 
   // ---- Step 5 accordion state: order / hidden / open (persisted per run) ----
-  const ACC_DEFAULT_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "businessLicenses", "ownership", "propertyTax", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
+  const ACC_PREVIOUS_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "businessLicenses", "ownership", "propertyTax", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
+  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "businessLicenses", "valuation", "listing", "crime", "transit", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "proximity", "corridor", "development", "people", "incentives", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
   const mergeAccOrder = (saved: string[], def: string[]): string[] => {
+    // The app persisted its old default even for people who never dragged a row.
+    // Migrate only that exact order; keep genuinely customized orders intact.
+    if (JSON.stringify(saved) === JSON.stringify(ACC_PREVIOUS_ORDER)) return [...def];
     const out = saved.filter((x) => def.includes(x));
     for (let idx = 0; idx < def.length; idx++) {
       const idRow = def[idx];
@@ -3062,6 +3066,7 @@ export default function RunDetail() {
     ...(coParcelAddressNewsData?.articles || []),
     ...(newsTakeaway?.meta || []),
     ...(neighborhoodNewsData?.articles || []),
+    ...(neighborhoodNewsData?.archive || []),
     ...(nnTakeaway?.culture || []),
     ...(nnTakeaway?.dev || []),
   ]);
@@ -17498,7 +17503,7 @@ export default function RunDetail() {
                                           <div><div className="bl">Momentum · <span data-testid="text-news-label">{nn.kpis.momentumLabel}</span></div><div className="bd">vs. Chicago community areas</div></div>
                                         </div>
                                         <div className="kyp-block count slate">
-                                          <div className="bv" data-testid="text-news-articles">{nn.kpis.articleCount}</div>
+                                          <div className="bv" data-testid="text-news-articles">{neighborhoodNewsData?.article_count ?? nn.kpis.articleCount}</div>
                                           <div><div className="bl">Articles found</div><div className="bd">past year</div></div>
                                         </div>
                                       </div>
@@ -17549,6 +17554,18 @@ export default function RunDetail() {
                                   </div>
                                 ) : (
                                   <p className="text-sm text-muted-foreground">News data not available for this area.</p>
+                                )}
+                                {!!neighborhoodNewsData?.archive?.length && (
+                                  <details className="mt-5" data-testid="neighborhood-news-archive">
+                                    <summary className="cursor-pointer font-medium text-sm py-2">
+                                      Full-year neighborhood archive · {neighborhoodNewsData.archive.length} stories
+                                    </summary>
+                                    <div className="kyp-arch">
+                                      {neighborhoodNewsData.archive.map((a: any, i: number) => (
+                                        <NewsArchCard key={a.url || i} a={{ ...a, date: a.published }} testid={`row-neighborhood-archive-${i}`} />
+                                      ))}
+                                    </div>
+                                  </details>
                                 )}
                               </>
                             )}

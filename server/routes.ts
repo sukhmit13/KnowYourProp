@@ -9384,20 +9384,22 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       if (!neighborhood) {
         return res.status(400).json({ error: 'neighborhood param required' });
       }
-      const { findRelevantArticles, calculateMomentumScore, findRelevantPodcasts } = await import('./newsMonitor');
-      const [articles, podcasts] = await Promise.all([
-        findRelevantArticles(neighborhood, NEIGHBORHOOD_NEWS_DAYS),
+      const { calculateMomentumScore, findRelevantPodcasts } = await import('./newsMonitor');
+      const { getNeighborhoodNewsArchive } = await import('./neighborhoodNewsArchive');
+      const [archive, podcasts] = await Promise.all([
+        getNeighborhoodNewsArchive(neighborhood),
         findRelevantPodcasts(neighborhood, NEIGHBORHOOD_NEWS_DAYS),
       ]);
-      const score = calculateMomentumScore(articles);
+      const score = calculateMomentumScore(archive);
       const label = score >= 75 ? 'High Activity' : score >= 50 ? 'Moderate Activity' : 'Low Activity';
       res.json({
         neighborhood,
-        article_count: articles.length,
+        article_count: archive.length,
         momentum_score: score,
         momentum_label: label,
-        momentum_signals: `${articles.length} recent articles detected`,
-        articles,
+        momentum_signals: `${archive.length} articles in the past year`,
+        articles: archive.slice(0, 12),
+        archive,
         podcasts,
       });
     } catch (err) {
