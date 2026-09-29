@@ -513,7 +513,8 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-accrow.dragrow{opacity:.55}
 .kyp-accrow.overrow{outline:2px dashed var(--kyp-indigo);outline-offset:2px}
 .kyp-acchd{display:flex;align-items:flex-start;gap:14px;padding:15px 18px;cursor:pointer}
-.kyp-acchd .drag{color:#c8c6bd;font-size:13px;flex:none;letter-spacing:-2px;cursor:grab;margin-top:6px}
+.kyp-acchd .drag{display:flex;align-items:center;justify-content:center;width:26px;height:30px;flex:none;color:var(--kyp-indigo);background:var(--kyp-indigoSoft);border:1px solid #dfe3f7;border-radius:7px;font-size:19px;line-height:1;cursor:grab}
+.kyp-acchd .drag:hover{background:#dfe3f7}
 .kyp-acchd .num{font-family:var(--kyp-mono);font-size:12px;font-weight:700;color:var(--kyp-ink2);background:#eef0e9;border-radius:8px;width:34px;height:30px;display:flex;align-items:center;justify-content:center;flex:none}
 .kyp-accrow.g .num{background:#e7f2ea;color:var(--kyp-green)}.kyp-accrow.o .num{background:#fbeede;color:#c0651e}
 .kyp-acchd .mid{flex:1;min-width:0;line-height:1.5;padding-top:3px;display:block}
