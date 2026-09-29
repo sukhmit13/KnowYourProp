@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { BriefcaseBusiness, TrendingDown, TrendingUp } from "lucide-react";
+import { BriefcaseBusiness } from "lucide-react";
 import {
   groupLicenseEstablishments,
   titleCaseBusiness,
@@ -41,8 +41,6 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
   const visible = showAll ? filtered : filtered.slice(0, 6);
   const maxMix = rankedMix[0]?.[1] || 1;
   const priorKnown = data.priorPeriodCount > 0;
-  const trendUp = (data.changePct || 0) >= 0;
-  const topMix = rankedMix[0]?.[0]?.replace(/ only$/, "") || "mixed openings";
 
   return (
     <div id="print-section-new-business-licenses" className="kyp-biz" data-testid="card-business-licenses">
@@ -68,18 +66,6 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
           <div className="bv">{data.licenseCount}</div>
           <div><div className="bl">License issuances</div><div className="bd">grouped into {data.totalCount} businesses</div></div>
         </div>
-      </div>
-
-      <div className="kyp-biz-takeaway">
-        <div className="kyp-biz-takeaway-title">
-          {priorKnown && (trendUp ? <TrendingUp aria-hidden="true" /> : <TrendingDown aria-hidden="true" />)}
-          Local formation
-        </div>
-        <p>
-          <b>{data.totalCount} new business{data.totalCount === 1 ? "" : "es"}</b> opened within a mile in the past year,
-          led by <b>{topMix.toLowerCase()}</b>.
-          {priorKnown ? ` That is ${Math.abs(data.changePct || 0)}% ${trendUp ? "above" : "below"} the prior 12-month period.` : " There is no prior-period baseline for a percentage comparison."}
-        </p>
       </div>
 
       <KypSubhead className="fam-green" subsection={1}>

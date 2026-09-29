@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { HardHat, TrendingDown, TrendingUp } from "lucide-react";
+import { HardHat } from "lucide-react";
 import { KypSubhead } from "@/components/report/AccordionSection";
 
 interface Props {
@@ -41,14 +41,15 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits 
         <div className="kyp-block slate"><div className="bv">{money(stats.medianReportedCost)}</div><div><div className="bl">Median reported cost</div><div className="bd">declared permit value</div></div></div>
       </div>
 
-      <div className={`kyp-biz-takeaway${supplyGate ? " attention" : ""}`}>
-        <div className="kyp-biz-takeaway-title">{supplyGate ? <HardHat aria-hidden="true" /> : trend?.changePct != null && (trend.changePct >= 0 ? <TrendingUp aria-hidden="true" /> : <TrendingDown aria-hidden="true" />)} Nearby construction</div>
-        <p>
-          <b>{data.activePermitCount} permit{data.activePermitCount === 1 ? "" : "s"}</b> within one mile {data.activePermitCount === 1 ? "was" : "were"} issued in the past 18 months and may still be building.
-          {data.communityBenchmark ? ` The ${data.communityBenchmark.name} community area recorded ${data.communityBenchmark.totalPermits} qualifying permits over the same three-year source period.` : ""}
-          {supplyGate ? ` Nearby permits identify ${stats.permittedUnits.toLocaleString()} units, or ${supplyRatio!.toFixed(1)}× the subject’s ${subjectUnits} units; this is a competing-supply and construction-disruption flag, not a statement that projects are currently active.` : ""}
-        </p>
-      </div>
+      {(data.communityBenchmark || supplyGate) && (
+        <div className={`kyp-biz-takeaway${supplyGate ? " attention" : ""}`}>
+          <div className="kyp-biz-takeaway-title">{supplyGate && <HardHat aria-hidden="true" />} Nearby construction</div>
+          <p>
+            {data.communityBenchmark ? `The ${data.communityBenchmark.name} community area recorded ${data.communityBenchmark.totalPermits} qualifying permits over the same three-year source period.` : ""}
+            {supplyGate ? ` Nearby permits identify ${stats.permittedUnits.toLocaleString()} units, or ${supplyRatio!.toFixed(1)}× the subject’s ${subjectUnits} units; this is a competing-supply and construction-disruption flag, not a statement that projects are currently active.` : ""}
+          </p>
+        </div>
+      )}
 
       <KypSubhead className="fam-green" subsection={1}><span className="lbl">Permit mix</span><span className="ct">select a type to filter records</span><span className="rule" /></KypSubhead>
       <div className="kyp-biz-mix">
