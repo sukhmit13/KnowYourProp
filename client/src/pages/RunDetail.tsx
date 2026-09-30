@@ -1264,16 +1264,18 @@ export default function RunDetail() {
   const ACC_PREVIOUS_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "businessLicenses", "ownership", "propertyTax", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
   const ACC_LAST_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "businessLicenses", "valuation", "listing", "crime", "transit", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
   const ACC_BEFORE_REORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "crime", "transit", "businessLicenses", "valuation", "listing", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
-  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
+  const ACC_BEFORE_HISTORIC_REORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
+  const ACC_BEFORE_HISTORIC_CORRECTION = ["ownership", "zoning", "zoningHistory", "historic", "propertyTax", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
+  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
   const mergeAccOrder = (saved: string[], def: string[]): string[] => {
     // The app persisted its old default even for people who never dragged a row.
     // Migrate only that exact order; keep genuinely customized orders intact.
-    const oldDefault = [ACC_PREVIOUS_ORDER, ACC_LAST_DEFAULT_ORDER, ACC_BEFORE_REORDER]
+    const oldDefault = [ACC_PREVIOUS_ORDER, ACC_LAST_DEFAULT_ORDER, ACC_BEFORE_REORDER, ACC_BEFORE_HISTORIC_REORDER, ACC_BEFORE_HISTORIC_CORRECTION]
       .some((order) => JSON.stringify(saved) === JSON.stringify(order));
-    const out = oldDefault ? [...def] : saved.filter((x) => def.includes(x));
+    let out = oldDefault ? [...def] : saved.filter((x) => def.includes(x));
     for (let idx = 0; idx < def.length; idx++) {
       const idRow = def[idx];
       if (out.includes(idRow)) continue;
@@ -1286,7 +1288,15 @@ export default function RunDetail() {
       const withoutMoved = out.filter((row) => row !== "incentives" && row !== "transit");
       const crimeIndex = withoutMoved.indexOf("crime");
       withoutMoved.splice(crimeIndex < 0 ? withoutMoved.length : crimeIndex, 0, "incentives", "transit");
-      return withoutMoved;
+      out = withoutMoved;
+    }
+    // Move this group once in saved reports; later manual drags still stick.
+    if (!localStorage.getItem(`kyp-acc-order-tax-historic-zoning-v2-${id}`)) {
+      const group = ["propertyTax", "historic", "zoning", "zoningHistory"];
+      const first = Math.min(...group.map((row) => out.indexOf(row)).filter((index) => index >= 0));
+      const before = out.slice(0, first).filter((row) => !group.includes(row)).length;
+      out = out.filter((row) => !group.includes(row));
+      out.splice(before, 0, ...group);
     }
     return out;
   };
@@ -1326,6 +1336,7 @@ export default function RunDetail() {
   useEffect(() => { if (accHydratedIdRef.current === id) try {
     localStorage.setItem(`kyp-acc-order-${id}`, JSON.stringify(accOrder));
     localStorage.setItem(`kyp-acc-order-incentives-transit-v1-${id}`, "1");
+    localStorage.setItem(`kyp-acc-order-tax-historic-zoning-v2-${id}`, "1");
   } catch {} }, [accOrder, id]);
   useEffect(() => { if (accHydratedIdRef.current === id) try { localStorage.setItem(`kyp-acc-hidden-${id}`, JSON.stringify(accHidden)); } catch {} }, [accHidden, id]);
   const accMove = useCallback((src: string, tgt: string) => {

@@ -4,7 +4,7 @@ import { type ScanSection } from "./CollapsibleSection";
 type SectionMeta = Pick<ScanSection, "id" | "anchorId" | "title" | "summary" | "info">;
 
 export const SECTION_ORDER = [
-  "historic", "countyRecord", "permits", "ownership", "zoning", "valuation", "debt", "market", "incentives", "transit", "newBusinessLicenses", "newConstruction",
+  "countyRecord", "permits", "ownership", "historic", "zoning", "valuation", "debt", "market", "incentives", "transit", "newBusinessLicenses", "newConstruction",
   "crime", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
 ] as const;
 
