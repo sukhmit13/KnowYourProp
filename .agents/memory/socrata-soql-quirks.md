@@ -31,3 +31,8 @@ The parcel-sales feed exposes neighborhood identifiers with a township prefix; t
 
 **Why:** A citywide sales query timed out, while a superficially successful ZIP-level join could otherwise yield all-zero charts by silently mismatching the two identifiers.
 **How to apply:** For sales trends or comparable-sales geography changes, verify the actual identifiers and filter to the requested ZIP before computing counts or prices. Treat undocumented assessor class codes as unknown rather than guessing their housing category.
+
+Cook County assessor parcel ZIPs are often ZIP+4; exact equality against a five-digit ZIP returns no rows, while a bounded prefix range preserves the neighborhood set. Grouping parcels by ZIP and neighborhood has highly variable latency, approaching or exceeding the upstream timeout even when the sales queries are quick.
+
+**Why:** Equality misses ZIP+4 rows, and repeated uncached group queries dominate latency.
+**How to apply:** Preserve the ZIP+4 prefix and city filter, verify neighborhood sets against the live feed when changing the query, and use a shared successful-result cache across server instances. Never convert an unknown neighborhood mapping into a zero-sales result.

@@ -16077,6 +16077,13 @@ export default function RunDetail() {
                   <KypSubhead subsection={2} data-testid="trigger-transaction-trends-subsection"><span className="lbl">Area Transaction Trends</span><span className="ct">Cook County transfer records</span></KypSubhead>
                       <div className="kyp-market-panel">
                         <p className="kyp-scopenote">Figures below describe <b>ZIP {facts.zipCode}</b>, not this address</p>
+                        {transactionTrendsData?.isStale && (
+                          <p className="kyp-scopenote" role="status" data-testid="transaction-trends-stale">
+                            Showing the last successful Cook County snapshot
+                            {transactionTrendsData.lastUpdated ? ` from ${newsFmtD(transactionTrendsData.lastUpdated)}` : ''}.
+                            The live refresh has not completed; this data may have changed.
+                          </p>
+                        )}
                         {isLoadingTransactionTrends ? (
                           <div className="space-y-3">
                             <Skeleton className="h-52 w-full" />

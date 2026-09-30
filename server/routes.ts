@@ -9495,7 +9495,8 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       const zip = (req.query.zip as string || '').trim();
       if (!/^\d{5}$/.test(zip)) return res.status(400).json({ error: 'Valid 5-digit ZIP required' });
       const { getTransactionTrends } = await import('./transactionTrends');
-      const result = await getTransactionTrends(zip);
+      const { persistentTransactionTrendsCache } = await import('./transactionTrendsCache');
+      const result = await getTransactionTrends(zip, persistentTransactionTrendsCache);
       if (!result) return res.status(503).json({ error: 'Transaction data not yet available' });
       res.json(result);
     } catch (err) {

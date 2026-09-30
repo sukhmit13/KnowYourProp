@@ -1,0 +1,115 @@
+<!-- ============================================================
+     STEP 25 — §People : TARGET MARKUP REFERENCE
+     ============================================================
+     This is the exact DOM the restyled section must produce:
+     every class, in order, with real values from
+     522 N. Claremont Ave · West Town · ZIP 60612 · Tract 17031242900.
+
+     HOW TO USE THIS
+     - Match the element structure and class names exactly.
+     - Replace every literal value with the existing binding. The data
+       hooks do not change in this step; only markup and classes do.
+     - Keep every id="print-section-*" and data-testid from the current
+       code — they are omitted here for readability, not deleted.
+     - No stylesheet is included. All classes resolve against
+       kyp-base.css once §10 of the spec is appended to it.
+
+     CLASS SOURCES
+     - Already in kyp-base.css: kyp-subhead, kyp-scopenote, kyp-seg,
+       kyp-segrow, kyp-blocks/kyp-block, kyp-hbar, kyp-dtab, kyp-trend,
+       kyp-cxtiles/kyp-cxtile, kyp-mix/kyp-mixcard/kyp-mixrow,
+       kyp-loanrow, kyp-morelink, kyp-charttitle, kyp-src
+     - NEW in patch-25: kyp-votetab, kyp-votebar, kyp-votekey,
+       kyp-votemargin, kyp-refrow, and the two fixes
+       (.kyp-hbar .htrack > b.out, .kyp-votekey)
+
+     BLOCK MODIFIERS ARE .ind .grn .dark .slate — NOT .indigo / .green
+     BLOCK ORDER IS .bv THEN .bl THEN .bd — never reversed
+     ============================================================ -->
+
+
+
+<div class="kyp-subhead first"><span class="n">25.1</span><span class="lbl">Languages Spoken</span>
+ <span class="ct">American Community Survey</span></div>
+<p class="kyp-scopenote">Figures below describe <b>ZIP 60612</b>, not this address</p>
+<div class="kyp-segrow">
+ <span class="kyp-seg"><button class="on">By ZIP code</button><button>By neighbourhood</button></span>
+</div>
+<div class="kyp-blocks hero two">
+ <div class="kyp-block ind"><div class="bv">27.5%</div>
+  <div class="bl">Speak a language other than English at home</div>
+  <div class="bd">23% below city average &middot; Middle tier for diversity (#34 of 55)</div></div>
+ <div class="kyp-block slate"><div class="bv">3,052</div>
+  <div class="bl">Limited English proficiency</div>
+  <div class="bd">8.5% of the 35,900 residents aged 5+</div></div>
+</div>
+<div class="kyp-charttitle">Top languages at home</div>
+<div class="kyp-hbar"><span class="hl">English only</span><span class="htrack"><i class="ind" style="width:72.5%"><b class="hbar-count">72.5%</b></i></span></div><div class="kyp-hbar"><span class="hl">Spanish</span><span class="htrack"><i class="ind" style="width:15.8%"><b class="hbar-count">15.8%</b></i></span></div><div class="kyp-hbar"><span class="hl">Chinese</span><span class="htrack"><i class="ind" style="width:2.5%"></i><b class="out" style="left:2.5%">2.5%</b></span></div>
+<div class="kyp-src">Source: American Community Survey 5-Year Estimates by ZIP code (ACS 2019&ndash;2023)</div>
+
+<div class="kyp-subhead"><span class="n">25.2</span><span class="lbl">Demographic Trends</span>
+ <span class="ct">2014&ndash;2018 vs 2019&ndash;2023</span></div>
+<p class="kyp-scopenote">Figures below describe <b>ZIP 60612</b>, not this address</p>
+<div class="kyp-segrow">
+ <span class="kyp-seg"><button class="on">ZIP code</button><button>Census tract</button></span>
+</div>
+<table class="kyp-dtab">
+ <tr><th>Metric</th><th>2014&ndash;2018</th><th>2019&ndash;2023</th><th>Change</th></tr>
+ <tr><td>Population</td><td class="base">34,311</td><td>34,699</td><td><span class="kyp-trend " style="background:var(--kyp-slate)">↑ +1.1%</span></td></tr><tr><td>Median Age</td><td class="base">31.6</td><td>35.2</td><td><span class="kyp-trend " style="background:var(--kyp-slate)">↑ +11.4%</span></td></tr><tr><td>Median Household Income</td><td class="base">$41,300</td><td>$60,457</td><td><span class="kyp-trend up">↑ +46.4%</span></td></tr><tr><td>Per Capita Income</td><td class="base">$26,796</td><td>$43,589</td><td><span class="kyp-trend up">↑ +62.7%</span></td></tr><tr><td>% Below Poverty</td><td class="base">32.6%</td><td>23.5%</td><td><span class="kyp-trend up">↓ −9.2 pts</span></td></tr><tr><td>% Unemployed (16+)</td><td class="base">11.8%</td><td>11.1%</td><td><span class="kyp-trend up">↓ −0.8 pts</span></td></tr><tr><td>% Without HS Diploma (25+)</td><td class="base">15.6%</td><td>11.1%</td><td><span class="kyp-trend up">↓ −4.5 pts</span></td></tr><tr><td>% White</td><td class="base">27.7%</td><td>26.3%</td><td><span class="kyp-trend " style="background:var(--kyp-slate)">↓ −1.5 pts</span></td></tr><tr><td>% Black/African American</td><td class="base">60.5%</td><td>54.8%</td><td><span class="kyp-trend " style="background:var(--kyp-slate)">↓ −5.7 pts</span></td></tr><tr><td>% Hispanic/Latino</td><td class="base">12.3%</td><td>16.1%</td><td><span class="kyp-trend " style="background:var(--kyp-slate)">↑ +3.8 pts</span></td></tr><tr><td>% Asian</td><td class="base">4.6%</td><td>4.9%</td><td><span class="kyp-trend " style="background:var(--kyp-slate)">↑ +0.3 pts</span></td></tr><tr><td>% BIPOC</td><td class="base">72.3%</td><td>73.7%</td><td><span class="kyp-trend " style="background:var(--kyp-slate)">↑ +1.5 pts</span></td></tr><tr><td>% Owner-Occupied</td><td class="base">27.7%</td><td>30.8%</td><td><span class="kyp-trend up">↑ +3.1 pts</span></td></tr><tr><td>% Renter-Occupied</td><td class="base">72.3%</td><td>69.2%</td><td><span class="kyp-trend " style="background:var(--kyp-slate)">↓ −3.1 pts</span></td></tr><tr><td>% Housing Vacancy</td><td class="base">14.4%</td><td>10.9%</td><td><span class="kyp-trend up">↓ −3.5 pts</span></td></tr><tr><td>Median Home Value</td><td class="base">$269,800</td><td>$331,600</td><td><span class="kyp-trend up">↑ +22.9%</span></td></tr><tr><td>Median Gross Rent</td><td class="base">$1,016</td><td>$1,330</td><td><span class="kyp-trend " style="background:var(--kyp-slate)">↑ +30.9%</span></td></tr><tr><td>% Commute via Transit</td><td class="base">33.8%</td><td>23.4%</td><td><span class="kyp-trend down">↓ −10.4 pts</span></td></tr></table>
+<div class="kyp-src">U.S. Census Bureau, ACS 5-Year Estimates &middot; green = favourable,
+ red = unfavourable, slate = contextual, not rated</div>
+
+<div class="kyp-subhead"><span class="n">25.3</span><span class="lbl">Daytime Economy</span>
+ <span class="ct">Census LEHD, 2021</span></div>
+<p class="kyp-scopenote">Figures below describe <b>Census Tract 17031242900</b>, not this address</p>
+<div class="kyp-cxtiles">
+ <div class="kyp-cxtile"><div class="l">Jobs here</div><div class="n">577</div>
+  <div class="s">workers commute in daily</div></div>
+ <div class="kyp-cxtile dark"><div class="l">Residents working</div><div class="n">1,061</div>
+  <div class="s">residents leave to work</div></div>
+ <div class="kyp-cxtile slate"><div class="l">Net daytime pull</div><div class="n">&minus;484</div>
+  <div class="s">more residents leave than arrive</div></div>
+ <div class="kyp-cxtile slate"><div class="l">Jobs over $3,333/mo</div><div class="n">59%</div>
+  <div class="s">of jobs in this tract</div></div>
+</div>
+<div class="kyp-charttitle">Jobs by industry</div>
+<div class="kyp-hbar wide"><span class="hl">Food Service & Accommodation</span><span class="htrack"><i class="ind" style="width:100%"><b class="hbar-count">31</b></i></span></div><div class="kyp-hbar wide"><span class="hl">Arts & Entertainment</span><span class="htrack"><i class="ind" style="width:84%"><b class="hbar-count">26</b></i></span></div><div class="kyp-hbar wide"><span class="hl">Retail Trade</span><span class="htrack"><i class="ind" style="width:81%"><b class="hbar-count">25</b></i></span></div><div class="kyp-hbar wide"><span class="hl">Healthcare & Social Assistance</span><span class="htrack"><i class="ind" style="width:29%"><b class="hbar-count">9</b></i></span></div>
+<div class="kyp-src">Source: U.S. Census Bureau LEHD Origin-Destination Employment Statistics
+ (LODES8), 2021 &middot; WAC = workers at workplace, RAC = workers at home</div>
+
+<div class="kyp-subhead"><span class="n">25.4</span><span class="lbl">Voting &amp; Civic</span>
+ <span class="ct">reported, not rated</span></div>
+<p class="kyp-scopenote">Figures below describe <b>community area West Town</b>, not this address</p>
+<div class="kyp-blocks hero two">
+ <div class="kyp-block ind"><div class="bv">D+72.7%</div>
+  <div class="bl">Average Democratic margin</div>
+  <div class="bd">across the last three presidential elections</div></div>
+ <div class="kyp-block slate"><div class="bv">3</div>
+  <div class="bl">Presidential cycles on record</div>
+  <div class="bd">2016 &middot; 2020 &middot; 2024 &mdash; margin narrowing each cycle</div></div>
+</div>
+<div class="kyp-charttitle">Presidential elections</div>
+<table class="kyp-votetab">
+ <tr><th>Year</th><th class="wide">Democratic / Republican</th><th>Margin</th><th>Turnout</th></tr>
+ <tr><td>2024</td><td><div class="kyp-votebar"><i class="dem" style="width:82.8%"></i><i class="rep" style="width:15.5%"></i></div><div class="kyp-votekey"><span>D <b>82.8%</b></span><span>R <b>15.5%</b></span></div></td><td><span class="kyp-votemargin">D+67.3</span></td><td>42,500</td></tr><tr><td>2020</td><td><div class="kyp-votebar"><i class="dem" style="width:87.2%"></i><i class="rep" style="width:11.1%"></i></div><div class="kyp-votekey"><span>D <b>87.2%</b></span><span>R <b>11.1%</b></span></div></td><td><span class="kyp-votemargin">D+76.1</span></td><td>44,200</td></tr><tr><td>2016</td><td><div class="kyp-votebar"><i class="dem" style="width:84.8%"></i><i class="rep" style="width:10.2%"></i></div><div class="kyp-votekey"><span>D <b>84.8%</b></span><span>R <b>10.2%</b></span></div></td><td><span class="kyp-votemargin">D+74.6</span></td><td>40,800</td></tr></table>
+<div class="kyp-charttitle">Mayoral runoffs</div>
+<div class="kyp-mix"><div class="kyp-mixcard"><div class="mh">2023 Runoff</div><div class="kyp-mixrow"><span class="sw" style="background:var(--kyp-indigoL)"></span><span class="nm">Brandon Johnson &middot; Progressive</span><span class="pc">62.4%</span></div><div class="kyp-mixrow"><span class="sw" style="background:var(--kyp-muted)"></span><span class="nm">Paul Vallas &middot; Moderate</span><span class="pc">37.6%</span></div></div><div class="kyp-mixcard"><div class="mh">2019 Runoff</div><div class="kyp-mixrow"><span class="sw" style="background:var(--kyp-indigoL)"></span><span class="nm">Lori Lightfoot &middot; Reform</span><span class="pc">79.8%</span></div><div class="kyp-mixrow"><span class="sw" style="background:var(--kyp-muted)"></span><span class="nm">Toni Preckwinkle &middot; Establishment</span><span class="pc">20.2%</span></div></div></div>
+<div class="kyp-charttitle">Recent referendums <span style="font-weight:400;text-transform:none;
+ letter-spacing:0">&middot; share voting yes</span></div>
+<div class="kyp-refrow"><span class="rn">Elected School Board <u>(2024)</u></span><span class="rt"><i style="width:63%"></i></span><span class="ro passed">Passed</span></div><div class="kyp-refrow"><span class="rn">Bring Chicago Home <u>(2024)</u></span><span class="rt"><i style="width:42%"></i></span><span class="ro failed">Failed</span></div><div class="kyp-refrow"><span class="rn">Broadband Access <u>(2020)</u></span><span class="rt"><i style="width:84%"></i></span><span class="ro passed">Passed</span></div><div class="kyp-refrow"><span class="rn">City Plan Goals <u>(2020)</u></span><span class="rt"><i style="width:85%"></i></span><span class="ro passed">Passed</span></div><div class="kyp-refrow"><span class="rn">Firearm Restrictions <u>(2020)</u></span><span class="rt"><i style="width:79%"></i></span><span class="ro passed">Passed</span></div><div class="kyp-refrow"><span class="rn">Preserve ACA <u>(2018)</u></span><span class="rt"><i style="width:81%"></i></span><span class="ro passed">Passed</span></div><div class="kyp-refrow"><span class="rn">Bump Stock Ban <u>(2018)</u></span><span class="rt"><i style="width:83%"></i></span><span class="ro passed">Passed</span></div><div class="kyp-refrow"><span class="rn">$15 Minimum Wage <u>(2014)</u></span><span class="rt"><i style="width:85%"></i></span><span class="ro passed">Passed</span></div>
+<div class="kyp-src">Chicago Board of Elections, Illinois State Board of Elections, Cook County
+ Clerk &middot; aggregated from ward-level results; Chicago's 50 wards do not align with its 77
+ community areas, so figures are approximated by precinct overlap</div>
+
+<div class="kyp-subhead"><span class="n">25.5</span><span class="lbl">Places of Worship</span>
+ <span class="ct">20 within 1 mile</span></div>
+<p class="kyp-scopenote">Figures below describe places within <b>1 mile</b>, not this address</p>
+<div class="kyp-blocks hero two">
+ <div class="kyp-block ind"><div class="bv">20</div><div class="bl">Within 1 mile</div></div>
+ <div class="kyp-block slate"><div class="bv">1</div><div class="bl">Tradition represented</div>
+  <div class="bd">Christian &mdash; 20 of 20</div></div>
+</div>
+<div class="kyp-charttitle">Christian &middot; 20</div>
+<div class="kyp-loanrow"><div class="lmain"><span class="lnm">Blessed Maria Gabriella West Parish</span><div class="lmeta">2248 W Washington Blvd</div></div></div><div class="kyp-loanrow"><div class="lmain"><span class="lnm">Greater Bethlehem Healing Temple</span><div class="lmeta">12 S Oakley Blvd</div></div></div><div class="kyp-loanrow"><div class="lmain"><span class="lnm">Holy Protection Parish of the Orthodox Church of Ukraine</span><div class="lmeta">900 N Washtenaw Ave</div></div></div><div class="kyp-loanrow"><div class="lmain"><span class="lnm">Holy Rosary Catholic Church (Our Lady of Unity Parish)</span><div class="lmeta">604 N Western Ave</div></div></div><div class="kyp-loanrow"><div class="lmain"><span class="lnm">Holy Trinity Orthodox Cathedral</span><div class="lmeta">1121 N Leavitt St</div></div></div><div class="kyp-loanrow"><div class="lmain"><span class="lnm">JLM Abundant Life</span><div class="lmeta">2622 W Jackson Blvd</div></div></div>
+<div class="kyp-morelink">+ 14 more &rarr;</div>
+<div class="kyp-src">Source: OpenStreetMap contributors</div>

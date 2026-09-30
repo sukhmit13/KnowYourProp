@@ -86,6 +86,7 @@ globalThis.fetch = (async (input: RequestInfo | URL) => {
         ];
   return { ok: true, json: async () => rows } as Response;
 }) as typeof fetch;
+const mockedFetch = globalThis.fetch;
 
 try {
   const trends = await getTransactionTrends('60612');
@@ -104,6 +105,7 @@ try {
 
   const assessorRequest = requestUrls.find((url) => url.pathname.includes('c49d-89sn'))!;
   assert.equal(assessorRequest.searchParams.get('$group'), 'township_name,nbhd');
+  assert.match(assessorRequest.searchParams.get('$where')!, /property_zip >= '60612' AND property_zip < '60613' AND property_city='CHICAGO'/);
   const salesRequests = requestUrls.filter((url) => url.pathname.includes('wvhk-k5uv'));
   assert.equal(salesRequests.length, 2);
   for (const url of salesRequests) {
@@ -117,6 +119,50 @@ try {
 
   await getTransactionTrends('60612');
   assert.equal(requestUrls.length, 3, 'successful ZIP result is cached');
+
+  const storedResult = { ...trends, zip: '60614' };
+  const fresh = await getTransactionTrends('60614', {
+    read: async () => ({ result: storedResult, fetchedAt: Date.now() }),
+    write: async () => { throw new Error('fresh cache should not refresh'); },
+  });
+  assert.deepEqual(fresh, storedResult);
+  assert.equal(requestUrls.length, 3, 'shared cache avoids cold Cook County requests');
+
+  const staleZip = '60615';
+  const fetchedAt = Date.now() - 8 * 24 * 60 * 60 * 1000;
+  let saved!: () => void;
+  const savedPromise = new Promise<void>((resolve) => { saved = resolve; });
+  const stale = await getTransactionTrends(staleZip, {
+    read: async () => ({ result: { ...trends, zip: staleZip }, fetchedAt }),
+    write: async () => { saved(); },
+  });
+  assert.equal(stale.isStale, true, 'expired shared data is marked as stale');
+  assert.equal(stale.lastUpdated, new Date(fetchedAt).toISOString());
+  await savedPromise;
+  const refreshed = await getTransactionTrends(staleZip);
+  assert.equal(refreshed.isStale, undefined, 'successful background refresh replaces stale data');
+
+  globalThis.fetch = (async () => ({
+    ok: false,
+    status: 503,
+    text: async () => 'County source unavailable',
+  })) as typeof fetch;
+  await assert.rejects(getTransactionTrends('60616'), /Socrata HTTP 503/, 'cold source failure is an error, not an empty sale history');
+  globalThis.fetch = (async () => ({ ok: true, json: async () => [] })) as typeof fetch;
+  await assert.rejects(getTransactionTrends('60617'), /No assessor neighborhoods/, 'an unmapped ZIP is not reported as zero sales');
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = new URL(String(input));
+    const rows = url.pathname.includes('c49d-89sn') ? [{ township_name: 'Lake View', nbhd: '50' }] : [];
+    return { ok: true, json: async () => rows } as Response;
+  }) as typeof fetch;
+  await assert.rejects(getTransactionTrends('60618'), /no sale-count rows/, 'empty upstream sales must not be cached as confirmed zero sales');
+
+  globalThis.fetch = mockedFetch;
+  const withoutSharedCache = await getTransactionTrends('60619', {
+    read: async () => { throw new Error('Cache database unavailable'); },
+    write: async () => { throw new Error('Cache database unavailable'); },
+  });
+  assert.equal(withoutSharedCache.years.find((year) => year.year === 2022)?.singleFamily, 2, 'healthy county response works when the cache database is down');
 } finally {
   globalThis.fetch = originalFetch;
 }

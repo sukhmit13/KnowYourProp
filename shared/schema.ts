@@ -92,6 +92,14 @@ export const geocodeCache = pgTable("geocode_cache", {
   cachedAt: timestamp("cached_at").defaultNow(),
 });
 
+// Shared across app instances so a cold transaction-trends request does not
+// repeat the slow Cook County ZIP+4 lookup after each server restart.
+export const transactionTrendsCache = pgTable("transaction_trends_cache", {
+  cacheKey: text("cache_key").primaryKey(),
+  data: jsonb("data").notNull(),
+  fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull(),
+});
+
 // Property Tax Cache
 export const propertyTaxCache = pgTable("property_tax_cache", {
   id: serial("id").primaryKey(),

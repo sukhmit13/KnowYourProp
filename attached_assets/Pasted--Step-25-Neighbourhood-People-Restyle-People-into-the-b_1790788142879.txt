@@ -1,0 +1,379 @@
+# Step 25 — Neighbourhood & People
+
+Restyle §People into the bold hybrid language, flatten two levels of nesting into five numbered
+subheads, and remove the AI takeaway.
+
+**Run as 3 prompts.** Every step leaves a working report.
+
+Audited against commit **`5cb2d3a`** (2026-09-30 16:40 UTC) — the build that already has Steps 23
+and 24 in it. If the repo has moved, find code by the quoted text, not the line number.
+
+---
+
+## 0. Audit
+
+| | |
+|---|---|
+| Section | `RunDetail.tsx` **17965–18757** |
+| Lines | **793** |
+| Rendered labels | **36** |
+| `data-testid` values | **27** |
+| Data fields touched | **24** |
+| Coverage | **100%** |
+
+Fields: `artsEntertainmentJobs · avg_dem_margin · classification · data_sources · foodServiceJobs ·
+healthcareJobs · highEarners · linguisticDiversity · mayoral · nonEnglishPct · notes · places ·
+presidential · referendums · rents · residentsWhoWork · retailJobs · takeaway · topLanguages ·
+totalCount · tract · trend · workersInTract · zip`
+
+---
+
+## 1. The problem
+
+```
+25  NEIGHBORHOOD & PEOPLE                          ← accordion row
+    └─ <Collapsible> "Neighborhood People Profile" ← collapsible #1  (a whole Card)
+        ├─ AI takeaway card
+        ├─ <Collapsible> Languages Spoken          ← collapsible #2
+        ├─ <Collapsible> Demographic Trends        ← collapsible #2
+        │   └─ Daytime Economy                     (not collapsible)
+        ├─ <Collapsible> Voting Trends             ← collapsible #2
+        │   ├─ Presidential  ← collapsible #3
+        │   ├─ Mayoral       ← collapsible #3
+        │   └─ Referendums   ← collapsible #3
+        └─ <Collapsible> Places of Worship         ← collapsible #2
+```
+
+**Three levels of chrome before a referendum result.** The row itself already collapses; the
+"Neighborhood People Profile" card inside it is a second lid on the same box, and it adds nothing —
+its title repeats the row title and its subtitle repeats the row summary.
+
+---
+
+## 2. Every label and field has a destination
+
+### Kept — restyled in place
+
+| Renders today | Destination |
+|---|---|
+| `Languages Spoken`, By ZIP Code / By Neighborhood toggle | **25.1** `.kyp-seg` |
+| `Moderate Linguistic Diversity` band, non-English %, "23% below city average", "Middle tier for diversity (#34 of 55)" | **25.1** `.kyp-block ind` |
+| `Top Languages at Home` bars | **25.1** `.kyp-hbar` |
+| Limited English Proficiency count + % of population 5+; Population 5+ | **25.1** `.kyp-block slate` |
+| `Demographic Trends`, ZIP Code / Census Tract toggle | **25.2** `.kyp-seg` |
+| 18-row metric table, 2014–2018 vs 2019–2023, Change column | **25.2** `.kyp-dtab` |
+| Favorable / Unfavorable / Contextual trend colours | **25.2** `.kyp-trend up` / `.down` / slate — **kept exactly as today**, including on the composition rows |
+| `Daytime Economy` — Jobs here, Residents working, Net daytime pull | **25.3** `.kyp-cxtiles` |
+| `Jobs by Industry · Tract` bars | **25.3** `.kyp-hbar wide` |
+| "59% of jobs in this tract pay > $3,333/month" | **25.3** fourth `.kyp-cxtile` |
+| `Voting Trends`, `Strongly Democratic`, `Trending more Republican`, `Average Democratic Margin` | **25.4** `.kyp-block` |
+| `Presidential Elections` — year, D/R split bar, Margin, Turnout | **25.4** `.kyp-votetab` + `.kyp-votebar` |
+| `Mayoral Elections` — 2023 / 2019 runoffs, candidate, party, share | **25.4** `.kyp-mix` / `.kyp-mixcard` |
+| `Recent Referendums` — 8 rows, year, share, Passed / Failed | **25.4** `.kyp-refrow` |
+| Election data-sources note (ward vs community-area caveat) | **25.4** `.kyp-src` — kept verbatim, it is a real methodology limit |
+| `Places of Worship`, count, religion grouping, name + address | **25.5** `.kyp-block` + `.kyp-loanrow` |
+| `No places of worship found within 1 mile.`, `Places of worship data unavailable.`, `Political data not available for this community area.`, `No Data` | kept verbatim as empty states |
+
+### Cut
+
+| Cut | Reason |
+|---|---|
+| The whole AI takeaway card — `THE TAKEAWAY`, title, 6 tone rows, `ACS 5-yr` / `HMDA 2025` / `Verify basis` chips, `CONTEXT — REPORTED, NOT RATED` block (`RunDetail.tsx` ~18026–18070) | **No takeaways.** The subheads say what was measured; the reader interprets it. |
+| `Writing the takeaway from this section's data…` loading state | Dies with the card. |
+| The `Neighborhood People Profile` Card wrapper, its `CardTitle`, its collapsed badges and the `Languages spoken, demographic trends, voting patterns, and community insights` subtitle | A second collapsible inside a collapsible row. The row already has a title and a one-liner. |
+| `bg-amber-500` on the linguistic-diversity badge (line ~17989) | **Amber is not in the palette** — and it dies with the badge row anyway. |
+
+**Nothing else is cut.** 36 labels, 27 test IDs, 24 fields, all accounted for.
+
+---
+
+## 3. The row one-liner — the Step 24 bug, again
+
+`scanBuilder.tsx:202` does this:
+
+```js
+if (ctx.peopleTakeaway?.takeaway?.title) dyn.people = { takeaway: mdEmph(ctx.peopleTakeaway.takeaway.title) };
+```
+
+and `accProps` prefers `scan?.takeaway` over `summary`. So the row currently reads:
+
+> `25  NEIGHBORHOOD & PEOPLE — West Town's ZIP 60612 shows rising incomes and home values alongside…`
+
+That is the AI headline, truncated by `mdEmph`'s 70-character clause cutter. Removing the takeaway
+card alone will **not** fix it — the headline reaches the row through a different path. Prompt 1
+removes `dyn.people` so the row falls back to the factual `SECTION_META.people.summary`.
+
+---
+
+## 4. Reuse table — check this before writing any CSS
+
+`kyp-base.css` is now **120,090 bytes / 1,180 rules / 275 `kyp-` families** (Step 24's patch is in).
+Almost everything this section needs already exists.
+
+| What you need | Use | Do **not** write |
+|---|---|---|
+| ZIP / tract and ZIP / neighbourhood toggles | `.kyp-seg` + `.kyp-segrow`, active button gets `.on` | a new toggle |
+| Metric table with change column | `.kyp-dtab` — `th`, `td`, `td.base` (muted prior value) | a new table |
+| Green / red change pill | `.kyp-trend.up` / `.kyp-trend.down` | a new pill |
+| Contextual (not-rated) change pill | `.kyp-trend` with `style="background:var(--kyp-slate)"` | a new variant |
+| Language and industry bars | `.kyp-hbar` — `.hl`, `.htrack > i.ind`, `.hbar-count`; add `.wide` for long labels | a new bar |
+| Daytime-economy tiles | `.kyp-cxtiles` / `.kyp-cxtile` with `.dark` / `.slate`, and `.l` `.n` `.s` inside | a new tile |
+| Hero stats | `.kyp-blocks hero two` + `.kyp-block` with **`.ind` `.grn` `.dark` `.slate`** | `.indigo`, `.green` — **these do not exist** |
+| Mayoral runoff cards | `.kyp-mixcard` + `.mh` + `.kyp-mixrow` (`.sw` `.nm` `.pc`) | a new card |
+| Worship / list rows | `.kyp-loanrow` + `.lmain` / `.lnm` / `.lmeta` | a new row |
+| "+ 14 more →" | `.kyp-morelink` | a new link |
+| Subheads, scope notes, source lines, chart titles | `.kyp-subhead` (+`.first`), `.kyp-scopenote`, `.kyp-src`, `.kyp-charttitle` | anything new |
+
+Tokens are exactly: `--kyp-bad --kyp-card --kyp-debt --kyp-debtLine --kyp-debtSoft --kyp-disp
+--kyp-green --kyp-indigo --kyp-indigoL --kyp-indigoSoft --kyp-ink --kyp-ink2 --kyp-line --kyp-mono
+--kyp-muted --kyp-orange --kyp-paper --kyp-sans --kyp-slate --kyp-wash`. There is no `--kyp-good`.
+
+**Block markup order:** `.bv` first, then `.bl`, then optional `.bd`. `.bl` carries `margin-top:8px`,
+which only works below the numeral.
+
+Only **two** things genuinely do not exist, and §7 adds them: the presidential split bar
+(`.kyp-votetab` / `.kyp-votebar` / `.kyp-votekey` / `.kyp-votemargin`) and the referendum row
+(`.kyp-refrow`).
+
+---
+
+## 5. The five subheads
+
+Numbers derive from the live accordion index via `SectionNumberContext` — never hard-coded.
+
+| # | Label | Counter-text | Geography |
+|---|---|---|---|
+| 25.1 | Languages Spoken | American Community Survey | ZIP **or** neighbourhood (toggle) |
+| 25.2 | Demographic Trends | 2014–2018 vs 2019–2023 | ZIP **or** census tract (toggle) |
+| 25.3 | Daytime Economy | Census LEHD, 2021 | census tract |
+| 25.4 | Voting & Civic | reported, not rated | community area |
+| 25.5 | Places of Worship | 20 within 1 mile | 1-mile radius |
+
+The first carries `.kyp-subhead.first`.
+
+**Four different geographies in one section**, and today none of them is stated up front. Each
+subhead opens with a `.kyp-scopenote`:
+
+```jsx
+<p className="kyp-scopenote">Figures below describe <b>ZIP 60612</b>, not this address</p>
+<p className="kyp-scopenote">Figures below describe <b>Census Tract 17031242900</b>, not this address</p>
+<p className="kyp-scopenote">Figures below describe <b>community area West Town</b>, not this address</p>
+<p className="kyp-scopenote">Figures below describe places within <b>1 mile</b>, not this address</p>
+```
+
+On 25.1 and 25.2 the note must follow the **selected** toggle state, not name both.
+
+---
+
+## 6. Colour
+
+- `.kyp-block ind` for the headline count in each subhead; `.kyp-block slate` for its companion.
+- `.kyp-block dark` for Residents working; `.kyp-cxtile slate` for Net daytime pull and the pay tile.
+- **The demographic table keeps its trend colours exactly as today**, on every row including
+  composition. That was an explicit decision; do not change which rows are coloured.
+- Voting is **`.kyp-block ind` and slate only — never green or red.** A margin is not a verdict.
+  `Strongly Democratic` and `Trending more Republican` are descriptions, and the section's
+  counter-text says *reported, not rated*.
+- Referendum outcomes: `Passed` is `.ro.passed` (indigo soft), `Failed` is `.ro.failed` (wash).
+  **Not green and red** — a referendum passing is not good news about the property.
+- **No amber anywhere.** Verified: zero occurrences in the patch.
+
+---
+
+## 7. Prompt 1 — flatten and restyle
+
+> In `client/src/pages/RunDetail.tsx`, section `accProps("people")` at lines 17965–18757:
+>
+> 1. **Delete the AI takeaway card** — the block starting `{peopleTakeawayRec?.takeaway && (` at
+>    ~18026 through its closing `)}`, and the `{generatePeopleTakeaway.isPending && …}` loading
+>    block right after it.
+> 2. **Remove the `Neighborhood People Profile` wrapper**: the `<Collapsible open={isNeighborhoodProfileOpen}>`,
+>    its `<Card>`, `<CardHeader>`, `<CardTitle>`, the collapsed badge row (which contains the
+>    `bg-amber-500` diversity badge) and the `Languages spoken, demographic trends, voting patterns,
+>    and community insights` subtitle. Its children become direct children of the accordion section.
+>    Keep `isNeighborhoodProfileOpen` / `setIsNeighborhoodProfileOpen` in state for now — other code
+>    references them; remove in Prompt 3 if nothing does.
+> 3. **Un-nest the four inner collapsibles.** Languages, Demographic Trends, Voting Trends and Places
+>    of Worship each become a `.kyp-subhead` + content, always visible. The three collapsibles inside
+>    Voting Trends (Presidential, Mayoral, Referendums) become `.kyp-charttitle` headings.
+> 4. **Split Daytime Economy out** of the Demographic Trends block into its own subhead, 25.3.
+> 5. Apply the class mapping in §4. Keep every `id="print-section-*"` and every `data-testid`
+>    exactly as it is.
+> 6. Add a `.kyp-scopenote` above each subhead's content per §5.
+>
+> Do not change any data hook, any query, or any figure. This is markup and classes only.
+
+## 8. Prompt 2 — the row one-liner and the dead generator
+
+> 1. In `client/src/components/report/scanBuilder.tsx`, delete the `dyn.people` assignment at
+>    line ~202. The row then falls back to `SECTION_META.people.summary`.
+> 2. In `client/src/components/report/sectionRegistry.tsx`, set `people.summary` to:
+>    `"Who lives here, what they earn, where they work and how they vote."`
+> 3. In `RunDetail.tsx` lines ~3070–3081, remove the `useGeneratePeopleTakeaway` effect and the
+>    `peopleTakeawayAttemptedRef`. Nothing renders that takeaway any more, so generating it is
+>    wasted model spend on every report. Leave `usePeopleTakeaway` itself and the server route in
+>    place — deleting the endpoint is a separate decision.
+> 4. Remove `peopleTakeaway` from the `ScanCtx` object passed to `buildScanSections` (~line 3883)
+>    and from the `ScanCtx` interface.
+>
+> Verify: the row reads `25 NEIGHBORHOOD & PEOPLE — Who lives here, what they earn, where they work
+> and how they vote.` — a complete sentence, no ellipsis, no mid-clause cut.
+
+## 9. Prompt 3 — cleanup
+
+> - Confirm `bg-amber-500` no longer appears anywhere in the §People range.
+> - Confirm no `.kyp-block` in this section is missing a colour modifier (`ind` / `grn` / `dark` /
+>   `slate` / `wash`) — an unmodified `.kyp-block` is white text on no background.
+> - Confirm `isNeighborhoodProfileOpen` still has a reader; if not, remove it and its
+>   `sectionStates` key.
+> - Run: `document.querySelectorAll('.kyp-block:not(.ind):not(.grn):not(.dark):not(.slate):not(.wash):not(.orange):not(.red):not(.bad)').length` — expect 0.
+
+---
+
+## 10. The CSS — append to the end of `client/src/kyp-base.css`
+
+Parser-verified (`tinycss2`, walking qualified-rules and recursing into `@media`):
+
+- **30 rules, 28 unique selectors, 0 parse errors**
+- **0 selector collisions** against the 1,153 selectors already in `kyp-base.css`
+- 11 `var()` references, **0 unresolved** against the 21 defined tokens
+- **0 amber occurrences**
+- `kyp-base.css` 120,090 → 124,209 bytes (+4,119)
+
+Append-only. It redefines nothing.
+
+```css
+/* ============================================================
+   Step 25 — Neighbourhood & People
+   Append to the END of client/src/kyp-base.css.
+
+   Only TWO new families. Everything else in this section reuses
+   what already exists: .kyp-dtab + .kyp-trend (demographic table),
+   .kyp-hbar (languages, jobs by industry), .kyp-cxtiles (daytime
+   economy), .kyp-seg (both toggles), .kyp-blocks (heroes),
+   .kyp-src, .kyp-charttitle, .kyp-subhead.
+   ============================================================ */
+
+/* --- 1. Split vote bar (presidential results) --------------- */
+.kyp-votetab { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+.kyp-votetab th {
+  font-family: var(--kyp-mono); font-size: 8.5px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--kyp-muted);
+  text-align: right; padding-bottom: 8px;
+}
+.kyp-votetab th:first-child,
+.kyp-votetab th.wide { text-align: left; }
+.kyp-votetab td {
+  padding: 11px 0; border-bottom: 1px solid var(--kyp-line);
+  text-align: right; color: var(--kyp-ink);
+}
+.kyp-votetab td:first-child { text-align: left; font-weight: 600; }
+.kyp-votetab tr:last-child td { border-bottom: 0; }
+
+.kyp-votebar {
+  position: relative; height: 15px; border-radius: 4px;
+  background: var(--kyp-wash); overflow: hidden; display: flex; min-width: 200px;
+}
+.kyp-votebar i { display: block; height: 100%; }
+.kyp-votebar i.dem { background: var(--kyp-indigoL); }
+.kyp-votebar i.rep { background: var(--kyp-bad); }
+.kyp-votebar span {
+  position: absolute; top: 0; line-height: 15px;
+  font-family: var(--kyp-mono); font-size: 8.5px; font-weight: 700; color: #fff;
+}
+.kyp-votebar span.l { left: 5px; }
+.kyp-votebar span.r { right: 5px; }
+.kyp-votemargin {
+  font-family: var(--kyp-mono); font-size: 10.5px; font-weight: 700;
+  padding: 3px 8px; border-radius: 5px;
+  background: var(--kyp-indigoSoft); color: var(--kyp-indigo);
+}
+
+/* --- 2. Referendum rows ------------------------------------- */
+.kyp-refrow {
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 0; border-bottom: 1px solid var(--kyp-line);
+}
+.kyp-refrow:last-of-type { border-bottom: 0; }
+.kyp-refrow .rn { flex: 1; min-width: 0; font-size: 13.5px; color: var(--kyp-ink); }
+.kyp-refrow .rn u {
+  font-family: var(--kyp-mono); font-size: 10.5px; color: var(--kyp-muted);
+  text-decoration: none; margin-left: 7px;
+}
+.kyp-refrow .rt {
+  position: relative; width: 260px; height: 9px; flex: none;
+  background: var(--kyp-wash); border-radius: 5px; overflow: hidden;
+}
+.kyp-refrow .rt i { display: block; height: 100%; background: var(--kyp-indigoL); border-radius: 5px; }
+/* 50% line — the bar means nothing without it */
+.kyp-refrow .rt::after {
+  content: ''; position: absolute; left: 50%; top: 0; bottom: 0;
+  width: 1px; background: var(--kyp-paper);
+}
+.kyp-refrow .ro {
+  font-family: var(--kyp-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 5px; flex: none; width: 62px; text-align: center;
+}
+.kyp-refrow .ro.passed { background: var(--kyp-indigoSoft); color: var(--kyp-indigo); }
+.kyp-refrow .ro.failed { background: var(--kyp-wash); color: var(--kyp-ink2); }
+
+@media (max-width: 720px) {
+  .kyp-refrow { flex-wrap: wrap; }
+  .kyp-refrow .rt { width: 100%; order: 3; }
+  .kyp-votebar { min-width: 120px; }
+}
+
+/* --- 3. Two fixes found by rendering the mock ---------------- */
+/* A label inside a narrow bar clips. Below ~12% the number has to sit
+   outside the fill, not in it. */
+.kyp-hbar .htrack > b.out {
+  position: absolute; top: 50%; transform: translateY(-50%); margin-left: 9px;
+  font-family: var(--kyp-mono); font-size: 11px; font-weight: 700; color: var(--kyp-ink2);
+}
+/* Vote percentages go under the bar, not inside it — the Republican share is
+   routinely 10–16%, too narrow to hold "R 15.5%" legibly. */
+.kyp-votekey {
+  display: flex; justify-content: space-between; margin-top: 4px;
+  font-family: var(--kyp-mono); font-size: 9.5px; color: var(--kyp-muted);
+}
+.kyp-votekey b { font-weight: 700; color: var(--kyp-ink2); }
+```
+
+---
+
+## ✅ Done when
+
+- [ ] No takeaway card anywhere in §People.
+- [ ] No `Neighborhood People Profile` card — content sits directly under the accordion row.
+- [ ] Five numbered subheads, 25.1–25.5, renumbering when the row is dragged.
+- [ ] A `.kyp-scopenote` above each, naming ZIP / tract / community area / 1 mile, and following the
+      toggle on 25.1 and 25.2.
+- [ ] The row one-liner is a complete sentence, not a truncated AI headline.
+- [ ] `useGeneratePeopleTakeaway` no longer fires on report load.
+- [ ] Demographic trend colours are unchanged from today, on every row.
+- [ ] Voting carries no green or red. Referendum outcomes are indigo / wash.
+- [ ] No amber. No unmodified `.kyp-block`.
+- [ ] Every `print-section-*` id and every `data-testid` still present.
+
+---
+
+## Two things the mock caught, so they don't recur
+
+**A label inside a narrow bar clips.** The Chinese language bar is 2.5% wide and rendered as
+`.5%` — `.kyp-hbar .htrack i` has `min-width:26px` and 7px of padding, which cannot hold four
+characters. Below ~12%, put the count outside the fill using `.kyp-hbar .htrack > b.out` with
+`style="left:{pct}%"`.
+
+**Vote percentages do not fit inside the bar.** The Republican share is routinely 10–16%; a label
+absolutely positioned at the bar's right edge lands on the light remainder in white text and
+disappears. Percentages go in a `.kyp-votekey` row *under* the bar, D left, R right.
+
+---
+
+## Not in this step
+
+- Places of Worship stays in §People. It is a distance-based amenity and arguably belongs in
+  §Proximity — flagged, deliberately not moved.
+- The `/api/people-takeaway` route and its stored records. Prompt 2 stops calling the generator;
+  removing the endpoint and its table is a separate decision.

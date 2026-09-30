@@ -3800,7 +3800,7 @@ export function useTransactionTrends(zip: string | undefined | null) {
     },
     staleTime: 15 * 60 * 1000,
     refetchOnWindowFocus: true,
-    refetchInterval: (query) => query.state.status === 'error' ? 60_000 : false,
+    refetchInterval: (query) => query.state.status === 'error' || query.state.data?.isStale ? 60_000 : false,
   });
 }
 

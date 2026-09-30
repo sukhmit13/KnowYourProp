@@ -81,6 +81,13 @@ export interface TransactionTrendsResult {
   zip: string;
   years: YearSnapshot[];
   yoyChanges: YoYChange[];
+  isStale?: boolean;
+  lastUpdated?: string;
+}
+
+export interface TransactionTrendsCache {
+  read(zip: string): Promise<{ result: TransactionTrendsResult; fetchedAt: number } | null>;
+  write(zip: string, result: TransactionTrendsResult, fetchedAt: number): Promise<void>;
 }
 
 type CatKey = 'singleFamily' | 'unit2to4' | 'condo' | 'commercial';
@@ -98,26 +105,33 @@ export function assessorNbhdToSaleHistoryKey(townshipName: string, nbhd: unknown
   return townshipCode + String(nbhd).padStart(3, '0');
 }
 
-async function soqlFetch(url: string): Promise<any[]> {
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(30000),
-  });
-  if (!res.ok) {
-    const responseDetail = (await res.text()).slice(0, 500);
-    throw new Error(`Socrata HTTP ${res.status}${responseDetail ? `: ${responseDetail}` : ''}`);
+async function soqlFetch(url: string, stage: string): Promise<any[]> {
+  const start = Date.now();
+  try {
+    const res = await fetch(url, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!res.ok) {
+      const responseDetail = (await res.text()).slice(0, 500);
+      throw new Error(`Socrata HTTP ${res.status}${responseDetail ? `: ${responseDetail}` : ''}`);
+    }
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('Non-array response from Socrata');
+    console.log(`[TransactionTrends] ${stage}: ${data.length} rows in ${Date.now() - start}ms`);
+    return data;
+  } catch (error) {
+    console.error(`[TransactionTrends] ${stage} failed after ${Date.now() - start}ms:`, error);
+    throw error;
   }
-  const data = await res.json();
-  if (!Array.isArray(data)) throw new Error('Non-array response from Socrata');
-  return data;
 }
 
-async function soqlFetchAll(url: string): Promise<any[]> {
+async function soqlFetchAll(url: string, stage: string): Promise<any[]> {
   const pageSize = 50000;
   const rows: any[] = [];
   for (let offset = 0; ; offset += pageSize) {
     const pageUrl = `${url}&$limit=${pageSize}&$offset=${offset}`;
-    const page = await soqlFetch(pageUrl);
+    const page = await soqlFetch(pageUrl, stage);
     rows.push(...page);
     if (page.length < pageSize) return rows;
   }
@@ -127,22 +141,30 @@ async function soqlFetchAll(url: string): Promise<any[]> {
 const zipNbhdCache = new Map<string, { nbhds: string[]; fetchedAt: number }>();
 const zipResultCache = new Map<string, { result: TransactionTrendsResult; fetchedAt: number }>();
 const zipInflight = new Map<string, Promise<TransactionTrendsResult>>();
+const zipRefreshInflight = new Map<string, Promise<TransactionTrendsResult>>();
 
 async function getNbhdsForZip(zip: string): Promise<string[]> {
   const cached = zipNbhdCache.get(zip);
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) return cached.nbhds;
 
+  // Assessor property_zip often contains ZIP+4; equality on a five-digit ZIP
+  // returns no rows. The bounded text range preserves the ZIP prefix match.
+  const nextZip = String(Number(zip) + 1).padStart(5, '0');
+  const zipFilter = zip === '99999'
+    ? `property_zip like '${zip}%'`
+    : `property_zip >= '${zip}' AND property_zip < '${nextZip}'`;
   const params = new URLSearchParams({
     '$select': 'township_name,nbhd',
-    '$where': `property_zip like '${zip}%' AND property_city='CHICAGO'`,
+    '$where': `${zipFilter} AND property_city='CHICAGO'`,
     '$group': 'township_name,nbhd',
     '$limit': '100',
   });
-  const rows = await soqlFetch(`${ASSESSOR_UNIVERSE}?${params.toString()}`);
+  const rows = await soqlFetch(`${ASSESSOR_UNIVERSE}?${params.toString()}`, `ZIP ${zip} neighborhoods`);
   const nbhds = [...new Set(rows
     .map((row) => assessorNbhdToSaleHistoryKey(String(row.township_name || ''), row.nbhd))
     .filter((nbhd): nbhd is string => nbhd !== null))];
 
+  if (!nbhds.length) throw new Error(`No assessor neighborhoods were returned for ZIP ${zip}; sales cannot be scoped`);
   zipNbhdCache.set(zip, { nbhds, fetchedAt: Date.now() });
   console.log(`[TransactionTrends] ZIP ${zip}: ${nbhds.length} nbhds -> ${nbhds.join(', ')}`);
   return nbhds;
@@ -213,18 +235,23 @@ async function fetchZipTrends(zip: string): Promise<TransactionTrendsResult> {
       '$where': `sale_date >= '${TARGET_YEARS[0]}-01-01' AND sale_date < '${TARGET_YEARS[TARGET_YEARS.length - 1] + 1}-01-01' AND ${SALE_FILTERS} AND ${nbhdFilter}`,
       '$group': 'year,nbhd,class',
     });
-    const saleRows = await soqlFetchAll(`${SALE_HISTORY}?${countParams.toString()}`);
+    const medianParams = latestCompleteYear === undefined ? null : new URLSearchParams({
+      '$select': 'class,sale_price',
+      '$where': `sale_date >= '${latestCompleteYear}-01-01' AND sale_date < '${latestCompleteYear + 1}-01-01' AND ${SALE_FILTERS} AND ${nbhdFilter}`,
+    });
+    const [saleRows, priceRows] = await Promise.all([
+      soqlFetchAll(`${SALE_HISTORY}?${countParams.toString()}`, `ZIP ${zip} sale counts`),
+      medianParams ? soqlFetchAll(`${SALE_HISTORY}?${medianParams.toString()}`, `ZIP ${zip} prices`) : Promise.resolve([]),
+    ]);
+    if (!saleRows.length) {
+      throw new Error(`Cook County returned no sale-count rows for ZIP ${zip}; cannot confirm zero sales`);
+    }
     const nbhdCounts = aggregateCounts(saleRows);
     for (const [year, yearCounts] of nbhdCounts) {
       for (const category of CATEGORIES) counts.get(year)![category] += yearCounts[category];
     }
 
     if (latestCompleteYear !== undefined) {
-      const medianParams = new URLSearchParams({
-        '$select': 'class,sale_price',
-        '$where': `sale_date >= '${latestCompleteYear}-01-01' AND sale_date < '${latestCompleteYear + 1}-01-01' AND ${SALE_FILTERS} AND ${nbhdFilter}`,
-      });
-      const priceRows = await soqlFetchAll(`${SALE_HISTORY}?${medianParams.toString()}`);
       medianPrices = calculateMedianPrices(priceRows);
     }
   }
@@ -255,21 +282,79 @@ async function fetchZipTrends(zip: string): Promise<TransactionTrendsResult> {
   return { zip, years, yoyChanges };
 }
 
-export async function getTransactionTrends(zip: string): Promise<TransactionTrendsResult> {
+function refreshZip(zip: string, cache?: TransactionTrendsCache): Promise<TransactionTrendsResult> {
+  const inflight = zipRefreshInflight.get(zip);
+  if (inflight) return inflight;
+  const requestedAt = Date.now();
+  const request = fetchZipTrends(zip)
+    .then(async (result) => {
+      // Start time is the ordering key for overlapping refreshes across instances.
+      const fetchedAt = requestedAt;
+      zipResultCache.set(zip, { result, fetchedAt });
+      if (cache) {
+        try {
+          await cache.write(zip, result, fetchedAt);
+        } catch (error) {
+          console.error(`[TransactionTrends] ZIP ${zip} could not save shared cache:`, error);
+        }
+      }
+      return result;
+    })
+    .catch((error) => {
+      console.error(`[TransactionTrends] ZIP ${zip} transaction trends failed:`, error);
+      throw error;
+    })
+    .finally(() => zipRefreshInflight.delete(zip));
+  zipRefreshInflight.set(zip, request);
+  return request;
+}
+
+export async function getTransactionTrends(zip: string, cache?: TransactionTrendsCache): Promise<TransactionTrendsResult> {
   const cached = zipResultCache.get(zip);
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) return cached.result;
   const inflight = zipInflight.get(zip);
   if (inflight) return inflight;
 
-  const request = fetchZipTrends(zip)
-    .then((result) => {
-      zipResultCache.set(zip, { result, fetchedAt: Date.now() });
-      return result;
-    })
-    .catch((error) => {
-      console.error(`[TransactionTrends] ZIP ${zip} transaction trends failed:`, (error as Error).message);
-      throw error;
-    })
+  const request = (async () => {
+    let persisted: Awaited<ReturnType<TransactionTrendsCache['read']>> = null;
+    try {
+      persisted = cache ? await cache.read(zip) : null;
+    } catch (error) {
+      console.error(`[TransactionTrends] ZIP ${zip} shared cache read failed; using available source data:`, error);
+      if (cached) {
+        void refreshZip(zip, cache).catch(() => {});
+        return {
+          ...cached.result,
+          isStale: true,
+          lastUpdated: new Date(cached.fetchedAt).toISOString(),
+        };
+      }
+      return refreshZip(zip, cache);
+    }
+    if (persisted) {
+      const valid = persisted.result?.zip === zip
+        && Array.isArray(persisted.result.years)
+        && persisted.result.years.length === TARGET_YEARS.length
+        && persisted.result.years.every((year, index) => year.year === TARGET_YEARS[index]);
+      if (!valid) {
+        console.error(`[TransactionTrends] ZIP ${zip} shared cache has an invalid response; fetching again`);
+      } else if (Number.isFinite(persisted.fetchedAt)) {
+        if (Date.now() - persisted.fetchedAt < CACHE_TTL) {
+          zipResultCache.set(zip, persisted);
+          return persisted.result;
+        }
+        // Answer immediately from the last successful source snapshot while
+        // revalidating in the background. Never present it as live data.
+        void refreshZip(zip, cache).catch(() => {});
+        return {
+          ...persisted.result,
+          isStale: true,
+          lastUpdated: new Date(persisted.fetchedAt).toISOString(),
+        };
+      }
+    }
+    return refreshZip(zip, cache);
+  })()
     .finally(() => zipInflight.delete(zip));
   zipInflight.set(zip, request);
   return request;
