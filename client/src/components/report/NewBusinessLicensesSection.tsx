@@ -5,6 +5,7 @@ import {
   type NearbyLicensesResponse,
 } from "@shared/businessLicenses";
 import { KypSubhead } from "@/components/report/AccordionSection";
+import { REPORT_SECTION_TITLES } from "@/components/report/sectionRegistry";
 
 interface Props {
   data?: NearbyLicensesResponse;
@@ -27,7 +28,7 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
   }, [establishments]);
 
   if (isLoading) {
-    return <div className="kyp-biz-loading" aria-live="polite"><span /><span /><span /></div>;
+    return <div className="kyp-biz-loading" aria-live="polite" aria-label={REPORT_SECTION_TITLES.newBusinessLicenses}><span /><span /><span /></div>;
   }
   if (isError) {
     return <div className="kyp-status-empty unknown">New business issuance records could not be loaded. The result is unknown rather than zero.</div>;
@@ -44,7 +45,7 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
   return (
     <div id="print-section-new-business-licenses" className="kyp-biz" data-testid="card-business-licenses">
       <div className="kyp-biz-topline">
-        <span className="kyp-biz-radius">1 mile · new issuances only</span>
+        <span className="kyp-biz-radius">1 mile · past 12 months · new issuances only</span>
       </div>
 
       <div className="kyp-blocks kyp-biz-heroes">

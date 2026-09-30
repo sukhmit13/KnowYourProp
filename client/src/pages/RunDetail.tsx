@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef, memo, useMemo, useContext, Fr
 import ReactDOM from "react-dom";
 import { useRoute, useLocation } from "wouter";
 import { buildScanSections } from "@/components/report/scanBuilder";
+import { REPORT_SECTION_TITLES } from "@/components/report/sectionRegistry";
 import { AccordionSection, buildSubsectionNumbers, KypSubhead, SectionNumberContext } from "@/components/report/AccordionSection";
 import { NewBusinessLicensesSection } from "@/components/report/NewBusinessLicensesSection";
 import { NewConstructionSection } from "@/components/report/NewConstructionSection";
@@ -493,9 +494,10 @@ const PRINT_SECTIONS: PrintSection[] = [
   { id: 'listing-snapshot', label: 'Active Listing Snapshot', defaultChecked: true, group: 'Location & Overview' },
 
   // Project Use & Zoning
-  { id: 'project-type', label: 'Project Use & Zoning Compatibility', defaultChecked: true, group: 'Project Use & Zoning' },
+  { id: 'project-type', label: REPORT_SECTION_TITLES.zoning, defaultChecked: true, group: 'Project Use & Zoning' },
   { id: 'ward', label: 'Ward & Alderperson', defaultChecked: true, level: 1, group: 'Project Use & Zoning' },
-  { id: 'zoning-details', label: 'Zoning Details', defaultChecked: true, level: 1, group: 'Project Use & Zoning' },
+  { id: 'zoning-details', label: 'Zoning District Details', defaultChecked: true, level: 1, group: 'Project Use & Zoning' },
+  { id: 'zoning-history', label: REPORT_SECTION_TITLES.zoningHistory, defaultChecked: true, level: 1, group: 'Project Use & Zoning' },
 
   // Project Use Analysis (project-type-specific sections)
   { id: 'childcare', label: 'Childcare Access', defaultChecked: true, group: 'Project Use Analysis', requiresProjectType: ['Day Care Center', 'School (Private)'] },
@@ -536,6 +538,7 @@ const PRINT_SECTIONS: PrintSection[] = [
   // Property Details
   { id: 'permits', label: 'Permits & Violations', defaultChecked: true, group: 'Permits & Violations' },
   { id: 'ownership', label: 'Ownership & Title', defaultChecked: true, group: 'Ownership & Title' },
+  { id: 'business-licenses', label: REPORT_SECTION_TITLES.businessLicenses, defaultChecked: true, group: 'Ownership & Title' },
   { id: 'mortgage-lending', label: 'Mortgage & Lending Market', defaultChecked: true, group: 'Mortgage & Lending' },
   { id: 'hmda-stats', label: 'Residential Mortgage Market (HMDA)', defaultChecked: true, level: 1, group: 'Mortgage & Lending' },
   { id: 'transaction-trends', label: 'Area Transaction Trends', defaultChecked: true, level: 1, group: 'Mortgage & Lending' },
@@ -549,7 +552,7 @@ const PRINT_SECTIONS: PrintSection[] = [
 
   // Proximity & Neighborhood
   { id: 'crime', label: 'Safety & Crime', defaultChecked: true, group: 'Safety & Crime' },
-  { id: 'new-business-licenses', label: 'New Business Licenses', defaultChecked: true, group: 'Safety & Crime' },
+  { id: 'new-business-licenses', label: REPORT_SECTION_TITLES.newBusinessLicenses, defaultChecked: true, group: 'Safety & Crime' },
   { id: 'new-construction', label: 'New Construction', defaultChecked: true, group: 'Proximity & Neighborhood' },
   { id: 'proximity-details', label: 'Proximity & Neighborhood Intelligence', defaultChecked: true, group: 'Proximity & Neighborhood' },
   { id: 'schools', label: 'Nearby CPS Schools', defaultChecked: true, level: 1, group: 'Proximity & Neighborhood' },
@@ -3381,6 +3384,23 @@ export default function RunDetail() {
     if (insightPrintInFlightRef.current && !insightHtml) return;
     printInFlightRef.current = true;
     const allSectionIds = PRINT_SECTIONS.map(s => s.id);
+    const getPrintTarget = (sectionId: string): HTMLElement | null => {
+      const anchor = document.getElementById(`print-section-${sectionId}`);
+      if (sectionId === 'project-type') {
+        const row = document.getElementById('section-zoning');
+        if (row instanceof HTMLElement) return row;
+      }
+      if (sectionId === 'new-business-licenses') {
+        const row = document.getElementById('section-newBusinessLicenses');
+        if (row instanceof HTMLElement) return row;
+      }
+      if (!anchor) return null;
+      if (['business-licenses', 'zoning-history'].includes(sectionId)) {
+        const row = anchor.closest('.kyp-accrow');
+        return row instanceof HTMLElement ? row : anchor;
+      }
+      return anchor;
+    };
 
     // When printing with the insight report, prepend it as a print-only block
     const insightEl = insightHtml ? injectInsightForPrint(insightHtml) : null;
@@ -3406,7 +3426,7 @@ export default function RunDetail() {
       const selectedMarketChild = ['hmda-stats', 'transaction-trends', 'comparable-sales', 'sba-loans']
         .some(sectionId => selectedSections.includes(sectionId));
       allSectionIds.forEach(sectionId => {
-        const el = document.getElementById(`print-section-${sectionId}`);
+        const el = getPrintTarget(sectionId);
         if (el) {
           const includeSection = selectedSections.includes(sectionId)
             || (sectionId === 'mortgage-lending' && selectedMarketChild);
@@ -3433,7 +3453,7 @@ export default function RunDetail() {
         if (cleaned) return;
         cleaned = true;
         allSectionIds.forEach(sectionId => {
-          const el = document.getElementById(`print-section-${sectionId}`);
+          const el = getPrintTarget(sectionId);
           if (el) el.classList.remove('print-exclude');
         });
         INCENTIVE_SUBSECTION_IDS.forEach(subId => {
@@ -3884,8 +3904,8 @@ export default function RunDetail() {
   });
   const ACC_CUSTOM_META: Record<string, { title: string; summary: string; info: string[] }> = {
     listing: { title: "Active Listing", summary: "Live listing status for this address — price, status and terms.", info: ["AI listing lookup", "Price, status & broker", "Rent roll / unit mix when published"] },
-    businessLicenses: { title: "Business Licenses", summary: "Every business ever licensed at this address.", info: ["City of Chicago license records", "Operator, term and license class", "Active, expired and revoked"] },
-    zoningHistory: { title: "Zoning History", summary: "Recorded City Council and Zoning Board actions for this parcel.", info: ["City Council filings", "Zoning Board decisions", "Filing documents and named professionals"] },
+    businessLicenses: { title: REPORT_SECTION_TITLES.businessLicenses, summary: "Every business ever licensed at this address.", info: ["City of Chicago license records", "Operator, term and license class", "Active, expired and revoked"] },
+    zoningHistory: { title: REPORT_SECTION_TITLES.zoningHistory, summary: "Recorded City Council and Zoning Board actions for this parcel.", info: ["City Council filings", "Zoning Board decisions", "Filing documents and named professionals"] },
     analysis: { title: "Project Use Analysis", summary: "Deep-dive analysis for your selected use.", info: ["Demand & demographics for your use", "Nearby competitors", "Use-specific estimators"] },
     potential: { title: "Development Potential & Rental Market", summary: "FAR, buildable envelope and rental potential.", info: ["FAR & buildable envelope", "Market rents (RentCast)", "Short-term rental (Airbnb)", "Commercial listings"] },
     proximity: { title: "Proximity", summary: "Distances and nearby property conditions around this address.", info: ["Nearby destinations", "Vacant and abandoned buildings", "Data sources and search radii"] },
@@ -4216,8 +4236,10 @@ export default function RunDetail() {
       {/* Section Jump Search Dialog */}
       {sectionSearchOpen && (() => {
         const jumpSections = [
-          { label: 'Zoning & Allowed Uses', icon: Scale, action: () => { return 'print-section-zoning-details'; } },
-          { label: 'Zoning History', icon: Gavel, action: () => { setAccHidden((m) => ({ ...m, zoningHistory: false })); setAccOpen((m) => ({ ...m, zoningHistory: true })); return 'section-zoningHistory'; } },
+          { label: REPORT_SECTION_TITLES.zoning, icon: Scale, action: () => { setAccHidden((m) => ({ ...m, zoning: false })); setAccOpen((m) => ({ ...m, zoning: true })); return 'section-zoning'; } },
+          { label: REPORT_SECTION_TITLES.zoningHistory, icon: Gavel, action: () => { setAccHidden((m) => ({ ...m, zoningHistory: false })); setAccOpen((m) => ({ ...m, zoningHistory: true })); return 'print-section-zoning-history'; } },
+          { label: REPORT_SECTION_TITLES.businessLicenses, icon: FileText, action: () => { setAccHidden((m) => ({ ...m, businessLicenses: false })); setAccOpen((m) => ({ ...m, businessLicenses: true })); return 'print-section-business-licenses'; } },
+          { label: REPORT_SECTION_TITLES.newBusinessLicenses, icon: FileText, action: () => { setAccHidden((m) => ({ ...m, newBusinessLicenses: false })); setAccOpen((m) => ({ ...m, newBusinessLicenses: true })); return 'section-newBusinessLicenses'; } },
           { label: 'Active Listing Snapshot', icon: Newspaper, action: () => { setAccOpen((open) => ({ ...open, listing: true })); return 'print-section-listing-snapshot'; } },
           { label: 'Permits & Violations', icon: ClipboardCheck, action: () => 'section-permits' },
           { label: 'Historic Status', icon: Landmark, action: () => { setAccHidden((m) => ({ ...m, historic: false })); setAccOpen((m) => ({ ...m, historic: true })); return 'print-section-historic-status'; } },
@@ -4990,8 +5012,8 @@ export default function RunDetail() {
           <div className="kyp-acc" data-testid="acc-list">
 
           {/* Check Your Project Use - Full Width Section */}
-          {facts?.zoning && (
           <AccordionSection {...accProps("zoning")}>
+            {facts?.zoning && (
             <motion.div
               id="print-section-project-type"
               initial={{ opacity: 0 }}
@@ -5411,8 +5433,8 @@ export default function RunDetail() {
                 document.body
               )}
             </motion.div>
+            )}
           </AccordionSection>
-          )}
 
           {/* Active Listing Snapshot — on-demand AI web-search lookup of the live listing.
               THIRD-PARTY LISTING CLAIMS, not verified data — labeled prominently as such. */}
@@ -5581,7 +5603,7 @@ export default function RunDetail() {
               transition={{ delay: 0.19 }}
             >
               {isLoadingBizLicenseHistory ? (
-                <div className="space-y-3" data-testid="business-licenses-loading">
+                <div className="space-y-3" data-testid="business-licenses-loading" aria-label={REPORT_SECTION_TITLES.businessLicenses}>
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-28 w-full" />
                   <Skeleton className="h-28 w-full" />
@@ -5684,7 +5706,7 @@ export default function RunDetail() {
           <AccordionSection {...accProps("zoningHistory")}>
             <motion.div id="print-section-zoning-history" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.145 }}>
               {isLoadingZoningHistory ? (
-                <div className="seccard space-y-3" data-testid="zoning-history-loading">
+                <div className="seccard space-y-3" data-testid="zoning-history-loading" aria-label={REPORT_SECTION_TITLES.zoningHistory}>
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-20 w-full" />
                   <Skeleton className="h-28 w-full" />

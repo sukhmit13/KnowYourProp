@@ -3,6 +3,13 @@ import { type ScanSection } from "./CollapsibleSection";
 // Static metadata only. anchorId values confirmed against the jumpSections map in RunDetail.
 type SectionMeta = Pick<ScanSection, "id" | "anchorId" | "title" | "summary" | "info">;
 
+export const REPORT_SECTION_TITLES = {
+  businessLicenses: "Business License History at This Address",
+  newBusinessLicenses: "New Business Licenses Nearby",
+  zoning: "Zoning & Allowed Uses",
+  zoningHistory: "Recorded Zoning Actions",
+} as const;
+
 export const SECTION_ORDER = [
   "countyRecord", "permits", "ownership", "historic", "zoning", "valuation", "market", "incentives", "transit", "newBusinessLicenses", "newConstruction",
   "crime", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
@@ -18,7 +25,7 @@ export const SECTION_META: Record<string, SectionMeta> = {
   permits: { id: "permits", anchorId: "section-permits", title: "Permits & Violations",
     summary: "Building permits, professionals on record, and code violations.",
     info: ["Permit history — current vs prior owner", "Professionals who worked on the building", "Building violations", "Sidewalk cafe permits", "MBE/WBE/DBE/VBE/BEPD are City of Chicago vendor certifications (minority-, women-, disadvantaged-, veteran-owned, and business enterprises owned by people with disabilities). We show them as reported by the city directory; we do not verify current standing."] },
-  zoning: { id: "zoning", anchorId: "print-section-zoning-details", title: "Zoning & What You Can Build",
+  zoning: { id: "zoning", anchorId: "section-zoning", title: REPORT_SECTION_TITLES.zoning,
     summary: "What the zoning lets you build, by-right or with approvals.",
     info: ["Zoning district & meaning", "Allowed uses — as-of-right", "Your project-use verdict", "Development potential: FAR, height, parking", "Zoning & ZBA history"] },
   valuation: { id: "valuation", anchorId: "section-rentcast", title: "Valuation & Cashflow",
@@ -33,7 +40,7 @@ export const SECTION_META: Record<string, SectionMeta> = {
   transit: { id: "transit", anchorId: "print-section-transit", title: "Transit Access",
     summary: "Rail, Metra, bus and street traffic near the property.",
     info: ["CTA rail — nearest stations & ridership", "Metra — stations & ridership", "CTA bus — routes & ridership", "Street traffic volume (ADT)"] },
-  newBusinessLicenses: { id: "newBusinessLicenses", anchorId: "print-section-new-business-licenses", title: "New Business Licenses",
+  newBusinessLicenses: { id: "newBusinessLicenses", anchorId: "section-newBusinessLicenses", title: REPORT_SECTION_TITLES.newBusinessLicenses,
     summary: "New business issuances and formation change within one mile.",
     info: ["Distinct businesses, not raw license records", "Current and prior 12-month formation", "New-issuance license mix", "Nearest openings"] },
   newConstruction: { id: "newConstruction", anchorId: "print-section-new-construction", title: "New Construction",

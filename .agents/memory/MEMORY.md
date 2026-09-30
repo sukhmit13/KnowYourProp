@@ -6,7 +6,7 @@
 - [Insight report evidence](insight-report-evidence.md) — geo-null silently drops zoning/transit/demo/childcare blocks with no markers; prod→dev run replication needs 4 tables; DIAG measures fullContext only.
 - [Owner intel & IL SOS access](owner-intel-sos-access.md) — ilsos.gov 403s datacenter IPs; SOS scraping must use ScrapingBee (quota resets monthly); fail loudly to manual link.
 - [claude-sonnet-5 API quirks](claude-sonnet-5-api-quirks.md) — rejects temperature; thinking tokens eat max_tokens; join all text blocks and fail hard on truncation/empty output.
-- [Report design system](report-design-system.md) — shared CSS primitives for report restyles; verify design-subagent passes with tsc baseline + Playwright; subagents break imports/JSX.
+- [Report design system](report-design-system.md) — shared primitives, evidence-scoped section names, and browser/type-baseline verification.
 - [Report section hierarchy](report-section-hierarchy.md) — each accordion row gets one header; subsection labels use full-width standard rules without a second icon/short line or extra outer frame.
 - [Metra station name matching](metra-station-matching.md) — GTFS vs RTAMS survey names differ; alias table + hint-only fuzzy match, ambiguous → 404, never guess.
 - [Contractor rankings pipeline](contractor-rankings-pipeline.md) — permits-only data; rank by trade-specific counts, compute activity live, rebuilds fail hard + atomic.

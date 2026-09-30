@@ -1,6 +1,6 @@
 ---
 name: Report design system
-description: Durable rules for restyling report pages and verifying design-subagent passes
+description: Durable rules for report styling, evidence-scoped section names, and browser verification
 ---
 
 # Report design system
@@ -44,3 +44,17 @@ Match a mock's visual treatment, but keep source labels consistent with the actu
 **Why:** a supplied worship-list mock attributed records to OpenStreetMap while the existing endpoint used Google Places. Copying the footer literally would create a false attribution despite leaving the data untouched.
 
 **How to apply:** verify the current provider before replacing source text. Honor provided source metadata and otherwise name the known provider; do not change queries or datasets merely to match a mock's label.
+
+## Evidence-scoped section names
+Distinguish subject-address license history from nearby new issuances, and current zoning/use rules from recorded zoning actions. Keep radius and time-window qualifiers in scope text rather than long titles.
+
+**Why:** The user explicitly approved this distinction across the report, navigation, and print options. License records do not prove current operation, and available zoning filings do not establish a complete history or approval to build.
+
+**How to apply:** Preserve those distinctions when revising labels, use the same canonical title on each surface, and leave official dataset/source names unchanged.
+
+## Whole-section navigation and print targets
+Section-level navigation and print selection must target the actual accordion row, including its header, and remain available through loading, error, empty, and populated states. Treat standalone context cards as separate targets.
+
+**Why:** A matching zoning label concealed a target pointing to the district summary card rather than the full section; success-only nearby-license anchors also disappeared when no records were available.
+
+**How to apply:** Check the actual target's DOM scope, verify include/exclude behavior for the whole row, and confirm unrelated context cards and sibling sections remain unaffected.
