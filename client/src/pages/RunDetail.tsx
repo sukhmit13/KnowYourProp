@@ -2344,7 +2344,10 @@ export default function RunDetail() {
   // The recorder scraper extracts the true current owner from the most recent deed grantee
   // and stores it in lienData.ownerName, which we prefer for display and owner lien searches.
   const saleHistoryBuyerName = pinLookupData?.saleHistory?.[0]?.buyerName || null;
-  const { data: lienData, isLoading: isLoadingLiens } = useLienSearch(submittedPin, saleHistoryBuyerName, facts?.city);
+  const { data: lienData, isLoading: isLoadingLiens, isFetching: isFetchingLiens } = useLienSearch(submittedPin, saleHistoryBuyerName, facts?.city);
+  const isCheckingTitle = (isLoadingFacts || isLoadingPinLookup || isLoadingLiens || isFetchingLiens
+    || (!submittedPin && !!pinLookupData?.pin))
+    && (!lienData || !!lienData.searchFailed);
   // Prefer the recorder-determined owner name (deed grantee); fall back to sale history
   const derivedOwnerName = lienData?.ownerName || saleHistoryBuyerName;
   // Distress resolution — a GENUINE sale (Sales section, quit-claims excluded)
@@ -3865,7 +3868,7 @@ export default function RunDetail() {
     nnTakeaway: nnTakeaway as any,
     lienDistress,
     lienData,
-    isLoadingLiens,
+    isLoadingLiens: isCheckingTitle,
     businessLicenses: nearbyLicensesData,
     newConstruction: newConstructionData,
   });
@@ -3976,7 +3979,7 @@ export default function RunDetail() {
       ? "g" as const
       : "indigo" as const;
   const propertyTaxBadge = propertyTaxStatusLabel
-    ?? (propertyTaxData ? undefined : isLoadingPropertyTax ? "Loading" : undefined);
+    ?? (propertyTaxData ? undefined : isLoadingPropertyTax ? "Checking" : undefined);
   const propertyTaxSubsections = buildSubsectionNumbers([
     ["bill", !!propertyTaxData || isLoadingPropertyTax],
     ["assessed", !!latestPropertyAssessment],
@@ -4091,6 +4094,23 @@ export default function RunDetail() {
       : zoningPermission === 'special_use'
         ? `A ${selectedProjectType} needs Special Use approval in ${facts?.zoning} — a ZBA hearing, not a rezoning.`
         : `A ${selectedProjectType} is not allowed in ${facts?.zoning} — it needs a City Council map amendment.`;
+  // Only replace findings during the initial fetch, not a refresh with cached data.
+  const checkingHeaders: Record<string, boolean> = {
+    ownership: isCheckingTitle && !lienDistress?.hasForeclosureActive
+      && !lienDistress?.lis?.activeCount && !(lienData?.activeLienCount ?? 0),
+    propertyTax: isLoadingPropertyTax && !propertyTaxData,
+    listing: listingChecking && !listingSnapshot,
+    businessLicenses: isLoadingBizLicenseHistory && !bizLicenseHistoryData,
+    zoningHistory: isLoadingZoningHistory && !zoningHistoryData,
+    historic: isLoadingLandmark && !landmarkData,
+    permits: isLoadingPermitsViolations && !combinedPermitViolations,
+    market: (isLoadingHmda || isLoadingComps) && !hmdaData && !compsData && !hmdaTakeaway?.headline,
+    transit: isLoadingTransit && !transitData,
+    crime: isLoadingCrime && !crimeData && !crimeTractData,
+    newBusinessLicenses: isLoadingNearbyLicenses && !nearbyLicensesData,
+    newConstruction: isLoadingNewConstruction && !newConstructionData,
+    incentives: (isLoadingIncentives || isLoadingLocationIncentives) && !incentivesData && !locationIncentivesData,
+  };
   const accProps = (rowId: string) => {
     const scan = accScanSections.find((s) => s.id === rowId);
     const custom = ACC_CUSTOM_META[rowId];
@@ -4098,16 +4118,17 @@ export default function RunDetail() {
     const summary = custom?.summary || scan?.summary || "";
     const verdict: "good" | "watch" | "context" =
       scan?.verdict?.tone === "good" ? "good" : scan?.verdict?.tone === "attention" ? "watch" : "context";
+    const checking = checkingHeaders[rowId] === true;
     const pos = accOrder.indexOf(rowId);
     return {
       id: rowId,
       index: (pos < 0 ? accOrder.length : pos) + 1,
       order: (pos < 0 ? accOrder.length : pos) + 1,
       eyebrow: title,
-      takeaway: rowId === "zoning" ? zoningTakeaway : rowId === "propertyTax" ? propertyTaxTakeaway : rowId === "listing" ? listingTakeaway : rowId === "businessLicenses" ? businessLicensesTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : rowId === "proximity" || rowId === "schools" || rowId === "entCulture" ? summary : scan?.takeaway ?? summary,
-      verdict: rowId === "businessLicenses" ? "context" as const : verdict,
-      badge: rowId === "zoning" ? zoningPermission === 'permitted' ? 'BY-RIGHT' : zoningPermission === 'special_use' ? 'SPECIAL USE' : zoningPermission ? 'REZONING' : facts?.zoning || undefined : rowId === "propertyTax" ? propertyTaxBadge : rowId === "listing" ? listingBadge : rowId === "businessLicenses" ? businessLicensesBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
-      badgeTone: rowId === "zoning"
+      takeaway: checking ? "Checking records for this section." : rowId === "zoning" ? zoningTakeaway : rowId === "propertyTax" ? propertyTaxTakeaway : rowId === "listing" ? listingTakeaway : rowId === "businessLicenses" ? businessLicensesTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : rowId === "proximity" || rowId === "schools" || rowId === "entCulture" ? summary : scan?.takeaway ?? summary,
+      verdict: checking || rowId === "businessLicenses" ? "context" as const : verdict,
+      badge: checking ? "Checking" : rowId === "zoning" ? zoningPermission === 'permitted' ? 'BY-RIGHT' : zoningPermission === 'special_use' ? 'SPECIAL USE' : zoningPermission ? 'REZONING' : facts?.zoning || undefined : rowId === "propertyTax" ? propertyTaxBadge : rowId === "listing" ? listingBadge : rowId === "businessLicenses" ? businessLicensesBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
+      badgeTone: checking ? "indigo" as const : rowId === "zoning"
         ? zoningPermission === 'permitted' ? "g" as const : zoningPermission ? "o" as const : "indigo" as const
         : rowId === "listing"
         ? listingSnapshot?.status === "not_found"
@@ -14756,7 +14777,7 @@ export default function RunDetail() {
           {/* 04 · Ownership & Title — one evidence-first surface for transfers, debt and claims. */}
           <AccordionSection {...accProps("ownership")}>
             <motion.div id="print-section-ownership" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }}>
-              <OwnershipTitleSection pin={submittedPin || pinLookupData?.pin || null} city={facts?.city} pinLookupData={pinLookupData} lienData={lienData} debtSnapRec={debtSnapRec} isDebtSnapshotFetched={debtSnapFetched} lienDistress={lienDistress} isLoadingLiens={isLoadingLiens} relatedParcels={relatedParcels} address={run?.address} saleDerivation={saleDerivation} />
+              <OwnershipTitleSection pin={submittedPin || pinLookupData?.pin || null} city={facts?.city} pinLookupData={pinLookupData} lienData={lienData} debtSnapRec={debtSnapRec} isDebtSnapshotFetched={debtSnapFetched} lienDistress={lienDistress} isLoadingLiens={isCheckingTitle} relatedParcels={relatedParcels} address={run?.address} saleDerivation={saleDerivation} />
             </motion.div>
           </AccordionSection>
 

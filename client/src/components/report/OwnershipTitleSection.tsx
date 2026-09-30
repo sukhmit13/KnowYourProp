@@ -461,7 +461,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
     ) || null;
   const owner = lienData?.ownerName || latest?.grantee || "Owner not resolved";
   const entity = /LLC|L\.L\.C|TRUST|INC|LP\b/i.test(owner);
-  const titleKnown = !!lienData && !isLoadingLiens && !lienData.searchFailed;
+  const titleKnown = !!lienData && !lienData.searchFailed;
   const activeLienCount = titleKnown
     ? Math.max(Number(lienData?.activeLienCount ?? 0), liens.length)
     : null;
@@ -475,7 +475,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         ? ["att", `${activeLienCount} active lien${activeLienCount === 1 ? "" : "s"}`]
         : titleKnown
           ? ["good", "Clear title"]
-          : ["ctx", "Status unknown"];
+          : ["ctx", isLoadingLiens ? "Checking" : "Status unknown"];
 
   const since = latest?.monthYear || "unknown";
   const recordedPrincipal = debtSnapshotReady && typeof snap?.combined_recorded_debt === "number"
@@ -595,7 +595,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
           <span className="kyp-mt claimed">Claimed</span>
           <span className="bv">{activeLienCount ?? "—"}</span>
           <span className="bl">Active property liens</span>
-          <span className="bd">{!titleKnown ? "Recorder status unavailable" : activeLienCount ? "Review payoff or release" : "No active property lien found"}</span>
+          <span className="bd">{!titleKnown ? isLoadingLiens ? "Checking Recorder records" : "Recorder status unavailable" : activeLienCount ? "Review payoff or release" : "No active property lien found"}</span>
         </div>
       </div>
 

@@ -81,7 +81,7 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
   // Never let co-parcel ownership or a failed recorder search imply clean title.
   const activeLisPendens = ctx.lienDistress?.lis?.activeCount ?? 0;
   const activeLiens = ctx.lienData?.activeLienCount ?? 0;
-  const titleUnavailable = !!ctx.isLoadingLiens || !!ctx.lienData?.searchFailed || !ctx.lienData;
+  const titleUnavailable = !!ctx.lienData?.searchFailed || !ctx.lienData;
   if (ctx.lienDistress?.hasForeclosureActive) {
     dyn.ownership = {
       takeaway: <>An active foreclosure filing needs <em>title review before closing</em>.</>,
@@ -97,9 +97,14 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
       takeaway: <><em>{activeLiens} active lien{activeLiens === 1 ? "" : "s"}</em> need payoff or release review.</>,
       verdict: { tone: "attention", label: `${activeLiens} active lien${activeLiens === 1 ? "" : "s"}` },
     };
+  } else if (titleUnavailable && ctx.isLoadingLiens) {
+    dyn.ownership = {
+      takeaway: <>Checking Recorder records for this property.</>,
+      verdict: { tone: "context", label: "Checking" },
+    };
   } else if (titleUnavailable) {
     dyn.ownership = {
-      takeaway: <>Recorder results are <em>not available yet</em> — title status is unknown.</>,
+      takeaway: <>Recorder results could not be verified — <em>title status is unknown</em>.</>,
       verdict: { tone: "attention", label: "Status unknown" },
     };
   } else {

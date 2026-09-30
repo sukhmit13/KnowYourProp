@@ -20,3 +20,9 @@ Owner-name lien searches belong with Ownership & Title, but they are separate fr
 **Why:** The user wants owner liens in the ownership section; matching a recorded owner's name does not prove the lien attaches to this parcel or even that the person/entity is the same.
 
 **How to apply:** Keep the owner-name search and its identity/release caveats as a separate subsection; never roll its results into the property's active-lien count, title-clear badge, or payoff assertion.
+
+Report status badges must distinguish an in-progress check from a completed inconclusive check: use “Checking” during an initial lookup or retry without verified data, and “Status unknown” only after the lookup settles without usable evidence. Retain a verified cached finding during refresh.
+
+**Why:** A normal first report load showed “Status unknown” while Recorder records were still being fetched, which suggested the lookup had failed.
+
+**How to apply:** Use the same pending-vs-settled distinction for future section headers and nested status badges. Do not let a missing response masquerade as a clean result or let a pending request mask an already supported adverse finding.
