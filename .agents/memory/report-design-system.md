@@ -30,3 +30,10 @@ Report sections wrap content in `.subsection-text`, whose `.subsection-text p, .
 - The shareable insight report is no longer AI-written HTML: the model returns validated JSON content only; `server/insightReportTemplate.ts` owns 100% of the design and escapes everything.
 - **Why:** full-HTML generation was slow (2-3 min), design drifted run to run, and truncation could save broken HTML.
 - **How to apply:** restyle by editing the template, never the prompt; content length caps in the template's LIMITS must keep worst-case content on one 1056px page — verify with `node scripts/test_report_template_fit.mjs` after any template or LIMITS change.
+
+## Browser fixtures using live Vite modules
+Use the served app HTML as a fixture's shell, retain its React Refresh bootstrap, and match the transformed dependency imports rather than copying source-level imports.
+
+**Why:** bare intercepted HTML fails before rendering live components when the React Refresh preamble is absent. Raw Vite-prebundled CommonJS modules can expose only a default export even when the source uses named imports.
+
+**How to apply:** when testing a report fragment outside the authenticated page, preserve the generated shell, dependency interop, and required app providers before diagnosing product failures.

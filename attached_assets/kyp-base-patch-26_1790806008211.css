@@ -1,0 +1,34 @@
+/* ============================================================
+   Step 26 — §Mortgage & Lending Market
+   Append to the END of client/src/kyp-base.css.
+
+   Three rules. Everything else in this step is markup.
+   No existing rule is edited; no chart component is touched.
+   ============================================================ */
+
+/* 1. Two PEER blocks are equal width.
+      .kyp-blocks.hero.two is 1.4fr/1fr on purpose — the first block is the
+      headline there. 19.1's two city ranks are peers, so they share width.  */
+.kyp-blocks.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+/* 2. The All / Originated / Denied switch has NO visible selected state
+      today — HMDAStats.tsx:667-677 sets aria-pressed and nothing renders.
+      Under one shared control driving 19.1-19.4 that is not survivable.   */
+.kyp-block[aria-pressed="true"] {
+  outline: 2.5px solid var(--kyp-ink);
+  outline-offset: 2px;
+}
+
+/* 3. The commercial KPI strip opens the commercial run without taking a
+      subhead number. The rule is what a subhead uses, so it reads as a
+      divider rather than as a continuation of Recently Sold Comps.        */
+.kyp-cxtiles.opens {
+  border-top: 2px solid var(--kyp-ink);
+  padding-top: 18px;
+  margin-top: 26px;
+}

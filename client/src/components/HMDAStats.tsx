@@ -1,15 +1,12 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
+import { useEffect, useState, type ReactNode } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { KypSubhead } from "@/components/report/AccordionSection";
 import { PieChart, Pie, Cell, Tooltip as ReTooltip } from "recharts";
 import {
   Building2, TrendingUp, Users, DollarSign,
   ShieldAlert, CreditCard, BarChart3, Home, Landmark, Banknote
 } from "lucide-react";
-import type { HmdaStats, HmdaSubStats, HmdaBreakdownItem, HmdaLenderItem, HmdaData, HmdaCommunityRank, HmdaYear } from "@/hooks/use-runs";
+import type { HmdaStats, HmdaSubStats, HmdaBreakdownItem, HmdaLenderItem, HmdaData, HmdaRank, HmdaYear } from "@/hooks/use-runs";
 import { getHmdaYearRateForScope, useMortgageRate } from "@/hooks/use-runs";
 
 const YEARS = [2025, 2024, 2023] as const;
@@ -21,19 +18,28 @@ function availableHmdaYears(hmdaData: HmdaData | null | undefined): HmdaYear[] {
   });
 }
 
-interface HMDAFinancingProps {
+export interface HMDAFinancingProps {
   hmdaData: HmdaData | null | undefined;
   communityArea: string | null | undefined;
   tractGeoid: string | null | undefined;
   isLoading: boolean;
+  children?: (state: HMDAFinancingRenderState) => ReactNode;
 }
 
-interface HMDABuyerProps {
+export interface HMDABuyerProps {
   hmdaData: HmdaData | null | undefined;
-  label: string;
-  communityArea?: string | null;
-  tractGeoid?: string | null;
+  scope: 'community' | 'tract';
+  year: HmdaYear;
+  view: BuyerView;
 }
+
+export type HMDAFinancingRenderState = {
+  /** Effective scope after falling back when only one scope exists for the selected year. */
+  scope: 'community' | 'tract';
+  year: HmdaYear;
+  view: HMDAView;
+  stats: HmdaStats | null;
+};
 
 const PRODUCT_TYPE_COLORS: Record<string, string> = {
   'FHA:First Lien': 'bg-secondary',
@@ -240,7 +246,7 @@ function LenderTable({ lenders, view = 'all' }: { lenders: HmdaLenderItem[]; vie
   );
 }
 
-function StatsPanel({ stats, label, view = 'all' }: { stats: HmdaStats; label: string; view?: BuyerView }) {
+export function HMDAMarketMixPanel({ stats, view = 'all' }: { stats: HmdaStats; view?: BuyerView }) {
   const fha = stats.byLoanType.find(a => a.key === '2');
   const conventional = stats.byLoanType.find(a => a.key === '1');
   const va = stats.byLoanType.find(a => a.key === '3');
@@ -278,12 +284,6 @@ function StatsPanel({ stats, label, view = 'all' }: { stats: HmdaStats; label: s
             </div>
           )}
 
-          {(stats.byLender?.length ?? 0) > 0 && (
-            <div className="kyp-mixcard" id="hmda-lenders">
-              <div className="mh">Active Lenders · top by application volume</div>
-              <LenderTable lenders={stats.byLender} view="all" />
-            </div>
-          )}
         </>
       )}
 
@@ -319,23 +319,20 @@ function StatsPanel({ stats, label, view = 'all' }: { stats: HmdaStats; label: s
                   </div>
                 ) : null}
 
-                {orig.byPropertyValueBin && orig.byPropertyValueBin.length > 0 && (
+                {((orig.byPropertyValueBin?.length ?? 0) > 0 || (stats.byDenialReason?.length ?? 0) > 0) && (
                   <div className="kyp-mix">
-                    <HmdaBarBlock items={orig.byPropertyValueBin} ramp={PROP_VALUE_RAMP} title="Property Value at Origination" icon={DollarSign} headNote="distribution" />
+                    {orig.byPropertyValueBin && orig.byPropertyValueBin.length > 0 && (
+                      <HmdaBarBlock items={orig.byPropertyValueBin} ramp={PROP_VALUE_RAMP} title="Property Value at Origination" icon={DollarSign} headNote="distribution" />
+                    )}
+                    {(stats.byDenialReason?.length ?? 0) > 0 && (
+                      <HmdaBarBlock items={[...stats.byDenialReason.filter(i => i.key !== '1111')].sort((a, b) => b.pct - a.pct).slice(0, 6)} ramp={DENIAL_RAMP} title="Denial Reasons" icon={ShieldAlert} headNote="% of applications" ranked />
+                    )}
                   </div>
                 )}
-
-                <DemographicsPanel sub={orig} showDemographics={false} />
               </>
             );
           })()}
 
-          {(stats.byLender?.length ?? 0) > 0 && (
-            <div className="kyp-mixcard">
-              <div className="mh">Active Lenders · ranked by loans originated</div>
-              <LenderTable lenders={stats.byLender} view="closed" />
-            </div>
-          )}
         </>
       )}
 
@@ -362,27 +359,26 @@ function StatsPanel({ stats, label, view = 'all' }: { stats: HmdaStats; label: s
             );
           })()}
 
-          {(stats.byLender?.length ?? 0) > 0 && (
-            <div className="kyp-mixcard">
-              <div className="mh">Active Lenders · ranked by applications denied</div>
-              <LenderTable lenders={stats.byLender} view="denied" />
-            </div>
-          )}
         </>
       )}
     </div>
   );
 }
 
-const SEX_COLORS: Record<string, string> = {
-  'Male': 'bg-blue-400',
-  'Female': 'bg-rose-400',
-  'Joint': 'bg-slate-400',
-};
+export function HMDALenders({ lenders, view = 'all' }: { lenders: HmdaLenderItem[]; view?: 'all' | 'closed' | 'denied' }) {
+  if (!lenders.length) return <p className="kyp-emptypanel">No lender-level records are available for this scope, year, and view.</p>;
+  return (
+    <div className="kyp-mixcard" id="hmda-lenders">
+      <div className="mh">Active Lenders · {view === 'closed' ? 'ranked by loans closed' : view === 'denied' ? 'ranked by applications denied' : 'ranked by applications'}</div>
+      <LenderTable lenders={lenders} view={view} />
+    </div>
+  );
+}
 
-type BuyerView = 'all' | 'closed' | 'denied';
+export type HMDAView = 'all' | 'closed' | 'denied';
+type BuyerView = HMDAView;
 
-function DemographicsPanel({ sub, colorPrefix, year, showDemographics = true }: { sub: HmdaSubStats; colorPrefix?: string; year?: number; showDemographics?: boolean }) {
+function DemographicsPanel({ sub, colorPrefix, showDemographics = true }: { sub: HmdaSubStats; colorPrefix?: string; showDemographics?: boolean }) {
   const ageOrder = ['<25', '25-34', '35-44', '45-54', '55-64', '65-74', '>74'];
   const sortedAge = [...(sub.byAge ?? [])].sort((a, b) => ageOrder.indexOf(a.key) - ageOrder.indexOf(b.key));
   const dtiColors = colorPrefix === 'red' ? ['#fecaca', '#fca5a5', '#f87171', '#ef4444', '#dc2626'] : DTI_COLORS_HEX;
@@ -424,39 +420,21 @@ function DemographicsPanel({ sub, colorPrefix, year, showDemographics = true }: 
         </div>
       ) : null}
 
-      {sub.byDenialReason && sub.byDenialReason.length > 0 && (
+      {!showDemographics && sub.byDenialReason && sub.byDenialReason.length > 0 && (
         <HmdaBarBlock items={sub.byDenialReason.filter(i => i.key !== '1111')} ramp={DENIAL_RAMP} title="Top Denial Reasons" icon={ShieldAlert} headNote="% of applications" ranked />
       )}
 
-      {year ? (
-        <p className="text-xs text-muted-foreground">
-          Source: FFIEC/CFPB {year} HMDA loan-level data. Cook County (FIPS 17031).
-        </p>
-      ) : null}
     </div>
   );
 }
 
-export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }: HMDABuyerProps) {
-  const [year, setYear] = useState<HmdaYear>(2025);
-  const [scope, setScope] = useState<'community' | 'tract'>('community');
-  const [view, setView] = useState<BuyerView>('all');
-
+export function HMDABuyerProfile({ hmdaData, scope, year, view }: HMDABuyerProps) {
   const availableYears = availableHmdaYears(hmdaData);
   const activeYear = availableYears.includes(year) ? year : availableYears[0] ?? year;
   const yearData = hmdaData?.[activeYear];
-  const hasCommunity = !!yearData?.community;
-  const hasTract = !!yearData?.tract;
   const stats = scope === 'community' ? (yearData?.community ?? yearData?.tract) : (yearData?.tract ?? yearData?.community);
 
   if (!stats) return null;
-
-  const originatedAction = stats.byAction.find((a: HmdaBreakdownItem) => a.key === '1');
-  const deniedAction = stats.byAction.find((a: HmdaBreakdownItem) => a.key === '3');
-  const closedCount = originatedAction?.count ?? 0;
-  const closedPct = originatedAction?.pct ?? 0;
-  const deniedCount = deniedAction?.count ?? 0;
-  const deniedPct = deniedAction?.pct ?? 0;
 
   const allSubStats: HmdaSubStats = {
     total: stats.total,
@@ -471,115 +449,30 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
 
   return (
     <div className="kyp-hmda-buyer">
-      {/* Year + scope controls */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        {hasCommunity && hasTract ? (
-          <div className="kyp-seg">
-            <button
-              onClick={() => setScope('community')}
-              className={scope === 'community' ? 'on' : ''}
-              aria-pressed={scope === 'community'}
-              data-testid="button-hmda-buyer-scope-community"
-            >
-              {communityArea || 'Community Area'}
-            </button>
-            <button
-              onClick={() => setScope('tract')}
-              className={scope === 'tract' ? 'on' : ''}
-              aria-pressed={scope === 'tract'}
-              data-testid="button-hmda-buyer-scope-tract"
-            >
-              Census Tract {tractGeoid?.slice(-6)}
-            </button>
-          </div>
-        ) : (
-          <span className="text-xs text-muted-foreground">{stats.total.toLocaleString()} applications in {activeYear}</span>
-        )}
-        {availableYears.length > 1 && (
-          <div className="kyp-seg ml-auto">
-            {availableYears.map(y => (
-              <button
-                key={y}
-                onClick={() => setYear(y)}
-                className={activeYear === y ? 'on' : ''}
-                aria-pressed={activeYear === y}
-                data-testid={`button-hmda-buyer-year-${y}`}
-              >
-                {y}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Clickable stat boxes as view switcher */}
-      <div className="kyp-blocks">
-        <button
-          type="button"
-          onClick={() => setView('all')}
-          className="kyp-block ind text-left border-0 cursor-pointer"
-          aria-pressed={view === 'all'}
-          data-testid="button-hmda-buyer-view-all"
-        >
-          <div className="bv">{stats.total.toLocaleString()}</div>
-          <div className="bl">All Applications</div>
-        </button>
-        <button
-          type="button"
-          onClick={() => setView('closed')}
-          className="kyp-block grn text-left border-0 cursor-pointer"
-          aria-pressed={view === 'closed'}
-          data-testid="button-hmda-buyer-view-closed"
-        >
-          <div className="bv">{closedCount.toLocaleString()}</div>
-          <div className="bl">Originated · {closedPct}%</div>
-        </button>
-        <button
-          type="button"
-          onClick={() => setView('denied')}
-          className="kyp-block slate text-left border-0 cursor-pointer"
-          aria-pressed={view === 'denied'}
-          data-testid="button-hmda-buyer-view-denied"
-        >
-          <div className="bv">{deniedCount.toLocaleString()}</div>
-          <div className="bl">Denied · {deniedPct}%</div>
-        </button>
-      </div>
-
-      {/* Demographics panel */}
-      {view === 'all' && <DemographicsPanel sub={allSubStats} year={activeYear} />}
+      {view === 'all' && <DemographicsPanel sub={allSubStats} />}
       {view === 'closed' && stats.originated && (
-        <DemographicsPanel sub={stats.originated} year={activeYear} />
+        <DemographicsPanel sub={stats.originated} />
       )}
       {view === 'closed' && !stats.originated && (
         <p className="text-sm text-muted-foreground py-2">Breakdown not available.</p>
       )}
       {view === 'denied' && stats.denied && (
-        <DemographicsPanel sub={stats.denied} colorPrefix="red" year={activeYear} />
+        <DemographicsPanel sub={stats.denied} colorPrefix="red" />
       )}
       {view === 'denied' && !stats.denied && (
         <p className="text-sm text-muted-foreground py-2">Breakdown not available.</p>
       )}
 
-      {/* Lender table */}
-      {(stats.byLender?.length ?? 0) > 0 && (
-        <div className="kyp-mixcard">
-          <div className="mh">
-            Active Lenders · {view === 'closed' ? 'ranked by loans originated' : view === 'denied' ? 'ranked by applications denied' : 'top by application volume'}
-          </div>
-          <LenderTable lenders={stats.byLender} view={view === 'denied' ? 'denied' : view === 'closed' ? 'closed' : 'all'} />
-        </div>
-      )}
     </div>
   );
 }
 
-export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoading }: HMDAFinancingProps) {
+export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoading, children }: HMDAFinancingProps) {
   // Same react-query cache entry the valuation calculator uses — one source, no second fetch.
   const { data: todayRate } = useMortgageRate();
   const [scope, setScope] = useState<'community' | 'tract'>('community');
   const [year, setYear] = useState<HmdaYear>(2025);
-  const [view, setView] = useState<BuyerView>('all');
+  const [view, setView] = useState<BuyerView>('closed');
 
   if (isLoading) {
     return (
@@ -686,50 +579,30 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
             </div>
           )}
 
-          {/* Community Rankings */}
+          <KypSubhead subsection={1}><span className="lbl">Market Position</span><span className="ct">{activeScope === 'tract' ? `Census Tract ${tractGeoid || 'selected'}` : `Community Area ${communityArea || 'selected'}`} vs. the city</span></KypSubhead>
           {(() => {
-            const r2024 = hmdaData?.[2025]?.communityRank;
-            const r2023 = hmdaData?.[2024]?.communityRank;
-            if (!r2024 && !r2023) return null;
-            const rankLabel = (rank: number | null, outOf: number) =>
-              rank ? `#${rank} of ${outOf}` : '—';
-            const trendIcon = (curr: number | null, prev: number | null) => {
-              if (!curr || !prev) return null;
-              if (curr < prev) return <span className="up ml-1">▲</span>;
-              if (curr > prev) return <span className="dn ml-1">▼</span>;
-              return null;
+            const rankData: HmdaRank | null = activeScope === 'tract'
+              ? yearData?.tractRank ?? null
+              : yearData?.communityRank ?? null;
+            if (!rankData) return <p className="kyp-emptypanel">Area lending rank is not available for {activeYear}; no other scope is substituted.</p>;
+            const priorYear = availableYears.filter((candidate) => candidate < activeYear).sort((a, b) => b - a)[0];
+            const priorData = priorYear ? hmdaData?.[priorYear] : null;
+            const prior: HmdaRank | null = priorData
+              ? (activeScope === 'tract' ? priorData.tractRank ?? null : priorData.communityRank ?? null)
+              : null;
+            const areaLabel = rankData.areaLabel || (activeScope === 'tract' ? 'HMDA tracts mapped to Chicago community areas' : 'Chicago community areas');
+            const nameCase = (name?: string | null) => name ? name.toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase()) : null;
+            const rankBlock = (key: 'byTotal' | 'byOriginated', label: string) => {
+              const item = rankData[key];
+              const metricUnavailable = !item || item.rank == null || item.count == null;
+              const old = prior?.[key]?.rank;
+              const comparison = !metricUnavailable && old != null ? item.rank! < old ? `up from #${old} in ${priorYear}` : item.rank! > old ? `down from #${old} in ${priorYear}` : `unchanged from #${old} in ${priorYear}` : null;
+              const leader = nameCase(item?.leader?.name);
+              const countLabel = !metricUnavailable ? `${item.count!.toLocaleString()} here` : null;
+              const leaderLabel = leader && item?.leader?.count != null ? `${leader} leads with ${item.leader.count.toLocaleString()}` : null;
+              return <div className="kyp-block ind" key={key}><div className="bv">{metricUnavailable ? '—' : `#${item.rank}`}</div><div className="bl">of {item?.outOf ?? rankData.byTotal.outOf} {areaLabel} · {label}</div><div className="bd">{metricUnavailable ? 'Rank or count unavailable for this area and year.' : [countLabel, leaderLabel, comparison].filter(Boolean).join(' · ')}</div></div>;
             };
-            return (
-              <div className="kyp-rankcard">
-                <div className="rl">
-                  City Ranking — {communityArea || 'Community Area'} vs. 77 Community Areas
-                </div>
-                <div className="kyp-rankgrid">
-                  <span />
-                  <span className="h">2025</span>
-                  <span className="h">2024</span>
-
-                  <span className="k">Applications</span>
-                  <span className="v">
-                    {rankLabel(r2024?.byTotal.rank ?? null, r2024?.byTotal.outOf ?? 77)}
-                    {trendIcon(r2024?.byTotal.rank ?? null, r2023?.byTotal.rank ?? null)}
-                  </span>
-                  <span className="v prior">
-                    {rankLabel(r2023?.byTotal.rank ?? null, r2023?.byTotal.outOf ?? 77)}
-                  </span>
-
-                  <span className="k">Closed Loans</span>
-                  <span className="v">
-                    {rankLabel(r2024?.byOriginated.rank ?? null, r2024?.byOriginated.outOf ?? 77)}
-                    {trendIcon(r2024?.byOriginated.rank ?? null, r2023?.byOriginated.rank ?? null)}
-                  </span>
-                  <span className="v prior">
-                    {rankLabel(r2023?.byOriginated.rank ?? null, r2023?.byOriginated.outOf ?? 77)}
-                  </span>
-                </div>
-                <div className="kyp-rankfoot"><span className="up">▲</span> improved rank vs. prior year · <span className="dn">▼</span> declined</div>
-              </div>
-            );
+            return <div className="kyp-blocks two">{rankBlock('byTotal', 'applications')}{rankBlock('byOriginated', 'loans closed')}</div>;
           })()}
 
           {/* Avg Interest Rate Block */}
@@ -788,21 +661,10 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
               );
             }
 
-            // All comparison logic computed in code — never model-generated.
-            const MATERIAL_GAP_PT = 1.00; // caution appears only when today is ≥ 1 pt above area closings
             const diff = todayInfo.rate - areaRate;
-            const isCaution = diff >= MATERIAL_GAP_PT;
             const inLine = Math.abs(diff) < 0.05;
             const higher = diff > 0;
             const signedDelta = `${diff >= 0 ? '+' : '−'}${Math.abs(diff).toFixed(2)}`;
-            const bps = Math.round(Math.abs(diff) * 100 / 5) * 5; // hedged, rounded to nearest 5 bps
-            const explain = isCaution
-              ? <><b>Financing has gotten meaningfully pricier.</b> Today's benchmark sits a full point-plus above what loans here closed at in {yearLabel} — a real "rates have moved" signal worth flagging.</>
-              : Math.abs(diff) < 0.05
-                ? <><b>Loans here closed right around today's market.</b> The {yearLabel} average (a full-year blend of conventional, FHA and VA first-lien loans) is roughly in line with the current 30-year benchmark — a buyer financing now would likely pay about what recent closings here did.</>
-                : higher
-                  ? <><b>Loans here closed just below today's market.</b> The {yearLabel} average (a full-year blend of conventional, FHA and VA first-lien loans) is about {bps} bps under the current 30-year benchmark — so a buyer financing now would likely pay a touch more than recent closings here.</>
-                  : <><b>Loans here closed just above today's market.</b> The {yearLabel} average (a full-year blend of conventional, FHA and VA first-lien loans) is about {bps} bps over the current 30-year benchmark — so a buyer financing now would likely pay a bit less than recent closings here.</>;
             return (
               <div className="kyp-ratecmp" data-testid="hmda-ratecard">
                 <div className="rh">
@@ -825,13 +687,12 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
                     <div className="s">30-yr fixed · <b>Freddie Mac PMMS</b>, as of {todayInfo.asOfLabel}</div>
                   </div>
                 </div>
-                <div className="kyp-body">{explain}</div>
                 <div className="fine">HMDA first-lien originations only · excludes HELOCs and second mortgages. Today's benchmark is a national 30-yr snapshot, not a local quote.</div>
               </div>
             );
           })()}
 
-          {activeStats && <StatsPanel stats={activeStats} label={scope} view={view} />}
+          {children?.({ scope: activeScope, year: activeYear, view, stats: activeStats })}
         </div>
   );
 }

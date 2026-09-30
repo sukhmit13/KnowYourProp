@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KypSubhead } from "@/components/report/AccordionSection";
+import { SectionNumberContext } from "@/components/report/AccordionSection";
 
 interface SBALoansViewProps {
   data: any;
@@ -11,6 +12,7 @@ interface SBALoansViewProps {
   /** true only when the subject parcel is positively known to be non-residentially zoned */
   subjectIsCommercial?: boolean;
   zoningCode?: string | null;
+  hideKpis?: boolean;
 }
 
 function fmt(n: number) {
@@ -54,7 +56,20 @@ function LenderBar({ name, count, totalAmount, max }: { name: string; count: num
 
 const SHOW_N = 10;
 
-export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBALoansViewProps) {
+export function SBAKpiStrip({ data, isLoading, zipCode }: Pick<SBALoansViewProps, 'data' | 'isLoading' | 'zipCode'>) {
+  if (isLoading) return <div className="kyp-cxtiles opens" aria-label="Loading SBA lending summary">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-lg" />)}</div>;
+  if (!data?.summary) return null;
+  const { summary, loans7a = [], loans504 = [] } = data;
+  const nLenders = new Set([...(summary.top7aLenders ?? []), ...(summary.top504Lenders ?? [])].map((l: any) => l.name)).size;
+  return <div className="kyp-cxtiles opens">
+    <div className="kyp-cxtile"><div className="l">7(a) Loans</div><div className="n">{summary.total7aLoans}</div><div className="s">{fmt(summary.total7aAmount)} total</div></div>
+    <div className="kyp-cxtile"><div className="l">504 · CRE</div><div className="n">{summary.total504Loans}</div><div className="s">{fmt(summary.total504Amount)} total</div></div>
+    <div className="kyp-cxtile"><div className="l">Total Deployed</div><div className="n">{fmt(summary.totalAmount)}</div><div className="s">ZIP {zipCode}</div></div>
+    <div className="kyp-cxtile"><div className="l">Active Lenders</div><div className="n">{nLenders || new Set([...loans7a, ...loans504].map((l: any) => l.lender).filter(Boolean)).size}</div><div className="s">in this ZIP</div></div>
+  </div>;
+}
+
+export function SBALoansView({ data, isLoading, zipCode, isError, onRetry, hideKpis = false }: SBALoansViewProps) {
   const [visible504, setVisible504] = useState(SHOW_N);
   const [visible7a, setVisible7a] = useState(SHOW_N);
   const [visible504Lenders, setVisible504Lenders] = useState(SHOW_N);
@@ -100,13 +115,8 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
 
   const { summary, loans7a = [], loans504 = [] } = data;
 
-  const n7a: number = summary.total7aLoans;
-  const n504: number = summary.total504Loans;
-  const amt7a = fmt(summary.total7aAmount);
-  const amt504 = fmt(summary.total504Amount);
   const top7a: any[] = summary.top7aLenders ?? [];
   const top504: any[] = summary.top504Lenders ?? [];
-  const nLenders = new Set([...top7a, ...top504].map((l: any) => l.name)).size;
   const top7aMax = top7a[0]?.count ?? 1;
   const top504Max = top504[0]?.count ?? 1;
 
@@ -114,21 +124,11 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
   const by7aAmount = [...loans7a].sort((a: any, b: any) => (b.amount ?? 0) - (a.amount ?? 0));
   return (
     <div className="kyp-sba-view pt-2" data-testid="sba-loans-view">
-      <div className="kyp-body mb-2">SBA-guaranteed business and commercial-real-estate lending · FY2020–present</div>
-
-      {/* KPI tiles */}
-      <div className="kyp-cxtiles">
-        <div className="kyp-cxtile"><div className="l">7(a) Loans</div><div className="n">{n7a}</div><div className="s">{amt7a} total</div></div>
-        <div className="kyp-cxtile"><div className="l">504 · CRE</div><div className="n">{n504}</div><div className="s">{amt504} total</div></div>
-        <div className="kyp-cxtile"><div className="l">Total Deployed</div><div className="n">{fmt(summary.totalAmount)}</div><div className="s">ZIP {zipCode}</div></div>
-        <div className="kyp-cxtile"><div className="l">Active Lenders</div><div className="n">{nLenders}</div><div className="s">in this ZIP</div></div>
-      </div>
+      {!hideKpis && <SBAKpiStrip data={data} isLoading={false} zipCode={zipCode} />}
 
       {/* SBA 504 */}
       {loans504.length > 0 && (
         <>
-          <div id="sba504" className="kyp-loan-scope"><span>504 loan scope</span><b>504 loans fund owner-occupied commercial real estate. This FOIA dataset reports borrower, industry, amount, and CDC lender—not the financed address; these are ZIP-level records, not property matches.</b></div>
-
           <div>
             {by504Amount.map((loan: any, i: number) => {
               const mapsUrl = loan.borrowerName
@@ -161,7 +161,7 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
 
           {top504.length > 0 && (
             <>
-              <div className="kyp-charttitle">504 lenders (CDCs)</div>
+              <div className="kyp-charttitle">504 lenders (CDCs) · ranked by loans closed</div>
               <div>
                 {top504.slice(0, visible504Lenders).map((l: any, i: number) => <LenderBar key={i} {...l} max={top504Max} />)}
                 <div className="hidden print:block">{top504.slice(visible504Lenders).map((l: any, i: number) => <LenderBar key={i} {...l} max={top504Max} />)}</div>
@@ -176,14 +176,12 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
       )}
 
       {/* SBA 7(a) */}
-      <KypSubhead subsection={5} id="sba7a">
+      <KypSubhead subsection={8} id="sba7a">
         <span className="lbl">Commercial Lending — SBA 7(a)</span>
-        <span className="ct">small business</span>
+        <span className="ct">small business · borrower street address</span>
       </KypSubhead>
       {loans7a.length > 0 && (
         <>
-          <div className="kyp-body mt-2">Supports working capital, equipment, and expansion for small businesses. 7(a) records carry a borrower street address and jobs supported.</div>
-
           <div>
             {by7aAmount.map((loan: any, i: number) => {
               const query = loan.address
@@ -216,7 +214,7 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
 
           {top7a.length > 0 && (
             <>
-              <div id="sba-lenders" className="kyp-charttitle">7(a) lenders</div>
+              <div id="sba-lenders" className="kyp-charttitle">7(a) lenders · ranked by loans closed</div>
               <div>
                 {top7a.slice(0, visible7aLenders).map((l: any, i: number) => <LenderBar key={i} {...l} max={top7aMax} />)}
                 <div className="hidden print:block">{top7a.slice(visible7aLenders).map((l: any, i: number) => <LenderBar key={i} {...l} max={top7aMax} />)}</div>
@@ -230,7 +228,13 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
         <p className="kyp-emptypanel">No SBA 7(a) loans found in ZIP {zipCode} (FY2020–present).</p>
       )}
 
-      <div className="kyp-src">Source: SBA FOIA 7(a) &amp; 504 loan data · FY2020–present · ZIP {zipCode}</div>
+      <CommercialSourceFooter zipCode={zipCode} />
     </div>
   );
+}
+
+function CommercialSourceFooter({ zipCode }: { zipCode: string }) {
+  const sectionNumber = useContext(SectionNumberContext);
+  const base = sectionNumber == null ? null : String(sectionNumber).padStart(2, '0');
+  return <div className="kyp-src">{base ? `${base}.7–${base}.8` : 'Commercial lending'} describe ZIP {zipCode}, not this address. Source: SBA FOIA 7(a) and 504 loan data, FY2020–present. The 504 file reports borrower, industry, amount and CDC lender — not the financed address, so 504 records are ZIP-level, not property matches. 7(a) records do carry a borrower street address. Lender bars rank by loans closed; the dollar total on each bar is the sum for that lender.</div>;
 }

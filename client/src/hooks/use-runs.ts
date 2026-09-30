@@ -3438,15 +3438,24 @@ export interface HmdaStats {
   bySex?: HmdaBreakdownItem[];
 }
 
-export interface HmdaCommunityRank {
-  byTotal: { rank: number | null; outOf: number };
-  byOriginated: { rank: number | null; outOf: number };
+export interface HmdaRankMetric {
+  rank: number | null;
+  outOf: number;
+  count: number | null;
+  leader: { name: string; count: number | null } | null;
+}
+
+export interface HmdaRank {
+  byTotal: HmdaRankMetric;
+  byOriginated: HmdaRankMetric;
+  areaLabel?: string;
 }
 
 export interface HmdaYearData {
   tract: HmdaStats | null;
   community: HmdaStats | null;
-  communityRank?: HmdaCommunityRank | null;
+  communityRank?: HmdaRank | null;
+  tractRank?: HmdaRank | null;
 }
 
 export interface HmdaYearRate {

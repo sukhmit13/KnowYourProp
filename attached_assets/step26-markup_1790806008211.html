@@ -1,0 +1,217 @@
+<!-- ============================================================
+     STEP 26 — §Mortgage & Lending Market : TARGET MARKUP
+     ============================================================
+     The exact DOM the de-duplicated section must produce.
+     WHAT CHANGES: structure only. No CSS is added by this step.
+
+     ⚠ CHART FORMS DO NOT CHANGE.
+     Every <svg> donut below stands for the EXISTING <MiniPieChart>
+     Recharts component (HMDAStats.tsx:124-165) — 88x88, cx/cy 40,
+     innerRadius 24, outerRadius 40, paddingAngle 1.5, legend right.
+     It is drawn as inline SVG here only because Recharts cannot run
+     in a static file. DO NOT replace MiniPieChart, and DO NOT
+     convert any donut to a bar list.
+
+     Donuts  : Loan Type · Occupancy · Loan Product Type ·
+               Property Type · Age · Race · Income · DTI
+     Bars    : Property Value · Denial Reasons · Active Lenders
+               (already bars in the product, deliberately —
+                see the comment at HMDAStats.tsx:167)
+
+     THE CONTROL BAR (.ctlbar) is a MOCK-ONLY wrapper drawn to show
+     that scope / year / view sit above 19.1–19.4 and drive all four.
+     In the product it is the existing HMDAFinancingStats controls
+     plus its .kyp-block view buttons, lifted above the first
+     subhead — do NOT add .ctlbar to kyp-base.css.
+
+     - Match structure and class names; replace literals with the
+       existing bindings.
+     - Keep every id="print-section-*" and data-testid.
+     - Subhead numbers come from KypSubhead subsection={n}.
+     - Counter-text on 19.2 / 19.3 / 19.4 follows the active view.
+     - SAMPLE VALUES marks borrower demographics: illustrative only.
+     ============================================================ -->
+
+
+<div class="ctlbar">
+ <div class="kyp-segrow"><span class="kyp-seg"><button class="on">West Town</button><button>Census Tract 242900</button></span><span class="kyp-seg spacer"><button class="on">2025</button><button>2024</button><button>2023</button></span></div>
+ <div class="kyp-blocks hero two">
+ <div class="kyp-block ind"><div class="bv">3,890</div><div class="bl">All applications</div></div>
+ <div class="kyp-block grn on" aria-pressed="true"><div class="bv">1,970</div>
+  <div class="bl">Originated &middot; 50.6%</div></div>
+</div>
+<div class="kyp-blocks hero two">
+ <div class="kyp-block slate"><div class="bv">333</div>
+  <div class="bl">Denied &middot; 8.6%</div></div>
+ <div class="kyp-block dark"><div class="bv">6.47%</div>
+  <div class="bl">Avg rate, closed first-lien</div></div>
+</div>
+</div>
+
+<div class="kyp-subhead first"><span class="n">19.1</span><span class="lbl">Market Position</span>
+ <span class="ct">West Town vs. the city</span></div>
+<div class="kyp-blocks two">
+ <div class="kyp-block ind"><div class="bv">#2</div>
+  <div class="bl">of 77 community areas &middot; applications</div>
+  <div class="bd">3,890 here &middot; Near North leads with 5,120 &middot; up from #3 in 2024</div></div>
+ <div class="kyp-block ind"><div class="bv">#3</div>
+  <div class="bl">of 77 community areas &middot; loans closed</div>
+  <div class="bd">1,970 here &middot; Near North leads with 2,640 &middot; unchanged from 2024</div></div>
+</div>
+<div class="kyp-ratecmp"><div class="rh">Interest rates &mdash; this area vs. today</div>
+ <div class="cmp">
+  <div class="side"><span class="lab">This area &middot; 2025 closed</span>
+   <div class="v">6.47%</div>
+   <div class="s">Avg across 2,297 closed first-lien loans in Community Area West Town</div></div>
+  <div class="delta"><div class="amt">+0.56 pts</div><div class="lbl">higher<br>today</div></div>
+  <div class="side today"><span class="lab">Today &middot; market benchmark</span>
+   <div class="v">7.03%</div>
+   <div class="s">30-yr fixed &middot; Freddie Mac PMMS, as of Sep 24, 2026</div></div></div>
+ <div class="fine">HMDA first-lien originations only &middot; excludes HELOCs and second
+  mortgages.</div></div>
+
+<div class="kyp-subhead"><span class="n">19.2</span><span class="lbl">What Got Funded</span>
+ <span class="ct">1,970 originated loans</span></div>
+<div class="kyp-mix"><div class="kyp-mixcard"><div class="mh">Loan type</div><div class="kyp-donut"><svg width="88" height="88" viewBox="0 0 88 88" style="flex:none"><path d="M84.00,43.48 A40,40 0 0,0 83.95,42.01 L67.97,42.81 A24,24 0 0,1 68.00,43.69 Z" fill="#e8b018"/><path d="M83.88,40.97 A40,40 0 1,0 83.77,48.29 L67.86,46.57 A24,24 0 1,1 67.93,42.18 Z" fill="#4068d0"/><path d="M83.87,47.24 A40,40 0 0,0 84.00,44.52 L68.00,44.31 A24,24 0 0,1 67.92,45.95 Z" fill="#f87058"/></svg><div class="dlegend"><div class="kyp-mixrow"><span class="sw" style="background:#e8b018"></span><span class="nm">FHA</span><span class="pc">1.0%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#4068d0"></span><span class="nm">Conventional</span><span class="pc">97.5%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#f87058"></span><span class="nm">VA</span><span class="pc">1.5%</span></div></div></div></div><div class="kyp-mixcard"><div class="mh">Occupancy</div><div class="kyp-donut"><svg width="88" height="88" viewBox="0 0 88 88" style="flex:none"><path d="M84.00,43.48 A40,40 0 1,0 72.47,72.09 L61.08,60.86 A24,24 0 1,1 68.00,43.69 Z" fill="#a060f0"/><path d="M73.20,71.34 A40,40 0 0,0 84.00,44.52 L68.00,44.31 A24,24 0 0,1 61.52,60.40 Z" fill="#e8b018"/></svg><div class="dlegend"><div class="kyp-mixrow"><span class="sw" style="background:#a060f0"></span><span class="nm">Principal Residence</span><span class="pc">87.2%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#e8b018"></span><span class="nm">Investment Property</span><span class="pc">12.1%</span></div></div></div></div></div>
+<div class="kyp-mix"><div class="kyp-mixcard"><div class="mh">Loan product type</div><div class="kyp-donut"><svg width="88" height="88" viewBox="0 0 88 88" style="flex:none"><path d="M84.00,43.48 A40,40 0 1,0 69.09,75.15 L59.05,62.69 A24,24 0 1,1 68.00,43.69 Z" fill="#38a850"/><path d="M69.90,74.48 A40,40 0 0,0 83.74,48.54 L67.85,46.72 A24,24 0 0,1 59.54,62.29 Z" fill="#f87058"/><path d="M83.85,47.49 A40,40 0 0,0 84.00,44.52 L68.00,44.31 A24,24 0 0,1 67.91,46.10 Z" fill="#4068d0"/></svg><div class="dlegend"><div class="kyp-mixrow"><span class="sw" style="background:#38a850"></span><span class="nm">Conventional:First Lien</span><span class="pc">86.0%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#f87058"></span><span class="nm">Conventional:Subordinate Lien</span><span class="pc">12.4%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#4068d0"></span><span class="nm">FHA:First Lien</span><span class="pc">1.6%</span></div></div></div></div><div class="kyp-mixcard"><div class="mh">Property type</div><div class="kyp-donut"><svg width="88" height="88" viewBox="0 0 88 88" style="flex:none"><path d="M4.0,44.0 A40,40 0 1,1 84.0,44.0 A40,40 0 1,1 4.0,44.0 Z M20.0,44.0 A24,24 0 1,0 68.0,44.0 A24,24 0 1,0 20.0,44.0 Z" fill="#f87058" fill-rule="evenodd"/></svg><div class="dlegend"><div class="kyp-mixrow"><span class="sw" style="background:#f87058"></span><span class="nm">Single Family (1-4 Units):Site-Built</span><span class="pc">100.0%</span></div></div></div></div></div>
+<div class="kyp-charttitle">Property value &middot; distribution</div>
+<div class="kyp-hbar"><span class="hl">$300k-$500k</span><span class="htrack"><i class="ind" style="width:69%"><b class="hbar-count">22.8%</b></i></span></div><div class="kyp-hbar"><span class="hl">$500k-$750k</span><span class="htrack"><i class="ind" style="width:100%"><b class="hbar-count">32.9%</b></i></span></div><div class="kyp-hbar"><span class="hl">$750k-$1M</span><span class="htrack"><i class="ind" style="width:54%"><b class="hbar-count">17.7%</b></i></span></div><div class="kyp-hbar"><span class="hl">>$1M</span><span class="htrack"><i class="ind" style="width:81%"><b class="hbar-count">26.6%</b></i></span></div>
+<div class="kyp-charttitle">Denial reasons &middot; % of applications</div>
+<div class="kyp-hbar"><span class="hl">Debt-to-income ratio</span><span class="htrack"><i class="ind" style="width:100%"><b class="hbar-count">4.7%</b></i></span></div><div class="kyp-hbar"><span class="hl">Employment history</span><span class="htrack"><i class="ind" style="width:17%"><b class="hbar-count">0.8%</b></i></span></div><div class="kyp-hbar"><span class="hl">Credit history</span><span class="htrack"><i class="ind" style="width:17%"><b class="hbar-count">0.8%</b></i></span></div><div class="kyp-hbar"><span class="hl">Collateral</span><span class="htrack"><i class="ind" style="width:17%"><b class="hbar-count">0.8%</b></i></span></div><div class="kyp-hbar"><span class="hl">Unverifiable information</span><span class="htrack"><i class="ind" style="width:17%"><b class="hbar-count">0.8%</b></i></span></div><div class="kyp-hbar"><span class="hl">Credit application incomplete</span><span class="htrack"><i class="ind" style="width:17%"><b class="hbar-count">0.8%</b></i></span></div>
+
+<div class="kyp-subhead"><span class="n">19.3</span><span class="lbl">Who's Borrowing</span>
+ <span class="ct">borrowers who closed</span><span class="sample">SAMPLE VALUES</span></div>
+<div class="kyp-mix"><div class="kyp-mixcard"><div class="mh">Age group</div><div class="kyp-donut"><svg width="88" height="88" viewBox="0 0 88 88" style="flex:none"><path d="M84.00,43.48 A40,40 0 0,0 18.52,13.17 L28.71,25.50 A24,24 0 0,1 68.00,43.69 Z" fill="#fbbf24"/><path d="M17.72,13.84 A40,40 0 0,0 19.27,75.44 L29.16,62.86 A24,24 0 0,1 28.23,25.91 Z" fill="#f97316"/><path d="M20.10,76.08 A40,40 0 0,0 57.53,81.64 L52.12,66.59 A24,24 0 0,1 29.66,63.25 Z" fill="#ef4444"/><path d="M58.51,81.28 A40,40 0 0,0 78.42,64.38 L64.65,56.23 A24,24 0 0,1 52.71,66.37 Z" fill="#ec4899"/><path d="M78.94,63.47 A40,40 0 0,0 82.98,52.99 L67.39,49.39 A24,24 0 0,1 64.96,55.68 Z" fill="#8b5cf6"/><path d="M83.20,51.97 A40,40 0 0,0 84.00,44.52 L68.00,44.31 A24,24 0 0,1 67.52,48.78 Z" fill="#6366f1"/></svg><div class="dlegend"><div class="kyp-mixrow"><span class="sw" style="background:#fbbf24"></span><span class="nm">25-34</span><span class="pc">36.2%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#f97316"></span><span class="nm">35-44</span><span class="pc">28.4%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#ef4444"></span><span class="nm">45-54</span><span class="pc">16.1%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#ec4899"></span><span class="nm">55-64</span><span class="pc">11.0%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#8b5cf6"></span><span class="nm">&lt;25</span><span class="pc">4.9%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#6366f1"></span><span class="nm">65-74</span><span class="pc">3.4%</span></div></div></div></div><div class="kyp-mixcard"><div class="mh">Race</div><div class="kyp-donut"><svg width="88" height="88" viewBox="0 0 88 88" style="flex:none"><path d="M84.00,43.48 A40,40 0 0,0 4.71,36.48 L20.43,39.49 A24,24 0 0,1 68.00,43.69 Z" fill="#60a5fa"/><path d="M4.53,37.52 A40,40 0 0,0 31.14,81.88 L36.29,66.73 A24,24 0 0,1 20.32,40.11 Z" fill="#10b981"/><path d="M32.14,82.20 A40,40 0 0,0 69.87,74.51 L59.52,62.31 A24,24 0 0,1 36.88,66.92 Z" fill="#f59e0b"/><path d="M70.66,73.82 A40,40 0 0,0 82.26,55.66 L66.96,51.00 A24,24 0 0,1 59.99,61.89 Z" fill="#fb7185"/><path d="M82.55,54.66 A40,40 0 0,0 84.00,44.52 L68.00,44.31 A24,24 0 0,1 67.13,50.39 Z" fill="#94a3b8"/></svg><div class="dlegend"><div class="kyp-mixrow"><span class="sw" style="background:#60a5fa"></span><span class="nm">White</span><span class="pc">47.2%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#10b981"></span><span class="nm">Black or African American</span><span class="pc">22.8%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#f59e0b"></span><span class="nm">Hispanic or Latino</span><span class="pc">16.4%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#fb7185"></span><span class="nm">Asian</span><span class="pc">9.1%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#94a3b8"></span><span class="nm">Joint</span><span class="pc">4.5%</span></div></div></div></div></div>
+<div class="kyp-mix"><div class="kyp-mixcard"><div class="mh">Income</div><div class="kyp-donut"><svg width="88" height="88" viewBox="0 0 88 88" style="flex:none"><path d="M84.00,43.48 A40,40 0 0,0 28.60,7.09 L34.76,21.85 A24,24 0 0,1 68.00,43.69 Z" fill="#065f46"/><path d="M27.63,7.50 A40,40 0 0,0 4.85,52.21 L20.51,48.93 A24,24 0 0,1 34.18,22.10 Z" fill="#047857"/><path d="M5.08,53.24 A40,40 0 0,0 51.72,83.25 L48.63,67.55 A24,24 0 0,1 20.65,49.54 Z" fill="#059669"/><path d="M52.75,83.03 A40,40 0 0,0 77.76,65.45 L64.26,56.87 A24,24 0 0,1 49.25,67.42 Z" fill="#10b981"/><path d="M78.31,64.56 A40,40 0 0,0 84.00,44.52 L68.00,44.31 A24,24 0 0,1 64.59,56.34 Z" fill="#34d399"/></svg><div class="dlegend"><div class="kyp-mixrow"><span class="sw" style="background:#065f46"></span><span class="nm">$200k+</span><span class="pc">31.5%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#047857"></span><span class="nm">$150-200k</span><span class="pc">22.0%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#059669"></span><span class="nm">$100-150k</span><span class="pc">24.8%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#10b981"></span><span class="nm">$75-100k</span><span class="pc">12.9%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#34d399"></span><span class="nm">&lt;$75k</span><span class="pc">8.8%</span></div></div></div></div><div class="kyp-mixcard"><div class="mh">Debt-to-income</div><div class="kyp-donut"><svg width="88" height="88" viewBox="0 0 88 88" style="flex:none"><path d="M84.00,43.48 A40,40 0 0,0 33.59,5.38 L37.75,20.83 A24,24 0 0,1 68.00,43.69 Z" fill="#8b5cf6"/><path d="M32.58,5.67 A40,40 0 0,0 4.01,44.98 L20.01,44.59 A24,24 0 0,1 37.15,21.00 Z" fill="#c4b5fd"/><path d="M4.05,46.03 A40,40 0 0,0 32.82,82.41 L37.29,67.04 A24,24 0 0,1 20.03,45.22 Z" fill="#a78bfa"/><path d="M33.83,82.69 A40,40 0 0,0 74.97,69.32 L62.58,59.19 A24,24 0 0,1 37.90,67.21 Z" fill="#7c3aed"/><path d="M75.62,68.50 A40,40 0 0,0 84.00,44.52 L68.00,44.31 A24,24 0 0,1 62.97,58.70 Z" fill="#6d28d9"/></svg><div class="dlegend"><div class="kyp-mixrow"><span class="sw" style="background:#8b5cf6"></span><span class="nm">36-42%</span><span class="pc">29.4%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#c4b5fd"></span><span class="nm">&lt;20%</span><span class="pc">21.2%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#a78bfa"></span><span class="nm">20-30%</span><span class="pc">20.1%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#7c3aed"></span><span class="nm">30-36%</span><span class="pc">18.6%</span></div><div class="kyp-mixrow"><span class="sw" style="background:#6d28d9"></span><span class="nm">43-49%</span><span class="pc">10.7%</span></div></div></div></div></div>
+
+<div class="kyp-subhead"><span class="n">19.4</span><span class="lbl">Active Lenders</span>
+ <span class="ct">ranked by loans originated</span></div>
+<div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>GUARANTEED RATE, INC.</span><span style="width:52px;flex:none;font-size:10px;color:var(--kyp-muted);text-align:right">6.41%</span><span class="htrack"><i class="ind" style="width:100%"><b class="hbar-count">212 closed</b></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>UNITED WHOLESALE MORTGAGE, LLC</span><span style="width:52px;flex:none;font-size:10px;color:var(--kyp-muted);text-align:right">6.55%</span><span class="htrack"><i class="ind" style="width:79%"><b class="hbar-count">168 closed</b></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>JPMorgan Chase Bank, National Association</span><span style="width:52px;flex:none;font-size:10px;color:var(--kyp-muted);text-align:right">6.29%</span><span class="htrack"><i class="ind" style="width:67%"><b class="hbar-count">141 closed</b></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>Wintrust Mortgage, a division of Barrington Bank</span><span style="width:52px;flex:none;font-size:10px;color:var(--kyp-muted);text-align:right">6.38%</span><span class="htrack"><i class="ind" style="width:56%"><b class="hbar-count">118 closed</b></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>Bank of America, National Association</span><span style="width:52px;flex:none;font-size:10px;color:var(--kyp-muted);text-align:right">6.22%</span><span class="htrack"><i class="ind" style="width:45%"><b class="hbar-count">96 closed</b></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>CrossCountry Mortgage, LLC</span><span style="width:52px;flex:none;font-size:10px;color:var(--kyp-muted);text-align:right">6.62%</span><span class="htrack"><i class="ind" style="width:40%"><b class="hbar-count">84 closed</b></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>Citibank, National Association</span><span style="width:52px;flex:none;font-size:10px;color:var(--kyp-muted);text-align:right">6.31%</span><span class="htrack"><i class="ind" style="width:33%"><b class="hbar-count">71 closed</b></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>The Huntington National Bank</span><span style="width:52px;flex:none;font-size:10px;color:var(--kyp-muted);text-align:right">6.48%</span><span class="htrack"><i class="ind" style="width:30%"><b class="hbar-count">63 closed</b></i></span></div>
+<button type="button" class="kyp-morelink market-showmore">+ Show 10 more lenders &rarr;</button>
+<div class="kyp-src">19.1&ndash;19.4 describe Community Area West Town, not this address.
+ Source: FFIEC HMDA loan-level disclosure, 2023&ndash;2025. Rate column is each lender's average on
+ closed first-lien loans; reported rates are historical, not a current quote.</div>
+
+<div class="kyp-subhead"><span class="n">19.5</span><span class="lbl">Area Transaction Trends</span>
+ <span class="ct">Cook County transfer records</span><span class="sample">SAMPLE VALUES</span></div>
+<div class="kyp-blocks four"><div class="kyp-block ind"><div class="bv">183</div><div class="bl"><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#2b3a9e;margin-right:6px;vertical-align:1px"></i>Single Family &middot; 2025 sales</div><div class="bd">Median $565,000<br>&#9650; 15.8% more than 2024</div></div><div class="kyp-block ind"><div class="bv">84</div><div class="bl"><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#b1466f;margin-right:6px;vertical-align:1px"></i>2–4 Unit &middot; 2025 sales</div><div class="bd">Median $742,000<br>&#9650; 18.3% more than 2024</div></div><div class="kyp-block ind"><div class="bv">277</div><div class="bl"><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#9a7fd0;margin-right:6px;vertical-align:1px"></i>Condo &middot; 2025 sales</div><div class="bd">Median $389,500<br>&#9650; 11.2% more than 2024</div></div><div class="kyp-block ind"><div class="bv">36</div><div class="bl"><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f0a41c;margin-right:6px;vertical-align:1px"></i>Commercial &middot; 2025 sales</div><div class="bd">Median $1,240,000<br>&#9650; 7 more than 2024</div></div></div>
+<div class="ttbox">
+ <div id="tt-chart">
+  <div class="chart kyp-ttchart">
+   <div class="yax"><span>400</span><span>300</span><span>200</span><span>100</span><span>0</span></div>
+   <div class="plot">
+    <div class="plotarea area">
+     <div class="grid" style="bottom:25%"></div><div class="grid" style="bottom:50%"></div>
+     <div class="grid" style="bottom:75%"></div><div class="grid" style="top:0"></div>
+     <div class="grp"><div class="tip"><span class="ty">2022</span><span class="tr"><span class="sw" style="background:#2b3a9e"></span>Single Family: 214</span><span class="tr"><span class="sw" style="background:#b1466f"></span>2–4 Unit: 96</span><span class="tr"><span class="sw" style="background:#9a7fd0"></span>Condo: 331</span><span class="tr"><span class="sw" style="background:#f0a41c"></span>Commercial: 41</span></div><i class="bar" style="background:#2b3a9e;height:53.5%"></i><i class="bar" style="background:#b1466f;height:24.0%"></i><i class="bar" style="background:#9a7fd0;height:82.8%"></i><i class="bar" style="background:#f0a41c;height:10.2%"></i></div><div class="grp"><div class="tip"><span class="ty">2023</span><span class="tr"><span class="sw" style="background:#2b3a9e"></span>Single Family: 171</span><span class="tr"><span class="sw" style="background:#b1466f"></span>2–4 Unit: 78</span><span class="tr"><span class="sw" style="background:#9a7fd0"></span>Condo: 268</span><span class="tr"><span class="sw" style="background:#f0a41c"></span>Commercial: 33</span></div><i class="bar" style="background:#2b3a9e;height:42.8%"></i><i class="bar" style="background:#b1466f;height:19.5%"></i><i class="bar" style="background:#9a7fd0;height:67.0%"></i><i class="bar" style="background:#f0a41c;height:8.2%"></i></div><div class="grp"><div class="tip"><span class="ty">2024</span><span class="tr"><span class="sw" style="background:#2b3a9e"></span>Single Family: 158</span><span class="tr"><span class="sw" style="background:#b1466f"></span>2–4 Unit: 71</span><span class="tr"><span class="sw" style="background:#9a7fd0"></span>Condo: 249</span><span class="tr"><span class="sw" style="background:#f0a41c"></span>Commercial: 29</span></div><i class="bar" style="background:#2b3a9e;height:39.5%"></i><i class="bar" style="background:#b1466f;height:17.8%"></i><i class="bar" style="background:#9a7fd0;height:62.3%"></i><i class="bar" style="background:#f0a41c;height:7.2%"></i></div><div class="grp"><div class="tip"><span class="ty">2025</span><span class="tr"><span class="sw" style="background:#2b3a9e"></span>Single Family: 183</span><span class="tr"><span class="sw" style="background:#b1466f"></span>2–4 Unit: 84</span><span class="tr"><span class="sw" style="background:#9a7fd0"></span>Condo: 277</span><span class="tr"><span class="sw" style="background:#f0a41c"></span>Commercial: 36</span></div><i class="bar" style="background:#2b3a9e;height:45.8%"></i><i class="bar" style="background:#b1466f;height:21.0%"></i><i class="bar" style="background:#9a7fd0;height:69.2%"></i><i class="bar" style="background:#f0a41c;height:9.0%"></i></div>
+    </div>
+    <div class="xlab"><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div>
+   </div>
+  </div>
+  <div class="legend kyp-ttlegend"><span class="lg"><span class="sw" style="background:#2b3a9e"></span>Single Family</span><span class="lg"><span class="sw" style="background:#b1466f"></span>2–4 Unit</span><span class="lg"><span class="sw" style="background:#9a7fd0"></span>Condo</span><span class="lg"><span class="sw" style="background:#f0a41c"></span>Commercial</span></div>
+ </div>
+ <p class="ttfoot">Describes ZIP 60612, not this address. Counts are transaction volume, not
+  price. Median price is the most recent complete year only. Source: Cook County Assessor
+  parcel sales.</p>
+</div>
+<div class="mocknote"><b>Renders empty today.</b> <code>buildSaleHistCache()</code> fails, the route
+ returns 503 and the panel shows <i>&ldquo;Transaction data not available for this ZIP code.&rdquo;</i>
+ This is the populated state the existing markup already produces once
+ <b>Step 24 Prompt 5</b> lands. Step 26 changes nothing here.</div>
+
+<div class="kyp-subhead"><span class="n">19.6</span><span class="lbl">Recently Sold Comps</span>
+ <span class="ct">within 0.75 mi &middot; class-matched</span><span class="sample">SAMPLE VALUES</span></div>
+<div class="kyp-comps-view">
+ <div class="cmp-summary">
+  <div class="cmp-stop"><span class="cmp-conf cmp-conf-high">&#9678; High Confidence</span>
+   <span class="cmp-pill">5 comps</span></div>
+  <div class="cmp-stats">
+   <div><div class="cmp-st-l">Indicated Value</div><div class="cmp-st-n">$742,500</div>
+    <div class="cmp-st-s">median $/sqft &times; subject sqft</div></div>
+   <div><div class="cmp-st-l">Median Sale Price</div><div class="cmp-st-n">$725K</div></div>
+   <div><div class="cmp-st-l">Median $/Sqft</div><div class="cmp-st-n">$293</div></div>
+  </div>
+  <div class="cmp-range">Range: $655K &ndash; $813K &middot; 0.75 mi radius &middot; last 12 months
+   &middot; 63 total nearby sales</div>
+ </div>
+ <div class="cmp-card"><div class="cmp-crow"><span class="cmp-rk">#1</span>
+ <div class="cmp-bd"><div class="cmp-addr">1642 W Ohio St</div>
+  <div class="cmp-meta"><span class="cmp-m">0.3 mi</span><span class="cmp-m">Jun 2025 · 98 days ago</span></div></div>
+ <div class="cmp-right"><div class="cmp-price">$725,000</div><div class="cmp-ppsf">$293/sqft</div></div>
+ <span class="cmp-chev">&rsaquo;</span></div>
+ <div class="cmp-cbot"><div class="cmp-specs"><span class="cmp-sp">2,470 sqft</span>
+   <span class="cmp-sp">3 bd</span><span class="cmp-sp">2.5 ba</span></div>
+  <div class="cmp-match cmp-match-g"><span class="cmp-ml">Match</span>
+   <span class="cmp-mt"><span style="width:91%"></span></span><span class="cmp-mv">91</span></div></div>
+</div><div class="cmp-card"><div class="cmp-crow"><span class="cmp-rk">#2</span>
+ <div class="cmp-bd"><div class="cmp-addr">2119 W Walnut St</div>
+  <div class="cmp-meta"><span class="cmp-m">0.4 mi</span><span class="cmp-m">Apr 2025 · 161 days ago</span></div></div>
+ <div class="cmp-right"><div class="cmp-price">$698,000</div><div class="cmp-ppsf">$281/sqft</div></div>
+ <span class="cmp-chev">&rsaquo;</span></div>
+ <div class="cmp-cbot"><div class="cmp-specs"><span class="cmp-sp">2,485 sqft</span>
+   <span class="cmp-sp">3 bd</span><span class="cmp-sp">2.5 ba</span></div>
+  <div class="cmp-match cmp-match-g"><span class="cmp-ml">Match</span>
+   <span class="cmp-mt"><span style="width:88%"></span></span><span class="cmp-mv">88</span></div></div>
+</div><div class="cmp-card"><div class="cmp-crow"><span class="cmp-rk">#3</span>
+ <div class="cmp-bd"><div class="cmp-addr">934 N Hoyne Ave</div>
+  <div class="cmp-meta"><span class="cmp-m">0.5 mi</span><span class="cmp-m">Aug 2025 · 41 days ago</span></div></div>
+ <div class="cmp-right"><div class="cmp-price">$812,500</div><div class="cmp-ppsf">$316/sqft</div></div>
+ <span class="cmp-chev">&rsaquo;</span></div>
+ <div class="cmp-cbot"><div class="cmp-specs"><span class="cmp-sp">2,570 sqft</span>
+   <span class="cmp-sp">3 bd</span><span class="cmp-sp">2.5 ba</span></div>
+  <div class="cmp-match cmp-match-g"><span class="cmp-ml">Match</span>
+   <span class="cmp-mt"><span style="width:84%"></span></span><span class="cmp-mv">84</span></div></div>
+</div><div class="cmp-card"><div class="cmp-crow"><span class="cmp-rk">#4</span>
+ <div class="cmp-bd"><div class="cmp-addr">1508 W Huron St</div>
+  <div class="cmp-meta"><span class="cmp-m">0.6 mi</span><span class="cmp-m">Feb 2025 · 219 days ago</span></div></div>
+ <div class="cmp-right"><div class="cmp-price">$655,000</div><div class="cmp-ppsf">$272/sqft</div></div>
+ <span class="cmp-chev">&rsaquo;</span></div>
+ <div class="cmp-cbot"><div class="cmp-specs"><span class="cmp-sp">2,410 sqft</span>
+   <span class="cmp-sp">3 bd</span><span class="cmp-sp">2.5 ba</span></div>
+  <div class="cmp-match cmp-match-g"><span class="cmp-ml">Match</span>
+   <span class="cmp-mt"><span style="width:79%"></span></span><span class="cmp-mv">79</span></div></div>
+</div><div class="cmp-card"><div class="cmp-crow"><span class="cmp-rk">#5</span>
+ <div class="cmp-bd"><div class="cmp-addr">2246 W Rice St</div>
+  <div class="cmp-meta"><span class="cmp-m">0.7 mi</span><span class="cmp-m">Jul 2025 · 76 days ago</span></div></div>
+ <div class="cmp-right"><div class="cmp-price">$770,000</div><div class="cmp-ppsf">$305/sqft</div></div>
+ <span class="cmp-chev">&rsaquo;</span></div>
+ <div class="cmp-cbot"><div class="cmp-specs"><span class="cmp-sp">2,525 sqft</span>
+   <span class="cmp-sp">3 bd</span><span class="cmp-sp">2.5 ba</span></div>
+  <div class="cmp-match cmp-match-g"><span class="cmp-ml">Match</span>
+   <span class="cmp-mt"><span style="width:76%"></span></span><span class="cmp-mv">76</span></div></div>
+</div>
+ <button type="button" class="kyp-morelink market-showmore">Show All 12 Comps &rarr;</button>
+ <div class="kyp-src">Describes sales within 0.75 miles, not this address. Source: Cook County
+  Assessor sales records; same property class required for matching. Informational only &mdash;
+  not a certified appraisal.</div>
+</div>
+<div class="mocknote"><b>On a commercial parcel this panel currently states something false.</b>
+ The characteristics join (<code>bcnq-qi2z</code>) was archived May 2022 and is residential-only, so a
+ join failure and a genuinely empty area produce the same message. <b>Step 24 Prompt 6</b>, not Step 26.</div>
+
+<div class="kyp-cxtiles opens"><div class="kyp-cxtile"><div class="l">7(a) Loans</div><div class="n">69</div><div class="s">$8.9M total</div></div><div class="kyp-cxtile"><div class="l">504 &middot; CRE</div><div class="n">21</div><div class="s">$18.7M total</div></div><div class="kyp-cxtile"><div class="l">Total Deployed</div><div class="n">$27.6M</div><div class="s">ZIP 60612</div></div><div class="kyp-cxtile"><div class="l">Active Lenders</div><div class="n">8</div><div class="s">in this ZIP</div></div></div>
+
+<div class="kyp-subhead"><span class="n">19.7</span>
+ <span class="lbl">Commercial Lending &mdash; SBA 504</span>
+ <span class="ct">owner-occupied CRE &middot; borrower, not property address</span><span class="sample">SAMPLE VALUES</span></div>
+<div class="kyp-sba-view">
+ <div><div class="kyp-loanrow"><div class="lmain"><a class="lnm">Claremont Holdings LLC</a><div class="lmeta">Lessors of Nonresidential Buildings</div><div class="lvia">via Wintrust Bank, N.A.</div></div><div class="lright"><div class="lamt">$2.4M</div><div class="ldate">Mar 2025</div></div></div><div class="kyp-loanrow"><div class="lmain"><a class="lnm">Josephine's Market Inc</a><div class="lmeta">Supermarkets and Other Grocery Retailers</div><div class="lvia">via Byline Bank</div></div><div class="lright"><div class="lamt">$1.8M</div><div class="ldate">Nov 2024</div></div></div><div class="kyp-loanrow"><div class="lmain"><a class="lnm">West Loop Dental PC</a><div class="lmeta">Offices of Dentists</div><div class="lvia">via Somercor 504, Inc.</div></div><div class="lright"><div class="lamt">$1.1M</div><div class="ldate">Aug 2024</div></div></div><div class="kyp-loanrow"><div class="lmain"><a class="lnm">Ohio Street Fitness LLC</a><div class="lmeta">Fitness and Recreational Sports Centers</div><div class="lvia">via Somercor 504, Inc.</div></div><div class="lright"><div class="lamt">$865K</div><div class="ldate">May 2024</div></div></div><div class="kyp-loanrow"><div class="lmain"><a class="lnm">Hoyne Avenue Auto Group</a><div class="lmeta">Automotive Body and Interior Repair</div><div class="lvia">via Wintrust Bank, N.A.</div></div><div class="lright"><div class="lamt">$740K</div><div class="ldate">Feb 2023</div></div></div></div>
+ <button type="button" class="kyp-morelink market-showmore">+ Show 10 more 504 loans &rarr;</button>
+ <div class="kyp-charttitle">504 lenders (CDCs) &middot; ranked by loans closed</div>
+ <div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>Somercor 504, Inc.</span><span class="htrack"><i class="ind" style="width:100%"><span class="hbar-count">9 loans &middot; $7.9M</span></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>Wintrust Bank, N.A.</span><span class="htrack"><i class="ind" style="width:67%"><span class="hbar-count">6 loans &middot; $6.2M</span></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>Byline Bank</span><span class="htrack"><i class="ind" style="width:44%"><span class="hbar-count">4 loans &middot; $3.1M</span></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>Growth Corp</span><span class="htrack"><i class="ind" style="width:22%"><span class="hbar-count">2 loans &middot; $1.4M</span></i></span></div></div>
+</div>
+
+<div class="kyp-subhead"><span class="n">19.8</span>
+ <span class="lbl">Commercial Lending &mdash; SBA 7(a)</span>
+ <span class="ct">small business &middot; borrower street address</span><span class="sample">SAMPLE VALUES</span></div>
+<div class="kyp-sba-view">
+ <div><div class="kyp-loanrow"><div class="lmain"><a class="lnm">Rice Street Coffee Co</a><div class="lmeta">2246 W Rice St, Chicago</div><div class="lvia">via Byline Bank</div></div><div class="lright"><div class="lamt">$350K</div><div class="laux"><span class="ljobs">41 jobs</span><span class="ldate">Jul 2025</span></div></div></div><div class="kyp-loanrow"><div class="lmain"><a class="lnm">Claremont Print & Sign</a><div class="lmeta">1708 N Claremont Ave, Chicago</div><div class="lvia">via Huntington National Bank</div></div><div class="lright"><div class="lamt">$275K</div><div class="laux"><span class="ljobs">12 jobs</span><span class="ldate">Apr 2025</span></div></div></div><div class="kyp-loanrow"><div class="lmain"><a class="lnm">West Town Staffing LLC</a><div class="lmeta">1122 N Western Ave, Chicago</div><div class="lvia">via Live Oak Banking Company</div></div><div class="lright"><div class="lamt">$240K</div><div class="laux"><span class="ljobs">28 jobs</span><span class="ldate">Jan 2025</span></div></div></div><div class="kyp-loanrow"><div class="lmain"><a class="lnm">Walnut Street Logistics</a><div class="lmeta">2119 W Walnut St, Chicago</div><div class="lvia">via Byline Bank</div></div><div class="lright"><div class="lamt">$185K</div><div class="laux"><span class="ljobs">9 jobs</span><span class="ldate">Oct 2024</span></div></div></div><div class="kyp-loanrow"><div class="lmain"><a class="lnm">Huron Family Dental</a><div class="lmeta">1508 W Huron St, Chicago</div><div class="lvia">via Newtek Small Business Finance</div></div><div class="lright"><div class="lamt">$150K</div><div class="laux"><span class="ljobs">6 jobs</span><span class="ldate">Jun 2024</span></div></div></div></div>
+ <button type="button" class="kyp-morelink market-showmore">+ Show 10 more 7(a) loans &rarr;</button>
+ <div id="sba-lenders" class="kyp-charttitle">7(a) lenders &middot; ranked by loans closed</div>
+ <div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>Byline Bank</span><span class="htrack"><i class="ind" style="width:100%"><span class="hbar-count">14 loans &middot; $2.9M</span></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>Huntington National Bank</span><span class="htrack"><i class="ind" style="width:64%"><span class="hbar-count">9 loans &middot; $1.8M</span></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>Live Oak Banking Company</span><span class="htrack"><i class="ind" style="width:43%"><span class="hbar-count">6 loans &middot; $1.4M</span></i></span></div><div class="kyp-hbar wide"><span class="hl"><i class="tick ind"></i>Newtek Small Business Finance</span><span class="htrack"><i class="ind" style="width:29%"><span class="hbar-count">4 loans &middot; $720K</span></i></span></div></div>
+ <div class="kyp-src">19.7&ndash;19.8 describe ZIP 60612, not this address. Source: SBA FOIA 7(a) and
+  504 loan data, FY2020&ndash;present. The 504 file reports borrower, industry, amount and CDC
+  lender &mdash; not the financed address, so 504 records are ZIP-level, not property matches.
+  7(a) records do carry a borrower street address. Lender bars rank by loans closed; the dollar
+  total on each bar is the sum for that lender.</div>
+</div>

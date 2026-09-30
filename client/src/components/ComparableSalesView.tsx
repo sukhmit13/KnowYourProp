@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   ChevronRight,
   ExternalLink,
-  Info,
 } from 'lucide-react';
 
 interface Comparable {
@@ -326,15 +325,6 @@ export function ComparableSalesView({ compsData, isLoading, subjectSqft }: Props
         </div>
       )}
 
-      {/* Disclaimer */}
-      <div className="cmp-note">
-        <Info className="w-3.5 h-3.5" />
-        <div>
-          Comps pulled from Cook County Assessor sales records. Same property class required for matching.
-          Informational only — not a certified appraisal.
-        </div>
-      </div>
-
       {/* Comp Cards */}
       {comparables.length > 0 && (
         <div className="space-y-2">
@@ -354,6 +344,8 @@ export function ComparableSalesView({ compsData, isLoading, subjectSqft }: Props
           )}
         </div>
       )}
+
+      <div className="kyp-src">Describes sales within {searchParams.radiusMiles} miles, not this address. Source: Cook County Assessor sales records; same property class required for matching. Informational only — not a certified appraisal.</div>
 
       {comparables.length === 0 && marketAnalysis.basedOnComps === 0 && !compsData.error && (
         <div className="text-center py-6 text-muted-foreground text-sm">

@@ -43,6 +43,7 @@ import { readCachedPeerspace } from "./peerspace";
 import { fetchGooglePlacesData, type GooglePlace } from "./google-places";
 import { derivePlacesSearchTerm } from "@shared/placesSearch";
 import { getVehicleOwnership, getSeniorsData } from "./localDemographics";
+import { getHmdaRankings } from "./hmdaRankings";
 import { resolveUserFromToken } from "./auth";
 import { buildPropertyInsightContentPrompt } from "./prompts/reportPromptBuilder";
 import { validateInsightReportContent, renderInsightReport } from "./insightReportTemplate";
@@ -4687,20 +4688,31 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     loadHmdaYear(year);
     const d = hmdaCache[String(year)];
     if (!d?.byCommunity) return null;
-    const entries = Object.entries(d.byCommunity) as [string, any][];
-    const outOf = entries.length;
     const caKey = communityArea.toUpperCase();
+    return getHmdaRankings(d.byCommunity, caKey, 'Chicago community areas');
+  }
 
-    const byTotalSorted = [...entries].sort(([, a], [, b]) => b.total - a.total);
-    const byTotalRank = byTotalSorted.findIndex(([name]) => name === caKey) + 1;
+  let hmdaTractCommunityMap: Record<string, string> | null | undefined;
 
-    const byOriginatedSorted = [...entries].sort(([, a], [, b]) => (b.originated?.total ?? 0) - (a.originated?.total ?? 0));
-    const byOriginatedRank = byOriginatedSorted.findIndex(([name]) => name === caKey) + 1;
+  function getTractRankings(year: number, tract: string) {
+    loadHmdaYear(year);
+    const d = hmdaCache[String(year)];
+    if (!d?.byTract) return null;
 
-    return {
-      byTotal: { rank: byTotalRank || null, outOf },
-      byOriginated: { rank: byOriginatedRank || null, outOf },
-    };
+    if (hmdaTractCommunityMap === undefined) {
+      const mapPath = path.join(__dirname, 'data', 'hmda_tract_community_map.json');
+      hmdaTractCommunityMap = fs.existsSync(mapPath)
+        ? JSON.parse(fs.readFileSync(mapPath, 'utf-8'))
+        : null;
+    }
+    if (!hmdaTractCommunityMap) return null;
+
+    return getHmdaRankings(
+      d.byTract,
+      tract,
+      'HMDA tracts mapped to Chicago community areas',
+      new Set(Object.keys(hmdaTractCommunityMap)),
+    );
   }
 
   app.get('/api/hmda-stats', async (req, res) => {
@@ -4722,15 +4734,18 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     const rank2025 = communityArea ? getCommunityRankings(2025, communityArea) : null;
     const rank2024 = communityArea ? getCommunityRankings(2024, communityArea) : null;
     const rank2023 = communityArea ? getCommunityRankings(2023, communityArea) : null;
+    const tractRank2025 = tract ? getTractRankings(2025, tract) : null;
+    const tractRank2024 = tract ? getTractRankings(2024, tract) : null;
+    const tractRank2023 = tract ? getTractRankings(2023, tract) : null;
 
     loadHmdaRates();
     const tractRates = tract ? (hmdaRatesByTract?.[tract] || null) : null;
     const communityRates = communityArea ? (hmdaRatesByCommunity?.[communityArea.toUpperCase()] || null) : null;
 
     res.json({
-      2025: { ...data2025, communityRank: rank2025 },
-      2024: { ...data2024, communityRank: rank2024 },
-      2023: { ...data2023, communityRank: rank2023 },
+      2025: { ...data2025, communityRank: rank2025, tractRank: tractRank2025 },
+      2024: { ...data2024, communityRank: rank2024, tractRank: tractRank2024 },
+      2023: { ...data2023, communityRank: rank2023, tractRank: tractRank2023 },
       rates: { tract: tractRates, community: communityRates },
     });
   });

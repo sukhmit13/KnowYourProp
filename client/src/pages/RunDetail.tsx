@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback, useRef, memo, useMemo, Fragment } from "react";
+import { useEffect, useState, useCallback, useRef, memo, useMemo, useContext, Fragment } from "react";
 import ReactDOM from "react-dom";
 import { useRoute, useLocation } from "wouter";
 import { buildScanSections } from "@/components/report/scanBuilder";
-import { AccordionSection, buildSubsectionNumbers, KypSubhead } from "@/components/report/AccordionSection";
+import { AccordionSection, buildSubsectionNumbers, KypSubhead, SectionNumberContext } from "@/components/report/AccordionSection";
 import { NewBusinessLicensesSection } from "@/components/report/NewBusinessLicensesSection";
 import { NewConstructionSection } from "@/components/report/NewConstructionSection";
 import { OwnershipTitleSection, deriveSaleHistory } from "@/components/report/OwnershipTitleSection";
@@ -29,13 +29,13 @@ import { PrintSettingsDialog, type PrintSection } from "@/components/PrintSettin
 import { ReportChat } from "@/components/ReportChat";
 import { PropertyMap } from "@/components/PropertyMap";
 import { PreTitleCheck } from "@/components/PreTitleCheck";
-import { HMDAFinancingStats, HMDABuyerProfile } from "@/components/HMDAStats";
+import { HMDAFinancingStats, HMDABuyerProfile, HMDALenders, HMDAMarketMixPanel } from "@/components/HMDAStats";
 import { ComparableSalesView } from "@/components/ComparableSalesView";
 import { IncentiveCheckerCards, checkerAvail, checkerTypeGroup } from "@/components/IncentivesCheckerSection";
 import { INC_STATE, IncentiveTypeLabel, IncentiveTifChip as SectionDetailChip } from "@/components/incentivePrimitives";
 import { IncentiveCard } from "@/components/IncentiveCard";
 import { ChildcareDemandMeter } from "@/components/ChildcareDemandMeter";
-import { SBALoansView } from "@/components/SBALoansView";
+import { SBALoansView, SBAKpiStrip } from "@/components/SBALoansView";
 import CorridorIntelligenceView, { type CorridorCardData } from "@/components/CorridorIntelligenceView";
 import { ProjectTypeCombobox } from "@/components/ProjectTypeCombobox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1136,6 +1136,20 @@ function NewsDevCard({ p, testid }: { p: any; testid?: string }) {
       </div>
     </div>
   );
+}
+
+function HMDAResidentialFooter({ scope, communityArea, tractGeoid }: { scope: 'community' | 'tract'; communityArea?: string | null; tractGeoid?: string | null }) {
+  const sectionNumber = useContext(SectionNumberContext);
+  const base = sectionNumber == null ? null : String(sectionNumber).padStart(2, '0');
+  const selectedArea = scope === 'tract' ? `Census Tract ${tractGeoid || 'selected'}` : `Community Area ${communityArea || 'selected'}`;
+  return <div className="kyp-src">{base ? `${base}.1–${base}.4` : 'Residential mortgage subsections'} describe {selectedArea}, not this address. Source: FFIEC HMDA loan-level disclosure, 2023–2025. Rate column is each lender's average on closed first-lien loans; reported rates are historical, not a current quote.</div>;
+}
+
+function parseTransactionCount(value: unknown): number | null {
+  if (value == null || (typeof value === 'string' && value.trim() === '')) return null;
+  if (typeof value !== 'number' && typeof value !== 'string') return null;
+  const count = Number(value);
+  return Number.isFinite(count) && count >= 0 ? count : null;
 }
 
 export default function RunDetail() {
@@ -16059,37 +16073,36 @@ export default function RunDetail() {
               <div>
                 {(facts?.tractGeoid || facts?.communityArea) && (
                   <div id="print-section-hmda-stats">
-                    <KypSubhead subsection={1} data-testid="trigger-hmda-stats-subsection"><span className="lbl">Residential Mortgage Market</span><span className="ct">HMDA loan-level records</span></KypSubhead>
-                        <div className="kyp-market-panel">
-                          <p className="kyp-scopenote">Figures below describe <b>{facts?.tractGeoid && facts?.communityArea ? `Census Tract ${facts.tractGeoid} or Community Area ${facts.communityArea}, as selected below` : facts?.tractGeoid ? `Census Tract ${facts.tractGeoid}` : `Community Area ${facts?.communityArea}`}</b>, not this address</p>
-                          <HMDAFinancingStats
-                            hmdaData={hmdaData}
-                            communityArea={facts?.communityArea}
-                            tractGeoid={facts?.tractGeoid}
-                            isLoading={isLoadingHmda}
-                          />
-                          {hmdaData && (
-                            <div className="kyp-market-buyer">
-                              <HMDABuyerProfile
-                                hmdaData={hmdaData}
-                                label={facts?.communityArea || 'This Area'}
-                                communityArea={facts?.communityArea}
-                                tractGeoid={facts?.tractGeoid}
-                              />
-                            </div>
-                          )}
-                          <div className="kyp-src">Source: FFIEC HMDA loan-level disclosure, 2023–2025. Tract and community-area figures describe area lending, not this address; reported rates are historical, not a current quote.</div>
-                        </div>
+                    <div className="kyp-market-panel">
+                      <HMDAFinancingStats hmdaData={hmdaData} communityArea={facts?.communityArea} tractGeoid={facts?.tractGeoid} isLoading={isLoadingHmda}>
+                        {({ scope, year, view, stats }) => {
+                          const actionKey = view === 'closed' ? '1' : view === 'denied' ? '3' : null;
+                          const count = actionKey ? stats?.byAction.find((item) => item.key === actionKey)?.count : stats?.total;
+                          const countText = count == null ? 'count unavailable' : count.toLocaleString();
+                          const whatFundedText = view === 'all' ? `all ${countText} applications` : view === 'closed' ? `${countText} originated loans` : `${countText} denied applications`;
+                          const borrowingText = view === 'all' ? 'all applicants' : view === 'closed' ? 'borrowers who closed' : 'applicants who were denied';
+                          const lendersText = view === 'all' ? 'ranked by applications' : view === 'closed' ? 'ranked by loans closed' : 'ranked by applications denied';
+                          return <>
+                            <KypSubhead subsection={2}><span className="lbl">What Got Funded</span><span className="ct">{whatFundedText}</span></KypSubhead>
+                            {stats ? <HMDAMarketMixPanel stats={stats} view={view} /> : <p className="kyp-emptypanel">Funding breakdown is not available for this scope and year.</p>}
+                            <KypSubhead subsection={3}><span className="lbl">Who's Borrowing</span><span className="ct">{borrowingText}</span></KypSubhead>
+                            {hmdaData && <div className="kyp-market-buyer"><HMDABuyerProfile hmdaData={hmdaData} scope={scope} year={year} view={view} /></div>}
+                            <KypSubhead subsection={4}><span className="lbl">Active Lenders</span><span className="ct">{lendersText}</span></KypSubhead>
+                            {stats ? <HMDALenders lenders={stats.byLender ?? []} view={view} /> : <p className="kyp-emptypanel">Lender records are not available for this scope and year.</p>}
+                            <HMDAResidentialFooter scope={scope} communityArea={facts?.communityArea} tractGeoid={facts?.tractGeoid} />
+                          </>;
+                        }}
+                      </HMDAFinancingStats>
+                    </div>
                   </div>
                 )}
 
                 {facts?.zipCode && (
                   <div id="print-section-transaction-trends">
-                  <KypSubhead subsection={2} data-testid="trigger-transaction-trends-subsection"><span className="lbl">Area Transaction Trends</span><span className="ct">Cook County transfer records</span></KypSubhead>
+                  <KypSubhead subsection={5} data-testid="trigger-transaction-trends-subsection"><span className="lbl">Area Transaction Trends</span><span className="ct">Cook County transfer records</span></KypSubhead>
                       <div className="kyp-market-panel">
-                        <p className="kyp-scopenote">Figures below describe <b>ZIP {facts.zipCode}</b>, not this address</p>
                         {transactionTrendsData?.isStale && (
-                          <p className="kyp-scopenote" role="status" data-testid="transaction-trends-stale">
+                          <p className="text-xs text-muted-foreground" role="status" data-testid="transaction-trends-stale">
                             Showing the last successful Cook County snapshot
                             {transactionTrendsData.lastUpdated ? ` from ${newsFmtD(transactionTrendsData.lastUpdated)}` : ''}.
                             The live refresh has not completed; this data may have changed.
@@ -16113,12 +16126,12 @@ export default function RunDetail() {
                         ) : transactionTrendsData?.years?.length > 0 ? (() => {
                           const td = transactionTrendsData;
                           const years = (td.years || []) as any[];
-                          if (years.every((year: any) => ['singleFamily', 'unit2to4', 'condo', 'commercial'].every(key => Number(year[key] ?? 0) === 0))) {
+                          if (years.every((year: any) => ['singleFamily', 'unit2to4', 'condo', 'commercial'].every(key => parseTransactionCount(year?.[key]) === 0))) {
                             return <div className="kyp-emptypanel">No qualifying property sales were recorded for ZIP {facts?.zipCode} in the four-year source period.</div>;
                           }
                           const latestYear = years[years.length - 1];
                           const prevYear = years[years.length - 2];
-                          const TT_TYPES = [
+                           const TT_TYPES = [
                             { key: 'singleFamily', label: 'Single Family', color: '#2b3a9e' },
                             { key: 'unit2to4', label: '2–4 Unit', color: '#b1466f' },
                             { key: 'condo', label: 'Condo', color: '#9a7fd0' },
@@ -16126,8 +16139,7 @@ export default function RunDetail() {
                           ] as const;
                           // Missing/non-numeric counts stay null — never silently coerced to 0
                           const ttVal = (y: any, key: string): number | null => {
-                            const n = Number(y?.[key]);
-                            return Number.isFinite(n) && n >= 0 ? n : null;
+                            return parseTransactionCount(y?.[key]);
                           };
                           // Nice axis max: smallest "round" number ≥ tallest bar, divisible by 4
                           const ttMaxVal = Math.max(1, ...years.flatMap((y: any) => TT_TYPES.map(t => ttVal(y, t.key) ?? 0)));
@@ -16157,7 +16169,18 @@ export default function RunDetail() {
                             <div className="ttbox">
                               {/* Grouped bar chart */}
                               <div id="tt-chart">
-                                <div className="chtitle">Property sale transactions in ZIP {facts?.zipCode} by type · {years[0]?.year}–{latestYear.year}</div>
+                               <div className="kyp-blocks four">
+                                 {TT_TYPES.map(t => {
+                                   const count = ttVal(latestYear, t.key);
+                                   const median = latestYear.medianPrice?.[t.key];
+                                   const change = ttChange(t.key);
+                                   return <div className="kyp-block ind" key={t.key}>
+                                     <div className="bv">{count !== null ? count.toLocaleString() : '—'}</div>
+                                     <div className="bl"><i style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: t.color, marginRight: 6, verticalAlign: 1 }} />{t.label} · {latestYear.year} sales</div>
+                                     <div className="bd">{typeof median === 'number' ? `Median ${median.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}` : 'Median unavailable'}{change && <><br />{change.delta > 0 ? '▲' : change.delta < 0 ? '▼' : '—'} {change.text}{change.delta !== 0 ? ` than ${prevYear?.year}` : ''}</>}</div>
+                                   </div>;
+                                 })}
+                               </div>
                                 <div className="chart kyp-ttchart">
                                   <div className="yax">
                                     <span>{ttAxisMax.toLocaleString()}</span>
@@ -16199,56 +16222,9 @@ export default function RunDetail() {
                                 </div>
                               </div>
 
-                              {latestYear?.medianPrice && (
-                                <div className="kyp-medrow" aria-label={`Median sale prices in ${latestYear.year}`}>
-                                  {TT_TYPES.map(t => {
-                                    const median = latestYear.medianPrice?.[t.key];
-                                    return (
-                                      <div className={`kyp-medcard${typeof median === 'number' ? '' : ' empty'}`} key={t.key}>
-                                        <div className="ml"><i style={{ background: t.color }} />{t.label}</div>
-                                        <div className="mv">{typeof median === 'number' ? median.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : '—'}</div>
-                                        <div className="ms">Median · {latestYear.year}</div>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-
-                              {/* YoY change cards — neutral directional (volume change is not good/bad) */}
-                              {prevYear && (
-                                <div>
-                                  <div className="yoyhd">Year-over-Year Change · {prevYear.year} → {latestYear.year}</div>
-                                  <div className="yoy">
-                                    {TT_TYPES.map(t => {
-                                      const c = ttChange(t.key);
-                                      const count = ttVal(latestYear, t.key);
-                                      return (
-                                        <div key={t.key} className="yc" data-testid={`tt-card-${t.key}`}>
-                                          <div className="h">
-                                            <span className="sw" style={{ background: t.color }} />
-                                            <span className="nm">{t.label}</span>
-                                          </div>
-                                          <div className="n">{count !== null ? count.toLocaleString() : '—'}</div>
-                                          {c && (
-                                            <span className="chg">
-                                              {c.delta !== 0 && (
-                                                <svg viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                  {c.delta < 0 ? <><path d="M12 5v14" /><path d="m19 12-7 7-7-7" /></> : <><path d="M12 19V5" /><path d="m5 12 7-7 7 7" /></>}
-                                                </svg>
-                                              )}
-                                              {c.text}
-                                            </span>
-                                          )}
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              )}
-
                               {/* ZIP ranking intentionally removed: only render a rank when benchmarked against N>1 real ZIPs (backend currently compares the ZIP against itself). */}
 
-                              <p className="ttfoot">Counts are transaction volume, not price. Median price is the most recent complete year only. Source: Cook County Assessor parcel sales.</p>
+                              <p className="ttfoot">Describes ZIP {facts?.zipCode}, not this address. Counts are transaction volume, not price. Median price is the most recent complete year only. Source: Cook County Assessor parcel sales.</p>
                             </div>
                           );
                         })() : (
@@ -16260,9 +16236,8 @@ export default function RunDetail() {
 
                 {(compsData || isLoadingComps) && compPropertyClass && (
                   <div id="print-section-comparable-sales">
-                    <KypSubhead subsection={3} data-testid="trigger-recently-sold-comps"><span className="lbl">Recently Sold Comps</span><span className="ct">class-matched sales</span></KypSubhead>
+                    <KypSubhead subsection={6} data-testid="trigger-recently-sold-comps"><span className="lbl">Recently Sold Comps</span><span className="ct">within {compsData?.searchParams?.radiusMiles ?? 0.75} mi · class-matched</span></KypSubhead>
                         <div className="kyp-market-panel">
-                          <p className="kyp-scopenote">Figures below describe sales within <b>{compsData?.searchParams?.radiusMiles ?? 0.75} miles</b>, not this address</p>
                           <ComparableSalesView
                             compsData={compsData}
                             isLoading={isLoadingComps}
@@ -16274,9 +16249,9 @@ export default function RunDetail() {
 
                 {facts?.zipCode && (
                   <div id="print-section-sba-loans">
-                  <KypSubhead subsection={4} data-testid="trigger-sba-loans-subsection"><span className="lbl">Commercial Lending — SBA 504</span><span className="ct">owner-occupied CRE</span></KypSubhead>
+                    <SBAKpiStrip data={sbaLoansData} isLoading={isLoadingSBALoans} zipCode={facts.zipCode} />
+                    <KypSubhead subsection={7} data-testid="trigger-sba-loans-subsection"><span className="lbl">Commercial Lending — SBA 504</span><span className="ct">owner-occupied CRE · borrower, not property address</span></KypSubhead>
                       <div className="kyp-market-panel">
-                        <p className="kyp-scopenote">Figures below describe <b>ZIP {facts.zipCode}</b>, not this address</p>
                         <SBALoansView
                           data={sbaLoansData}
                           isLoading={isLoadingSBALoans}
@@ -16285,6 +16260,7 @@ export default function RunDetail() {
                           zipCode={facts.zipCode}
                           subjectIsCommercial={!isLoadingZoning && !!facts?.zoning && !!zoningInfo?.category && zoningInfo.category !== 'residential'}
                           zoningCode={facts?.zoning ?? null}
+                          hideKpis
                         />
                       </div>
                   </div>

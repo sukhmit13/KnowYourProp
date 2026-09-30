@@ -1,0 +1,383 @@
+# Step 26 — §Mortgage & Lending Market
+
+**This supersedes the earlier `REPLIT_STEP26_mortgage_dedup.md` entirely. Discard that file.**
+Two things in it were wrong and are corrected below (§9).
+
+Audited against commit **`5cb2d3a`**. Section read in full: `RunDetail.tsx` **16040–16270**, 231
+lines, plus every component it mounts — `HMDAStats.tsx` (818 lines), `SBALoansView.tsx` (236),
+`ComparableSalesView.tsx` (367), and `getCommunityRankings()` in `server/routes.ts` (4685–4703).
+**100%.**
+
+---
+
+## 0. Files to work from
+
+| File | What it is |
+|---|---|
+| `step26-target-full.png` | **The target.** Render this and match it. |
+| `step26-target-full.html` | The same page, self-contained — open it in a browser to inspect the DOM and computed styles. |
+| `step26-markup.html` | The target DOM alone, with comments. Class names and element order here are normative. |
+| `kyp-base-patch-26.css` | The only CSS this step adds. Three rules. Append to the **end** of `client/src/kyp-base.css`. |
+
+> **The mock's donuts are inline SVG. The product's are Recharts.** `MiniPieChart`
+> (`HMDAStats.tsx:124–165`) is drawn as static SVG in the mock only because Recharts cannot run in
+> an HTML file. **Do not replace `MiniPieChart`. Do not convert any donut to a list or a bar.**
+> Rings, radii, `paddingAngle`, colours and slice order in the mock match the component exactly.
+
+---
+
+## 1. Before → after
+
+```
+BEFORE (4 subheads)                        AFTER (8 subheads)
+§19 Mortgage & Lending Market              §19 Mortgage & Lending Market
+                                             ┌ shared control bar (no heading) ──┐
+                                             │ scope · year · All/Orig/Denied    │
+                                             └───────────────────────────────────┘
+  .1 Residential Mortgage Market             .1 Market Position
+     scope note            ◄── DELETE           two rank blocks · rate comparison
+     scope toggle                            .2 What Got Funded
+     year toggle                                loan type · occupancy · product
+     view switch                                property type · property value
+     city ranking (grid)   ◄── REPLACE          denial reasons
+     rate comparison                         .3 Who's Borrowing
+     KPI blocks                                 sex · race · ethnicity · age
+     funding donuts                             income · DTI
+     property value                          .4 Active Lenders
+     denial reasons                             ranked by loans closed
+     ACTIVE LENDERS                             └ footer covering .1–.4
+     └ (buyer profile)                       .5 Area Transaction Trends
+        scope toggle       ◄── DELETE           4 summary blocks
+        year toggle        ◄── DELETE           grouped bar chart
+        view switch        ◄── DELETE           └ footer
+        demographics                         .6 Recently Sold Comps
+        denial reasons     ◄── DELETE           summary · comp cards
+        ACTIVE LENDERS     ◄── DELETE           └ footer
+     source line                             ┌ commercial KPI strip (no heading) ┐
+  .2 Area Transaction Trends                 .7 Commercial Lending — SBA 504
+     scope note            ◄── DELETE           504 loans · 504 lenders (CDCs)
+     chart title           ◄── DELETE        .8 Commercial Lending — SBA 7(a)
+     chart                                      7(a) loans · 7(a) lenders
+     median row            ◄── MERGE UP         └ footer covering .7–.8
+     YoY row               ◄── MERGE UP
+     foot note
+  .3 Recently Sold Comps
+     scope note            ◄── DELETE
+     disclaimer (top)      ◄── MOVE TO END
+     comp cards
+  .4 Commercial Lending — SBA 504
+     scope note            ◄── DELETE
+     "owner-occupied CRE · FY2020–present"  ◄── MOVE TO .ct + footer
+     KPI tiles
+     504 loan scope box    ◄── DELETE
+     504 loans
+     504 lenders
+  .5 Commercial Lending — SBA 7(a)   (inside SBALoansView)
+     "working capital… · FY2020–present"    ◄── MOVE TO .ct + footer
+     7(a) loans
+     7(a) lenders
+     source line
+```
+
+**Nine duplicated elements become zero. Eight scope/source interruptions become four footers.**
+Every figure that renders today still renders. Nothing is deleted from the report.
+
+---
+
+## 2. The rule that changed
+
+**Scope and source notes go at the END of a block, once.** Not above the data, not between panels.
+
+A *block* is a run of subsections under one control or one source — not each subsection. This
+section has four blocks and therefore four footer lines:
+
+| Block | Footer sits after | Class |
+|---|---|---|
+| 19.1–19.4 residential | Active Lenders | `.kyp-src` |
+| 19.5 trends | the chart | `.ttfoot` (already there) |
+| 19.6 comps | the comp cards | `.kyp-src` |
+| 19.7–19.8 commercial | 7(a) lenders | `.kyp-src` |
+
+**The one exception** is a fact that would cause a *misread of the numbers themselves*. That goes
+in the subhead's counter-text (`.ct`), which costs no vertical space and is read on the way in:
+
+| Subhead | `.ct` |
+|---|---|
+| 19.6 | `within 0.75 mi · class-matched` |
+| 19.7 | `owner-occupied CRE · borrower, not property address` |
+| 19.8 | `small business · borrower street address` |
+
+Also delete `.chtitle` (`RunDetail.tsx:16136`). The y-axis, the x-axis year labels, the legend and
+the four blocks above it all already say "transactions by type, 2022–2025".
+
+---
+
+## 3. `client/src/components/HMDAStats.tsx`
+
+### 3a. `HMDABuyerProfile` becomes controlled
+
+1. Add `scope`, `year` and `view` to its props. **Delete** the three `useState` at **`:441–443`**.
+2. **Delete** its scope toggle (`:515–522`), its year toggle (`:537`) and its All/Originated/Denied
+   buttons (`:519–539`). It renders only `DemographicsPanel` for the props it is given.
+3. **Delete** its `<LenderTable>` at **`:570`**.
+4. In `DemographicsPanel`, do not render the denial-reasons block when `showDemographics` is true —
+   `StatsPanel` already renders it above.
+
+Two independent state sets is a correctness bug, not a layout preference: the upper panel can show
+Census Tract 2025 while the lower shows West Town 2024, under one scope note that says
+*"…as selected below"*, singular.
+
+### 3b. Lenders come out of `StatsPanel`
+
+5. Remove the three `<LenderTable>` call sites (**`:284`, `:336`, `:368`**) and the `.kyp-card`
+   wrappers around them. Export `HMDALenders({ lenders, view })` so `RunDetail` can place it under
+   its own subhead.
+
+`LenderTable` (`:200–241`) is **one list keyed by LEI**. `view` only re-sorts and relabels it. Two
+copies means the same lender can be #1 in one and #4 in the other on the same screen.
+
+### 3c. Default to loans closed
+
+6. `HMDAFinancingStats` (`:580–582`): `useState('all')` → **`useState('closed')`**.
+
+Applications received measures marketing reach. Loans closed measures who actually funds deals here,
+which is what the reader wants. The All / Denied totals stay visible in the blocks above, so no
+denominator is lost.
+
+7. `HMDAFinancingStats` gains an optional `children` and passes `scope` / `year` / `view` down via a
+   render prop or context — whichever fits the file. **Do not duplicate the state.**
+
+### 3d. The year toggle
+
+8. **`:15`** — `const YEARS = [2025, 2024]` → `[2025, 2024, 2023]`.
+
+2023 is on disk. `suffix = year === 2024 ? '' : '_' + year` means the unsuffixed file is 2024, so all
+three years exist; the constant hides one.
+
+### 3e. The city ranking — two real bugs, then a rebuild
+
+9. **`:690`** reads `hmdaData?.[2025]?.communityRank` into a variable named `r2024`, and the column
+   headers `2025` / `2024` are hard-coded. **The rank card ignores the year toggle.** Select 2024 and
+   nothing moves.
+10. It also ignores `scope` — it is always the community-area ranking, even with Census Tract
+    selected. Under one shared control that contradiction is on screen at all times.
+11. **Replace the whole `.kyp-rankcard` block (`:688–732`)** with two `.kyp-block ind`:
+
+```
+#2   OF 77 COMMUNITY AREAS · APPLICATIONS
+     3,890 here · Near North leads with 5,120 · up from #3 in 2024
+
+#3   OF 77 COMMUNITY AREAS · LOANS CLOSED
+     1,970 here · Near North leads with 2,640 · unchanged from 2024
+```
+
+Markup order is **`.bv` first, then `.bl`, then `.bd`** — `.bl` carries `margin-top:8px`. Wrap in
+`<div class="kyp-blocks two">` (new rule, in the patch). Indigo, not green: a rank is a
+classification, not a verdict.
+
+The counts and the leader come from §4 below. Until that ships, render `.bd` with the year
+comparison only and omit the count clause — **do not invent a leader or a count.**
+
+### 3f. The view switch needs a visible state
+
+12. The three blocks at `:667–677` set `aria-pressed` and render nothing. Keep `aria-pressed` (it is
+    correct) — the patch adds `.kyp-block[aria-pressed="true"]`. No markup change.
+
+---
+
+## 4. `server/routes.ts` — `getCommunityRankings()` (`:4685–4703`)
+
+The function already holds the sorted array and the subject's own totals in memory. Return them:
+
+```ts
+const subject = d.byCommunity[caKey];
+return {
+  byTotal: {
+    rank: byTotalRank || null, outOf,
+    count: subject?.total ?? null,
+    leader: byTotalSorted[0]
+      ? { name: byTotalSorted[0][0], count: byTotalSorted[0][1].total } : null,
+  },
+  byOriginated: {
+    rank: byOriginatedRank || null, outOf,
+    count: subject?.originated?.total ?? null,
+    leader: byOriginatedSorted[0]
+      ? { name: byOriginatedSorted[0][0], count: byOriginatedSorted[0][1].originated?.total ?? null }
+      : null,
+  },
+};
+```
+
+No new fetch, no new dataset. Title-case `leader.name` for display — `byCommunity` keys are upper-case.
+
+---
+
+## 5. `client/src/pages/RunDetail.tsx` — `accProps("market")`, ~16040–16270
+
+13. **Delete every `<p className="kyp-scopenote">`** in this section: `:16052`, `:16078`, `:16241`,
+    `:16255`. Four of them.
+14. **Delete `.chtitle`** at `:16136`.
+15. **Eight subheads.** Use `KypSubhead subsection={n}` as the existing ones do — **never hard-code
+    the number**:
+
+| n | `.lbl` | `.ct` |
+|---|---|---|
+| 1 | Market Position | *(area) vs. the city* |
+| 2 | What Got Funded | follows the active view — see below |
+| 3 | Who's Borrowing | follows the active view |
+| 4 | Active Lenders | follows the active view |
+| 5 | Area Transaction Trends | Cook County transfer records |
+| 6 | Recently Sold Comps | within {radius} mi · class-matched |
+| 7 | Commercial Lending — SBA 504 | owner-occupied CRE · borrower, not property address |
+| 8 | Commercial Lending — SBA 7(a) | small business · borrower street address |
+
+16. **Counter-text on 2, 3 and 4 follows the active view.** The control sits above them, so without
+    this, changing the switch alters three panels with no visible cause:
+
+| view | `.2` | `.3` | `.4` |
+|---|---|---|---|
+| all | `all {n} applications` | `all applicants` | `ranked by applications` |
+| closed | `{n} originated loans` | `borrowers who closed` | `ranked by loans closed` |
+| denied | `{n} denied applications` | `applicants who were denied` | `ranked by applications denied` |
+
+17. `HMDABuyerProfile` (~`:16061`) moves under subhead 3 and receives `scope` / `year` / `view`.
+    `HMDALenders` goes under subhead 4.
+18. **Residential footer** after Active Lenders:
+    `19.1–19.4 describe {scope === 'tract' ? 'Census Tract ' + tractGeoid : 'Community Area ' + communityArea}, not this address. Source: FFIEC HMDA loan-level disclosure, 2023–2025. Rate column is each lender's average on closed first-lien loans; reported rates are historical, not a current quote.`
+    Note it names **only the selected scope** — the current string says "X or Y, as selected below",
+    which was written for two controls.
+
+### 19.5 — summary blocks move above the chart
+
+19. **Delete `.kyp-medrow` (`:16178–16191`) and the YoY row (`:16194–16223`).** Replace both with one
+    `<div className="kyp-blocks four">` **above** `#tt-chart`, one block per `TT_TYPES` entry:
+
+    - `.bv` — latest-year count
+    - `.bl` — an 8px colour swatch in `t.color`, then `{t.label} · {year} sales`
+    - `.bd` — `Median {median}` then `{▲/▼} {change text}`
+
+    All four are `.kyp-block ind`. **Not green/red** — the existing code comment says it outright:
+    *"neutral directional (volume change is not good/bad)."* More condo sales is not good news.
+
+    Keep `ttChange()` and `ttVal()` exactly as they are, including the small-base guard and the
+    null handling. A missing count still renders `—`, never `0`.
+20. `.ttfoot` gains the ZIP: `Describes ZIP {zipCode}, not this address. Counts are transaction
+    volume, not price. Median price is the most recent complete year only. Source: Cook County
+    Assessor parcel sales.`
+
+### 19.6 — comps
+
+21. In `ComparableSalesView.tsx`, **delete the `.cmp-note` disclaimer at `:330–336`** (the one above
+    the cards; keep the expanded-radius notice at `:320–327`, which is conditional and specific).
+    Add after the show-all button:
+    `Describes sales within {radiusMiles} miles, not this address. Source: Cook County Assessor sales records; same property class required for matching. Informational only — not a certified appraisal.`
+    in a `<div className="kyp-src">`.
+
+### Commercial KPI strip
+
+22. The four KPI tiles cover **both** programmes, so they must not sit under a heading that says 504.
+    Lift them out of `SBALoansView` (or render them before the 19.7 subhead) as
+    `<div className="kyp-cxtiles opens">` — the `opens` modifier is in the patch and gives the strip
+    the same top rule a subhead has, so it opens the commercial run without taking a number.
+
+---
+
+## 6. `client/src/components/SBALoansView.tsx`
+
+23. **Delete the `.kyp-loan-scope` box at `:130`.** Its substance moves to the 19.7 counter-text and
+    the commercial footer.
+24. **Delete both `.kyp-body` lines** — `:117` and `:185`. `FY2020–present` belongs in the footer,
+    where it also governs the lender bars; the programme description moves to `.ct`.
+25. The 7(a) subhead at `:179` keeps its own `KypSubhead`, but `subsection={5}` is hard-coded. Make
+    it **8**, or better, derive it — if a subhead above it is ever added or removed this silently
+    goes wrong.
+26. Chart titles become `504 lenders (CDCs) · ranked by loans closed` and
+    `7(a) lenders · ranked by loans closed`.
+    **No sort change is needed** — `topLenders()` in `server/sbaLoans.ts:201–203` already sorts by
+    `count` descending. This is a label, not a behaviour change.
+27. **Commercial footer**, replacing `.kyp-src` at `:233`:
+    `19.7–19.8 describe ZIP {zipCode}, not this address. Source: SBA FOIA 7(a) and 504 loan data, FY2020–present. The 504 file reports borrower, industry, amount and CDC lender — not the financed address, so 504 records are ZIP-level, not property matches. 7(a) records do carry a borrower street address. Lender bars rank by loans closed; the dollar total on each bar is the sum for that lender.`
+
+---
+
+## 7. CSS — `kyp-base-patch-26.css`
+
+Three rules, appended to the **end** of `client/src/kyp-base.css`. Parser-verified: 3 rules,
+3 selectors, **0 parse errors, 0 collisions with the 1,184 existing rules, 0 unresolved tokens,
+no amber.**
+
+```css
+.kyp-blocks.two { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0 }
+.kyp-block[aria-pressed="true"] { outline:2.5px solid var(--kyp-ink); outline-offset:2px }
+.kyp-cxtiles.opens { border-top:2px solid var(--kyp-ink); padding-top:18px; margin-top:26px }
+```
+
+**Do not put `kyp-` rules anywhere but `kyp-base.css`, and do not hoist its tokens to `:root`.**
+Class names are exact: block modifiers are `.ind` and `.grn`, **not** `.indigo` / `.green`. The
+token is `--kyp-green`; there is no `--kyp-good`.
+
+---
+
+## 8. Verify before reporting done
+
+- Exactly **one** scope toggle, **one** year toggle, **one** view switch in the residential block.
+- Exactly **one** Active Lenders table on the page.
+  `document.querySelectorAll('[data-testid^="row-hmda-lender-"]').length` returns the lender count
+  once, not twice.
+- Denial reasons appear **once**.
+- **Zero** `.kyp-scopenote`, **zero** `.chtitle`, **zero** `.kyp-loan-scope`, **zero**
+  `.kyp-medrow`, **zero** `.yoyhd` in this section.
+- Exactly **four** footers: three `.kyp-src` + one `.ttfoot`.
+- The active view block has a visible outline; clicking a different one moves it.
+- Switching to Denied changes 19.2, 19.3 and 19.4 together, and all three counter-texts update.
+- Switching scope to Census Tract updates the residential footer to name **only** the tract, and the
+  19.1 rank blocks update too.
+- The year toggle offers 2025 / 2024 / 2023, and the 19.1 rank blocks respond to it.
+- Chart inventory unchanged: **10 donuts** (loan type, occupancy, product type, property type, sex,
+  race, ethnicity, age, income, DTI), **2 bar blocks** (property value, denial reasons), **3 ranked
+  bar lists** (HMDA lenders, 504 CDCs, 7(a) lenders), **1 grouped bar chart** (trends), **5 comp
+  cards**. If any of those counts changes, something was converted that should not have been.
+- Subhead numbers are 1–8 and renumber if the accordion row is dragged.
+- Demographics still render: sex, race, ethnicity, age, income, DTI.
+
+---
+
+## 9. Corrections to the earlier Step 26 file
+
+Two claims in `REPLIT_STEP26_mortgage_dedup.md` were wrong:
+
+- **"Split SBA into two subheads."** It is already two. `SBALoansView.tsx:179` has its own
+  `KypSubhead`. The real problem was narrower: the KPI tiles cover both programmes but sat under the
+  504 heading. Fixed by §5 item 22.
+- **The commercial lender bars were said to need a sort change.** They do not —
+  `server/sbaLoans.ts:201–203` already sorts by count descending.
+
+---
+
+## 10. Not in this step
+
+- **Area Transaction Trends renders empty in production.** `buildSaleHistCache()` fails, the route
+  returns 503, and the panel shows *"Transaction data not available for this ZIP code."* The target
+  shows the populated state because that is what the existing markup produces once the data
+  arrives. The fix is **Step 24 Prompt 5** — server-side, separate commit. There is a second latent
+  bug behind it: `getNbhdsForZip` builds its key as `township_code + nbhd.padStart(3,'0')` while
+  `buildSaleHistCache` uses `nbhd` raw, so the chart would come back all-zero even after the fetch
+  is fixed.
+- **Recently Sold Comps states something false on a commercial parcel.** The characteristics source
+  `bcnq-qi2z` was archived May 2022 and is residential-only, and the join at
+  `server/comparableSales.ts:136` is a hard drop, so a total join failure and a genuinely empty area
+  produce the same message. **Step 24 Prompt 6.**
+- The dead scan hero: `scanBuilder.tsx:42/:120` reads `compsData?.sales`, but the API returns
+  `comparables`.
+- Dead print checkboxes `print-section-hmda-stats` and `print-section-sba-loans` — no such ids.
+
+None of those are duplication or layout, so none belong here.
+
+---
+
+## ⚠ Separate from this step, and overdue
+
+Three live API keys are committed in `.replit` lines 65–71 and present in four commits —
+`RENTCAST_API_KEY`, `GOOGLE_PLACES_API_KEY`, `APIFY_API_TOKEN`. `.gitignore` has a missing newline
+(`*.tar.gzserver/cache/`), so **neither pattern works.** Rotate all three, move them to Replit
+Secrets, `git rm --cached .replit`, and fix the newline.
