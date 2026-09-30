@@ -8,6 +8,7 @@ import { NewConstructionSection } from "@/components/report/NewConstructionSecti
 import { OwnershipTitleSection, deriveSaleHistory } from "@/components/report/OwnershipTitleSection";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { formatNewsDate } from "@/lib/newsDate";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { levelRating, closestSchool, ratingScore, ratingTier } from "@/lib/schoolsDisplay";
@@ -1057,7 +1058,7 @@ const safeUrl = (url?: string) => {
   if (url.startsWith('#')) return url;
   try { const u = new URL(url); return u.protocol === 'http:' || u.protocol === 'https:' ? url : undefined; } catch { return undefined; }
 };
-const newsFmtD = (d?: string) => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+const newsFmtD = formatNewsDate;
 const newsStateLabel: Record<string, string> = { consistent: 'consistent', appears_superseded: 'appears superseded', no_update: 'no update on file' };
 // record-check verdict dot: consistent = good · appears_superseded = att · no_update = ctx
 const newsVClass = (state: string) => state === 'consistent' ? 'good' : state === 'appears_superseded' ? 'att' : 'ctx';
@@ -2933,7 +2934,7 @@ export default function RunDetail() {
   const { data: bizLicenseHistoryData, isLoading: isLoadingBizLicenseHistory } = useBusinessLicenseHistory(run?.address);
   const { data: upcomingDevsData, isLoading: isLoadingUpcomingDevs } = useUpcomingDevelopments((facts as any)?.neighborhood ?? undefined, facts?.communityArea ?? undefined, facts?.lat, facts?.lon ?? undefined, upcomingRadiusMi);
   const { data: hmdaData, isLoading: isLoadingHmda } = useHmdaStats(facts?.tractGeoid, facts?.communityArea);
-  const { data: transactionTrendsData, isLoading: isLoadingTransactionTrends } = useTransactionTrends(facts?.zipCode);
+  const { data: transactionTrendsData, isLoading: isLoadingTransactionTrends, isError: isTransactionTrendsError, refetch: refetchTransactionTrends } = useTransactionTrends(facts?.zipCode);
   const { data: schoolsData, isLoading: isLoadingSchools, isError: isSchoolsError } = useSchoolsNearby(facts?.lat, facts?.lon);
   const { data: sbaLoansData, isLoading: isLoadingSBALoans, isError: isSBALoansError, refetch: refetchSBALoans } = useSBALoans(facts?.zipCode);
   const compPropertyClass = propertyTaxData?.propertyClass || pinLookupData?.characteristicsData?.propertyClass;
@@ -16086,6 +16087,11 @@ export default function RunDetail() {
                               <Skeleton className="h-16 w-full" />
                             </div>
                           </div>
+                        ) : isTransactionTrendsError && !transactionTrendsData ? (
+                          <div className="kyp-emptypanel" role="alert" data-testid="transaction-trends-error">
+                            Could not load transaction trends for ZIP {facts.zipCode}. The data request failed; this does not mean there were no sales.{" "}
+                            <button type="button" className="underline" onClick={() => refetchTransactionTrends()}>Try again</button>
+                          </div>
                         ) : transactionTrendsData?.years?.length > 0 ? (() => {
                           const td = transactionTrendsData;
                           const years = (td.years || []) as any[];
@@ -17151,7 +17157,7 @@ export default function RunDetail() {
                         // Generated layout — meta takeaway + KPIs + categorized columns with
                         // permit-deduped development cards (each project rendered once).
                         const t = nnTakeaway;
-                        const fmtD = (d: string) => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                        const fmtD = newsFmtD;
                         const statusCls = (stage: string) => stage === 'permitted' || stage === 'under_construction' || stage === 'complete' ? 'perm' : stage === 'approved' ? 'appr' : 'prop';
                         const goCorridor = (e: React.MouseEvent) => { e.preventDefault(); revealAnchor('print-section-corridor-news'); };
                         const CULTURE_SHOW = 4, DEV_SHOW = 5;

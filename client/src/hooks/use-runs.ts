@@ -3798,8 +3798,9 @@ export function useTransactionTrends(zip: string | undefined | null) {
       if (!res.ok) throw new Error('Failed to fetch transaction trends');
       return await res.json();
     },
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
+    staleTime: 15 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchInterval: (query) => query.state.status === 'error' ? 60_000 : false,
   });
 }
 
