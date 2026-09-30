@@ -4,14 +4,11 @@ import { type ScanSection } from "./CollapsibleSection";
 type SectionMeta = Pick<ScanSection, "id" | "anchorId" | "title" | "summary" | "info">;
 
 export const SECTION_ORDER = [
-  "overview", "historic", "countyRecord", "permits", "ownership", "zoning", "valuation", "debt", "market", "incentives", "transit", "newBusinessLicenses", "newConstruction",
+  "historic", "countyRecord", "permits", "ownership", "zoning", "valuation", "debt", "market", "incentives", "transit", "newBusinessLicenses", "newConstruction",
   "crime", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
 ] as const;
 
 export const SECTION_META: Record<string, SectionMeta> = {
-  overview: { id: "overview", anchorId: "print-section-property-info", title: "Property Overview",
-    summary: "Address, PIN, zoning, building profile and lot — the basic facts.",
-    info: ["Location map", "Facts: PIN, zoning, Opportunity-Zone flag", "Building profile: units, sqft, beds/baths, year", "Parcel / assessor record"] },
   historic: { id: "historic", anchorId: "print-section-historic-status", title: "Historic Status",
     summary: "Chicago Historic Resources Survey rating and designation signals.",
     info: ["CHRS survey rating", "Municipal designation signals", "Demolition-hold rule", "Credit eligibility requirements"] },

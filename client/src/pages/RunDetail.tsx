@@ -537,7 +537,6 @@ const PRINT_SECTIONS: PrintSection[] = [
   // Property Details
   { id: 'permits', label: 'Permits & Violations', defaultChecked: true, group: 'Permits & Violations' },
   { id: 'ownership', label: 'Ownership & Title', defaultChecked: true, group: 'Ownership & Title' },
-  { id: 'property-info', label: 'Property Details', defaultChecked: true, group: 'Property Details' },
   { id: 'pre-title-check', label: 'Pre-Title Check (Liens & Flags)', defaultChecked: true, level: 1, group: 'Property Details' },
   { id: 'mortgage-lending', label: 'Mortgage & Lending Market', defaultChecked: true, group: 'Mortgage & Lending' },
   { id: 'hmda-stats', label: 'Residential Mortgage Market (HMDA)', defaultChecked: true, level: 1, group: 'Mortgage & Lending' },
@@ -1265,7 +1264,7 @@ export default function RunDetail() {
   const ACC_PREVIOUS_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "businessLicenses", "ownership", "propertyTax", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
   const ACC_LAST_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "businessLicenses", "valuation", "listing", "crime", "transit", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
   const ACC_BEFORE_REORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "crime", "transit", "businessLicenses", "valuation", "listing", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
-  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
+  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
@@ -4177,7 +4176,6 @@ export default function RunDetail() {
         const jumpSections = [
           { label: 'Zoning & Allowed Uses', icon: Scale, action: () => { return 'print-section-zoning-details'; } },
           { label: 'Zoning History', icon: Gavel, action: () => { setAccHidden((m) => ({ ...m, zoningHistory: false })); setAccOpen((m) => ({ ...m, zoningHistory: true })); return 'section-zoningHistory'; } },
-          { label: 'Property Details', icon: Building2, action: () => { setSectionOpen('propertyDetails', true); return 'print-section-property-info'; } },
           { label: 'Active Listing Snapshot', icon: Newspaper, action: () => { setAccOpen((open) => ({ ...open, listing: true })); return 'print-section-listing-snapshot'; } },
           { label: 'Permits & Violations', icon: ClipboardCheck, action: () => 'section-permits' },
           { label: 'Historic Status', icon: Landmark, action: () => { setAccHidden((m) => ({ ...m, historic: false })); setAccOpen((m) => ({ ...m, historic: true })); return 'print-section-historic-status'; } },
@@ -9491,7 +9489,8 @@ export default function RunDetail() {
           </motion.div>
           </AccordionSection>
 
-          {/* Property Details Section - Collapsible containing Parcel Info and Building History */}
+          {/* Property Overview retired. Keep its legacy implementation dormant for possible restoration. */}
+          {false && (
           <AccordionSection {...accProps("overview")}>
           <motion.div
             id="print-section-property-info"
@@ -11371,6 +11370,7 @@ export default function RunDetail() {
             </Collapsible>
           </motion.div>
           </AccordionSection>
+          )}
 
           <AccordionSection {...accProps("propertyTax")}>
             <div className="kyp-tax" data-testid="section-property-tax-body">

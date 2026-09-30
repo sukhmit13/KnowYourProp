@@ -222,7 +222,7 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
     verdict: /high/i.test(ctx.nnTakeaway?.kpis?.momentumLabel || "") ? { tone: "good", label: "High momentum" } : undefined,
   };
 
-  // (overview, valuation, proximity, development intentionally unwired — no concise
+  // (valuation, proximity, development intentionally unwired — no concise
   //  generated one-liner in scope at the mount point, so they show their muted summary.)
 
   return SECTION_ORDER.map((id) => ({ ...SECTION_META[id], ...(dyn[id] || {}) }));
