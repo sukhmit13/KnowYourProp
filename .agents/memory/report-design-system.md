@@ -15,6 +15,8 @@ Restyles must reuse the shared primitives already in the global stylesheet (sect
 
 **How to apply (after any design-subagent pass):** subagents have repeatedly broken the build (mismatched JSX tags, lucide imports shadowing UI components, unimported icons). Always: run tsc and compare against the pre-existing error baseline (do not expect zero); check the workflow actually reloaded; visually verify each touched section with a headless-browser screenshot (expand all sections first; some headings need text locators, not h3).
 
+**Mock HTML beats thumbnail dimensions:** attached small PNG previews may be scaled-down images of much wider HTML mocks; never infer live CSS pixel sizes from the thumbnail. **Why:** copying thumbnail-scale typography made a report section unreadably tiny despite resembling the preview at first glance. **How to apply:** compare the mock's original HTML/CSS dimensions and inspect a representative rendered layout at desktop and mobile widths before claiming parity.
+
 **Orange summary tiles:** Use Syracuse's dark-orange variant for tiles with white numbers and small white labels, rather than the brighter standard orange. **Why:** the standard Syracuse orange offers only about 3:1 contrast with white, insufficient for small tile labels; the dark-orange variant reaches about 4.5:1 and keeps all summary-tile text consistent. **How to apply:** check computed foreground and background on any new orange stat tile, including its caption, instead of assuming inherited white text survives a variant override.
 
 ## Specificity trap: .subsection-text

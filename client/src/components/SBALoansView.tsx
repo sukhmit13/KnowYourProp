@@ -113,8 +113,8 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
   const by504Amount = [...loans504].sort((a: any, b: any) => (b.amount ?? 0) - (a.amount ?? 0));
   const by7aAmount = [...loans7a].sort((a: any, b: any) => (b.amount ?? 0) - (a.amount ?? 0));
   return (
-    <div className="pt-2" data-testid="sba-loans-view">
-      <div className="kyp-body mb-2">SBA-guaranteed business &amp; commercial-real-estate loans in ZIP {zipCode} · FY2020–present</div>
+    <div className="kyp-sba-view pt-2" data-testid="sba-loans-view">
+      <div className="kyp-body mb-2">SBA-guaranteed business and commercial-real-estate lending · FY2020–present</div>
 
       {/* KPI tiles */}
       <div className="kyp-cxtiles">
@@ -127,11 +127,7 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
       {/* SBA 504 */}
       {loans504.length > 0 && (
         <>
-          <div id="sba504" className="flex items-center gap-2 my-2">
-            <span className="ct">CRE Financing</span>
-            <span className="kyp-pill ctx">{n504} loans · {amt504}</span>
-          </div>
-          <div className="kyp-loan-scope"><span>504 loan scope</span><b>504 loans fund owner-occupied commercial real estate. Read these rows as ZIP-level, not address-linked: the SBA FOIA 504 dataset discloses borrower entity, industry, loan amount, and CDC lender — not the financed property address. 7(a) records do carry a borrower street address.</b></div>
+          <div id="sba504" className="kyp-loan-scope"><span>504 loan scope</span><b>504 loans fund owner-occupied commercial real estate. This FOIA dataset reports borrower, industry, amount, and CDC lender—not the financed address; these are ZIP-level records, not property matches.</b></div>
 
           <div>
             {by504Amount.map((loan: any, i: number) => {
@@ -180,17 +176,12 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
       )}
 
       {/* SBA 7(a) */}
-      <KypSubhead subsection={5}>
+      <KypSubhead subsection={5} id="sba7a">
         <span className="lbl">Commercial Lending — SBA 7(a)</span>
         <span className="ct">small business</span>
       </KypSubhead>
-      <p className="kyp-scopenote">Figures below describe <b>ZIP {zipCode}</b>, not this address</p>
       {loans7a.length > 0 && (
         <>
-          <div id="sba7a" className="flex items-center gap-2 my-2">
-            <span className="ct">Business Financing</span>
-            <span className="kyp-pill ctx">{n7a} loans · {amt7a}</span>
-          </div>
           <div className="kyp-body mt-2">Supports working capital, equipment, and expansion for small businesses. 7(a) records carry a borrower street address and jobs supported.</div>
 
           <div>

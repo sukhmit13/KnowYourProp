@@ -14144,15 +14144,15 @@ export default function RunDetail() {
                                 {/* ---- Day Care ---- */}
                                 <div className="subwrap" id="daycare">
                                   <KypSubhead subsection={schoolSubsections.childcare}><span className="lbl">Childcare</span><span className="ct">licensed early-childhood supply</span></KypSubhead>
-                                  <div className="toggle">
-                                    <div className={`tg${childcareViewMode === 'zip' ? ' on' : ''}`} data-testid="tab-childcare-zip" onClick={() => setChildcareViewMode('zip')}>
+                                  <div className="toggle" role="group" aria-label="Childcare area">
+                                    <button type="button" aria-pressed={childcareViewMode === 'zip'} className={`tg${childcareViewMode === 'zip' ? ' on' : ''}`} data-testid="tab-childcare-zip" onClick={() => setChildcareViewMode('zip')}>
                                       <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
                                       By ZIP Code
-                                    </div>
-                                    <div className={`tg${childcareViewMode === 'community' ? ' on' : ''}`} data-testid="tab-childcare-community" onClick={() => setChildcareViewMode('community')}>
+                                    </button>
+                                    <button type="button" aria-pressed={childcareViewMode === 'community'} className={`tg${childcareViewMode === 'community' ? ' on' : ''}`} data-testid="tab-childcare-community" onClick={() => setChildcareViewMode('community')}>
                                       <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 3-6 2v16l6-2 6 2 6-2V3l-6 2-6-2z"/><path d="M9 3v16"/><path d="M15 5v16"/></svg>
                                       By Neighborhood
-                                    </div>
+                                    </button>
                                   </div>
                                   <div className="scopeline">
                                     ZIP <b>{facts?.zipCode || 'N/A'}</b> · Neighborhood <b>{facts?.communityArea || 'N/A'}</b>{facts?.ward ? <> · Ward <b>{facts.ward}</b></> : null} — boundaries differ, so metrics may vary between views.
@@ -16063,7 +16063,7 @@ export default function RunDetail() {
                 {(facts?.tractGeoid || facts?.communityArea) && (
                   <div id="print-section-hmda-stats">
                     <KypSubhead subsection={1} data-testid="trigger-hmda-stats-subsection"><span className="lbl">Residential Mortgage Market</span><span className="ct">HMDA loan-level records</span></KypSubhead>
-                        <div className="seccard">
+                        <div className="kyp-market-panel">
                           <p className="kyp-scopenote">Figures below describe <b>{facts?.tractGeoid && facts?.communityArea ? `Census Tract ${facts.tractGeoid} or Community Area ${facts.communityArea}, as selected below` : facts?.tractGeoid ? `Census Tract ${facts.tractGeoid}` : `Community Area ${facts?.communityArea}`}</b>, not this address</p>
                           <HMDAFinancingStats
                             hmdaData={hmdaData}
@@ -16071,9 +16071,8 @@ export default function RunDetail() {
                             tractGeoid={facts?.tractGeoid}
                             isLoading={isLoadingHmda}
                           />
-                          <div className="kyp-src">Source: FFIEC HMDA loan-level disclosure, 2023–2025. Tract and community-area figures describe area lending, not this address; reported rates are historical, not a current quote.</div>
                           {hmdaData && (
-                            <div className="pt-3">
+                            <div className="kyp-market-buyer">
                               <HMDABuyerProfile
                                 hmdaData={hmdaData}
                                 label={facts?.communityArea || 'This Area'}
@@ -16082,6 +16081,7 @@ export default function RunDetail() {
                               />
                             </div>
                           )}
+                          <div className="kyp-src">Source: FFIEC HMDA loan-level disclosure, 2023–2025. Tract and community-area figures describe area lending, not this address; reported rates are historical, not a current quote.</div>
                         </div>
                   </div>
                 )}
@@ -16089,7 +16089,7 @@ export default function RunDetail() {
                 {facts?.zipCode && (
                   <div id="print-section-transaction-trends">
                   <KypSubhead subsection={2} data-testid="trigger-transaction-trends-subsection"><span className="lbl">Area Transaction Trends</span><span className="ct">Cook County transfer records</span></KypSubhead>
-                      <div className="px-4 pt-2 pb-4">
+                      <div className="kyp-market-panel">
                         <p className="kyp-scopenote">Figures below describe <b>ZIP {facts.zipCode}</b>, not this address</p>
                         {isLoadingTransactionTrends ? (
                           <div className="space-y-3">
@@ -16252,7 +16252,7 @@ export default function RunDetail() {
                 {(compsData || isLoadingComps) && compPropertyClass && (
                   <div id="print-section-comparable-sales">
                     <KypSubhead subsection={3} data-testid="trigger-recently-sold-comps"><span className="lbl">Recently Sold Comps</span><span className="ct">class-matched sales</span></KypSubhead>
-                        <div className="pt-2 pb-3 pl-4">
+                        <div className="kyp-market-panel">
                           <p className="kyp-scopenote">Figures below describe sales within <b>{compsData?.searchParams?.radiusMiles ?? 0.75} miles</b>, not this address</p>
                           <ComparableSalesView
                             compsData={compsData}
@@ -16266,7 +16266,7 @@ export default function RunDetail() {
                 {facts?.zipCode && (
                   <div id="print-section-sba-loans">
                   <KypSubhead subsection={4} data-testid="trigger-sba-loans-subsection"><span className="lbl">Commercial Lending — SBA 504</span><span className="ct">owner-occupied CRE</span></KypSubhead>
-                      <div className="seccard">
+                      <div className="kyp-market-panel">
                         <p className="kyp-scopenote">Figures below describe <b>ZIP {facts.zipCode}</b>, not this address</p>
                         <SBALoansView
                           data={sbaLoansData}

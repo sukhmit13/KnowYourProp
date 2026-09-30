@@ -1406,3 +1406,165 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 /* --- 11. Lender labels and button link reset ---------------- */
 .kyp-hbar.wide .hl { width: 230px; }
 button.kyp-morelink { background: none; border: 0; padding: 0; }
+
+/* ============================================================
+   Mortgage & lending report density
+   Scoped to the three Step 24 views; retain the data and controls,
+   but bring card rhythm and labels into the compact report system.
+   ============================================================ */
+#section-market .kyp-accbody { padding:6px 20px 20px; }
+#section-market .kyp-market-panel { padding:6px 0 15px; }
+#section-market .kyp-market-buyer {
+  margin-top:14px; padding-top:14px; border-top:1px solid var(--kyp-line);
+}
+#section-market .kyp-market-panel > .kyp-src { margin-top:12px; }
+@media (max-width:720px) {
+  #section-market .kyp-accbody { padding:6px 14px 20px; }
+}
+.kyp-hmda-financing,
+.kyp-hmda-panel,
+.kyp-hmda-buyer { display:flex; flex-direction:column; gap:10px; }
+.kyp-hmda-hero .kyp-blocks.hero.two {
+  grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);
+  gap:8px; margin:0 0 8px;
+}
+.kyp-hmda-hero .kyp-blocks.hero.two:last-child { margin-bottom:0; }
+.kyp-hmda-hero .kyp-block { min-width:0; min-height:80px; padding:12px 14px; border-radius:9px; }
+.kyp-hmda-hero .kyp-block .bv { font-size:35px; line-height:1.05; }
+.kyp-hmda-hero .kyp-block .bl { font-size:9px; margin-top:5px; }
+.kyp-hmda-financing > .flex.items-center.justify-between,
+.kyp-hmda-buyer > .flex.items-center.justify-between {
+  margin:0 0 2px; gap:8px;
+}
+.kyp-hmda-panel > .kyp-blocks,
+.kyp-hmda-buyer > .kyp-blocks { gap:8px; margin:0 0 2px; }
+.kyp-hmda-panel .kyp-block,
+.kyp-hmda-buyer .kyp-block {
+  border-radius:9px; padding:11px 13px; min-height:66px;
+}
+.kyp-hmda-panel .kyp-block .bv,
+.kyp-hmda-buyer .kyp-block .bv { font-size:30px; }
+.kyp-hmda-panel .kyp-block .bl,
+.kyp-hmda-buyer .kyp-block .bl { font-size:8.5px; margin-top:5px; }
+.kyp-hmda-panel .kyp-rankcard,
+.kyp-hmda-financing .kyp-rankcard { margin:2px 0; padding:12px 14px; }
+.kyp-hmda-panel .kyp-ratecmp,
+.kyp-hmda-financing .kyp-ratecmp { margin:2px 0; padding:13px 15px; }
+.kyp-hmda-panel .kyp-mix,
+.kyp-hmda-buyer .kyp-mix { gap:8px; margin:2px 0; }
+.kyp-hmda-panel .kyp-mixcard,
+.kyp-hmda-buyer .kyp-mixcard { border-radius:9px; padding:10px 12px; }
+.kyp-hmda-panel .kyp-mixcard .mh,
+.kyp-hmda-buyer .kyp-mixcard .mh { margin-bottom:6px; font-size:9px; }
+.kyp-hmda-panel .kyp-donut,
+.kyp-hmda-buyer .kyp-donut { gap:8px; }
+.kyp-hmda-panel .kyp-mixrow,
+.kyp-hmda-buyer .kyp-mixrow { gap:6px; padding:2px 0; font-size:11px; }
+.kyp-hmda-panel .kyp-mixrow .pc,
+.kyp-hmda-buyer .kyp-mixrow .pc { font-size:10px; }
+.kyp-hmda-panel .kyp-hbar,
+.kyp-hmda-buyer .kyp-hbar { padding:5px 0; gap:9px; }
+.kyp-hmda-panel .kyp-hbar .htrack,
+.kyp-hmda-buyer .kyp-hbar .htrack { height:22px; }
+.kyp-hmda-panel .kyp-hbar.wide .hl,
+.kyp-hmda-buyer .kyp-hbar.wide .hl { width:190px; }
+.kyp-hmda-panel .kyp-hbar .hl,
+.kyp-hmda-buyer .kyp-hbar .hl { font-size:12px; }
+.kyp-hmda-panel .kyp-src,
+.kyp-hmda-buyer .kyp-src { margin-top:7px; padding-top:7px; }
+.kyp-hmda-panel [aria-pressed="true"],
+.kyp-hmda-buyer [aria-pressed="true"] {
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.72);
+}
+
+.kyp-sba-view { color:var(--kyp-ink); }
+.kyp-sba-view > .kyp-body { margin-bottom:8px; font-size:12px; line-height:1.4; }
+.kyp-sba-view .kyp-cxtiles { gap:8px; margin:8px 0 12px; }
+.kyp-sba-view .kyp-cxtile { border-radius:9px; padding:11px 12px; }
+.kyp-sba-view .kyp-cxtile .l { margin-bottom:5px; font-size:8px; }
+.kyp-sba-view .kyp-cxtile .n { font-size:24px; }
+.kyp-sba-view .kyp-cxtile .s { font-size:9.5px; margin-top:3px; }
+.kyp-sba-view .kyp-loan-scope {
+  gap:8px; margin:8px 0 6px; padding:9px 11px;
+  background:var(--kyp-wash); border:1px solid var(--kyp-line);
+  border-left:3px solid var(--kyp-slate); border-radius:7px; line-height:1.45;
+}
+.kyp-sba-view .kyp-loan-scope span { color:var(--kyp-slate); }
+.kyp-sba-view .kyp-loanrow { padding:8px 0; gap:10px; }
+.kyp-sba-view .kyp-loanrow .lnm { font-size:12.5px; }
+.kyp-sba-view .kyp-loanrow .lmeta { font-size:10.5px; }
+.kyp-sba-view .kyp-charttitle { margin:14px 0 6px; }
+.kyp-sba-view .kyp-hbar { padding:6px 0; }
+.kyp-sba-view .kyp-emptypanel { padding:14px 12px; margin:8px 0; }
+
+.kyp-comps-view .cmp-summary {
+  background:var(--kyp-card); border-color:var(--kyp-line);
+  border-radius:10px; padding:13px 15px;
+}
+.kyp-comps-view .cmp-stop { margin-bottom:10px; }
+.kyp-comps-view .cmp-conf { padding:4px 9px; font-size:10px; }
+.kyp-comps-view .cmp-pill {
+  color:var(--kyp-ink2); background:var(--kyp-wash);
+  border-color:var(--kyp-line); padding:4px 9px; font-size:10px;
+}
+.kyp-comps-view .cmp-stats { gap:12px; }
+.kyp-comps-view .cmp-st-l { color:var(--kyp-ink2); font-size:10.5px; }
+.kyp-comps-view .cmp-st-n {
+  color:var(--kyp-ink); font-family:var(--kyp-disp); font-size:26px;
+}
+.kyp-comps-view .cmp-st-s { color:var(--kyp-muted); line-height:1.4; }
+.kyp-comps-view .cmp-range {
+  margin-top:10px; padding-top:9px; color:var(--kyp-muted);
+  border-color:var(--kyp-line); font-size:10.5px; line-height:1.45;
+}
+.kyp-comps-view .cmp-note {
+  gap:8px; padding:9px 11px; border-color:var(--kyp-line);
+  background:var(--kyp-wash); color:var(--kyp-ink2); font-size:11px;
+}
+.kyp-comps-view .cmp-note svg { color:var(--kyp-indigo); }
+.kyp-comps-view .cmp-card {
+  background:var(--kyp-card); border-color:var(--kyp-line);
+  border-radius:9px; padding:11px 13px;
+}
+.kyp-comps-view .cmp-card:focus-visible {
+  outline:2px solid var(--kyp-indigo); outline-offset:2px;
+}
+.kyp-comps-view .cmp-crow { gap:10px; }
+.kyp-comps-view .cmp-rk { color:var(--kyp-indigo); font-family:var(--kyp-mono); }
+.kyp-comps-view .cmp-addr { color:var(--kyp-ink); font-size:13px; }
+.kyp-comps-view .cmp-addr a { color:inherit; text-decoration-color:var(--kyp-line); }
+.kyp-comps-view .cmp-meta { gap:10px; margin-top:3px; font-size:10.5px; }
+.kyp-comps-view .cmp-meta svg,
+.kyp-comps-view .cmp-specs svg,
+.kyp-comps-view .cmp-chev { color:var(--kyp-indigo); }
+.kyp-comps-view .cmp-price { color:var(--kyp-ink); font-family:var(--kyp-disp); font-size:21px; }
+.kyp-comps-view .cmp-ppsf { font-size:10px; }
+.kyp-comps-view .cmp-cbot {
+  margin:8px 0 0 36px; padding-top:8px; border-color:var(--kyp-line);
+}
+.kyp-comps-view .cmp-specs { gap:11px; font-size:10.5px; }
+.kyp-comps-view .cmp-match { gap:6px; }
+.kyp-comps-view .cmp-detail {
+  margin:9px 0 0 36px; padding-top:9px; color:var(--kyp-ink2);
+  border-color:var(--kyp-line); font-size:11px;
+}
+
+@media (max-width:720px) {
+  .kyp-hmda-panel .kyp-hbar.wide .hl,
+  .kyp-hmda-buyer .kyp-hbar.wide .hl { width:min(42vw,170px); }
+  .kyp-sba-view .kyp-cxtiles { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:640px) {
+  .kyp-comps-view .cmp-summary { padding:11px 12px; }
+  .kyp-comps-view .cmp-crow { align-items:flex-start; gap:7px; }
+  .kyp-comps-view .cmp-rk { width:22px; font-size:11px; }
+  .kyp-comps-view .cmp-addr { font-size:12px; }
+  .kyp-comps-view .cmp-meta { gap:5px 8px; }
+  .kyp-comps-view .cmp-price { font-size:18px; }
+  .kyp-comps-view .cmp-cbot,
+  .kyp-comps-view .cmp-detail { margin-left:29px; }
+  .kyp-comps-view .cmp-specs { gap:8px; }
+}
+@media print {
+  .kyp-comps-view .cmp-card { break-inside:avoid; }
+}

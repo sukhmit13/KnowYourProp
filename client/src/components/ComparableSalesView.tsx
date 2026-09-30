@@ -103,10 +103,19 @@ function CompCard({ comp, rank }: { comp: Comparable; rank: number }) {
     <div
       className="cmp-card"
       data-testid={`card-comp-${rank}`}
+      role="group"
+      tabIndex={0}
+      aria-expanded={expanded}
+      aria-label={`Comparable sale ${rank}: ${comp.address || `PIN ${comp.pin}`}. Press Enter or Space to ${expanded ? 'hide' : 'show'} details.`}
       onClick={() => {
         // Don't toggle when the click ends a text selection
         if (window.getSelection()?.toString()) return;
         setExpanded(!expanded);
+      }}
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) return;
+        event.preventDefault();
+        setExpanded((open) => !open);
       }}
     >
       <div className="cmp-crow">
@@ -233,7 +242,7 @@ export function ComparableSalesView({ compsData, isLoading, subjectSqft }: Props
   const suppressIndicatedValue = marketAnalysis.confidence === 'Low' || searchParams.radiusMiles > 1.5;
 
   return (
-    <div className="space-y-3 pt-1">
+    <div className="kyp-comps-view space-y-3 pt-1">
       {/* Market Analysis Summary */}
       <div className="cmp-summary">
         <div className="cmp-stop">

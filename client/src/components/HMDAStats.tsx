@@ -240,52 +240,14 @@ function LenderTable({ lenders, view = 'all' }: { lenders: HmdaLenderItem[]; vie
   );
 }
 
-function StatsPanel({ stats, label, view = 'all', onViewChange }: { stats: HmdaStats; label: string; view?: BuyerView; onViewChange?: (v: BuyerView) => void }) {
-  const originatedAction = stats.byAction.find(a => a.key === '1');
-  const deniedAction = stats.byAction.find(a => a.key === '3');
+function StatsPanel({ stats, label, view = 'all' }: { stats: HmdaStats; label: string; view?: BuyerView }) {
   const fha = stats.byLoanType.find(a => a.key === '2');
   const conventional = stats.byLoanType.find(a => a.key === '1');
   const va = stats.byLoanType.find(a => a.key === '3');
   const principalRes = stats.byOccupancy.find(a => a.key === '1');
   const investment = stats.byOccupancy.find(a => a.key === '3');
-  const closedCount = originatedAction?.count ?? 0;
-  const closedPct = originatedAction?.pct ?? 0;
-  const deniedCount = deniedAction?.count ?? 0;
-  const deniedPct = deniedAction?.pct ?? 0;
-
   return (
-    <div className="space-y-5">
-      {/* Summary stat boxes — clickable view switchers */}
-      <div className="kyp-blocks">
-        <button
-          type="button"
-          onClick={() => onViewChange?.('all')}
-          className="kyp-block ind text-left border-0 cursor-pointer"
-          data-testid="stat-hmda-total"
-        >
-          <div className="bv">{stats.total.toLocaleString()}</div>
-          <div className="bl">All Applications</div>
-        </button>
-        <button
-          type="button"
-          onClick={() => onViewChange?.('closed')}
-          className="kyp-block grn text-left border-0 cursor-pointer"
-          data-testid="stat-hmda-originated"
-        >
-          <div className="bv">{closedCount.toLocaleString()}</div>
-          <div className="bl">Originated · {closedPct}%</div>
-        </button>
-        <button
-          type="button"
-          onClick={() => onViewChange?.('denied')}
-          className="kyp-block slate text-left border-0 cursor-pointer"
-          data-testid="stat-hmda-denied"
-        >
-          <div className="bv">{deniedCount.toLocaleString()}</div>
-          <div className="bl">Denied · {deniedPct}%</div>
-        </button>
-      </div>
-
+    <div className="kyp-hmda-panel">
       {/* ALL view */}
       {view === 'all' && (
         <>
@@ -508,7 +470,7 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
   };
 
   return (
-    <div className="space-y-5">
+    <div className="kyp-hmda-buyer">
       {/* Year + scope controls */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         {hasCommunity && hasTract ? (
@@ -516,6 +478,7 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
             <button
               onClick={() => setScope('community')}
               className={scope === 'community' ? 'on' : ''}
+              aria-pressed={scope === 'community'}
               data-testid="button-hmda-buyer-scope-community"
             >
               {communityArea || 'Community Area'}
@@ -523,6 +486,7 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
             <button
               onClick={() => setScope('tract')}
               className={scope === 'tract' ? 'on' : ''}
+              aria-pressed={scope === 'tract'}
               data-testid="button-hmda-buyer-scope-tract"
             >
               Census Tract {tractGeoid?.slice(-6)}
@@ -538,6 +502,7 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
                 key={y}
                 onClick={() => setYear(y)}
                 className={activeYear === y ? 'on' : ''}
+                aria-pressed={activeYear === y}
                 data-testid={`button-hmda-buyer-year-${y}`}
               >
                 {y}
@@ -553,6 +518,7 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
           type="button"
           onClick={() => setView('all')}
           className="kyp-block ind text-left border-0 cursor-pointer"
+          aria-pressed={view === 'all'}
           data-testid="button-hmda-buyer-view-all"
         >
           <div className="bv">{stats.total.toLocaleString()}</div>
@@ -562,6 +528,7 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
           type="button"
           onClick={() => setView('closed')}
           className="kyp-block grn text-left border-0 cursor-pointer"
+          aria-pressed={view === 'closed'}
           data-testid="button-hmda-buyer-view-closed"
         >
           <div className="bv">{closedCount.toLocaleString()}</div>
@@ -571,6 +538,7 @@ export function HMDABuyerProfile({ hmdaData, label, communityArea, tractGeoid }:
           type="button"
           onClick={() => setView('denied')}
           className="kyp-block slate text-left border-0 cursor-pointer"
+          aria-pressed={view === 'denied'}
           data-testid="button-hmda-buyer-view-denied"
         >
           <div className="bv">{deniedCount.toLocaleString()}</div>
@@ -645,8 +613,15 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
     ? (communityStats ? 'community' : 'tract')
     : (tractStats ? 'tract' : 'community');
   const activeStats = activeScope === 'community' ? communityStats : tractStats;
+  const closed = activeStats?.byAction.find(a => a.key === '1');
+  const denied = activeStats?.byAction.find(a => a.key === '3');
+  const rateSummary = getHmdaYearRateForScope(hmdaData?.rates, activeScope, activeYear);
+  const validRate = typeof rateSummary?.avgFirstLienRate === 'number'
+    && Number.isFinite(rateSummary.avgFirstLienRate)
+    && rateSummary.avgFirstLienRate > 0
+    && rateSummary.firstLienRateCount > 0;
   return (
-        <div className="pl-6 pb-2 space-y-4">
+        <div className="kyp-hmda-financing pb-2">
           {/* Scope + year controls */}
           <div className="flex items-center justify-between flex-wrap gap-2">
             {hasCommunity && hasTract && (
@@ -654,6 +629,7 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
                 <button
                   onClick={() => setScope('community')}
                   className={scope === 'community' ? 'on' : ''}
+                  aria-pressed={scope === 'community'}
                   data-testid="button-hmda-scope-community"
                 >
                   {communityArea || 'Community Area'}
@@ -661,6 +637,7 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
                 <button
                   onClick={() => setScope('tract')}
                   className={scope === 'tract' ? 'on' : ''}
+                  aria-pressed={scope === 'tract'}
                   data-testid="button-hmda-scope-tract"
                 >
                   Census Tract {tractGeoid?.slice(-6)}
@@ -674,6 +651,7 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
                     key={y}
                     onClick={() => setYear(y)}
                     className={activeYear === y ? 'on' : ''}
+                    aria-pressed={activeYear === y}
                     data-testid={`button-hmda-year-${y}`}
                   >
                     {y}
@@ -682,6 +660,31 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
               </div>
             )}
           </div>
+
+          {activeStats && (
+            <div className="kyp-hmda-hero">
+              <div className="kyp-blocks hero two">
+                <button type="button" onClick={() => setView('all')} className="kyp-block ind text-left border-0 cursor-pointer" aria-pressed={view === 'all'} data-testid="stat-hmda-total">
+                  <div className="bv">{activeStats.total.toLocaleString()}</div>
+                  <div className="bl">All applications</div>
+                </button>
+                <button type="button" onClick={() => setView('closed')} className="kyp-block grn text-left border-0 cursor-pointer" aria-pressed={view === 'closed'} data-testid="stat-hmda-originated">
+                  <div className="bv">{(closed?.count ?? 0).toLocaleString()}</div>
+                  <div className="bl">Originated · {closed?.pct ?? 0}%</div>
+                </button>
+              </div>
+              <div className="kyp-blocks hero two">
+                <button type="button" onClick={() => setView('denied')} className="kyp-block slate text-left border-0 cursor-pointer" aria-pressed={view === 'denied'} data-testid="stat-hmda-denied">
+                  <div className="bv">{(denied?.count ?? 0).toLocaleString()}</div>
+                  <div className="bl">Denied · {denied?.pct ?? 0}%</div>
+                </button>
+                <div className="kyp-block dark" data-testid="hmda-rate-summary">
+                  <div className="bv">{validRate ? `${rateSummary!.avgFirstLienRate!.toFixed(2)}%` : '—'}</div>
+                  <div className="bl">Avg rate, closed first-lien · {activeYear}</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Community Rankings */}
           {(() => {
@@ -828,7 +831,7 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
             );
           })()}
 
-          {activeStats && <StatsPanel stats={activeStats} label={scope} view={view} onViewChange={setView} />}
+          {activeStats && <StatsPanel stats={activeStats} label={scope} view={view} />}
         </div>
   );
 }
