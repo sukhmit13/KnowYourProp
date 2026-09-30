@@ -1481,8 +1481,6 @@ export default function RunDetail() {
   const crimeTier = (p: number) => p >= 50 ? 'good' : p >= 30 ? 'att' : 'bad';
   const tierFill = (t: string) => t === 'good' ? 'var(--kyp-green)' : t === 'att' ? 'var(--kyp-orange)' : 'var(--kyp-bad)';
   const tierBlock = (t: string) => t === 'good' ? 'grn' : t === 'att' ? 'orange' : 'red';
-  const isProximitySectionOpen = sectionStates.proximity;
-  const setIsProximitySectionOpen = useCallback((v: boolean) => setSectionOpen('proximity', v), [setSectionOpen]);
   const isTodSectionOpen = sectionStates.tod;
   const setIsTodSectionOpen = useCallback((v: boolean) => setSectionOpen('tod', v), [setSectionOpen]);
   const isSbifSectionOpen = sectionStates.sbif;
@@ -13753,48 +13751,18 @@ export default function RunDetail() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.187 }}
           >
-                  <div className="space-y-6">
-
-                    {/* Proximity Information */}
-                    <Collapsible open={isProximitySectionOpen} onOpenChange={setIsProximitySectionOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                          <h3 className="chead chead-icon">
-                            <MapPin className="w-4 h-4" />
-                            Proximity Information
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            {!isProximitySectionOpen && !isLoadingProximity && proximityData && (
-                              <div className="flex flex-wrap gap-1.5">
-                                {proximityData.park && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {proximityData.park.name} ({(proximityData.park.distanceFt / 5280).toFixed(2)} mi)
-                                  </Badge>
-                                )}
-                                {proximityData.hospital && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {proximityData.hospital.name}
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isProximitySectionOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                      <div className="px-4">
+                  <div className="step23-proximity">
                       {isLoadingProximity && pinLookupData?.pin ? (
                         <p className="text-sm text-muted-foreground">Loading...</p>
                       ) : proximityData ? (
                         <div>
                           <div className="dir-facts pgrid">
-                            <div className="dir-fact">
+                            <div className="dir-fact" style={{ order: 12 }}>
                               <div className="dir-fact-top"><span className="dir-fact-label">Data year</span></div>
                               <p className="dir-fact-value">{proximityData.dataYear}</p>
                             </div>
                             {proximityData.park && (
-                              <div className="dir-fact">
+                              <div className="dir-fact" style={{ order: 1 }}>
                                 <div className="dir-fact-top">
                                   <span className="dir-fact-icon"><TreePine className="w-3 h-3" /></span>
                                   <span className="dir-fact-label">Nearest Park</span>
@@ -13805,7 +13773,7 @@ export default function RunDetail() {
                             )}
 
                             {proximityData.university && (
-                              <div className="dir-fact">
+                              <div className="dir-fact" style={{ order: 3 }}>
                                 <div className="dir-fact-top">
                                   <span className="dir-fact-icon"><Award className="w-3 h-3" /></span>
                                   <span className="dir-fact-label">Nearest University</span>
@@ -13816,7 +13784,7 @@ export default function RunDetail() {
                             )}
 
                             {proximityData.hospital && (
-                              <div className="dir-fact">
+                              <div className="dir-fact" style={{ order: 2 }}>
                                 <div className="dir-fact-top">
                                   <span className="dir-fact-icon"><Plus className="w-3 h-3" /></span>
                                   <span className="dir-fact-label">Nearest Hospital</span>
@@ -13827,7 +13795,7 @@ export default function RunDetail() {
                             )}
 
                             {proximityData.stadium && (
-                              <div className="dir-fact">
+                              <div className="dir-fact" style={{ order: 4 }}>
                                 <div className="dir-fact-top">
                                   <span className="dir-fact-icon"><Building className="w-3 h-3" /></span>
                                   <span className="dir-fact-label">Nearest Stadium</span>
@@ -13838,7 +13806,7 @@ export default function RunDetail() {
                             )}
 
                             {proximityData.highway && (
-                              <div className="dir-fact">
+                              <div className="dir-fact" style={{ order: 5 }}>
                                 <div className="dir-fact-top">
                                   <span className="dir-fact-icon"><Ruler className="w-3 h-3" /></span>
                                   <span className="dir-fact-label">Nearest Highway</span>
@@ -13849,7 +13817,7 @@ export default function RunDetail() {
                             )}
 
                             {proximityData.foreclosures && (
-                              <div className="dir-fact">
+                              <div className="dir-fact" style={{ order: 10 }}>
                                 <div className="dir-fact-top">
                                   <span className="dir-fact-icon"><AlertTriangle className="w-3 h-3" /></span>
                                   <span className="dir-fact-label">Foreclosures</span>
@@ -13859,7 +13827,7 @@ export default function RunDetail() {
                               </div>
                             )}
 
-                            <div className="dir-fact" data-testid="fact-vacant-abandoned">
+                            <div className="dir-fact" style={{ order: 11 }} data-testid="fact-vacant-abandoned">
                               <div className="dir-fact-top">
                                 <span className="dir-fact-icon"><Building2 className="w-3 h-3" /></span>
                                 <span className="dir-fact-label">Vacant &amp; abandoned</span>
@@ -13872,7 +13840,7 @@ export default function RunDetail() {
                               </p>
                             </div>
                             {vacantBuildingsData?.totalViolations > 0 && (
-                              <div style={{ gridColumn: '1 / -1' }}>
+                              <div style={{ gridColumn: '1 / -1', order: 13 }}>
                               <Collapsible open={isVacantBuildingsOpen} onOpenChange={setIsVacantBuildingsOpen}>
                                 <CollapsibleTrigger asChild>
                                   <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
@@ -14069,7 +14037,7 @@ export default function RunDetail() {
                             )}
 
                             {proximityData.vacantLand && (
-                              <div className="dir-fact">
+                              <div className="dir-fact" style={{ order: 9 }}>
                                 <div className="dir-fact-top">
                                   <span className="dir-fact-icon"><MapIcon className="w-3 h-3" /></span>
                                   <span className="dir-fact-label">Vacant Land</span>
@@ -14081,7 +14049,7 @@ export default function RunDetail() {
 
 
                             {proximityData.lakeMichigan && (
-                              <div className="dir-fact">
+                              <div className="dir-fact" style={{ order: 7 }}>
                                 <div className="dir-fact-top">
                                   <span className="dir-fact-icon"><Waves className="w-3 h-3" /></span>
                                   <span className="dir-fact-label">Lake Michigan</span>
@@ -14092,7 +14060,7 @@ export default function RunDetail() {
                             )}
 
                             {proximityData.bikeTrail && (
-                              <div className="dir-fact">
+                              <div className="dir-fact" style={{ order: 6 }}>
                                 <div className="dir-fact-top">
                                   <span className="dir-fact-icon"><Bike className="w-3 h-3" /></span>
                                   <span className="dir-fact-label">Bike Trail</span>
@@ -14103,7 +14071,7 @@ export default function RunDetail() {
                             )}
 
                             {proximityData.airportNoise !== undefined && proximityData.airportNoise !== null && (
-                              <div className="dir-fact">
+                              <div className="dir-fact" style={{ order: 8 }}>
                                 <div className="dir-fact-top">
                                   <span className="dir-fact-icon"><Plane className="w-3 h-3" /></span>
                                   <span className="dir-fact-label">Airport Noise</span>
@@ -14113,23 +14081,20 @@ export default function RunDetail() {
                               </div>
                             )}
                           </div>
+                          <div className="kyp-src">City of Chicago Data Portal, data year {proximityData.dataYear}. Distances are straight-line from the parcel centroid. City-owned lots are covered in Development Potential.</div>
                         </div>
                       ) : !pinLookupData?.pin ? (
                         <p className="text-sm text-muted-foreground">PIN lookup required for proximity information</p>
                       ) : (
                         <p className="text-sm text-muted-foreground">Unable to load proximity information</p>
                       )}
-                      </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-
                   </div>
           </motion.div>
           </AccordionSection>
 
                     <AccordionSection {...accProps("schools")}>
                     {/* Schools */}
-                        <div className="px-4 pb-4 pt-1">
+                        <div className="pb-4 pt-1">
                           {isLoadingSchools ? (
                             <p className="text-sm text-muted-foreground">Loading...</p>
                           ) : (() => {
@@ -14155,26 +14120,14 @@ export default function RunDetail() {
                               ['middle', middle.length > 0],
                               ['high', high.length > 0],
                             ]);
-                            const elemRate = levelRating(elem);
-                            const highRate = levelRating(high);
-                            const elemClosest = closestSchool(elem);
-                            const highClosest = closestSchool(high);
-                            const glGradIcon = <svg viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 2 6 2s6-1 6-2v-5"/></svg>;
-                            const rateClass = (b?: 'good' | 'caution' | 'bad') => b === 'caution' ? ' cau' : b === 'bad' ? ' bad' : '';
                             const lvlClass = (r?: string) => { const t = ratingTier(r); return t === 'good' ? '' : t === 'caution' ? ' cau' : t === 'bad' ? ' bad' : ' neu'; };
                             const schoolRow = (school: any) => (
-                              <div key={school.schoolId} className="srow" data-testid={`card-school-${school.schoolId}`}>
-                                <div className="stop">
-                                  <div className="snm">
-                                    <span className="name">
-                                      <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(school.name + ' Chicago IL')}`} target="_blank" rel="noopener noreferrer" data-testid={`link-school-${school.schoolId}`}>{school.name}</a>
-                                    </span>
-                                    {school.overallRating && <span className={`lvl${lvlClass(school.overallRating)}`} data-testid={`badge-school-rating-${school.schoolId}`}>{school.overallRating}</span>}
-                                    <span className={`acc ${school.attendanceBoundary ? 'boundary' : 'enroll'}`}>{school.attendanceBoundary ? 'Boundary' : 'Open Enrollment'}</span>
-                                  </div>
-                                  <span className="sdist">{school.distanceMiles?.toFixed(2)} mi</span>
-                                </div>
-                                {school.gradesOffered && <div className="sgrades">Grades {school.gradesOffered}{school.attendanceBoundary ? '' : ' · application / lottery'}</div>}
+                              <div key={school.schoolId} className="srow step23-list-row" data-testid={`card-school-${school.schoolId}`}>
+                                <a className="step23-name" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(school.name + ' Chicago IL')}`} target="_blank" rel="noopener noreferrer" data-testid={`link-school-${school.schoolId}`}>{school.name}</a>
+                                {school.overallRating && <span className={`lvl${lvlClass(school.overallRating)}`} data-testid={`badge-school-rating-${school.schoolId}`}>{school.overallRating}</span>}
+                                <span className={`acc ${school.attendanceBoundary ? 'boundary' : 'enroll'}`}>{school.attendanceBoundary ? 'Boundary' : 'Open enrollment'}</span>
+                                {school.gradesOffered && <span className="step23-meta">Grades {school.gradesOffered}</span>}
+                                <span className="step23-distance">{school.distanceMiles?.toFixed(2) ?? '—'} mi</span>
                               </div>
                             );
                             return (
@@ -14206,17 +14159,8 @@ export default function RunDetail() {
                                   {(childcareViewMode === 'zip' ? isLoadingChildcare : isLoadingCommunityChildcare) ? (
                                     <p className="text-sm text-muted-foreground">Loading...</p>
                                   ) : dcData && dcCat ? (
-                                    <div className="dcard" data-testid="childcare-demand-meter">
-                                      <div className="dctop">
-                                        <span className={`dpill${dcCat === 'adequate' || dcCat === 'plentiful' ? ' g' : dcCat === 'desert' ? ' b' : ''}`} data-testid="badge-childcare-status">
-                                          <span className="d" />{dcCat === 'desert' ? 'Childcare desert' : dcCat === 'underserved' ? 'Underserved' : dcCat === 'adequate' ? 'Adequate' : 'Plentiful'}
-                                        </span>
-                                        <span className="dhead">
-                                          {cps != null
-                                            ? <><b>{cps.toFixed(1)}</b> children under 5 per licensed slot</>
-                                            : <><b>{dcData.childrenUnder5.toLocaleString()}</b> children under 5 — no licensed slots in this area</>}
-                                        </span>
-                                      </div>
+                                    <div className="dcard step23-childcare" data-testid="childcare-demand-meter">
+                                      <span className="sr-only" data-testid="badge-childcare-status">{dcCat === 'desert' ? 'Childcare desert' : dcCat === 'underserved' ? 'Underserved' : dcCat === 'adequate' ? 'Adequate' : 'Plentiful'}: {cps != null ? `${cps.toFixed(1)} children under 5 per licensed slot` : 'no licensed slots'}</span>
                                       <div className="gauge">
                                         {(['desert', 'underserved', 'adequate', 'plentiful'] as const).map(seg => (
                                           <div key={seg} className={`gs${dcCat === seg ? ` on${seg === 'adequate' || seg === 'plentiful' ? ' g' : seg === 'desert' ? ' b' : ''}` : ''}`} />
@@ -14230,12 +14174,14 @@ export default function RunDetail() {
                                           </div>
                                         ))}
                                       </div>
-                                      <div className="dstats">
-                                        <b>{dcData.childrenUnder5.toLocaleString()}</b> children under 5 · <b>{dcData.licensedSlots.toLocaleString()}</b> licensed slots ({dcData.centerSlots.toLocaleString()} center · {dcData.familyHomeSlots.toLocaleString()} home)
-                                        {dcGap > 0
-                                          ? <> · roughly a <b>{dcGap.toLocaleString()}-slot gap</b> to reach adequate coverage.</>
-                                          : <> · capacity meets the adequate threshold.</>}
-                                        <div className="dsrc">Source: {dcData.sources.childrenSource} {dcData.sources.childrenYear} · {dcData.sources.childcareSource} {dcData.sources.childcareYear}</div>
+                                      <div className="step23-childcare-stats">
+                                        <div><span>Children under 5</span><strong>{dcData.childrenUnder5.toLocaleString()}</strong></div>
+                                        <div><span>Licensed slots</span><strong>{dcData.licensedSlots.toLocaleString()}</strong></div>
+                                        <div><span>Center slots</span><strong>{dcData.centerSlots.toLocaleString()}</strong></div>
+                                        <div><span>Family-home slots</span><strong>{dcData.familyHomeSlots.toLocaleString()}</strong></div>
+                                      </div>
+                                      <div className="dsrc">
+                                        {dcGap > 0 ? `Roughly a ${dcGap.toLocaleString()}-slot gap to reach adequate coverage.` : 'Capacity meets the adequate threshold.'} Source: {dcData.sources.childrenSource} {dcData.sources.childrenYear} · {dcData.sources.childcareSource} {dcData.sources.childcareYear}.
                                       </div>
                                     </div>
                                   ) : (
@@ -14243,7 +14189,7 @@ export default function RunDetail() {
                                   )}
                                 </div>
 
-                                {/* ---- Schools at a glance ---- */}
+                                {/* ---- School lists ---- */}
                                 {!facts?.lat ? (
                                   <p className="text-sm text-muted-foreground mt-5">Geocoding required to find nearby schools.</p>
                                 ) : isSchoolsError || !schoolsData ? (
@@ -14252,47 +14198,6 @@ export default function RunDetail() {
                                   <p className="text-sm text-muted-foreground mt-5">No CPS schools found within {radius} miles.</p>
                                 ) : (
                                   <>
-                                    <div className="subwrap">
-                                      <div className="glancehd" data-testid="schools-at-a-glance">Schools at a Glance <span>· within {radius} mi</span></div>
-                                      <div className="g2">
-                                        {elem.length > 0 && (
-                                          <div className="glance" data-testid="glance-elementary">
-                                            <div className="gltop">
-                                              <span className="glic">{glGradIcon}</span>
-                                              <span className="gllab">Elementary · K–8</span>
-                                              {elemRate && <span className={`glrate${rateClass(elemRate.badge)}`} data-testid="badge-glance-elementary"><span className="d" />{elemRate.label}</span>}
-                                            </div>
-                                            <div className="glnum"><span className="n">{elem.length}</span><span className="u">school{elem.length !== 1 ? 's' : ''} nearby</span></div>
-                                            {elemClosest && <div className="glclose">Closest — <b>{elemClosest.name}</b> · {elemClosest.distanceMiles?.toFixed(2)} mi</div>}
-                                            <div className="glnote">{elem.filter((s: any) => s.attendanceBoundary).length} with an attendance boundary in this radius. Address-level assignment not verified.</div>
-                                          </div>
-                                        )}
-                                        {high.length > 0 && (
-                                          <div className="glance" data-testid="glance-high">
-                                            <div className="gltop">
-                                              <span className="glic">{glGradIcon}</span>
-                                              <span className="gllab">High School</span>
-                                              {highRate && <span className={`glrate${rateClass(highRate.badge)}`} data-testid="badge-glance-high"><span className="d" />{highRate.label}</span>}
-                                            </div>
-                                            <div className="glnum"><span className="n">{high.length}</span><span className="u">school{high.length !== 1 ? 's' : ''} nearby</span></div>
-                                            {highClosest && <div className="glclose">Closest — <b>{highClosest.name}</b> · {highClosest.distanceMiles?.toFixed(2)} mi</div>}
-                                            <div className="glnote">{high.length} high schools within {radius} mi · {high.filter((s: any) => s.attendanceBoundary).length} with an attendance boundary in this radius.</div>
-                                          </div>
-                                        )}
-                                        {middle.length > 0 && (
-                                          <div className="glance" data-testid="glance-middle">
-                                            <div className="gltop">
-                                              <span className="glic">{glGradIcon}</span>
-                                              <span className="gllab">Middle</span>
-                                              {levelRating(middle) && <span className={`glrate${rateClass(levelRating(middle)!.badge)}`}><span className="d" />{levelRating(middle)!.label}</span>}
-                                            </div>
-                                            <div className="glnum"><span className="n">{middle.length}</span><span className="u">school{middle.length !== 1 ? 's' : ''} nearby</span></div>
-                                            {closestSchool(middle) && <div className="glclose">Closest — <b>{closestSchool(middle)!.name}</b> · {closestSchool(middle)!.distanceMiles?.toFixed(2)} mi</div>}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-
                                     {/* ---- Elementary list ---- */}
                                     {elem.length > 0 && (
                                       <div className="subwrap" id="elementary">
@@ -14369,11 +14274,11 @@ export default function RunDetail() {
 
                             {/* Michelin Guide Restaurants */}
                             <div className="ec-sub" id="ec-michelin" style={{ marginTop: mich.length + jba.length + murals.length + lms.length + gals.length > 0 ? undefined : 8 }}>
-                              <KypSubhead subsection={cultureSubsections.michelin} data-testid="trigger-michelin-sub"><span className="lbl">Michelin Guide</span><span className="ct">within 1 mi</span>{mich.length > 0 && <span className="chip">{michelinData!.total} recognized</span>}</KypSubhead>
+                              <KypSubhead subsection={cultureSubsections.michelin} data-testid="trigger-michelin-sub"><span className="lbl">Michelin Guide</span><span className="ct">{mich.length} within 1 mi</span></KypSubhead>
                               {mich.length > 0 ? (
                                 <div data-testid="list-michelin-restaurants">
-                                  {(ecShowAll.michelin ? mich : mich.slice(0, 6)).map((r: any, idx: number) => (
-                                    <div key={idx} className="row" data-testid={`michelin-restaurant-${idx}`}>
+                                  {mich.map((r: any, idx: number) => (
+                                    <div key={idx} className={`row${!ecShowAll.michelin && idx >= 6 ? ' culture-overflow' : ''}`} data-testid={`michelin-restaurant-${idx}`}>
                                       <div className="rtop">
                                         <div className="rnm">
                                           {r.googleUrl ? (
@@ -14412,7 +14317,7 @@ export default function RunDetail() {
 
                             {/* James Beard Award Winners */}
                             <div className="ec-sub" id="ec-jamesbeard">
-                              <KypSubhead subsection={cultureSubsections.jamesBeard} data-testid="trigger-jba-sub"><span className="lbl">James Beard</span><span className="ct">within 1 mi</span><span className="chip">{jba.length} of Chicago's {jbaData?.citywideTotal ?? '—'} citywide</span></KypSubhead>
+                              <KypSubhead subsection={cultureSubsections.jamesBeard} data-testid="trigger-jba-sub"><span className="lbl">James Beard</span><span className="ct">{jba.length} of {jbaData?.citywideTotal ?? '—'} citywide</span></KypSubhead>
                               {jba.length > 0 ? (
                                 <div data-testid="list-jba-restaurants">
                                   {jba.map((r: any, idx: number) => (
@@ -14441,11 +14346,11 @@ export default function RunDetail() {
 
                             {/* Registered Murals */}
                             <div className="ec-sub" id="ec-murals">
-                              <KypSubhead subsection={cultureSubsections.murals} data-testid="trigger-murals-sub"><span className="lbl">Registered murals</span><span className="ct">within {muralRad} mi</span>{murals.length > 0 && <span className="chip">{muralsData!.total} mural{muralsData!.total !== 1 ? 's' : ''}</span>}</KypSubhead>
+                              <KypSubhead subsection={cultureSubsections.murals} data-testid="trigger-murals-sub"><span className="lbl">Registered murals</span><span className="ct">{murals.length} within {muralRad} mi</span></KypSubhead>
                               {murals.length > 0 ? (
                                 <div data-testid="list-murals">
-                                  {(ecShowAll.murals ? murals : murals.slice(0, 6)).map((m: any, idx: number) => (
-                                    <div key={idx} className="row" data-testid={`mural-item-${idx}`}>
+                                  {murals.map((m: any, idx: number) => (
+                                    <div key={idx} className={`row${!ecShowAll.murals && idx >= 6 ? ' culture-overflow' : ''}`} data-testid={`mural-item-${idx}`}>
                                       <div className="rtop">
                                         <div className="rnm">
                                           <span className="name">{m.title}</span>
@@ -14471,11 +14376,11 @@ export default function RunDetail() {
 
                             {/* Architectural Landmarks */}
                             <div className="ec-sub" id="ec-landmarks">
-                              <KypSubhead subsection={cultureSubsections.landmarks} data-testid="trigger-landmarks-designated-sub"><span className="lbl">Architectural landmarks</span><span className="ct">within {lmRad} mi</span>{lms.length > 0 && <span className="chip">{designatedLandmarksData!.total} landmark{designatedLandmarksData!.total !== 1 ? 's' : ''}</span>}</KypSubhead>
+                              <KypSubhead subsection={cultureSubsections.landmarks} data-testid="trigger-landmarks-designated-sub"><span className="lbl">Architectural landmarks</span><span className="ct">{lms.length} within {lmRad} mi</span></KypSubhead>
                               {lms.length > 0 ? (
                                 <div data-testid="list-designated-landmarks">
-                                  {(ecShowAll.landmarks ? lms : lms.slice(0, 6)).map((l: any, idx: number) => (
-                                    <div key={idx} className="row" data-testid={`landmark-designated-item-${idx}`}>
+                                  {lms.map((l: any, idx: number) => (
+                                    <div key={idx} className={`row${!ecShowAll.landmarks && idx >= 4 ? ' culture-overflow' : ''}`} data-testid={`landmark-designated-item-${idx}`}>
                                       <div className="rtop">
                                         <div className="rnm">
                                           <span className="name">{l.name}</span>
@@ -14489,7 +14394,7 @@ export default function RunDetail() {
                                       <a className="addr" href={`https://www.google.com/maps/search/?api=1&query=${l.latitude},${l.longitude}`} target="_blank" rel="noopener noreferrer" data-testid={`link-landmark-designated-address-${idx}`}>{l.address}</a>
                                     </div>
                                   ))}
-                                  {lms.length > 6 && (
+                                  {lms.length > 4 && (
                                     <button type="button" className="more" onClick={() => setEcShowAll(s => ({ ...s, landmarks: !s.landmarks }))} data-testid="button-ec-landmarks-more">
                                       {ecShowAll.landmarks ? 'Show fewer' : `Show all ${lms.length} within ${lmRad} mile →`}
                                     </button>
@@ -14503,11 +14408,11 @@ export default function RunDetail() {
 
                             {/* Art Galleries */}
                             <div className="ec-sub" id="ec-galleries">
-                              <KypSubhead subsection={cultureSubsections.galleries} data-testid="trigger-art-galleries-sub"><span className="lbl">Art galleries</span><span className="ct">within {galRad} mi</span>{gals.length > 0 && <span className="chip">{artGalleriesData!.totalCount}{nearestGal ? ` · ${nearestGal.distanceMiles} mi` : ''}</span>}</KypSubhead>
+                              <KypSubhead subsection={cultureSubsections.galleries} data-testid="trigger-art-galleries-sub"><span className="lbl">Art galleries</span><span className="ct">{gals.length} within {galRad} mi</span></KypSubhead>
                               {gals.length > 0 ? (
                                 <div data-testid="list-art-galleries">
                                   {gals.map((g: any, idx: number) => (
-                                    <div key={idx} className="row" data-testid={`art-gallery-item-${idx}`}>
+                                    <div key={idx} className={`row${!ecShowAll.galleries && idx >= 2 ? ' culture-overflow' : ''}`} data-testid={`art-gallery-item-${idx}`}>
                                       <div className="rtop">
                                         <div className="rnm">
                                           <span className="name">{g.businessName}</span>
@@ -14521,12 +14426,18 @@ export default function RunDetail() {
                                       <a className="addr" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.businessName + ', ' + g.address + ', Chicago, IL')}`} target="_blank" rel="noopener noreferrer" data-testid={`link-art-gallery-address-${idx}`}>{g.address}</a>
                                     </div>
                                   ))}
+                                  {gals.length > 2 && (
+                                    <button type="button" className="more" onClick={() => setEcShowAll(s => ({ ...s, galleries: !s.galleries }))} data-testid="button-ec-galleries-more">
+                                      {ecShowAll.galleries ? 'Show fewer' : `Show all ${gals.length} within ${galRad} mi →`}
+                                    </button>
+                                  )}
                                   <div className="src">Source: City of Chicago Business Licenses (Sale of Art)</div>
                                 </div>
                               ) : (
                                 <p className="text-sm text-muted-foreground py-2">{!geocode.data?.lat ? 'Geocoding required for gallery data' : isArtGalleriesError ? 'Unable to load City of Chicago Business License records.' : 'No art galleries found within 1 mile'}</p>
                               )}
                             </div>
+                            <div className="kyp-src">Michelin Guide Chicago · James Beard Foundation · Chicago Mural Registry · Chicago Landmarks · City of Chicago Business Licenses (Sale of Art).</div>
                           </>
                         );
                       })()}

@@ -2425,3 +2425,61 @@ a.cmp-nm{text-decoration:underline}
 .asmb-opt .bd{flex:1;font-size:12px;color:#565651;line-height:1.55}
 .asmb-opt .bd .h{font-size:12.5px;font-weight:700;color:#141414;margin-bottom:3px}
 .asmb-opt .bd b{color:#141414;font-weight:600}
+
+/* Step 23: compact, continuous neighborhood context rows. */
+.step23-proximity .dir-facts.pgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.step23-proximity .dir-fact{min-width:0;background:#fff;padding:13px 15px}
+.step23-proximity .dir-fact-top{margin-bottom:6px}
+.step23-proximity .dir-fact-icon{display:none}
+.step23-proximity .dir-fact-label{font-size:8.5px;color:var(--kyp-muted)}
+.step23-proximity .dir-fact-value,.step23-proximity .dir-fact-qualifier{margin-left:0}
+.step23-proximity .dir-fact-value{font-size:14.5px;overflow-wrap:anywhere}
+.step23-proximity .kyp-src{margin-top:15px}
+
+.schbox .subwrap:first-of-type{margin-top:20px}
+.schbox .step23-childcare{border:0;border-radius:0;padding:0}
+.schbox .step23-childcare .gauge{margin-top:12px;margin-bottom:8px}
+.schbox .step23-childcare .gs{height:6px}
+.schbox .step23-childcare .glabels{margin-bottom:16px}
+.schbox .step23-childcare .gl .n{font-family:var(--kyp-mono);font-size:9px;text-transform:uppercase}
+.schbox .step23-childcare-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;background:var(--kyp-wash);border-radius:8px;padding:12px 15px}
+.schbox .step23-childcare-stats div{display:flex;justify-content:space-between;align-items:baseline;gap:8px;min-width:0}
+.schbox .step23-childcare-stats span{font-family:var(--kyp-mono);font-size:9px;color:var(--kyp-muted);text-transform:uppercase}
+.schbox .step23-childcare-stats strong{font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-ink)}
+.schbox .step23-childcare .dsrc{margin-top:10px}
+.schbox .srow.step23-list-row{display:flex;align-items:baseline;gap:9px;padding:9px 0;border-top:0;border-bottom:1px solid var(--kyp-line)}
+.schbox .step23-list-row .step23-name{font-size:13.5px;font-weight:600;color:var(--kyp-ink);text-decoration:none}
+.schbox .step23-list-row .step23-name:hover{text-decoration:underline}
+.schbox .step23-list-row .lvl,.schbox .step23-list-row .acc{font-size:8px;padding:2px 7px;white-space:nowrap}
+.schbox .step23-list-row .step23-meta{font-size:11.5px;color:var(--kyp-muted);flex:1}
+.schbox .step23-list-row .step23-distance{font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-muted);white-space:nowrap;margin-left:auto}
+
+.ecbox .kyp-blocks.hero.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ecbox .ec-sub .kyp-subhead{margin-top:29px;flex-wrap:nowrap}
+.ecbox .ec-sub .kyp-subhead .ct{margin-left:0}
+.ecbox .row{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 9px;padding:9px 0;border-top:0;border-bottom:1px solid var(--kyp-line)}
+.ecbox .row .rtop,.ecbox .row .rnm{display:contents}
+.ecbox .row .name{font-size:13.5px;font-weight:600}
+.ecbox .row .aw,.ecbox .row .yr{font-family:var(--kyp-mono);font-size:8px;font-weight:700;background:var(--kyp-wash);color:var(--kyp-ink2);border:0;border-radius:5px;padding:2px 7px;white-space:nowrap}
+.ecbox .row .meta,.ecbox .row .addr{font-size:11.5px;color:var(--kyp-muted);margin:0}
+.ecbox .row .meta{order:1}
+.ecbox .row .addr{order:2}
+.ecbox .row .dist{order:3;font-size:11px;color:var(--kyp-muted);background:none;border:0;padding:0;margin-left:auto}
+.ecbox .row.culture-overflow{display:none}
+.ecbox .src{display:none}
+.ecbox .kyp-src{margin-top:18px}
+@media print{
+  .ecbox .row.culture-overflow{display:flex}
+  .ecbox .more{display:none}
+}
+@media(max-width:680px){
+  .step23-proximity .dir-facts.pgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .schbox .step23-childcare-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ecbox .kyp-blocks.hero.three{grid-template-columns:1fr}
+  .schbox .step23-list-row .step23-meta,.ecbox .row .meta,.ecbox .row .addr{flex-basis:auto}
+}
+@media(max-width:420px){
+  .step23-proximity .dir-facts.pgrid{grid-template-columns:1fr}
+  .schbox .step23-list-row,.ecbox .row{column-gap:6px}
+  .schbox .step23-list-row .step23-meta{flex-basis:100%}
+}
