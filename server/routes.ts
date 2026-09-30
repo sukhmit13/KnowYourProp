@@ -8987,43 +8987,9 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     }
   });
 
-  // Pre-Title Check - "Can I Finance This Property?"
-  app.post('/api/pre-title-check', async (req, res) => {
-    try {
-      const { pin, address, openViolationsCount } = req.body;
-      
-      if (!pin) {
-        return res.status(400).json({ 
-          success: false,
-          error: 'PIN is required for pre-title check' 
-        });
-      }
-      
-      if (!address) {
-        return res.status(400).json({ 
-          success: false,
-          error: 'Address is required for pre-title check' 
-        });
-      }
-      
-      const { runPreTitleCheck } = await import('./preTitleService');
-      const result = await runPreTitleCheck(pin, address, openViolationsCount || 0);
-      
-      res.json(result);
-    } catch (err) {
-      console.error('Pre-title check error:', err);
-      res.status(500).json({ 
-        success: false,
-        error: 'Unable to complete pre-title check',
-        message: 'Please try again later or check records manually',
-        manualCheckLinks: {
-          propertyTax: 'https://www.cookcountytreasurer.com/setsearchparameters.aspx',
-          foreclosure: 'https://www.cookcountyclerkofcourt.org/CourtCaseSearch/DocketSearch',
-          liens: 'https://ccrecorder.org/',
-          waterBill: 'https://webapps1.chicago.gov/wtrblnginq/wtrBillInquiry.htm'
-        }
-      });
-    }
+  // Retired feature: stale clients must not launch checks or receive cached verdicts.
+  app.post('/api/pre-title-check', (_req, res) => {
+    res.status(410).json({ success: false, error: 'Pre-Title Check has been retired' });
   });
 
   // Contractor Discovery API

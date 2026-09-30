@@ -43,3 +43,11 @@ test("Ownership & Title shows Checking during retry of a failed search", () => {
   const section = ownership({ isLoadingLiens: true, lienData: { searchFailed: true } });
   assert.equal(section?.verdict?.label, "Checking");
 });
+
+test("report scan excludes Pre-Title Check while retaining Ownership & Title evidence", () => {
+  const sections = buildScanSections({ lienData: { activeLienCount: 2 } });
+  assert.ok(!sections.some(({ id, title }) => id === "debt" || /Pre-Title/i.test(title)));
+  assert.deepEqual(sections.find(({ id }) => id === "ownership")?.verdict,
+    { tone: "attention", label: "2 active liens" });
+  assert.ok(sections.some(({ id }) => id === "market"));
+});

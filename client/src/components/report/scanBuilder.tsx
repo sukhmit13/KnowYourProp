@@ -43,7 +43,6 @@ export interface ScanCtx {
   effectiveCompatibility?: { permission?: "permitted" | "special_use" | string } | null;
   assemblage?: { common_control?: "exact" | "likely" | "unclear" } | null;
   incMeta?: { counts?: { likely?: number; confirm?: number; na?: number } } | null;
-  debtSnap?: { takeaway?: { title?: string } } | null;
   newsTakeaway?: { section?: { title?: string; rows?: { tone?: string }[] } } | null;
   /** true when any site-specific (parcel/adjacent) coverage exists — gates the neighborhood fallback */
   hasSiteNews?: boolean;
@@ -116,9 +115,6 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
       verdict: { tone: "good", label: "Clear title" },
     };
   }
-
-  // 5 · Debt — cached debt-snapshot takeaway title (no verdict: badge tone isn't exposed at mount)
-  if (ctx.debtSnap?.takeaway?.title) dyn.debt = { takeaway: mdEmph(ctx.debtSnap.takeaway.title) };
 
   // 6 · Local Market — HMDA takeaway headline + comps count hero
   const comps = ctx.compsData?.comparables?.length;

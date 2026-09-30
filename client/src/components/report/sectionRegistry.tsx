@@ -4,7 +4,7 @@ import { type ScanSection } from "./CollapsibleSection";
 type SectionMeta = Pick<ScanSection, "id" | "anchorId" | "title" | "summary" | "info">;
 
 export const SECTION_ORDER = [
-  "countyRecord", "permits", "ownership", "historic", "zoning", "valuation", "debt", "market", "incentives", "transit", "newBusinessLicenses", "newConstruction",
+  "countyRecord", "permits", "ownership", "historic", "zoning", "valuation", "market", "incentives", "transit", "newBusinessLicenses", "newConstruction",
   "crime", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
 ] as const;
 
@@ -27,9 +27,6 @@ export const SECTION_META: Record<string, SectionMeta> = {
   ownership: { id: "ownership", anchorId: "section-ownership", title: "Ownership & Title",
      summary: "Sale history, recorded debt, liens, and title status.",
      info: ["Chain of title", "Debt on title", "Title claims and filings", "Owner-name lien search", "Current owner & entity"] },
-  debt: { id: "debt", anchorId: "print-section-pre-title-check", title: "Pre-Title Check",
-     summary: "Property tax, financing readiness, and closing flags.",
-     info: ["Property tax, exemptions & appeals", "Financing readiness", "Closing flags"] },
   market: { id: "market", anchorId: "print-section-mortgage-lending", title: "Mortgage & Lending Market",
     summary: "Who lends here, on what terms, and what has been changing hands.",
     info: ["Residential mortgage market (HMDA)", "Area transaction trends", "Recently sold comps", "Commercial lending — SBA 504", "Commercial lending — SBA 7(a)"] },

@@ -28,7 +28,6 @@ import { FunnelModal, ROLES, TRANSACTION_TYPES, REFERRAL_OPTIONS, type FunnelAns
 import { PrintSettingsDialog, type PrintSection } from "@/components/PrintSettingsDialog";
 import { ReportChat } from "@/components/ReportChat";
 import { PropertyMap } from "@/components/PropertyMap";
-import { PreTitleCheck } from "@/components/PreTitleCheck";
 import { HMDAFinancingStats, HMDABuyerProfile, HMDALenders, HMDAMarketMixPanel } from "@/components/HMDAStats";
 import { ComparableSalesView } from "@/components/ComparableSalesView";
 import { IncentiveCheckerCards, checkerAvail, checkerTypeGroup } from "@/components/IncentivesCheckerSection";
@@ -537,7 +536,6 @@ const PRINT_SECTIONS: PrintSection[] = [
   // Property Details
   { id: 'permits', label: 'Permits & Violations', defaultChecked: true, group: 'Permits & Violations' },
   { id: 'ownership', label: 'Ownership & Title', defaultChecked: true, group: 'Ownership & Title' },
-  { id: 'pre-title-check', label: 'Pre-Title Check (Liens & Flags)', defaultChecked: true, level: 1, group: 'Property Details' },
   { id: 'mortgage-lending', label: 'Mortgage & Lending Market', defaultChecked: true, group: 'Mortgage & Lending' },
   { id: 'hmda-stats', label: 'Residential Mortgage Market (HMDA)', defaultChecked: true, level: 1, group: 'Mortgage & Lending' },
   { id: 'transaction-trends', label: 'Area Transaction Trends', defaultChecked: true, level: 1, group: 'Mortgage & Lending' },
@@ -635,7 +633,6 @@ interface SectionStates {
   transactionTrends: boolean;
   hmdaBuyer: boolean;
   sbaLoans: boolean;
-  preTitleCheck: boolean;
   upcomingDevelopments: boolean;
   devNewsSub: boolean;
   newConstructionSub: boolean;
@@ -801,7 +798,7 @@ const DEFAULT_SECTION_STATES: SectionStates = {
   seniorPopulation: false, nearbyFillingStations: false, evRegistrations: false,
   evCharging: false, nearbyHotels: false, nearbyRestaurants: false,
   nearbyCoffee: false, nearbyBars: false, cannabisMarket: false,
-  hmdaStats: false, transactionTrends: false, hmdaBuyer: false, sbaLoans: false, preTitleCheck: false, upcomingDevelopments: false, zoningHistory: false,
+  hmdaStats: false, transactionTrends: false, hmdaBuyer: false, sbaLoans: false, upcomingDevelopments: false, zoningHistory: false,
   devNewsSub: false, newConstructionSub: false, zbaActivitySub: false,
   recentlySoldComps: false, schools: false, airbnb: false, rentcast: true,
   loopnetSection: false,
@@ -1280,7 +1277,7 @@ export default function RunDetail() {
   const ACC_BEFORE_REORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "crime", "transit", "businessLicenses", "valuation", "listing", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
   const ACC_BEFORE_HISTORIC_REORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
   const ACC_BEFORE_HISTORIC_CORRECTION = ["ownership", "zoning", "zoningHistory", "historic", "propertyTax", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
-  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
+  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
@@ -3876,7 +3873,6 @@ export default function RunDetail() {
     effectiveCompatibility,
     assemblage,
     incMeta,
-    debtSnap: debtSnapRec as any,
     newsTakeaway: newsTakeaway as any,
     hasSiteNews: !!(newsTakeaway?.meta?.length) || (addressNewsData?.articles?.length || 0) + (coParcelAddressNewsData?.articles?.length || 0) > 0,
     nnTakeaway: nnTakeaway as any,
@@ -4227,7 +4223,6 @@ export default function RunDetail() {
           { label: 'Historic Status', icon: Landmark, action: () => { setAccHidden((m) => ({ ...m, historic: false })); setAccOpen((m) => ({ ...m, historic: true })); return 'print-section-historic-status'; } },
           { label: 'Ownership & Title', icon: History, action: () => { setAccHidden((m) => ({ ...m, ownership: false })); setAccOpen((m) => ({ ...m, ownership: true })); return 'section-ownership'; } },
           { label: 'Property Tax Records', icon: Receipt, action: () => { setAccOpen((m) => ({ ...m, propertyTax: true })); return 'section-propertyTax'; } },
-          { label: 'Pre-Title Check', icon: AlertTriangle, action: () => { setSectionOpen('preTitleCheck', true); return 'print-section-pre-title-check'; } },
           { label: 'Lien Search', icon: Lock, action: () => { setAccHidden((m) => ({ ...m, ownership: false })); setAccOpen((m) => ({ ...m, ownership: true })); return 'owner-liens'; } },
           { label: 'Area Transaction Trends', icon: BarChart3, action: () => { setAccHidden((m) => ({ ...m, market: false })); setAccOpen((m) => ({ ...m, market: true })); return 'print-section-mortgage-lending'; } },
           { label: 'Local Mortgage Market (HMDA)', icon: TrendingUp, action: () => { setAccHidden((m) => ({ ...m, market: false })); setAccOpen((m) => ({ ...m, market: true })); return 'print-section-mortgage-lending'; } },
@@ -16028,40 +16023,6 @@ export default function RunDetail() {
                 )}
           </motion.div>
           </AccordionSection>
-
-          {/* Pre-Title Check - Can I Finance This Property? */}
-          {run?.address && (
-          <AccordionSection {...accProps("debt")}>
-            <motion.div
-              id="print-section-pre-title-check"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.192 }}
-            >
-              <PreTitleCheck
-                pin={submittedPin || pinLookupData?.pin || null}
-                address={run.address}
-                openViolationsCount={violationsData?.openViolations || 0}
-                lienData={lienData}
-                propertyTaxData={propertyTaxData}
-                city={facts?.city}
-                isOpen={sectionStates.preTitleCheck}
-                onIsOpenChange={(v) => setSectionOpen('preTitleCheck', v)}
-                onScrollToSection={(section) => {
-                  if (section === 'propertyTax') {
-                    setAccHidden((m) => ({ ...m, propertyTax: false }));
-                    setAccOpen((m) => ({ ...m, propertyTax: true }));
-                    revealAnchor('section-propertyTax');
-                  } else if (section === 'ownership') {
-                    setAccHidden((m) => ({ ...m, ownership: false }));
-                    setAccOpen((m) => ({ ...m, ownership: true }));
-                    revealAnchor('section-ownership');
-                  }
-                }}
-              />
-            </motion.div>
-          </AccordionSection>
-          )}
 
           <AccordionSection {...accProps("market")}>
             <motion.div

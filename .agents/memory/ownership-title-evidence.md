@@ -27,10 +27,10 @@ Report status badges must distinguish an in-progress check from a completed inco
 
 **How to apply:** Use the same pending-vs-settled distinction for future section headers and nested status badges. Do not let a missing response masquerade as a clean result or let a pending request mask an already supported adverse finding.
 
-Water/utility debt checks belong under Ownership & Title. A current utility-account balance and a Chicago Full Payment Certificate are different evidence types, not interchangeable clearance claims.
+Unsupported water/utility balance checks are excluded from the report entirely for now, not relocated into Ownership & Title. A current utility-account balance and a Chicago Full Payment Certificate are different evidence types, not interchangeable clearance claims.
 
-**Why:** The user confirmed this placement. The City's certificate is official clearance for a particular property transfer; an account balance is only a billing finding, and additional charges or transfer-specific exceptions can affect clearance.
+**Why:** The user superseded the earlier placement agreement and requested removing Pre-Title Check and its utility items because no reliable retrieval mechanism exists. The City's certificate is official clearance for a particular transfer, not merely a current account balance.
 
-**How to apply:** Keep balances, recorded water liens, and issued certificates separate. Missing access stays unverified, never zero or paid in full. Verify a working balance-access method before promising automated address/PIN lookup; a manual link or public application portal does not establish that capability.
+**How to apply:** Do not restore a utility placeholder or Pre-Title Check without a new request and a verified retrieval method. Preserve genuine recorded lien evidence in Ownership & Title. If utility access is implemented later, keep balances, recorded water liens, and issued certificates separate; missing access never means zero or paid in full.
 
 Official reference: https://www.chicago.gov/city/en/depts/fin/supp_info/utility-billing/full-payment-certificates.html (checked 2026-09-30).
