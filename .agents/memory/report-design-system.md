@@ -19,6 +19,8 @@ Restyles must reuse the shared primitives already in the global stylesheet (sect
 
 **Expanded-section alignment:** Safety & Crime is the user's reference for the content inset and outer spacing of every expanded report section. **Why:** per-section padding overrides made otherwise matching sections visibly start farther left in the published report. **How to apply:** keep the accordion's outer gutter shared; don't add section-specific accordion-body padding or a second inset to its first content wrapper. Compare computed first-content positions across sections at desktop and mobile widths.
 
+**Train-line badge lettering:** Use white lettering for every colored CTA and Metra route identifier, including light yellow, gold, and pastel lines; a subtle dark shadow can aid legibility. **Why:** mixed dark/white lettering within the same route-badge pattern looks inconsistent to the user. **How to apply:** preserve actual route colors while keeping the foreground consistent across lists, station details, and ridership summaries; don't apply this rule to chart strokes or plain route names.
+
 **Orange summary tiles:** Use Syracuse's dark-orange variant for tiles with white numbers and small white labels, rather than the brighter standard orange. **Why:** the standard Syracuse orange offers only about 3:1 contrast with white, insufficient for small tile labels; the dark-orange variant reaches about 4.5:1 and keeps all summary-tile text consistent. **How to apply:** check computed foreground and background on any new orange stat tile, including its caption, instead of assuming inherited white text survives a variant override.
 
 ## Specificity trap: .subsection-text

@@ -59,6 +59,7 @@
 .kyp-pill.good{background:var(--kyp-green)} .kyp-pill.att{background:var(--kyp-orange)}
 .kyp-pill.bad{background:var(--kyp-bad)} .kyp-pill.ctx{background:var(--kyp-slate)}
 .kyp-linepill{display:inline-block;border-radius:5px;padding:1px 7px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;color:#fff}
+.kyp-linepill,.transit-line-pill,.tz-lb{text-shadow:0 1px 2px rgba(0,0,0,.75)}
 .kyp-trend{font-family:var(--kyp-mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;color:#fff}
 .kyp-trend.up{background:var(--kyp-green)} .kyp-trend.down{background:var(--kyp-bad)}
 .kyp-rank{font-family:var(--kyp-mono);font-size:11px;font-weight:700;color:#fff;background:var(--kyp-slate);border-radius:6px;padding:2px 8px}
