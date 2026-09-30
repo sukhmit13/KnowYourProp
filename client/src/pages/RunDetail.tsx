@@ -545,9 +545,9 @@ const PRINT_SECTIONS: PrintSection[] = [
   { id: 'sba-loans', label: 'Commercial Lending (SBA)', defaultChecked: true, level: 1, group: 'Mortgage & Lending' },
 
   // Development Potential
-  { id: 'development-potential', label: 'Development Potential and Rental Market', defaultChecked: true, group: 'Development Potential and Rental Market' },
-  { id: 'airbnb-market', label: 'Short-Term Rental Market (Airbnb)', defaultChecked: true, level: 1, group: 'Development Potential and Rental Market' },
-  { id: 'rentcast-market', label: 'Long-Term Rental Market (RentCast)', defaultChecked: true, level: 1, group: 'Development Potential and Rental Market' },
+  { id: 'development-potential', label: 'Development Potential & Rental Market', defaultChecked: true, group: 'Development Potential & Rental Market' },
+  { id: 'airbnb-market', label: 'Short-Term Rental Market (Airbnb)', defaultChecked: true, level: 1, group: 'Development Potential & Rental Market' },
+  { id: 'rentcast-market', label: 'Long-Term Rental Market (RentCast)', defaultChecked: true, level: 1, group: 'Development Potential & Rental Market' },
 
   // Proximity & Neighborhood
   { id: 'crime', label: 'Safety & Crime', defaultChecked: true, group: 'Safety & Crime' },
@@ -3863,7 +3863,7 @@ export default function RunDetail() {
     businessLicenses: { title: "Business Licenses", summary: "Every business ever licensed at this address.", info: ["City of Chicago license records", "Operator, term and license class", "Active, expired and revoked"] },
     zoningHistory: { title: "Zoning History", summary: "Recorded City Council and Zoning Board actions for this parcel.", info: ["City Council filings", "Zoning Board decisions", "Filing documents and named professionals"] },
     analysis: { title: "Project Use Analysis", summary: "Deep-dive analysis for your selected use.", info: ["Demand & demographics for your use", "Nearby competitors", "Use-specific estimators"] },
-    potential: { title: "Development Potential and Rental Market", summary: "FAR, buildable envelope and rental potential.", info: ["FAR & buildable envelope", "Market rents (RentCast)", "Short-term rental (Airbnb)", "Commercial listings"] },
+    potential: { title: "Development Potential & Rental Market", summary: "FAR, buildable envelope and rental potential.", info: ["FAR & buildable envelope", "Market rents (RentCast)", "Short-term rental (Airbnb)", "Commercial listings"] },
     proximity: { title: "Proximity", summary: "Distances and nearby property conditions around this address.", info: ["Nearby destinations", "Vacant and abandoned buildings", "Data sources and search radii"] },
     schools: { title: "Schools & Childcare", summary: "Nearby childcare resources and CPS schools within 1.5 miles.", info: ["INCCRRA childcare supply", "Chicago Public Schools", "Attendance boundaries are not yet checked against this address"] },
     entCulture: { title: "Entertainment & Culture", summary: "Dining recognition, murals, landmarks and galleries within 1 mile.", info: ["Michelin Guide", "James Beard Foundation", "Chicago Mural Registry", "Chicago Landmarks", "Chicago business licences"] },
@@ -4217,7 +4217,7 @@ export default function RunDetail() {
             setSectionOpen(isDaycare ? 'googlePlacesDaycareSection' : 'googlePlacesSection', true);
             return isDaycare ? 'section-google-places-daycare' : 'section-google-places-inline';
           } }] : []),
-          { label: 'Development Potential and Rental Market', icon: Building2, action: () => { setSectionOpen('developmentPotential', true); return 'print-section-development-potential'; } },
+          { label: 'Development Potential & Rental Market', icon: Building2, action: () => { setSectionOpen('developmentPotential', true); return 'print-section-development-potential'; } },
         ];
         const q = sectionSearchQuery.toLowerCase();
         const filtered = q.length > 0 ? jumpSections.filter(s => s.label.toLowerCase().includes(q)) : jumpSections;
@@ -12021,7 +12021,7 @@ export default function RunDetail() {
                       <CardHeader className="pb-2 cursor-pointer hover-elevate rounded-t-lg">
                         <div className="flex items-center justify-between">
                           <CardTitle className="chead flex items-center gap-2">
-                            Development Potential and Rental Market
+                            Development Potential &amp; Rental Market
                           </CardTitle>
                           <div className="flex items-center gap-2">
                             {isDevelopmentPotentialOpen && farStatus === 'overbuilt' && (
