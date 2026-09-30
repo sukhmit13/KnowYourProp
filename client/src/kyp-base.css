@@ -1051,6 +1051,11 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-tax-year-status.paid{color:var(--kyp-green)}
 .kyp-tax-year-status.partial,.kyp-tax-year-status.unpaid{color:var(--kyp-bad)}
 .kyp-tax-year-status.unknown{color:var(--kyp-muted)}
+.kyp-tax-coparcel .kyp-tax-status.delinquent,
+.kyp-tax-coparcel .kyp-tax-year-status.partial,
+.kyp-tax-coparcel .kyp-tax-year-status.unpaid{background:var(--kyp-bad);color:#fff}
+.kyp-tax-coparcel .kyp-tax-year-status.partial,
+.kyp-tax-coparcel .kyp-tax-year-status.unpaid{display:inline-block;border-radius:5px;padding:4px 7px;line-height:1.3}
 .kyp-tax-outcome{display:inline-block;border-radius:5px;padding:3px 6px;font-family:var(--kyp-mono);font-size:9px;font-weight:700;color:var(--kyp-ink2);background:var(--kyp-wash);white-space:nowrap}
 .kyp-tax-outcome.reduced{color:var(--kyp-green);background:rgba(37,116,67,.1)}
 .kyp-tax-outcome.increase{color:#a45a1e;background:rgba(184,112,43,.11)}

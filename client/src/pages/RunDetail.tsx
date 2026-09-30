@@ -11489,11 +11489,6 @@ export default function RunDetail() {
                         </span>
                         {propertyTaxData.isStale && <span className="kyp-tax-muted">Refreshing the Treasurer record…</span>}
                       </div>
-                      {propertyTaxData.paymentStatus === "delinquent" && (
-                        <p className="kyp-note kyp-tax-alert" data-testid="tax-delinquent-note">
-                          Delinquent taxes are reported{propertyTaxYears[0]?.amountDue > 0 ? `; $${propertyTaxYears[0].amountDue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} is currently due` : ""}. Verify the payoff and any payment plan directly with the Treasurer before closing; a plan is not confirmed by this record.
-                        </p>
-                      )}
                       {propertyTaxData.paymentStatus === "sold" && (
                         <p className="kyp-note kyp-tax-alert" data-testid="tax-sale-note">A tax sale is reported. Confirm redemption status with the County Clerk before relying on this record.</p>
                       )}
@@ -11768,7 +11763,6 @@ export default function RunDetail() {
                             </div>
                           )) : <p className="kyp-tax-muted">No representative is named in the filings.</p>;
                         })()}
-                        <p className="kyp-src">These results count filings on this parcel only and are not a representative's overall record. PTAB outcomes and later corrections are not verified here. For broader history, see the <a href="https://www.cookcountyboardofreview.com/" target="_blank" rel="noopener noreferrer">Board of Review's public filings</a>.</p>
                       </div>
                     </>
                   )}
@@ -11790,7 +11784,6 @@ export default function RunDetail() {
                             coParcelTaxData.paymentStatus === "sold" ? "Tax sale recorded" :
                               coParcelTaxData.paymentStatus === "unknown" ? "Status unverified" : "Status pending"}
                       </div>
-                      {coParcelTaxData.paymentStatus === "delinquent" && <p className="kyp-note kyp-tax-alert">A delinquent balance is reported on this related parcel. Confirm the amount due with the Treasurer.</p>}
                       {coParcelTaxData.paymentStatus === "sold" && <p className="kyp-note kyp-tax-alert">A tax sale is reported on this related parcel. Confirm redemption status with the County Clerk.</p>}
                       {coParcelTaxData.paymentStatus === "unknown" && <p className="kyp-note">The Treasurer could not verify the related parcel's current status.</p>}
                       {coParcelTaxData.taxYears?.length ? (
@@ -11800,7 +11793,7 @@ export default function RunDetail() {
                             <tbody>{coParcelTaxData.taxYears.slice().sort((a, b) => Number(b.year) - Number(a.year)).slice(0, 3).map((year) => {
                               const complete = year.installment1 > 0 && year.installment2 > 0;
                               const billed = complete ? year.billed : year.installment1 > 0 ? year.installment1 : year.billed;
-                              return <tr key={year.year} className={!complete ? "dim" : undefined}><td>{year.year}</td><td>{complete ? `${year.installment1.toLocaleString("en-US", { style: "currency", currency: "USD" })} + ${year.installment2.toLocaleString("en-US", { style: "currency", currency: "USD" })}` : year.installment1 > 0 ? "First installment only" : "Unavailable"}</td><td className="hero">{billed > 0 ? billed.toLocaleString("en-US", { style: "currency", currency: "USD" }) : "—"}</td><td>{year.status === "paid" ? "Paid" : year.status === "partial" ? `${year.amountDue.toLocaleString("en-US", { style: "currency", currency: "USD" })} due` : year.status === "unpaid" ? "Unpaid" : "Unknown"}</td></tr>;
+                              return <tr key={year.year} className={!complete ? "dim" : undefined}><td>{year.year}</td><td>{complete ? `${year.installment1.toLocaleString("en-US", { style: "currency", currency: "USD" })} + ${year.installment2.toLocaleString("en-US", { style: "currency", currency: "USD" })}` : year.installment1 > 0 ? "First installment only" : "Unavailable"}</td><td className="hero">{billed > 0 ? billed.toLocaleString("en-US", { style: "currency", currency: "USD" }) : "—"}</td><td><span className={`kyp-tax-year-status ${year.status}`}>{year.status === "paid" ? "Paid" : year.status === "partial" ? `${year.amountDue.toLocaleString("en-US", { style: "currency", currency: "USD" })} due` : year.status === "unpaid" ? "Unpaid" : "Unknown"}</span></td></tr>;
                             })}</tbody>
                           </table>
                         </div>
