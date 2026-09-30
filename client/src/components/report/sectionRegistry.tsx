@@ -4,8 +4,8 @@ import { type ScanSection } from "./CollapsibleSection";
 type SectionMeta = Pick<ScanSection, "id" | "anchorId" | "title" | "summary" | "info">;
 
 export const SECTION_ORDER = [
-  "overview", "historic", "countyRecord", "permits", "ownership", "zoning", "valuation", "debt", "market", "transit", "newBusinessLicenses", "newConstruction",
-  "crime", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news",
+  "overview", "historic", "countyRecord", "permits", "ownership", "zoning", "valuation", "debt", "market", "incentives", "transit", "newBusinessLicenses", "newConstruction",
+  "crime", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
 ] as const;
 
 export const SECTION_META: Record<string, SectionMeta> = {
@@ -64,7 +64,7 @@ export const SECTION_META: Record<string, SectionMeta> = {
     summary: "New-construction permits and proposed projects nearby.",
     info: ["New-construction permits (radius-wide)", "Upcoming / proposed developments"] },
   people: { id: "people", anchorId: "print-section-demographics", title: "Neighborhood & People",
-    summary: "Demographics, income, tenure and workforce (context only).",
+    summary: "Who lives here, what they earn, where they work and how they vote.",
     info: ["Demographic trends", "Languages spoken", "Vehicle ownership", "Senior population", "Jobs & workforce", "Voting & civic lean (context only)"] },
   incentives: { id: "incentives", anchorId: "print-section-location-incentives", title: "Incentives",
     summary: "Which incentive programs the parcel is eligible for.",

@@ -12,7 +12,7 @@ import { formatNewsDate } from "@/lib/newsDate";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { levelRating, closestSchool, ratingScore, ratingTier } from "@/lib/schoolsDisplay";
-import { useListingSnapshot, useGenerateListingSnapshot, useUpdateRunLabel, useRun, usePublicRun, useGeocodeLookup, useZoningInfo, useBusinessUses, useZoningCompatibility, useChildcareAccess, useCommunityAreaChildcareAccess, useGroceryAccess, useCommunityAreaGroceryAccess, useSbifEligibility, useNmtcEligibility, useMmrpEligibility, useHubZoneEligibility, useQctEligibility, useChaOpportunityArea, useTransitProximity, useTODStatus, useEvStations, useGasStations, useHotels, useRestaurants, useCoffeeShops, useBars, useNearbyDayCares, usePropertyTax, useRefreshPropertyTax, useLienSearch, usePinLookup, useProximityData, useMichelinNearby, useMuralsNearby, useDesignatedLandmarksNearby, useZbaWardSummary, useZbaCitySummary, useEVRegistrations, useCannabisDispensariesByZip, useUpdateProjectType, useUpdateFunnelAnswers, useUpdateManualProperty, useCensusACS, useCombinedPermitViolations, useCrimeStats, useCrimeTractRanking, useCrimeTakeaway, useGenerateCrimeTakeaway, useHmdaTakeaway, useGenerateHmdaTakeaway, useNewsTakeaway, useGenerateNewsTakeaway, useNeighborhoodNewsTakeaway, useGenerateNeighborhoodNewsTakeaway, usePeopleTakeaway, useGeneratePeopleTakeaway, useTransitTakeaway, useGenerateTransitTakeaway, useElectionData, useVehicleOwnership, useSeniorsData, useSeniorsZipData, useLanguageData, useLanguageZipData, useChildcareEnhancedData, useChildcareEnhancedZipData, useLandmarkStatus, useChildcareCapacity, useChildcareCapacityZip, useFairMarketRent, useCtaRidership, useCtaBusRidership, useMetraRidership, useMetraLineRidership, useNewConstruction, useNearbyNewConstruction, useNearbyBusinessLicenses, useNearbyArtGalleries, useAddressNews, useNeighborhoodNews, useCorridorNews, useVacantBuildingsNearby, useMortgageRate, useToggleFavorite, useHmdaStats, usePlacesOfWorship, useUpcomingDevelopments, useComparableSales, useSBALoans, useSchoolsNearby, useAirbnbStats, useRentcast, useRentcastRadius, useJBANearby, useLocationIncentives, useZbaApprovals, useRelatedParcels, useCityOwnedLots, useLoopNet, usePeerspace, useZoningHistory, useTransactionTrends, useSidewalkCafe, useBusinessLicenseHistory, useGooglePlaces, useTrafficCount, useLodesData, useListingData, useIncentivesCheck, useSbaRates, useDebtSnapshot, useBuildDebtSnapshot } from "@/hooks/use-runs";
+import { useListingSnapshot, useGenerateListingSnapshot, useUpdateRunLabel, useRun, usePublicRun, useGeocodeLookup, useZoningInfo, useBusinessUses, useZoningCompatibility, useChildcareAccess, useCommunityAreaChildcareAccess, useGroceryAccess, useCommunityAreaGroceryAccess, useSbifEligibility, useNmtcEligibility, useMmrpEligibility, useHubZoneEligibility, useQctEligibility, useChaOpportunityArea, useTransitProximity, useTODStatus, useEvStations, useGasStations, useHotels, useRestaurants, useCoffeeShops, useBars, useNearbyDayCares, usePropertyTax, useRefreshPropertyTax, useLienSearch, usePinLookup, useProximityData, useMichelinNearby, useMuralsNearby, useDesignatedLandmarksNearby, useZbaWardSummary, useZbaCitySummary, useEVRegistrations, useCannabisDispensariesByZip, useUpdateProjectType, useUpdateFunnelAnswers, useUpdateManualProperty, useCensusACS, useCombinedPermitViolations, useCrimeStats, useCrimeTractRanking, useCrimeTakeaway, useGenerateCrimeTakeaway, useHmdaTakeaway, useGenerateHmdaTakeaway, useNewsTakeaway, useGenerateNewsTakeaway, useNeighborhoodNewsTakeaway, useGenerateNeighborhoodNewsTakeaway, useTransitTakeaway, useGenerateTransitTakeaway, useElectionData, useVehicleOwnership, useSeniorsData, useSeniorsZipData, useLanguageData, useLanguageZipData, useChildcareEnhancedData, useChildcareEnhancedZipData, useLandmarkStatus, useChildcareCapacity, useChildcareCapacityZip, useFairMarketRent, useCtaRidership, useCtaBusRidership, useMetraRidership, useMetraLineRidership, useNewConstruction, useNearbyNewConstruction, useNearbyBusinessLicenses, useNearbyArtGalleries, useAddressNews, useNeighborhoodNews, useCorridorNews, useVacantBuildingsNearby, useMortgageRate, useToggleFavorite, useHmdaStats, usePlacesOfWorship, useUpcomingDevelopments, useComparableSales, useSBALoans, useSchoolsNearby, useAirbnbStats, useRentcast, useRentcastRadius, useJBANearby, useLocationIncentives, useZbaApprovals, useRelatedParcels, useCityOwnedLots, useLoopNet, usePeerspace, useZoningHistory, useTransactionTrends, useSidewalkCafe, useBusinessLicenseHistory, useGooglePlaces, useTrafficCount, useLodesData, useListingData, useIncentivesCheck, useSbaRates, useDebtSnapshot, useBuildDebtSnapshot } from "@/hooks/use-runs";
 import { buildDebtCardModel } from "@shared/debtCardModel";
 import { withoutRepeatedNews } from "@/components/report/newsArticleDedup";
 import { classifyArticle } from "@shared/articleSubject";
@@ -574,7 +574,6 @@ const PRINT_SECTIONS: PrintSection[] = [
 ];
 
 interface SectionStates {
-  neighborhoodProfile: boolean;
   addressNews: boolean;
   neighborhoodNews: boolean;
   corridorNews: boolean;
@@ -615,12 +614,6 @@ interface SectionStates {
   ctaBus: boolean;
   ctaBusRidership: boolean;
   metraRidership: boolean;
-  languages: boolean;
-  demographics: boolean;
-  voting: boolean;
-  presidential: boolean;
-  mayoral: boolean;
-  referendums: boolean;
   childcareAccess: boolean;
   childcareDemographics: boolean;
   parentsLaborForce: boolean;
@@ -639,7 +632,6 @@ interface SectionStates {
   nearbyCoffee: boolean;
   nearbyBars: boolean;
   cannabisMarket: boolean;
-  worship: boolean;
   hmdaStats: boolean;
   transactionTrends: boolean;
   hmdaBuyer: boolean;
@@ -794,7 +786,7 @@ function HistoricStatusPanel({
 }
 
 const DEFAULT_SECTION_STATES: SectionStates = {
-  neighborhoodProfile: false, addressNews: false, neighborhoodNews: false, corridorNews: false,
+  addressNews: false, neighborhoodNews: false, corridorNews: false,
   locationIncentives: false, propertyDetails: false, developmentPotential: false,
   farAnalysis: true, fmrSubsection: true, vacantBuildings: false, cityOwnedLots: false,
   proximityDetails: false, transitAccess: false, projectTypeInfo: false,
@@ -803,14 +795,13 @@ const DEFAULT_SECTION_STATES: SectionStates = {
   michelinSub: false, jbaSub: false, muralsSub: false, artGalleriesSub: false,
   landmarksDesignatedSub: false, tod: false, sbif: false, nmtc: false,
   mmrp: false, enterpriseZone: false, nof: false, investSw: false, hubzone: false, qct: false, chaOpportunity: false, class6b: false, class7: false, cdg: false, adu: false, ctaRail: false, ctaRidership: false, metra: false,
-  ctaBus: false, ctaBusRidership: false, metraRidership: false, languages: false, demographics: false,
-  voting: false, presidential: false, mayoral: false, referendums: false,
+  ctaBus: false, ctaBusRidership: false, metraRidership: false,
   childcareAccess: false, childcareDemographics: false, parentsLaborForce: false,
   daycareEstimator: false, siteDaycareDetails: false, ccap: false,
   nearbyDayCares: false, groceryAccess: false, autoDependency: false,
   seniorPopulation: false, nearbyFillingStations: false, evRegistrations: false,
   evCharging: false, nearbyHotels: false, nearbyRestaurants: false,
-  nearbyCoffee: false, nearbyBars: false, cannabisMarket: false, worship: false,
+  nearbyCoffee: false, nearbyBars: false, cannabisMarket: false,
   hmdaStats: false, transactionTrends: false, hmdaBuyer: false, sbaLoans: false, preTitleCheck: false, upcomingDevelopments: false, zoningHistory: false,
   devNewsSub: false, newConstructionSub: false, zbaActivitySub: false,
   recentlySoldComps: false, schools: false, airbnb: false, rentcast: true,
@@ -1273,21 +1264,30 @@ export default function RunDetail() {
   // ---- Step 5 accordion state: order / hidden / open (persisted per run) ----
   const ACC_PREVIOUS_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "businessLicenses", "ownership", "propertyTax", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
   const ACC_LAST_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "businessLicenses", "valuation", "listing", "crime", "transit", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
-  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "crime", "transit", "businessLicenses", "valuation", "listing", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
+  const ACC_BEFORE_REORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "crime", "transit", "businessLicenses", "valuation", "listing", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
+  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
   const mergeAccOrder = (saved: string[], def: string[]): string[] => {
     // The app persisted its old default even for people who never dragged a row.
     // Migrate only that exact order; keep genuinely customized orders intact.
-    if (JSON.stringify(saved) === JSON.stringify(ACC_PREVIOUS_ORDER) ||
-        JSON.stringify(saved) === JSON.stringify(ACC_LAST_DEFAULT_ORDER)) return [...def];
-    const out = saved.filter((x) => def.includes(x));
+    const oldDefault = [ACC_PREVIOUS_ORDER, ACC_LAST_DEFAULT_ORDER, ACC_BEFORE_REORDER]
+      .some((order) => JSON.stringify(saved) === JSON.stringify(order));
+    const out = oldDefault ? [...def] : saved.filter((x) => def.includes(x));
     for (let idx = 0; idx < def.length; idx++) {
       const idRow = def[idx];
       if (out.includes(idRow)) continue;
       const prev = def.slice(0, idx).reverse().find((p) => out.includes(p));
       out.splice(prev ? out.indexOf(prev) + 1 : 0, 0, idRow);
+    }
+    // Move these sections once for existing reports, including saved custom
+    // orders. A later manual drag is respected because the marker is persisted.
+    if (!localStorage.getItem(`kyp-acc-order-incentives-transit-v1-${id}`)) {
+      const withoutMoved = out.filter((row) => row !== "incentives" && row !== "transit");
+      const crimeIndex = withoutMoved.indexOf("crime");
+      withoutMoved.splice(crimeIndex < 0 ? withoutMoved.length : crimeIndex, 0, "incentives", "transit");
+      return withoutMoved;
     }
     return out;
   };
@@ -1324,7 +1324,10 @@ export default function RunDetail() {
     accHydratedIdRef.current = id;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-  useEffect(() => { if (accHydratedIdRef.current === id) try { localStorage.setItem(`kyp-acc-order-${id}`, JSON.stringify(accOrder)); } catch {} }, [accOrder, id]);
+  useEffect(() => { if (accHydratedIdRef.current === id) try {
+    localStorage.setItem(`kyp-acc-order-${id}`, JSON.stringify(accOrder));
+    localStorage.setItem(`kyp-acc-order-incentives-transit-v1-${id}`, "1");
+  } catch {} }, [accOrder, id]);
   useEffect(() => { if (accHydratedIdRef.current === id) try { localStorage.setItem(`kyp-acc-hidden-${id}`, JSON.stringify(accHidden)); } catch {} }, [accHidden, id]);
   const accMove = useCallback((src: string, tgt: string) => {
     if (src === tgt) return;
@@ -1425,8 +1428,6 @@ export default function RunDetail() {
     prevIdRef.current = id;
   }, [id]);
 
-  const isNeighborhoodProfileOpen = sectionStates.neighborhoodProfile;
-  const setIsNeighborhoodProfileOpen = useCallback((v: boolean) => setSectionOpen('neighborhoodProfile', v), [setSectionOpen]);
   const isAddressNewsOpen = sectionStates.addressNews;
   const setIsAddressNewsOpen = useCallback((v: boolean) => setSectionOpen('addressNews', v), [setSectionOpen]);
   const isNeighborhoodNewsOpen = sectionStates.neighborhoodNews;
@@ -1537,10 +1538,6 @@ export default function RunDetail() {
   const schoolsMetricAnchor = (m?: string) => m ? 'print-section-schools-daycare' : undefined;
   // Only the lenders bullet deep-links (per spec); other HMDA bullets carry no chip.
   const hmdaMetricAnchor = (m?: string) => m === 'lenders' ? 'hmda-lenders' : undefined;
-  const isLanguagesSectionOpen = sectionStates.languages;
-  const setIsLanguagesSectionOpen = useCallback((v: boolean) => setSectionOpen('languages', v), [setSectionOpen]);
-  const isWorshipSectionOpen = sectionStates.worship;
-  const setIsWorshipSectionOpen = useCallback((v: boolean) => setSectionOpen('worship', v), [setSectionOpen]);
   const isZoningHistoryOpen = sectionStates.zoningHistory;
   const setIsZoningHistoryOpen = useCallback((v: boolean) => setSectionOpen('zoningHistory', v), [setSectionOpen]);
   const isHmdaBuyerOpen = sectionStates.hmdaBuyer;
@@ -1551,16 +1548,6 @@ export default function RunDetail() {
   const setIsNewConstructionSubOpen = useCallback((v: boolean) => setSectionOpen('newConstructionSub', v), [setSectionOpen]);
   const isZbaActivitySubOpen = sectionStates.zbaActivitySub;
   const setIsZbaActivitySubOpen = useCallback((v: boolean) => setSectionOpen('zbaActivitySub', v), [setSectionOpen]);
-  const isDemographicsSectionOpen = sectionStates.demographics;
-  const setIsDemographicsSectionOpen = useCallback((v: boolean) => setSectionOpen('demographics', v), [setSectionOpen]);
-  const isVotingSectionOpen = sectionStates.voting;
-  const setIsVotingSectionOpen = useCallback((v: boolean) => setSectionOpen('voting', v), [setSectionOpen]);
-  const isPresidentialOpen = sectionStates.presidential;
-  const setIsPresidentialOpen = useCallback((v: boolean) => setSectionOpen('presidential', v), [setSectionOpen]);
-  const isMayoralOpen = sectionStates.mayoral;
-  const setIsMayoralOpen = useCallback((v: boolean) => setSectionOpen('mayoral', v), [setSectionOpen]);
-  const isReferendumsOpen = sectionStates.referendums;
-  const setIsReferendumsOpen = useCallback((v: boolean) => setSectionOpen('referendums', v), [setSectionOpen]);
   const isChildcareAccessOpen = sectionStates.childcareAccess;
   const setIsChildcareAccessOpen = useCallback((v: boolean) => setSectionOpen('childcareAccess', v), [setSectionOpen]);
   const isChildcareDemographicsOpen = sectionStates.childcareDemographics;
@@ -3066,21 +3053,6 @@ export default function RunDetail() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, nnTakeawayFetched, facts?.communityArea, isLoadingNeighborhoodNews, neighborhoodNewsData]);
 
-  // Cached takeaway for the Neighborhood People Profile — trigger-only; the
-  // server derives every input (ACS/HMDA/LODES/language/elections) itself.
-  const { data: peopleTakeawayRec, isFetched: peopleTakeawayFetched } = usePeopleTakeaway(id);
-  const generatePeopleTakeaway = useGeneratePeopleTakeaway(id);
-  const peopleTakeawayAttemptedRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (!id || !peopleTakeawayFetched) return;
-    if (!isNeighborhoodProfileOpen) return; // paid call — only once the section is opened
-    if (!facts?.communityArea && !facts?.zipCode) return;
-    if (peopleTakeawayAttemptedRef.current === id) return;
-    peopleTakeawayAttemptedRef.current = id;
-    generatePeopleTakeaway.mutate();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, peopleTakeawayFetched, isNeighborhoodProfileOpen, facts?.communityArea, facts?.zipCode]);
-
   // Comprehensive report snapshot — built from ALL already-loaded data so Claude never re-fetches.
   const reportSnapshot = useMemo(() => {
     if (!run || !facts) return null;
@@ -3881,7 +3853,6 @@ export default function RunDetail() {
     newsTakeaway: newsTakeaway as any,
     hasSiteNews: !!(newsTakeaway?.meta?.length) || (addressNewsData?.articles?.length || 0) + (coParcelAddressNewsData?.articles?.length || 0) > 0,
     nnTakeaway: nnTakeaway as any,
-    peopleTakeaway: peopleTakeawayRec as any,
     lienDistress,
     lienData,
     isLoadingLiens,
@@ -4165,6 +4136,14 @@ export default function RunDetail() {
       },
     };
   };
+
+  const peopleSubsections = buildSubsectionNumbers([
+    ["languages", true],
+    ["demographics", true],
+    ["daytimeEconomy", true],
+    ["voting", true],
+    ["worship", true],
+  ]);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden print:block print:overflow-visible">
@@ -17973,173 +17952,33 @@ export default function RunDetail() {
           </AccordionSection>
           )}
 
-          {/* Neighborhood People Profile - Collapsible Section */}
-          {((languageData || languageZipData) || facts?.communityArea) && (
+           {/* Neighborhood & People */}
           <AccordionSection {...accProps("people")}>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.195 }}
             >
-              <Collapsible open={isNeighborhoodProfileOpen} onOpenChange={setIsNeighborhoodProfileOpen}>
-                <Card className="border border-border overflow-visible">
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover-elevate pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="chead flex items-center gap-2">
-                          Neighborhood People Profile
-                        </CardTitle>
-                        <span className="text-muted-foreground text-sm">{isNeighborhoodProfileOpen ? '▼' : '▶'}</span>
-                      </div>
-                      {!isNeighborhoodProfileOpen && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {languageData && (
-                            <Badge variant="outline" className="text-xs">
-                              {languageData.topLanguages?.[1]?.language || 'Diverse'}: {languageData.nonEnglishPct}% non-English
-                            </Badge>
-                          )}
-                          {languageData?.linguisticDiversity && (
-                            <Badge className={`text-xs ${languageData.linguisticDiversity === 'high' ? 'bg-green-600 text-white' : languageData.linguisticDiversity === 'moderate' ? 'bg-amber-500 text-white' : ''}`}>
-                              {languageData.linguisticDiversity === 'high' ? 'High' : languageData.linguisticDiversity === 'moderate' ? 'Moderate' : 'Low'} Diversity
-                            </Badge>
-                          )}
-                          {electionData?.classification && (
-                            <Badge className="text-xs">
-                              {electionData.classification}
-                            </Badge>
-                          )}
-                          {censusACSData?.zip?.metrics.find(m => m.label === 'Population') && (
-                            <Badge variant="outline" className="text-xs">
-                              Pop: {censusACSData.zip.metrics.find(m => m.label === 'Population')?.value}
-                            </Badge>
-                          )}
-                          {censusACSData?.zip?.metrics.find(m => m.label === 'Median Household Income') && (
-                            <Badge variant="outline" className="text-xs">
-                              Median Income: {censusACSData.zip.metrics.find(m => m.label === 'Median Household Income')?.value}
-                            </Badge>
-                          )}
-                          {fmrData && (
-                            <Badge variant="outline" className="text-xs">
-                              2BR FMR: ${fmrData.rents.twoBed.toLocaleString()}/mo
-                            </Badge>
-                          )}
-                        </div>
-                      )}
-                      {isNeighborhoodProfileOpen && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Languages spoken, demographic trends, voting patterns, and community insights
-                        </p>
-                      )}
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <CardContent className="pt-0 space-y-6">
-
-          {/* AI Takeaway — fair-housing-hardened, server-derived, cached */}
-          {peopleTakeawayRec?.takeaway && (
-            <div className="rounded-lg p-4 sm:p-5" style={{ background: '#eef0fb', border: '1px solid #d9ddf2' }} data-testid="people-takeaway-card">
-              <div className="flex items-center gap-2 mb-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b3a9e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
-                <span className="text-[11px] font-mono tracking-[0.14em] font-semibold" style={{ color: '#2b3a9e' }}>THE TAKEAWAY</span>
-              </div>
-              <p className="font-serif text-lg sm:text-xl leading-snug mb-3" style={{ color: '#1c2333' }} data-testid="people-takeaway-title">
-                {peopleTakeawayRec.takeaway.title}
-              </p>
-              <div className="space-y-2.5">
-                {peopleTakeawayRec.takeaway.rows.map((row, i) => (
-                  <div key={i} className="flex items-start gap-2.5" data-testid={`people-takeaway-row-${i}`}>
-                    <span
-                      className="mt-1.5 w-2 h-2 rounded-full shrink-0"
-                      style={{ background: row.tone === 'good' ? '#2f7d3f' : row.tone === 'caution' ? '#f3b31f' : row.tone === 'insight' ? '#2b3a9e' : '#9aa0ae' }}
-                    />
-                    <div className="text-sm leading-relaxed" style={{ color: '#2a3040' }}>
-                      <span dangerouslySetInnerHTML={{ __html: row.html }} />
-                      {row.chip && (
-                        <span
-                          className="ml-2 inline-block align-middle text-[10px] font-mono px-1.5 py-0.5 rounded border"
-                          style={row.chip === 'Verify basis'
-                            ? { background: '#fdf6e4', borderColor: '#e8cf8a', color: '#8a6a12' }
-                            : { background: '#ffffff', borderColor: '#c4caea', color: '#2b3a9e' }}
-                        >
-                          {row.chip}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {peopleTakeawayRec.takeaway.context_note && (
-                <div className="mt-3.5 pt-3" style={{ borderTop: '1px dashed #b9c0e4' }}>
-                  <div className="text-[10px] font-mono tracking-[0.12em] mb-1" style={{ color: '#6b7290' }}>CONTEXT — REPORTED, NOT RATED</div>
-                  <p className="text-[13px] leading-relaxed" style={{ color: '#565d72' }} data-testid="people-takeaway-context">
-                    {peopleTakeawayRec.takeaway.context_note}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-          {generatePeopleTakeaway.isPending && !peopleTakeawayRec?.takeaway && (
-            <div className="rounded-lg p-4 text-sm text-muted-foreground animate-pulse" style={{ background: '#eef0fb', border: '1px solid #d9ddf2' }} data-testid="people-takeaway-loading">
-              Writing the takeaway from this section's data…
-            </div>
-          )}
+              <div className="space-y-6">
 
           {/* Languages Spoken Section */}
-          {(languageData || languageZipData) && (
-            <div id="print-section-languages" className="border-b pb-6">
-              <Collapsible open={isLanguagesSectionOpen} onOpenChange={setIsLanguagesSectionOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <Globe className="w-4 h-4" />
-                      Languages Spoken
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isLanguagesSectionOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {languageData && (
-                            <Badge variant="outline" className="text-xs">
-                              {languageData.nonEnglishPct}% Non-English
-                            </Badge>
-                          )}
-                          {languageData?.topLanguages?.[1] && (
-                            <Badge variant="outline" className="text-xs">
-                              {languageData.topLanguages[1].language}
-                            </Badge>
-                          )}
-                          {languageData?.linguisticDiversity && (
-                            <Badge variant={languageData.linguisticDiversity === 'high' ? 'default' : 'secondary'} className="text-xs">
-                              {languageData.linguisticDiversity === 'high' ? 'High' : languageData.linguisticDiversity === 'moderate' ? 'Moderate' : 'Low'} Diversity
-                            </Badge>
-                          )}
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isLanguagesSectionOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                <div className="px-4 mt-2">
-                  <Tabs value={languagesViewMode} onValueChange={(v) => setLanguagesViewMode(v as 'zip' | 'community')} className="w-full mb-4">
-                    <TabsList className="grid w-full grid-cols-2 h-12 p-1.5 bg-secondary border border-border" data-testid="tabs-languages-view">
-                      <TabsTrigger
-                        value="zip"
-                        data-testid="tab-languages-zip"
-                        className="h-full text-sm font-semibold data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-                      >
-                        <MapPin className="w-4 h-4" />
-                        By ZIP Code
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="community"
-                        data-testid="tab-languages-community"
-                        className="h-full text-sm font-semibold data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-                      >
-                        <MapIcon className="w-4 h-4" />
-                        By Neighborhood
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
+            <div id="print-section-languages">
+              <KypSubhead subsection={peopleSubsections.languages}>
+                <span className="lbl">Languages Spoken</span>
+                <span className="ct">American Community Survey</span>
+              </KypSubhead>
+              <p className="kyp-scopenote">
+                Figures below describe <b>{languagesViewMode === "zip"
+                  ? `ZIP ${languageZipData?.zipCode ?? facts?.zipCode ?? ""}`
+                  : `neighborhood ${languageData?.communityArea ?? facts?.communityArea ?? "unavailable"}`}</b>, not this address
+              </p>
+              <div className="kyp-segrow">
+                <div className="kyp-seg" data-testid="tabs-languages-view">
+                  <button type="button" className={languagesViewMode === "zip" ? "on" : ""} onClick={() => setLanguagesViewMode("zip")} data-testid="tab-languages-zip">By ZIP Code</button>
+                  <button type="button" className={languagesViewMode === "community" ? "on" : ""} onClick={() => setLanguagesViewMode("community")} data-testid="tab-languages-community">By Neighborhood</button>
+                </div>
+              </div>
+              <div className="space-y-4">
                   {(languagesViewMode === 'zip' ? isLoadingLanguageZip : isLoadingLanguage) ? (
                     <div className="space-y-3">
                       <Skeleton className="h-6 w-2/3" />
@@ -18160,67 +17999,53 @@ export default function RunDetail() {
                       : (currentLangData as any).communityArea;
                     return (
                     <div className="space-y-4">
-                      <div className={`p-3 rounded-lg border ${
-                        currentLangData.linguisticDiversity === 'moderate'
-                          ? 'bg-[#ecedf9] border-[#d7dcf3]'
-                          : 'bg-secondary border-border'
-                      }`}>
-                        <div className="flex items-center gap-2">
-                          <span className={`font-semibold text-sm ${
-                            currentLangData.linguisticDiversity === 'moderate' ? 'text-[#2b3a9e]' : 'text-foreground'
-                          }`}>
-                            {currentLangData.linguisticDiversity === 'high'
-                              ? 'High Linguistic Diversity'
-                              : currentLangData.linguisticDiversity === 'moderate'
-                              ? 'Moderate Linguistic Diversity'
-                              : 'Primarily English-Speaking'}
-                          </span>
+                      <div className="kyp-blocks hero two">
+                        <div className="kyp-block ind">
+                          <div className="bv">{currentLangData.nonEnglishPct}%</div>
+                          <div className="bl">Speak a language other than English at home</div>
                         </div>
-                        <p className={`text-sm mt-1 ${
-                          currentLangData.linguisticDiversity === 'moderate' ? 'text-[#565651]' : 'text-foreground'
-                        }`}>
-                          {currentLangData.nonEnglishPct}% speak a language other than English at home • {currentLangData.comparedToCityAvg}
-                        </p>
-                        {currentLangData.rankDescription && (
-                          <p className={`text-xs mt-1 font-medium ${
-                            currentLangData.linguisticDiversity === 'moderate' ? 'text-[#2b3a9e]' : 'text-muted-foreground'
-                          }`} data-testid="text-language-rank">
-                            {currentLangData.rankDescription}
-                          </p>
-                        )}
+                        <div className="kyp-block slate">
+                          <div className="bv">{currentLangData.linguisticDiversity === 'high' ? 'High' : currentLangData.linguisticDiversity === 'moderate' ? 'Moderate' : 'Low'}</div>
+                          <div className="bl">Linguistic diversity</div>
+                          <div className="bd">{currentLangData.comparedToCityAvg}</div>
+                          {currentLangData.rankDescription && <div className="bd" data-testid="text-language-rank">{currentLangData.rankDescription}</div>}
+                        </div>
                       </div>
 
                       <div className="space-y-2">
-                        <h4 className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651]">Top Languages at Home</h4>
-                        <div className="space-y-2">
-                          {currentLangData.topLanguages.map((lang, idx) => (
-                            <div key={lang.language} className="flex items-center gap-2">
-                              <div className="flex-1">
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="text-sm font-medium">{lang.language}</span>
-                                  <span className="text-sm text-muted-foreground">{lang.pct}%</span>
-                                </div>
-                                <div className="w-full bg-secondary border border-border rounded-full h-2">
-                                  <div
-                                    className="h-2 rounded-full"
-                                    style={{ background: 'var(--chart-sf)', width: `${Math.min(lang.pct, 100)}%` }}
-                                    title={`${lang.language}: ${lang.pct}%`}
-                                  />
-                                </div>
+                        <div className="kyp-charttitle">Top Languages at Home</div>
+                        {currentLangData.topLanguages.map((lang) => {
+                          const pct = Math.min(lang.pct, 100);
+                          return (
+                            <div key={lang.language} className="kyp-hbar" title={`${lang.language}: ${lang.pct}%`}>
+                              <span className="hl">{lang.language}</span>
+                              <div className="htrack">
+                                <i className="ind" style={{ width: `${pct}%` }}>
+                                  {pct >= 12 && <span className="hbar-count">{lang.pct}%</span>}
+                                </i>
+                                {pct < 12 && <b className="out" style={{ left: `${pct}%` }}>{lang.pct}%</b>}
                               </div>
                             </div>
-                          ))}
+                          );
+                        })}
+                      </div>
+
+                      <div className="kyp-blocks hero two">
+                        <div className="kyp-block slate" data-testid="text-lep-count">
+                          <div className="bv">{currentLangData.limitedEnglishProficiency.count.toLocaleString()}</div>
+                          <div className="bl">Limited English proficiency</div>
+                          <div className="bd">{currentLangData.limitedEnglishProficiency.pct}% of population 5+</div>
+                        </div>
+                        <div className="kyp-block slate" data-testid="text-population-5-plus">
+                          <div className="bv">{currentLangData.population5Plus.toLocaleString()}</div>
+                          <div className="bl">Population 5+</div>
+                          <div className="bd">{areaLabel}</div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3">
-                        <StatTile label="Limited English Proficiency" value={currentLangData.limitedEnglishProficiency.count.toLocaleString()} qualifier={`(${currentLangData.limitedEnglishProficiency.pct}% of population 5+)`} data-testid="text-lep-count" />
-                        <StatTile label="Population 5+" value={currentLangData.population5Plus.toLocaleString()} qualifier={areaLabel} data-testid="text-population-5-plus" />
-                      </div>
-
                       {currentLangData.limitedEnglishProficiency.pct >= 10 && (
-                        <div className="p-2 bg-secondary rounded-lg border border-border">
-                          <p className="text-sm text-foreground">
+                        <div className="kyp-scopenote">
+                          <p>
                             <span className="font-medium">Note:</span> {currentLangData.limitedEnglishProficiency.pct}% have limited English proficiency. Consider bilingual signage, staff, or translation services.
                           </p>
                         </div>
@@ -18235,53 +18060,15 @@ export default function RunDetail() {
                     );
                   })()}
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
-          )}
 
           {/* Demographic Trends Section */}
-          {facts?.communityArea && (
-            <div id="print-section-demographics" className="border-b pb-6">
-              <Collapsible open={isDemographicsSectionOpen} onOpenChange={setIsDemographicsSectionOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <User className="w-4 h-4" />
-                      Demographic Trends: {facts.communityArea}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isDemographicsSectionOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {censusACSData?.zip || censusACSData?.tract ? (
-                            <>
-                              {censusACSData?.zip?.metrics.find(m => m.label === 'Population') && (
-                                <Badge variant="outline" className="text-xs">
-                                  Pop: {censusACSData.zip.metrics.find(m => m.label === 'Population')?.value}
-                                </Badge>
-                              )}
-                              {censusACSData?.zip?.metrics.find(m => m.label === 'Median Household Income') && (
-                                <Badge variant="outline" className="text-xs">
-                                  ZIP Income: {censusACSData.zip.metrics.find(m => m.label === 'Median Household Income')?.value}
-                                </Badge>
-                              )}
-                              {censusACSData?.tract?.metrics.find(m => m.label === 'Median Household Income') && (
-                                <Badge variant="outline" className="text-xs">
-                                  Tract Income: {censusACSData.tract.metrics.find(m => m.label === 'Median Household Income')?.value}
-                                </Badge>
-                              )}
-                            </>
-                          ) : (
-                            <Badge variant="secondary" className="text-xs">No Data</Badge>
-                          )}
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isDemographicsSectionOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                <div className="px-4 mt-2 space-y-6">
+            <div id="print-section-demographics">
+              <KypSubhead subsection={peopleSubsections.demographics}>
+                <span className="lbl">Demographic Trends</span>
+                <span className="ct">2014–2018 vs 2019–2023</span>
+              </KypSubhead>
+              <div className="space-y-4">
 
                   {/* ACS demographics — ZIP ⇄ Census Tract toggle (mirrors the HMDA scope control). Community Area removed: Chicago Data Portal snapshot was incomplete. */}
                   <div>
@@ -18289,15 +18076,12 @@ export default function RunDetail() {
                       const sel = demoViewMode === 'zip' ? censusACSData?.zip : censusACSData?.tract;
                       return (
                         <>
-                          <div className="flex items-center gap-3 mb-3 flex-wrap">
-                            <div className="hmda-seg" data-testid="toggle-demographics-geo">
-                              <button type="button" className={demoViewMode === 'zip' ? 'hmda-seg-on' : ''} onClick={() => setDemoViewMode('zip')} data-testid="button-demographics-zip">ZIP Code</button>
-                              <button type="button" className={demoViewMode === 'tract' ? 'hmda-seg-on' : ''} onClick={() => setDemoViewMode('tract')} data-testid="button-demographics-tract">Census Tract</button>
+                           <p className="kyp-scopenote">Figures below describe <b>{demoViewMode === 'zip' ? (sel?.name ?? `ZIP ${facts?.zipCode || 'unavailable'}`) : (sel?.name ?? `Census Tract ${facts?.tractGeoid || 'unavailable'}`)}</b>, not this address</p>
+                          <div className="kyp-segrow">
+                            <div className="kyp-seg" data-testid="toggle-demographics-geo">
+                              <button type="button" className={demoViewMode === 'zip' ? 'on' : ''} onClick={() => setDemoViewMode('zip')} data-testid="button-demographics-zip">ZIP Code</button>
+                              <button type="button" className={demoViewMode === 'tract' ? 'on' : ''} onClick={() => setDemoViewMode('tract')} data-testid="button-demographics-tract">Census Tract</button>
                             </div>
-                            <span className="text-xs text-muted-foreground">
-                              {sel ? sel.name : demoViewMode === 'zip' ? `ZIP ${facts?.zipCode || ''}` : facts?.tractGeoid || ''}
-                              {' · U.S. Census Bureau ACS'}
-                            </span>
                           </div>
                           {isLoadingCensusACS ? (
                             <div className="space-y-2">
@@ -18309,7 +18093,7 @@ export default function RunDetail() {
                             <div className="space-y-3">
                               <div className="overflow-x-auto">
                                 <div className="demo-legend"><span><i className="demo-dot" style={{background:'#2f7d3f'}} />Favorable trend</span><span><i className="demo-dot" style={{background:'#d13b26'}} />Unfavorable trend</span><span><i className="demo-dot" style={{background:'#8b8a84'}} />Contextual — not rated</span></div>
-                                <table className="civic-table" data-testid={demoViewMode === 'zip' ? 'table-demographics-zip' : 'table-demographics-tract'}>
+                                <table className="kyp-dtab" data-testid={demoViewMode === 'zip' ? 'table-demographics-zip' : 'table-demographics-tract'}>
                                   <thead>
                                     <tr className="border-b bg-muted">
                                       <th className="text-left py-2 px-3 font-semibold">Metric</th>
@@ -18336,8 +18120,13 @@ export default function RunDetail() {
                                           {sel.priorMetrics && <td className="text-right py-2 px-3 text-muted-foreground">{prior?.value ?? '—'}</td>}
                                           <td className="text-right py-2 px-3">{m.value}</td>
                                           {sel.priorMetrics && (
-                                            <td className={`text-right py-2 px-3 text-xs ${demographicChangeClass(m.label, change?.up ?? null)}`}>
-                                              {change ? <span>{change.up ? '↑' : '↓'} {change.text}</span> : <span className="text-muted-foreground">—</span>}
+                                            <td className="text-right">
+                                              {change ? (() => {
+                                                const tone = demographicChangeClass(m.label, change.up);
+                                                const toneClass = tone === 'demo-good' ? 'up' : tone === 'demo-bad' ? 'down' : '';
+                                                const background = tone === 'demo-good' ? '#2f7d3f' : tone === 'demo-bad' ? '#d13b26' : 'var(--kyp-slate)';
+                                                return <span className={`kyp-trend ${toneClass}`} style={{ background }}>{change.up ? '↑' : '↓'} {change.text}</span>;
+                                              })() : <span className="text-muted-foreground">—</span>}
                                             </td>
                                           )}
                                         </tr>
@@ -18359,15 +18148,15 @@ export default function RunDetail() {
                     })()}
                   </div>
 
-                  {/* Sub-section 4: LODES Daytime Economy (Census LEHD) */}
-                  {(isLoadingLodes || lodesData) && (
-                    <div className="border-t pt-5" data-testid="section-lodes">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-[11px] font-bold rounded-md px-2.5 py-0.5" style={{ background: '#ecedf9', color: '#2b3a9e' }}>Daytime Economy</span>
-                        <span className="text-xs text-muted-foreground">
-                          Census Tract {facts?.tractGeoid} · U.S. Census LEHD (2021)
-                        </span>
-                      </div>
+                  </div>
+                </div>
+                <div data-testid="section-lodes">
+                    <KypSubhead subsection={peopleSubsections.daytimeEconomy}>
+                      <span className="lbl">Daytime Economy</span>
+                      <span className="ct">Census LEHD, 2021</span>
+                    </KypSubhead>
+                    <p className="kyp-scopenote">Figures below describe <b>Census Tract {facts?.tractGeoid || "unavailable"}</b>, not this address</p>
+                    <div>
                       {isLoadingLodes ? (
                         <div className="space-y-2">
                           <Skeleton className="h-4 w-full" />
@@ -18376,27 +18165,34 @@ export default function RunDetail() {
                       ) : lodesData ? (
                         <div className="space-y-4">
                           {/* Worker flow summary */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <StatTile className="lodes-tile" data-testid="lodes-workers-in"
-                              label="Jobs Here"
-                              qualifier="workers commute in daily"
-                              value={lodesData.workersInTract.toLocaleString()}
-                            />
-                            <StatTile className="lodes-tile" data-testid="lodes-residents-out"
-                              label="Residents Working"
-                              qualifier="residents leave to work"
-                              value={lodesData.residentsWhoWork.toLocaleString()}
-                            />
-                            <StatTile className="lodes-tile" data-testid="lodes-net-flow"
-                              label="Net Daytime Pull"
-                              qualifier={lodesData.workersInTract > lodesData.residentsWhoWork ? 'employment center' : 'bedroom community'}
-                              value={`${lodesData.workersInTract - lodesData.residentsWhoWork >= 0 ? '+' : '\u2212'}${Math.abs(lodesData.workersInTract - lodesData.residentsWhoWork).toLocaleString()}`}
-                            />
+                          <div className="kyp-cxtiles">
+                            <div className="kyp-cxtile" data-testid="lodes-workers-in">
+                              <span className="l">Jobs Here</span>
+                              <span className="n">{lodesData.workersInTract.toLocaleString()}</span>
+                              <span className="s">workers commute in daily</span>
+                            </div>
+                            <div className="kyp-cxtile dark" data-testid="lodes-residents-out">
+                              <span className="l">Residents Working</span>
+                              <span className="n">{lodesData.residentsWhoWork.toLocaleString()}</span>
+                              <span className="s">residents leave to work</span>
+                            </div>
+                            <div className="kyp-cxtile slate" data-testid="lodes-net-flow">
+                              <span className="l">Net Daytime Pull</span>
+                              <span className="n">{`${lodesData.workersInTract - lodesData.residentsWhoWork >= 0 ? '+' : '\u2212'}${Math.abs(lodesData.workersInTract - lodesData.residentsWhoWork).toLocaleString()}`}</span>
+                              <span className="s">{lodesData.workersInTract > lodesData.residentsWhoWork ? 'employment center' : 'bedroom community'}</span>
+                            </div>
+                            {lodesData.highEarners > 0 && lodesData.workersInTract > 0 && (
+                              <div className="kyp-cxtile slate">
+                                <span className="l">Higher-Earning Jobs</span>
+                                <span className="n">{Math.round((lodesData.highEarners / lodesData.workersInTract) * 100)}%</span>
+                                <span className="s">of jobs pay &gt; $3,333/month</span>
+                              </div>
+                            )}
                           </div>
                           {/* Industry breakdown */}
                           {(lodesData.retailJobs > 0 || lodesData.healthcareJobs > 0 || lodesData.foodServiceJobs > 0 || lodesData.artsEntertainmentJobs > 0) && (
                             <div>
-                              <p className="lodes-barlbl">Jobs by Industry · Tract</p>
+                              <p className="kyp-charttitle">Jobs by Industry · Tract</p>
                               <div>
                                 {[
                                   { label: 'Healthcare & Social Assistance', value: lodesData.healthcareJobs },
@@ -18407,68 +18203,31 @@ export default function RunDetail() {
                                   const maxVal = Math.max(lodesData!.healthcareJobs, lodesData!.foodServiceJobs, lodesData!.retailJobs, lodesData!.artsEntertainmentJobs);
                                   const pct = maxVal > 0 ? (value / maxVal) * 100 : 0;
                                   return (
-                                    <div key={label} className="lodes-rb" title={`${label}: ${value.toLocaleString()} jobs`}>
-                                      <span className="lodes-nm">{label}</span>
-                                      <div className="lodes-trk"><span style={{ width: `${pct}%` }} /></div>
-                                      <span className="lodes-v">{value.toLocaleString()}</span>
+                                    <div key={label} className="kyp-hbar wide" title={`${label}: ${value.toLocaleString()} jobs`}>
+                                      <span className="hl">{label}</span>
+                                      <div className="htrack"><i className="ind" style={{ width: `${pct}%` }}><span className="hbar-count">{value.toLocaleString()}</span></i></div>
                                     </div>
                                   );
                                 })}
                               </div>
                             </div>
                           )}
-                          {lodesData.highEarners > 0 && lodesData.workersInTract > 0 && (
-                            <p className="lodes-callout">
-                              <b>{Math.round((lodesData.highEarners / lodesData.workersInTract) * 100)}%</b> of jobs in this tract pay &gt; $3,333/month.
-                            </p>
-                          )}
-                          <div className="lodes-src">
+                          <div className="kyp-src">
                             Source: U.S. Census Bureau LEHD Origin-Destination Employment Statistics (LODES8), 2021. WAC = workers at workplace; RAC = workers at home.
                           </div>
                         </div>
-                      ) : null}
-                    </div>
-                  )}
-
-                </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          )}
-
-          {/* Voting Trends Section */}
-          {facts?.communityArea && (
-            <div id="print-section-political" data-testid="section-political-profile">
-              <Collapsible open={isVotingSectionOpen} onOpenChange={setIsVotingSectionOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-voting-trends">
-                    <h3 className="chead chead-icon" data-testid="text-political-title">
-                      <Vote className="w-4 h-4" />
-                      Voting Trends: {facts.communityArea}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isVotingSectionOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {electionData?.classification ? (
-                            <>
-                              <Badge variant="outline" className="text-xs">
-                                {electionData.classification}
-                              </Badge>
-                              <Badge variant="outline" className="text-xs">
-                                {electionData.avg_dem_margin > 0 ? 'D+' : 'R+'}{Math.abs(electionData.avg_dem_margin).toFixed(1)}%
-                              </Badge>
-                            </>
-                          ) : (
-                            <Badge variant="secondary" className="text-xs">No Data</Badge>
-                          )}
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isVotingSectionOpen ? '▼' : '▶'}</span>
+                      ) : <p className="text-sm text-muted-foreground">Daytime employment data unavailable.</p>}
                     </div>
                   </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                <div className="px-4 mt-2">
+
+          {/* Voting Trends Section */}
+            <div id="print-section-political" data-testid="section-political-profile">
+              <KypSubhead subsection={peopleSubsections.voting} data-testid="trigger-voting-trends">
+                <span className="lbl" data-testid="text-political-title">Voting &amp; Civic</span>
+                <span className="ct">reported, not rated</span>
+              </KypSubhead>
+               <p className="kyp-scopenote">Figures below describe <b>community area {facts?.communityArea || "unavailable"}</b>, not this address</p>
+              <div>
                   {isLoadingElection ? (
                     <div className="space-y-3">
                       <Skeleton className="h-6 w-2/3" />
@@ -18477,73 +18236,54 @@ export default function RunDetail() {
                     </div>
                   ) : electionData ? (
                     <div className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-4 bg-muted rounded-lg border border-border">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge variant={electionData.classification === 'Swing Area' ? 'outline' : 'secondary'} data-testid="badge-classification">
-                              {electionData.classification}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground" data-testid="text-trend">
-                            {electionData.trend}
-                          </p>
+                      <div className="kyp-blocks hero two">
+                        <div className="kyp-block ind">
+                          <div className="bv" data-testid="badge-classification">{electionData.classification}</div>
+                          <div className="bl" data-testid="text-trend">{electionData.trend}</div>
                         </div>
-                        <div className="p-4 bg-muted rounded-lg border border-border">
-                          <p className="text-sm font-medium">Average Democratic Margin</p>
-                          <p className="text-2xl font-bold" data-testid="text-dem-margin">
+                        <div className="kyp-block slate">
+                          <div className="bv" data-testid="text-dem-margin">
                             {electionData.avg_dem_margin > 0 ? 'D+' : 'R+'}{Math.abs(electionData.avg_dem_margin).toFixed(1)}%
-                          </p>
+                          </div>
+                          <div className="bl">Average Democratic Margin</div>
                         </div>
                       </div>
 
-                      <Collapsible open={isPresidentialOpen} onOpenChange={setIsPresidentialOpen}>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                            <h4 className="chead">
-                              Presidential Elections
-                            </h4>
-                            <div className="flex items-center gap-2">
-                              {!isPresidentialOpen && (
-                                <div className="flex flex-wrap gap-1.5">
-                                  <Badge variant="secondary" className="text-xs">3 Elections</Badge>
-                                  <Badge variant="outline" className="text-xs">
-                                    2024: {electionData.presidential['2024'].margin}
-                                  </Badge>
-                                </div>
-                              )}
-                              <span className="text-muted-foreground text-sm">{isPresidentialOpen ? '▼' : '▶'}</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="px-4">
+                      <div>
+                        <p className="kyp-charttitle">Presidential Elections</p>
+                        <div>
                           <div className="overflow-x-auto">
-                            <table className="civic-table" data-testid="table-presidential">
+                            <table className="kyp-votetab" data-testid="table-presidential">
                               <thead>
-                                <tr className="border-b">
-                                  <th className="text-left py-2 font-medium">Year</th>
-                                  <th className="text-right py-2 font-medium">Democratic</th>
-                                  <th className="text-right py-2 font-medium">Republican</th>
-                                  <th className="text-right py-2 font-medium">Margin</th>
-                                  <th className="text-right py-2 font-medium">Turnout</th>
+                                <tr>
+                                  <th className="wide">Year</th>
+                                  <th>Vote</th>
+                                  <th>Margin</th>
+                                  <th>Turnout</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {(['2024', '2020', '2016'] as const).map((year) => {
                                   const result = electionData.presidential[year];
                                   return (
-                                    <tr key={year} className="border-b border-border/50" data-testid={`row-presidential-${year}`}>
-                                      <td className="py-2 font-medium">{year}</td>
-                                      <td colSpan={2} className="py-2">
-                                        <div className="civic-party-bar"><span className="civic-dem" style={{width:`${result.democratic_pct}%`}} /><span className="civic-rep" style={{width:`${result.republican_pct}%`}} /></div>
-                                        <div className="flex justify-between"><span className="civic-party-pct" style={{color:'#3f51c5'}}>D {result.democratic_pct.toFixed(1)}%</span><span className="civic-party-pct" style={{color:'#c34a39'}}>R {result.republican_pct.toFixed(1)}%</span></div>
+                                    <tr key={year} data-testid={`row-presidential-${year}`}>
+                                      <td>{year}</td>
+                                      <td>
+                                        <div className="kyp-votebar">
+                                          <i className="dem" style={{ width: `${result.democratic_pct}%` }} />
+                                          <i className="rep" style={{ width: `${result.republican_pct}%` }} />
+                                        </div>
+                                        <div className="kyp-votekey">
+                                          <span><b>D</b> {result.democratic_pct.toFixed(1)}%</span>
+                                          <span><b>R</b> {result.republican_pct.toFixed(1)}%</span>
+                                        </div>
                                       </td>
-                                      <td className="text-right py-2">
-                                        <Badge variant="outline" className="civic-margin text-xs" data-testid={`badge-margin-${year}`}>
+                                      <td>
+                                        <span className="kyp-votemargin" data-testid={`badge-margin-${year}`}>
                                           {result.margin}
-                                        </Badge>
+                                        </span>
                                       </td>
-                                      <td className="text-right py-2">
+                                      <td>
                                         {result.total_votes.toLocaleString()}
                                       </td>
                                     </tr>
@@ -18552,114 +18292,56 @@ export default function RunDetail() {
                               </tbody>
                             </table>
                           </div>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                        </div>
+                      </div>
 
-                      <Collapsible open={isMayoralOpen} onOpenChange={setIsMayoralOpen}>
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                            <h4 className="chead">
-                              Mayoral Elections
-                            </h4>
-                            <div className="flex items-center gap-2">
-                              {!isMayoralOpen && (
-                                <div className="flex flex-wrap gap-1.5">
-                                  <Badge variant="secondary" className="text-xs">2 Elections</Badge>
-                                  <Badge variant="outline" className="text-xs">
-                                    2023: {electionData.mayoral['2023'].winner} ({electionData.mayoral['2023'].winner_pct.toFixed(1)}%)
-                                  </Badge>
-                                </div>
-                              )}
-                              <span className="text-muted-foreground text-sm">{isMayoralOpen ? '▼' : '▶'}</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="px-4" data-testid="section-mayoral">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="kyp-charttitle">Mayoral Elections</p>
+                        <div className="kyp-mix" data-testid="section-mayoral">
                             {(['2023', '2019'] as const).map((year) => {
                               const result = electionData.mayoral[year];
                               return (
-                                <div key={year} className="p-3 bg-muted rounded-lg border border-border" data-testid={`card-mayoral-${year}`}>
-                                  <p className="text-sm font-medium mb-2">{year} Runoff</p>
-                                  <div className="space-y-1">
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-sm">
-                                        <span className="font-medium" data-testid={`text-winner-${year}`}>{result.winner}</span>
-                                        <span className="text-muted-foreground ml-1">({result.winner_label})</span>
-                                      </span>
-                                      <span className="text-sm font-bold text-right">{result.winner_pct.toFixed(1)}%</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-muted-foreground">
-                                      <span className="text-sm">
-                                        {result.opponent}
-                                        <span className="ml-1">({result.opponent_label})</span>
-                                      </span>
-                                      <span className="text-sm">{result.opponent_pct.toFixed(1)}%</span>
-                                    </div>
-                                    <div className="civic-runoff-bar"><span className="civic-winner" style={{width:`${result.winner_pct}%`}} /><span className="civic-runner" style={{width:`${result.opponent_pct}%`}} /></div>
+                                <div key={year} className="kyp-mixcard" data-testid={`card-mayoral-${year}`}>
+                                  <div className="mh">{year} Runoff</div>
+                                  <div className="kyp-mixrow">
+                                    <span className="sw" style={{ background: "var(--kyp-indigoL)" }} />
+                                    <span className="nm"><span data-testid={`text-winner-${year}`}>{result.winner}</span> ({result.winner_label})</span>
+                                    <span className="pc">{result.winner_pct.toFixed(1)}%</span>
+                                  </div>
+                                  <div className="kyp-mixrow">
+                                    <span className="sw" style={{ background: "var(--kyp-slate)" }} />
+                                    <span className="nm">{result.opponent} ({result.opponent_label})</span>
+                                    <span className="pc">{result.opponent_pct.toFixed(1)}%</span>
                                   </div>
                                 </div>
                               );
                             })}
-                          </div>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                        </div>
+                      </div>
 
                       {electionData.referendums && electionData.referendums.length > 0 && (
-                        <Collapsible open={isReferendumsOpen} onOpenChange={setIsReferendumsOpen}>
-                          <CollapsibleTrigger asChild>
-                            <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                              <h4 className="chead">
-                                Recent Referendums
-                              </h4>
-                              <div className="flex items-center gap-2">
-                                {!isReferendumsOpen && (
-                                  <div className="flex flex-wrap gap-1.5">
-                                    <Badge variant="secondary" className="text-xs">
-                                      {electionData.referendums.length} Referendum{electionData.referendums.length !== 1 ? 's' : ''}
-                                    </Badge>
-                                    {(() => {
-                                      const passed = electionData.referendums.filter(r => r.passed).length;
-                                      return (
-                                        <Badge variant="outline" className="text-xs">
-                                          {passed} Passed, {electionData.referendums.length - passed} Failed
-                                        </Badge>
-                                      );
-                                    })()}
-                                  </div>
-                                )}
-                                <span className="text-muted-foreground text-sm">{isReferendumsOpen ? '▼' : '▶'}</span>
-                              </div>
-                            </div>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <div className="px-4 space-y-2" data-testid="section-referendums">
-                              {electionData.referendums.map((ref, idx) => (
-                                <div key={idx} className="civic-ref-row" data-testid={`row-referendum-${idx}`}>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium" data-testid={`text-referendum-question-${idx}`}>{ref.question}</span>
-                                    <span className="text-xs text-muted-foreground">({ref.year})</span>
-                                  </div>
-                                  <div className="civic-yes-bar"><span className="civic-dem" style={{width:`${ref.yes_pct}%`}} /><span className="civic-threshold" /></div>
-                                  <Badge variant="outline" className={`text-xs ${ref.passed ? 'civic-passed' : 'civic-failed'}`} data-testid={`badge-referendum-result-${idx}`}>
-                                      {ref.passed ? 'Passed' : 'Failed'}
-                                  </Badge>
+                        <div>
+                          <p className="kyp-charttitle">Recent Referendums</p>
+                          <div data-testid="section-referendums">
+                            {electionData.referendums.map((ref, idx) => (
+                              <div key={idx} className="kyp-refrow" data-testid={`row-referendum-${idx}`}>
+                                <div className="rn">
+                                  <span data-testid={`text-referendum-question-${idx}`}>{ref.question}</span>
+                                  <u>{ref.year}</u>
                                 </div>
-                              ))}
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
+                                <div className="rt"><i style={{ width: `${ref.yes_pct}%` }} /></div>
+                                <span className={`ro ${ref.passed ? 'passed' : 'failed'}`} data-testid={`badge-referendum-result-${idx}`}>
+                                  {ref.passed ? 'Passed' : 'Failed'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
 
-                      <div className="text-xs text-muted-foreground pt-2 border-t flex items-start gap-1">
-                        <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                        <span>
-                          Data sources: {electionData.data_sources?.join(', ')}.
-                          {electionData.notes && ` ${electionData.notes}`}
-                        </span>
+                      <div className="kyp-src">
+                        Data sources: {electionData.data_sources?.join(', ')}.
+                        {electionData.notes && ` ${electionData.notes}`}
                       </div>
                     </div>
                   ) : (
@@ -18668,32 +18350,16 @@ export default function RunDetail() {
                     </p>
                   )}
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
-          )}
 
           {/* Places of Worship Section */}
           <div id="print-section-worship">
-            <Collapsible open={isWorshipSectionOpen} onOpenChange={setIsWorshipSectionOpen}>
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-places-of-worship">
-                  <h3 className="chead chead-icon">
-                    <Landmark className="w-4 h-4" />
-                    Places of Worship
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {!isWorshipSectionOpen && placesOfWorshipData && (
-                      <Badge variant="outline" className="text-xs">
-                        {placesOfWorshipData.totalCount} within 1 mi
-                      </Badge>
-                    )}
-                    <span className="text-muted-foreground text-sm">{isWorshipSectionOpen ? '▼' : '▶'}</span>
-                  </div>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-4 mt-2 pb-2">
+            <KypSubhead subsection={peopleSubsections.worship} data-testid="trigger-places-of-worship">
+              <span className="lbl">Places of Worship</span>
+              <span className="ct">{placesOfWorshipData?.totalCount ?? "—"} within 1 mile</span>
+            </KypSubhead>
+            <p className="kyp-scopenote">Figures below describe places within <b>1 mile</b>, not this address</p>
+            <div className="pb-2">
                   {isLoadingPlacesOfWorship ? (
                     <div className="space-y-2">
                       <Skeleton className="h-4 w-1/3" />
@@ -18724,49 +18390,42 @@ export default function RunDetail() {
                     });
                     return (
                       <div className="space-y-4">
-                        <p className="text-sm text-muted-foreground">
-                          {placesOfWorshipData.totalCount} {placesOfWorshipData.totalCount === 1 ? 'place' : 'places'} of worship found within 1 mile
-                        </p>
+                        <div className="kyp-blocks hero one">
+                          <div className="kyp-block ind">
+                            <div className="bv">{placesOfWorshipData.totalCount}</div>
+                            <div className="bl">Places of Worship within 1 mile</div>
+                          </div>
+                        </div>
                         {sorted.map(([religion, places]) => (
                           <div key={religion}>
-                            <div className="flex items-center gap-2 mb-1.5">
-                              <span className="font-jbmono text-xs font-bold uppercase tracking-wider text-foreground">{religion}</span>
-                              <Badge variant="secondary" className="text-xs px-1.5 py-0">{places.length}</Badge>
+                            <div className="kyp-charttitle">
+                              {religion} · {places.length}
                             </div>
-                            <div className="space-y-1">
+                            <div>
                               {places.map((place: any) => (
-                                <div key={place.id} className="text-sm flex items-start gap-2" data-testid={`row-worship-${place.id}`}>
-                                  <div className="w-1 h-1 rounded-full bg-foreground mt-2 shrink-0" />
-                                  <div className="min-w-0">
-                                    <span className="font-medium">{place.name || 'Unnamed'}</span>
-                                    {place.denomination && (
-                                      <span className="text-muted-foreground"> &middot; {place.denomination.charAt(0).toUpperCase() + place.denomination.slice(1)}</span>
-                                    )}
-                                    {place.address && (
-                                      <span className="text-muted-foreground text-xs block">{place.address}</span>
-                                    )}
+                                <div key={place.id} className="kyp-loanrow" data-testid={`row-worship-${place.id}`}>
+                                  <div className="lmain">
+                                    <span className="lnm">{place.name || 'Unnamed'}</span>
+                                    <span className="lmeta">
+                                      {place.denomination && `${place.denomination.charAt(0).toUpperCase() + place.denomination.slice(1)} · `}
+                                      {place.address}
+                                    </span>
                                   </div>
                                 </div>
                               ))}
                             </div>
                           </div>
                         ))}
-                        <p className="text-xs text-muted-foreground">Source: OpenStreetMap contributors</p>
+                        <p className="kyp-src">Source: OpenStreetMap contributors</p>
                       </div>
                     );
                   })()}
                 </div>
-              </CollapsibleContent>
-            </Collapsible>
+            </div>
           </div>
 
-                    </CardContent>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
             </motion.div>
           </AccordionSection>
-          )}
 
           <AccordionSection {...accProps("valuation")}>
           {/* Quick Cashflow Calculator for Day Care projects */}

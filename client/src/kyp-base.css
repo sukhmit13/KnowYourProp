@@ -1573,3 +1573,86 @@ button.kyp-morelink { background: none; border: 0; padding: 0; }
 @media print {
   .kyp-comps-view .cmp-card { break-inside:avoid; }
 }
+
+/* ============================================================
+   Step 25 — Neighbourhood & People
+   ============================================================ */
+
+/* --- 1. Split vote bar (presidential results) --------------- */
+.kyp-votetab { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+.kyp-votetab th {
+  font-family: var(--kyp-mono); font-size: 8.5px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--kyp-muted);
+  text-align: right; padding-bottom: 8px;
+}
+.kyp-votetab th:first-child,
+.kyp-votetab th.wide { text-align: left; }
+.kyp-votetab td {
+  padding: 11px 0; border-bottom: 1px solid var(--kyp-line);
+  text-align: right; color: var(--kyp-ink);
+}
+.kyp-votetab td:first-child { text-align: left; font-weight: 600; }
+.kyp-votetab tr:last-child td { border-bottom: 0; }
+
+.kyp-votebar {
+  position: relative; height: 15px; border-radius: 4px;
+  background: var(--kyp-wash); overflow: hidden; display: flex; min-width: 200px;
+}
+.kyp-votebar i { display: block; height: 100%; }
+.kyp-votebar i.dem { background: var(--kyp-indigoL); }
+.kyp-votebar i.rep { background: var(--kyp-bad); }
+.kyp-votebar span {
+  position: absolute; top: 0; line-height: 15px;
+  font-family: var(--kyp-mono); font-size: 8.5px; font-weight: 700; color: #fff;
+}
+.kyp-votebar span.l { left: 5px; }
+.kyp-votebar span.r { right: 5px; }
+.kyp-votemargin {
+  font-family: var(--kyp-mono); font-size: 10.5px; font-weight: 700;
+  padding: 3px 8px; border-radius: 5px;
+  background: var(--kyp-indigoSoft); color: var(--kyp-indigo);
+}
+
+/* --- 2. Referendum rows ------------------------------------- */
+.kyp-refrow {
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 0; border-bottom: 1px solid var(--kyp-line);
+}
+.kyp-refrow:last-of-type { border-bottom: 0; }
+.kyp-refrow .rn { flex: 1; min-width: 0; font-size: 13.5px; color: var(--kyp-ink); }
+.kyp-refrow .rn u {
+  font-family: var(--kyp-mono); font-size: 10.5px; color: var(--kyp-muted);
+  text-decoration: none; margin-left: 7px;
+}
+.kyp-refrow .rt {
+  position: relative; width: 260px; height: 9px; flex: none;
+  background: var(--kyp-wash); border-radius: 5px; overflow: hidden;
+}
+.kyp-refrow .rt i { display: block; height: 100%; background: var(--kyp-indigoL); border-radius: 5px; }
+.kyp-refrow .rt::after {
+  content: ''; position: absolute; left: 50%; top: 0; bottom: 0;
+  width: 1px; background: var(--kyp-paper);
+}
+.kyp-refrow .ro {
+  font-family: var(--kyp-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 5px; flex: none; width: 62px; text-align: center;
+}
+.kyp-refrow .ro.passed { background: var(--kyp-indigoSoft); color: var(--kyp-indigo); }
+.kyp-refrow .ro.failed { background: var(--kyp-wash); color: var(--kyp-ink2); }
+
+@media (max-width: 720px) {
+  .kyp-refrow { flex-wrap: wrap; }
+  .kyp-refrow .rt { width: 100%; order: 3; }
+  .kyp-votebar { min-width: 120px; }
+}
+
+.kyp-hbar .htrack > b.out {
+  position: absolute; top: 50%; transform: translateY(-50%); margin-left: 9px;
+  font-family: var(--kyp-mono); font-size: 11px; font-weight: 700; color: var(--kyp-ink2);
+}
+.kyp-votekey {
+  display: flex; justify-content: space-between; margin-top: 4px;
+  font-family: var(--kyp-mono); font-size: 9.5px; color: var(--kyp-muted);
+}
+.kyp-votekey b { font-weight: 700; color: var(--kyp-ink2); }

@@ -48,7 +48,6 @@ export interface ScanCtx {
   /** true when any site-specific (parcel/adjacent) coverage exists — gates the neighborhood fallback */
   hasSiteNews?: boolean;
   nnTakeaway?: { takeaway?: { title?: string }; kpis?: { momentumLabel?: string; momentumScore?: number } } | null;
-  peopleTakeaway?: { takeaway?: { title?: string } } | null;
   /** Permits & Violations — computed in RunDetail from dobDerived + violationsData */
   dobScan?: { headline?: string | null; openViolations?: number | null; notClosedCount?: number | null } | null;
   /** Ownership & Title — shared distress resolution and recorder-search state. */
@@ -197,9 +196,6 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
       verdict: momentum ? { tone: momTone, label: momentum } : undefined,
     };
   }
-
-  // 12 · People — context only; title if generated, never a verdict
-  if (ctx.peopleTakeaway?.takeaway?.title) dyn.people = { takeaway: mdEmph(ctx.peopleTakeaway.takeaway.title) };
 
   // 13 · Incentives — eligible counts
   const likely = num(ctx.incMeta?.counts?.likely);
