@@ -37,3 +37,10 @@ Use the served app HTML as a fixture's shell, retain its React Refresh bootstrap
 **Why:** bare intercepted HTML fails before rendering live components when the React Refresh preamble is absent. Raw Vite-prebundled CommonJS modules can expose only a default export even when the source uses named imports.
 
 **How to apply:** when testing a report fragment outside the authenticated page, preserve the generated shell, dependency interop, and required app providers before diagnosing product failures.
+
+## Source attribution in supplied mocks
+Match a mock's visual treatment, but keep source labels consistent with the actual data provider and response metadata.
+
+**Why:** a supplied worship-list mock attributed records to OpenStreetMap while the existing endpoint used Google Places. Copying the footer literally would create a false attribution despite leaving the data untouched.
+
+**How to apply:** verify the current provider before replacing source text. Honor provided source metadata and otherwise name the known provider; do not change queries or datasets merely to match a mock's label.

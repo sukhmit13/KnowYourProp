@@ -1,0 +1,336 @@
+# Step 25b — §Neighborhood & People: consistency pass
+
+Step 25 built this section. This is the cleanup pass on top of it, applying the same rules the
+§Mortgage & Lending Market step uses.
+
+Audited against commit **`16918b4`**. Section read in full: `RunDetail.tsx` **17988–18460**,
+473 lines, plus `DEMOGRAPHIC_FAVORABILITY` / `demographicChangeClass` at `972–981` and
+`peopleSubsections` at `4171–4177`. **100%.**
+
+**No subhead is added, removed or renumbered.** `buildSubsectionNumbers` already derives 25.1–25.5
+and the order does not change. This step is styling, markup and deletions only — no hook, no query,
+no figure changes.
+
+---
+
+## 0. Files to work from
+
+| File | What it is |
+|---|---|
+| `step25b-target.png` | **The target.** Render and match it. |
+| `step25b-target.html` | Same page, self-contained — open it and inspect computed styles. |
+| `step25b-markup.html` | The target DOM alone. Class names and element order are normative. |
+| `kyp-base-patch-25b.css` | The only CSS this step adds. Four rules, appended to the **end** of `client/src/kyp-base.css`. |
+
+> ⚠ **Rule 1 of the patch (`.kyp-blocks.two`) is the same rule as in `kyp-base-patch-26.css`.**
+> Whichever step ships first adds it. **Do not add it twice.**
+
+---
+
+## 1. Delete the scope notes — five of them
+
+| Line | Currently |
+|---|---|
+| `18002–18006` | Figures below describe ZIP … / neighborhood … |
+| `18111` | Figures below describe ZIP … / Census Tract … |
+| `18190` | Figures below describe Census Tract … |
+| `18261` | Figures below describe community area … |
+| `18393` | Figures below describe places within 1 mile … |
+
+**Nothing states scope before or between the panels.** The geography moves to two places: the
+subhead's counter-text, and the block's closing footer.
+
+### And delete one more thing that is not a scope note
+
+`18078–18084` renders, inside a `.kyp-scopenote`:
+
+> *"Note: {pct}% have limited English proficiency. Consider bilingual signage, staff, or
+> translation services."*
+
+That is a recommendation the report is making on the reader's behalf. **Cut it entirely** — do not
+move it to the footer. The LEP figure already renders in its own block; the reader draws the
+conclusion.
+
+---
+
+## 2. Counter-text carries the geography — and must be bound, not hard-coded
+
+| Line | `.ct` today | `.ct` after |
+|---|---|---|
+| `18000` | `American Community Survey` | `` {languagesViewMode === 'zip' ? `ZIP ${zip}` : communityArea} `` |
+| `18101` | `2014–2018 vs 2019–2023` | `` {demoViewMode === 'zip' ? `ZIP ${zip}` : `Census Tract ${tractGeoid}`} · 2014–2018 vs 2019–2023 `` |
+| `18188` | `Census LEHD, 2021` | `` `Census Tract ${tractGeoid}` `` |
+| `18259` | `reported, not rated` | `` `Community Area ${communityArea} · not rated` `` |
+| `18391` | `{totalCount} within 1 mile` | unchanged — already scope + count |
+
+**25.1 and 25.2 each have their own toggle.** Their counter-text *and* their footer must follow it.
+The mock shows the ZIP state of both; **do not freeze those strings.**
+
+The source name that used to live in `.ct` moves to the footer.
+
+---
+
+## 3. One footer per subsection, at the end
+
+§25 is five independent blocks — five sources, five geographies, two with their own scope control —
+so unlike §19 it is one footer each, not one per run of panels. All five use `.kyp-src`.
+
+| Sub | Footer |
+|---|---|
+| 25.1 | `Describes {scope}, not this address. Source: American Community Survey 5-Year Estimates {by ZIP Code \| by Community Area} (ACS 2019–2023).` |
+| 25.2 | `Describes {scope}, not this address. Source: {sel.source}, 2014–2018 vs 2019–2023. Favourable and unfavourable mark metrics with a conventional direction; race, tenure and commute rows are reported and not rated.` |
+| 25.3 | `Describes Census Tract {tractGeoid}, not this address. Source: U.S. Census Bureau LEHD Origin-Destination Employment Statistics (LODES8), 2021. WAC = workers at workplace; RAC = workers at home.` |
+| 25.4 | `Describes Community Area {communityArea}, not this address. Sources: {data_sources}. Results are reported, not rated.` |
+| 25.5 | `Describes places within 1 mile of this address. Source: OpenStreetMap contributors.` |
+
+Note 25.5's footer sits after the **last** religion group, not after each one.
+
+**Two of the five source lines are not `.kyp-src` today and must become it:**
+
+- `18086–18090` — `<div className="pt-2 border-t"><p className="text-xs text-muted-foreground">`
+- `18170–18173` — `<div className="text-xs text-muted-foreground flex items-start gap-1">` with an
+  `<Info>` icon. Drop the icon; `.kyp-src` carries its own top rule.
+
+`18247`, `18374` and `18451` are already `.kyp-src` — extend their text per the table.
+
+---
+
+## 4. Daytime Economy — the broken tiles
+
+**This is a real rendering bug, not a preference.**
+
+`18200–18223` writes the tiles as `<span className="l">`, `<span className="n">`,
+`<span className="s">`. `SBALoansView.tsx:121` writes the identical tiles as `<div>`. The CSS at
+`.kyp-cxtile .l / .n / .s` never declares a `display`, so divs stack and **spans run inline** —
+which is why the live section reads `JOBS HERE 577 workers commute in daily` on one wrapping line,
+and why the `margin-bottom:7px` does nothing: vertical margins do not apply to inline boxes.
+
+**Replace the whole `.kyp-cxtiles` block with `.kyp-blocks four` + `.kyp-block`:**
+
+```jsx
+<div className="kyp-blocks four">
+  <div className="kyp-block ind">
+    <div className="bv">{lodesData.workersInTract.toLocaleString()}</div>
+    <div className="bl">Jobs here</div>
+    <div className="bd">workers commute in daily</div>
+  </div>
+  <div className="kyp-block slate"> … Residents working … </div>
+  <div className="kyp-block slate"> … Net daytime pull … </div>
+  <div className="kyp-block slate"> … Higher-earning jobs … </div>
+</div>
+```
+
+Markup order is **`.bv` first, then `.bl`, then `.bd`** — `.bl` carries `margin-top:8px`.
+
+`.kyp-cxtiles` is the commercial-lending KPI strip from §19. It does not belong in §25. This one
+change fixes the inline bug *and* the numeral size, because `.kyp-cxtile .n` is 24px while
+`.kyp-block .bv` is 36px — which is why 25.3's numbers looked smaller than the rest of the section.
+
+Keep the conditional: the fourth block still renders only when
+`lodesData.highEarners > 0 && lodesData.workersInTract > 0`. **`.kyp-blocks four` with three
+children is fine** — the grid is `repeat(4,1fr)` and the row is simply short.
+
+---
+
+## 5. One set of tones, one set of sizes
+
+### 5a. No `.hero` anywhere in §25
+
+`.kyp-blocks.hero` does two things: it makes the first column 1.4fr and it bumps the **first**
+block's numeral from 36px to 46px. Both are wrong here, and together they are most of what looks
+unsettled.
+
+| Line | Today | After |
+|---|---|---|
+| `18034` | `kyp-blocks hero two` | `kyp-blocks two` |
+| `18065` | `kyp-blocks hero two` | `kyp-blocks two` |
+| `18271` | `kyp-blocks hero two` | `kyp-blocks two` |
+| `18425` | `kyp-blocks hero one` | `kyp-blocks one` |
+
+`.kyp-blocks.two` and `.kyp-blocks.one` are in the patch. Every numeral in §25 is then 36px.
+
+"Limited English Proficiency" and "Population 5+" (`18065`) are plainly peers; 1.4fr/1fr made one
+arbitrarily wider.
+
+### 5b. Headline indigo, supporting slate — and nothing else
+
+| Line | Today | After |
+|---|---|---|
+| `18035` | `.ind` | `.ind` ✓ |
+| `18039` | `.slate` | `.slate` ✓ |
+| `18066`, `18071` | `.slate` | `.slate` ✓ |
+| `18201` | `.kyp-cxtile` (indigoL) | `.kyp-block ind` |
+| `18206` | `.kyp-cxtile dark` | `.kyp-block slate` |
+| `18211`, `18217` | `.kyp-cxtile slate` | `.kyp-block slate` |
+| `18272` | `.ind` | `.ind` ✓ |
+| `18276` | `.slate` | `.slate` ✓ |
+| `18425–18430` | `.kyp-blocks hero one` + `.ind` | **deleted — see §5d** |
+
+**`.dark` leaves the section.** Three tones across four peer tiles was the inconsistency.
+
+### 5d. Places of Worship becomes a list, like Schools
+
+**Delete the summary block at `18425–18430` entirely.** It renders `20` above the label
+"Places of Worship within 1 mile" — while the subhead's own counter-text at `18391` already reads
+`{totalCount} within 1 mile`. Same data, same question, twice on the same screen. The counter-text
+stays; the block goes.
+
+What remains is a list, and it should be built the way §21 Schools builds its lists — that is
+already the report's pattern for "N things near here."
+
+**Each religion group becomes a `.subwrap` with its own `KypSubhead`**, replacing the
+`.kyp-charttitle` at `18433`:
+
+```jsx
+{sorted.map(([religion, places], i) => (
+  <div className="subwrap" key={religion}>
+    <KypSubhead className={i === 0 ? "first" : undefined}>
+      <span className="lbl">{religion}</span>
+      <span className="ct">{places.length}</span>
+    </KypSubhead>
+    <div>{places.map(worshipRow)}</div>
+  </div>
+))}
+```
+
+Pass no `subsection` — these are group headings inside 25.5, not numbered subsections, exactly as
+`21.2 Elementary` / `21.3 High Schools` sit inside Schools.
+
+**Two details that matter, both visible if you get them wrong:**
+
+- **`first` on the first group only.** `.kyp-subhead` carries
+  `border-top:1px solid var(--kyp-ink)`, so a group heading sitting directly under 25.5's own
+  subhead draws a second rule with nothing between the two — an empty band. The existing
+  `.kyp-subhead.first` modifier zeroes the border and the padding; that is what it is for. Later
+  groups keep their rule, because there they separate two real lists.
+- **The group count is the bare number**, not `{n} within 1 mile`. The radius is already stated in
+  25.5's counter-text and again in the footer; a third time on every group heading is noise. With
+  one group it also repeats the section's own total verbatim.
+
+**Each row uses the school row primitive**, replacing the `.kyp-loanrow` at `18438–18446`:
+
+```jsx
+const worshipRow = (place) => (
+  <div key={place.id} className="srow step23-list-row" data-testid={`row-worship-${place.id}`}>
+    <a className="step23-name"
+       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + ' Chicago IL')}`}
+       target="_blank" rel="noopener noreferrer">{place.name || 'Unnamed'}</a>
+    <span className="step23-meta">{place.address}</span>
+  </div>
+);
+```
+
+`.srow`, `.step23-list-row`, `.step23-name` and `.step23-meta` already exist in `index.css` and are
+already used by Schools. **No new CSS.** The row gains a maps link it does not have today, matching
+`schoolRow` at `14122–14130`.
+
+**Two things to know about this data before you build it.**
+
+1. **`denomination` is always `null`.** `server/routes.ts:9348` hard-codes it. So the
+   `{place.denomination && …}` branch at `18442` is dead code — it has never rendered. Drop it
+   rather than carrying it forward.
+2. **There is no distance field**, which is why the row has nothing in the right-hand
+   `.step23-distance` slot that Schools fills with `0.14 mi`. **Do not invent one.**
+
+   It is, however, cheap to add and it is the one thing that would make this list genuinely match
+   Schools. The route at `server/routes.ts:9282` already receives `lat` / `lng` in the request body
+   and already asks Google for `places.location` in its field mask (`:9297`), so the coordinates are
+   in hand and thrown away. A haversine in the `acc.push` at `:9347` would return
+   `distanceMiles` per place, the list could sort by it, and the row would take
+   `<span className="step23-distance">{place.distanceMiles?.toFixed(2)} mi</span>`.
+
+   **Treat that as optional and confirm with the owner before doing it** — it is a server change and
+   this step is otherwise client-only. The target mock shows the list *without* distance, which is
+   what today's data supports.
+
+### 5c. A phrase in `.bv` takes `.txt`
+
+`.bv` is for a numeral. Length, not point size, is what gives a block its weight — measured in
+Instrument Serif at 36px, `577` renders **54px** wide, `D+72.7%` **139px**, and
+`Strongly Democratic` **301px**. At a shared 36px the phrase has more than twice the ink of the
+block beside it. At 24px it renders 201px and the two read as siblings.
+
+Add `txt` to the two `.bv` elements whose value is a word or phrase:
+
+- `18040` — `High` / `Moderate` / `Low` → `<div className="bv txt">`
+- `18273` — `{electionData.classification}` → `<div className="bv txt">`
+
+`.kyp-block .bv.txt` is in the patch. It is opt-in, so no other block in the report changes.
+
+---
+
+## 6. One judgment call for the owner to confirm
+
+`DEMOGRAPHIC_FAVORABILITY` at `972–975` contains `'median home value': 'up'`, which paints
++22.9% **green — favorable**. Rising home value is good news for an owner and bad news for a buyer,
+and the report does not know which the reader is.
+
+**Leave it as-is unless the owner says otherwise.** The mock shows it green. If it is to change,
+the fix is deleting that one key so the row falls through to `demo-neutral` (slate), exactly as
+`Median Gross Rent` already does — rent is not in the table, which is why it renders slate today.
+
+The other five keys — income, per-capita income, poverty, unemployment, diploma, vacancy — have a
+conventional direction and stay.
+
+---
+
+## 7. CSS — `kyp-base-patch-25b.css`
+
+Four rules, appended to the **end** of `client/src/kyp-base.css`. Parser-verified against the live
+stylesheet: **4 rules, 0 parse errors, 0 collisions with the 1,214 existing rules, 0 unresolved
+tokens, no amber.**
+
+```css
+.kyp-blocks.two  { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0 }
+.kyp-blocks.one  { grid-template-columns:1fr }
+.kyp-block .bv.txt { font-size:24px }
+.kyp-cxtile .l, .kyp-cxtile .n, .kyp-cxtile .s { display:block }
+```
+
+Rule 4 is **not** what fixes Daytime Economy — §4 above does, by leaving that primitive behind. It
+is there so `.kyp-cxtile` cannot fail the same way again in §19 or anywhere else.
+
+**Do not put `kyp-` rules anywhere but `kyp-base.css`, and do not hoist its tokens to `:root`.**
+Class names are exact: block modifiers are `.ind` and `.slate`, **not** `.indigo` / `.dark` here.
+
+---
+
+## 8. Verify before reporting done
+
+- **Zero** `.kyp-scopenote` in `17988–18460`.
+- **Zero** `.kyp-cxtile` in `RunDetail.tsx` (it should survive only in `SBALoansView.tsx`).
+- **Zero** `.kyp-blocks hero` in `17988–18460`.
+- **Zero** `.kyp-loanrow` in `17988–18460` — Places of Worship uses `.srow step23-list-row`.
+- The standalone `20` block above the worship list is gone; the count appears **once**, in 25.5's
+  counter-text.
+- **Zero** `.kyp-block dark` in `17988–18460`.
+- Exactly **five** `.kyp-src`, one at the end of each subsection, and **no**
+  `text-xs text-muted-foreground` source lines left.
+- The bilingual-signage note is gone and appears nowhere else.
+- Daytime Economy's four tiles each render label, numeral and detail on **three separate lines**,
+  and their numerals are the same size as 25.1's and 25.4's.
+- Toggling 25.1 to **By Neighborhood** changes both its counter-text and its footer.
+- Toggling 25.2 to **Census Tract** changes both its counter-text and its footer.
+- Subheads are still 25.1–25.5 and still derive from `buildSubsectionNumbers`.
+- Chart inventory unchanged: **1 demographic table**, **2 horizontal bar lists** (top languages,
+  jobs by industry), **1 vote table with 3 stacked bars**, **2 runoff cards**, **7 referendum
+  rows**, **1 worship list** (re-laid out as rows, not converted to a chart). Nothing becomes a different form.
+- Every figure that renders today still renders.
+
+---
+
+## 9. Not in this step
+
+- The demographic table's favourable/unfavourable scale itself — only the one key in §6 is in
+  question, and only if the owner says so.
+- The vote bars, runoff cards and referendum rows — those shipped in Step 25 and are correct.
+- §Mortgage & Lending Market — that is `REPLIT_STEP26_market_final.md`, a separate commit.
+
+---
+
+## ⚠ Separate from this step, and still outstanding
+
+Three live API keys are committed in `.replit` lines 65–71 and present in four commits —
+`RENTCAST_API_KEY`, `GOOGLE_PLACES_API_KEY`, `APIFY_API_TOKEN`. `.gitignore` has a missing newline
+(`*.tar.gzserver/cache/`), so **neither pattern works.** Rotate all three, move them to Replit
+Secrets, `git rm --cached .replit`, and fix the newline.

@@ -17973,13 +17973,10 @@ export default function RunDetail() {
             <div id="print-section-languages">
               <KypSubhead subsection={peopleSubsections.languages}>
                 <span className="lbl">Languages Spoken</span>
-                <span className="ct">American Community Survey</span>
+                <span className="ct">{languagesViewMode === 'zip'
+                  ? `ZIP ${languageZipData?.zipCode ?? facts?.zipCode ?? ''}`
+                  : languageData?.communityArea ?? facts?.communityArea ?? 'Unavailable'}</span>
               </KypSubhead>
-              <p className="kyp-scopenote">
-                Figures below describe <b>{languagesViewMode === "zip"
-                  ? `ZIP ${languageZipData?.zipCode ?? facts?.zipCode ?? ""}`
-                  : `neighborhood ${languageData?.communityArea ?? facts?.communityArea ?? "unavailable"}`}</b>, not this address
-              </p>
               <div className="kyp-segrow">
                 <div className="kyp-seg" data-testid="tabs-languages-view">
                   <button type="button" className={languagesViewMode === "zip" ? "on" : ""} onClick={() => setLanguagesViewMode("zip")} data-testid="tab-languages-zip">By ZIP Code</button>
@@ -18003,17 +18000,17 @@ export default function RunDetail() {
                       );
                     }
                     const areaLabel = languagesViewMode === 'zip'
-                      ? `ZIP ${(currentLangData as any).zipCode}`
-                      : (currentLangData as any).communityArea;
+                      ? `ZIP ${(currentLangData as any).zipCode ?? facts?.zipCode ?? ''}`
+                      : (currentLangData as any).communityArea ?? facts?.communityArea ?? 'unavailable';
                     return (
                     <div className="space-y-4">
-                      <div className="kyp-blocks hero two">
+                      <div className="kyp-blocks two">
                         <div className="kyp-block ind">
                           <div className="bv">{currentLangData.nonEnglishPct}%</div>
                           <div className="bl">Speak a language other than English at home</div>
                         </div>
                         <div className="kyp-block slate">
-                          <div className="bv">{currentLangData.linguisticDiversity === 'high' ? 'High' : currentLangData.linguisticDiversity === 'moderate' ? 'Moderate' : 'Low'}</div>
+                          <div className="bv txt">{currentLangData.linguisticDiversity === 'high' ? 'High' : currentLangData.linguisticDiversity === 'moderate' ? 'Moderate' : 'Low'}</div>
                           <div className="bl">Linguistic diversity</div>
                           <div className="bd">{currentLangData.comparedToCityAvg}</div>
                           {currentLangData.rankDescription && <div className="bd" data-testid="text-language-rank">{currentLangData.rankDescription}</div>}
@@ -18038,7 +18035,7 @@ export default function RunDetail() {
                         })}
                       </div>
 
-                      <div className="kyp-blocks hero two">
+                      <div className="kyp-blocks two">
                         <div className="kyp-block slate" data-testid="text-lep-count">
                           <div className="bv">{currentLangData.limitedEnglishProficiency.count.toLocaleString()}</div>
                           <div className="bl">Limited English proficiency</div>
@@ -18051,18 +18048,8 @@ export default function RunDetail() {
                         </div>
                       </div>
 
-                      {currentLangData.limitedEnglishProficiency.pct >= 10 && (
-                        <div className="kyp-scopenote">
-                          <p>
-                            <span className="font-medium">Note:</span> {currentLangData.limitedEnglishProficiency.pct}% have limited English proficiency. Consider bilingual signage, staff, or translation services.
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-muted-foreground">
-                          Source: American Community Survey 5-Year Estimates {languagesViewMode === 'zip' ? 'by ZIP Code' : 'by Community Area'} (ACS 2019-2023)
-                        </p>
+                      <div className="kyp-src">
+                        Describes {areaLabel}, not this address. Source: American Community Survey 5-Year Estimates {languagesViewMode === 'zip' ? 'by ZIP Code' : 'by Community Area'} (ACS 2019–2023).
                       </div>
                     </div>
                     );
@@ -18074,7 +18061,9 @@ export default function RunDetail() {
             <div id="print-section-demographics">
               <KypSubhead subsection={peopleSubsections.demographics}>
                 <span className="lbl">Demographic Trends</span>
-                <span className="ct">2014–2018 vs 2019–2023</span>
+                <span className="ct">{demoViewMode === 'zip'
+                  ? `ZIP ${facts?.zipCode || 'unavailable'}`
+                  : `Census Tract ${facts?.tractGeoid || 'unavailable'}`} · 2014–2018 vs 2019–2023</span>
               </KypSubhead>
               <div className="space-y-4">
 
@@ -18084,7 +18073,6 @@ export default function RunDetail() {
                       const sel = demoViewMode === 'zip' ? censusACSData?.zip : censusACSData?.tract;
                       return (
                         <>
-                           <p className="kyp-scopenote">Figures below describe <b>{demoViewMode === 'zip' ? (sel?.name ?? `ZIP ${facts?.zipCode || 'unavailable'}`) : (sel?.name ?? `Census Tract ${facts?.tractGeoid || 'unavailable'}`)}</b>, not this address</p>
                           <div className="kyp-segrow">
                             <div className="kyp-seg" data-testid="toggle-demographics-geo">
                               <button type="button" className={demoViewMode === 'zip' ? 'on' : ''} onClick={() => setDemoViewMode('zip')} data-testid="button-demographics-zip">ZIP Code</button>
@@ -18143,9 +18131,8 @@ export default function RunDetail() {
                                   </tbody>
                                 </table>
                               </div>
-                              <div className="text-xs text-muted-foreground flex items-start gap-1">
-                                <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                <span>{sel.source} · 2014–2018 vs 2019–2023</span>
+                               <div className="kyp-src">
+                                 Describes {demoViewMode === 'zip' ? `ZIP ${facts?.zipCode || 'unavailable'}` : `Census Tract ${facts?.tractGeoid || 'unavailable'}`}, not this address. Source: {sel.source}, 2014–2018 vs 2019–2023. Favourable and unfavourable mark metrics with a conventional direction; race, tenure and commute rows are reported and not rated.
                               </div>
                             </div>
                           ) : (
@@ -18161,9 +18148,8 @@ export default function RunDetail() {
                 <div data-testid="section-lodes">
                     <KypSubhead subsection={peopleSubsections.daytimeEconomy}>
                       <span className="lbl">Daytime Economy</span>
-                      <span className="ct">Census LEHD, 2021</span>
+                      <span className="ct">Census Tract {facts?.tractGeoid || "unavailable"}</span>
                     </KypSubhead>
-                    <p className="kyp-scopenote">Figures below describe <b>Census Tract {facts?.tractGeoid || "unavailable"}</b>, not this address</p>
                     <div>
                       {isLoadingLodes ? (
                         <div className="space-y-2">
@@ -18173,27 +18159,27 @@ export default function RunDetail() {
                       ) : lodesData ? (
                         <div className="space-y-4">
                           {/* Worker flow summary */}
-                          <div className="kyp-cxtiles">
-                            <div className="kyp-cxtile" data-testid="lodes-workers-in">
-                              <span className="l">Jobs Here</span>
-                              <span className="n">{lodesData.workersInTract.toLocaleString()}</span>
-                              <span className="s">workers commute in daily</span>
+                          <div className="kyp-blocks four">
+                            <div className="kyp-block ind" data-testid="lodes-workers-in">
+                              <div className="bv">{lodesData.workersInTract.toLocaleString()}</div>
+                              <div className="bl">Jobs here</div>
+                              <div className="bd">workers commute in daily</div>
                             </div>
-                            <div className="kyp-cxtile dark" data-testid="lodes-residents-out">
-                              <span className="l">Residents Working</span>
-                              <span className="n">{lodesData.residentsWhoWork.toLocaleString()}</span>
-                              <span className="s">residents leave to work</span>
+                            <div className="kyp-block slate" data-testid="lodes-residents-out">
+                              <div className="bv">{lodesData.residentsWhoWork.toLocaleString()}</div>
+                              <div className="bl">Residents working</div>
+                              <div className="bd">residents leave to work</div>
                             </div>
-                            <div className="kyp-cxtile slate" data-testid="lodes-net-flow">
-                              <span className="l">Net Daytime Pull</span>
-                              <span className="n">{`${lodesData.workersInTract - lodesData.residentsWhoWork >= 0 ? '+' : '\u2212'}${Math.abs(lodesData.workersInTract - lodesData.residentsWhoWork).toLocaleString()}`}</span>
-                              <span className="s">{lodesData.workersInTract > lodesData.residentsWhoWork ? 'employment center' : 'bedroom community'}</span>
+                            <div className="kyp-block slate" data-testid="lodes-net-flow">
+                              <div className="bv">{`${lodesData.workersInTract - lodesData.residentsWhoWork >= 0 ? '+' : '\u2212'}${Math.abs(lodesData.workersInTract - lodesData.residentsWhoWork).toLocaleString()}`}</div>
+                              <div className="bl">Net daytime pull</div>
+                              <div className="bd">{lodesData.workersInTract > lodesData.residentsWhoWork ? 'employment center' : 'bedroom community'}</div>
                             </div>
                             {lodesData.highEarners > 0 && lodesData.workersInTract > 0 && (
-                              <div className="kyp-cxtile slate">
-                                <span className="l">Higher-Earning Jobs</span>
-                                <span className="n">{Math.round((lodesData.highEarners / lodesData.workersInTract) * 100)}%</span>
-                                <span className="s">of jobs pay &gt; $3,333/month</span>
+                              <div className="kyp-block slate">
+                                <div className="bv">{Math.round((lodesData.highEarners / lodesData.workersInTract) * 100)}%</div>
+                                <div className="bl">Higher-earning jobs</div>
+                                <div className="bd">of jobs pay &gt; $3,333/month</div>
                               </div>
                             )}
                           </div>
@@ -18221,7 +18207,7 @@ export default function RunDetail() {
                             </div>
                           )}
                           <div className="kyp-src">
-                            Source: U.S. Census Bureau LEHD Origin-Destination Employment Statistics (LODES8), 2021. WAC = workers at workplace; RAC = workers at home.
+                            Describes Census Tract {facts?.tractGeoid || "unavailable"}, not this address. Source: U.S. Census Bureau LEHD Origin-Destination Employment Statistics (LODES8), 2021. WAC = workers at workplace; RAC = workers at home.
                           </div>
                         </div>
                       ) : <p className="text-sm text-muted-foreground">Daytime employment data unavailable.</p>}
@@ -18232,9 +18218,8 @@ export default function RunDetail() {
             <div id="print-section-political" data-testid="section-political-profile">
               <KypSubhead subsection={peopleSubsections.voting} data-testid="trigger-voting-trends">
                 <span className="lbl" data-testid="text-political-title">Voting &amp; Civic</span>
-                <span className="ct">reported, not rated</span>
+                <span className="ct">Community Area {facts?.communityArea || "unavailable"} · not rated</span>
               </KypSubhead>
-               <p className="kyp-scopenote">Figures below describe <b>community area {facts?.communityArea || "unavailable"}</b>, not this address</p>
               <div>
                   {isLoadingElection ? (
                     <div className="space-y-3">
@@ -18244,9 +18229,9 @@ export default function RunDetail() {
                     </div>
                   ) : electionData ? (
                     <div className="space-y-6">
-                      <div className="kyp-blocks hero two">
+                      <div className="kyp-blocks two">
                         <div className="kyp-block ind">
-                          <div className="bv" data-testid="badge-classification">{electionData.classification}</div>
+                          <div className="bv txt" data-testid="badge-classification">{electionData.classification}</div>
                           <div className="bl" data-testid="text-trend">{electionData.trend}</div>
                         </div>
                         <div className="kyp-block slate">
@@ -18348,8 +18333,7 @@ export default function RunDetail() {
                       )}
 
                       <div className="kyp-src">
-                        Data sources: {electionData.data_sources?.join(', ')}.
-                        {electionData.notes && ` ${electionData.notes}`}
+                        Describes Community Area {facts?.communityArea || "unavailable"}, not this address. Sources: {electionData.data_sources?.join(', ')}. Results are reported, not rated.
                       </div>
                     </div>
                   ) : (
@@ -18366,7 +18350,6 @@ export default function RunDetail() {
               <span className="lbl">Places of Worship</span>
               <span className="ct">{placesOfWorshipData?.totalCount ?? "—"} within 1 mile</span>
             </KypSubhead>
-            <p className="kyp-scopenote">Figures below describe places within <b>1 mile</b>, not this address</p>
             <div className="pb-2">
                   {isLoadingPlacesOfWorship ? (
                     <div className="space-y-2">
@@ -18398,33 +18381,30 @@ export default function RunDetail() {
                     });
                     return (
                       <div className="space-y-4">
-                        <div className="kyp-blocks hero one">
-                          <div className="kyp-block ind">
-                            <div className="bv">{placesOfWorshipData.totalCount}</div>
-                            <div className="bl">Places of Worship within 1 mile</div>
-                          </div>
-                        </div>
-                        {sorted.map(([religion, places]) => (
-                          <div key={religion}>
-                            <div className="kyp-charttitle">
-                              {religion} · {places.length}
-                            </div>
+                        {sorted.map(([religion, places], i) => (
+                          <div className="subwrap" key={religion}>
+                            <KypSubhead className={i === 0 ? "first" : undefined}>
+                              <span className="lbl">{religion}</span>
+                              <span className="ct">{places.length}</span>
+                            </KypSubhead>
                             <div>
                               {places.map((place: any) => (
-                                <div key={place.id} className="kyp-loanrow" data-testid={`row-worship-${place.id}`}>
-                                  <div className="lmain">
-                                    <span className="lnm">{place.name || 'Unnamed'}</span>
-                                    <span className="lmeta">
-                                      {place.denomination && `${place.denomination.charAt(0).toUpperCase() + place.denomination.slice(1)} · `}
-                                      {place.address}
-                                    </span>
-                                  </div>
+                                <div key={place.id} className="srow step23-list-row" data-testid={`row-worship-${place.id}`}>
+                                  <a
+                                    className="step23-name"
+                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.name || 'Unnamed'} Chicago IL`)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    {place.name || 'Unnamed'}
+                                  </a>
+                                  <span className="step23-meta">{place.address}</span>
                                 </div>
                               ))}
                             </div>
                           </div>
                         ))}
-                        <p className="kyp-src">Source: OpenStreetMap contributors</p>
+                        <div className="kyp-src">Describes places within 1 mile of this address. Source: {placesOfWorshipData.source || 'Google Places'}.</div>
                       </div>
                     );
                   })()}
