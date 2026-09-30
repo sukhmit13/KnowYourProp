@@ -2427,9 +2427,6 @@ a.cmp-nm{text-decoration:underline}
 .asmb-opt .bd b{color:#141414;font-weight:600}
 
 /* Step 23 — dense evidence layout: parcel anchors, schools and culture. */
-#section-proximity .kyp-accbody,
-#section-schools .kyp-accbody,
-#section-entCulture .kyp-accbody{padding:6px 18px 20px}
 .step23-proximity .dir-facts.pgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:4px}
 .step23-proximity .dir-fact{min-width:0;padding:13px 15px;border:1px solid var(--kyp-line);border-radius:11px;background:var(--kyp-card)}
 .step23-proximity .dir-fact-top{margin-bottom:6px}
@@ -2495,9 +2492,6 @@ a.cmp-nm{text-decoration:underline}
   .ecbox .more{display:none}
 }
 @media(max-width:680px){
-  #section-proximity .kyp-accbody,
-  #section-schools .kyp-accbody,
-  #section-entCulture .kyp-accbody{padding:6px 14px 20px}
   .step23-proximity .dir-facts.pgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .schbox .kyp-blocks.hero,.ecbox .kyp-blocks.hero.three{grid-template-columns:1fr}
   .schbox .step23-childcare-stats{grid-template-columns:repeat(2,minmax(0,1fr))}

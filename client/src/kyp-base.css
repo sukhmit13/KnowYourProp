@@ -532,9 +532,12 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-acchd .badge.indigo{background:var(--kyp-indigo)}
 .kyp-acchd .ico{width:27px;height:27px;border-radius:7px;border:1px solid #c9cfee;display:flex;align-items:center;justify-content:center;color:#2b3a9e;font-size:12px;flex:none;background:var(--kyp-card);margin-top:2px}
 .kyp-acchd .ico svg{width:15px;height:15px;color:#2b3a9e}
-.kyp-accbody{padding:6px 26px 26px 66px;border-top:1px solid var(--kyp-line)}
+.kyp-accbody{padding:6px 26px 26px 83px;border-top:1px solid var(--kyp-line)}
+/* Safety & Crime originally added a second 17px inset via .kyp-sec. Keep its
+   content in place while every expanded section now shares that same gutter. */
+.kyp-accbody .kyp-sec{padding-left:0}
 .kyp-accbody.closed{display:none}
-@media (max-width: 720px){.kyp-accbody{padding:6px 14px 20px 14px}.kyp-acchd{gap:9px;padding:13px 12px}}
+@media (max-width: 720px){.kyp-accbody{padding:6px 14px 20px 31px}.kyp-acchd{gap:9px;padding:13px 12px}}
 
 /* ---- bottom: generate insight report ---- */
 .kyp-gen{margin-top:26px}
@@ -1412,15 +1415,11 @@ button.kyp-morelink { background: none; border: 0; padding: 0; }
    Scoped to the three Step 24 views; retain the data and controls,
    but bring card rhythm and labels into the compact report system.
    ============================================================ */
-#section-market .kyp-accbody { padding:6px 20px 20px; }
 #section-market .kyp-market-panel { padding:6px 0 15px; }
 #section-market .kyp-market-buyer {
   margin-top:14px; padding-top:14px; border-top:1px solid var(--kyp-line);
 }
 #section-market .kyp-market-panel > .kyp-src { margin-top:12px; }
-@media (max-width:720px) {
-  #section-market .kyp-accbody { padding:6px 14px 20px; }
-}
 .kyp-hmda-financing,
 .kyp-hmda-panel,
 .kyp-hmda-buyer { display:flex; flex-direction:column; gap:10px; }
