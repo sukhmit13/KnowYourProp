@@ -1,0 +1,248 @@
+# Step 22 — what still has to be done
+
+**Read this before touching anything.** Step 22A shipped. Steps 1–5 did not. This file supersedes
+the run order in `REPLIT_STEP22_HOW_TO_RUN.md` with verified line numbers.
+
+All line numbers below were checked against commit **`a6c0ad8`**. If the repo has moved since, find
+the code by the quoted text rather than trusting the number.
+
+---
+
+## ⛔ First — one thing not to do
+
+There has been an offer to *"update Corridor Intelligence to the same single-header, continuously
+visible report layout."*
+
+**Do not restyle §corridor.** It is being **deleted**, and its content redistributed. Restyling it
+would mean carefully applying the design language to 830 lines that Step 4 removes, and would
+entrench the problem this whole change exists to fix.
+
+The problem is not that §corridor looks old. It is that **§news splits by publisher and §corridor
+splits by geography**, so the same article is filed twice under two different logics. The
+cross-section filter that was added — stopping corridor articles repeating what News already showed
+— is a patch over that fault. Split by *subject* and the need for it disappears: a story is culture
+or it is development, and it lands in exactly one place.
+
+---
+
+## Where things actually stand
+
+Verified at `a6c0ad8`:
+
+| | State |
+|---|---|
+| `server/articleSubject.ts` with `classifyArticle()` | ✅ exists |
+| `upcomingDevelopments.test.ts` covering it | ✅ exists |
+| Anything in `client/` importing `classifyArticle` | ❌ **nothing** |
+| `CULTURE_SOURCES` publisher filter | ❌ still live, 2 copies — `17515` and `18406` |
+| `corridor` in `ACC_DEFAULT_ORDER` | ❌ still there |
+| `<AccordionSection {...accProps("corridor")}>` | ❌ still there — `17718` |
+| Momentum score | ❌ still rendered — `17484`, `17505`, `18243` |
+
+So 22A did exactly what it promised — server and assets, no visible change — and stopped.
+
+---
+
+## The corridor boundary is safe. Confirmed.
+
+Before deleting 830 lines, here is why nothing about the corridor rule is lost.
+
+**Everything that defines the boundary is server-side, in `server/newsMonitor.ts`:**
+
+| Thing | Value |
+|---|---|
+| `CORRIDOR_PROXIMITY_MILES` | `0.5` (line 771) |
+| `CORRIDOR_KEYWORDS` | **34 corridors** defined |
+| corridors carrying the `line` refinement | **3 of 34** |
+| `findNearbyCorridors()` | server |
+| `addressMatchesCorridor()` | server |
+
+Deleting JSX cannot touch any of it. `/api/corridor-news` keeps returning `corridors`,
+`corridorKeys`, `is_near_corridor`, `mentionsNeighborhood` and `tier` unchanged.
+
+**The 830 lines are rendering, not logic.** The only functional reference inside them is
+`isOnCorridor(...)` at `17743` and `18043`, and it is **defined at line 2964** — far outside the
+deletion range, so it survives:
+
+```ts
+const isOnCorridor = (_corridorName: string, distanceMiles: number) => {
+  return distanceMiles === 0;
+};
+```
+
+Note what that does: it measures nothing. It returns true only when distance is exactly `0`, which
+happens solely because `addressMatchesCorridor()` forces it to 0 on a server-side address match.
+That is what rescues the on-corridor case — **by raw geometry, Milwaukee Avenue ranks last of six
+for an address on Milwaukee Avenue** (0.48 mi to centerline).
+
+**The risk is not loss. It is orphaning.** The boundary survives intact but does nothing unless the
+new sections consume it. Three things must carry over:
+
+1. `useCorridorNews(...)` at line **2926** stays.
+2. Each section's `.1` subhead filters on non-empty `corridorKeys`; `.2` takes the rest.
+3. `isOnCorridor` is used in the culture section's block 1 so the caption reads *on corridor* when
+   distance is 0 and *nearest corridor* otherwise.
+
+---
+
+## Prompt 1 — swap the classifier in place
+
+**Paste this alone. Then stop.**
+
+> 1. Move `server/articleSubject.ts` to `shared/articleSubject.ts`. The client can only import from
+>    `@shared/*` — `tsconfig.json` maps `@/*` → `client/src` and `@shared/*` → `shared`. Update the
+>    import in `server/upcomingDevelopments.test.ts` to match.
+> 2. In `client/src/pages/RunDetail.tsx` there are two identical copies of a publisher-based article
+>    filter, at lines **17515–17516** and **18406–18407**:
+>    ```ts
+>    const CULTURE_SOURCES = ['eater', 'infatuation', 'what now', 'timeout', 'chicago reader'];
+>    const isCulture = (src: string) => CULTURE_SOURCES.some(s => src.toLowerCase().includes(s));
+>    ```
+>    Replace **both** with the subject classifier: import `classifyArticle` from
+>    `@shared/articleSubject`, derive `cultureArticles` as articles where
+>    `classifyArticle(a.title, a.summary, a.url) === 'culture'`, and `realEstateArticles` as the rest.
+> 3. Delete `CULTURE_SOURCES` and `isCulture` in both places.
+> 4. **Change nothing else.** The `Entertainment & Culture` and `Real Estate & Development` headings,
+>    the card components, the section structure, the momentum score and §corridor all stay exactly as
+>    they are. Only *what falls under each heading* changes.
+> 5. Report what the cross-section dedup filter added earlier is doing and where it lives — it may
+>    become redundant once the split is by subject.
+
+**Why stop here.** This is a one-function diff. Load ten saved runs and read the two lists. If the
+classification is wrong you find out now, in one function, instead of after two sections have been
+rebuilt around it. **Expect to tune `DEVELOPMENT_TERMS` a round or two — do it at this step.**
+
+---
+
+## Prompt 2 — add the development section, additively
+
+Build §23 Development & Real Estate per `REPLIT_STEP22B_news_sections.md`, as a **new** row in
+`ACC_DEFAULT_ORDER` called `developmentNews`.
+
+**Delete nothing.** The development articles will be in two places on purpose, so the old and new
+can be compared in a real report before anything is destroyed.
+
+Target: **`step22-target-development.png`**.
+
+Verify: DPD unit figures match the Plan Commission pages for two or three known addresses; the
+coverage figure excludes permit-matched addresses; an article with no parseable address contributes
+zero units.
+
+---
+
+## Prompt 3 — strip §news to culture, rename it
+
+Remove the development half from §news, rename the row `newsCulture`, add the three blocks, the
+scope subheads and the slate activity badge, per 22B §3.
+
+**Delete the momentum score** — all of it:
+
+| Location | What |
+|---|---|
+| `17484–17486` | `kyp-block count` with `momentumScore`, `text-news-score`, `text-news-label` |
+| `17505–17507` | second copy, `momentum_score` / `momentum_label` |
+| `18243` | corridor momentum badge, `bg-amber-500` — **amber is not in the palette** |
+
+Replace with the activity badge: low / medium / high, slate, no numeral.
+
+Target: **`step22-target-culture.png`**.
+
+Verify: momentum appears nowhere; the article that was in both sections is now in one.
+
+---
+
+## Prompt 4 — delete §corridor
+
+**Only now, and in a commit of its own.**
+
+Remove `corridor` from `ACC_DEFAULT_ORDER` and delete the `<AccordionSection {...accProps("corridor")}>`
+block starting at **17718**.
+
+`mergeAccOrder` (line 1262) makes this safe with no migration:
+
+```js
+const out = saved.filter((x) => def.includes(x));
+```
+
+Any saved id no longer in `ACC_DEFAULT_ORDER` is silently dropped. A user with a custom order loses
+their placement for that one row. No crash, no orphan row. `accHidden` keys for dead ids are inert.
+
+### ⚠ Six anchor references — five die, one must be fixed in the same prompt
+
+`print-section-corridor-news` appears six times:
+
+| Line | Fate |
+|---|---|
+| `17720` | dies with the section |
+| `18281` | dies |
+| `18299` | dies |
+| `18353` | dies |
+| **`1063`** | `newsGoCorridor` — **survives, must be deleted** |
+| **`1138`** | inside `NewsDevCard` — **survives, must be replaced** |
+
+Line 1138 today:
+
+```jsx
+{p.inPermitData && <a className="kyp-across" href="#print-section-corridor-news" onClick={newsGoCorridor}>
+  <svg viewBox="0 0 24 24" strokeWidth="2.2"><path d="M20 6 9 17l-5-5" /></svg>
+  Same project in Corridor permit data — counted once</a>}
+```
+
+Replace it with the plain `.kyp-archrec` permit-confirmation line from 22B §4 — no anchor, no
+handler — and delete `newsGoCorridor` at line 1063. Leaving either one ships a link to a section
+that no longer exists.
+
+### Boundary check, run it before closing the prompt
+
+- `useCorridorNews` at line 2926 is still called.
+- Every article row under a `.1` subhead carries a `.kyp-archtag` chip for each corridor it matched.
+- A property on a named corridor reads **on corridor**, not a distance.
+- **1254 N Milwaukee → 6 corridors within ½ mi** (Ashland 0.02, Division 0.12, Damen 0.40,
+  Chicago 0.43, North 0.46, Milwaukee 0.48).
+- **522 N Claremont → 3 corridors within ½ mi.**
+
+Those counts come from running the real distance function, not from an estimate. If either address
+returns a different number, the boundary has been broken — stop and report.
+
+---
+
+## Prompt 5 — cleanup
+
+Separate prompt, no behaviour change:
+
+- `CULTURE_SOURCES` — confirm both copies are gone
+- `bg-amber-500` at `18243` and any other corridor-era Tailwind
+- `.kyp-archage` amber at `kyp-base.css:436` → orange
+- Duplicate `data-testid`: `text-news-score` and `text-news-label` should no longer exist;
+  `text-news-articles` should appear once
+- Dead `cyp-` verdict rules in `index.css` 2243–2265, if still present
+
+---
+
+## If something goes wrong
+
+The order puts the destructive step last on purpose. If Prompt 4 goes badly, revert that commit
+alone — Prompts 1–3 stand on their own and the report keeps working with one extra section. **Do not
+batch Prompt 4 with anything else**, for exactly that reason.
+
+---
+
+## ✅ Order
+
+- [ ] **1** — Classifier swapped in place. Tune `DEVELOPMENT_TERMS` here. **Stop and check.**
+- [ ] **2** — §23 added. Nothing deleted. Deliberate duplication.
+- [ ] **3** — §news stripped to culture and renamed. Momentum deleted, all three copies.
+- [ ] **4** — §corridor deleted. Fix lines 1063 and 1138 in the same prompt. Run the boundary check.
+- [ ] **5** — Cleanup.
+
+## Target images
+
+| File | Shows |
+|---|---|
+| `step22-target-culture.png` | §22 after Prompt 3 — blocks, 22.1 On the corridors, 22.2 In {neighbourhood}, 22.3 Podcasts |
+| `step22-target-development.png` | §23 after Prompt 2 — three blocks, the two-unit-figure caveat, 23.1/23.2/23.3 |
+| `step22-target.html` | both, self-contained, open in a browser |
+
+The publisher wordmarks in the targets are placeholders. The real SVGs are already in
+`client/public/logos/` and should look better than the mock, not worse. Blank tiles mean a 404 under
+`/logos/`, not a styling fault.
