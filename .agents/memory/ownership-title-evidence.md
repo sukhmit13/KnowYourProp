@@ -26,3 +26,11 @@ Report status badges must distinguish an in-progress check from a completed inco
 **Why:** A normal first report load showed “Status unknown” while Recorder records were still being fetched, which suggested the lookup had failed.
 
 **How to apply:** Use the same pending-vs-settled distinction for future section headers and nested status badges. Do not let a missing response masquerade as a clean result or let a pending request mask an already supported adverse finding.
+
+Water/utility debt checks belong under Ownership & Title. A current utility-account balance and a Chicago Full Payment Certificate are different evidence types, not interchangeable clearance claims.
+
+**Why:** The user confirmed this placement. The City's certificate is official clearance for a particular property transfer; an account balance is only a billing finding, and additional charges or transfer-specific exceptions can affect clearance.
+
+**How to apply:** Keep balances, recorded water liens, and issued certificates separate. Missing access stays unverified, never zero or paid in full. Verify a working balance-access method before promising automated address/PIN lookup; a manual link or public application portal does not establish that capability.
+
+Official reference: https://www.chicago.gov/city/en/depts/fin/supp_info/utility-billing/full-payment-certificates.html (checked 2026-09-30).
