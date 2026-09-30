@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KypSubhead } from "@/components/report/AccordionSection";
 
@@ -52,11 +52,19 @@ function LenderBar({ name, count, totalAmount, max }: { name: string; count: num
   );
 }
 
-const SHOW_N = 4;
+const SHOW_N = 10;
 
 export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBALoansViewProps) {
-  const [showAll504, setShowAll504] = useState(false);
-  const [showAll7a, setShowAll7a] = useState(false);
+  const [visible504, setVisible504] = useState(SHOW_N);
+  const [visible7a, setVisible7a] = useState(SHOW_N);
+  const [visible504Lenders, setVisible504Lenders] = useState(SHOW_N);
+  const [visible7aLenders, setVisible7aLenders] = useState(SHOW_N);
+  useEffect(() => {
+    setVisible504(SHOW_N);
+    setVisible7a(SHOW_N);
+    setVisible504Lenders(SHOW_N);
+    setVisible7aLenders(SHOW_N);
+  }, [zipCode]);
 
   if (isLoading) {
     return (
@@ -104,9 +112,6 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
 
   const by504Amount = [...loans504].sort((a: any, b: any) => (b.amount ?? 0) - (a.amount ?? 0));
   const by7aAmount = [...loans7a].sort((a: any, b: any) => (b.amount ?? 0) - (a.amount ?? 0));
-  const shown504 = showAll504 ? by504Amount : by504Amount.slice(0, SHOW_N);
-  const shown7a = showAll7a ? by7aAmount : by7aAmount.slice(0, SHOW_N);
-
   return (
     <div className="pt-2" data-testid="sba-loans-view">
       <div className="kyp-body mb-2">SBA-guaranteed business &amp; commercial-real-estate loans in ZIP {zipCode} · FY2020–present</div>
@@ -129,12 +134,12 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
           <div className="kyp-loan-scope"><span>504 loan scope</span><b>504 loans fund owner-occupied commercial real estate. Read these rows as ZIP-level, not address-linked: the SBA FOIA 504 dataset discloses borrower entity, industry, loan amount, and CDC lender — not the financed property address. 7(a) records do carry a borrower street address.</b></div>
 
           <div>
-            {shown504.map((loan: any, i: number) => {
+            {by504Amount.map((loan: any, i: number) => {
               const mapsUrl = loan.borrowerName
                 ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${loan.borrowerName} ${loan.city || 'Chicago'} IL`)}`
                 : null;
               return (
-                <div key={i} className="kyp-loanrow">
+                <div key={i} className={`kyp-loanrow${i >= visible504 ? ' loan-overflow' : ''}`}>
                   <div className="lmain">
                     {mapsUrl ? (
                       <a className="lnm" href={mapsUrl} target="_blank" rel="noopener noreferrer" data-testid={`link-504-maps-${i}`}>{niceName(loan.borrowerName)}</a>
@@ -152,18 +157,20 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
               );
             })}
           </div>
-          {by504Amount.length > SHOW_N && (
-            <button type="button" className="kyp-morelink" onClick={() => setShowAll504(v => !v)} data-testid="more-504">
-              {showAll504 ? '− show fewer 504 loans' : `+ ${by504Amount.length - SHOW_N} more 504 loans →`}
+          {visible504 < by504Amount.length && (
+            <button type="button" className="kyp-morelink market-showmore" onClick={() => setVisible504(n => n + SHOW_N)} data-testid="more-504">
+              + Show {Math.min(SHOW_N, by504Amount.length - visible504)} more 504 loans →
             </button>
           )}
 
           {top504.length > 0 && (
             <>
-              <div className="kyp-charttitle">Top 504 lenders (CDCs)</div>
+              <div className="kyp-charttitle">504 lenders (CDCs)</div>
               <div>
-                {top504.map((l: any, i: number) => <LenderBar key={i} {...l} max={top504Max} />)}
+                {top504.slice(0, visible504Lenders).map((l: any, i: number) => <LenderBar key={i} {...l} max={top504Max} />)}
+                <div className="hidden print:block">{top504.slice(visible504Lenders).map((l: any, i: number) => <LenderBar key={i} {...l} max={top504Max} />)}</div>
               </div>
+              {visible504Lenders < top504.length && <button type="button" className="kyp-morelink market-showmore" data-testid="more-504-lenders" onClick={() => setVisible504Lenders(n => n + SHOW_N)}>+ Show {Math.min(SHOW_N, top504.length - visible504Lenders)} more 504 lenders →</button>}
             </>
           )}
         </>
@@ -187,13 +194,13 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
           <div className="kyp-body mt-2">Supports working capital, equipment, and expansion for small businesses. 7(a) records carry a borrower street address and jobs supported.</div>
 
           <div>
-            {shown7a.map((loan: any, i: number) => {
+            {by7aAmount.map((loan: any, i: number) => {
               const query = loan.address
                 ? `${loan.address} ${loan.city || 'Chicago'} IL`
                 : `${loan.borrowerName} ${loan.city || 'Chicago'} IL`;
               const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
               return (
-                <div key={i} className="kyp-loanrow">
+                <div key={i} className={`kyp-loanrow${i >= visible7a ? ' loan-overflow' : ''}`}>
                   <div className="lmain">
                     <a className="lnm" href={mapsUrl} target="_blank" rel="noopener noreferrer" data-testid={`link-7a-maps-${i}`}>{niceName(loan.borrowerName || 'Undisclosed')}</a>
                     {loan.address && <div className="lmeta">{loan.address}{loan.city ? `, ${loan.city}` : ''}</div>}
@@ -210,18 +217,20 @@ export function SBALoansView({ data, isLoading, zipCode, isError, onRetry }: SBA
               );
             })}
           </div>
-          {by7aAmount.length > SHOW_N && (
-            <button type="button" className="kyp-morelink" onClick={() => setShowAll7a(v => !v)} data-testid="more-7a">
-              {showAll7a ? '− show fewer 7(a) loans' : `+ ${by7aAmount.length - SHOW_N} more 7(a) loans →`}
+          {visible7a < by7aAmount.length && (
+            <button type="button" className="kyp-morelink market-showmore" onClick={() => setVisible7a(n => n + SHOW_N)} data-testid="more-7a">
+              + Show {Math.min(SHOW_N, by7aAmount.length - visible7a)} more 7(a) loans →
             </button>
           )}
 
           {top7a.length > 0 && (
             <>
-              <div id="sba-lenders" className="kyp-charttitle">Top 7(a) lenders</div>
+              <div id="sba-lenders" className="kyp-charttitle">7(a) lenders</div>
               <div>
-                {top7a.map((l: any, i: number) => <LenderBar key={i} {...l} max={top7aMax} />)}
+                {top7a.slice(0, visible7aLenders).map((l: any, i: number) => <LenderBar key={i} {...l} max={top7aMax} />)}
+                <div className="hidden print:block">{top7a.slice(visible7aLenders).map((l: any, i: number) => <LenderBar key={i} {...l} max={top7aMax} />)}</div>
               </div>
+              {visible7aLenders < top7a.length && <button type="button" className="kyp-morelink market-showmore" data-testid="more-7a-lenders" onClick={() => setVisible7aLenders(n => n + SHOW_N)}>+ Show {Math.min(SHOW_N, top7a.length - visible7aLenders)} more 7(a) lenders →</button>}
             </>
           )}
         </>

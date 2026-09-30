@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -198,6 +198,8 @@ function HmdaBarBlock({ items, ramp, title, icon: Icon, headNote, ranked = false
 }
 
 function LenderTable({ lenders, view = 'all' }: { lenders: HmdaLenderItem[]; view?: 'all' | 'closed' | 'denied' }) {
+  const [visibleCount, setVisibleCount] = useState(10);
+  useEffect(() => { setVisibleCount(10); }, [lenders, view]);
   const sorted = [...lenders].sort((a, b) => {
     if (view === 'closed') return (b.closedCount ?? 0) - (a.closedCount ?? 0);
     if (view === 'denied') return (b.deniedCount ?? 0) - (a.deniedCount ?? 0);
@@ -230,12 +232,10 @@ function LenderTable({ lenders, view = 'all' }: { lenders: HmdaLenderItem[]; vie
 
   return (
     <div>
-      {sorted.slice(0, 10).map(renderRow)}
-      {sorted.length > 10 && (
-        <div data-testid="scroll-hmda-lenders">
-          {sorted.slice(10).map(renderRow)}
-        </div>
-      )}
+      {sorted.slice(0, visibleCount).map(renderRow)}
+      {visibleCount < sorted.length && <button type="button" className="hmda-showall market-showmore" data-testid="show-more-hmda-lenders" onClick={() => setVisibleCount(n => n + 10)}>Show {Math.min(10, sorted.length - visibleCount)} more lenders →</button>}
+      {visibleCount > 10 && <button type="button" className="hmda-showall market-showmore ml-4" onClick={() => setVisibleCount(10)}>Show fewer</button>}
+      <div className="hidden print:block">{sorted.slice(visibleCount).map(renderRow)}</div>
     </div>
   );
 }
@@ -803,7 +803,7 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
             return (
               <div className="kyp-ratecmp" data-testid="hmda-ratecard">
                 <div className="rh">
-                  <svg viewBox="0 0 24 24" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  <svg className="inline-block h-4 w-4 mr-1 align-middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                   Interest rates — this area vs. today
                 </div>
                 <div className="cmp">

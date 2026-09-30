@@ -1224,6 +1224,15 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
   letter-spacing: .06em; text-transform: uppercase;
   color: var(--kyp-ink2); margin-bottom: 14px;
 }
+.kyp-ratecmp .rh svg {
+  width: 16px; height: 16px; display: inline-block; vertical-align: middle;
+  margin-right: 5px; fill: none; stroke: currentColor;
+}
+.kyp-loanrow.loan-overflow { display: none; }
+@media print {
+  .kyp-loanrow.loan-overflow { display: flex; }
+  .market-showmore { display: none; }
+}
 .kyp-ratecmp .cmp {
   display: grid; grid-template-columns: 1fr auto 1fr;
   gap: 16px; align-items: center;

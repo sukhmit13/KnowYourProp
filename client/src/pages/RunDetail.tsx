@@ -1445,10 +1445,6 @@ export default function RunDetail() {
   const setIsGooglePlacesDaycareOpen = useCallback((v: boolean) => setSectionOpen('googlePlacesDaycareSection', v), [setSectionOpen]);
   const isRentcastOpen = sectionStates.rentcast;
   const setIsRentcastOpen = useCallback((v: boolean) => setSectionOpen('rentcast', v), [setSectionOpen]);
-  const isRecentlySoldCompsOpen = sectionStates.recentlySoldComps;
-  const setIsRecentlySoldCompsOpen = useCallback((v: boolean) => setSectionOpen('recentlySoldComps', v), [setSectionOpen]);
-  const isSBALoansOpen = sectionStates.sbaLoans;
-  const setIsSBALoansOpen = useCallback((v: boolean) => setSectionOpen('sbaLoans', v), [setSectionOpen]);
   const isLocationIncentivesOpen = sectionStates.locationIncentives;
   const setIsLocationIncentivesOpen = useCallback((v: boolean) => setSectionOpen('locationIncentives', v), [setSectionOpen]);
   const isPropertyDetailsOpen = sectionStates.propertyDetails;
@@ -1545,10 +1541,6 @@ export default function RunDetail() {
   const setIsLanguagesSectionOpen = useCallback((v: boolean) => setSectionOpen('languages', v), [setSectionOpen]);
   const isWorshipSectionOpen = sectionStates.worship;
   const setIsWorshipSectionOpen = useCallback((v: boolean) => setSectionOpen('worship', v), [setSectionOpen]);
-  const isHmdaStatsOpen = sectionStates.hmdaStats;
-  const setIsHmdaStatsOpen = useCallback((v: boolean) => setSectionOpen('hmdaStats', v), [setSectionOpen]);
-  const isTransactionTrendsOpen = sectionStates.transactionTrends;
-  const setIsTransactionTrendsOpen = useCallback((v: boolean) => setSectionOpen('transactionTrends', v), [setSectionOpen]);
   const isZoningHistoryOpen = sectionStates.zoningHistory;
   const setIsZoningHistoryOpen = useCallback((v: boolean) => setSectionOpen('zoningHistory', v), [setSectionOpen]);
   const isHmdaBuyerOpen = sectionStates.hmdaBuyer;
@@ -16158,19 +16150,7 @@ export default function RunDetail() {
               <div>
                 {(facts?.tractGeoid || facts?.communityArea) && (
                   <div id="print-section-hmda-stats">
-                    <Collapsible open={isHmdaStatsOpen} onOpenChange={setIsHmdaStatsOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-hmda-stats-subsection">
-                          <KypSubhead subsection={1}><span className="lbl">Residential Mortgage Market</span><span className="ct">HMDA loan-level records</span></KypSubhead>
-                          <div className="flex items-center gap-2">
-                            {!isHmdaStatsOpen && (
-                              <Badge variant="outline" className="text-xs">HMDA</Badge>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isHmdaStatsOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
+                    <KypSubhead subsection={1} data-testid="trigger-hmda-stats-subsection"><span className="lbl">Residential Mortgage Market</span><span className="ct">HMDA loan-level records</span></KypSubhead>
                         <div className="seccard">
                           <p className="kyp-scopenote">Figures below describe <b>{facts?.tractGeoid && facts?.communityArea ? `Census Tract ${facts.tractGeoid} or Community Area ${facts.communityArea}, as selected below` : facts?.tractGeoid ? `Census Tract ${facts.tractGeoid}` : `Community Area ${facts?.communityArea}`}</b>, not this address</p>
                           <HMDAFinancingStats
@@ -16191,26 +16171,12 @@ export default function RunDetail() {
                             </div>
                           )}
                         </div>
-                      </CollapsibleContent>
-                    </Collapsible>
                   </div>
                 )}
 
                 {facts?.zipCode && (
                   <div id="print-section-transaction-trends">
-                  <Collapsible open={isTransactionTrendsOpen} onOpenChange={setIsTransactionTrendsOpen}>
-                    <CollapsibleTrigger asChild>
-                      <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-transaction-trends-subsection">
-                        <KypSubhead subsection={2}><span className="lbl">Area Transaction Trends</span><span className="ct">Cook County transfer records</span></KypSubhead>
-                        <div className="flex items-center gap-2">
-                          {!isTransactionTrendsOpen && (
-                            <Badge variant="outline" className="text-xs">ZIP {facts.zipCode}</Badge>
-                          )}
-                          <span className="text-muted-foreground text-sm">{isTransactionTrendsOpen ? '▼' : '▶'}</span>
-                        </div>
-                      </div>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
+                  <KypSubhead subsection={2} data-testid="trigger-transaction-trends-subsection"><span className="lbl">Area Transaction Trends</span><span className="ct">Cook County transfer records</span></KypSubhead>
                       <div className="px-4 pt-2 pb-4">
                         <p className="kyp-scopenote">Figures below describe <b>ZIP {facts.zipCode}</b>, not this address</p>
                         {isLoadingTransactionTrends ? (
@@ -16368,28 +16334,12 @@ export default function RunDetail() {
                           <p className="kyp-emptypanel">Transaction data not available for this ZIP code.</p>
                         )}
                       </div>
-                    </CollapsibleContent>
-                  </Collapsible>
                   </div>
                 )}
 
                 {(compsData || isLoadingComps) && compPropertyClass && (
                   <div id="print-section-comparable-sales">
-                    <Collapsible open={isRecentlySoldCompsOpen} onOpenChange={setIsRecentlySoldCompsOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-recently-sold-comps">
-                          <KypSubhead subsection={3}><span className="lbl">Recently Sold Comps</span><span className="ct">class-matched sales</span></KypSubhead>
-                          <div className="flex items-center gap-2">
-                            {!isRecentlySoldCompsOpen && compsData && (
-                              <Badge variant="outline" className="text-xs">
-                                {compsData.comparables?.length > 0 ? `${compsData.comparables.length} comps` : 'Class ' + compPropertyClass}
-                              </Badge>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isRecentlySoldCompsOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
+                    <KypSubhead subsection={3} data-testid="trigger-recently-sold-comps"><span className="lbl">Recently Sold Comps</span><span className="ct">class-matched sales</span></KypSubhead>
                         <div className="pt-2 pb-3 pl-4">
                           <p className="kyp-scopenote">Figures below describe sales within <b>{compsData?.searchParams?.radiusMiles ?? 0.75} miles</b>, not this address</p>
                           <ComparableSalesView
@@ -16398,29 +16348,12 @@ export default function RunDetail() {
                             subjectSqft={pinLookupData?.characteristicsData?.buildingSf ?? null}
                           />
                         </div>
-                      </CollapsibleContent>
-                    </Collapsible>
                   </div>
                 )}
 
                 {facts?.zipCode && (
                   <div id="print-section-sba-loans">
-                  <Collapsible open={isSBALoansOpen} onOpenChange={setIsSBALoansOpen}>
-                    <CollapsibleTrigger asChild>
-                      <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-sba-loans-subsection">
-                        <KypSubhead subsection={4}><span className="lbl">Commercial Lending — SBA 504</span><span className="ct">owner-occupied CRE</span></KypSubhead>
-                        <div className="flex items-center gap-2">
-                          {!isSBALoansOpen && (
-                            <>
-                              <Badge variant="outline" className="text-xs">SBA 7(a)</Badge>
-                              <Badge variant="outline" className="text-xs">SBA 504</Badge>
-                            </>
-                          )}
-                          <span className="text-muted-foreground text-sm">{isSBALoansOpen ? '▼' : '▶'}</span>
-                        </div>
-                      </div>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
+                  <KypSubhead subsection={4} data-testid="trigger-sba-loans-subsection"><span className="lbl">Commercial Lending — SBA 504</span><span className="ct">owner-occupied CRE</span></KypSubhead>
                       <div className="seccard">
                         <p className="kyp-scopenote">Figures below describe <b>ZIP {facts.zipCode}</b>, not this address</p>
                         <SBALoansView
@@ -16433,8 +16366,6 @@ export default function RunDetail() {
                           zoningCode={facts?.zoning ?? null}
                         />
                       </div>
-                    </CollapsibleContent>
-                  </Collapsible>
                   </div>
                 )}
               </div>

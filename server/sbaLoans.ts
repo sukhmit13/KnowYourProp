@@ -190,7 +190,7 @@ async function streamCSVForCookCounty(
   return lenders;
 }
 
-function topLenders(rows: string[][], nameCol: number, amountCol: number, n = 5) {
+function topLenders(rows: string[][], nameCol: number, amountCol: number) {
   const map = new Map<string, { count: number; total: number }>();
   for (const r of rows) {
     const name = (r[nameCol] || 'Unknown').trim().replace(/^"(.+)"$/, '$1') || 'Unknown';
@@ -200,8 +200,7 @@ function topLenders(rows: string[][], nameCol: number, amountCol: number, n = 5)
   }
   return [...map.entries()]
     .map(([name, s]) => ({ name, count: s.count, totalAmount: s.total }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, n);
+    .sort((a, b) => b.count - a.count);
 }
 
 function parseDate(s: string): string | null {
