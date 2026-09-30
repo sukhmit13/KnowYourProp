@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { parseUnits } from './upcomingDevelopments';
 import { summarizeDevelopmentUnits } from '../shared/developmentUnitCoverage';
-import { classifyArticle } from './articleSubject';
+import { classifyArticle } from '../shared/articleSubject';
 
 assert.deepEqual(parseUnits('replacing a 6-unit building with a 200-unit tower'), {
   units: 200, ambiguous: true,

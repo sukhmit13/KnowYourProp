@@ -1,5 +1,3 @@
-// Prepared for the subject-based news split. The report still uses its existing
-// publisher-based split until the subsequent news step.
 const DEVELOPMENT_TERMS = [
   'unit', 'units', 'apartment', 'apartments', 'condo', 'condos',
   'mixed-use', 'mixed use', 'tower', 'stories', 'story building',

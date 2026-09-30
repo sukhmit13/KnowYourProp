@@ -14,6 +14,7 @@ import { levelRating, closestSchool, ratingScore, ratingTier } from "@/lib/schoo
 import { useListingSnapshot, useGenerateListingSnapshot, useUpdateRunLabel, useRun, usePublicRun, useGeocodeLookup, useZoningInfo, useBusinessUses, useZoningCompatibility, useChildcareAccess, useCommunityAreaChildcareAccess, useGroceryAccess, useCommunityAreaGroceryAccess, useSbifEligibility, useNmtcEligibility, useMmrpEligibility, useHubZoneEligibility, useQctEligibility, useChaOpportunityArea, useTransitProximity, useTODStatus, useEvStations, useGasStations, useHotels, useRestaurants, useCoffeeShops, useBars, useNearbyDayCares, usePropertyTax, useRefreshPropertyTax, useLienSearch, usePinLookup, useProximityData, useMichelinNearby, useMuralsNearby, useDesignatedLandmarksNearby, useZbaWardSummary, useZbaCitySummary, useEVRegistrations, useCannabisDispensariesByZip, useUpdateProjectType, useUpdateFunnelAnswers, useUpdateManualProperty, useCensusACS, useCombinedPermitViolations, useCrimeStats, useCrimeTractRanking, useCrimeTakeaway, useGenerateCrimeTakeaway, useHmdaTakeaway, useGenerateHmdaTakeaway, useNewsTakeaway, useGenerateNewsTakeaway, useNeighborhoodNewsTakeaway, useGenerateNeighborhoodNewsTakeaway, usePeopleTakeaway, useGeneratePeopleTakeaway, useTransitTakeaway, useGenerateTransitTakeaway, useElectionData, useVehicleOwnership, useSeniorsData, useSeniorsZipData, useLanguageData, useLanguageZipData, useChildcareEnhancedData, useChildcareEnhancedZipData, useLandmarkStatus, useChildcareCapacity, useChildcareCapacityZip, useFairMarketRent, useCtaRidership, useCtaBusRidership, useMetraRidership, useMetraLineRidership, useNewConstruction, useNearbyNewConstruction, useNearbyBusinessLicenses, useNearbyArtGalleries, useAddressNews, useNeighborhoodNews, useCorridorNews, useVacantBuildingsNearby, useMortgageRate, useToggleFavorite, useHmdaStats, usePlacesOfWorship, useUpcomingDevelopments, useComparableSales, useSBALoans, useSchoolsNearby, useAirbnbStats, useRentcast, useRentcastRadius, useJBANearby, useLocationIncentives, useZbaApprovals, useRelatedParcels, useCityOwnedLots, useLoopNet, usePeerspace, useZoningHistory, useTransactionTrends, useSidewalkCafe, useBusinessLicenseHistory, useGooglePlaces, useTrafficCount, useLodesData, useListingData, useIncentivesCheck, useSbaRates, useDebtSnapshot, useBuildDebtSnapshot } from "@/hooks/use-runs";
 import { buildDebtCardModel } from "@shared/debtCardModel";
 import { withoutRepeatedNews } from "@/components/report/newsArticleDedup";
+import { classifyArticle } from "@shared/articleSubject";
 import { normalizeDevelopmentAddress, summarizeDevelopmentUnits } from "@shared/developmentUnitCoverage";
 import { detectAssemblage, buildAssemblageTakeaway } from "@shared/assemblage";
 import { resolveDistress } from "@shared/lienDistress";
@@ -16391,10 +16392,8 @@ export default function RunDetail() {
                                       </div>
                                     </div>
                                     {(() => {
-                                      const CULTURE_SOURCES = ['eater', 'infatuation', 'what now', 'timeout', 'chicago reader'];
-                                      const isCulture = (src: string) => CULTURE_SOURCES.some(s => src.toLowerCase().includes(s));
-                                      const cultureArticles = (neighborhoodNewsData.articles || []).filter((a: any) => isCulture(a.source || ''));
-                                      const realEstateArticles = (neighborhoodNewsData.articles || []).filter((a: any) => !isCulture(a.source || ''));
+                                      const cultureArticles = (neighborhoodNewsData.articles || []).filter((a: any) => classifyArticle(a.title || '', a.summary || '', a.url || '') === 'culture');
+                                      const realEstateArticles = (neighborhoodNewsData.articles || []).filter((a: any) => classifyArticle(a.title || '', a.summary || '', a.url || '') === 'development');
                                       const toArch = (a: any) => ({ url: a.url, source: a.source, title: a.title, date: a.published ? String(a.published).slice(0, 10) : '' });
                                       return (
                                         <>
@@ -17294,10 +17293,8 @@ export default function RunDetail() {
                           </div>
 
                           {(() => {
-                            const CULTURE_SOURCES = ['eater', 'infatuation', 'what now', 'timeout', 'chicago reader'];
-                            const isCulture = (src: string) => CULTURE_SOURCES.some(s => src.toLowerCase().includes(s));
-                            const cultureArticles = (neighborhoodNewsData.articles || []).filter((a: any) => isCulture(a.source || ''));
-                            const realEstateArticles = (neighborhoodNewsData.articles || []).filter((a: any) => !isCulture(a.source || ''));
+                            const cultureArticles = (neighborhoodNewsData.articles || []).filter((a: any) => classifyArticle(a.title || '', a.summary || '', a.url || '') === 'culture');
+                            const realEstateArticles = (neighborhoodNewsData.articles || []).filter((a: any) => classifyArticle(a.title || '', a.summary || '', a.url || '') === 'development');
                             const podcastEpisodes = neighborhoodNewsData.podcasts || [];
                             const ArticleList = ({ articles, emptyMsg, testPrefix }: { articles: any[]; emptyMsg: string; testPrefix: string }) => (
                               articles.length > 0 ? (
