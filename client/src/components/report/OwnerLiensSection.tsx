@@ -99,15 +99,11 @@ export function OwnerLiensSection({
 
       {ownerLiens.length > 0 ? (
         <>
-          <p className="kyp-owner-lien-summary">
-            <b>{ownerLiens.length} personal lien record{ownerLiens.length === 1 ? "" : "s"} found.</b> Confirm identity, payoff, and release before using these records in a closing decision.
-          </p>
           {ownerLiens.slice(0, 10).map((doc: any, index: number) => (
             <div className="kyp-xact claim" key={doc.documentNumber || index} data-testid={`row-owner-lien-${index}`}>
               <div className="xtop"><span className="xttl">{doc.documentType || doc.category || "Personal lien record"}</span></div>
               <div className="xgrid">
                 <div className="xf"><span className="k">Against</span><span className="v">{recordedOwnerName || ownerNameInput || "Name not recorded"}</span></div>
-                <div className="xf"><span className="k">Status</span><span className="v">Confirm identity and release</span></div>
               </div>
               <DocRefComponent documentNumber={doc.documentNumber || doc.docNo} viewLink={doc.viewLink} recordedDate={doc.recordingDate || doc.recordedDate} />
             </div>

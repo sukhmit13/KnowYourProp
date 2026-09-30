@@ -7,3 +7,8 @@ Each top-level accordion row should have one visible row header, not an addition
 
 **Why:** Duplicate headers, mixed short rules, and an extra outer frame made recently added education and culture rows look structurally different from the surrounding report.
 **How to apply:** When promoting older panels into report rows or adding new sections, keep the accordion as the only section-level toggle and use the standard subsection pattern for content below it. Local controls such as year/scope selectors and "show 10 more" lists may remain interactive. Preserve intentional borders on individual data cards and controls.
+
+Expanded subsections should primarily present records and measurements, not repeat an interpretation or tell users to perform obvious actions. The one-sentence takeaway belongs in the accordion header; deeper insights belong in the separately generated report. Keep factual scope, missing-evidence qualifiers, and cross-PIN loan/collateral context when they prevent misleading interpretations.
+
+**Why:** repeated gray instructions next to visible tax bills and released lien records cluttered the report and implied an unresolved state the evidence did not establish.
+**How to apply:** before removing explanatory copy, distinguish redundant advice from material source limitations, and preserve document/status facts without inferring release or payoff from a title alone.

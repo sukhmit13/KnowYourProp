@@ -348,7 +348,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-owner-lien-editor{display:flex;gap:8px;margin:-2px 0 12px}
 .kyp-owner-lien-editor input{flex:1;min-width:0;border:1px solid var(--kyp-line);border-radius:8px;background:var(--kyp-card);padding:8px 10px;font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-ink);outline:none}
 .kyp-owner-lien-editor input:focus{border-color:var(--kyp-indigo);box-shadow:0 0 0 2px var(--kyp-indigoSoft)}
-.kyp-owner-lien-summary{margin:0 0 10px;padding:10px 12px;border-left:4px solid var(--kyp-orange);background:#fff6e9;border-radius:7px;font-size:11.5px;line-height:1.45;color:var(--kyp-ink2)}
+.kyp-owner-liens .kyp-xact .xgrid{grid-template-columns:1fr}
 @media(max-width:640px){
   .kyp-blocks{grid-template-columns:1fr}
   .kyp-terms{grid-template-columns:1fr 1fr}
