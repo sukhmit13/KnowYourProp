@@ -1270,14 +1270,16 @@ export default function RunDetail() {
 
   // ---- Step 5 accordion state: order / hidden / open (persisted per run) ----
   const ACC_PREVIOUS_ORDER = ["overview", "historic", "countyRecord", "permits", "listing", "businessLicenses", "ownership", "propertyTax", "zoning", "zoningHistory", "analysis", "potential", "valuation", "newBusinessLicenses", "newConstruction", "debt", "transit", "crime", "proximity", "corridor", "development", "people", "incentives", "news"];
-  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "businessLicenses", "valuation", "listing", "crime", "transit", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
+  const ACC_LAST_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "businessLicenses", "valuation", "listing", "crime", "transit", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
+  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "crime", "transit", "businessLicenses", "valuation", "listing", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
   const mergeAccOrder = (saved: string[], def: string[]): string[] => {
     // The app persisted its old default even for people who never dragged a row.
     // Migrate only that exact order; keep genuinely customized orders intact.
-    if (JSON.stringify(saved) === JSON.stringify(ACC_PREVIOUS_ORDER)) return [...def];
+    if (JSON.stringify(saved) === JSON.stringify(ACC_PREVIOUS_ORDER) ||
+        JSON.stringify(saved) === JSON.stringify(ACC_LAST_DEFAULT_ORDER)) return [...def];
     const out = saved.filter((x) => def.includes(x));
     for (let idx = 0; idx < def.length; idx++) {
       const idRow = def[idx];
@@ -1431,8 +1433,6 @@ export default function RunDetail() {
   const setIsCorridorNewsOpen = useCallback((v: boolean) => setSectionOpen('corridorNews', v), [setSectionOpen]);
   const isUpcomingDevelopmentsOpen = sectionStates.upcomingDevelopments;
   const setIsUpcomingDevelopmentsOpen = useCallback((v: boolean) => setSectionOpen('upcomingDevelopments', v), [setSectionOpen]);
-  const isSchoolsOpen = sectionStates.schools;
-  const setIsSchoolsOpen = useCallback((v: boolean) => setSectionOpen('schools', v), [setSectionOpen]);
   const isAirbnbOpen = sectionStates.airbnb;
   const setIsAirbnbOpen = useCallback((v: boolean) => setSectionOpen('airbnb', v), [setSectionOpen]);
   const isLoopnetSectionOpen = sectionStates.loopnetSection;
@@ -1487,8 +1487,6 @@ export default function RunDetail() {
   const tierBlock = (t: string) => t === 'good' ? 'grn' : t === 'att' ? 'orange' : 'red';
   const isProximitySectionOpen = sectionStates.proximity;
   const setIsProximitySectionOpen = useCallback((v: boolean) => setSectionOpen('proximity', v), [setSectionOpen]);
-  const isEntertainmentSectionOpen = sectionStates.entertainment;
-  const setIsEntertainmentSectionOpen = useCallback((v: boolean) => setSectionOpen('entertainment', v), [setSectionOpen]);
   const isTodSectionOpen = sectionStates.tod;
   const setIsTodSectionOpen = useCallback((v: boolean) => setSectionOpen('tod', v), [setSectionOpen]);
   const isSbifSectionOpen = sectionStates.sbif;
@@ -14139,47 +14137,6 @@ export default function RunDetail() {
 
                     <AccordionSection {...accProps("schools")}>
                     {/* Schools */}
-                    <Collapsible id="schools-content" open={isSchoolsOpen} onOpenChange={setIsSchoolsOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="trigger-schools-section">
-                          <h3 className="chead chead-icon">
-                            <GraduationCap className="w-4 h-4" />
-                            Schools &amp; Childcare
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            {!isSchoolsOpen && (
-                              <div className="flex flex-wrap gap-1.5">
-                                {isLoadingSchools ? (
-                                  <Badge variant="secondary" className="text-xs">Loading...</Badge>
-                                ) : schoolsData ? (
-                                  <>
-                                    {schoolsData.elementary?.length > 0 && (
-                                      <Badge variant="outline" className="text-xs">
-                                        {schoolsData.elementary.length} Elementary
-                                      </Badge>
-                                    )}
-                                    {schoolsData.middle?.length > 0 && (
-                                      <Badge variant="outline" className="text-xs">
-                                        {schoolsData.middle.length} Middle
-                                      </Badge>
-                                    )}
-                                    {schoolsData.high?.length > 0 && (
-                                      <Badge variant="outline" className="text-xs">
-                                        {schoolsData.high.length} High
-                                      </Badge>
-                                    )}
-                                    {schoolsData.total === 0 && (
-                                      <Badge variant="secondary" className="text-xs">None within 1.5 mi</Badge>
-                                    )}
-                                  </>
-                                ) : null}
-                              </div>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isSchoolsOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
                         <div className="px-4 pb-4 pt-1">
                           {isLoadingSchools ? (
                             <p className="text-sm text-muted-foreground">Loading...</p>
@@ -14210,7 +14167,6 @@ export default function RunDetail() {
                             const highRate = levelRating(high);
                             const elemClosest = closestSchool(elem);
                             const highClosest = closestSchool(high);
-                            const gradIcon = <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 2 6 2s6-1 6-2v-5"/></svg>;
                             const glGradIcon = <svg viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 2 6 2s6-1 6-2v-5"/></svg>;
                             const rateClass = (b?: 'good' | 'caution' | 'bad') => b === 'caution' ? ' cau' : b === 'bad' ? ' bad' : '';
                             const lvlClass = (r?: string) => { const t = ratingTier(r); return t === 'good' ? '' : t === 'caution' ? ' cau' : t === 'bad' ? ' bad' : ' neu'; };
@@ -14239,23 +14195,9 @@ export default function RunDetail() {
                                   <div className="kyp-block dark"><div className="bv">{elem.length}</div><div><div className="bl">Elementary within {radius} mi</div><div className="bd">{elem.filter((s: any) => s.attendanceBoundary).length} attendance boundary · {elem.filter((s: any) => !s.attendanceBoundary).length} open enrollment</div></div></div>
                                   <div className="kyp-block dark"><div className="bv">{high.length}</div><div><div className="bl">High schools within {radius} mi</div><div className="bd">{high.filter((s: any) => s.attendanceBoundary).length} with an attendance boundary in this radius</div></div></div>
                                 </div>
-                                <div className="sh">
-                                  <span className="sq" />
-                                  <span className="t">Schools &amp; Day Care</span>
-                                  <span className="count">
-                                    {elem.length + high.length + middle.length > 0
-                                      ? <>{elem.length > 0 && `${elem.length} elementary`}{elem.length > 0 && high.length > 0 && ' · '}{high.length > 0 && `${high.length} high`} · within {radius} mi</>
-                                      : `No CPS schools within ${radius} mi`}
-                                  </span>
-                                </div>
-
                                 {/* ---- Day Care ---- */}
                                 <div className="subwrap" id="daycare">
-                                  <div className="ssh">
-                                    <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="5" r="3"/><path d="M9 20v-5l-2 1v-4a5 5 0 0 1 10 0v4l-2-1v5"/></svg>
-                                    <KypSubhead subsection={schoolSubsections.childcare}><span className="lbl">Childcare</span></KypSubhead>
-                                    <span className="sub">licensed early-childhood supply</span>
-                                  </div>
+                                  <KypSubhead subsection={schoolSubsections.childcare}><span className="lbl">Childcare</span><span className="ct">licensed early-childhood supply</span></KypSubhead>
                                   <div className="toggle">
                                     <div className={`tg${childcareViewMode === 'zip' ? ' on' : ''}`} data-testid="tab-childcare-zip" onClick={() => setChildcareViewMode('zip')}>
                                       <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -14362,11 +14304,7 @@ export default function RunDetail() {
                                     {/* ---- Elementary list ---- */}
                                     {elem.length > 0 && (
                                       <div className="subwrap" id="elementary">
-                                        <div className="ssh">
-                                          {gradIcon}
-                                          <KypSubhead subsection={schoolSubsections.elementary}><span className="lbl">Elementary</span></KypSubhead>
-                                          <span className="sub">{elem.length} within {radius} mi</span>
-                                        </div>
+                                        <KypSubhead subsection={schoolSubsections.elementary}><span className="lbl">Elementary</span><span className="ct">{elem.length} within {radius} mi</span></KypSubhead>
                                         <div>{elem.map((s: any) => schoolRow(s))}</div>
                                       </div>
                                     )}
@@ -14374,11 +14312,7 @@ export default function RunDetail() {
                                     {/* ---- Middle list (standalone only) ---- */}
                                     {middle.length > 0 && (
                                       <div className="subwrap" id="middleschools">
-                                        <div className="ssh">
-                                          {gradIcon}
-                                          <KypSubhead subsection={schoolSubsections.middle}><span className="lbl">Middle</span></KypSubhead>
-                                          <span className="sub">{middle.length} within {radius} mi</span>
-                                        </div>
+                                        <KypSubhead subsection={schoolSubsections.middle}><span className="lbl">Middle</span><span className="ct">{middle.length} within {radius} mi</span></KypSubhead>
                                         <div>{middle.map((s: any) => schoolRow(s))}</div>
                                       </div>
                                     )}
@@ -14386,11 +14320,7 @@ export default function RunDetail() {
                                     {/* ---- High school list ---- */}
                                     {high.length > 0 && (
                                       <div className="subwrap" id="highschools">
-                                        <div className="ssh">
-                                          {gradIcon}
-                                          <KypSubhead subsection={schoolSubsections.high}><span className="lbl">High schools</span></KypSubhead>
-                                          <span className="sub">{high.length} within {radius} mi</span>
-                                        </div>
+                                        <KypSubhead subsection={schoolSubsections.high}><span className="lbl">High schools</span><span className="ct">{high.length} within {radius} mi</span></KypSubhead>
                                         <div>{high.map((s: any) => schoolRow(s))}</div>
                                       </div>
                                     )}
@@ -14404,72 +14334,10 @@ export default function RunDetail() {
                             );
                           })()}
                         </div>
-                      </CollapsibleContent>
-                    </Collapsible>
                     </AccordionSection>
 
                     <AccordionSection {...accProps("entCulture")}>
                     {/* Entertainment & Culture */}
-                    <Collapsible id="entertainment-content" open={isEntertainmentSectionOpen} onOpenChange={setIsEntertainmentSectionOpen}>
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                          <h3 className="chead chead-icon">
-                            <Star className="w-4 h-4" />
-                            Entertainment &amp; Culture
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            {!isEntertainmentSectionOpen && (
-                              <div className="flex flex-wrap gap-1.5">
-                                {!isLoadingMichelin && michelinData && (
-                                  michelinData.restaurants.length > 0 ? (
-                                    <>
-                                      <Badge variant="secondary" className="text-xs border-0" style={{ background: '#ecedf9', color: '#2b3a9e' }}>
-                                        {michelinData.total} Michelin Restaurant{michelinData.total !== 1 ? 's' : ''}
-                                      </Badge>
-                                      {michelinData.restaurants.some((r: any) => r.rating.includes('Star')) && (
-                                        <Badge variant="default" className="text-xs">
-                                          {michelinData.restaurants.filter((r: any) => r.rating.includes('Star')).length} Starred
-                                        </Badge>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <Badge variant="secondary" className="text-xs border-0" style={{ background: '#ecedf9', color: '#2b3a9e' }}>No Michelin Nearby</Badge>
-                                  )
-                                )}
-                                {!isLoadingMurals && muralsData && (
-                                  muralsData.murals.length > 0 ? (
-                                    <Badge variant="secondary" className="text-xs border-0" style={{ background: '#ecedf9', color: '#2b3a9e' }}>
-                                      {muralsData.total} Mural{muralsData.total !== 1 ? 's' : ''}
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant="secondary" className="text-xs border-0" style={{ background: '#ecedf9', color: '#2b3a9e' }}>No Murals Nearby</Badge>
-                                  )
-                                )}
-                                {!isLoadingDesignatedLandmarks && designatedLandmarksData && (
-                                  designatedLandmarksData.landmarks.length > 0 ? (
-                                    <Badge variant="secondary" className="text-xs border-0" style={{ background: '#ecedf9', color: '#2b3a9e' }}>
-                                      {designatedLandmarksData.total} Landmark{designatedLandmarksData.total !== 1 ? 's' : ''}
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant="secondary" className="text-xs border-0" style={{ background: '#ecedf9', color: '#2b3a9e' }}>No Landmarks Nearby</Badge>
-                                  )
-                                )}
-                                {!isLoadingArtGalleries && artGalleriesData && (
-                                  artGalleriesData.galleries.length > 0 ? (
-                                    <Badge variant="secondary" className="text-xs border-0" style={{ background: '#ecedf9', color: '#2b3a9e' }}>
-                                      {artGalleriesData.totalCount} Art Galler{artGalleriesData.totalCount !== 1 ? 'ies' : 'y'}
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant="secondary" className="text-xs border-0" style={{ background: '#ecedf9', color: '#2b3a9e' }}>No Art Galleries Nearby</Badge>
-                                  )
-                                )}
-                              </div>
-                            )}
-                            <span className="text-muted-foreground text-sm">{isEntertainmentSectionOpen ? '▼' : '▶'}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
                       <div className="ecbox seccard" id="print-section-entertainment-culture">
                       {(isLoadingMichelin || isLoadingJBA || isLoadingMurals || isLoadingDesignatedLandmarks || isLoadingArtGalleries) ? (
                         <p className="text-sm text-muted-foreground pt-2">Loading...</p>
@@ -14509,13 +14377,7 @@ export default function RunDetail() {
 
                             {/* Michelin Guide Restaurants */}
                             <div className="ec-sub" id="ec-michelin" style={{ marginTop: mich.length + jba.length + murals.length + lms.length + gals.length > 0 ? undefined : 8 }}>
-                              <div className="ssh" data-testid="trigger-michelin-sub">
-                                <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2s2-.9 2-2V2"/><path d="M5 11v11"/><path d="M13 2v20"/><path d="M13 8c0-3 1.8-6 4-6v20"/></svg>
-                                <KypSubhead subsection={cultureSubsections.michelin}><span className="lbl">Michelin Guide</span></KypSubhead>
-                                <span className="rad">within 1 mi</span>
-                                {mich.length > 0 && <span className="chip">{michelinData!.total} recognized</span>}
-                              </div>
-                              <div className="ssline" />
+                              <KypSubhead subsection={cultureSubsections.michelin} data-testid="trigger-michelin-sub"><span className="lbl">Michelin Guide</span><span className="ct">within 1 mi</span>{mich.length > 0 && <span className="chip">{michelinData!.total} recognized</span>}</KypSubhead>
                               {mich.length > 0 ? (
                                 <div data-testid="list-michelin-restaurants">
                                   {(ecShowAll.michelin ? mich : mich.slice(0, 6)).map((r: any, idx: number) => (
@@ -14558,13 +14420,7 @@ export default function RunDetail() {
 
                             {/* James Beard Award Winners */}
                             <div className="ec-sub" id="ec-jamesbeard">
-                              <div className="ssh" data-testid="trigger-jba-sub">
-                                <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9a6 6 0 0 0 12 0V4H6z"/><path d="M6 5H4a2 2 0 0 0 0 4h2"/><path d="M18 5h2a2 2 0 0 1 0 4h-2"/><path d="M12 15v4"/><path d="M8 22h8"/><path d="M10 19h4"/></svg>
-                                <KypSubhead subsection={cultureSubsections.jamesBeard}><span className="lbl">James Beard</span></KypSubhead>
-                                <span className="rad">within 1 mi</span>
-                                <span className="chip">{jba.length} of Chicago's {jbaData?.citywideTotal ?? '—'} citywide</span>
-                              </div>
-                              <div className="ssline" />
+                              <KypSubhead subsection={cultureSubsections.jamesBeard} data-testid="trigger-jba-sub"><span className="lbl">James Beard</span><span className="ct">within 1 mi</span><span className="chip">{jba.length} of Chicago's {jbaData?.citywideTotal ?? '—'} citywide</span></KypSubhead>
                               {jba.length > 0 ? (
                                 <div data-testid="list-jba-restaurants">
                                   {jba.map((r: any, idx: number) => (
@@ -14593,13 +14449,7 @@ export default function RunDetail() {
 
                             {/* Registered Murals */}
                             <div className="ec-sub" id="ec-murals">
-                              <div className="ssh" data-testid="trigger-murals-sub">
-                                <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-.9-.5-1.3-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H16a5 5 0 0 0 5-5c0-5-4-9-9-9z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="10.5" r="1"/></svg>
-                                <KypSubhead subsection={cultureSubsections.murals}><span className="lbl">Registered murals</span></KypSubhead>
-                                <span className="rad">within {muralRad} mi</span>
-                                {murals.length > 0 && <span className="chip">{muralsData!.total} mural{muralsData!.total !== 1 ? 's' : ''}</span>}
-                              </div>
-                              <div className="ssline" />
+                              <KypSubhead subsection={cultureSubsections.murals} data-testid="trigger-murals-sub"><span className="lbl">Registered murals</span><span className="ct">within {muralRad} mi</span>{murals.length > 0 && <span className="chip">{muralsData!.total} mural{muralsData!.total !== 1 ? 's' : ''}</span>}</KypSubhead>
                               {murals.length > 0 ? (
                                 <div data-testid="list-murals">
                                   {(ecShowAll.murals ? murals : murals.slice(0, 6)).map((m: any, idx: number) => (
@@ -14629,13 +14479,7 @@ export default function RunDetail() {
 
                             {/* Architectural Landmarks */}
                             <div className="ec-sub" id="ec-landmarks">
-                              <div className="ssh" data-testid="trigger-landmarks-designated-sub">
-                                <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V10"/><path d="M9 21V10"/><path d="M15 21V10"/><path d="M19 21V10"/><path d="m3 10 9-7 9 7"/><path d="M3 10h18"/></svg>
-                                <KypSubhead subsection={cultureSubsections.landmarks}><span className="lbl">Architectural landmarks</span></KypSubhead>
-                                <span className="rad">within {lmRad} mi</span>
-                                {lms.length > 0 && <span className="chip">{designatedLandmarksData!.total} landmark{designatedLandmarksData!.total !== 1 ? 's' : ''}</span>}
-                              </div>
-                              <div className="ssline" />
+                              <KypSubhead subsection={cultureSubsections.landmarks} data-testid="trigger-landmarks-designated-sub"><span className="lbl">Architectural landmarks</span><span className="ct">within {lmRad} mi</span>{lms.length > 0 && <span className="chip">{designatedLandmarksData!.total} landmark{designatedLandmarksData!.total !== 1 ? 's' : ''}</span>}</KypSubhead>
                               {lms.length > 0 ? (
                                 <div data-testid="list-designated-landmarks">
                                   {(ecShowAll.landmarks ? lms : lms.slice(0, 6)).map((l: any, idx: number) => (
@@ -14667,13 +14511,7 @@ export default function RunDetail() {
 
                             {/* Art Galleries */}
                             <div className="ec-sub" id="ec-galleries">
-                              <div className="ssh" data-testid="trigger-art-galleries-sub">
-                                <svg className="hic" viewBox="0 0 24 24" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-4.5-4.5L6 21"/></svg>
-                                <KypSubhead subsection={cultureSubsections.galleries}><span className="lbl">Art galleries</span></KypSubhead>
-                                <span className="rad">within {galRad} mi</span>
-                                {gals.length > 0 && <span className="chip">{artGalleriesData!.totalCount}{nearestGal ? ` · ${nearestGal.distanceMiles} mi` : ''}</span>}
-                              </div>
-                              <div className="ssline" />
+                              <KypSubhead subsection={cultureSubsections.galleries} data-testid="trigger-art-galleries-sub"><span className="lbl">Art galleries</span><span className="ct">within {galRad} mi</span>{gals.length > 0 && <span className="chip">{artGalleriesData!.totalCount}{nearestGal ? ` · ${nearestGal.distanceMiles} mi` : ''}</span>}</KypSubhead>
                               {gals.length > 0 ? (
                                 <div data-testid="list-art-galleries">
                                   {gals.map((g: any, idx: number) => (
@@ -14701,8 +14539,6 @@ export default function RunDetail() {
                         );
                       })()}
                       </div>
-                      </CollapsibleContent>
-                    </Collapsible>
                     </AccordionSection>
 
           {/* Transit Proximity Section */}

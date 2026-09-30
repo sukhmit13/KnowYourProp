@@ -2032,8 +2032,10 @@ a.cmp-nm{text-decoration:underline}
 .profind b{color:var(--ink2)}
 
 /* ============ SCHX — Schools & Day Care rebuild (schbox-scoped) ============ */
-.schbox{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
+.schbox{background:transparent;border:0;border-radius:0;padding:0;box-shadow:none}
 .schbox [id]{scroll-margin-top:90px}
+.schbox .subwrap .kyp-subhead{width:100%;margin-top:22px}
+.schbox .subwrap .kyp-subhead .ct{margin-left:auto;text-align:right}
 .schbox .sh{display:flex;align-items:center;gap:9px;padding-bottom:14px;margin-bottom:16px}
 .schbox .sh .sq{width:11px;height:11px;border-radius:3px;background:var(--indigo);flex:none}
 .schbox .sh .t{font-family:var(--font-jbmono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
@@ -2128,11 +2130,12 @@ a.cmp-nm{text-decoration:underline}
 /* ── Entertainment & Culture section (ecbox) — spec: report-entculture reference ── */
 .ecbox .ec-sub{margin-top:24px}
 .ecbox .ec-sub[id]{scroll-margin-top:90px}
+.ecbox .ec-sub .kyp-subhead{width:100%;margin-top:24px;flex-wrap:wrap}
 .ecbox .ssh{display:flex;align-items:center;gap:9px;margin-bottom:6px}
 .ecbox .ssh .hic{width:17px;height:17px;stroke:var(--indigo);fill:none;flex:none}
 .ecbox .ssh .t{font-family:var(--font-jbmono);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
 .ecbox .ssh .rad{font-family:var(--font-jbmono);font-size:9.5px;color:var(--na);text-transform:uppercase;letter-spacing:.04em}
-.ecbox .ssh .chip{margin-left:auto;font-family:var(--font-jbmono);font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--indigo);background:var(--indigo-soft);border:1px solid #dde1f6;border-radius:6px;padding:3px 8px;white-space:nowrap}
+.ecbox .kyp-subhead .chip{margin-left:auto;font-family:var(--font-jbmono);font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--indigo);background:var(--indigo-soft);border:1px solid #dde1f6;border-radius:6px;padding:3px 8px;white-space:nowrap}
 .ecbox .ssline{height:1px;background:var(--line);margin-bottom:6px}
 .ecbox .row{padding:13px 0;border-top:1px solid var(--line)}
 .ecbox .row:first-of-type{border-top:none}

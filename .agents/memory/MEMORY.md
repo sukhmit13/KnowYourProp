@@ -7,6 +7,7 @@
 - [Owner intel & IL SOS access](owner-intel-sos-access.md) — ilsos.gov 403s datacenter IPs; SOS scraping must use ScrapingBee (quota resets monthly); fail loudly to manual link.
 - [claude-sonnet-5 API quirks](claude-sonnet-5-api-quirks.md) — rejects temperature; thinking tokens eat max_tokens; join all text blocks and fail hard on truncation/empty output.
 - [Report design system](report-design-system.md) — shared CSS primitives for report restyles; verify design-subagent passes with tsc baseline + Playwright; subagents break imports/JSX.
+- [Report section hierarchy](report-section-hierarchy.md) — each accordion row gets one header; subsection labels use full-width standard rules without a second icon/short line or extra outer frame.
 - [Metra station name matching](metra-station-matching.md) — GTFS vs RTAMS survey names differ; alias table + hint-only fuzzy match, ambiguous → 404, never guess.
 - [Contractor rankings pipeline](contractor-rankings-pipeline.md) — permits-only data; rank by trade-specific counts, compute activity live, rebuilds fail hard + atomic.
 - [Auth & run ownership](auth-run-ownership.md) — new run endpoints need cookie+bearer auth, case-insensitive email ownership, 404 for non-owned; paid calls need lock+cooldown.
