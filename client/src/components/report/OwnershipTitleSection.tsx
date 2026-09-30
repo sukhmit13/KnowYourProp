@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { KypSubhead } from "@/components/report/AccordionSection";
+import { buildSubsectionNumbers, KypSubhead } from "@/components/report/AccordionSection";
 import { OwnerLiensSection } from "./OwnerLiensSection";
 
 // ---- Sale History derivation (spec: every flag computed in code, not an LLM) ----
@@ -558,6 +558,17 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
   });
   const coverageRows = Array.from(coverageByPin.entries());
   const showTimeline = timelineEvents.length > 0 || scopeChanges.length > 0;
+  const showHistoricalFilings = titleKnown && historicalLiens.length > 0;
+  const subsections = buildSubsectionNumbers([
+    ["details", true],
+    ["timeline", showTimeline],
+    ["chain", true],
+    ["debt", true],
+    ["title", true],
+    ["historical", showHistoricalFilings],
+    ["other", true],
+    ["ownerLiens", true],
+  ]);
 
   return (
     <div id="section-ownership" data-testid="section-ownership" className="kyp-ownership">
@@ -598,7 +609,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         </div>
       )}
 
-      <KypSubhead subsection={1}><span className="lbl">Ownership details</span><span className="rule" /></KypSubhead>
+      <KypSubhead subsection={subsections.details}><span className="lbl">Ownership details</span><span className="rule" /></KypSubhead>
       <div className="kyp-owner">
         <span className="olab">Owner</span>
         <span className="onm">{owner}</span>
@@ -629,7 +640,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
 
       {showTimeline && (
         <div className="kyp-otl" data-testid="ownership-timeline">
-          <KypSubhead subsection={2}><span className="lbl">Ownership &amp; debt timeline</span><span className="ct">{timelineEvents.length > 12 ? `Latest 12 of ${timelineEvents.length} events · complete instrument index below` : `${timelineEvents.length} recorded event${timelineEvents.length === 1 ? "" : "s"}`}</span><span className="rule" /></KypSubhead>
+          <KypSubhead subsection={subsections.timeline}><span className="lbl">Ownership &amp; debt timeline</span><span className="ct">{timelineEvents.length > 12 ? `Latest 12 of ${timelineEvents.length} events · complete instrument index below` : `${timelineEvents.length} recorded event${timelineEvents.length === 1 ? "" : "s"}`}</span><span className="rule" /></KypSubhead>
           <div className="kyp-otlplot">
             <div className="kyp-timeline-line" />
             <div className="kyp-timeline-events">
@@ -681,7 +692,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         </div>
       ))}
 
-      <KypSubhead subsection={showTimeline ? 3 : 2}>
+      <KypSubhead subsection={subsections.chain}>
         <span className="lbl">Chain of title</span>
         <span className="ct">{sales.length} qualifying transfer{sales.length === 1 ? "" : "s"}</span>
         <span className="rule" />
@@ -719,7 +730,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         </div>
       </details>
 
-      <KypSubhead subsection={showTimeline ? 4 : 3}>
+      <KypSubhead subsection={subsections.debt}>
         <span className="lbl">Debt on title</span>
         <span className="ct">{debtSnapshotReady ? `current owner · ${active.length} unreleased · ${released.length} historical/cleared` : "resolved snapshot required"}</span>
         <span className="rule" />
@@ -793,7 +804,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         <div className="kyp-method">A maturity runway needs a reliably extracted, recorded maturity date. Estimated dates, credit lines, and uncertain extractions do not produce a runway; check the instrument and any modifications for the actual terms.</div>
       )}
 
-      <KypSubhead subsection={showTimeline ? 5 : 4}>
+      <KypSubhead subsection={subsections.title}>
         <span className="lbl">Title status</span>
         <span className={`kyp-pill ${titleBadge[0]}`}>{titleBadge[1]}</span>
         <span className="rule" />
@@ -822,9 +833,9 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
               />
             </div>
           ))}
-          {historicalLiens.length > 0 && (
+          {showHistoricalFilings && (
             <>
-              <KypSubhead className="kyp-subhead-minor" subsection={showTimeline ? 5 : 4}>
+              <KypSubhead className="kyp-subhead-minor" subsection={subsections.historical}>
                 <span className="lbl">Historical filings</span>
                 <span className="ct">{historicalLiens.length} released or probably cleared</span>
                 <span className="rule" />
@@ -872,7 +883,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         </>
       )}
 
-      <KypSubhead subsection={showTimeline ? (historicalLiens.length > 0 ? 6 : 5) : (historicalLiens.length > 0 ? 5 : 4)}>
+      <KypSubhead subsection={subsections.other}>
         <span className="lbl">Other Recorder instruments</span>
         <span className="ct">{lienData?.searchFailed ? "Search incomplete" : `${otherInstruments.length} indexed instrument${otherInstruments.length === 1 ? "" : "s"}`}</span>
         <span className="rule" />
@@ -892,7 +903,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         city={city}
         lienData={lienData}
         DocRefComponent={DocRef}
-        subsection={(showTimeline ? (historicalLiens.length > 0 ? 6 : 5) : (historicalLiens.length > 0 ? 5 : 4)) + 1}
+        subsection={subsections.ownerLiens}
       />
       <div className="kyp-src">
         Sources: Cook County Assessor transfer records and Cook County Recorder instruments. Sale prices are declared transfer amounts. Loan amounts are original recorded principal, not balances; positions and refinance relationships are inferred from recording evidence and must be confirmed at title.
