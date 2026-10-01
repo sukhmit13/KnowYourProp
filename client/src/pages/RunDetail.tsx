@@ -981,23 +981,24 @@ const demographicChangeClass = (label: string, up: boolean | null) => {
 };
 
 // ===== Step 4d — News archive primitives (hybrid) =====
-// Bundle real logos in the repo, keyed by domain. Add files under client/public/logos/*.svg.
+// Bundle publisher-owned compact marks, not wide mastheads shrunk into square tiles.
+// Asset provenance is recorded in client/public/logos/SOURCES.md.
 const SOURCE_LOGOS: Record<string, string> = {
-  'blockclubchicago.org': '/logos/block-club.svg',
-  'chicagobusiness.com':  '/logos/crains.svg',
-  'therealdeal.com':      '/logos/trd.svg',
-  'chicagoyimby.com':     '/logos/yimby.svg',
-  'chicagotribune.com':   '/logos/tribune.svg',
-  'suntimes.com':         '/logos/sun-times.svg',
+  'blockclubchicago.org': '/logos/block-club-icon.png',
+  'chicagobusiness.com':  '/logos/crains-icon.png',
+  'therealdeal.com':      '/logos/trd-icon.png',
+  'chicagoyimby.com':     '/logos/yimby-icon.png',
+  'chicagotribune.com':   '/logos/tribune-icon.png',
+  'suntimes.com':         '/logos/sun-times-icon.png',
   'chicago.eater.com':    '/logos/eater.svg',
-  'chicagoreader.com':    '/logos/chicago-reader.svg',
+  'chicagoreader.com':    '/logos/chicago-reader-icon.png',
   'chicago.urbanize.city': '/logos/urbanize.svg',
-  'wbez.org':             '/logos/wbez.svg',
+  'wbez.org':             '/logos/wbez-icon.png',
   'chicagomag.com':       '/logos/chicago-magazine.svg',
   'timeout.com':          '/logos/time-out.svg',
-  'theinfatuation.com':   '/logos/infatuation.svg',
-  'bisnow.com':           '/logos/bisnow.svg',
-  'archpaper.com':        '/logos/archpaper.svg',
+  'theinfatuation.com':   '/logos/infatuation-icon.png',
+  'bisnow.com':           '/logos/bisnow-icon.png',
+  'archpaper.com':        '/logos/archpaper-icon.png',
 };
 // deterministic colored-plate tone for the fallback, by source name
 const PLATE_TONES = ['s-indigo', 's-green', 's-slate'];
@@ -1073,7 +1074,7 @@ function LogoTile({ url, source, date, lead }: { url?: string; source: string; d
   return (
     <div className="kyp-archlogo" style={{
       ...(lead ? { width: 88, height: 88 } : {}),
-      ...((dom === 'timeout.com' || dom === 'theinfatuation.com') && bundled ? { backgroundColor: '#171717' } : {}),
+      ...(dom === 'timeout.com' && bundled ? { backgroundColor: '#171717' } : {}),
     }}>
       <img src={src} alt={source}
         onError={() => { if (src !== favicon && favicon) setSrc(favicon); else setFailed(true); }} />

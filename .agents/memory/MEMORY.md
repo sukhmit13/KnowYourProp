@@ -44,3 +44,4 @@
 - [Development report parity](development-report-parity.md) — published history is canonical for previewing; report IDs can conflict across databases, and publishing code does not sync rows.
 - [CPS school assignment evidence](cps-school-assignment.md) — nearby schools with attendance boundaries are not proof of which school serves the address; avoid assignment claims until polygon containment is checked.
 - [Mortgage market view context](mortgage-market-view-context.md) — closed-loan view retains one application-level denial-reasons chart with its own explicit denominator.
+- [Publisher icon vetting](publisher-icon-vetting.md) — redirects can return another brand's favicon; verify app name/seller before using higher-resolution publisher artwork.
