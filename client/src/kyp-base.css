@@ -1424,7 +1424,7 @@ button.kyp-morelink { background: none; border: 0; padding: 0; }
    ============================================================ */
 #section-market .kyp-market-panel { padding:6px 0 15px; }
 #section-market .kyp-market-buyer {
-  margin-top:14px; padding-top:14px; border-top:1px solid var(--kyp-line);
+  margin:0; padding:0; border:0;
 }
 #section-market .kyp-market-panel > .kyp-src { margin-top:12px; }
 .kyp-hmda-financing,

@@ -105,11 +105,37 @@ const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 const errors = [];
 page.on("pageerror", (error) => { errors.push(error.message); console.error("Browser:", error.message); });
 await page.route("**/step26-check", (route) => route.fulfill({ status: 200, contentType: "text/html", body: html }));
+async function assertBorrowerSpacing() {
+  const layout = await page.locator(".kyp-market-buyer").evaluate((wrapper) => {
+    const style = getComputedStyle(wrapper);
+    const heading = wrapper.previousElementSibling;
+    const card = wrapper.querySelector(".kyp-mixcard");
+    return {
+      margin: style.marginTop,
+      padding: style.paddingTop,
+      border: style.borderTopWidth,
+      headingBorder: getComputedStyle(heading).borderTopWidth,
+      gap: card.getBoundingClientRect().top - heading.getBoundingClientRect().bottom,
+      expectedGap: parseFloat(getComputedStyle(heading).marginBottom)
+        + (parseFloat(getComputedStyle(wrapper.parentElement).rowGap) || 0)
+        + (parseFloat(getComputedStyle(card.parentElement).marginTop) || 0),
+      cardBorder: getComputedStyle(card).borderTopWidth,
+    };
+  });
+  assert.equal(layout.margin, "0px", "Borrower charts do not add a second top margin");
+  assert.equal(layout.padding, "0px", "Borrower charts do not add a second top padding");
+  assert.equal(layout.border, "0px", "No gray divider above borrower charts");
+  assert.equal(layout.headingBorder, "1px", "Keep the standard subsection heading rule");
+  assert.equal(layout.cardBorder, "1px", "Keep individual chart-card borders");
+  assert.ok(Math.abs(layout.gap - layout.expectedGap) <= 1,
+    `Borrower charts use the normal heading gap, not stacked spacing (${layout.gap}px)`);
+}
 try {
   await page.goto(`${origin}/step26-check`);
   await page.getByTestId("stat-hmda-originated").waitFor();
   await page.waitForTimeout(700);
   assert.equal(await page.getByTestId("stat-hmda-originated").getAttribute("aria-pressed"), "true");
+  await assertBorrowerSpacing();
   assert.equal(await page.locator(".recharts-pie").count(), 10, "All original donut panels remain");
   assert.equal((await page.locator(".kyp-hmda-panel .mh").allTextContents()).filter((text) => /Property Value|Denial Reasons/.test(text)).length, 2);
   assert.equal(await page.locator("#hmda-lenders").count(), 1);
@@ -126,6 +152,7 @@ try {
   assert.match((await page.locator(".kyp-subhead .ct").allTextContents())[1], /denied applications/i);
   assert.match((await page.locator(".kyp-subhead .ct").allTextContents())[2], /applicants who were denied/i);
   assert.match((await page.locator(".kyp-subhead .ct").allTextContents())[3], /ranked by applications denied/i);
+  await assertBorrowerSpacing();
   assert.notEqual(await page.getByTestId("stat-hmda-denied").evaluate((el) => getComputedStyle(el).outlineWidth), "0px");
   await page.getByTestId("button-hmda-year-2024").click();
   assert.match(await page.getByTestId("stat-hmda-total").innerText(), new RegExp(hmdaData[2024].community.total.toLocaleString("en-US")));
@@ -166,10 +193,12 @@ try {
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "/tmp/step26-market-desktop.png", fullPage: true });
   await page.screenshot({ path: "/tmp/step26-market-desktop-top.png" });
+  await page.locator(".kyp-market-buyer").screenshot({ path: "/tmp/borrower-charts-desktop.png" });
   await page.locator("#print-section-transaction-trends").screenshot({ path: "/tmp/step26-market-trends.png" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, "No mobile horizontal overflow");
+  await assertBorrowerSpacing();
   await page.screenshot({ path: "/tmp/step26-market-mobile.png", fullPage: true });
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "/tmp/step26-market-mobile-top.png" });
