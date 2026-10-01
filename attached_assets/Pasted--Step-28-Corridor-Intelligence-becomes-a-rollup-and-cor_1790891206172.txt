@@ -1,0 +1,378 @@
+# Step 28 — §Corridor Intelligence becomes a rollup, and corridor tags go everywhere
+
+Audited against commit **`5855bc9`**. Read in full: `CorridorIntelligenceView.tsx` (317 lines),
+the `accProps("corridor")` block in `RunDetail.tsx`, `NewBusinessLicensesSection.tsx`, and
+`server/developmentPipeline.ts` (the corridor resolver Step 27 built). **100%.**
+
+This step depends on Step 27 being merged. It consumes the resolver Step 27 added; it does not
+build a second one.
+
+---
+
+## 0. Files to work from
+
+| File | What it is |
+|---|---|
+| `corr-target.png` | **The target.** Render and match it. |
+| `corr-target.html` | Same page, self-contained — open it and inspect computed styles. |
+| `corr-markup.html` | The target DOM alone. Class names and element order are normative. |
+| `kyp-base-patch-28-corridor.css` | The only CSS this step adds. 19 rules, appended to the **end** of `client/src/kyp-base.css`. |
+
+---
+
+## 1. What this step does
+
+**Corridor stops being a fifth copy of records that live elsewhere and becomes an index.**
+
+```
+BEFORE                                      AFTER
+§ Corridor Intelligence                     § Corridor Intelligence
+  4-row prose takeaway        ◄ DELETE        rollup: 5 blocks
+  5 KPI tiles                                 per corridor:
+  per corridor:                                 name · tier · on-corridor/distance
+    license ROWS              ◄ COUNT+LINK      one-line blurb
+    construction ROWS         ◄ COUNT+LINK      count chips → link to the owning section
+    coverage ROWS                               corridor coverage (kept)
+    zoning ROWS               ◄ COUNT+LINK    footer
+    DPD ROWS                 ◄ COUNT+LINK
+  footer
+```
+
+**The section header one-liner is the only prose in the section.** Set it in
+`sectionRegistry.tsx`:
+
+```ts
+corridor: { id: "corridor", anchorId: "print-section-corridor-news", title: "Corridor Intelligence",
+  summary: "Which commercial corridors this address sits on, and how much is happening on each.",
+  info: ["Corridors within ~0.5 mi", "Activity counts linked to their source section",
+         "Corridor news coverage"] },
+```
+
+---
+
+## 2. Delete the takeaway
+
+`CorridorIntelligenceView.tsx` **`121–169`** — the whole `<div className="take">` block: the
+`take-head` / `take-label` / `take-title`, and all four `take-row` entries
+(`good`, `insight`, `insight`, `caution`).
+
+Those rows say things like *"Construction is adding housing and storefronts"* and *"a strongly
+connected retail location."* The report shows the data; the reader draws the conclusion.
+
+With it go the locals that only fed it: `headline` (`112–116`), `covHeadline` (`109`),
+`approvedZoning` (`110`), `catCounts` / `topCats` (`102–107`), `numWord` / `NUM_WORDS` (`85–86`),
+`onCorr`, `others`, `closest`, `primaryCount` (`96–99`) — except keep whatever the sort still needs.
+
+**Keep `licensesLoading`.** It currently only gates takeaway prose (`141`); after this change it
+should suppress the licenses count rather than render a stale zero.
+
+---
+
+## 3. Records stay listed — but one line each
+
+**Corridor lists everything on the corridor.** Someone opening this section wants the whole corridor
+picture without leaving it; a count that sends them elsewhere does not answer that. The two-column
+layout (businesses on the left, construction on the right) is kept.
+
+**What stops repeating is the per-record detail**, which belongs to the section that owns the record:
+architect, GC, reported cost, city class, parking, case numbers, applicant, proposal text. Those
+are why this section was ~800 lines. Each corridor row carries **name or address · one meta line ·
+date**, and links to its full record.
+
+| Column / block | Row shows | Row links to |
+|---|---|---|
+| Businesses with new licenses | business name · address · **every license category as a `.kyp-liccat` chip** · license start | `#section-new-business-licenses` |
+| New construction | address · use · **units · stories · parking · reported cost · distance** · issue date · **architect and GC, each linked into Discovery** | `#development-permits` |
+| Zoning activity | address · type · zone · decision · month | `#development-zba` |
+| DPD applications | address · application type · status · month | `#development-proposed` |
+| Corridor coverage | the standard news row — see §6d | the article |
+
+Each column header carries an `all {n} →` link to the same anchor, so the full-detail view is one
+click away. Those anchors already exist — Step 27 created `development-permits`,
+`development-proposed`, `development-zba`, `development-news` (`RunDetail.tsx:3469`, `:3494`).
+
+**Rewrite** `CorridorIntelligenceView.tsx` `220–258` (licenses + construction grid), `273–288`
+(zoning) and `289–306` (DPD applications) to the `.kyp-corrrow` markup in the target.
+
+**No new server fields.** `CorridorCardData` already carries everything these rows need:
+`CorrLicense.tags` (the license categories), and `CorrConstruction.{use, stories, units, parking,
+cost, distanceMi, architect, gc, cityClass}`. The architect and GC are already on the card and
+already rendered today at `:250` — they just become Discovery links, the same `.kyp-pro` markup
+Step 27 added to §development .1.
+
+> ### ⚠ The row is a `<div>`, not an `<a>`
+>
+> A row has several destinations: the record itself, the architect, the GC. Wrapping the whole row
+> in an anchor nests `<a>` inside `<a>`, which is invalid — the browser auto-closes the outer one and
+> every link and style after that point silently breaks. **Link the name or address only.** This is
+> not hypothetical; the first draft of this target did it and the architect link rendered as
+> unstyled 17px body text.
+
+**Keep `260–271`, the coverage rows — but render them as news, not as a bespoke row.** News is the
+one record type this section owns; it is already deduped against §News by `withoutRepeatedNews`
+(`RunDetail.tsx:3058`). Replace `.covtitle` / `.covmeta` / `.covsum` with **`NewsArchCard`** — see
+§6d. Every news surface in the report uses the same row.
+
+Since the cards no longer render record detail, `CorridorCardData` drops `licenses`,
+`construction`, `zoning` and `dpdApplications` as arrays and gains four counts. **Compute the counts
+server-side from the corridor field** — see §5 — rather than rebuilding the maps client-side.
+
+---
+
+## 3a. Each corridor is an UNNUMBERED subhead
+
+Every corridor gets its own `KypSubhead` inside a `.subwrap` — the same pattern §21 Schools uses for
+Elementary / High Schools and §25.5 Places of Worship uses for each religion group.
+
+```jsx
+{sorted.map((c, i) => (
+  <div className="subwrap" key={c.key}>
+    <KypSubhead className={i === 0 ? "first" : undefined}>
+      <span className="lbl">{c.name}</span>
+      <span className="ct">Tier {c.tier} · {c.tierLabel} · {c.onCorridor ? "on corridor" : `${c.distanceMi} mi`}</span>
+    </KypSubhead>
+    …
+  </div>
+))}
+```
+
+**Pass no `subsection`.** Numbered subsections are a fixed table of contents — §development always
+has four, §25 always has five. The corridor count varies by property: one address has three
+corridors, the next has one. Numbering instances rather than topics would give you `22.1–22.3` on
+one report and `22.1` on the next, for the same section.
+
+This also deletes four bespoke rules from the patch — `.kyp-corrcard`, `.kyp-corrhead`,
+`.kyp-corrtier`, `.kyp-corrdist` — because `.subwrap` and `KypSubhead` already do that work.
+
+**`first` on the first corridor only.** `.kyp-subhead` carries `border-top`, so the first one sitting
+directly under the rollup blocks would otherwise draw a rule against them.
+
+---
+
+## 4. The rollup blocks
+
+Five `.kyp-block` in `<div class="kyp-blocks five">`:
+
+| Block | Tone | `.bv` | `.bl` | `.bd` |
+|---|---|---|---|---|
+| 1 | `ind` | permits | New construction permits | `{permitUnits} · via City Building Permits` |
+| 2 | `slate` | licenses | Businesses with new licenses | `last 12 mo` |
+| 3 | `slate` | articles | News articles | `last 90 days` |
+| 4 | `slate` | zoning appeals | Zoning appeals | `decisions & hearings` |
+| 5 | `slate` | DPD applications | DPD applications | `Plan Commission` |
+
+**Fix `permitUnits` while you are here.** `CorridorKpis.permitUnits` is typed `string | null`, but
+`RunDetail.tsx:16880` hard-codes it `null` with the comment *"permits confirm filing, not a unit
+total"* — so that line has never rendered. `developmentPipeline.ts` now computes a properly deduped
+unit figure. Feed the corridor-filtered subset of it in. **If the pipeline returns null for units,
+render no unit clause** — do not substitute a raw sum.
+
+**Fix the DPD count too.** `RunDetail.tsx:16964` passes
+`corridorNewsData.dpdApplications?.length || 0` — an unfiltered array length, while every other KPI
+beside it is corridor-matched. Use the corridor-matched count.
+
+---
+
+## 5. Server — one resolver, used everywhere
+
+Step 27 added the corridor resolver in `server/developmentPipeline.ts` (reads `CORRIDOR_KEYWORDS`
+at `:269`). This step **extends its use and deletes the client-side duplicate.**
+
+### 5a. Delete the inline matcher
+
+`RunDetail.tsx` builds corridor regexes **twice** — once for the collapsed-header badges
+(`~16609–16719`) and again for the card payloads (`~16738–16829`) — with separately constructed,
+identical patterns:
+
+```js
+name.toLowerCase().split(/\s+/) → drop ['avenue','ave','street','st','boulevard','blvd']
+new RegExp(`\\b${base}\\s+(ave|avenue|st|street|blvd|boulevard)`, 'i')
+```
+
+**It matches the address string only, with no coordinate check.** A business license at
+7000 W Chicago Ave therefore matches the West Town "Chicago Avenue" corridor, whose box is
+`lat 41.894–41.90, lng -87.70 to -87.64`. Delete both copies and use the server field.
+
+### 5b. Two bugs this removes
+
+1. **ZBA badge and list disagree.** At `~16700` the badge count skips the distance test when the
+   property has no geocode; at `~16817` the list computes distance `99` in the same situation, which
+   fails `> 1.0` and **drops every ZBA case**. Header says 4, list shows 0.
+2. **Double matching.** Each record type is matched twice per render.
+
+### 5c. Add `corridor` to the two remaining sources
+
+Permits, DPD applications and ZBA cases already carry it from Step 27. Add the same
+`corridor: { key, name, tier } | null` field, from the same resolver, to:
+
+- **business licenses** — `/api/new-business-licenses` (or whichever route feeds
+  `nearbyLicensesData`)
+- **news articles** — alongside the existing `corridorKeys`, so one shape is used everywhere.
+  `corridorKeys` can stay as the server's internal multi-match; the client reads `corridor`.
+
+Same rule as Step 27: **name match AND inside the bbox** (or within ~120 m of `line` for the three
+diagonal corridors). Name alone is what produces the 7000 W Chicago Ave bug above.
+
+### 5d. Return corridor counts
+
+The corridor payload returns, per corridor: `licenses`, `permits`, `zoningAppeals`,
+`dpdApplications`, `articles` as counts, deduped the way the current KPI totals already dedupe
+(`permitNumber`, `licenseEstablishmentKey`, `url`, `caseNumber` — `RunDetail.tsx:16856–16878`).
+Move that dedup server-side with the matching; do not leave it split across both.
+
+---
+
+## 6. Corridor tags in the sections being rolled up
+
+### 6a. §New Business Licenses
+
+`NewBusinessLicensesSection.tsx` already renders `.kyp-biz-card` with a `.kyp-biz-cardmeta` row
+(`~:100`). Add the tag first in that row:
+
+```jsx
+{business.corridor && <span className="kyp-corridor">{business.corridor.name}</span>}
+```
+
+`.kyp-corridor` already exists — Step 27 added it.
+
+### 6b. §News on This Property and the news rows in §development .4
+
+Add the same tag to the `.kyp-archkick` row, which already carries the status pill and the
+*also a permit* tag.
+
+### 6c. Already done
+
+Permits, DPD applications and ZBA cases got the tag in Step 27. Nothing to do.
+
+### 6d. Every news surface uses the publisher-logo row
+
+The report already has four canonical news rows, all `LogoTile` + `.kyp-archrow`:
+
+| Component | Line | Use |
+|---|---|---|
+| `LogoTile` | `1070` | bundled SVG from `SOURCE_LOGOS` → favicon → coloured plate |
+| `NewsSiteCard` | `1096` | site-specific coverage, with the record check |
+| `NewsArchCard` | `1120` | a plain article row |
+| `NewsDevCard` | `1134` | a development article, with stage tag and corridor cross-ref |
+
+**Three live surfaces bypass them and must be converted:**
+
+| Line | What it renders today | Convert to |
+|---|---|---|
+| `CorridorIntelligenceView.tsx:260–271` | `.covtitle` / `.covmeta` / `.covsum` | `NewsArchCard` |
+| `RunDetail.tsx:17173` | corridor neighborhood articles in `p-3 rounded-lg bg-muted border border-border text-sm` | `NewsArchCard` |
+| `RunDetail.tsx:17221` | corridor podcasts, same Tailwind block | `NewsArchCard`, with the show name as `source` |
+
+`NewsArchCard` takes `{ a: { url, source, title, date } }`. Pass the article through unchanged;
+`LogoTile` resolves the logo from the URL's domain, so nothing else is needed.
+
+**Do not write a fifth card component.** If a surface needs one more field than `NewsArchCard`
+carries, add it there.
+
+---
+
+## 7. Convert to the design language
+
+Corridor is the last major section still on its own class families, scoped under `.corrwrap` in
+`index.css`: `.take`, `.take-head`, `.take-label`, `.take-title`, `.take-row`, `.kpis`, `.kpi`,
+`.corr`, `.corrhead`, `.corrsub`, `.corrchips`, `.cchip`, `.tierchip`, `.corrdist`, `.corrgrid`,
+`.colh`, `.item`, `.r1`, `.nm2`, `.dt`, `.addr`, `.meta2`, `.tags`, `.tag`, `.rawtag`, `.corrextra`,
+`.cexlabel`, `.covtitle`, `.covmeta`, `.covsum`, `.zrow`, `.zaddr`, `.zmeta`, `.zstatus`, `.zuse`,
+`.foot`.
+
+**Delete those rules from `index.css`** — they have no other consumer. The replacements are in the
+patch, plus `.kyp-block`, `.kyp-blocks`, `.kyp-charttitle` and `.kyp-src` which already exist.
+
+Also remove the `lucide-react` icons that no longer have a home (`Lightbulb`, `FileText`, `Scale`,
+`HardHat`, `Briefcase`, `Newspaper` were takeaway and column-header decoration). Keep `Navigation`
+only if you keep the corridor glyph; the target does not use it.
+
+---
+
+## 8. 468 lines of dead code, and a correction about amber
+
+### 8a. The `!hybridInc` branches are dead — delete them
+
+`RunDetail.tsx:1221`:
+
+```ts
+const hybridInc: boolean = true; // Step 5: the new design is the only render — legacy (!hybridInc) branches are dead code, cleanup queued
+```
+
+The flag is a hard-coded `true`, so every `!hybridInc` branch is unreachable:
+
+| Block | Lines | Size |
+|---|---|---|
+| `{!hybridInc && (() => {` | `16602–16760` | 159 lines |
+| `{!hybridInc && facts?.communityArea && (` | `17273–17581` | 309 lines |
+
+**468 lines.** Delete both, and the `hybridInc` constant with them. The comment already says cleanup
+is queued; this is the step that touches that code.
+
+### 8b. Amber — a correction
+
+An earlier note said the only amber left was in that legacy block. That was wrong; it was scoped to
+one audited range. Amber is a **second palette**, not a stray:
+
+- `index.css:113–114` define `--amber` and `--amber-soft` as deliberate tokens
+- `index.css:129`, `:131`, `:1167` consume them (`.inc-banner-1`, `.dsc-chip-amber`)
+- **live** Tailwind amber in `RunDetail.tsx` at `9793`, `9855`, `9877`, `10975`, `12303`, `12826`
+- a `'good' | 'amber' | 'bad'` state machine at `19298–19321` with its own `KB.amber` colour
+
+**None of that is in scope for this step.** It is pre-`kyp-` app styling in sections that have not
+been converted yet, and it will go section by section. Do not sweep it here — just do not add any
+new amber. The rule stands for `kyp-` work: green / orange / red / slate / indigo, no amber.
+
+---
+
+## 9. CSS — `kyp-base-patch-28-corridor.css`
+
+19 rules, appended to the **end** of `client/src/kyp-base.css`. Parser-verified against the live
+stylesheet: **0 parse errors, 0 collisions with the 1,240 existing rules, 0 unresolved tokens,
+no amber.**
+
+Tier chips and the on-corridor marker are **indigo** — a tier is a classification, not a verdict.
+
+---
+
+## 10. Verify before reporting done
+
+- **Zero** `take-row`, `take-title`, `take-label` anywhere.
+- **Zero** `corrwrap`, `cchip`, `tierchip`, `zstatus`, `covtitle` in `index.css` or any component.
+- **Zero** `hybridInc` anywhere; both legacy blocks gone.
+- Every news row in the section renders a publisher logo (or its coloured-plate fallback) —
+  `document.querySelectorAll('.corrwrap .kyp-archrow').length` equals the number of articles shown,
+  and no article renders in a `bg-muted` Tailwind block.
+- **Zero** inline corridor regexes in `RunDetail.tsx` — search for `boulevard|blvd` and expect
+  nothing.
+- The corridor section renders **no record rows except coverage**.
+- Every count chip is a link, and clicking `14 permits` lands on the permits subsection of
+  §Nearby Development & Construction.
+- The permits KPI shows a unit clause, or no clause — never a raw sum when the pipeline suppressed
+  the figure.
+- The DPD KPI equals the sum of the per-corridor DPD counts. It does not today.
+- **The ZBA badge/list bug**: find a property where geocoding fails and confirm the ZBA count and
+  the records agree. They disagree today.
+- A business license on a corridor shows a `kyp-corridor` tag in §New Business Licenses; one on a
+  side street shows none.
+- Spot-check the bbox guard: a `W Chicago Ave` address far west of West Town gets **no** Chicago
+  Avenue tag.
+- Section header one-liner is the only prose in the section.
+- Every figure that renders today still renders, or is reachable by its link.
+
+---
+
+## 11. Not in this step
+
+- §25's Daytime Economy tiles still use `.kyp-cxtile` (4 of them). The Step 25b CSS shipped but
+  that markup change did not, so they stack correctly at 24px instead of 36px. §5d of
+  `REPLIT_STEP25B_people.md`.
+
+---
+
+## ⚠ Separate from this step, and still outstanding
+
+Three live API keys are committed in `.replit` lines 65–71 and present in four commits —
+`RENTCAST_API_KEY`, `GOOGLE_PLACES_API_KEY`, `APIFY_API_TOKEN`. `.gitignore` has a missing newline
+(`*.tar.gzserver/cache/`), so **neither pattern works.** Rotate all three, move them to Replit
+Secrets, `git rm --cached .replit`, and fix the newline.
