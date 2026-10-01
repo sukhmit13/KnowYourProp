@@ -87,7 +87,9 @@ export function AccordionSection({
           <span className="eb">{eyebrow}</span>
           <span className="tk">{takeaway}</span>
         </div>
-        {badge && !off && <span className={`badge ${badgeTone ?? (id === "zoningHistory" ? "indigo" : v)}`}>{badge}</span>}
+        <span className={`badge ${badge?.trim() ? badgeTone ?? (id === "zoningHistory" ? "indigo" : v) : "c"}`}>
+          {badge?.trim() ? badge : "Not checked"}
+        </span>
         {onToggleOff && (
           <span
             className="ico"

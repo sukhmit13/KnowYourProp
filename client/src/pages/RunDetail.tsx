@@ -59,6 +59,7 @@ import StatTile from "@/components/StatTile";
 import InsightReportSection from "@/components/InsightReportSection";
 import { CountyRecordSection } from "@/components/report/CountyRecordSection";
 import { trackEvent } from "@/lib/analytics";
+import { fallbackSummaryBadge, headerBadgeNumber, headerCountyUnitCount, type HeaderBadgeState } from "@/lib/sectionHeaderBadges";
 
 function proRoleIcon(role: string) {
   const r = (role || '').toLowerCase();
@@ -376,6 +377,22 @@ function LocationFactCard({ label, value, icon: Icon, loading = false, highlight
       </CardContent>
     </Card>
   );
+}
+
+function ValuationMetricBridge({
+  runId,
+  metric,
+  onMetric,
+}: {
+  runId: number | null;
+  metric: string | undefined;
+  onMetric: (runId: number | null, metric: string | undefined) => void;
+}) {
+  useEffect(() => {
+    onMetric(runId, metric);
+    return () => onMetric(runId, undefined);
+  }, [runId, metric, onMetric]);
+  return null;
 }
 
 // Incentive sub-section IDs that have an eligibility gate — used in handlePrint to exclude non-eligible ones
@@ -1712,6 +1729,25 @@ export default function RunDetail() {
   // Latest computed valuation snapshot (written each render by the calculator,
   // read by handleSaveReportContext so saved report inputs match the screen)
   const valuationSnapshotRef = useRef<ValuationSnapshot | null>(null);
+  const [valuationMetricBadgeState, setValuationMetricBadgeState] = useState<{
+    runId: number | null;
+    value: string | undefined;
+  }>({ runId: null, value: undefined });
+  const handleValuationMetricBadge = useCallback((runId: number | null, value: string | undefined) => {
+    if (runId !== id) return;
+    setValuationMetricBadgeState((current) =>
+      current.runId === runId && current.value === value ? current : { runId, value },
+    );
+  }, [id]);
+  const valuationMetricBadge: string | undefined =
+    valuationMetricBadgeState.runId === id ? valuationMetricBadgeState.value : undefined;
+  const [marketMetricBadgeState, setMarketMetricBadgeState] = useState<{ runId: number | null; value: string | undefined }>({ runId: null, value: undefined });
+  const handleMarketMetricBadge = useCallback((runId: number | null, value: string | undefined) => {
+    if (runId !== id) return;
+    setMarketMetricBadgeState(current =>
+      current.runId === runId && current.value === value ? current : { runId, value });
+  }, [id]);
+  const marketMetricBadge = marketMetricBadgeState.runId === id ? marketMetricBadgeState.value : undefined;
 
   // Insight Report in-section control: the toolbar button scrolls to the slot
   // and fires this trigger (one behavior, two entry points).
@@ -4142,6 +4178,154 @@ export default function RunDetail() {
     newConstruction: isLoadingNewConstruction && !newConstructionData,
     incentives: (isLoadingIncentives || isLoadingLocationIncentives) && !incentivesData && !locationIncentivesData,
   };
+  // New badges fill only previously blank headers. A missing response is never a zero.
+  const headerHasCoordinates = Number.isFinite(facts?.lat) && Number.isFinite(facts?.lon)
+    && facts?.lat != null && facts?.lon != null;
+  const headerLotSf = headerBadgeNumber(run?.manualLandSqFt || propertyTaxData?.landSquareFeet || pinLookupData?.commercialData?.landSf);
+  const headerCompanionLotSf = run?.manualLandSqFt ? 0
+    : headerBadgeNumber(coParcelTaxData?.landSquareFeet || coParcelLookupData?.commercialData?.landSf);
+  const headerFar = headerBadgeNumber(zoningInfo?.maxFAR);
+  const headerEnvelopeSf = (!coParcelPin || headerCompanionLotSf != null)
+    && headerLotSf != null && headerLotSf > 0 && headerFar != null && headerFar > 0
+    ? Math.floor((headerLotSf + (headerCompanionLotSf ?? 0)) * headerFar) : null;
+  const headerCountyUnits = headerCountyUnitCount(propertyTaxData?.apartments, pinLookupData?.commercialData?.totalUnits);
+  const headerCountyYear = headerBadgeNumber(propertyTaxData?.yearBuilt ?? pinLookupData?.characteristicsData?.yearBuilt);
+  const headerCountyFacts = [
+    headerCountyUnits != null ? `${headerCountyUnits} unit${headerCountyUnits === 1 ? "" : "s"}` : null,
+    headerCountyYear != null && headerCountyYear >= 1700 && headerCountyYear <= new Date().getFullYear()
+      ? `Built ${headerCountyYear}` : null,
+  ].filter(Boolean).join(" · ");
+  const headerSchoolIds = new Set([
+    ...(schoolsData?.elementary ?? []), ...(schoolsData?.middle ?? []), ...(schoolsData?.high ?? []),
+  ].map((school, index) => school.schoolId != null ? `id-${school.schoolId}` : `record-${index}`));
+  const headerCultureSources = [michelinData, jbaData, muralsData, designatedLandmarksData, artGalleriesData];
+  const headerCultureEntries = [
+    ...(michelinData?.restaurants ?? []), ...(jbaData?.restaurants ?? []), ...(muralsData?.murals ?? []),
+    ...(designatedLandmarksData?.landmarks ?? []), ...(artGalleriesData?.galleries ?? []),
+  ];
+  const headerCultureCount = new Set(headerCultureEntries.map((entry, index) => {
+    const place = entry as { name?: string; title?: string };
+    return (place.name || place.title)?.trim().toLowerCase() || `record-${index}`;
+  })).size;
+  const headerCultureLoading = isLoadingMichelin || isLoadingJBA || isLoadingMurals
+    || isLoadingDesignatedLandmarks || isLoadingArtGalleries;
+  const headerCultureError = isMichelinError || isJBAError || isMuralsError
+    || isDesignatedLandmarksError || isArtGalleriesError;
+  const headerAnalysisData = isDaycare ? googlePlacesDaycareData : googlePlacesData;
+  const headerAnalysisReady = placesConfirmed && headerAnalysisData?.status !== "pending"
+    && Array.isArray(headerAnalysisData?.places);
+  const headerParkFt = headerBadgeNumber(proximityData?.park?.distanceFt);
+  const headerPopulation = censusACSData?.zip?.metrics?.find(metric => metric.label === "Population");
+  const headerPopulationNumber = headerBadgeNumber(headerPopulation?.value);
+  const headerMarketYear = hmdaData ? Object.keys(hmdaData).map(Number).filter(Number.isFinite).sort((a, b) => b - a)[0] : undefined;
+  const headerMarketStats = headerMarketYear != null ? hmdaData?.[headerMarketYear as keyof typeof hmdaData]?.community
+    ?? hmdaData?.[headerMarketYear as keyof typeof hmdaData]?.tract : undefined;
+  const headerAreaLoans = headerMarketStats && "byAction" in headerMarketStats
+    ? headerBadgeNumber(headerMarketStats.byAction.find(action => action.key === "1")?.count) : null;
+  const headerSiteNewsLoaded = !!addressNewsData && (!coParcelAddress || !!coParcelAddressNewsData);
+  const headerSiteArticles = [...(addressNewsData?.articles ?? []), ...(coParcelAddressNewsData?.articles ?? [])];
+  const headerPropertyArticleCount = new Set(headerSiteArticles.map(article => article.url)).size;
+  const headerNearbyPermitCount = nearbyConstructionData && Array.isArray(nearbyConstructionData.permits)
+    ? nearbyConstructionData.permits.length : null;
+  const headerDevelopmentApplicationCount = upcomingDevsData && Array.isArray(upcomingDevsData.dpdApplications)
+    ? upcomingDevsData.dpdApplications.length : null;
+  const headerZoningHistoryIncomplete = !!zoningHistoryData && (
+    zoningHistoryData.coverage?.cityCouncil?.complete !== true || zoningHistoryData.coverage?.zba?.checked !== true
+  );
+  const projectAnalysisApplicable = (isDaycareOrSchool || isGrocery || isGasStation || isAutoService || isSeniorCare || isHotel || isRestaurant || isCoffeeShop || isBar || isCannabis || !!googlePlacesSearchTerm);
+  const headerFallbackStates: Record<string, HeaderBadgeState> = {
+    ownership: { loading: isCheckingTitle, hasData: !!lienData, error: !!lienData?.searchFailed, emptyLabel: "Status unknown" },
+    propertyTax: { loading: isLoadingPropertyTax, checked: !!submittedPin, hasData: !!propertyTaxData, emptyLabel: "Status unverified" },
+    historic: {
+      loading: isLoadingLandmark, checked: headerHasCoordinates, hasData: !!landmarkData,
+      label: landmarkData?.colorTag ? `${landmarkData.colorTag}-rated` : undefined,
+      emptyLabel: "No historic flags found",
+    },
+    zoning: { loading: isLoadingZoning, hasData: !!zoningInfo, emptyLabel: "Status not verified" },
+    zoningHistory: {
+      loading: isLoadingZoningHistory, hasData: !!zoningHistoryData, incomplete: headerZoningHistoryIncomplete,
+      label: zoningHistoryView.actionCount > 0 ? `${zoningHistoryView.actionCount} recorded actions` : undefined,
+      emptyLabel: "No actions found",
+    },
+    potential: {
+      loading: isLoadingZoning || isLoadingPropertyTax, hasData: !!zoningInfo,
+      label: isPlannedDevelopment ? "PD review needed"
+        : headerEnvelopeSf != null ? `Est. FAR ceiling ${headerEnvelopeSf.toLocaleString()} SF` : undefined,
+      emptyLabel: "Inputs needed",
+    },
+    incentives: { loading: isLoadingIncentives || isLoadingLocationIncentives, checked: headerHasCoordinates,
+      hasData: !!incentivesData || !!locationIncentivesData, emptyLabel: "Eligibility to confirm" },
+    transit: { loading: isLoadingTransit, checked: headerHasCoordinates, hasData: !!transitData, emptyLabel: "Status not verified" },
+    crime: { loading: isLoadingCrime, checked: headerHasCoordinates, hasData: !!crimeData || !!crimeTractData, emptyLabel: "Comparison unavailable" },
+    businessLicenses: { loading: isLoadingBizLicenseHistory, hasData: !!bizLicenseHistoryData, emptyLabel: "Status not verified" },
+    valuation: { hasData: true, label: valuationMetricBadge, emptyLabel: "Inputs needed" },
+    listing: {
+      loading: listingChecking, checked: !listingNeverChecked, error: isListingSnapshotError,
+      hasData: !!listingSnapshot, emptyLabel: "Listed · Checks incomplete",
+    },
+    countyRecord: {
+      loading: isLoadingPinLookup || isLoadingPropertyTax, checked: !!submittedPin || !!pinLookupData?.pin,
+      hasData: !!pinLookupData || !!propertyTaxData, label: headerCountyFacts || undefined, emptyLabel: "Record incomplete",
+    },
+    permits: { loading: isLoadingPermitsViolations, hasData: !!combinedPermitViolations, emptyLabel: "Status not verified" },
+    analysis: {
+      loading: isDaycare ? isLoadingGooglePlacesDaycare : isLoadingGooglePlaces,
+      hasData: !selectedProjectType || headerAnalysisReady,
+      label: !selectedProjectType ? "Select a use" : headerAnalysisReady ? `${headerAnalysisData.places.length} nearby competitors` : undefined,
+      checked: !selectedProjectType || placesConfirmed, emptyLabel: "Analysis unavailable",
+      applicable: !selectedProjectType || projectAnalysisApplicable,
+    },
+    newBusinessLicenses: { loading: isLoadingNearbyLicenses, error: isErrorNearbyLicenses, checked: headerHasCoordinates,
+      hasData: !!nearbyLicensesData, emptyLabel: "Status not verified" },
+    newConstruction: { loading: isLoadingNewConstruction, error: isErrorNewConstruction, checked: headerHasCoordinates,
+      hasData: !!newConstructionData, emptyLabel: "Status not verified" },
+    market: {
+      loading: isLoadingHmda || isLoadingComps || isLoadingTransactionTrends || isLoadingSBALoans,
+      checked: !!facts?.tractGeoid || !!facts?.communityArea || !!facts?.zipCode,
+      hasData: !!hmdaData || !!compsData || !!transactionTrendsData || !!sbaLoansData,
+      label: marketMetricBadgeState.runId === id ? marketMetricBadge || "Selected market data unavailable"
+        : headerAreaLoans != null ? `${headerAreaLoans.toLocaleString()} area loans closed · ${headerMarketYear}` : undefined,
+      emptyLabel: "Partial market data",
+    },
+    proximity: {
+      loading: isLoadingProximity || isLoadingPinLookup, checked: !!pinLookupData?.pin || isLoadingPinLookup,
+      hasData: !!proximityResponse,
+      label: headerParkFt != null ? `Park ${(headerParkFt / 5280).toFixed(2)} mi` : undefined, emptyLabel: "Distance unavailable",
+    },
+    schools: { loading: isLoadingSchools, error: isSchoolsError, checked: headerHasCoordinates, hasData: !!schoolsData,
+      label: schoolsData ? `${headerSchoolIds.size} nearby schools` : undefined },
+    entCulture: {
+      loading: headerCultureLoading, checked: headerHasCoordinates, error: headerCultureError,
+      hasData: headerCultureSources.some(Boolean),
+      incomplete: headerCultureSources.some(Boolean) && (!headerCultureSources.every(Boolean) || headerCultureError),
+      label: headerCultureSources.every(Boolean) ? `${headerCultureCount} nearby places` : undefined,
+    },
+    corridor: {
+      loading: isLoadingCorridorNews, checked: headerHasCoordinates, hasData: !!corridorNewsData,
+      applicable: corridorNewsData ? corridorNewsData.is_near_corridor !== false : undefined,
+      emptyLabel: "Activity not verified",
+    },
+    development: {
+      loading: isLoadingUpcomingDevs || isLoadingNearbyConstruction, checked: headerHasCoordinates,
+      hasData: !!upcomingDevsData || !!nearbyConstructionData,
+      label: headerNearbyPermitCount != null && headerDevelopmentApplicationCount != null
+        ? `${headerNearbyPermitCount} permits · ${headerDevelopmentApplicationCount} applications`
+        : headerNearbyPermitCount != null ? `${headerNearbyPermitCount} nearby permits`
+        : headerDevelopmentApplicationCount != null ? `${headerDevelopmentApplicationCount} applications` : undefined,
+      emptyLabel: "Project count unavailable",
+    },
+    people: {
+      loading: isLoadingCensusACS, checked: !!facts?.zipCode || !!facts?.communityArea, hasData: !!censusACSData,
+      label: headerPopulationNumber != null ? `ZIP population ${headerPopulationNumber.toLocaleString()}` : undefined,
+      emptyLabel: "Population unavailable",
+    },
+    news: {
+      loading: isLoadingAddressNews || (!!coParcelAddress && isLoadingCoParcelAddressNews),
+      hasData: headerSiteNewsLoaded,
+      label: headerSiteNewsLoaded && headerPropertyArticleCount > 0 ? `${headerPropertyArticleCount} articles to review` : undefined,
+      emptyLabel: "No property coverage found",
+    },
+  };
   const accProps = (rowId: string) => {
     const scan = accScanSections.find((s) => s.id === rowId);
     const custom = ACC_CUSTOM_META[rowId];
@@ -4150,6 +4334,8 @@ export default function RunDetail() {
     const verdict: "good" | "watch" | "context" =
       scan?.verdict?.tone === "good" ? "good" : scan?.verdict?.tone === "attention" ? "watch" : "context";
     const checking = checkingHeaders[rowId] === true;
+    const currentBadge = checking ? "Checking" : rowId === "zoning" ? zoningPermission === 'permitted' ? 'BY-RIGHT' : zoningPermission === 'special_use' ? 'SPECIAL USE' : zoningPermission ? 'REZONING' : facts?.zoning || undefined : rowId === "propertyTax" ? propertyTaxBadge : rowId === "listing" ? listingBadge : rowId === "businessLicenses" ? businessLicensesBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label;
+    const fallbackBadge = fallbackSummaryBadge(headerFallbackStates[rowId]);
     const pos = accOrder.indexOf(rowId);
     return {
       id: rowId,
@@ -4158,8 +4344,8 @@ export default function RunDetail() {
       eyebrow: title,
       takeaway: checking ? "Checking records for this section." : rowId === "zoning" ? zoningTakeaway : rowId === "propertyTax" ? propertyTaxTakeaway : rowId === "listing" ? listingTakeaway : rowId === "businessLicenses" ? businessLicensesTakeaway : rowId === "zoningHistory" ? zoningHistoryTakeaway : rowId === "historic" ? historicStatusTakeaway : rowId === "proximity" || rowId === "schools" || rowId === "entCulture" ? summary : scan?.takeaway ?? summary,
       verdict: checking || rowId === "businessLicenses" ? "context" as const : verdict,
-      badge: checking ? "Checking" : rowId === "zoning" ? zoningPermission === 'permitted' ? 'BY-RIGHT' : zoningPermission === 'special_use' ? 'SPECIAL USE' : zoningPermission ? 'REZONING' : facts?.zoning || undefined : rowId === "propertyTax" ? propertyTaxBadge : rowId === "listing" ? listingBadge : rowId === "businessLicenses" ? businessLicensesBadge : rowId === "zoningHistory" ? zoningHistoryBadge : rowId === "historic" ? historicStatusBadge : scan?.verdict?.label,
-      badgeTone: checking ? "indigo" as const : rowId === "zoning"
+      badge: currentBadge || fallbackBadge.label,
+      badgeTone: !currentBadge ? fallbackBadge.tone : checking ? "indigo" as const : rowId === "zoning"
         ? zoningPermission === 'permitted' ? "g" as const : zoningPermission ? "o" as const : "indigo" as const
         : rowId === "listing"
         ? listingSnapshot?.status === "not_found"
@@ -5973,8 +6159,8 @@ export default function RunDetail() {
             </motion.div>
           </AccordionSection>
           {/* Project Use Specific Analysis - Collapsible Section */}
-          {(isDaycareOrSchool || isGrocery || isGasStation || isAutoService || isSeniorCare || isHotel || isRestaurant || isCoffeeShop || isBar || isCannabis || !!googlePlacesSearchTerm) && (
           <AccordionSection {...accProps("analysis")}>
+          {projectAnalysisApplicable ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -8447,8 +8633,14 @@ export default function RunDetail() {
               </Card>
             </Collapsible>
           </motion.div>
-          </AccordionSection>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {selectedProjectType
+                ? "Project-specific analysis is not available for this selected use."
+                : "Select a use to see project-specific analysis."}
+            </p>
           )}
+          </AccordionSection>
 
           {/* Location Based Incentives - Collapsible Section */}
           <AccordionSection {...accProps("incentives")}>
@@ -16067,6 +16259,11 @@ export default function RunDetail() {
                           const borrowingText = view === 'all' ? 'all applicants' : view === 'closed' ? 'borrowers who closed' : 'applicants who were denied';
                           const lendersText = view === 'all' ? 'ranked by applications' : view === 'closed' ? 'ranked by loans closed' : 'ranked by applications denied';
                           return <>
+                             <ValuationMetricBridge
+                               runId={id}
+                               metric={count == null ? undefined : `${countText} ${scope === 'tract' ? 'tract' : 'area'} ${view === 'closed' ? 'loans closed' : view === 'denied' ? 'denials' : 'applications'} · ${year}`}
+                               onMetric={handleMarketMetricBadge}
+                             />
                             <KypSubhead subsection={2}><span className="lbl">What Got Funded</span><span className="ct">{whatFundedText}</span></KypSubhead>
                             {stats ? <HMDAMarketMixPanel stats={stats} view={view} /> : <p className="kyp-emptypanel">Funding breakdown is not available for this scope and year.</p>}
                             <KypSubhead subsection={3}><span className="lbl">Who's Borrowing</span><span className="ct">{borrowingText}</span></KypSubhead>
@@ -16573,8 +16770,8 @@ export default function RunDetail() {
           </AccordionSection>
 
           {/* Corridor News - shown when property is within 0.5 miles of a major corridor */}
-          {corridorNewsData?.is_near_corridor && (
           <AccordionSection {...accProps("corridor")}>
+          {corridorNewsData?.is_near_corridor ? (
             <motion.div
               id="print-section-corridor-news"
               initial={{ opacity: 0 }}
@@ -17071,8 +17268,14 @@ export default function RunDetail() {
                 </Card>
               </Collapsible>
             </motion.div>
-          </AccordionSection>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {corridorNewsData?.is_near_corridor === false
+                ? "No major corridor was identified within 0.5 miles of this property."
+                : "Corridor proximity data is not available for this property."}
+            </p>
           )}
+          </AccordionSection>
 
           {/* Neighborhood News - Collapsible Section (hybrid: merged into the News section above) */}
           {!hybridInc && facts?.communityArea && (
@@ -17386,8 +17589,8 @@ export default function RunDetail() {
           )}
 
           {/* Upcoming Developments Section */}
-          {!!(facts?.neighborhood || facts?.communityArea) && (
           <AccordionSection {...accProps("development")}>
+          {!!(facts?.neighborhood || facts?.communityArea) ? (
             <motion.div
               id="print-section-upcoming-developments"
               initial={{ opacity: 0 }}
@@ -17941,8 +18144,12 @@ export default function RunDetail() {
                 </Card>
               </Collapsible>
             </motion.div>
-          </AccordionSection>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Neighborhood or community-area data is not available, so nearby development records cannot be scoped.
+            </p>
           )}
+          </AccordionSection>
 
            {/* Neighborhood & People */}
           <AccordionSection {...accProps("people")}>
@@ -18983,9 +19190,19 @@ export default function RunDetail() {
                         annualOperatingCosts, monthlyPI, monthlyTaxes, monthlyInsurance, monthlyPITI,
                         annualCashFlow, dscr, capRate, roi, noiCoversExpenses,
                       } = metrics;
+                      const valuationBadgeMetric = Number.isFinite(metrics.purchasePrice) && metrics.purchasePrice > 0
+                        && Number.isFinite(metrics.annualDebtService) && metrics.annualDebtService > 0
+                        && Number.isFinite(dscr)
+                        ? `Est. DSCR ${dscr.toFixed(2)}×`
+                        : undefined;
 
                       return (
                         <div className="space-y-4">
+                          <ValuationMetricBridge
+                            runId={id}
+                            metric={valuationBadgeMetric}
+                            onMetric={handleValuationMetricBadge}
+                          />
                           {/* ── Calc header: two knobs — MODE (the math) and TIER (the view) ── */}
                           {!hasCashflowData && hasRentalOptions && (
                             <div className="bg-card border border-border rounded-[13px] px-4 py-3.5" data-testid="noi-calc-header">

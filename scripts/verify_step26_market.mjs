@@ -65,7 +65,7 @@ const fixture = {
 const module = `
 import React from "${reactPath}";
 import ReactDOM from "${rootPath}";
-const { useContext } = React;
+const { useContext, useEffect } = React;
 const { createRoot } = ReactDOM;
 import { QueryClient, QueryClientProvider } from "${queryPath}";
 import { AccordionSection, KypSubhead, SectionNumberContext } from "/src/components/report/AccordionSection.tsx";
@@ -76,7 +76,10 @@ import { Skeleton } from "/src/components/ui/skeleton.tsx";
 const motion = { div: ({initial,animate,transition,...props}) => React.createElement("div",props) };
 ${helper("HMDAResidentialFooter")}
 ${helper("parseTransactionCount")}
+${helper("ValuationMetricBridge")}
 function Fixture({facts,hmdaData,sbaLoansData,transactionTrendsData,compsData,sectionIndex}) {
+  const id = 123;
+  const handleMarketMetricBadge = (_runId, value) => { window.headerMarketBadge = value; };
   const isLoadingHmda=false, isLoadingTransactionTrends=false, isTransactionTrendsError=false;
   const isLoadingComps=false, isLoadingSBALoans=false, isSBALoansError=false, isLoadingZoning=false;
   const compPropertyClass="203", pinLookupData={characteristicsData:{buildingSf:2500}}, zoningInfo={category:"residential"};
@@ -90,6 +93,7 @@ const root=createRoot(document.getElementById("root"));
 const queryClient=new QueryClient({defaultOptions:{queries:{retry:false,queryFn:async({queryKey})=>(await fetch(queryKey[0])).json()}}});
 let revision=0;
 window.renderFixture=(overrides={})=>root.render(React.createElement(QueryClientProvider,{client:queryClient},React.createElement(Fixture,{...base,...overrides,key:++revision})));
+window.replaceHmdaData=(hmdaData)=>root.render(React.createElement(QueryClientProvider,{client:queryClient},React.createElement(Fixture,{...base,hmdaData,key:revision})));
 window.renderFixture();
 `;
 const compiled = await transform(module, { loader: "tsx", jsxFactory: "React.createElement", jsxFragment: "React.Fragment" });
@@ -136,6 +140,11 @@ try {
   await page.waitForTimeout(700);
   assert.equal(await page.getByTestId("stat-hmda-originated").getAttribute("aria-pressed"), "true");
   await assertBorrowerSpacing();
+  await page.waitForFunction(() => window.headerMarketBadge?.includes("area loans closed"));
+  await page.evaluate(() => window.replaceHmdaData({}));
+  await page.waitForFunction(() => window.headerMarketBadge === undefined);
+  await page.evaluate(() => window.renderFixture());
+  await page.waitForFunction(() => window.headerMarketBadge?.includes("area loans closed"));
   assert.equal(await page.locator(".recharts-pie").count(), 10, "All original donut panels remain");
   assert.equal((await page.locator(".kyp-hmda-panel .mh").allTextContents()).filter((text) => /Property Value|Denial Reasons/.test(text)).length, 2);
   assert.equal(await page.locator("#hmda-lenders").count(), 1);
@@ -149,6 +158,7 @@ try {
   assert.equal(await page.locator('[data-testid^="row-hmda-lender-"]').count(), hmdaData[2025].community.byLender.length);
   assert.equal(await page.locator('[data-testid^="button-hmda-year-"]').count(), 3);
   await page.getByTestId("stat-hmda-denied").click();
+  await page.waitForFunction(() => window.headerMarketBadge?.includes("area denials"));
   assert.match((await page.locator(".kyp-subhead .ct").allTextContents())[1], /denied applications/i);
   assert.match((await page.locator(".kyp-subhead .ct").allTextContents())[2], /applicants who were denied/i);
   assert.match((await page.locator(".kyp-subhead .ct").allTextContents())[3], /ranked by applications denied/i);
