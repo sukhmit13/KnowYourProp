@@ -51,6 +51,8 @@
 .kyp-stat{font-family:var(--kyp-disp);font-size:clamp(28px,3vw,38px);line-height:1;color:var(--kyp-ink)}
 .kyp-label{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-ink2)}
 .kyp-src{font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-muted);line-height:1.45;margin-top:12px;border-top:1px solid var(--kyp-line);padding-top:9px}
+.kyp-construction-notes p{margin:0}
+.kyp-construction-notes p+p{margin:8px 0 0}
 .kyp-body{font-family:var(--kyp-sans);font-size:14px;line-height:1.5;color:var(--kyp-ink2)}
 .kyp-charttitle{font-family:var(--kyp-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--kyp-ink2);font-weight:700;margin:24px 0 8px}
 

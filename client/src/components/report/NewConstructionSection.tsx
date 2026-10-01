@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { HardHat } from "lucide-react";
 import { KypSubhead } from "@/components/report/AccordionSection";
 
 interface Props {
@@ -45,16 +44,6 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits 
         <div className="kyp-block slate"><div className="bv">{money(stats.medianReportedCost)}</div><div><div className="bl">Median reported cost</div><div className="bd">declared permit value</div></div></div>
       </div>
 
-      {(data.communityBenchmark || supplyGate) && (
-        <div className={`kyp-biz-takeaway${supplyGate ? " attention" : ""}`}>
-          <div className="kyp-biz-takeaway-title">{supplyGate && <HardHat aria-hidden="true" />} Nearby construction</div>
-          <p>
-            {data.communityBenchmark ? `The ${data.communityBenchmark.name} community area recorded ${data.communityBenchmark.totalPermits} qualifying permits over the same three-year source period.` : ""}
-            {supplyGate ? ` Nearby permits identify ${stats.permittedUnits.toLocaleString()} units, or ${supplyRatio!.toFixed(1)}× the subject’s ${subjectUnits} units; this is a competing-supply and construction-disruption flag, not a statement that projects are currently active.` : ""}
-          </p>
-        </div>
-      )}
-
       <KypSubhead className="fam-green" subsection={1}><span className="lbl">Permit mix</span><span className="ct">select a type to filter records</span><span className="rule" /></KypSubhead>
       <div className="kyp-biz-mix">
         {categories.map(([category, count]) => <button key={category} type="button" className={`kyp-hbar${filter === category ? " active" : ""}`} onClick={() => { setFilter(filter === category ? null : category); setShowAllPermits(false); }}>
@@ -65,11 +54,6 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits 
       {years.length > 0 && <><KypSubhead className="fam-green" subsection={2}><span className="lbl">Annual permit volume</span><span className="ct">three-year source period</span><span className="rule" /></KypSubhead>
         <div className="kyp-biz-mix">{years.map(([year, row]) => <div className="kyp-hbar yr" key={year}><span className="hl">{year}</span><span className="htrack"><i className="ind" style={{ width: `${row.total / maxYear * 100}%` }}><b className="hbar-count">{row.total}</b></i></span></div>)}</div>
       </>}
-      <div className="kyp-biz-takeaway">
-        <div className="kyp-biz-takeaway-title">12-month trend</div>
-        <p>{trend.suppressed ? `Trend is not shown because only ${trend.current12Months + trend.prior12Months} permits fall in the two comparison years; at least four combined permits are needed.` : `${trend.current12Months} permits in the trailing 12 months versus ${trend.prior12Months} in the prior 12 months (${trend.changePct! > 0 ? "+" : ""}${trend.changePct}%).`}</p>
-      </div>
-
       <KypSubhead className="fam-green" subsection={years.length > 0 ? 3 : 2}><span className="lbl">{permits.length} nearby permit{permits.length === 1 ? "" : "s"}</span><span className="ct">nearest first</span><span className="rule" /></KypSubhead>
       <div className="kyp-biz-list">{(showAllPermits ? permits : permits.slice(0, 12)).map((permit: any, index: number) => <article key={permit.permitNumber} className="kyp-biz-card" data-testid={`row-new-construction-${index}`}>
         <div><b>{permit.address}</b><span>{label[permit.category]} · issued {permit.issueDate || "date unavailable"}{permit.likelyStillBuilding ? " · likely still building" : ""}</span></div>
@@ -81,7 +65,16 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits 
           {showAllPermits ? "Show fewer ↑" : `Show all ${permits.length} nearby permits →`}
         </button>
       )}
-      <div className="kyp-src">Source: Chicago Building Permits. Only “Permit - New Construction” records within one mile are counted. Garages, temporary structures, and other accessory structures are excluded. “Likely still building” is an 18-month issued-permit proxy, not a construction-status verification.</div>
+      <div className="kyp-src kyp-construction-notes" data-testid="new-construction-notes">
+        {(data.communityBenchmark || supplyGate) && (
+          <p>
+            Nearby construction: {data.communityBenchmark ? `The ${data.communityBenchmark.name} community area recorded ${data.communityBenchmark.totalPermits} qualifying permits over the same three-year source period.` : ""}
+            {supplyGate ? ` Nearby permits identify ${stats.permittedUnits.toLocaleString()} units, or ${supplyRatio!.toFixed(1)}× the subject’s ${subjectUnits} units; this is a competing-supply and construction-disruption flag, not a statement that projects are currently active.` : ""}
+          </p>
+        )}
+        <p>12-month trend: {trend.suppressed ? `Trend is not shown because only ${trend.current12Months + trend.prior12Months} permits fall in the two comparison years; at least four combined permits are needed.` : `${trend.current12Months} permits in the trailing 12 months versus ${trend.prior12Months} in the prior 12 months (${trend.changePct! > 0 ? "+" : ""}${trend.changePct}%).`}</p>
+        <p>Source: Chicago Building Permits. Only “Permit - New Construction” records within one mile are counted. Garages, temporary structures, and other accessory structures are excluded. “Likely still building” is an 18-month issued-permit proxy, not a construction-status verification.</p>
+      </div>
     </div>
   );
 }
