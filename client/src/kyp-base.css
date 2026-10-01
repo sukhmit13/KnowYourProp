@@ -1423,6 +1423,9 @@ button.kyp-morelink { background: none; border: 0; padding: 0; }
    but bring card rhythm and labels into the compact report system.
    ============================================================ */
 #section-market .kyp-market-panel { padding:6px 0 15px; }
+/* Let the next subsection's standard margin own the space after the source note. */
+#section-market #print-section-transaction-trends .kyp-market-panel { padding-bottom:0; }
+#section-market .ttbox .kyp-ttchart { margin-top:28px; }
 #section-market .kyp-market-buyer {
   margin:0; padding:0; border:0;
 }
