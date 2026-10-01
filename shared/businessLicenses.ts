@@ -21,13 +21,13 @@ export interface NearbyLicense {
 export interface NearbyLicensesResponse {
   /** Current 12-month issuance records. A business may hold several records. */
   licenses: NearbyLicense[];
-  /** Distinct businesses opened in the current 12-month period. */
+  /** Distinct businesses receiving new licenses in the current 12-month period; not confirmed openings. */
   totalCount: number;
   /** Current issuance records, retained to make the grouping transparent. */
   licenseCount: number;
-  /** Distinct businesses opened in the preceding 12-month period. */
+  /** Distinct businesses receiving new licenses in the preceding 12-month period. */
   priorPeriodCount: number;
-  /** Year-over-year formation change; null when there is no prior-period base. */
+  /** Year-over-year change in businesses receiving new licenses; null when there is no prior-period base. */
   changePct: number | null;
   radiusMiles: number;
   periodMonths: number;

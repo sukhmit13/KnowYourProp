@@ -652,7 +652,7 @@ export function buildReportPdfHtml(run: Run, d: GatheredData, ward: WardInfo, op
       <tbody>${Object.entries(d.amenities).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${fmtNum(v.total)}</td><td>${fmtNum(v.within1)}</td><td class="wrap">${esc(v.names.join(', '))}</td></tr>`).join('')}</tbody>
     </table>
     <p class="fn">Restaurants, coffee, and bars counted within 1 mile; hotels, gas, and EV charging within 3 miles. Local licensed-business datasets.</p>` : '<p class="unavail">Nearby business data unavailable.</p>'}
-    ${d.licenses?.licenses?.length ? `<p class="body-p">${fmtNum(d.licenses.totalCount)} new business${d.licenses.totalCount === 1 ? '' : 'es'} within 1 mile in the past 12 months, from ${fmtNum(d.licenses.licenseCount)} new issuance${d.licenses.licenseCount === 1 ? '' : 's'}.</p>` : ''}
+    ${d.licenses?.licenses?.length ? `<p class="body-p">${fmtNum(d.licenses.totalCount)} businesses with new licenses within 1 mile in the past 12 months; ${fmtNum(d.licenses.licenseCount)} license issuance${d.licenses.licenseCount === 1 ? '' : 's'} recorded. New licenses do not necessarily mean new business openings.</p>` : ''}
     ${d.traffic?.latestCount ? `<p class="body-p">Street traffic: ${fmtNum(d.traffic.latestCount)} vehicles/day${d.traffic.roadName ? ` on ${esc(d.traffic.roadName)}` : ''}${d.traffic.percentile ? ` — busier than ${esc(String(d.traffic.percentile))}% of measured Chicago segments` : ''}${d.traffic.latestDate ? ` (counted ${esc(String(d.traffic.latestDate).slice(0, 10))})` : ''}.</p>` : ''}
   </section>` });
 

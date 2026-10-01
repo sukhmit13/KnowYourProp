@@ -5,7 +5,7 @@ type SectionMeta = Pick<ScanSection, "id" | "anchorId" | "title" | "summary" | "
 
 export const REPORT_SECTION_TITLES = {
   businessLicenses: "Business License History at This Address",
-  newBusinessLicenses: "New Business Licenses Nearby",
+  newBusinessLicenses: "New License Issuances Nearby",
   zoning: "Zoning & Allowed Uses",
   zoningHistory: "Recorded Zoning Actions",
 } as const;
@@ -41,8 +41,8 @@ export const SECTION_META: Record<string, SectionMeta> = {
     summary: "Rail, Metra, bus and street traffic near the property.",
     info: ["CTA rail — nearest stations & ridership", "Metra — stations & ridership", "CTA bus — routes & ridership", "Street traffic volume (ADT)"] },
   newBusinessLicenses: { id: "newBusinessLicenses", anchorId: "section-newBusinessLicenses", title: REPORT_SECTION_TITLES.newBusinessLicenses,
-    summary: "New business issuances and formation change within one mile.",
-    info: ["Distinct businesses, not raw license records", "Current and prior 12-month formation", "New-issuance license mix", "Nearest openings"] },
+    summary: "Businesses receiving new licenses within one mile, not confirmed openings.",
+    info: ["Businesses receiving new licenses, not confirmed openings", "Current and prior 12-month issuance periods", "New-issuance license mix", "Nearest businesses receiving licenses"] },
   newConstruction: { id: "newConstruction", anchorId: "print-section-new-construction", title: "New Construction",
     summary: "Nearby new-construction permits, permit mix, and building activity within one mile.",
     info: ["One-mile parcel-specific permit scope", "Permit mix, unit counts and median reported cost", "18-month likely-still-building proxy", "Community area count is benchmark context only"] },
@@ -59,7 +59,7 @@ export const SECTION_META: Record<string, SectionMeta> = {
     summary: "Michelin and James Beard dining, murals, landmarks and galleries within a mile.",
     info: ["Michelin Guide and James Beard restaurants", "Registered murals and architectural landmarks", "Licensed art galleries"] },
   corridor: { id: "corridor", anchorId: "print-section-neighborhood-news", title: "Corridor Intelligence",
-    summary: "New businesses and news on the nearby commercial corridors.",
+    summary: "New license issuances and news on the nearby commercial corridors.",
     info: ["New business licenses on the corridor", "Corridor news coverage", "Neighborhood news"] },
   development: { id: "development", anchorId: "print-section-upcoming-developments", title: "Nearby Development & Construction",
     summary: "New-construction permits and proposed projects nearby.",

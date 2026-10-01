@@ -169,11 +169,11 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
   if (licenseCount != null) {
     const change = ctx.businessLicenses?.changePct;
     dyn.newBusinessLicenses = {
-      takeaway: <><em>{licenseCount} new business{licenseCount === 1 ? "" : "es"}</em> opened within a mile in the past year.</>,
+      takeaway: <><em>{licenseCount} business{licenseCount === 1 ? "" : "es"} with new license{licenseCount === 1 ? "" : "s"}</em> within a mile in the past year.</>,
       verdict: change == null
         ? { tone: "context", label: "No prior baseline" }
-        : { tone: change >= 0 ? "good" : "attention", label: `${change > 0 ? "+" : ""}${change}% formation` },
-      hero: { value: String(licenseCount), label: "openings" },
+        : { tone: change >= 0 ? "good" : "attention", label: `${change > 0 ? "+" : ""}${change}% business count change` },
+      hero: { value: String(licenseCount), label: "businesses with new licenses" },
     };
   }
 

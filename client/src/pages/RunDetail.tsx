@@ -16832,7 +16832,7 @@ export default function RunDetail() {
                             return (
                               <Badge variant="outline" className="text-xs" data-testid="badge-corridor-total-licenses">
                                 <Briefcase className="w-3 h-3 mr-1" />
-                                {totalCorridorLicenses} New Business {totalCorridorLicenses === 1 ? 'License' : 'Licenses'}
+                                {totalCorridorLicenses} {totalCorridorLicenses === 1 ? 'Business' : 'Businesses'} with New Licenses
                               </Badge>
                             );
                           })()}

@@ -7,7 +7,7 @@ import { REPORT_SECTION_TITLES, SECTION_META, SECTION_ORDER } from "./sectionReg
 test("approved report titles are bound consistently to section, print, and jump surfaces", () => {
   assert.deepEqual(REPORT_SECTION_TITLES, {
     businessLicenses: "Business License History at This Address",
-    newBusinessLicenses: "New Business Licenses Nearby",
+    newBusinessLicenses: "New License Issuances Nearby",
     zoning: "Zoning & Allowed Uses",
     zoningHistory: "Recorded Zoning Actions",
   });

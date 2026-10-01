@@ -148,7 +148,7 @@ const ALL_SECTIONS: SectionConfig[] = [
   { id: 'electionData', label: 'Voting Trends', isDefault: false, alwaysAvailable: true, group: 'Neighborhood People Profile' },
   { id: 'neighborhoodNews', label: 'Neighborhood News', isDefault: false, alwaysAvailable: true, group: 'Neighborhood Intelligence' },
   { id: 'corridorNews', label: 'Corridor Intelligence', isDefault: false, alwaysAvailable: true, group: 'Neighborhood Intelligence' },
-  { id: 'nearbyBusinessLicenses', label: 'New Business Licenses', isDefault: false, alwaysAvailable: true, group: 'Neighborhood Intelligence' },
+  { id: 'nearbyBusinessLicenses', label: 'New License Issuances Nearby', isDefault: false, alwaysAvailable: true, group: 'Neighborhood Intelligence' },
   { id: 'upcomingDevelopments', label: 'Upcoming Real Estate Developments', isDefault: false, alwaysAvailable: true, group: 'Neighborhood Intelligence' },
   { id: 'mortgageMarket', label: 'Local Mortgage Market (HMDA)', isDefault: false, alwaysAvailable: true, group: 'Market Data' },
   { id: 'sbaLoans', label: 'SBA Commercial Loans', isDefault: false, alwaysAvailable: true, group: 'Market Data' },
@@ -2141,14 +2141,15 @@ function PropertyColumn({ runId, address, label, initialProjectType, onRemove, o
               <div className="space-y-2 p-3 rounded-xl bg-[#faf9f6] border border-[#eae8e2]">
                 <h4 className="font-jbmono text-[10px] font-bold uppercase tracking-widest text-[#8b8a84] flex items-center gap-1">
                   <FileText className="w-3 h-3" />
-                  New Business Licenses
+                  New License Issuances Nearby
                 </h4>
                 {isLoadingBusinessLicenses ? <Skeleton className="h-10 w-full" /> : nearbyBusinessLicensesData?.licenses?.length > 0 ? (
                   <div className="bg-white border border-[#eae8e2] rounded-lg p-2 text-xs space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">New Businesses:</span>
+                      <span className="text-muted-foreground">Businesses with new licenses</span>
                       <span className="font-medium">{nearbyBusinessLicensesData.totalCount}</span>
                     </div>
+                    <p className="text-[10px] text-muted-foreground">New licenses do not necessarily mean new business openings.</p>
                     {groupLicenseEstablishments(nearbyBusinessLicensesData.licenses).slice(0, 3).map((l, i: number) => (
                       <div key={i} className="flex justify-between gap-1 text-muted-foreground">
                         <span className="truncate">{titleCaseBusiness(l.name) || 'Business'}</span>

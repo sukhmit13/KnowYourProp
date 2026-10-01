@@ -139,12 +139,12 @@ export default function CorridorIntelligenceView({ kpis, corridors, licensesLoad
           <span className="dot" />
           <div className="body">
             {licensesLoading ? (
-              <>Business-license records are still loading, so corridor formation is not yet available.</>
+              <>Business-license issuance records are still loading, so issuance activity is not yet available.</>
             ) : kpis.licenses > 0 ? (
-              <><b>Steady new-business formation.</b> <b>{kpis.licenses} new business license{kpis.licenses !== 1 ? "s" : ""}</b> opened along these corridors in the last 12 months{topCats.length > 0 ? <> — heavily {topCats.join(", ")}</> : null}
+              <><b>Recent license activity.</b> <b>{kpis.licenses} business{kpis.licenses !== 1 ? "es" : ""}</b> received {kpis.licenses === 1 ? "a new license" : "new licenses"} along these corridors in the last 12 months{topCats.length > 0 ? <> — most commonly {topCats.join(", ")}</> : null}
               {covHeadline ? <> — and recent press ties {covHeadline.source ? `${covHeadline.source} coverage` : "local coverage"} to corridor momentum{covHeadline.title ? <> (&ldquo;{covHeadline.title}&rdquo;)</> : null}.</> : <>.</>}</>
             ) : (
-              <><b>No new business licenses recorded.</b> No new licenses were issued along these corridors in the last 12 months — a quiet formation period in the city's Business License records.</>
+              <><b>No recent business-license records.</b> No businesses with new licenses appeared along these corridors in the last 12 months.</>
             )}
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function CorridorIntelligenceView({ kpis, corridors, licensesLoad
       {/* ── KPI tiles ── */}
       <div className="kpis" data-testid="corridor-kpis">
         <div className="kpi"><div className="n">{kpis.permits}</div><div className="l">New construction permits</div><div className="s">{kpis.permitUnits ? `${kpis.permitUnits} · ` : ""}via City Building Permits</div></div>
-        <div className="kpi"><div className="n">{kpis.licenses}</div><div className="l">New business licenses</div><div className="s">Last 12 mo · via Chicago Business Licenses</div></div>
+        <div className="kpi"><div className="n">{kpis.licenses}</div><div className="l">Businesses with new licenses</div><div className="s">Last 12 mo · via Chicago Business Licenses</div></div>
         <div className="kpi"><div className="n">{kpis.articles}</div><div className="l">News article{kpis.articles !== 1 ? "s" : ""}</div><div className="s">Last 90 days · Block Club / Curbed / local news</div></div>
         <div className="kpi"><div className="n">{kpis.zoningAppeals}</div><div className="l">Zoning appeal{kpis.zoningAppeals !== 1 ? "s" : ""}</div><div className="s">Recent decisions &amp; hearings · via Zoning Board of Appeals</div></div>
         <div className="kpi"><div className="n">{kpis.dpdApplications}</div><div className="l">DPD application{kpis.dpdApplications !== 1 ? "s" : ""}</div><div className="s">Plan Commission pages · application signals</div></div>
@@ -182,7 +182,7 @@ export default function CorridorIntelligenceView({ kpis, corridors, licensesLoad
         const hasData = c.licenses.length > 0 || c.construction.length > 0 || c.coverage.length > 0 || c.zoning.length > 0 || c.dpdApplications.length > 0;
         const chips = (
           <div className="corrchips">
-            {c.licenses.length > 0 && <span className="cchip">{c.licenses.length} license{c.licenses.length !== 1 ? "s" : ""}</span>}
+            {c.licenses.length > 0 && <span className="cchip">{c.licenses.length} business{c.licenses.length !== 1 ? "es" : ""} with new license{c.licenses.length !== 1 ? "s" : ""}</span>}
             {c.construction.length > 0 && <span className="cchip">{c.construction.length} permit{c.construction.length !== 1 ? "s" : ""}</span>}
             {c.coverage.length > 0 && <span className="cchip">{c.coverage.length} article{c.coverage.length !== 1 ? "s" : ""}</span>}
             {c.zoning.length > 0 && <span className="cchip">{c.zoning.length} zoning appeal{c.zoning.length !== 1 ? "s" : ""}</span>}
@@ -221,7 +221,7 @@ export default function CorridorIntelligenceView({ kpis, corridors, licensesLoad
               <div className="corrgrid">
                 {c.licenses.length > 0 && (
                   <div>
-                    <div className="colh"><Briefcase /> New business licenses</div>
+                    <div className="colh"><Briefcase /> Businesses with new licenses</div>
                     {c.licenses.map((l, i) => (
                       <div className="item" key={i} data-testid={`corridor-license-${c.key}-${i}`}>
                         <div className="r1"><span className="nm2">{l.name}</span>{l.date && <span className="dt">{l.date}</span>}</div>
@@ -310,7 +310,7 @@ export default function CorridorIntelligenceView({ kpis, corridors, licensesLoad
 
       {/* ── Footer: single line ── */}
       <div className="foot" data-testid="corridor-footer">
-        Showing primary commercial corridors within ~0.5 mi of the property (nearest point). <b>Tier 1</b> = primary commercial corridor · <b>Tier 2</b> = secondary / emerging. Individual licenses, permits, appeals, and DPD applications can sit farther along a corridor (distance shown per item). DPD rows are published application signals, not approvals or construction proof. Sources: City Building Permits · Chicago Business Licenses · Zoning Board of Appeals · Chicago DPD Plan Commission · Block Club / Curbed / local news.
+        Showing primary commercial corridors within ~0.5 mi of the property (nearest point). <b>Tier 1</b> = primary commercial corridor · <b>Tier 2</b> = secondary / emerging. Businesses with new licenses are grouped by business name and address; established businesses may receive additional licenses, so new licenses do not confirm new business openings. Individual licenses, permits, appeals, and DPD applications can sit farther along a corridor (distance shown per item). DPD rows are published application signals, not approvals or construction proof. Sources: City Building Permits · Chicago Business Licenses · Zoning Board of Appeals · Chicago DPD Plan Commission · Block Club / Curbed / local news.
       </div>
     </div>
   );

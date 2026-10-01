@@ -16,6 +16,16 @@ test("Mortgage & Lending Market omits the comp hero when no comparables are retu
   assert.equal(section?.hero, undefined);
 });
 
+test("Business License scan describes license issuances without asserting business openings", () => {
+  const section = buildScanSections({ businessLicenses: { totalCount: 4, priorPeriodCount: 2, changePct: 100 } })
+    .find(({ id }) => id === "newBusinessLicenses");
+  const text = renderToStaticMarkup(React.createElement(React.Fragment, null, section?.takeaway));
+  assert.match(text, /4 businesses with new licenses/);
+  assert.doesNotMatch(text, /opened|opening|formation/i);
+  assert.deepEqual(section?.hero, { value: "4", label: "businesses with new licenses" });
+  assert.equal(section?.verdict?.label, "+100% business count change");
+});
+
 const ownership = (ctx: Parameters<typeof buildScanSections>[0]) =>
   buildScanSections(ctx).find(({ id }) => id === "ownership");
 

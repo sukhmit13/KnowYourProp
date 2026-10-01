@@ -31,10 +31,10 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
     return <div className="kyp-biz-loading" aria-live="polite" aria-label={REPORT_SECTION_TITLES.newBusinessLicenses}><span /><span /><span /></div>;
   }
   if (isError) {
-    return <div className="kyp-status-empty unknown">New business issuance records could not be loaded. The result is unknown rather than zero.</div>;
+    return <div className="kyp-status-empty unknown">New license issuance records could not be loaded. The result is unknown rather than zero.</div>;
   }
   if (!data || establishments.length === 0) {
-    return <div className="kyp-status-empty">No qualifying new business issuances were found within 1 mile in the past 12 months.</div>;
+    return <div className="kyp-status-empty">No qualifying new license issuances were found within 1 mile in the past 12 months. This does not establish whether new businesses opened.</div>;
   }
 
   const filtered = filter ? establishments.filter((business) => business.comboLabel === filter) : establishments;
@@ -51,13 +51,13 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
       <div className="kyp-blocks kyp-biz-heroes">
         <div className="kyp-block grn">
           <div className="bv">{data.totalCount}</div>
-          <div><div className="bl">New businesses</div><div className="bd">distinct openings · past 12 months</div></div>
+          <div><div className="bl">Businesses with new licenses</div><div className="bd">distinct businesses · past 12 months</div></div>
         </div>
         <div className="kyp-block ind">
           <div className="bv">{priorKnown ? `${data.changePct! > 0 ? "+" : ""}${data.changePct}%` : "—"}</div>
           <div>
-            <div className="bl">Formation change</div>
-            <div className="bd">{priorKnown ? `${data.priorPeriodCount} businesses in the prior year` : "no prior-year baseline"}</div>
+            <div className="bl">Year-over-year change</div>
+            <div className="bd">{priorKnown ? `${data.priorPeriodCount} businesses with new licenses in the prior year` : "no prior-year baseline"}</div>
           </div>
         </div>
         <div className="kyp-block slate">
@@ -68,7 +68,7 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
 
       <KypSubhead className="fam-green" subsection={1}>
         <span className="lbl">License mix</span>
-        <span className="ct">distinct businesses · select to filter openings</span>
+        <span className="ct">distinct businesses · select to filter</span>
         <span className="rule" />
       </KypSubhead>
       <div className="kyp-biz-mix">
@@ -85,7 +85,7 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
       </div>
 
       <KypSubhead className="fam-green" subsection={2}>
-        <span className="lbl">{filter ? `${filtered.length} matching opening${filtered.length === 1 ? "" : "s"}` : `${establishments.length} openings`}</span>
+        <span className="lbl">{filter ? `${filtered.length} matching business${filtered.length === 1 ? "" : "es"}` : `${establishments.length} business${establishments.length === 1 ? "" : "es"} with new licenses`}</span>
         <span className="ct">nearest first · each business counted once</span>
         <span className="rule" />
       </KypSubhead>
@@ -101,7 +101,7 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
               <span className="kyp-biz-distance">{business.distanceMiles.toFixed(2)} mi</span>
               <div className="kyp-biz-cardmeta">
                 {business.licenses.map((license) => <span className="kyp-liccat" key={`${license.licenseType}-${license.startDate}`}>{license.licenseType}</span>)}
-                {earliest && <span>Issued {monthYear(earliest)}</span>}
+                {earliest && <span>License start {monthYear(earliest)}</span>}
               </div>
             </article>
           );
@@ -109,11 +109,11 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
       </div>
       {filtered.length > 6 && (
         <button type="button" className="kyp-morelink no-print" onClick={() => setShowAll((current) => !current)}>
-          {showAll ? "Show fewer openings ↑" : `Show all ${filtered.length} openings →`}
+          {showAll ? "Show fewer businesses ↑" : `Show all ${filtered.length} businesses →`}
         </button>
       )}
       <div className="kyp-src">
-        Source: Chicago Business Licenses. New issuances only, 1-mile radius, past 12 months. Businesses are grouped by business name and normalized street address, so multiple licenses at one establishment count once.
+        Source: Chicago Business Licenses. Initial license applications (ISSUE) only; renewals excluded. 1-mile radius, past 12 months. Existing businesses may receive new licenses; these records do not confirm new business openings. Businesses are grouped by business name and normalized street address, so multiple licenses at one establishment count once. Dates shown are license term start dates.
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ Treat Chicago `ISSUE` as an initial application for a license, not proof that th
 
 **Why:** Chicago's official Business Licenses dataset distinguishes initial license applications (`ISSUE`) from renewals (`RENEW`), relocations (`C_LOC`), capacity changes (`C_CAPA`), expansions (`C_EXPA`), and activity changes (`C_SBA`). These are license transactions, not independently verified opening dates. `AAI` means issued; it does not alone establish unexpired licensing or current operation.
 
+The user confirmed that established businesses appear among these records and explicitly wants new license activity distinguished from new business openings.
+
 **How to apply:** Describe ISSUE-only results as new license issuances or businesses receiving new licenses. Claims of new businesses, openings, or formation require additional historical evidence. Keep the nearby issuance scope separate from address-level license history, where renewals are intentionally relevant.
 
 Source: https://data.cityofchicago.org/Community-Economic-Development/Business-Licenses/r5kz-chrr

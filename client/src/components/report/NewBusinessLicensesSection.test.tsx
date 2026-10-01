@@ -62,3 +62,35 @@ test("nearby-license accordion target stays mounted through loading, error, empt
     );
   }
 });
+
+test("new license records are not presented as confirmed business openings", () => {
+  const markup = renderToStaticMarkup(
+    <NewBusinessLicensesSection
+      data={{ ...populatedData, priorPeriodCount: 2, changePct: -50 }}
+      isLoading={false}
+      isError={false}
+    />,
+  );
+  assert.match(markup, /Businesses with new licenses/);
+  assert.match(markup, /Year-over-year change/);
+  assert.match(markup, /2 businesses with new licenses in the prior year/);
+  assert.match(markup, /1 business with new licenses/);
+  assert.match(markup, /Initial license applications \(ISSUE\) only; renewals excluded/);
+  assert.match(markup, /Existing businesses may receive new licenses; these records do not confirm new business openings/);
+  assert.match(markup, /License start Jan 2026/);
+  assert.doesNotMatch(markup, />New businesses<|distinct openings|Formation change|filter openings|matching opening|1 openings|Issued Jan/);
+});
+
+test("empty and failed license results do not claim no businesses opened", () => {
+  const empty = renderToStaticMarkup(
+    <NewBusinessLicensesSection
+      data={{ ...populatedData, licenses: [], totalCount: 0, licenseCount: 0 }}
+      isLoading={false}
+      isError={false}
+    />,
+  );
+  assert.match(empty, /No qualifying new license issuances/);
+  assert.match(empty, /This does not establish whether new businesses opened/);
+  const error = renderToStaticMarkup(<NewBusinessLicensesSection isLoading={false} isError />);
+  assert.match(error, /New license issuance records could not be loaded/);
+});
