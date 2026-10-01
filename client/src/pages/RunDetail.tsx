@@ -1296,14 +1296,15 @@ export default function RunDetail() {
   const ACC_BEFORE_REORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "crime", "transit", "businessLicenses", "valuation", "listing", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
   const ACC_BEFORE_HISTORIC_REORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
   const ACC_BEFORE_HISTORIC_CORRECTION = ["ownership", "zoning", "zoningHistory", "historic", "propertyTax", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
-  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
+  const ACC_BEFORE_COUNTY_REORDER = ["ownership", "propertyTax", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
+  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "countyRecord", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "permits", "analysis", "newBusinessLicenses", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
   const mergeAccOrder = (saved: string[], def: string[]): string[] => {
     // The app persisted its old default even for people who never dragged a row.
     // Migrate only that exact order; keep genuinely customized orders intact.
-    const oldDefault = [ACC_PREVIOUS_ORDER, ACC_LAST_DEFAULT_ORDER, ACC_BEFORE_REORDER, ACC_BEFORE_HISTORIC_REORDER, ACC_BEFORE_HISTORIC_CORRECTION]
+    const oldDefault = [ACC_PREVIOUS_ORDER, ACC_LAST_DEFAULT_ORDER, ACC_BEFORE_REORDER, ACC_BEFORE_HISTORIC_REORDER, ACC_BEFORE_HISTORIC_CORRECTION, ACC_BEFORE_COUNTY_REORDER]
       .some((order) => JSON.stringify(saved) === JSON.stringify(order));
     let out = oldDefault ? [...def] : saved.filter((x) => def.includes(x));
     for (let idx = 0; idx < def.length; idx++) {
@@ -1327,6 +1328,11 @@ export default function RunDetail() {
       const before = out.slice(0, first).filter((row) => !group.includes(row)).length;
       out = out.filter((row) => !group.includes(row));
       out.splice(before, 0, ...group);
+    }
+    // Apply the requested third-position placement once to saved reports too.
+    if (!localStorage.getItem(`kyp-acc-order-county-historic-v1-${id}`)) {
+      out = out.filter((row) => row !== "countyRecord" && row !== "historic");
+      out.splice(2, 0, "countyRecord", "historic");
     }
     return out;
   };
@@ -1367,6 +1373,9 @@ export default function RunDetail() {
     localStorage.setItem(`kyp-acc-order-${id}`, JSON.stringify(accOrder));
     localStorage.setItem(`kyp-acc-order-incentives-transit-v1-${id}`, "1");
     localStorage.setItem(`kyp-acc-order-tax-historic-zoning-v2-${id}`, "1");
+    if (accOrder.indexOf("countyRecord") === 2 && accOrder.indexOf("historic") === 3) {
+      localStorage.setItem(`kyp-acc-order-county-historic-v1-${id}`, "1");
+    }
   } catch {} }, [accOrder, id]);
   useEffect(() => { if (accHydratedIdRef.current === id) try { localStorage.setItem(`kyp-acc-hidden-${id}`, JSON.stringify(accHidden)); } catch {} }, [accHidden, id]);
   const accMove = useCallback((src: string, tgt: string) => {

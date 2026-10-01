@@ -48,3 +48,4 @@
 - [Business license evidence](business-license-evidence.md) — ISSUE excludes renewals but does not prove a new business opening; issuance status is not proof of current operation.
 - [Development pipeline evidence](development-pipeline-evidence.md) — permit units are description estimates; incomplete observed proposal counts are not complete totals or guaranteed lower bounds.
 - [Corridor layout decision](corridor-layout-decision.md) — user chose the compact-row visual target over contradictory counts-only wording.
+- [Accordion order migrations](accordion-order-migrations.md) — Fast Refresh preserves old state; mark per-run reorders complete only after their intended placement is applied.

@@ -82,9 +82,42 @@ test("canonical title updates preserve the established report section order", ()
   const defaultOrder = runDetail.match(/const ACC_DEFAULT_ORDER = \[([^\]]*)\];/);
   assert.ok(defaultOrder, "accordion default order remains declared");
   assert.deepEqual([...defaultOrder[1].matchAll(/"([^"]+)"/g)].map(([, id]) => id), [
-    "ownership", "propertyTax", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing",
-    "countyRecord", "permits", "analysis", "newBusinessLicenses", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
+    "ownership", "propertyTax", "countyRecord", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing",
+    "permits", "analysis", "newBusinessLicenses", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
   ]);
+});
+
+test("county section moves to third in saved reports once, preserving other ordering and later drags", () => {
+  const source = readFileSync(new URL("../../pages/RunDetail.tsx", import.meta.url), "utf8");
+  const ast = ts.createSourceFile("RunDetail.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const statements: string[] = [];
+  const visit = (node: ts.Node) => {
+    if (ts.isVariableStatement(node) && node.declarationList.declarations.some((declaration) => {
+      const name = declaration.name.getText(ast);
+      return name === "mergeAccOrder" || (name.startsWith("ACC_")
+        && !!declaration.initializer && ts.isArrayLiteralExpression(declaration.initializer));
+    })) statements.push(node.getText(ast));
+    ts.forEachChild(node, visit);
+  };
+  visit(ast);
+  const js = ts.transpileModule(statements.join("\n"), {
+    compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext },
+  }).outputText;
+  const load = (migrated: boolean) => new Function("localStorage", "id",
+    `${js}\nreturn { mergeAccOrder, ACC_DEFAULT_ORDER, ACC_BEFORE_COUNTY_REORDER };`)({
+      getItem: (key: string) => key.startsWith("kyp-acc-order-county-historic-v1-") && !migrated ? null : "1",
+    }, 1);
+  const { mergeAccOrder, ACC_DEFAULT_ORDER, ACC_BEFORE_COUNTY_REORDER } = load(false);
+  assert.deepEqual(mergeAccOrder(ACC_BEFORE_COUNTY_REORDER, ACC_DEFAULT_ORDER), ACC_DEFAULT_ORDER);
+  const custom = ["news", ...ACC_DEFAULT_ORDER.filter((id: string) => id !== "news")];
+  const reordered = mergeAccOrder(custom, ACC_DEFAULT_ORDER);
+  assert.deepEqual(reordered.slice(2, 4), ["countyRecord", "historic"]);
+  assert.deepEqual(reordered.filter((id: string) => !["countyRecord", "historic"].includes(id)),
+    custom.filter((id: string) => !["countyRecord", "historic"].includes(id)));
+  assert.equal(new Set(reordered).size, ACC_DEFAULT_ORDER.length);
+  const laterDrag = [...ACC_DEFAULT_ORDER].reverse();
+  assert.deepEqual(load(true).mergeAccOrder(laterDrag, ACC_DEFAULT_ORDER), laterDrag);
+  assert.match(source, /localStorage\.setItem\(`kyp-acc-order-county-historic-v1-\$\{id\}`, "1"\)/);
 });
 
 test("proximity, schools, and culture are independent report sections", () => {
