@@ -59,7 +59,7 @@ import StatTile from "@/components/StatTile";
 import InsightReportSection from "@/components/InsightReportSection";
 import { CountyRecordSection } from "@/components/report/CountyRecordSection";
 import { trackEvent } from "@/lib/analytics";
-import { fallbackSummaryBadge, headerBadgeNumber, headerCountyUnitCount, type HeaderBadgeState } from "@/lib/sectionHeaderBadges";
+import { fallbackSummaryBadge, headerBadgeNumber, headerCountyUnitCount, headerFarCeilingBadge, type HeaderBadgeState } from "@/lib/sectionHeaderBadges";
 
 function proRoleIcon(role: string) {
   const r = (role || '').toLowerCase();
@@ -4185,9 +4185,13 @@ export default function RunDetail() {
   const headerCompanionLotSf = run?.manualLandSqFt ? 0
     : headerBadgeNumber(coParcelTaxData?.landSquareFeet || coParcelLookupData?.commercialData?.landSf);
   const headerFar = headerBadgeNumber(zoningInfo?.maxFAR);
-  const headerEnvelopeSf = (!coParcelPin || headerCompanionLotSf != null)
-    && headerLotSf != null && headerLotSf > 0 && headerFar != null && headerFar > 0
-    ? Math.floor((headerLotSf + (headerCompanionLotSf ?? 0)) * headerFar) : null;
+  const headerPotentialBadge = headerFarCeilingBadge({
+    lotSf: headerLotSf,
+    maxFar: headerFar,
+    hasCompanion: !!coParcelPin,
+    companionLotSf: headerCompanionLotSf,
+    manualCombinedLot: !!run?.manualLandSqFt,
+  });
   const headerCountyUnits = headerCountyUnitCount(propertyTaxData?.apartments, pinLookupData?.commercialData?.totalUnits);
   const headerCountyYear = headerBadgeNumber(propertyTaxData?.yearBuilt ?? pinLookupData?.characteristicsData?.yearBuilt);
   const headerCountyFacts = [
@@ -4250,7 +4254,7 @@ export default function RunDetail() {
     potential: {
       loading: isLoadingZoning || isLoadingPropertyTax, hasData: !!zoningInfo,
       label: isPlannedDevelopment ? "PD review needed"
-        : headerEnvelopeSf != null ? `Est. FAR ceiling ${headerEnvelopeSf.toLocaleString()} SF` : undefined,
+        : headerPotentialBadge,
       emptyLabel: "Inputs needed",
     },
     incentives: { loading: isLoadingIncentives || isLoadingLocationIncentives, checked: headerHasCoordinates,

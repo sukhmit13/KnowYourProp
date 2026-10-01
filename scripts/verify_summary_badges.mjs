@@ -204,7 +204,7 @@ window.__vite_plugin_react_preamble_installed__ = true;
 import React from "${reactPath}";
 import ReactDOM from "${rootPath}";
 import { AccordionSection } from "/src/components/report/AccordionSection.tsx";
-import { fallbackSummaryBadge } from "/src/lib/sectionHeaderBadges.ts";
+import { fallbackSummaryBadge, headerFarCeilingBadge } from "/src/lib/sectionHeaderBadges.ts";
 const { createRoot } = ReactDOM;
 const h = React.createElement;
 const ids = ${fixtureIds};
@@ -223,8 +223,12 @@ const existingBadges = {
 function Fixture() {
   const [hidden, setHidden] = React.useState({});
   const [open, setOpen] = React.useState({});
+  const [potentialState, setPotentialState] = React.useState(specialStates.potential);
+  window.setPotentialInputs = (inputs) => setPotentialState({
+    hasData: true, label: headerFarCeilingBadge(inputs), emptyLabel: "Inputs needed",
+  });
   return h("main", null, ids.map((id, i) => {
-    const fallback = fallbackSummaryBadge(specialStates[id] || { hasData: true });
+    const fallback = fallbackSummaryBadge(id === "potential" ? potentialState : specialStates[id] || { hasData: true });
     const existing = existingBadges[id];
     const badge = existing ? existing.label : fallback.label;
     const badgeTone = existing ? existing.tone : fallback.tone;
@@ -268,6 +272,15 @@ try {
   assert.match(await tone("zoning"), /\bindigo\b/, "Checking uses the indigo tone");
   assert.equal(await label("zoningHistory"), "Not applicable");
   assert.equal(await label("potential"), "Data incomplete");
+  await page.evaluate(() => window.setPotentialInputs({ lotSf: 2967, maxFar: 1.2, hasCompanion: true }));
+  await page.waitForFunction(() => document.querySelector('[data-testid="accsec-potential"] .badge')?.textContent === "Est. subject ceiling 3,560 SF");
+  assert.equal(await label("potential"), "Est. subject ceiling 3,560 SF", "Missing companion data must not hide the known subject ceiling");
+  await page.evaluate(() => window.setPotentialInputs({ lotSf: 2967, maxFar: 1.2, hasCompanion: true, companionLotSf: 2500 }));
+  await page.waitForFunction(() => document.querySelector('[data-testid="accsec-potential"] .badge')?.textContent === "Est. combined ceiling 6,560 SF");
+  await page.evaluate(() => window.setPotentialInputs({ lotSf: null, maxFar: 1.2 }));
+  await page.waitForFunction(() => document.querySelector('[data-testid="accsec-potential"] .badge')?.textContent === "Inputs needed");
+  await page.evaluate(() => window.setPotentialInputs({ lotSf: 2967, maxFar: 1.2, hasCompanion: true }));
+  await page.waitForFunction(() => document.querySelector('[data-testid="accsec-potential"] .badge')?.textContent === "Est. subject ceiling 3,560 SF");
   assert.equal(await label("listing"), "ACTIVE LISTING", "Keep an existing production-style badge label");
   assert.match(await tone("listing"), /\bg\b/, "Keep an existing badge tone");
   assert.equal(await label("countyRecord"), "TAX RECORD");

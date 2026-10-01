@@ -37,6 +37,29 @@ export function headerBadgeNumber(value: unknown): number | null {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
 }
 
+export interface HeaderFarCeilingInputs {
+  lotSf: unknown;
+  maxFar: unknown;
+  hasCompanion?: boolean;
+  companionLotSf?: unknown;
+  /** The report treats a manual lot-area override as the full selected lot area. */
+  manualCombinedLot?: boolean;
+}
+
+export function headerFarCeilingBadge(inputs: HeaderFarCeilingInputs): string | undefined {
+  const lotSf = headerBadgeNumber(inputs.lotSf);
+  const maxFar = headerBadgeNumber(inputs.maxFar);
+  if (lotSf == null || lotSf <= 0 || maxFar == null || maxFar <= 0) return undefined;
+  const companionLotSf = headerBadgeNumber(inputs.companionLotSf);
+  const companionKnown = companionLotSf != null && companionLotSf > 0;
+  const combined = !!inputs.hasCompanion && (!!inputs.manualCombinedLot || companionKnown);
+  const totalLotSf = lotSf + (inputs.hasCompanion && !inputs.manualCombinedLot && companionKnown ? companionLotSf : 0);
+  const ceilingSf = Math.floor(totalLotSf * maxFar);
+  if (!Number.isFinite(ceilingSf)) return undefined;
+  const scope = combined ? "combined ceiling" : inputs.hasCompanion ? "subject ceiling" : "FAR ceiling";
+  return `Est. ${scope} ${ceilingSf.toLocaleString("en-US")} SF`;
+}
+
 export function headerCountyUnitCount(apartments: unknown, commercialUnits: unknown): number | null {
   const words: Record<string, number> = {
     zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6,

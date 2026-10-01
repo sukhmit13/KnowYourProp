@@ -19,3 +19,8 @@ Every report row needs a summary badge even when the section has no findings, ha
 
 **Why:** The user explicitly wants complete header summaries regardless of whether information was retrieved or the section applies. During badge-coverage changes, they want existing nonempty wording and colors preserved rather than silently rewritten.
 **How to apply:** Fill blank summaries with scoped facts or honest state labels; never infer zero from missing data. Keep applicability guards around body content, and keep a hidden/dimmed row's badge visible.
+
+Missing companion-parcel records should not hide a supported subject-parcel summary. Show the available measurement with its parcel scope rather than implying that the user must enter missing inputs.
+
+**Why:** The user approved retaining the known subject-lot FAR ceiling when companion data was unavailable; a blanket “Inputs needed” badge contradicted the visible calculation.
+**How to apply:** Distinguish subject-only findings from complete combined-area findings. Missing data for an additional parcel is a scope limitation, not absence of evidence for the subject.
