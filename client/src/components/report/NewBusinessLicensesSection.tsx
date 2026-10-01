@@ -100,6 +100,7 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
               </div>
               <span className="kyp-biz-distance">{business.distanceMiles.toFixed(2)} mi</span>
               <div className="kyp-biz-cardmeta">
+                {business.corridor && <span className="kyp-corridor">{business.corridor.name}</span>}
                 {business.licenses.map((license) => <span className="kyp-liccat" key={`${license.licenseType}-${license.startDate}`}>{license.licenseType}</span>)}
                 {earliest && <span>License start {monthYear(earliest)}</span>}
               </div>

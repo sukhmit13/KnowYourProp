@@ -1766,3 +1766,63 @@ button.kyp-morelink { background: none; border: 0; padding: 0; }
 @media (max-width: 720px) {
   .kyp-twocol { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   Step 28 — §Corridor Intelligence becomes a rollup
+   Append to the END of client/src/kyp-base.css.
+
+   Six rules. The section's old .corrwrap / .take / .kpis / .corr
+   families in index.css are deleted, not restyled.
+   ============================================================ */
+
+/* 1. Five peer roll-up blocks. .kyp-blocks is 3-up at top level and
+      .four exists; this is the five-across case. Single column under
+      640px is already handled by the base @media rule.               */
+.kyp-blocks.five { grid-template-columns: repeat(5, 1fr); }
+@media (max-width: 900px) { .kyp-blocks.five { grid-template-columns: repeat(2, 1fr); } }
+
+/* 2. The one-line description under a corridor's subhead.                */
+.kyp-corrblurb { font-size: 12px; color: var(--kyp-muted); margin: 2px 0 0; }
+.subwrap .kyp-twocol { margin-top: 14px; }
+
+/* 5. A compact record row. Corridor LISTS everything on the corridor —
+      the grouping is what the section answers — but one line each. The
+      per-record detail (architect, GC, cost, city class, case number,
+      proposal text) stays in the section that owns the record, which each
+      row links to.                                                        */
+.kyp-corrcolh {
+  display: flex; align-items: baseline; gap: 8px;
+  font-family: var(--kyp-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--kyp-ink2);
+  padding-bottom: 6px; border-bottom: 1px solid var(--kyp-line); margin-bottom: 4px;
+}
+.kyp-corrcolh .all {
+  margin-left: auto; color: var(--kyp-indigo); text-decoration: none;
+  font-size: 9px; letter-spacing: .03em;
+}
+.kyp-corrcolh .all:hover { text-decoration: underline; }
+/* A record row carries several destinations — the record itself, and the
+   GC / architect links into Discovery — so the ROW IS NOT AN ANCHOR. Nested
+   <a> is invalid and the browser auto-closes the outer one, which silently
+   breaks every link and style after it.                                   */
+.kyp-corrrow {
+  display: grid; grid-template-columns: minmax(0,1fr) auto;
+  gap: 0 10px; padding: 6px 0;
+  border-bottom: 1px solid var(--kyp-wash);
+}
+.kyp-corrrow:hover { background: var(--kyp-wash); }
+.kyp-corrrow .m { font-size: 12.5px; font-weight: 600; min-width: 0; }
+.kyp-corrrow .m a { color: var(--kyp-ink); text-decoration: none; }
+.kyp-corrrow .m a:hover { color: var(--kyp-indigo); text-decoration: underline; }
+.kyp-corrrow .r { font-family: var(--kyp-mono); font-size: 10px; color: var(--kyp-muted); white-space: nowrap; }
+.kyp-corrrow .x {
+  grid-column: 1/-1; font-size: 11px; color: var(--kyp-muted);
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 1px;
+}
+.kyp-corrrow .kyp-liccat { font-size: 8px; }
+.kyp-corrrow .kyp-pro i { font-size: 7.5px; }
+.kyp-corrrow .kyp-pro a { font-size: 10.5px; }
+
+/* 6. Corridor coverage uses the report's standard news row — LogoTile +
+      .kyp-archrow — so every news surface looks the same. No new rules. */
+.kyp-corrsec { margin-top: 13px; }

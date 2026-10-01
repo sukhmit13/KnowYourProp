@@ -1099,6 +1099,7 @@ function NewsSiteCard({ m, g, idx, lead }: { m: any; g: any; idx: number; lead?:
       <LogoTile url={m.url} source={m.source} date={newsFmtD(m.date)} lead={lead} />
       <div className="kyp-archbody">
         <div className="kyp-archkick">
+          {m.corridor && <span className="kyp-corridor">{m.corridor.name}</span>}
           <span className="kyp-archdate">{newsFmtD(m.date)}</span>
           <span className={`kyp-archtag ${m.tier === 'parcel' ? '' : 'adj'}`}>{m.tier === 'parcel' ? 'This parcel' : `Adjacent · ${m.matched_address}`}</span>
           {m.age_flag && <span className="kyp-archage">{m.age_flag}</span>}
@@ -1118,13 +1119,19 @@ function NewsSiteCard({ m, g, idx, lead }: { m: any; g: any; idx: number; lead?:
 
 // Neighborhood culture row (light)
 function NewsArchCard({ a, testid }: { a: any; testid?: string }) {
+  const source = a.source || 'Local news';
+  const date = newsFmtD(a.date || a.published);
   return (
     <div className="kyp-archrow" data-testid={testid}>
-      <LogoTile url={a.url} source={a.source} date={newsFmtD(a.date)} />
+      <LogoTile url={a.url} source={source} date={date} />
       <div className="kyp-archbody">
-        <div className="kyp-archkick"><span className="kyp-archdate">{newsFmtD(a.date)}</span></div>
+        <div className="kyp-archkick">
+          {a.corridor && <span className="kyp-corridor">{a.corridor.name}</span>}
+          <span className="kyp-archdate">{date}</span>
+        </div>
         {safeUrl(a.url) ? <a className="kyp-archtitle" href={safeUrl(a.url)} target="_blank" rel="noopener noreferrer">{a.title}</a> : <span className="kyp-archtitle">{a.title}</span>}
-        <div className="kyp-archfoot">{safeUrl(a.url) && <a className="kyp-archread" href={safeUrl(a.url)} target="_blank" rel="noopener noreferrer">Read at {a.source} ↗</a>}</div>
+        {a.summary && <div className="kyp-archsum">{a.summary}</div>}
+        <div className="kyp-archfoot">{safeUrl(a.url) && <a className="kyp-archread" href={safeUrl(a.url)} target="_blank" rel="noopener noreferrer">Read at {source} ↗</a>}</div>
       </div>
     </div>
   );
@@ -1136,7 +1143,7 @@ function NewsDevCard({ p, testid }: { p: any; testid?: string }) {
     <div className="kyp-archrow" data-testid={testid}>
       <LogoTile url={p.url} source={p.source} date={newsFmtD(p.date)} />
       <div className="kyp-archbody">
-        <div className="kyp-archkick"><span className="kyp-archdate">{newsFmtD(p.date)}</span><span className={`kyp-stage ${newsStatusCls(p.stage)}`}>{p.stageLabel}</span></div>
+        <div className="kyp-archkick">{p.corridor && <span className="kyp-corridor">{p.corridor.name}</span>}<span className="kyp-archdate">{newsFmtD(p.date)}</span><span className={`kyp-stage ${newsStatusCls(p.stage)}`}>{p.stageLabel}</span></div>
         {safeUrl(p.url) ? <a className="kyp-archtitle" href={safeUrl(p.url)} target="_blank" rel="noopener noreferrer">{p.title}</a> : <span className="kyp-archtitle">{p.title}</span>}
         {p.oneLine && <div className="kyp-archsum">{p.oneLine}</div>}
         <div className="kyp-archfoot">
@@ -1217,8 +1224,6 @@ export default function RunDetail() {
   const [allSectionsExpanded, setAllSectionsExpanded] = useState(false);
 
   // Locally-managed collapsibles (not part of SectionStates) that must also open for print/expand-all
-  // KYP redesign hybrid-look flag (live-tester safe: URL-gated, default off)
-  const hybridInc: boolean = true; // Step 5: the new design is the only render — legacy (!hybridInc) branches are dead code, cleanup queued
   const [naIncOpen, setNaIncOpen] = useState(false);
   const [likelyIncOpen, setLikelyIncOpen] = useState(true);
   const [confirmIncOpen, setConfirmIncOpen] = useState(true);
@@ -1467,8 +1472,6 @@ export default function RunDetail() {
   const setIsAddressNewsOpen = useCallback((v: boolean) => setSectionOpen('addressNews', v), [setSectionOpen]);
   const isNeighborhoodNewsOpen = sectionStates.neighborhoodNews;
   const setIsNeighborhoodNewsOpen = useCallback((v: boolean) => setSectionOpen('neighborhoodNews', v), [setSectionOpen]);
-  const isCorridorNewsOpen = sectionStates.corridorNews;
-  const setIsCorridorNewsOpen = useCallback((v: boolean) => setSectionOpen('corridorNews', v), [setSectionOpen]);
   const isAirbnbOpen = sectionStates.airbnb;
   const setIsAirbnbOpen = useCallback((v: boolean) => setSectionOpen('airbnb', v), [setSectionOpen]);
   const isLoopnetSectionOpen = sectionStates.loopnetSection;
@@ -2945,7 +2948,6 @@ export default function RunDetail() {
   const { data: addressNewsData, isLoading: isLoadingAddressNews } = useAddressNews(run?.address);
   const { data: coParcelAddressNewsData, isLoading: isLoadingCoParcelAddressNews } = useAddressNews(coParcelAddress);
   const { data: neighborhoodNewsData, isLoading: isLoadingNeighborhoodNews } = useNeighborhoodNews(facts?.communityArea);
-  const { data: corridorNewsData, isLoading: isLoadingCorridorNews } = useCorridorNews(facts?.lat, facts?.lon, run?.address, facts?.neighborhood, facts?.communityArea);
   const { data: zbaApprovalsData, isLoading: isLoadingZbaApprovals, isError: isErrorZbaApprovals } = useZbaApprovals(wardNumber);
   // Verified co-parcels (assemblage) are searched alongside the subject address —
   // ordinances for a double lot are often filed under the companion's number or a range.
@@ -2983,9 +2985,6 @@ export default function RunDetail() {
     pinLookupData?.characteristicsData?.fullBaths ?? null,
   );
 
-  const isOnCorridor = (_corridorName: string, distanceMiles: number) => {
-    return distanceMiles === 0;
-  };
   const { data: nearbyLicensesData, isLoading: isLoadingNearbyLicenses, isError: isErrorNearbyLicenses } = useNearbyBusinessLicenses(facts?.lat, facts?.lon);
   const { data: nearbyConstructionData, isLoading: isLoadingNearbyConstruction } = useNearbyNewConstruction(facts?.lat, facts?.lon, facts?.communityArea);
 
@@ -3075,10 +3074,7 @@ export default function RunDetail() {
   // Cached takeaway for Neighborhood News — trigger-only; the server derives
   // neighborhood, feeds, and permit records from the run's own address.
   const { data: nnTakeaway, isFetched: nnTakeawayFetched } = useNeighborhoodNewsTakeaway(id);
-  const visibleCorridorArticles = withoutRepeatedNews<{
-    title: string; url: string; summary: string; published: string; source: string;
-    corridorKeys?: string[]; mentionsNeighborhood?: boolean;
-  }>(corridorNewsData?.articles || [], [
+  const corridorExcludedArticles = withoutRepeatedNews<any>([
     ...(addressNewsData?.articles || []),
     ...(coParcelAddressNewsData?.articles || []),
     ...(newsTakeaway?.meta || []),
@@ -3086,7 +3082,30 @@ export default function RunDetail() {
     ...(neighborhoodNewsData?.archive || []),
     ...(nnTakeaway?.culture || []),
     ...(nnTakeaway?.dev || []),
-  ]);
+  ], []).map((article: any) => ({
+    url: article.url,
+    title: article.title,
+    source: article.source,
+  }));
+  const { data: corridorNewsData, isLoading: isLoadingCorridorNews, isError: isErrorCorridorNews } = useCorridorNews(
+    facts?.lat,
+    facts?.lon,
+    run?.address,
+    facts?.neighborhood,
+    facts?.communityArea,
+    corridorExcludedArticles,
+  );
+  const corridorRollupReady = !!corridorNewsData?.kpis
+    && ["permits", "permitUnits", "licenses", "articles", "zoningAppeals", "dpdApplications"]
+      .every((key) => Object.prototype.hasOwnProperty.call(corridorNewsData.kpis, key))
+    && Array.isArray(corridorNewsData.cards)
+    && corridorNewsData.cards.length > 0
+    && Array.isArray(corridorNewsData.corridors)
+    && corridorNewsData.corridors.length > 0
+    && !!corridorNewsData.sourceCoverage
+    && ["licenses", "permits", "articles", "zoningAppeals", "dpdApplications"]
+      .every((key) => Object.prototype.hasOwnProperty.call(corridorNewsData.sourceCoverage, key));
+  const visibleCorridorArticles = corridorNewsData?.articles || [];
   const generateNnTakeaway = useGenerateNeighborhoodNewsTakeaway(id);
   const nnTakeawayAttemptedRef = useRef<number | null>(null);
   useEffect(() => {
@@ -8658,80 +8677,63 @@ export default function RunDetail() {
                         CSS order = stateBase(1000/2000/3000) + type*100 + idx; headers/labels slot in between. */}
                     {/* Glance tiles — compact one-line rows: marker → number → label.
                         Counts are computed from the same map that renders the cards, so they can never drift */}
-                    {hybridInc ? (
-                      <div className="kyp-blocks" style={{ order: -1 }}>
+                    {<div className="kyp-blocks" style={{ order: -1 }}>
                         <div className="kyp-block grn"><div className="bv">{incMeta.counts.likely}</div>
                           <div><div className="bl">Likely relevant</div><div className="bd">of {incMeta.counts.likely + incMeta.counts.confirm + incMeta.counts.na} checked</div></div></div>
                         <div className="kyp-block orange"><div className="bv">{incMeta.counts.confirm}</div><span className="chip">Verify to claim</span>
                           <div><div className="bl">Needs confirmation</div><div className="bd">may qualify</div></div></div>
                         <div className="kyp-block slate"><div className="bv">{incMeta.counts.na}</div><span className="chip">No fit</span>
                           <div><div className="bl">Not applicable</div><div className="bd">parcel / project data</div></div></div>
-                      </div>
-                    ) : (
-                    <div className="buckets" style={{ order: -1 }}>
-                      <div className="bkt good"><span className="bn">{incMeta.counts.likely}</span><span className="bl">Likely relevant</span></div>
-                      <div className="bkt caution"><span className="bn">{incMeta.counts.confirm}</span><span className="bl">Needs confirmation</span></div>
-                      <div className="bkt na"><span className="bn">{incMeta.counts.na}</span><span className="bl">Not applicable</span></div>
-                    </div>
-                    )}
+                      </div>}
 
                     {/* Availability group headers — each folds its group of cards */}
                     {incMeta.counts.likely > 0 && (
-                      <button type="button" id="inc-group-relevant" className={hybridInc ? `kyp-group on${likelyIncOpen ? ' openg' : ''}` : `grouph good${likelyIncOpen ? ' openg' : ''}`} style={{ order: 999 }}
+                      <button type="button" id="inc-group-relevant" className={`kyp-group on${likelyIncOpen ? ' openg' : ''}`} style={{ order: 999 }}
                         onClick={() => setLikelyIncOpen(o => !o)} aria-expanded={likelyIncOpen} data-testid="button-toggle-likely-incentives">
-                        {hybridInc ? (<>
+                        {<>
                           <span className="kyp-gcount">{incMeta.counts.likely}</span>
                           <span className="kyp-glabel">Likely relevant</span>
                           <span className="kyp-grule" />
                           <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 8, width: 14, height: 14, stroke: "var(--kyp-muted)", fill: "none" }}><path d="m6 9 6 6 6-6" /></svg>
-                        </>) : (<>
-                        <span className="gd" />Likely relevant <span className="ct">· {incMeta.counts.likely}</span>
-                        <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
-                        </>)}
+                        </>}
                       </button>
                     )}
                     {incMeta.counts.confirm > 0 && (
-                      <button type="button" className={hybridInc ? `kyp-group warn${confirmIncOpen ? ' openg' : ''}` : `grouph caution${confirmIncOpen ? ' openg' : ''}`} style={{ order: 1999 }}
+                      <button type="button" className={`kyp-group warn${confirmIncOpen ? ' openg' : ''}`} style={{ order: 1999 }}
                         onClick={() => setConfirmIncOpen(o => !o)} aria-expanded={confirmIncOpen} data-testid="button-toggle-confirm-incentives">
-                        {hybridInc ? (<>
+                        {<>
                           <span className="kyp-gcount">{incMeta.counts.confirm}</span>
                           <span className="kyp-glabel">Needs confirmation</span>
                           <span className="kyp-grule" />
                           <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 8, width: 14, height: 14, stroke: "var(--kyp-muted)", fill: "none" }}><path d="m6 9 6 6 6-6" /></svg>
-                        </>) : (<>
-                        <span className="gd" />Needs confirmation <span className="ct">· {incMeta.counts.confirm}</span>
-                        <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
-                        </>)}
+                        </>}
                       </button>
                     )}
                     {incMeta.counts.na > 0 && (
-                      <button type="button" className={hybridInc ? `kyp-group off${naIncOpen ? ' openg' : ''}` : `grouph na${naIncOpen ? ' openg' : ''}`} style={{ order: 2999 }}
+                      <button type="button" className={`kyp-group off${naIncOpen ? ' openg' : ''}`} style={{ order: 2999 }}
                         onClick={() => setNaIncOpen(o => !o)} aria-expanded={naIncOpen} data-testid="button-toggle-na-incentives">
-                        {hybridInc ? (<>
+                        {<>
                           <span className="kyp-gcount">{incMeta.counts.na}</span>
                           <span className="kyp-glabel">Not applicable</span>
                           <span className="kyp-grule" />
                           <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 8, width: 14, height: 14, stroke: "var(--kyp-muted)", fill: "none" }}><path d="m6 9 6 6 6-6" /></svg>
-                        </>) : (<>
-                        <span className="gd" />Not applicable <span className="ct">· {incMeta.counts.na}</span>
-                        <svg className="chev" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
-                        </>)}
+                        </>}
                       </button>
                     )}
 
                     {/* Type sub-labels: only within the Not Applicable group — eligible groups list flat by eligibility (each card keeps its type pill) */}
                     {naIncOpen && (
                       <span className="contents">
-                        {incMeta.typeHas(3, 1) && <IncentiveTypeLabel order={3100} variant={hybridInc ? "hybrid" : "current"}>Property Tax</IncentiveTypeLabel>}
-                        {incMeta.typeHas(3, 2) && <IncentiveTypeLabel order={3200} variant={hybridInc ? "hybrid" : "current"}>Financing &amp; Investor Credits</IncentiveTypeLabel>}
-                        {incMeta.typeHas(3, 3) && <IncentiveTypeLabel order={3300} variant={hybridInc ? "hybrid" : "current"}>Grants &amp; Direct Funding</IncentiveTypeLabel>}
-                        {incMeta.typeHas(3, 4) && <IncentiveTypeLabel order={3400} variant={hybridInc ? "hybrid" : "current"}>Zoning &amp; Development Rights</IncentiveTypeLabel>}
-                        {incMeta.typeHas(3, 5) && <IncentiveTypeLabel order={3500} variant={hybridInc ? "hybrid" : "current"}>Context / Clean Energy</IncentiveTypeLabel>}
+                        {incMeta.typeHas(3, 1) && <IncentiveTypeLabel order={3100} variant={"hybrid"}>Property Tax</IncentiveTypeLabel>}
+                        {incMeta.typeHas(3, 2) && <IncentiveTypeLabel order={3200} variant={"hybrid"}>Financing &amp; Investor Credits</IncentiveTypeLabel>}
+                        {incMeta.typeHas(3, 3) && <IncentiveTypeLabel order={3300} variant={"hybrid"}>Grants &amp; Direct Funding</IncentiveTypeLabel>}
+                        {incMeta.typeHas(3, 4) && <IncentiveTypeLabel order={3400} variant={"hybrid"}>Zoning &amp; Development Rights</IncentiveTypeLabel>}
+                        {incMeta.typeHas(3, 5) && <IncentiveTypeLabel order={3500} variant={"hybrid"}>Context / Clean Energy</IncentiveTypeLabel>}
                       </span>
                     )}
 
                     {/* TIF District card (moved out of the old takeaway list) */}
-                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-tif" className={incMeta.hiddenCls('tif', naIncOpen)} style={{ order: incMeta.order('tif') }}
+                    <IncentiveCard variant={"hybrid"} id="print-section-tif" className={incMeta.hiddenCls('tif', naIncOpen)} style={{ order: incMeta.order('tif') }}
                         state={incMeta.state('tif') === 0 ? "good" : incMeta.state('tif') === 1 ? "caution" : "na"}
                         name="TIF District (Tax Increment Financing)" type="Zoning" pill_label={incMeta.badge('tif')}
                         verdict={tifDistrictName ? <>This parcel is inside the <em>{tifDistrictName}</em> TIF district.</> : 'This parcel is not inside a TIF district.'}
@@ -8741,7 +8743,7 @@ export default function RunDetail() {
                         source="Chicago DPD" />
 
                     {/* Opportunity Zone card (moved out of the old takeaway list) */}
-                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-opportunity-zone" className={incMeta.hiddenCls('opportunity-zone', naIncOpen)} style={{ order: incMeta.order('opportunity-zone') }}
+                    <IncentiveCard variant={"hybrid"} id="print-section-opportunity-zone" className={incMeta.hiddenCls('opportunity-zone', naIncOpen)} style={{ order: incMeta.order('opportunity-zone') }}
                         state={incMeta.state('opportunity-zone') === 0 ? "good" : incMeta.state('opportunity-zone') === 1 ? "caution" : "na"}
                         name="Federal Opportunity Zone" type="Tax Credit" pill_label={incMeta.badge('opportunity-zone')}
                         verdict={facts?.opportunityZone ? 'This parcel is inside a federal Opportunity Zone.' : 'This parcel is not inside a federal Opportunity Zone.'}
@@ -8758,7 +8760,7 @@ export default function RunDetail() {
                     {isLoadingTOD ? (
                       <div id="print-section-tod" className={incMeta.hiddenCls('tod', naIncOpen)} style={{ order: incMeta.order('tod') }}><Skeleton className="h-16 w-full rounded-lg" /></div>
                     ) : todData ? (
-                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-tod" className={incMeta.hiddenCls('tod', naIncOpen)} style={{ order: incMeta.order('tod') }}
+                      <IncentiveCard variant={"hybrid"} id="print-section-tod" className={incMeta.hiddenCls('tod', naIncOpen)} style={{ order: incMeta.order('tod') }}
                         state={incMeta.state('tod') === 0 ? "good" : incMeta.state('tod') === 1 ? "caution" : "na"}
                         name="Transit-Oriented Development (TOD)" type="Zoning" pill_label={incMeta.badge('tod')}
                         verdict={<span data-testid="text-tod-status">{todData.inTOD ? <>Within TOD Area (<em>{todData.todType}</em>)</> : 'Not in TOD Area'}</span>}
@@ -8915,7 +8917,7 @@ export default function RunDetail() {
                     {isLoadingSbif ? (
                       <div id="print-section-sbif" className={incMeta.hiddenCls('sbif', naIncOpen)} style={{ order: incMeta.order('sbif') }}><Skeleton className="h-16 w-full rounded-lg" /></div>
                     ) : sbifData ? (
-                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-sbif" className={incMeta.hiddenCls('sbif', naIncOpen)} style={{ order: incMeta.order('sbif') }}
+                      <IncentiveCard variant={"hybrid"} id="print-section-sbif" className={incMeta.hiddenCls('sbif', naIncOpen)} style={{ order: incMeta.order('sbif') }}
                         state={incMeta.state('sbif') === 0 ? "good" : incMeta.state('sbif') === 1 ? "caution" : "na"}
                         name="SBIF — Small Business Improvement Fund" type="Grant" pill_label={incMeta.badge('sbif')}
                         verdict={sbifIneligibleUse ? <>Business type not eligible for SBIF</>
@@ -8959,7 +8961,7 @@ export default function RunDetail() {
                     {isLoadingNmtc ? (
                       <div id="print-section-nmtc" className={incMeta.hiddenCls('nmtc', naIncOpen)} style={{ order: incMeta.order('nmtc') }}><Skeleton className="h-16 w-full rounded-lg" /></div>
                     ) : nmtcData ? (
-                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-nmtc" className={incMeta.hiddenCls('nmtc', naIncOpen)} style={{ order: incMeta.order('nmtc') }}
+                      <IncentiveCard variant={"hybrid"} id="print-section-nmtc" className={incMeta.hiddenCls('nmtc', naIncOpen)} style={{ order: incMeta.order('nmtc') }}
                         state={incMeta.state('nmtc') === 0 ? "good" : incMeta.state('nmtc') === 1 ? "caution" : "na"}
                         name="New Markets Tax Credit (NMTC)" type="Financing" pill_label={incMeta.badge('nmtc')}
                         verdict={<>
@@ -9048,7 +9050,7 @@ export default function RunDetail() {
                     {isLoadingMmrp ? (
                       <div id="print-section-mmrp" className={incMeta.hiddenCls('mmrp', naIncOpen)} style={{ order: incMeta.order('mmrp') }}><Skeleton className="h-16 w-full rounded-lg" /></div>
                     ) : mmrpData ? (
-                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-mmrp" className={incMeta.hiddenCls('mmrp', naIncOpen)} style={{ order: incMeta.order('mmrp') }}
+                      <IncentiveCard variant={"hybrid"} id="print-section-mmrp" className={incMeta.hiddenCls('mmrp', naIncOpen)} style={{ order: incMeta.order('mmrp') }}
                         state={incMeta.state('mmrp') === 0 ? "good" : incMeta.state('mmrp') === 1 ? "caution" : "na"}
                         name="Micro-Market Recovery Program (MMRP)" type="Grant" pill_label={incMeta.badge('mmrp')}
                         verdict={<span data-testid="text-mmrp-status">{mmrpData.inMmrpZone
@@ -9081,7 +9083,7 @@ export default function RunDetail() {
                     {isLoadingLocationIncentives ? (
                       <div id="print-section-enterprise-zone" className={incMeta.hiddenCls('enterprise-zone', naIncOpen)} style={{ order: incMeta.order('enterprise-zone') }}><Skeleton className="h-16 w-full rounded-lg" /></div>
                     ) : locationIncentivesData ? (
-                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-enterprise-zone" className={incMeta.hiddenCls('enterprise-zone', naIncOpen)} style={{ order: incMeta.order('enterprise-zone') }}
+                      <IncentiveCard variant={"hybrid"} id="print-section-enterprise-zone" className={incMeta.hiddenCls('enterprise-zone', naIncOpen)} style={{ order: incMeta.order('enterprise-zone') }}
                         state={incMeta.state('enterprise-zone') === 0 ? "good" : incMeta.state('enterprise-zone') === 1 ? "caution" : "na"}
                         name="Illinois Enterprise Zone" type="Property Tax" pill_label={incMeta.badge('enterprise-zone')}
                         verdict={<span data-testid="text-enterprise-zone-status">{locationIncentivesData.enterpriseZone.inZone
@@ -9113,7 +9115,7 @@ export default function RunDetail() {
 
                     {/* Neighborhood Opportunity Fund (NOF) */}
                     {facts?.communityArea ? (
-                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-nof" className={incMeta.hiddenCls('nof', naIncOpen)} style={{ order: incMeta.order('nof') }}
+                      <IncentiveCard variant={"hybrid"} id="print-section-nof" className={incMeta.hiddenCls('nof', naIncOpen)} style={{ order: incMeta.order('nof') }}
                         state={incMeta.state('nof') === 0 ? "good" : incMeta.state('nof') === 1 ? "caution" : "na"}
                         name="Neighborhood Opportunity Fund (NOF)" type="Grant" pill_label={incMeta.badge('nof')}
                         verdict={<span data-testid="text-nof-status">{nofEligible
@@ -9162,7 +9164,7 @@ export default function RunDetail() {
                     )}
 
                     {/* Invest South/West */}
-                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-invest-sw" className={incMeta.hiddenCls('invest-sw', naIncOpen)} style={{ order: incMeta.order('invest-sw') }}
+                    <IncentiveCard variant={"hybrid"} id="print-section-invest-sw" className={incMeta.hiddenCls('invest-sw', naIncOpen)} style={{ order: incMeta.order('invest-sw') }}
                       state={incMeta.state('invest-sw') === 0 ? "good" : incMeta.state('invest-sw') === 1 ? "caution" : "na"}
                       name="Invest South/West" type="Grant" pill_label={incMeta.badge('invest-sw')}
                       verdict={investSwEligible
@@ -9207,7 +9209,7 @@ export default function RunDetail() {
 
                     {/* SBA HUBZone */}
                     {isCommercialProjectType && (
-                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-hubzone" className={incMeta.hiddenCls('hubzone', naIncOpen)} style={{ order: incMeta.order('hubzone') }}
+                    <IncentiveCard variant={"hybrid"} id="print-section-hubzone" className={incMeta.hiddenCls('hubzone', naIncOpen)} style={{ order: incMeta.order('hubzone') }}
                       state={incMeta.state('hubzone') === 0 ? "good" : incMeta.state('hubzone') === 1 ? "caution" : "na"}
                       name="SBA HUBZone" type="Program" pill_label={incMeta.badge('hubzone')}
                       verdict={<span data-testid="text-hubzone-status">{isLoadingHubzone ? 'Checking HUBZone status…' : hubzoneData?.eligible ? 'This property is in an SBA HUBZone' : 'This property is not in an SBA HUBZone'}</span>}
@@ -9241,7 +9243,7 @@ export default function RunDetail() {
 
                     {/* HUD Qualified Census Tract (QCT) */}
                     {!isCommercialProjectType && (
-                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-qct" className={incMeta.hiddenCls('qct', naIncOpen)} style={{ order: incMeta.order('qct') }}
+                    <IncentiveCard variant={"hybrid"} id="print-section-qct" className={incMeta.hiddenCls('qct', naIncOpen)} style={{ order: incMeta.order('qct') }}
                       state={incMeta.state('qct') === 0 ? "good" : incMeta.state('qct') === 1 ? "caution" : "na"}
                       name="LIHTC Qualified Census Tract (QCT)" type="Tax Credit" pill_label={incMeta.badge('qct')}
                       verdict={<span data-testid="text-qct-status">{isLoadingQct ? 'Checking QCT status…' : qctData?.eligible ? 'This property is in a Qualified Census Tract' : 'This property is not in a Qualified Census Tract'}</span>}
@@ -9272,7 +9274,7 @@ export default function RunDetail() {
 
                     {/* CHA Opportunity Area */}
                     {!isCommercialProjectType && (
-                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-cha-opportunity" className={incMeta.hiddenCls('cha-opportunity', naIncOpen)} style={{ order: incMeta.order('cha-opportunity') }}
+                    <IncentiveCard variant={"hybrid"} id="print-section-cha-opportunity" className={incMeta.hiddenCls('cha-opportunity', naIncOpen)} style={{ order: incMeta.order('cha-opportunity') }}
                       state={incMeta.state('cha-opportunity') === 0 ? "good" : incMeta.state('cha-opportunity') === 1 ? "caution" : "na"}
                       name="CHA Opportunity Area" type="Program" pill_label={incMeta.badge('cha-opportunity')}
                       verdict={<span data-testid="text-cha-opportunity-status">{isLoadingChaOpportunity ? 'Checking CHA Opportunity Area status…' : chaOpportunityData?.isOpportunityArea ? 'This census tract is a CHA Opportunity Area' : 'This census tract is not a CHA Opportunity Area'}</span>}
@@ -9309,7 +9311,7 @@ export default function RunDetail() {
                       const zoningUp = facts?.zoning?.toUpperCase() ?? '';
                       const class6bEligible = zoningUp.startsWith('M') || zoningUp.startsWith('PMD');
                       return (
-                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-class6b" className={incMeta.hiddenCls('class6b', naIncOpen)} style={{ order: incMeta.order('class6b') }}
+                      <IncentiveCard variant={"hybrid"} id="print-section-class6b" className={incMeta.hiddenCls('class6b', naIncOpen)} style={{ order: incMeta.order('class6b') }}
                         state={incMeta.state('class6b') === 0 ? "good" : incMeta.state('class6b') === 1 ? "caution" : "na"}
                         name="Class 6(b) Industrial Tax Incentive" type="Property Tax" pill_label={incMeta.badge('class6b')}
                         verdict={<span data-testid="text-class6b-status">{class6bEligible
@@ -9354,7 +9356,7 @@ export default function RunDetail() {
                       if (inTif) qualifyingZones.push(`TIF: ${tifDistrictName}`);
                       if (inEnterpriseZone) qualifyingZones.push('Enterprise Zone');
                       return (
-                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-class7" className={incMeta.hiddenCls('class7', naIncOpen)} style={{ order: incMeta.order('class7') }}
+                      <IncentiveCard variant={"hybrid"} id="print-section-class7" className={incMeta.hiddenCls('class7', naIncOpen)} style={{ order: incMeta.order('class7') }}
                         state={incMeta.state('class7') === 0 ? "good" : incMeta.state('class7') === 1 ? "caution" : "na"}
                         name="Class 7(a)/(b) Commercial Tax Incentive" type="Property Tax" pill_label={incMeta.badge('class7')}
                         verdict={<span data-testid="text-class7-status">{class7Eligible
@@ -9481,7 +9483,7 @@ export default function RunDetail() {
                       ];
 
                       return (
-                      <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-cdg" className={incMeta.hiddenCls('cdg', naIncOpen)} style={{ order: incMeta.order('cdg') }}
+                      <IncentiveCard variant={"hybrid"} id="print-section-cdg" className={incMeta.hiddenCls('cdg', naIncOpen)} style={{ order: incMeta.order('cdg') }}
                         state={incMeta.state('cdg') === 0 ? "good" : incMeta.state('cdg') === 1 ? "caution" : "na"}
                         name="Community Development Grant (CDG)" type="Grant" pill_label={incMeta.badge('cdg')}
                         verdict={<span data-testid="text-cdg-status">{cdgEligible
@@ -9575,11 +9577,11 @@ export default function RunDetail() {
                       naOpen={naIncOpen}
                       likelyOpen={likelyIncOpen}
                       confirmOpen={confirmIncOpen}
-                      variant={hybridInc ? "hybrid" : "current"}
+                      variant={"hybrid"}
                     />
 
                     {/* ADU (Accessory Dwelling Unit) Eligibility */}
-                    <IncentiveCard variant={hybridInc ? "hybrid" : "current"} id="print-section-adu" className={incMeta.hiddenCls('adu', naIncOpen)} style={{ order: incMeta.order('adu') }}
+                    <IncentiveCard variant={"hybrid"} id="print-section-adu" className={incMeta.hiddenCls('adu', naIncOpen)} style={{ order: incMeta.order('adu') }}
                       state={incMeta.state('adu') === 0 ? "good" : incMeta.state('adu') === 1 ? "caution" : "na"}
                       name="Accessory Dwelling Unit (ADU) Eligibility" type="Zoning" pill_label={incMeta.badge('adu')}
                       verdict={<span data-testid="text-adu-status">{facts?.aduZone === 'Zoning-Eligible'
@@ -15007,11 +15009,13 @@ export default function RunDetail() {
           </AccordionSection>
 
           <AccordionSection {...accProps("newBusinessLicenses")}>
-            <NewBusinessLicensesSection
-              data={nearbyLicensesData}
-              isLoading={isLoadingNearbyLicenses}
-              isError={isErrorNearbyLicenses}
-            />
+            <div id="section-new-business-licenses">
+              <NewBusinessLicensesSection
+                data={nearbyLicensesData}
+                isLoading={isLoadingNearbyLicenses}
+                isError={isErrorNearbyLicenses}
+              />
+            </div>
           </AccordionSection>
 
           <AccordionSection {...accProps("crime")}>
@@ -15183,8 +15187,7 @@ export default function RunDetail() {
                       return (
                         <div id="transit-glance" data-testid="transit-glance">
                           <KypSubhead className="fam-indigo" subsection={transitSubsections.glance} style={{marginTop:6}}><span className="lbl">Closest Mode of Transport</span><span className="rule"/></KypSubhead>
-                          {hybridInc ? (
-                          <div className="kyp-modes">
+                          {<div className="kyp-modes">
                             {/* Bus */}
                             <div className="kyp-mtile" data-testid="glance-mode-bus">
                               {busStops.length ? (
@@ -15249,87 +15252,7 @@ export default function RunDetail() {
                                 <div className="kyp-mtbody"><div className="kyp-mth">Metra</div><div className="kyp-mts">No Metra stations within 2 mi</div></div>
                               )}
                             </div>
-                          </div>
-                          ) : (
-                          <div className="tz-modes">
-                            {/* Bus */}
-                            <div className="tz-mode" data-testid="glance-mode-bus">
-                              <div className="top">
-                                <span className="ic"><Bus className="w-3.5 h-3.5" /></span>
-                                <span className="ml">CTA Bus</span>
-                              </div>
-                              {busStops.length ? (
-                                <>
-                                  {busStops.slice(0, 2).map((s, i) => (
-                                    <div key={i} className="tz-rrow">
-                                      <span className="main">
-                                        <span className="nm">{String(s.routes?.[0] ?? '').match(/^X?\d+[A-Z]?/i)?.[0] ?? s.routes?.[0]}{dirChip(s.direction)}</span>
-                                      </span>
-                                      <span className="w">{wm(s.distance)}<small> min walk</small></span>
-                                    </div>
-                                  ))}
-                                  <div className="extra">
-                                    {coversBoth
-                                      ? <>Covers both <b>N–S &amp; E–W</b> travel</>
-                                      : <>{busStops.length} route{busStops.length !== 1 ? 's' : ''} within ½ mi</>}
-                                  </div>
-                                </>
-                              ) : (
-                                <div className="extra">No routes within ½ mi</div>
-                              )}
-                            </div>
-                            {/* CTA L */}
-                            <div className="tz-mode" data-testid="glance-mode-rail">
-                              <div className="top">
-                                <span className="ic"><Train className="w-3.5 h-3.5" /></span>
-                                <span className="ml">CTA L</span>
-                              </div>
-                              {nearestRail ? (
-                                <>
-                                  <div className="tz-rrow">
-                                    <span className="main">
-                                      <span className="nm">{nearestRail.stopName.split(/[-/]/)[0].trim()}</span>
-                                      <span className="lines">
-                                        {nearestRail.routes.map((r, ri) => (
-                                          <span key={ri} className="tz-lb" style={{ background: getRouteHexColors([r])[0] }}>{r.replace(/ Line$/i, '')} Line</span>
-                                        ))}
-                                      </span>
-                                    </span>
-                                    <span className="w">{wm(nearestRail.distance)}<small> min walk</small></span>
-                                  </div>
-                                  <div className="extra">{Number(nearestRail.distance).toFixed(2)} mi · nearest of {transitData.ctaRail.length} station{transitData.ctaRail.length !== 1 ? 's' : ''} within 2 mi</div>
-                                </>
-                              ) : (
-                                <div className="extra">No L stations within 2 mi</div>
-                              )}
-                            </div>
-                            {/* Metra */}
-                            <div className="tz-mode" data-testid="glance-mode-metra">
-                              <div className="top">
-                                <span className="ic"><Train className="w-3.5 h-3.5" /></span>
-                                <span className="ml">Metra</span>
-                              </div>
-                              {nearestMetra ? (
-                                <>
-                                  <div className="tz-rrow">
-                                    <span className="main">
-                                      <span className="nm">{nearestMetra.stopName}</span>
-                                      <span className="lines">
-                                        {nearestMetra.routes.map((r: string, ri: number) => (
-                                          <span key={ri} className="tz-lb" style={{ background: getMetraRouteHex(r) }}>{r}</span>
-                                        ))}
-                                      </span>
-                                    </span>
-                                    <span className="w">{wm(nearestMetra.distance)}<small> min walk</small></span>
-                                  </div>
-                                  <div className="extra">{Number(nearestMetra.distance).toFixed(2)} mi · nearest of {transitData.metra.length} station{transitData.metra.length !== 1 ? 's' : ''} within 2 mi</div>
-                                </>
-                              ) : (
-                                <div className="extra">No Metra stations within 2 mi</div>
-                              )}
-                            </div>
-                          </div>
-                          )}
+                          </div>}
                         </div>
                       );
                     })()}
@@ -15340,7 +15263,6 @@ export default function RunDetail() {
                           <div className="mt-2">
                             <div className="space-y-1">
                               {transitData.ctaRail.map((stop, idx) => (
-                                hybridInc ? (
                                 <div key={idx} className="kyp-row" data-testid={`rail-station-row-${idx}`}>
                                   <span className="kyp-rbar" style={{ background: getRouteHexColors([stop.routes[0]])[0] }} />
                                   <span className="kyp-rn kyp-station-lines">
@@ -15354,18 +15276,6 @@ export default function RunDetail() {
                                   </span>
                                   <span className="kyp-rd">{stop.distance} mi</span>
                                 </div>
-                                ) : (
-                                <div key={idx} className="transit-station-row rail-multiline" data-testid={`rail-station-row-${idx}`}>
-                                  <span className="transit-name">{stop.stopName}</span>
-                                  <span className="kyp-route-pills">
-                                    {stop.routes.map((r, ri) => {
-                                      const color = getRouteHexColors([r])[0];
-                                       return <span key={ri} className="transit-line-pill" style={{ background: color }}>{r}</span>;
-                                    })}
-                                  </span>
-                                  <span className="transit-distance">{stop.distance} mi</span>
-                                </div>
-                                )
                               ))}
                             </div>
                           </div>
@@ -15390,8 +15300,7 @@ export default function RunDetail() {
                                     || (Array.isArray(station.routes) && station.routes.length ? station.routes : []);
                                   return (
                                   <div key={sIdx} className="space-y-3">
-                                    {hybridInc ? (
-                                    <div className="kyp-rhead">
+                                    {<div className="kyp-rhead">
                                       <span className="kyp-rname" data-testid={`badge-ridership-station-${sIdx}`}>{station.stationName}</span>
                                       {stationRoutes.map((r: string, ri: number) => (
                                          <span key={ri} className="kyp-linepill" style={{ background: getRouteHexColors([r])[0] }}>{r}</span>
@@ -15404,30 +15313,9 @@ export default function RunDetail() {
                                           {station.trendPct >= 0 ? '▲' : '▼'} {Math.abs(station.trendPct)}% · 3-yr
                                         </span>
                                       )}
-                                    </div>
-                                    ) : (
-                                    <div className="tz-rhead">
-                                      <span className="transit-rname" data-testid={`badge-ridership-station-${sIdx}`}>
-                                        {station.stationName}
-                                      </span>
-                                      {stationRoutes.map((r: string, ri: number) => (
-                                         <span key={ri} className="transit-line-pill" style={{ background: getRouteHexColors([r])[0] }}>{r}</span>
-                                      ))}
-                                      {station.weekdayRank > 0 && (
-                                        <span className="tz-rank" data-testid={`badge-ridership-rank-${sIdx}`}>
-                                          #{station.weekdayRank} of {station.totalStationsRanked} stations
-                                        </span>
-                                      )}
-                                      {station.trendPct !== null && (
-                                        <span className={`tz-trendp ${station.trendPct >= 0 ? 'up' : 'down'}`} data-testid={`badge-ridership-trend-${sIdx}`}>
-                                          {station.trendPct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                                          {station.trendPct >= 0 ? '+' : ''}{station.trendPct}% · 3-yr
-                                        </span>
-                                      )}
-                                    </div>
-                                    )}
+                                    </div>}
 
-                                    {station.latest && (hybridInc ? (() => {
+                                    {station.latest && ((() => {
                                       const wd = station.latest.weekday, sa = station.latest.saturday, su = station.latest.sunday;
                                       const h = (n: number) => `${Math.max(6, Math.round((n / Math.max(wd, 1)) * 100))}%`;
                                       return (
@@ -15443,13 +15331,7 @@ export default function RunDetail() {
                                           <div className="kyp-dlab"><span>Weekday</span><span>Sat</span><span>Sun/Hol</span></div>
                                         </div>
                                       );
-                                    })() : (
-                                      <div className="tz-kpis">
-                                        <div className="tz-kpi" data-testid={`card-ridership-weekday-${sIdx}`}><div><div className="l">Avg Weekday</div><div className="s">entries/day</div></div><div className="n">{station.latest.weekday.toLocaleString()}</div></div>
-                                        <div className="tz-kpi" data-testid={`card-ridership-saturday-${sIdx}`}><div><div className="l">Avg Saturday</div><div className="s">entries/day</div></div><div className="n">{station.latest.saturday.toLocaleString()}</div></div>
-                                        <div className="tz-kpi" data-testid={`card-ridership-sunday-${sIdx}`}><div><div className="l">Avg Sun/Hol</div><div className="s">entries/day</div></div><div className="n">{station.latest.sunday.toLocaleString()}</div></div>
-                                      </div>
-                                    ))}
+                                    })())}
 
                                     {ctaRidershipData.systemStats && station.latest && (() => {
                                       // Single linear scale drives marker, ticks AND labels — never hardcode axis values.
@@ -15461,7 +15343,7 @@ export default function RunDetail() {
                                       const pctile = station.weekdayRank > 0 && station.totalStationsRanked > 0
                                         ? Math.round(((station.totalStationsRanked - station.weekdayRank) / station.totalStationsRanked) * 100) : null;
                                       const tier = pctile == null ? null : pctile > 70 ? 'Strong' : pctile >= 30 ? 'Moderate' : 'Limited';
-                                      if (hybridInc) return (
+                                      return (
                                         <div className="kyp-cmp" data-testid={`cmp-ridership-${sIdx}`}>
                                           <div className="kyp-cmptop">
                                             <span className="kyp-cmplab">vs. all {station.totalStationsRanked || ''} L stations · weekday avg</span>
@@ -15523,11 +15405,7 @@ export default function RunDetail() {
                                   const stationColors = allStations.map((s: any) => getStationLineColor(s.stationId).hex);
                                   return (
                                     <div className="space-y-2 pt-2">
-                                      {hybridInc ? (
-                                        <div className="kyp-charttitle">Weekday trend · 36 months</div>
-                                      ) : (
-                                        <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Weekday Ridership Trend (36 Months)</p>
-                                      )}
+                                      {<div className="kyp-charttitle">Weekday trend · 36 months</div>}
                                       <div className="h-52 w-full" data-testid="chart-l-ridership-trend">
                                         <ResponsiveContainer width="100%" height="100%">
                                           <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -15553,18 +15431,9 @@ export default function RunDetail() {
                                   );
                                 })()}
 
-                                {hybridInc ? (
-                                  <div className="kyp-src">
+                                {<div className="kyp-src">
                                     Source: CTA L Station Entries, City of Chicago Data Portal. Data as of {ctaRidershipData.systemStats?.latestMonth}. Trend based on 36-month comparison.
-                                  </div>
-                                ) : (
-                                <div className="text-xs text-muted-foreground pt-2 border-t flex items-start gap-1">
-                                  <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                  <span>
-                                    Source: CTA L Station Entries, City of Chicago Data Portal. Data as of {ctaRidershipData.systemStats?.latestMonth}. Trend based on 36-month comparison.
-                                  </span>
-                                </div>
-                                )}
+                                  </div>}
                               </div>
                             ) : (
                               <p className="text-sm text-muted-foreground">
@@ -15582,7 +15451,6 @@ export default function RunDetail() {
                           <div className="mt-2">
                             <div className="space-y-1">
                               {transitData.metra.map((stop, idx) => (
-                                hybridInc ? (
                                 <div key={idx} className="kyp-row">
                                   <span className="kyp-rbar" style={{ background: getMetraRouteHex(stop.routes[0]) }} />
                                   <span className="kyp-rn kyp-station-lines">
@@ -15596,18 +15464,6 @@ export default function RunDetail() {
                                   </span>
                                   <span className="kyp-rd">{stop.distance} mi</span>
                                 </div>
-                                ) : (
-                                <div key={idx} className="transit-station-row rail-multiline">
-                                  <span className="transit-name">{stop.stopName}</span>
-                                  <span className="kyp-route-pills">
-                                    {stop.routes.map((r: string, ri: number) => {
-                                      const color = getMetraRouteHex(r);
-                                      return <span key={ri} className="transit-line-pill" style={{ background: color }}>{r}</span>;
-                                    })}
-                                  </span>
-                                  <span className="transit-distance">{stop.distance} mi</span>
-                                </div>
-                                )
                               ))}
                             </div>
                           </div>
@@ -15669,7 +15525,7 @@ export default function RunDetail() {
                                       const stationLines = (s.routes || []).filter((r: string) => lineByName.has(r));
                                       if (stationLines.length === 0) return null;
                                       const sZone = zoneFor(s);
-                                      if (hybridInc) return (
+                                      return (
                                         <div key={si} className="kyp-mcard" data-testid={`metra-line-station-${si}`}>
                                           <div className="kyp-mctop">
                                             <span className="kyp-rname" style={{ fontSize: 15 }}>{s.stopName}</span>
@@ -15720,11 +15576,7 @@ export default function RunDetail() {
                                   </div>
 
                                   <div className="space-y-2 pt-1">
-                                    {hybridInc ? (
-                                      <div className="kyp-charttitle">Monthly line ridership · 24 months, through {latestLabel}</div>
-                                    ) : (
-                                      <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Monthly Line Ridership (24 Months, through {latestLabel})</p>
-                                    )}
+                                    {<div className="kyp-charttitle">Monthly line ridership · 24 months, through {latestLabel}</div>}
                                     <div className="h-52 w-full" data-testid="chart-metra-line-ridership">
                                       <ResponsiveContainer width="100%" height="100%">
                                         <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -15745,26 +15597,12 @@ export default function RunDetail() {
                                     </div>
                                   </div>
 
-                                  {zoneFlowNote && (hybridInc ? (
-                                    <div className="kyp-zone" data-testid="text-metra-zone-flows">{zoneFlowNote}</div>
-                                  ) : (
-                                    <p className="text-xs" style={{ color: '#565651' }} data-testid="text-metra-zone-flows">{zoneFlowNote}</p>
-                                  ))}
+                                  {zoneFlowNote && (<div className="kyp-zone" data-testid="text-metra-zone-flows">{zoneFlowNote}</div>)}
 
-                                  {hybridInc ? (
-                                    <div className="kyp-src">
+                                  {<div className="kyp-src">
                                       Source: RTAMS Metra Monthly Ridership by Line / by Fare Zone, updated through {latestLabel}. Metra reports ridership at the line level only — figures are total monthly rides for each line, not boardings at an individual station. Dataset at{' '}
                                       <a href={metraLineData.meta.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">rtams.org</a>.
-                                    </div>
-                                  ) : (
-                                  <div className="text-xs text-muted-foreground pt-2 border-t flex items-start gap-1">
-                                    <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                    <span>
-                                      Source: RTAMS Metra Monthly Ridership by Line / by Fare Zone, updated through {latestLabel}. Metra reports ridership at the line level only — figures are total monthly rides for each line, not boardings at an individual station. Dataset at{' '}
-                                      <a href={metraLineData.meta.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline text-[#2b3a9e]">rtams.org</a>.
-                                    </span>
-                                  </div>
-                                  )}
+                                    </div>}
                                 </div>
                               );
                             })()}
@@ -15775,8 +15613,7 @@ export default function RunDetail() {
                               </div>
                             ) : metraRidershipData ? (
                               <div className="space-y-4">
-                                {hybridInc ? (
-                                  <>
+                                {<>
                                     {metraLineData && (
                                       <div className="kyp-title" style={{ fontSize: 14 }}>Station-level detail <span style={{ fontWeight: 400, color: 'var(--kyp-ink2)' }}>· {metraRidershipData.surveyYear} survey — last station-level count Metra conducted</span></div>
                                     )}
@@ -15801,41 +15638,7 @@ export default function RunDetail() {
                                         <div className="kyp-block grn" data-testid="card-metra-ridership-2006"><div className="bv">{metraRidershipData.boards2006.toLocaleString()}</div><div><div className="bl">2006 baseline</div><div className="bd">boardings/day</div></div></div>
                                       )}
                                     </div>
-                                  </>
-                                ) : (
-                                <>
-                                {metraLineData && (
-                                  <p className="text-xs pt-1" style={{ color: '#565651', fontWeight: 600 }}>Station-Level Detail (2018 survey — last station-level count Metra conducted)</p>
-                                )}
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <Badge variant="outline" className="text-xs" data-testid="badge-metra-ridership-station">
-                                    {metraRidershipData.stationName}
-                                  </Badge>
-                                  {metraRidershipData.rank > 0 && (
-                                    <Badge variant={metraRidershipData.rank <= 40 ? 'default' : 'secondary'} className="text-xs" data-testid="badge-metra-ridership-rank">
-                                      #{metraRidershipData.rank} of {metraRidershipData.totalStations} stations
-                                    </Badge>
-                                  )}
-                                  {metraRidershipData.boards2016 != null && metraRidershipData.boards2016 > 0 && (() => {
-                                    const pct = Math.round(((metraRidershipData.boards2018 - metraRidershipData.boards2016) / metraRidershipData.boards2016) * 1000) / 10;
-                                    return (
-                                      <Badge className="text-xs flex items-center gap-1 border-0" style={pct >= 0 ? { background: '#edf6ef', color: '#2f7d3f' } : { background: '#fbecea', color: '#b3311f' }} data-testid="badge-metra-ridership-trend">
-                                        {pct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                                        {pct >= 0 ? '+' : ''}{pct}% since 2016
-                                      </Badge>
-                                    );
-                                  })()}
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                  <StatTile label="DAILY BOARDINGS" qualifier={`avg weekday, ${metraRidershipData.surveyYear} survey`} value={metraRidershipData.boards2018.toLocaleString()} data-testid="card-metra-ridership-boardings" />
-                                  <StatTile label="STATION RANK" qualifier={`of ${metraRidershipData.totalStations} Metra stations`} value={`#${metraRidershipData.rank}`} data-testid="card-metra-ridership-rank" />
-                                  {metraRidershipData.boards2006 != null && metraRidershipData.boards2006 > 0 && (
-                                    <StatTile label="2006 BASELINE" qualifier="boardings/day in 2006" value={metraRidershipData.boards2006.toLocaleString()} data-testid="card-metra-ridership-2006" />
-                                  )}
-                                </div>
-                                </>
-                                )}
+                                  </>}
 
                                 {(() => {
                                   const points = ([
@@ -15847,11 +15650,7 @@ export default function RunDetail() {
                                   if (points.length < 2) return null;
                                   return (
                                     <div className="space-y-2 pt-2">
-                                      {hybridInc ? (
-                                        <div className="kyp-charttitle">Survey-year boardings trend</div>
-                                      ) : (
-                                        <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Survey-Year Boardings Trend</p>
-                                      )}
+                                      {<div className="kyp-charttitle">Survey-year boardings trend</div>}
                                       <div className="h-40 w-full" data-testid="chart-metra-ridership-trend">
                                         <ResponsiveContainer width="100%" height="100%">
                                           <LineChart data={points} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -15871,20 +15670,10 @@ export default function RunDetail() {
                                   );
                                 })()}
 
-                                {hybridInc ? (
-                                  <div className="kyp-src">
+                                {<div className="kyp-src">
                                     Source: RTAMS Metra Boarding &amp; Alighting Survey ({metraRidershipData.surveyYear}) · station-level boardings for {metraRidershipData.stationName}. Latest systemwide reports at{' '}
                                     <a href="https://metra.com/ridership-and-on-time-performance" target="_blank" rel="noopener noreferrer" className="underline">metra.com</a>.
-                                  </div>
-                                ) : (
-                                <div className="text-xs text-muted-foreground pt-2 border-t flex items-start gap-1">
-                                  <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                  <span>
-                                    Source: RTAMS Metra Boarding &amp; Alighting Survey ({metraRidershipData.surveyYear}) · station-level boardings for {metraRidershipData.stationName}. Latest systemwide reports at{' '}
-                                    <a href="https://metra.com/ridership-and-on-time-performance" target="_blank" rel="noopener noreferrer" className="underline text-[#2b3a9e]">metra.com</a>.
-                                  </span>
-                                </div>
-                                )}
+                                  </div>}
                               </div>
                             ) : !metraLineData ? (
                               <p className="text-sm text-muted-foreground">No ridership data available for {nearestMetraStopName}.</p>
@@ -15901,19 +15690,11 @@ export default function RunDetail() {
                           <div className="px-4 mt-2">
                             <div className="space-y-1">
                               {transitData.ctaBus.map((stop, idx) => (
-                                hybridInc ? (
                                 <div key={idx} className="kyp-row">
                                   <span className="kyp-rbar" style={{ background: "var(--kyp-indigo)" }} />
                                   <span className="kyp-rn">{stop.routes[0] || stop.stopName} <span style={{ fontWeight: 400, color: "var(--kyp-ink2)" }}>at {stop.stopName}</span></span>
                                   <span className="kyp-rd">{stop.distance} mi</span>
                                 </div>
-                                ) : (
-                                <div key={idx} className="transit-station-row">
-                                  <span className="transit-name">{stop.routes[0] || stop.stopName}</span>
-                                  <span className="text-sm text-muted-foreground">at {stop.stopName}</span>
-                                  <span className="transit-distance">{stop.distance} mi</span>
-                                </div>
-                                )
                               ))}
                             </div>
                           </div>
@@ -15935,8 +15716,7 @@ export default function RunDetail() {
                               <div className="space-y-4">
                                 {ctaBusRidershipData.routes.map((route: any, rIdx: number) => (
                                   <div key={rIdx} className="space-y-3">
-                                    {hybridInc ? (
-                                    <div className="kyp-rhead">
+                                    {<div className="kyp-rhead">
                                       <span className="kyp-rname" data-testid={`badge-bus-ridership-route-${rIdx}`}>#{route.route} {route.routeName}</span>
                                       {route.weekdayRank > 0 && (
                                         <span className="kyp-rank" data-testid={`badge-bus-ridership-rank-${rIdx}`}>#{route.weekdayRank} / {route.totalRoutesRanked}</span>
@@ -15946,27 +15726,9 @@ export default function RunDetail() {
                                           {route.trendPct >= 0 ? '▲' : '▼'} {Math.abs(route.trendPct)}% · 3-yr
                                         </span>
                                       )}
-                                    </div>
-                                    ) : (
-                                    <div className="tz-rhead">
-                                      <span className="tz-route" data-testid={`badge-bus-ridership-route-${rIdx}`}>
-                                        {route.route} {route.routeName}
-                                      </span>
-                                      {route.weekdayRank > 0 && (
-                                        <span className="tz-rank" data-testid={`badge-bus-ridership-rank-${rIdx}`}>
-                                          #{route.weekdayRank} of {route.totalRoutesRanked} routes
-                                        </span>
-                                      )}
-                                      {route.trendPct !== null && (
-                                        <span className={`tz-trendp ${route.trendPct >= 0 ? 'up' : 'down'}`} data-testid={`badge-bus-ridership-trend-${rIdx}`}>
-                                          {route.trendPct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                                          {route.trendPct >= 0 ? '+' : ''}{route.trendPct}% · 3-yr
-                                        </span>
-                                      )}
-                                    </div>
-                                    )}
+                                    </div>}
 
-                                    {route.latest && (hybridInc ? (() => {
+                                    {route.latest && ((() => {
                                       const wd = Math.round(route.latest.weekday), sa = Math.round(route.latest.saturday), su = Math.round(route.latest.sunday);
                                       const h = (n: number) => `${Math.max(6, Math.round((n / Math.max(wd, 1)) * 100))}%`;
                                       return (
@@ -15982,13 +15744,7 @@ export default function RunDetail() {
                                           <div className="kyp-dlab"><span>Weekday</span><span>Sat</span><span>Sun/Hol</span></div>
                                         </div>
                                       );
-                                    })() : (
-                                      <div className="tz-kpis">
-                                        <div className="tz-kpi" data-testid={`card-bus-ridership-weekday-${rIdx}`}><div><div className="l">Avg Weekday</div><div className="s">riders/day</div></div><div className="n">{Math.round(route.latest.weekday).toLocaleString()}</div></div>
-                                        <div className="tz-kpi" data-testid={`card-bus-ridership-saturday-${rIdx}`}><div><div className="l">Avg Saturday</div><div className="s">riders/day</div></div><div className="n">{Math.round(route.latest.saturday).toLocaleString()}</div></div>
-                                        <div className="tz-kpi" data-testid={`card-bus-ridership-sunday-${rIdx}`}><div><div className="l">Avg Sun/Hol</div><div className="s">riders/day</div></div><div className="n">{Math.round(route.latest.sunday).toLocaleString()}</div></div>
-                                      </div>
-                                    ))}
+                                    })())}
 
                                     {ctaBusRidershipData.systemStats && route.latest && (() => {
                                       // Single linear scale drives marker, ticks AND labels.
@@ -16000,7 +15756,7 @@ export default function RunDetail() {
                                       const pctile = route.weekdayRank > 0 && route.totalRoutesRanked > 0
                                         ? Math.round(((route.totalRoutesRanked - route.weekdayRank) / route.totalRoutesRanked) * 100) : null;
                                       const tier = pctile == null ? null : pctile > 70 ? 'Strong' : pctile >= 30 ? 'Moderate' : 'Limited';
-                                      if (hybridInc) return (
+                                      return (
                                         <div className="kyp-cmp" data-testid={`cmp-bus-ridership-${rIdx}`}>
                                           <div className="kyp-cmptop">
                                             <span className="kyp-cmplab">vs. all {route.totalRoutesRanked || ''} bus routes · weekday avg</span>
@@ -16062,11 +15818,7 @@ export default function RunDetail() {
                                   const lineColors = ['#2b3a9e', '#93a0da'];
                                   return (
                                     <div className="space-y-2 pt-2">
-                                      {hybridInc ? (
-                                        <div className="kyp-charttitle">Weekday trend · 36 months</div>
-                                      ) : (
-                                        <p className="text-xs" style={{ color: '#565651', fontWeight: 600 }}>Weekday Ridership Trend (36 Months)</p>
-                                      )}
+                                      {<div className="kyp-charttitle">Weekday trend · 36 months</div>}
                                       <div className="h-52 w-full" data-testid="chart-bus-ridership-trend">
                                         <ResponsiveContainer width="100%" height="100%">
                                           <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -16093,18 +15845,9 @@ export default function RunDetail() {
                                   );
                                 })()}
 
-                                {hybridInc ? (
-                                  <div className="kyp-src">
+                                {<div className="kyp-src">
                                     Source: CTA Bus Ridership, City of Chicago Data Portal. Data as of {ctaBusRidershipData.systemStats?.latestMonth}. Ridership is total route-wide boardings, not specific to any individual bus stop. Trend based on 36-month comparison.
-                                  </div>
-                                ) : (
-                                <div className="text-xs text-muted-foreground pt-2 border-t flex items-start gap-1">
-                                  <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                  <span>
-                                    Source: CTA Bus Ridership, City of Chicago Data Portal. Data as of {ctaBusRidershipData.systemStats?.latestMonth}. Ridership is total route-wide boardings, not specific to any individual bus stop. Trend based on 36-month comparison.
-                                  </span>
-                                </div>
-                                )}
+                                  </div>}
                               </div>
                             ) : (
                               <p className="text-sm text-muted-foreground">
@@ -16129,65 +15872,33 @@ export default function RunDetail() {
                             ) : trafficData ? (
                               <div className="space-y-4">
                                 {/* Segment info */}
-                                {hybridInc ? (
-                                <div>
+                                {<div>
                                   <div className="kyp-title" style={{ fontSize: 15 }}>{trafficData.roadName} ({trafficData.direction}) — {trafficData.fromSegment} to {trafficData.toSegment}</div>
                                   <div style={{ fontFamily: "var(--kyp-sans)", fontSize: 12, color: "var(--kyp-ink2)", marginTop: -8 }}>Nearest monitored segment · {trafficData.distanceFt < 5280 ? `${trafficData.distanceFt.toLocaleString()} ft away` : `${(trafficData.distanceFt / 5280).toFixed(2)} mi away`}</div>
-                                </div>
-                                ) : (
-                                <div>
-                                  <p className="text-sm font-medium">{trafficData.roadName} ({trafficData.direction}) — {trafficData.fromSegment} to {trafficData.toSegment}</p>
-                                  <p className="text-xs text-muted-foreground mt-0.5">Nearest monitored segment · {trafficData.distanceFt < 5280 ? `${trafficData.distanceFt.toLocaleString()} ft away` : `${(trafficData.distanceFt / 5280).toFixed(2)} mi away`}</p>
-                                </div>
-                                )}
+                                </div>}
 
                                 {/* Key stats */}
-                                {hybridInc ? (
-                                <div className="kyp-blocks">
+                                {<div className="kyp-blocks">
                                   <div className="kyp-block ind" data-testid="card-traffic-daily"><div className="bv">{trafficData.latestCount.toLocaleString()}</div><div><div className="bl">Daily vehicles</div><div className="bd">vehicles/day</div></div></div>
                                   <div className="kyp-block dark" data-testid="card-traffic-rank"><div className="bv">#{trafficData.cityRank > 0 ? trafficData.cityRank.toLocaleString() : '—'}</div><div><div className="bl">City rank</div><div className="bd">of {trafficData.cityTotal.toLocaleString()} segments</div></div></div>
                                   <div className="kyp-block grn" data-testid="card-traffic-percentile"><div className="bv">{trafficData.percentile > 0 ? <>{trafficData.percentile}<span style={{ fontSize: 18 }}>th</span></> : '—'}</div><div><div className="bl">Percentile</div><div className="bd">busier than {trafficData.percentile}%</div></div></div>
-                                </div>
-                                ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                  <StatTile label="DAILY VEHICLES" qualifier="vehicles/day" value={trafficData.latestCount.toLocaleString()} data-testid="card-traffic-daily" />
-                                  <StatTile label="CITY RANK" qualifier={`of ${trafficData.cityTotal.toLocaleString()} segments`} value={`#${trafficData.cityRank > 0 ? trafficData.cityRank.toLocaleString() : '—'}`} data-testid="card-traffic-rank" />
-                                  <StatTile label="PERCENTILE" qualifier={`busier than ${trafficData.percentile}% of city`} value={trafficData.percentile > 0 ? `${trafficData.percentile}th` : '—'} data-testid="card-traffic-percentile" />
-                                </div>
-                                )}
+                                </div>}
 
                                 {/* City comparison bar — neutral positional scale: traffic volume
                                     isn't inherently good or bad (depends on the use case). */}
                                 {trafficData.cityRank > 0 && (
-                                  hybridInc ? (
                                   <div className="kyp-cmp" data-testid="cmp-traffic">
                                     <div className="kyp-cmptop"><span className="kyp-cmplab">vs. all monitored segments citywide</span></div>
                                     <div className="kyp-track"><div className="fill" style={{ width: `${Math.min(100, trafficData.percentile)}%`, background: "var(--kyp-orange)" }} />
                                       <div className="tick" style={{ left: `${Math.min(100, trafficData.percentile)}%` }}><span className="tlab">This segment</span></div></div>
                                     <div className="kyp-cap">Busier isn't better or worse — high-visibility retail wants traffic; quiet residential doesn't.</div>
                                   </div>
-                                  ) : (
-                                  <div className="tz-cmp" data-testid="cmp-traffic">
-                                    <div className="tz-cmptop">
-                                      <span className="l">vs. all monitored street segments citywide</span>
-                                    </div>
-                                    <div className="tz-track flat">
-                                      <div className="tz-mk" style={{ left: `${Math.min(100, trafficData.percentile)}%` }} />
-                                    </div>
-                                    <div className="tz-labs"><span>Quieter streets</span><b>This segment: {trafficData.percentile}th percentile</b><span>Busier streets</span></div>
-                                    <div className="tz-cap">Busier isn't better or worse — high-visibility retail wants traffic; quiet residential doesn't.</div>
-                                  </div>
-                                  )
                                 )}
 
                                 {/* Yearly trend chart */}
                                 {trafficData.yearlyAverages.length >= 2 && (
                                   <div className="space-y-2 pt-2">
-                                    {hybridInc ? (
-                                    <div className="kyp-charttitle">Annual average daily traffic</div>
-                                    ) : (
-                                    <p className="text-xs font-medium text-muted-foreground">Annual Average Daily Traffic Trend</p>
-                                    )}
+                                    {<div className="kyp-charttitle">Annual average daily traffic</div>}
                                     <div className="h-44 w-full" data-testid="chart-traffic-trend">
                                       <ResponsiveContainer width="100%" height="100%">
                                         <LineChart data={trafficData.yearlyAverages} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -16199,7 +15910,7 @@ export default function RunDetail() {
                                             labelFormatter={(label) => `Year: ${label}`}
                                             contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }}
                                           />
-                                          <Line type="monotone" dataKey="avgCount" stroke={hybridInc ? "#e07a2e" : "#3f51c5"} strokeWidth={2} dot={{ r: 3, fill: hybridInc ? "#e07a2e" : "#3f51c5" }} activeDot={{ r: 5 }} />
+                                          <Line type="monotone" dataKey="avgCount" stroke={"#e07a2e"} strokeWidth={2} dot={{ r: 3, fill: "#e07a2e" }} activeDot={{ r: 5 }} />
                                         </LineChart>
                                       </ResponsiveContainer>
                                     </div>
@@ -16446,8 +16157,8 @@ export default function RunDetail() {
               The wrapper div is a stable scroll anchor for the scan view even when no articles render. */}
           <AccordionSection {...accProps("news")}>
           <div id="section-address-news">
-          {/* Hybrid: ONE merged News section (site-specific + neighborhood). Legacy blocks below are hidden under the flag. */}
-          {hybridInc && (() => {
+          {/* Merged News section (site-specific + neighborhood). */}
+          {(() => {
             const bothLoaded = !isLoadingAddressNews && (!coParcelAddress || !isLoadingCoParcelAddressNews);
             const primaryArticles = (addressNewsData?.articles || []).map((a: any) => ({ ...a, _addressLabel: run?.address?.split(',')[0] }));
             const coArticles = coParcelAddress ? (coParcelAddressNewsData?.articles || []).map((a: any) => ({ ...a, _addressLabel: coParcelAddress.split(',')[0] })) : [];
@@ -16599,986 +16310,69 @@ export default function RunDetail() {
               </motion.div>
             );
           })()}
-          {!hybridInc && (() => {
-            const bothLoaded = !isLoadingAddressNews && (!coParcelAddress || !isLoadingCoParcelAddressNews);
-            const primaryArticles = (addressNewsData?.articles || []).map((a: any) => ({ ...a, _addressLabel: run?.address?.split(',')[0] }));
-            const coArticles = coParcelAddress ? (coParcelAddressNewsData?.articles || []).map((a: any) => ({ ...a, _addressLabel: coParcelAddress.split(',')[0] })) : [];
-            const seenUrls = new Set<string>();
-            const merged = [...primaryArticles, ...coArticles]
-              .filter(a => { if (!a.url || seenUrls.has(a.url)) return false; seenUrls.add(a.url); return true; })
-              .sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime());
-            const showLabels = coParcelAddress && coArticles.length > 0;
-            if (!bothLoaded || merged.length === 0) return null;
-            return (
-              <motion.div
-                id="print-section-address-news"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-              >
-                  <div className="pt-0">
-                        {newsTakeaway?.section && newsTakeaway.meta?.length ? (() => {
-                          // Generated layout — Standard Takeaway (meta) + tiered article cards
-                          // with report-data-first Current status verification.
-                          const genById = new Map(newsTakeaway.articles.map(a => [a.id, a]));
-                          const parcelArts = newsTakeaway.meta.filter(m => m.tier === 'parcel');
-                          const adjArts = newsTakeaway.meta.filter(m => m.tier === 'adjacent');
-                          const fmtD = (d: string) => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-                          const stateLabel: Record<string, string> = { consistent: 'consistent', appears_superseded: 'appears superseded', no_update: 'no update on file' };
-                          const renderCard = (m: NonNullable<typeof newsTakeaway>['meta'][number], idx: number) => {
-                            const g = genById.get(m.id);
-                            return (
-                              <div key={m.id} className={`art ${m.tier === 'parcel' ? 'parcel' : ''}`} data-testid={`news-card-${m.tier}-${idx}`}>
-                                <div className="arttop">
-                                  <span className={`rbadge ${m.tier === 'parcel' ? 'parcel' : 'adj'}`}>{m.tier === 'parcel' ? 'This parcel' : `Adjacent · ${m.matched_address}`}</span>
-                                  <span className="artmeta"><b>{m.source}</b>{m.date ? <> · {fmtD(m.date)}</> : null}</span>
-                                  {m.age_flag && <span className="artage">{m.age_flag}</span>}
-                                </div>
-                                <div className="arttitle"><a href={m.url} target="_blank" rel="noopener noreferrer">{m.title}</a></div>
-                                {g && (
-                                  <>
-                                    <div className="arttake"><span className="tk">Takeaway</span><span className="tx">{g.takeaway}</span></div>
-                                    <div className="artattr">{g.attribution}</div>
-                                    {g.verification && (
-                                      <div className="artverify">
-                                        <span className="vpill">
-                                          <svg viewBox="0 0 24 24" strokeWidth="2.4"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
-                                          Current status · {stateLabel[g.verification.state] || g.verification.state}
-                                        </span>
-                                        <span className="vtx">
-                                          {g.verification.text}{' '}
-                                          <a className="vlink" href={g.verification.source_anchor}>View records</a>
-                                        </span>
-                                      </div>
-                                    )}
-                                  </>
-                                )}
-                                {m.url && (
-                                  <a className="artread" href={m.url} target="_blank" rel="noopener noreferrer">
-                                    Read at {m.source} <svg viewBox="0 0 24 24" strokeWidth="2.4"><path d="M7 17L17 7M9 7h8v8"/></svg>
-                                  </a>
-                                )}
-                              </div>
-                            );
-                          };
-                          return (
-                            <div className="newswrap" data-testid="news-coverage-generated">
-                              <p className="secsub">Press that explicitly names this parcel or an immediate co-parcel — sourced from {newsTakeaway.sources_line || "Block Club Chicago, Crain's Chicago Business, The Real Deal, Chicago YIMBY, Chicago Tribune, Chicago Sun-Times"}.</p>
-                              <div className="take" data-testid="news-takeaway">
-                                <div className="take-head">
-                                  <span className="take-label">
-                                    <svg viewBox="0 0 24 24" strokeWidth="2"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 1 3.6 10.8c-.6.5-.9 1.2-1 2.2h-5.2c-.1-1-.4-1.7-1-2.2A6 6 0 0 1 12 3z"/></svg>
-                                    Takeaway
-                                  </span>
-                                </div>
-                                <div className="take-title">{newsTakeaway.section.title}</div>
-                                {newsTakeaway.section.rows.map((r, i) => (
-                                  <div key={i} className={`take-row ${r.tone}`}>
-                                    <span className="dot" />
-                                    {/* server-validated output; b-tags only */}
-                                    <span className="body" dangerouslySetInnerHTML={{ __html: r.html }} />
-                                    {r.chip && (
-                                      <a className="take-chip" href="#news-tier-parcel" onClick={(e) => { e.preventDefault(); document.getElementById('news-tier-parcel')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}>
-                                        {r.chip.label}
-                                        <svg viewBox="0 0 24 24" strokeWidth="2.4"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-                                      </a>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                              {parcelArts.length > 0 && (
-                                <>
-                                  <div className="tier" id="news-tier-parcel">
-                                    <span className="tl">This parcel · {newsTakeaway.subjectAddress || run?.address?.split(',')[0]}</span>
-                                    <span className="ct">{parcelArts.length}</span>
-                                    <span className="rule" />
-                                  </div>
-                                  <div className="arts">{parcelArts.map(renderCard)}</div>
-                                </>
-                              )}
-                              {adjArts.length > 0 && (
-                                <>
-                                  <div className="tier">
-                                    <span className="tl">Adjacent &amp; co-parcels</span>
-                                    <span className="ct">{adjArts.length}</span>
-                                    <span className="rule" />
-                                  </div>
-                                  <div className="arts">{adjArts.map(renderCard)}</div>
-                                </>
-                              )}
-                              <div className="src">Coverage summarized from original reporting; every headline links to its source. Summaries are paraphrased, not reproduced — verify current status at the linked article. Corridor-level signals appear in the separate Corridor Intelligence section. Sources: {newsTakeaway.sources_line || "Block Club Chicago, Crain's Chicago Business, The Real Deal, Chicago YIMBY, Chicago Tribune, Chicago Sun-Times"}</div>
-                            </div>
-                          );
-                        })() : (
-                        <div className="space-y-4">
-                          <p className="text-xs text-muted-foreground">
-                            News articles that explicitly mention {showLabels ? 'either parcel address' : 'this property address'}, sourced from Block Club Chicago, Crain's, The Real Deal, Chicago YIMBY, Chicago Tribune, Sun-Times, and others.
-                          </p>
-                          {merged.map((article, idx) => (
-                            <div
-                              key={idx}
-                              className="border-b border-border last:border-0 pb-4 last:pb-0"
-                              data-testid={`address-news-article-${idx}`}
-                            >
-                              <a
-                                href={article.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-semibold text-sm hover:underline text-foreground block mb-1"
-                                data-testid={`link-address-news-${idx}`}
-                              >
-                                {article.title}
-                              </a>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1 flex-wrap">
-                                <span className="font-medium" data-testid={`text-address-news-source-${idx}`}>{article.source}</span>
-                                {article.published && (
-                                  <>
-                                    <span>·</span>
-                                    <span data-testid={`text-address-news-date-${idx}`}>
-                                      {new Date(article.published).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                                    </span>
-                                  </>
-                                )}
-                                {showLabels && (
-                                  <>
-                                    <span>·</span>
-                                    <Badge variant="outline" className="text-xs py-0">{article._addressLabel}</Badge>
-                                  </>
-                                )}
-                              </div>
-                              {article.summary && (
-                                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{article.summary}</p>
-                              )}
-                              <p className="text-xs text-muted-foreground mt-1 print:block hidden break-all">{article.url}</p>
-                            </div>
-                          ))}
-                        </div>
-                        )}
-                      </div>
-              </motion.div>
-            );
-          })()}
           </div>
           </AccordionSection>
 
-          {/* Corridor News - shown when property is within 0.5 miles of a major corridor */}
           <AccordionSection {...accProps("corridor")}>
-          {corridorNewsData?.is_near_corridor ? (
-            <motion.div
-              id="print-section-corridor-news"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Collapsible open={isCorridorNewsOpen} onOpenChange={setIsCorridorNewsOpen}>
-                <Card className="border border-border overflow-visible">
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover-elevate pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="chead flex items-center gap-2">
-                          Corridor Intelligence
-                        </CardTitle>
-                        <span className="text-muted-foreground text-sm">{isCorridorNewsOpen ? '▼' : '▶'}</span>
-                      </div>
-                      {!isCorridorNewsOpen && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {corridorNewsData.corridors?.map((c: any) => (
-                            <span
-                              key={c.corridorKey}
-                              className="records-fact"
-                              data-testid={`badge-corridor-${c.corridorKey}`}
-                            >
-                              {c.corridorName} ({isOnCorridor(c.corridorName, c.distanceMiles) ? 'On corridor' : `${c.distanceMiles} mi`})
-                            </span>
-                          ))}
-                          {visibleCorridorArticles.length > 0 && (
-                            <Badge variant="outline" className="text-xs" data-testid="badge-corridor-articles">
-                              {visibleCorridorArticles.length} Articles (90 days)
-                            </Badge>
-                          )}
-                          {(() => {
-                            if (!nearbyLicensesData?.licenses?.length || !corridorNewsData?.corridors?.length) return null;
-                            let totalCorridorLicenses = 0;
-                            const seen = new Set<string>();
-                            for (const c of corridorNewsData.corridors) {
-                              const name = (c.corridorName as string);
-                              const words = name.toLowerCase().split(/\s+/);
-                              const base = words.filter((w: string) => !['avenue', 'ave', 'street', 'st', 'boulevard', 'blvd'].includes(w)).join(' ');
-                              const pattern = new RegExp(`\\b${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+(ave|avenue|st|street|blvd|boulevard)`, 'i');
-                              for (const license of nearbyLicensesData.licenses) {
-                                const addr = (license.address || '').toUpperCase();
-                                if (pattern.test(addr)) {
-                                  const dedupKey = `${(license.businessName || '').toUpperCase()}|||${addr}`;
-                                  if (!seen.has(dedupKey)) {
-                                    seen.add(dedupKey);
-                                    totalCorridorLicenses++;
-                                  }
-                                }
-                              }
-                            }
-                            if (totalCorridorLicenses === 0) return null;
-                            return (
-                              <Badge variant="outline" className="text-xs" data-testid="badge-corridor-total-licenses">
-                                <Briefcase className="w-3 h-3 mr-1" />
-                                {totalCorridorLicenses} {totalCorridorLicenses === 1 ? 'Business' : 'Businesses'} with New Licenses
-                              </Badge>
-                            );
-                          })()}
-                          {(() => {
-                            if (!nearbyConstructionData?.permits?.length || !corridorNewsData?.corridors?.length) return null;
-                            const corridorPatterns = corridorNewsData.corridors.map((c: any) => {
-                              const name = c.corridorName as string;
-                              const words = name.toLowerCase().split(/\s+/);
-                              const base = words.filter((w: string) => !['avenue', 'ave', 'street', 'st', 'boulevard', 'blvd'].includes(w)).join(' ');
-                              return { pattern: new RegExp(`\\b${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+(ave|avenue|st|street|blvd|boulevard)`, 'i') };
-                            });
-                            const seen = new Set<string>();
-                            let total = 0;
-                            for (const permit of nearbyConstructionData.permits) {
-                              const addr = (permit.address || '').toUpperCase();
-                              for (const cp of corridorPatterns) {
-                                if (cp.pattern.test(addr)) {
-                                  const key = `${addr}|||${permit.permitNumber}`;
-                                  if (!seen.has(key)) { seen.add(key); total++; }
-                                  break;
-                                }
-                              }
-                            }
-                            if (total === 0) return null;
-                            return (
-                              <Badge variant="outline" className="text-xs" data-testid="badge-corridor-total-permits">
-                                <HardHat className="w-3 h-3 mr-1" />
-                                {total} New Construction {total === 1 ? 'Permit' : 'Permits'}
-                              </Badge>
-                            );
-                          })()}
-                          {(() => {
-                            if (!visibleCorridorArticles.length || !corridorNewsData?.corridors?.length) return null;
-                            const matchedCount = visibleCorridorArticles.filter((a: any) => a.corridorKeys?.length > 0).length;
-                            if (matchedCount === 0) return null;
-                            return (
-                              <Badge variant="outline" className="text-xs" data-testid="badge-corridor-total-articles">
-                                <Newspaper className="w-3 h-3 mr-1" />
-                                {matchedCount} {matchedCount === 1 ? 'Article' : 'Articles'}
-                              </Badge>
-                            );
-                          })()}
-                          {(() => {
-                            if (!corridorNewsData?.corridors?.length) return null;
-                            const allZba = [
-                              ...(zbaApprovalsData?.approvals || []),
-                              ...(zbaApprovalsData?.upcoming || []),
-                            ];
-                            if (!allZba.length) return null;
-                            const propLat = geocode.data?.lat;
-                            const propLon = geocode.data?.lon;
-                            const hav = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-                              const R = 3958.8, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
-                              const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-                              return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                            };
-                            const patterns = corridorNewsData.corridors.map((c: any) => {
-                              const name = c.corridorName as string;
-                              const words = name.toLowerCase().split(/\s+/);
-                              const base = words.filter((w: string) => !['avenue', 'ave', 'street', 'st', 'boulevard', 'blvd'].includes(w)).join(' ');
-                              return new RegExp(`\\b${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+(ave|avenue|st|street|blvd|boulevard)`, 'i');
-                            });
-                            let total = 0;
-                            const seen = new Set<string>();
-                            for (const item of allZba) {
-                              if (!item.lat || !item.lon) continue;
-                              if (propLat && propLon) {
-                                const d = hav(propLat, propLon, item.lat, item.lon);
-                                if (d > 1.0) continue;
-                              }
-                              const addr = (item.address || '').toUpperCase();
-                              for (const p of patterns) {
-                                if (p.test(addr)) {
-                                  if (!seen.has(item.caseNumber)) { seen.add(item.caseNumber); total++; }
-                                  break;
-                                }
-                              }
-                            }
-                            if (total === 0) return null;
-                            return (
-                              <Badge variant="outline" className="text-xs" data-testid="badge-corridor-total-zba">
-                                <Scale className="w-3 h-3 mr-1" />
-                                {total} Zoning {total === 1 ? 'Appeal' : 'Appeals'}
-                              </Badge>
-                            );
-                          })()}
-                        </div>
-                      )}
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <CardContent className="pt-0 space-y-4">
-                      {(() => {
-                        const corridorLicenseMap: Record<string, { name: string; address: string; licenses: string[]; categories: string[]; startDate: string; lat: number; lng: number }[]> = {};
-                        const corridorPermitMap: Record<string, { address: string; category: string; workDescription: string; issueDate: string; reportedCost: number; distanceMiles: number; permitNumber: string; architectName?: string; contractorName?: string; stories?: number; units?: number; parkingSpaces?: number; buildingUse?: string }[]> = {};
-                        const corridorArticleMap: Record<string, { title: string; url: string; summary: string; published: string; source: string }[]> = {};
-                        if (visibleCorridorArticles.length) {
-                          for (const article of visibleCorridorArticles) {
-                            for (const key of (article.corridorKeys || [])) {
-                              if (!corridorArticleMap[key]) corridorArticleMap[key] = [];
-                              corridorArticleMap[key].push({ title: article.title, url: article.url, summary: article.summary, published: article.published, source: article.source });
-                            }
-                          }
-                        }
-                        const buildCorridorPatterns = () => corridorNewsData.corridors.map((c: any) => {
-                          const name = c.corridorName as string;
-                          const words = name.toLowerCase().split(/\s+/);
-                          const base = words.filter((w: string) => !['avenue', 'ave', 'street', 'st', 'boulevard', 'blvd'].includes(w)).join(' ');
-                          return {
-                            corridorKey: c.corridorKey as string,
-                            pattern: new RegExp(`\\b${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+(ave|avenue|st|street|blvd|boulevard)`, 'i'),
-                          };
-                        });
-                        if (corridorNewsData?.corridors?.length) {
-                          const corridorStreetPatterns = buildCorridorPatterns();
-                          if (nearbyLicensesData?.licenses?.length) {
-                            for (const license of nearbyLicensesData.licenses) {
-                              const addr = (license.address || '').toUpperCase();
-                              for (const cp of corridorStreetPatterns) {
-                                if (cp.pattern.test(addr)) {
-                                  if (!corridorLicenseMap[cp.corridorKey]) corridorLicenseMap[cp.corridorKey] = [];
-                                  const dedupKey = licenseEstablishmentKey(license);
-                                  const existing = corridorLicenseMap[cp.corridorKey].find(b => licenseEstablishmentKey({ businessName: b.name, address: b.address }) === dedupKey);
-                                  if (existing) {
-                                    if (!existing.licenses.includes(license.licenseType)) existing.licenses.push(license.licenseType);
-                                    if (!existing.categories.includes(license.licenseCategory)) existing.categories.push(license.licenseCategory);
-                                  } else {
-                                    corridorLicenseMap[cp.corridorKey].push({
-                                      name: license.businessName,
-                                      address: license.address,
-                                      licenses: [license.licenseType],
-                                      categories: [license.licenseCategory],
-                                      startDate: license.startDate,
-                                      lat: license.latitude,
-                                      lng: license.longitude,
-                                    });
-                                  }
-                                  break;
-                                }
-                              }
-                            }
-                          }
-                          if (nearbyConstructionData?.permits?.length) {
-                            for (const permit of nearbyConstructionData.permits) {
-                              const addr = (permit.address || '').toUpperCase();
-                              for (const cp of corridorStreetPatterns) {
-                                if (cp.pattern.test(addr)) {
-                                  if (!corridorPermitMap[cp.corridorKey]) corridorPermitMap[cp.corridorKey] = [];
-                                  corridorPermitMap[cp.corridorKey].push({
-                                    address: permit.address,
-                                    category: permit.category,
-                                    workDescription: permit.workDescription,
-                                    issueDate: permit.issueDate,
-                                    reportedCost: permit.reportedCost,
-                                    distanceMiles: permit.distanceMiles,
-                                    permitNumber: permit.permitNumber,
-                                    architectName: permit.architectName,
-                                    contractorName: permit.contractorName,
-                                    stories: permit.stories,
-                                    units: permit.units,
-                                    parkingSpaces: permit.parkingSpaces,
-                                    buildingUse: permit.buildingUse,
-                                  });
-                                  break;
-                                }
-                              }
-                            }
-                          }
-                        }
-                        const corridorZbaMap: Record<string, any[]> = {};
-                        const _zbaHav = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-                          const R = 3958.8, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
-                          const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-                          return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                        };
-                        const _propLat = geocode.data?.lat, _propLon = geocode.data?.lon;
-                        const _zbaAllItems = [
-                          ...(zbaApprovalsData?.approvals || []).map((a: any) => ({ ...a, isDecision: true })),
-                          ...(zbaApprovalsData?.upcoming || []).filter((u: any) => { if (!u.hearingDate) return true; const hd = new Date(u.hearingDate + 'T12:00:00'); const tod = new Date(); tod.setHours(0,0,0,0); return hd >= tod; }).map((a: any) => ({ ...a, isDecision: false })),
-                        ];
-                        if (corridorNewsData?.corridors?.length) {
-                          const _zbaPatterns = buildCorridorPatterns();
-                          for (const item of _zbaAllItems) {
-                            if (!item.lat || !item.lon) continue;
-                            const d = (!_propLat || !_propLon) ? 99 : _zbaHav(_propLat, _propLon, item.lat, item.lon);
-                            if (d > 1.0) continue;
-                            const addr = (item.address || '').toUpperCase();
-                            for (const cp of _zbaPatterns) {
-                              if (cp.pattern.test(addr)) {
-                                if (!corridorZbaMap[cp.corridorKey]) corridorZbaMap[cp.corridorKey] = [];
-                                corridorZbaMap[cp.corridorKey].push({ ...item, _distMiles: d });
-                                break;
-                              }
-                            }
-                          }
-                        }
-                        const _zbaParseSubject = (subject: string) => {
-                          if (!subject) return { appType: '', proposed: '', building: '' };
-                          let appType = '';
-                          if (/special use/i.test(subject)) appType = 'Special Use';
-                          else if (/variation/i.test(subject)) appType = 'Variation';
-                          else if (/appeal/i.test(subject)) appType = 'Appeal';
-                          else if (/amendment/i.test(subject)) appType = 'Amendment';
-                          const establishM = subject.match(/to establish\s+(?:a\s+|an\s+)?([\s\S]+?)(?:\.|with\s+\d|located|in\s+an?\s+existing|$)/i);
-                          const reduceM = subject.match(/to\s+(reduce|increase|allow|permit|change|modify|convert|expand|demolish)\s+([\s\S]+?)(?:\.|for\s+a\s+proposed|in\s+an?\s+existing|$)/i);
-                          let proposed = '';
-                          if (establishM) proposed = establishM[1].replace(/\s+/g, ' ').trim();
-                          else if (reduceM) proposed = `${reduceM[1]} ${reduceM[2]}`.replace(/\s+/g, ' ').trim();
-                          if (proposed.length > 200) proposed = proposed.slice(0, 200).trim();
-                          const buildingParts: string[] = [];
-                          const storyM = subject.match(/(\d[\d,]*(?:\s*-\s*story|\s+stor(?:y|ies)))/i);
-                          if (storyM) buildingParts.push(storyM[1].replace(/\s+/g, ' '));
-                          const unitM = subject.match(/(\d[\d,]*)\s*(?:-|–)?\s*(?:dwelling\s+)?unit/i);
-                          if (unitM) buildingParts.push(`${unitM[1]} units`);
-                          const sqftM = subject.match(/([\d,]+)\s*(?:square\s*feet|sq\.?\s*ft)/i);
-                          if (sqftM) buildingParts.push(`${sqftM[1]} sq ft`);
-                          return { appType, proposed, building: buildingParts.join(' · ') };
-                        };
-
-                        // ── KPI totals (deduped across corridors) ──
-                        let _totalPermits = 0, _totalLicenses = 0, _totalArticles = 0, _totalZba = 0;
-                        {
-                          const _seenP = new Set<string>(), _seenL = new Set<string>(), _seenA = new Set<string>(), _seenZ = new Set<string>();
-                          for (const key of Object.keys(corridorPermitMap)) {
-                            for (const p of (corridorPermitMap[key] || [])) {
-                              if (_seenP.has(p.permitNumber)) continue;
-                              _seenP.add(p.permitNumber); _totalPermits++;
-                            }
-                          }
-                          for (const key of Object.keys(corridorLicenseMap)) {
-                            for (const l of (corridorLicenseMap[key] || [])) {
-                              const lk = licenseEstablishmentKey({ businessName: l.name, address: l.address });
-                              if (!_seenL.has(lk)) { _seenL.add(lk); _totalLicenses++; }
-                            }
-                          }
-                          for (const key of Object.keys(corridorArticleMap)) {
-                            for (const a of (corridorArticleMap[key] || [])) {
-                              if (!_seenA.has(a.url)) { _seenA.add(a.url); _totalArticles++; }
-                            }
-                          }
-                          for (const key of Object.keys(corridorZbaMap)) {
-                            for (const z of (corridorZbaMap[key] || [])) {
-                              if (!_seenZ.has(z.caseNumber)) { _seenZ.add(z.caseNumber); _totalZba++; }
-                            }
-                          }
-                        }
-                        const _permitUnits = null; // permits confirm filing, not a unit total
-
-                        const _fmtMonYr = (d: string | null | undefined) => {
-                          if (!d) return null;
-                          const dt = new Date(d);
-                          return isNaN(dt.getTime()) ? null : dt.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                        };
-                        const _catLabel = (cat: string) => cat === 'singleFamily' ? 'Single Family' : cat === 'multifamily' ? 'Multi-Family' : 'Commercial';
-                        const _titleCase = (s: string) => s.toLowerCase().replace(/\b\w/g, ch => ch.toUpperCase());
-
-                        const corridorCards: CorridorCardData[] = (corridorNewsData.corridors || []).map((c: any) => {
-                          const bizList = (corridorLicenseMap[c.corridorKey] || []).slice().sort((a: any, b: any) => new Date(b.startDate || 0).getTime() - new Date(a.startDate || 0).getTime());
-                          const permitList = (corridorPermitMap[c.corridorKey] || []).slice().sort((a: any, b: any) => new Date(b.issueDate || 0).getTime() - new Date(a.issueDate || 0).getTime());
-                          const articleList = corridorArticleMap[c.corridorKey] || [];
-                          const zbaList = corridorZbaMap[c.corridorKey] || [];
-                          return {
-                            key: c.corridorKey,
-                            name: c.corridorName,
-                            tier: c.tier,
-                            tierLabel: c.tier === 1 ? 'Primary' : 'Emerging',
-                            distanceMi: c.distanceMiles,
-                            onCorridor: isOnCorridor(c.corridorName, c.distanceMiles),
-                            blurb: c.description || '',
-                            licenses: bizList.map((b: any) => ({
-                              name: b.name,
-                              address: b.address,
-                              date: _fmtMonYr(b.startDate),
-                              tags: (b.categories?.length ? b.categories : b.licenses || []).filter(Boolean),
-                            })),
-                            construction: permitList.map((p: any) => {
-                              const cleanUse = p.buildingUse ? _titleCase(p.buildingUse) : _catLabel(p.category);
-                              const rawClass = _catLabel(p.category);
-                              return {
-                                address: p.address,
-                                date: _fmtMonYr(p.issueDate),
-                                use: cleanUse,
-                                stories: p.stories || null,
-                                units: p.units || null,
-                                parking: p.parkingSpaces || null,
-                                cost: p.reportedCost > 0 ? p.reportedCost : null,
-                                distanceMi: p.distanceMiles ?? null,
-                                architect: p.architectName || null,
-                                gc: p.contractorName || null,
-                                cityClass: rawClass !== cleanUse ? rawClass : null,
-                              };
-                            }),
-                            coverage: articleList.map((a: any) => ({
-                              title: a.title,
-                              url: a.url,
-                              source: (a.source || '').split(' - ')[0]?.replace(' Archives', '') || a.source || '',
-                              date: a.published ? new Date(a.published).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null,
-                              summary: a.summary || '',
-                            })),
-                            zoning: zbaList.map((z: any) => {
-                              const { appType, proposed } = _zbaParseSubject(z.subject || '');
-                              return {
-                                address: z.address,
-                                kind: appType || 'Application',
-                                zone: z.zoningDistrict || null,
-                                caseNo: z.caseNumber ? `#${z.caseNumber}` : null,
-                                date: z.isDecision ? (z.meetingMonth || null) : (z.hearingMonth || null),
-                                status: z.isDecision ? (z.decision || 'Decided') : 'Upcoming',
-                                distanceMi: typeof z._distMiles === 'number' ? z._distMiles : null,
-                                use: proposed ? _titleCase(proposed) : '',
-                              };
-                            }),
-                            dpdApplications: (corridorNewsData.dpdApplications || [])
-                              .filter((application: any) => application.corridorKeys?.includes(c.corridorKey))
-                              .map((application: any) => ({
-                                address: application.address,
-                                applicationType: application.applicationType,
-                                applicant: application.applicant,
-                                status: application.status,
-                                hearingDate: application.hearingDate,
-                                proposal: application.proposal,
-                                applicationUrl: application.applicationUrl,
-                                hearingUrl: application.hearingUrl,
-                                distanceMi: application.distanceMi ?? null,
-                              })),
-                          };
-                        });
-
-                        return (
-                          <CorridorIntelligenceView
-                            kpis={{ permits: _totalPermits, permitUnits: _permitUnits, licenses: _totalLicenses, articles: _totalArticles, zoningAppeals: _totalZba, dpdApplications: corridorNewsData.dpdApplications?.length || 0 }}
-                            corridors={corridorCards}
-                            licensesLoading={isLoadingNearbyLicenses}
-                          />
-                        );
-                      })()}
-
-
-                      {(() => {
-                        const neighborhoodArticles = visibleCorridorArticles.filter((a: any) => a.mentionsNeighborhood && !a.corridorKeys?.length);
-                        if (neighborhoodArticles.length === 0) return null;
-                        const neighborhoodLabel = facts?.neighborhood || facts?.communityArea || 'Neighborhood';
-                        return (
-                          <div className="space-y-2 max-h-80 overflow-y-auto">
-                            <h4 className="font-jbmono text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                              <MapPin className="w-3.5 h-3.5" />
-                              {neighborhoodLabel} News
-                            </h4>
-                            {neighborhoodArticles.map((article: any, idx: number) => (
-                              <div key={article.url || idx} className="p-3 rounded-lg bg-muted border border-border text-sm" data-testid={`row-corridor-article-neighborhood-${idx}`}>
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1 min-w-0">
-                                    <a
-                                      href={article.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="font-medium text-primary hover:underline leading-snug"
-                                      data-testid={`link-corridor-article-${idx}`}
-                                    >
-                                      {article.title}
-                                    </a>
-                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                      <Badge variant="outline" className="text-xs">
-                                        {article.source?.split(' - ')[0]?.replace(' Archives', '')}
-                                      </Badge>
-                                      {article.published && (
-                                        <span className="text-xs text-muted-foreground">
-                                          {new Date(article.published).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                        </span>
-                                      )}
-                                    </div>
-                                    {article.summary && (
-                                      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
-                                        {article.summary}
-                                      </p>
-                                    )}
-                                  </div>
-                                  <a href={article.url} target="_blank" rel="noopener noreferrer" className="shrink-0 mt-0.5">
-                                    <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                                  </a>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })()}
-
-                      {(() => {
-                        const corridorPodcasts = corridorNewsData.podcasts || [];
-                        if (corridorPodcasts.length === 0) return null;
-                        return (
-                          <div className="space-y-2 max-h-72 overflow-y-auto">
-                            <h4 className="font-jbmono text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                              <Mic className="w-3.5 h-3.5" />
-                              Podcast Coverage
-                            </h4>
-                            {corridorPodcasts.map((ep: any, idx: number) => (
-                              <div key={ep.url || idx} className="p-3 rounded-lg bg-muted border border-border text-sm" data-testid={`row-corridor-podcast-${idx}`}>
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1 min-w-0">
-                                    <a
-                                      href={ep.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="font-medium text-primary hover:underline leading-snug"
-                                      data-testid={`link-corridor-podcast-${idx}`}
-                                    >
-                                      {ep.title}
-                                    </a>
-                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                      <Badge className="text-xs gap-1">
-                                        <Mic className="w-2.5 h-2.5" />
-                                        {ep.source}
-                                      </Badge>
-                                      {ep.published && (
-                                        <span className="text-xs text-muted-foreground">
-                                          {new Date(ep.published).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                        </span>
-                                      )}
-                                    </div>
-                                    {ep.summary && (
-                                      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{ep.summary}</p>
-                                    )}
-                                  </div>
-                                  <a href={ep.url} target="_blank" rel="noopener noreferrer" className="shrink-0 mt-0.5">
-                                    <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                                  </a>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })()}
-
-                    </CardContent>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
-            </motion.div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {corridorNewsData?.is_near_corridor === false
-                ? "No major corridor was identified within 0.5 miles of this property."
-                : "Corridor proximity data is not available for this property."}
-            </p>
-          )}
+            <div id="print-section-corridor-news">
+              {isLoadingCorridorNews ? (
+                <p className="text-sm text-muted-foreground">Loading corridor intelligence…</p>
+              ) : isErrorCorridorNews ? (
+                <p className="text-sm text-muted-foreground">Corridor intelligence could not be loaded.</p>
+              ) : corridorNewsData?.is_near_corridor === false ? (
+                <p className="text-sm text-muted-foreground">No major corridor was identified within 0.5 miles of this property.</p>
+              ) : corridorNewsData?.is_near_corridor !== true ? (
+                <p className="text-sm text-muted-foreground">Corridor proximity data is not available for this property.</p>
+              ) : (
+                <>
+                  {!corridorRollupReady && (
+                    <p className="text-sm text-muted-foreground">
+                      Corridor rollup data is not ready yet; counts and corridor details are unavailable.
+                    </p>
+                  )}
+                  <CorridorIntelligenceView
+                    kpis={{
+                      permits: corridorNewsData.kpis?.permits ?? null,
+                      permitUnits: corridorNewsData.kpis?.permitUnits ?? null,
+                      licenses: corridorNewsData.kpis?.licenses ?? null,
+                      articles: corridorNewsData.kpis?.articles ?? null,
+                      zoningAppeals: corridorNewsData.kpis?.zoningAppeals ?? null,
+                      dpdApplications: corridorNewsData.kpis?.dpdApplications ?? null,
+                    }}
+                    corridors={(corridorNewsData.cards || []) as CorridorCardData[]}
+                    sourceCoverage={Object.fromEntries(
+                      Object.entries(corridorNewsData.sourceCoverage || {})
+                        .filter(([, coverage]: [string, any]) => coverage?.status && coverage.status !== "available")
+                        .map(([key, coverage]: [string, any]) => [key, coverage.status]),
+                    )}
+                    renderNewsArticle={(article, testid) => (
+                      <NewsArchCard a={article} testid={testid} />
+                    )}
+                  />
+                  {visibleCorridorArticles
+                    .filter((article: any) => article.mentionsNeighborhood && !article.corridorKeys?.length)
+                    .map((article: any, index: number) => (
+                      <NewsArchCard
+                        key={article.url || index}
+                        a={article}
+                        testid={`row-corridor-article-neighborhood-${index}`}
+                      />
+                    ))}
+                  {(corridorNewsData.podcasts || []).map((episode: any, index: number) => (
+                    <NewsArchCard
+                      key={episode.url || index}
+                      a={{
+                        ...episode,
+                        source: episode.showName || episode.show || episode.source,
+                        date: episode.date || episode.published,
+                      }}
+                      testid={`row-corridor-podcast-${index}`}
+                    />
+                  ))}
+                </>
+              )}
+            </div>
           </AccordionSection>
-
-          {/* Neighborhood News - Collapsible Section (hybrid: merged into the News section above) */}
-          {!hybridInc && facts?.communityArea && (
-            <motion.div
-              id="print-section-neighborhood-news"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Collapsible open={isNeighborhoodNewsOpen} onOpenChange={setIsNeighborhoodNewsOpen}>
-                <Card className="border border-border overflow-visible">
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover-elevate pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="chead flex items-center gap-2">
-                          Neighborhood News
-                        </CardTitle>
-                        <span className="text-muted-foreground text-sm">{isNeighborhoodNewsOpen ? '▼' : '▶'}</span>
-                      </div>
-                      {!isNeighborhoodNewsOpen && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {isLoadingNeighborhoodNews ? (
-                            <Badge variant="outline" className="text-xs">Loading...</Badge>
-                          ) : neighborhoodNewsData ? (
-                            <>
-                              <Badge
-                                className={`text-xs ${neighborhoodNewsData.momentum_score >= 75 ? 'bg-green-600 text-white' : neighborhoodNewsData.momentum_score >= 50 ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'}`}
-                                data-testid="badge-news-momentum"
-                              >
-                                {neighborhoodNewsData.momentum_label}
-                              </Badge>
-                              <Badge variant="outline" className="text-xs" data-testid="badge-news-count">
-                                {neighborhoodNewsData.article_count} articles (past year)
-                              </Badge>
-                              <Badge variant="outline" className="text-xs">
-                                Score: {neighborhoodNewsData.momentum_score}/100
-                              </Badge>
-                            </>
-                          ) : (
-                            <Badge variant="outline" className="text-xs">No data</Badge>
-                          )}
-                        </div>
-                      )}
-                      {isNeighborhoodNewsOpen && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Development and cultural coverage from local news sources for {facts.communityArea} (past year)
-                        </p>
-                      )}
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <CardContent className="pt-0 space-y-4">
-                      {isLoadingNeighborhoodNews ? (
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-3/4" />
-                          <Skeleton className="h-4 w-2/3" />
-                          <Skeleton className="h-4 w-1/2" />
-                        </div>
-                      ) : nnTakeaway?.takeaway ? (() => {
-                        // Generated layout — meta takeaway + KPIs + categorized columns with
-                        // permit-deduped development cards (each project rendered once).
-                        const t = nnTakeaway;
-                        const fmtD = newsFmtD;
-                        const statusCls = (stage: string) => stage === 'permitted' || stage === 'under_construction' || stage === 'complete' ? 'perm' : stage === 'approved' ? 'appr' : 'prop';
-                        const goCorridor = (e: React.MouseEvent) => { e.preventDefault(); revealAnchor('print-section-corridor-news'); };
-                        const CULTURE_SHOW = 4, DEV_SHOW = 5;
-                        return (
-                          <div className="nnwrap" data-testid="neighborhood-news-generated">
-                            <div className="take" data-testid="nn-takeaway">
-                              <div className="take-head">
-                                <span className="take-label">
-                                  <svg viewBox="0 0 24 24" strokeWidth="2"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 1 3.6 10.8c-.6.5-.9 1.2-1 2.2h-5.2c-.1-1-.4-1.7-1-2.2A6 6 0 0 1 12 3z"/></svg>
-                                  Takeaway
-                                </span>
-                              </div>
-                              <div className="take-title">{t.takeaway!.title}</div>
-                              {t.takeaway!.rows.map((r, i) => (
-                                <div key={i} className={`take-row ${r.tone}`}>
-                                  <span className="dot" />
-                                  {/* server-validated + sanitized output; b-tags only */}
-                                  <span className="body" dangerouslySetInnerHTML={{ __html: r.html }} />
-                                  {r.chip && (
-                                    <a className="take-chip" href="#print-section-corridor-news" onClick={goCorridor}>
-                                      {r.chip.label}
-                                      <svg viewBox="0 0 24 24" strokeWidth="2.4"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-                                    </a>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                            <div className="kpis">
-                              <div className="kpi"><div className="n" data-testid="text-news-score">{t.kpis?.momentumScore}</div><div className="l">Momentum Score</div></div>
-                              <div className="kpi"><div className="n" data-testid="text-news-articles">{t.kpis?.articleCount}</div><div className="l">Articles Found</div></div>
-                              <div className="kpi"><div className="n" data-testid="text-news-label">{t.kpis?.momentumLabel}</div><div className="l">Activity Level</div></div>
-                            </div>
-                            <div className="twocol">
-                              <div>
-                                <div className="colh">
-                                  <Utensils className="w-3.5 h-3.5" />
-                                  Entertainment &amp; Culture
-                                </div>
-                                {t.culture.length === 0 && <p className="text-sm text-muted-foreground italic">No recent entertainment or culture coverage found.</p>}
-                                {t.culture.slice(0, CULTURE_SHOW).map((a, i) => (
-                                  <div key={a.url || i} className="acard" data-testid={`nn-culture-${i}`}>
-                                    <div className="at"><a href={a.url} target="_blank" rel="noopener noreferrer">{a.title}</a></div>
-                                    <div className="am"><span className="asrc">{a.source}</span><span className="adate">{fmtD(a.date)}</span></div>
-                                  </div>
-                                ))}
-                                {t.culture.length > CULTURE_SHOW && (
-                                  <details>
-                                    <summary className="morelink cursor-pointer list-none">+ {t.culture.length - CULTURE_SHOW} more →</summary>
-                                    {t.culture.slice(CULTURE_SHOW).map((a, i) => (
-                                      <div key={a.url || i} className="acard">
-                                        <div className="at"><a href={a.url} target="_blank" rel="noopener noreferrer">{a.title}</a></div>
-                                        <div className="am"><span className="asrc">{a.source}</span><span className="adate">{fmtD(a.date)}</span></div>
-                                      </div>
-                                    ))}
-                                  </details>
-                                )}
-                              </div>
-                              <div>
-                                <div className="colh">
-                                  <Building2 className="w-3.5 h-3.5" />
-                                  Real Estate &amp; Development
-                                </div>
-                                {t.dev.length === 0 && <p className="text-sm text-muted-foreground italic">No recent development coverage found.</p>}
-                                {t.dev.slice(0, DEV_SHOW).map((p, i) => (
-                                  <div key={p.url || i} className="acard" data-testid={`nn-dev-${i}`}>
-                                    <div className="at"><a href={p.url} target="_blank" rel="noopener noreferrer">{p.title}</a></div>
-                                    <div className="am">
-                                      <span className="asrc">{p.source}</span>
-                                      <span className="adate">{fmtD(p.date)}</span>
-                                      <span className={`astatus ${statusCls(p.stage)}`}>{p.stageLabel}</span>
-                                    </div>
-                                    {p.oneLine && <div className="asum">{p.oneLine}</div>}
-                                    {p.inPermitData && (
-                                      <a className="across" href="#print-section-corridor-news" onClick={goCorridor}>
-                                        <svg viewBox="0 0 24 24" strokeWidth="2.2"><path d="M20 6 9 17l-5-5"/></svg>
-                                        Same project in Corridor permit data — counted once
-                                      </a>
-                                    )}
-                                    {!p.matchable && (
-                                      <span className="across" style={{ borderStyle: 'dashed', cursor: 'default' }}>location not specified — not matched</span>
-                                    )}
-                                  </div>
-                                ))}
-                                {t.dev.length > DEV_SHOW && (
-                                  <details>
-                                    <summary className="morelink cursor-pointer list-none">+ {t.dev.length - DEV_SHOW} more →</summary>
-                                    {t.dev.slice(DEV_SHOW).map((p, i) => (
-                                      <div key={p.url || i} className="acard">
-                                        <div className="at"><a href={p.url} target="_blank" rel="noopener noreferrer">{p.title}</a></div>
-                                        <div className="am"><span className="asrc">{p.source}</span><span className="adate">{fmtD(p.date)}</span><span className={`astatus ${statusCls(p.stage)}`}>{p.stageLabel}</span></div>
-                                      </div>
-                                    ))}
-                                  </details>
-                                )}
-                              </div>
-                            </div>
-                            <div className="src">Development items are matched to permit records by address and de-duplicated across sections. Sources: {t.sources_line}. Podcasts: Crain's Daily Gist, Reset (WBEZ), Eater's The Digest, Good Beer Hunting.</div>
-                          </div>
-                        );
-                      })() : neighborhoodNewsData ? (
-                        <>
-                          <div className="grid grid-cols-3 gap-3">
-                            <div className="text-center p-3 rounded-lg bg-secondary border border-border">
-                              <div className="text-2xl font-bold text-foreground" data-testid="text-news-score">
-                                {neighborhoodNewsData.momentum_score}
-                              </div>
-                              <div className="text-xs text-muted-foreground">Momentum Score</div>
-                            </div>
-                            <div className="text-center p-3 rounded-lg bg-secondary border border-border">
-                              <div className="text-2xl font-bold text-foreground" data-testid="text-news-articles">
-                                {neighborhoodNewsData.article_count}
-                              </div>
-                              <div className="text-xs text-muted-foreground">Articles Found</div>
-                            </div>
-                            <div className="text-center p-3 rounded-lg bg-secondary border border-border">
-                              <div className={`text-lg font-bold ${
-                                neighborhoodNewsData.momentum_score >= 75 ? 'text-foreground' :
-                                neighborhoodNewsData.momentum_score >= 50 ? 'text-muted-foreground' : 'text-muted-foreground'
-                              }`} data-testid="text-news-label">
-                                {neighborhoodNewsData.momentum_label}
-                              </div>
-                              <div className="text-xs text-muted-foreground">Activity Level</div>
-                            </div>
-                          </div>
-
-                          {(() => {
-                            const cultureArticles = (neighborhoodNewsData.articles || []).filter((a: any) => classifyArticle(a.title || '', a.summary || '', a.url || '') === 'culture');
-                            const realEstateArticles = (neighborhoodNewsData.articles || []).filter((a: any) => classifyArticle(a.title || '', a.summary || '', a.url || '') === 'development');
-                            const podcastEpisodes = neighborhoodNewsData.podcasts || [];
-                            const ArticleList = ({ articles, emptyMsg, testPrefix }: { articles: any[]; emptyMsg: string; testPrefix: string }) => (
-                              articles.length > 0 ? (
-                                <div className="space-y-2 max-h-80 overflow-y-auto">
-                                  {articles.map((article: any, idx: number) => (
-                                    <div key={article.url || idx} className="p-3 border border-border bg-background text-sm" data-testid={`row-${testPrefix}-article-${idx}`}>
-                                      <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1 min-w-0">
-                                          <a
-                                            href={article.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="font-medium text-primary hover:underline leading-snug"
-                                            data-testid={`link-${testPrefix}-article-${idx}`}
-                                          >
-                                            {article.title}
-                                          </a>
-                                          <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                            <Badge variant="outline" className="text-xs">{article.source}</Badge>
-                                            {article.published && (
-                                              <span className="text-xs text-muted-foreground">
-                                                {new Date(article.published).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                              </span>
-                                            )}
-                                          </div>
-                                          {article.summary && (
-                                            <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{article.summary}</p>
-                                          )}
-                                        </div>
-                                        <a href={article.url} target="_blank" rel="noopener noreferrer" className="shrink-0 mt-0.5">
-                                          <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                                        </a>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <p className="text-sm text-muted-foreground italic">{emptyMsg}</p>
-                              )
-                            );
-                            return (
-                              <div className="space-y-6">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                  <h4 className="font-jbmono text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
-                                    <Utensils className="w-3.5 h-3.5" />
-                                    Entertainment &amp; Culture
-                                  </h4>
-                                  <ArticleList articles={cultureArticles} emptyMsg={`No recent entertainment or culture coverage found for ${facts.communityArea}.`} testPrefix="culture" />
-                                </div>
-                                <div>
-                                  <h4 className="font-jbmono text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
-                                    <Building2 className="w-3.5 h-3.5" />
-                                    Real Estate &amp; Development
-                                  </h4>
-                                  <ArticleList articles={realEstateArticles} emptyMsg={`No recent real estate or development coverage found for ${facts.communityArea}.`} testPrefix="realestate" />
-                                </div>
-                              </div>
-
-                              {podcastEpisodes.length > 0 && (
-                                <div className="mt-6">
-                                  <h4 className="font-jbmono text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
-                                    <Mic className="w-3.5 h-3.5" />
-                                    Podcast Coverage
-                                  </h4>
-                                  <div className="space-y-2 max-h-72 overflow-y-auto">
-                                    {podcastEpisodes.map((ep: any, idx: number) => (
-                                      <div key={ep.url || idx} className="p-3 border border-border bg-background text-sm" data-testid={`row-podcast-neighborhood-${idx}`}>
-                                        <div className="flex items-start justify-between gap-2">
-                                          <div className="flex-1 min-w-0">
-                                            <a
-                                              href={ep.url}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="font-medium text-primary hover:underline leading-snug"
-                                              data-testid={`link-podcast-neighborhood-${idx}`}
-                                            >
-                                              {ep.title}
-                                            </a>
-                                            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                              <Badge className="text-xs gap-1">
-                                                <Mic className="w-2.5 h-2.5" />
-                                                {ep.source}
-                                              </Badge>
-                                              {ep.published && (
-                                                <span className="text-xs text-muted-foreground">
-                                                  {new Date(ep.published).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                </span>
-                                              )}
-                                            </div>
-                                            {ep.summary && (
-                                              <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{ep.summary}</p>
-                                            )}
-                                          </div>
-                                          <a href={ep.url} target="_blank" rel="noopener noreferrer" className="shrink-0 mt-0.5">
-                                            <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                                          </a>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              </div>
-                            );
-                          })()}
-
-                          <p className="text-xs text-muted-foreground">
-                            Sources: Block Club Chicago, Eater Chicago, The Infatuation, WhatNow Chicago, Timeout Chicago, Chicago Reader, Chicago YIMBY, Crain's Chicago Business, The Real Deal, Dwell, Dezeen. Podcasts: Crain's Chicago Daily Gist, Reset (WBEZ), Eater's The Digest, Good Beer Hunting.
-                          </p>
-                        </>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">News data not available for this area.</p>
-                      )}
-                    </CardContent>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
-            </motion.div>
-          )}
 
           {/* Upcoming Developments Section */}
           <AccordionSection {...accProps("development")}>

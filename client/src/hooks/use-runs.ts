@@ -3299,24 +3299,36 @@ export function useCorridorNews(
   address?: string,
   neighborhood?: string,
   communityArea?: string,
+  excludeArticles: Array<{ url?: string | null; title?: string | null; source?: string | null }> = [],
 ) {
+  const refreshStartedAt = useRef<number | null>(null);
   return useQuery<any>({
-    queryKey: ['/api/corridor-news', lat, lng, address, neighborhood, communityArea],
-    enabled: lat !== undefined && lng !== undefined,
+    queryKey: ['/api/corridor-news', 'rollup', lat, lng, address, neighborhood, communityArea, excludeArticles],
+    enabled: Number.isFinite(lat) && Number.isFinite(lng),
     queryFn: async () => {
-      const params = new URLSearchParams({ lat: String(lat), lng: String(lng) });
-      if (address) params.set('address', address);
-      if (neighborhood) params.set('neighborhood', neighborhood);
-      if (communityArea) params.set('communityArea', communityArea);
       const res = await fetch(
-        `/api/corridor-news?${params.toString()}`,
-        { credentials: 'include' }
+        '/api/corridor-news',
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lat, lng, address, neighborhood, communityArea, excludeArticles }),
+        }
       );
       if (!res.ok) throw new Error('Failed to fetch corridor news');
       return await res.json();
     },
     staleTime: 1000 * 60 * 60,
     refetchOnWindowFocus: false,
+    refetchInterval: (query) => {
+      const refreshing = query.state.data?.sourceCoverage?.zoningAppeals?.refreshing;
+      if (!refreshing) {
+        refreshStartedAt.current = null;
+        return false;
+      }
+      if (refreshStartedAt.current === null) refreshStartedAt.current = Date.now();
+      return Date.now() - refreshStartedAt.current < 90_000 ? 10_000 : false;
+    },
   });
 }
 

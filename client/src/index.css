@@ -2158,68 +2158,6 @@ a.cmp-nm{text-decoration:underline}
 .ecbox .more{font-size:11.5px;color:var(--indigo);text-decoration:none;font-weight:600;display:inline-block;margin-top:12px;background:none;border:none;padding:0;cursor:pointer}
 .ecbox .more:hover{text-decoration:underline}
 
-/* ===== Corridor Intelligence — spec redesign, scoped under .corrwrap ===== */
-.corrwrap{--paper:#faf9f6;--card:#fff;--ink:#141414;--ink2:#54544f;--muted:#8b8a84;--line:#e7e5df;--indigo:#2b3a9e;--indigoSoft:#eef0fb;--takeBorder:#dde1f6;--takeDivider:#e3e5f4;--good:#2f7d3f;--caution:#f0a41c;--disp:var(--font-serif);--mono:var(--font-jbmono);--take-label:11px;--take-title:21px;--take-body:13px;color:var(--ink)}
-/* Standard Takeaway (shared component styles) */
-.corrwrap .take{background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:12px;padding:18px 20px 19px;margin-bottom:22px}
-.corrwrap .take-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-.corrwrap .take-label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:var(--take-label);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo)}
-.corrwrap .take-label svg{width:15px;height:15px;stroke:var(--indigo);fill:none}
-.corrwrap .take-title{font-family:var(--disp);font-size:var(--take-title);line-height:1.28;color:var(--ink);margin-bottom:14px}
-.corrwrap .take-row{display:flex;align-items:flex-start;gap:11px;padding:10px 0}
-.corrwrap .take-row + .take-row{border-top:1px solid var(--takeDivider)}
-.corrwrap .take-row .dot{width:6px;height:6px;border-radius:50%;flex:none;margin-top:7px;background:#9aa1b0}
-.corrwrap .take-row.good .dot{background:var(--good)}
-.corrwrap .take-row.caution .dot{background:var(--caution)}
-.corrwrap .take-row.insight .dot{background:var(--indigo)}
-.corrwrap .take-row .body{flex:1;font-size:var(--take-body);line-height:1.5;color:var(--ink2)}
-.corrwrap .take-row .body b{color:var(--ink);font-weight:600}
-/* KPI tiles */
-.corrwrap .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px}
-.corrwrap .kpi{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--paper)}
-.corrwrap .kpi .n{font-family:var(--disp);font-size:32px;color:var(--ink);line-height:1}
-.corrwrap .kpi .l{font-size:12px;font-weight:600;color:var(--ink);margin-top:7px}
-.corrwrap .kpi .s{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:5px;line-height:1.5;letter-spacing:.01em}
-/* Corridor card */
-.corrwrap .corr{border:1px solid var(--line);border-radius:13px;padding:16px 18px;margin-bottom:12px;background:var(--card)}
-.corrwrap .corrhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.corrwrap .nav{width:15px;height:15px;stroke:var(--indigo);fill:none;flex:none}
-.corrwrap .corrhead .nm{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--ink)}
-.corrwrap .tierchip{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--indigo);background:var(--indigoSoft);border:1px solid var(--takeBorder);border-radius:6px;padding:3px 7px}
-.corrwrap .corrdist{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
-.corrwrap .corrchips{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
-.corrwrap .cchip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 9px}
-.corrwrap .corrsub{font-size:12.5px;color:var(--ink2);margin:10px 0 15px}
-.corrwrap .corrgrid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
-.corrwrap .colh{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:6px}
-.corrwrap .colh svg{width:12px;height:12px;stroke:var(--indigo);fill:none}
-.corrwrap .item{padding:9px 0;border-top:1px solid var(--line)}
-.corrwrap .item .r1{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
-.corrwrap .item .nm2{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.3}
-.corrwrap .item .dt{font-family:var(--mono);font-size:10px;color:var(--muted);flex:none}
-.corrwrap .item .addr{font-family:var(--mono);font-size:10.5px;color:var(--ink2);margin-top:3px}
-.corrwrap .item .meta2{font-size:11px;color:var(--ink2);margin-top:3px}
-.corrwrap .item .meta2 b{color:var(--ink);font-weight:600}
-.corrwrap .item .tags{margin-top:6px;display:flex;gap:5px;flex-wrap:wrap}
-.corrwrap .tag{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:2px 6px}
-.corrwrap .rawtag{color:var(--muted)}
-.corrwrap .corrextra{margin-top:15px;padding-top:14px;border-top:1px solid var(--line)}
-.corrwrap .cexlabel{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:9px}
-.corrwrap .cexlabel svg{width:12px;height:12px;stroke:var(--indigo);fill:none}
-.corrwrap .covtitle{font-size:13px;font-weight:600;color:var(--ink);line-height:1.35}
-.corrwrap .covtitle a{color:var(--ink);text-decoration:none;border-bottom:1.5px solid var(--takeBorder)}
-.corrwrap .covmeta{font-family:var(--mono);font-size:10px;color:var(--muted);margin:3px 0 6px}
-.corrwrap .covsum{font-size:12px;color:var(--ink2);line-height:1.5}
-.corrwrap .zrow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.corrwrap .zaddr{font-size:12.5px;font-weight:600;color:var(--ink)}
-.corrwrap .zmeta{font-family:var(--mono);font-size:10px;color:var(--ink2)}
-.corrwrap .zstatus{font-family:var(--mono);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:2px 7px}
-.corrwrap .zuse{font-size:12px;color:var(--ink2);margin-top:4px}
-.corrwrap .corr.collapsed{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--paper)}
-.corrwrap .corr.collapsed .corrsub{margin:0;flex-basis:100%;order:3}
-.corrwrap .foot{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.02em;line-height:1.6;padding-top:15px;margin-top:8px;border-top:1px solid var(--line)}
-.corrwrap .foot b{color:var(--ink2);font-weight:700}
-@media(max-width:640px){.corrwrap .kpis{grid-template-columns:repeat(2,1fr)}.corrwrap .corrgrid{grid-template-columns:1fr}.corrwrap .take-row{flex-wrap:wrap}}
 /* Corridor Intelligence: no divider line between the section header and the takeaway */
 #print-section-corridor-news .chead{border-bottom:none;padding-bottom:0;margin-bottom:0}
 /* Collapsible section title rows (title + chevron): the header owns the

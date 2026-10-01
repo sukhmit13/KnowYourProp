@@ -843,7 +843,16 @@ export async function findCorridorArticles(
   corridorKeys: string[],
   days = 90
 ): Promise<NewsArticle[]> {
-  if (corridorKeys.length === 0) return [];
+  return (await findCorridorArticlesWithCoverage(corridorKeys, days)).articles;
+}
+
+export async function findCorridorArticlesWithCoverage(
+  corridorKeys: string[],
+  days = 90,
+): Promise<{ articles: NewsArticle[]; coverage: { status: NewsFeedState; successfulFeeds: number; totalFeeds: number } }> {
+  if (corridorKeys.length === 0) {
+    return { articles: [], coverage: { status: "unavailable", successfulFeeds: 0, totalFeeds: 0 } };
+  }
 
   const CORRIDOR_FEED_MAP: Record<string, string[]> = {
     chicago_avenue: ['block_club_west_town'],
@@ -905,9 +914,16 @@ export async function findCorridorArticles(
     ...Array.from(neighborhoodFeedSet),
   ];
 
-  const feedPromises: Promise<NewsArticle[]>[] = feedNames
-    .filter(name => RSS_FEEDS[name])
-    .map(name => fetchFeed(name, RSS_FEEDS[name]));
+  const feedPromises: Promise<NewsArticle[]>[] = [];
+  const feedStates: NewsFeedState[] = [];
+  const addFeed = (name: string, url: string) => {
+    const index = feedPromises.length;
+    feedStates[index] = "unavailable";
+    feedPromises.push(fetchFeed(name, url, state => { feedStates[index] = state; }));
+  };
+  for (const name of feedNames.filter(feedName => RSS_FEEDS[feedName])) {
+    addFeed(name, RSS_FEEDS[name]);
+  }
 
   const crainsPerCorridor: { key: string; promiseIndex: number }[] = [];
   for (const key of corridorKeys) {
@@ -915,7 +931,7 @@ export async function findCorridorArticles(
     if (!url) continue;
     const cacheKey = `crains_corridor_${key}`;
     crainsPerCorridor.push({ key, promiseIndex: feedPromises.length });
-    feedPromises.push(fetchFeed(cacheKey, url));
+    addFeed(cacheKey, url);
   }
 
   const yimbyPerCorridor: { key: string; promiseIndex: number }[] = [];
@@ -923,7 +939,7 @@ export async function findCorridorArticles(
     const url = buildYimbyCorridorSearchUrl(key);
     if (!url) continue;
     yimbyPerCorridor.push({ key, promiseIndex: feedPromises.length });
-    feedPromises.push(fetchFeed(`yimby_corridor_${key}`, url));
+    addFeed(`yimby_corridor_${key}`, url);
   }
 
   const blockClubPerCorridor: { key: string; promiseIndex: number }[] = [];
@@ -931,7 +947,7 @@ export async function findCorridorArticles(
     const url = buildBlockClubCorridorSearchUrl(key);
     if (!url) continue;
     blockClubPerCorridor.push({ key, promiseIndex: feedPromises.length });
-    feedPromises.push(fetchFeed(`blockclub_corridor_${key}`, url));
+    addFeed(`blockclub_corridor_${key}`, url);
   }
 
   const realDealPerCorridor: { key: string; promiseIndex: number }[] = [];
@@ -939,7 +955,7 @@ export async function findCorridorArticles(
     const url = buildRealDealCorridorSearchUrl(key);
     if (!url) continue;
     realDealPerCorridor.push({ key, promiseIndex: feedPromises.length });
-    feedPromises.push(fetchFeed(`real_deal_corridor_${key}`, url));
+    addFeed(`real_deal_corridor_${key}`, url);
   }
 
   const dezeenPerCorridor: { key: string; promiseIndex: number }[] = [];
@@ -947,7 +963,7 @@ export async function findCorridorArticles(
     const url = buildDezeenCorridorSearchUrl(key);
     if (!url) continue;
     dezeenPerCorridor.push({ key, promiseIndex: feedPromises.length });
-    feedPromises.push(fetchFeed(`dezeen_corridor_${key}`, url));
+    addFeed(`dezeen_corridor_${key}`, url);
   }
 
   const dwellPerCorridor: { key: string; promiseIndex: number }[] = [];
@@ -955,7 +971,7 @@ export async function findCorridorArticles(
     const url = buildDwellCorridorSearchUrl(key);
     if (!url) continue;
     dwellPerCorridor.push({ key, promiseIndex: feedPromises.length });
-    feedPromises.push(fetchFeed(`dwell_corridor_${key}`, url));
+    addFeed(`dwell_corridor_${key}`, url);
   }
 
   const archDailyPerCorridor: { key: string; promiseIndex: number }[] = [];
@@ -963,7 +979,7 @@ export async function findCorridorArticles(
     const url = buildArchDailyCorridorSearchUrl(key);
     if (!url) continue;
     archDailyPerCorridor.push({ key, promiseIndex: feedPromises.length });
-    feedPromises.push(fetchFeed(`archdaily_corridor_${key}`, url));
+    addFeed(`archdaily_corridor_${key}`, url);
   }
 
   const infatuationPerCorridor: { key: string; promiseIndex: number }[] = [];
@@ -971,7 +987,7 @@ export async function findCorridorArticles(
     const url = buildInfatuationCorridorSearchUrl(key);
     if (!url) continue;
     infatuationPerCorridor.push({ key, promiseIndex: feedPromises.length });
-    feedPromises.push(fetchFeed(`infatuation_corridor_${key}`, url));
+    addFeed(`infatuation_corridor_${key}`, url);
   }
 
   const timeoutPerCorridor: { key: string; promiseIndex: number }[] = [];
@@ -979,7 +995,7 @@ export async function findCorridorArticles(
     const url = buildTimeoutCorridorSearchUrl(key);
     if (!url) continue;
     timeoutPerCorridor.push({ key, promiseIndex: feedPromises.length });
-    feedPromises.push(fetchFeed(`timeout_corridor_${key}`, url));
+    addFeed(`timeout_corridor_${key}`, url);
   }
 
   const chicagoReaderPerCorridor: { key: string; promiseIndex: number }[] = [];
@@ -987,7 +1003,7 @@ export async function findCorridorArticles(
     const url = buildChicagoReaderCorridorSearchUrl(key);
     if (!url) continue;
     chicagoReaderPerCorridor.push({ key, promiseIndex: feedPromises.length });
-    feedPromises.push(fetchFeed(`chicagoreader_corridor_${key}`, url));
+    addFeed(`chicagoreader_corridor_${key}`, url);
   }
 
   const results = await Promise.allSettled(feedPromises);
@@ -1155,7 +1171,12 @@ export async function findCorridorArticles(
   }
 
   filtered.sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime());
-  return filtered.slice(0, 12);
+  const successfulFeeds = feedStates.filter(state => state === "available").length;
+  const status = deriveNewsFeedCoverageStatus(feedStates);
+  return {
+    articles: filtered.slice(0, 12),
+    coverage: { status, successfulFeeds, totalFeeds: feedStates.length },
+  };
 }
 
 const SIGNAL_KEYWORDS = [
@@ -1181,6 +1202,14 @@ interface NewsArticle {
   source: string;
 }
 
+export type NewsFeedState = "available" | "partial" | "unavailable";
+
+export function deriveNewsFeedCoverageStatus(states: NewsFeedState[]): NewsFeedState {
+  if (states.length > 0 && states.every(state => state === "available")) return "available";
+  if (states.some(state => state === "available" || state === "partial")) return "partial";
+  return "unavailable";
+}
+
 interface CacheEntry {
   articles: NewsArticle[];
   timestamp: number;
@@ -1193,9 +1222,14 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-async function fetchFeed(feedName: string, url: string): Promise<NewsArticle[]> {
+async function fetchFeed(
+  feedName: string,
+  url: string,
+  reportState?: (state: NewsFeedState) => void,
+): Promise<NewsArticle[]> {
   const cached = feedCache.get(feedName);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    reportState?.('available');
     return cached.articles;
   }
 
@@ -1222,9 +1256,11 @@ async function fetchFeed(feedName: string, url: string): Promise<NewsArticle[]> 
     });
 
     feedCache.set(feedName, { articles, timestamp: Date.now() });
+    reportState?.('available');
     return articles;
   } catch (err) {
     console.error(`[NEWS] Error fetching feed ${feedName}:`, (err as Error).message);
+    reportState?.(cached ? 'partial' : 'unavailable');
     return cached?.articles || [];
   }
 }

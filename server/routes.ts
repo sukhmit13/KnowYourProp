@@ -2137,10 +2137,58 @@ export async function registerRoutes(
   // === NEWS COVERAGE TAKEAWAY (site-specific; report-data-first verification) ===
   const newsTakeawayInFlight = new Set<number>();
 
+  async function enrichNewsMetaWithCachedArticleLocation(metaItems: any[], subjectAddress: string): Promise<any[]> {
+    const [{ resolveArticleAddressPoint }, { getDevelopmentCorridor }] = await Promise.all([
+      import('./newsArticleLocation'),
+      import('./developmentPipeline'),
+    ]);
+    const newsArticleGeocodeLookups = new Map<string, Promise<any>>();
+    const readCachedGeocode = (addressKey: string) => {
+      const key = addressKey.trim().toLowerCase();
+      let lookup = newsArticleGeocodeLookups.get(key);
+      if (!lookup) {
+        if (newsArticleGeocodeLookups.size >= 60) return Promise.resolve(undefined);
+        lookup = storage.getGeocodeAnyAge(key).catch(() => undefined);
+        newsArticleGeocodeLookups.set(key, lookup);
+      }
+      return lookup;
+    };
+    return Promise.all(metaItems.map(async item => {
+      const articleText = `${item.articleTitle ?? item.title ?? ''} ${item.articleSummary ?? item.summary ?? item.snippet ?? ''}`;
+      const matchedAddress = String(item.matched ?? item.matched_address ?? '');
+      const tier = item.tier === 'adjacent' ? 'adjacent' as const : 'parcel' as const;
+      const identity = matchedAddress
+        ? await resolveArticleAddressPoint({
+          text: articleText,
+          matchedAddress,
+          tier,
+          subjectAddress,
+        }, readCachedGeocode)
+        : null;
+      const corridor = identity
+        ? getDevelopmentCorridor(identity.address, identity.latitude, identity.longitude)
+        : null;
+      const { raw: _raw, matched: _matched, articleTitle: _articleTitle, articleSummary: _articleSummary, ...publicItem } = item;
+      return {
+        ...publicItem,
+        corridor,
+        matchedArticleAddress: identity?.address ?? null,
+        locationVerification: identity
+          ? 'article address identity matched cached geocode coordinates'
+          : 'address-search association only; article-owned coordinates not verified',
+      };
+    }));
+  }
+
   app.get('/api/runs/:id/news-takeaway', async (req, res) => {
     const run = await loadOwnedRun(req, res);
     if (!run) return;
-    return res.json((run as any).newsTakeaway ?? null);
+    const cached = (run as any).newsTakeaway;
+    if (!cached) return res.json(null);
+    const meta = Array.isArray(cached.meta)
+      ? await enrichNewsMetaWithCachedArticleLocation(cached.meta, run.address)
+      : [];
+    return res.json({ ...cached, meta });
   });
 
   app.post('/api/runs/:id/news-takeaway', async (req, res) => {
@@ -2198,6 +2246,25 @@ export async function registerRoutes(
       // Fail-closed: zero matched coverage → the section renders nothing.
       return res.json({ section: null, articles: [], meta: [], generatedAt: new Date().toISOString() });
     }
+    const enrichedMeta = await enrichNewsMetaWithCachedArticleLocation(
+      inputArticles.map((article, index) => ({
+        ...article,
+        raw: merged[index]?.raw,
+        matched: merged[index]?.matched,
+        articleTitle: merged[index]?.raw?.title,
+        articleSummary: merged[index]?.raw?.summary,
+      })),
+      run.address,
+    );
+    const meta = enrichedMeta.map(article => {
+      const { snippet: _snippet, ...safeArticle } = article;
+      const mo = article.date ? monthsOld(article.date) : null;
+      return {
+        ...safeArticle,
+        snippet: undefined,
+        age_flag: mo != null && mo > 12 ? (mo >= 24 ? `~${Math.round(mo / 12)} yr old` : `~${mo} mo old`) : null,
+      };
+    });
     // report_facts — bound in code from the report's OWN sections (report-data-first).
     // Priority source 1: business licenses at the address (effective status derived
     // from term dates, mirroring the Business License History section's own logic).
@@ -2241,9 +2308,9 @@ export async function registerRoutes(
       ls: listingStatus,
     })).digest('hex').slice(0, 24);
     const cached = (run as any).newsTakeaway;
-    if (cached && cached.dataHash === dataHash && cached.section) return res.json(cached);
+    if (cached && cached.dataHash === dataHash && cached.section) return res.json({ ...cached, meta });
     if (cached?.generatedAt && Date.now() - new Date(cached.generatedAt).getTime() < 10 * 60 * 1000) {
-      return res.json(cached);
+      return res.json({ ...cached, meta });
     }
     if (newsTakeawayInFlight.has(run.id)) {
       return res.status(409).json({ message: 'Takeaway generation already running for this report.' });
@@ -2257,15 +2324,6 @@ export async function registerRoutes(
         articles: inputArticles,
         report_facts: reportFacts,
         as_of: asOf,
-      });
-      // meta: everything the renderer needs per card, bound in code (age flag included)
-      const meta = inputArticles.map(a => {
-        const mo = a.date ? monthsOld(a.date) : null;
-        return {
-          ...a,
-          snippet: undefined, // don't persist article bodies
-          age_flag: mo != null && mo > 12 ? (mo >= 24 ? `~${Math.round(mo / 12)} yr old` : `~${mo} mo old`) : null,
-        };
       });
       const takeaway = result ? {
         section: result.section,
@@ -9238,7 +9296,14 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       }
       const { getNearbyBusinessLicenses } = await import('./businessLicenses');
       const result = await getNearbyBusinessLicenses(parseFloat(lat), parseFloat(lng), 1.0);
-      res.json(result);
+      const { getDevelopmentCorridor } = await import('./developmentPipeline');
+      res.json({
+        ...result,
+        licenses: result.licenses.map(license => ({
+          ...license,
+          corridor: getDevelopmentCorridor(license.address, license.latitude, license.longitude),
+        })),
+      });
     } catch (err) {
       console.error('Nearby business licenses error:', err);
       res.status(500).json({ message: "Error looking up nearby business licenses" });
@@ -9393,68 +9458,24 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     }
   });
 
-  app.get('/api/corridor-news', async (req, res) => {
+  const handleCorridorNewsRequest = async (req: Request, res: Response) => {
     try {
-      const lat = parseFloat(req.query.lat as string);
-      const lng = parseFloat(req.query.lng as string);
-      const address = (req.query.address as string) || '';
-      if (isNaN(lat) || isNaN(lng)) {
-        return res.status(400).json({ error: 'lat, lng params required' });
+      const raw = req.method === 'POST' ? req.body : req.query;
+      const { validateCorridorNewsInput, getCorridorNews } = await import('./corridorIntelligence');
+      const input = validateCorridorNewsInput(raw);
+      if (!input) {
+        return res.status(400).json({
+          error: 'lat and lng must be valid coordinates; address, neighborhood, communityArea, and exclusions must be bounded valid values',
+        });
       }
-      const neighborhood = (req.query.neighborhood as string) || '';
-      const communityArea = (req.query.communityArea as string) || '';
-      const { findNearbyCorridors, findCorridorArticles, findCorridorPodcasts, articleMentionsCorridor, articleMentionsNeighborhood, getBorderingAreas, articleMentionsExplicitNonLocalNeighborhood } = await import('./newsMonitor');
-      const corridors = findNearbyCorridors(lat, lng, address);
-      if (corridors.length === 0) {
-        return res.json({ is_near_corridor: false, corridors: [] });
-      }
-      const corridorKeys = corridors.map(c => c.corridorKey);
-      const [articles, corridorPodcasts, dpdResult] = await Promise.all([
-        findCorridorArticles(corridorKeys, 90),
-        findCorridorPodcasts(corridorKeys, 90),
-        import('./dpdApplications').then(({ getDpdApplications }) => getDpdApplications()),
-      ]);
-
-      // Build allowed area set: current neighborhood + bordering community areas
-      const allowedAreas = new Set<string>();
-      if (neighborhood) allowedAreas.add(neighborhood.toLowerCase());
-      if (communityArea) allowedAreas.add(communityArea.toLowerCase());
-      getBorderingAreas(neighborhood, communityArea).forEach(a => allowedAreas.add(a));
-
-      const taggedArticles = articles.map(article => {
-        const matchedCorridors = corridorKeys.filter(key => articleMentionsCorridor(article, key));
-        const mentionsNeighborhood = !!(neighborhood || communityArea) &&
-          articleMentionsNeighborhood(article, neighborhood, communityArea);
-        // Exclude articles that explicitly name a non-local Chicago neighborhood
-        if (allowedAreas.size > 0 && articleMentionsExplicitNonLocalNeighborhood(article, allowedAreas)) {
-          return null;
-        }
-        return { ...article, corridorKeys: matchedCorridors, mentionsNeighborhood };
-      }).filter((a): a is NonNullable<typeof a> => a !== null && (a.corridorKeys.length > 0 || a.mentionsNeighborhood)).slice(0, 30);
-       const dpdApplications = dpdResult.applications.flatMap(application => {
-         if (application.latitude == null || application.longitude == null) return [];
-         const distanceMi = haversineDistanceMi(lat, lng, application.latitude, application.longitude);
-         if (distanceMi > CORRIDOR_DPD_RADIUS_MILES) return [];
-         const matchedCorridors = findNearbyCorridors(application.latitude, application.longitude, application.address)
-           .map(c => c.corridorKey).filter(key => corridorKeys.includes(key));
-         return matchedCorridors.length
-           ? [{ ...application, corridorKeys: matchedCorridors, distanceMi: Math.round(distanceMi * 100) / 100 }]
-           : [];
-       });
-      res.json({
-        is_near_corridor: true,
-        corridors,
-        news_count: taggedArticles.length,
-        articles: taggedArticles,
-        podcasts: corridorPodcasts,
-        dpdApplications,
-        dpdCoverage: dpdResult.coverage,
-      });
+      return res.json(await getCorridorNews(input));
     } catch (err) {
       console.error('Corridor news error:', err);
-      res.status(500).json({ error: 'Error fetching corridor news' });
+      return res.status(500).json({ error: 'Error fetching corridor news' });
     }
-  });
+  };
+  app.get('/api/corridor-news', handleCorridorNewsRequest);
+  app.post('/api/corridor-news', handleCorridorNewsRequest);
 
   app.get('/api/zba-approvals', async (req, res) => {
     try {
@@ -9682,9 +9703,6 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       res.status(500).json({ error: 'Error fetching radius rental data' });
     }
   });
-
-  // Keep corridor DPD signals local to the report address, matching the corridor discovery radius.
-  const CORRIDOR_DPD_RADIUS_MILES = 0.5;
 
   // Upcoming Developments - news and permits, supplemented by bounded DPD Plan Commission applications.
   function haversineDistanceMi(lat1: number, lon1: number, lat2: number, lon2: number): number {

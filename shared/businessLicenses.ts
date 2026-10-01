@@ -7,6 +7,12 @@ export type LicenseCategory =
   | 'gallery'
   | 'other';
 
+export interface LicenseCorridor {
+  key: string;
+  name: string;
+  tier: number;
+}
+
 export interface NearbyLicense {
   businessName: string;
   address: string;
@@ -16,6 +22,7 @@ export interface NearbyLicense {
   distanceMiles: number;
   latitude: number;
   longitude: number;
+  corridor?: LicenseCorridor | null;
 }
 
 export interface NearbyLicensesResponse {
@@ -39,6 +46,7 @@ export interface LicenseEstablishment {
   distanceMiles: number;
   licenses: Pick<NearbyLicense, 'licenseType' | 'licenseCategory' | 'startDate'>[];
   comboLabel: string;
+  corridor?: LicenseCorridor | null;
 }
 
 export const LICENSE_CATEGORY_LABEL: Record<LicenseCategory, string> = {
@@ -91,10 +99,12 @@ export function groupLicenseEstablishments(licenses: NearbyLicense[]): LicenseEs
         distanceMiles: license.distanceMiles,
         licenses: [],
         comboLabel: '',
+        corridor: license.corridor ?? null,
         categories: new Set<LicenseCategory>(),
       };
       grouped.set(key, establishment);
     }
+    if (!establishment.corridor && license.corridor) establishment.corridor = license.corridor;
     establishment.distanceMiles = Math.min(establishment.distanceMiles, license.distanceMiles);
     establishment.licenses.push({
       licenseType: license.licenseType,
