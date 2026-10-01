@@ -61,6 +61,7 @@ export interface ScanCtx {
   isLoadingLiens?: boolean;
   businessLicenses?: { totalCount: number; priorPeriodCount: number; changePct: number | null } | null;
   newConstruction?: { subject?: { totalPermits?: number }; activePermitCount?: number; trend?: { changePct?: number | null; suppressed?: boolean } } | null;
+  development?: { pipeline?: { unitsUnderConstruction?: number | null; observedUnitsUnderConstruction?: number | null; permitUnitsUnknownAddressCount?: number; permitUnitsSource?: string; potentialUnits?: number | null } | null } | null;
 }
 
 type Dyn = Partial<Pick<ScanSection, "takeaway" | "verdict" | "hero">>;
@@ -177,13 +178,16 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
     };
   }
 
-  const constructionCount = ctx.newConstruction?.subject?.totalPermits;
-  if (constructionCount != null) {
+  const fullConstructionUnits = num(ctx.development?.pipeline?.unitsUnderConstruction);
+  const observedConstructionUnits = num(ctx.development?.pipeline?.observedUnitsUnderConstruction);
+  const constructionUnits = fullConstructionUnits ?? (observedConstructionUnits != null && observedConstructionUnits > 0 ? observedConstructionUnits : null);
+  if (constructionUnits != null) {
     const trend = ctx.newConstruction?.trend;
-    dyn.newConstruction = {
-      takeaway: <><em>{constructionCount} new-construction permit{constructionCount === 1 ? "" : "s"}</em> within one mile over the source period.</>,
+    const estimated = ctx.development?.pipeline?.permitUnitsSource === "description";
+    dyn.development = {
+      takeaway: <><em>{estimated ? "~" : ""}{constructionUnits} units</em> in permits issued within 18 months.{fullConstructionUnits == null ? " Readable counts only; some permitted addresses have unknown units." : ""}</>,
       verdict: trend?.suppressed || trend?.changePct == null ? { tone: "context", label: "Trend limited" } : { tone: "context", label: `${trend.changePct > 0 ? "+" : ""}${trend.changePct}% activity` },
-      hero: { value: String(constructionCount), label: "permits" },
+      hero: { value: `${estimated ? "~" : ""}${constructionUnits}`, label: "units" },
     };
   }
 

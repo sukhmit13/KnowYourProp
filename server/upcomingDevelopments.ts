@@ -8,6 +8,7 @@ const rssParser = new Parser({
 export interface UpcomingDevelopment {
   id: string;
   source: string;
+  publisher?: string;
   stage: 2;
   title: string;
   url: string;

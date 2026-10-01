@@ -1,0 +1,321 @@
+# Step 27 — merge §New Construction into §Nearby Development & Construction
+
+> **On the numbering.** "Step 27" is the work item, not a section number. Its stylesheet is named
+> `kyp-base-patch-27-development.css` because an earlier, abandoned `kyp-base-patch-27.css` exists
+> (a donut-spacing change that was dropped and never specced). **Do not apply that file.** The section's own number in
+> the report (23, 24, …) is the live accordion index and changes when the user reorders rows — it is
+> 23 on one saved run and 24 on another. The target render shows `23.1–23.4` only because that is
+> where this section sat on the audited run. **Every subhead number in this step derives from
+> `KypSubhead subsection={n}`. Hard-code nothing.**
+
+Audited against commit **`90364cb`**. Read in full: `RunDetail.tsx` **17389–17946** (558 lines,
+the `accProps("development")` section), `NewConstructionSection.tsx` (86 lines),
+`sectionRegistry.tsx`, `scanBuilder.tsx` §9, `server/chicagoPermits.ts` `contacts()`,
+`server/dpdApplications.ts`, and `CORRIDOR_KEYWORDS` in `server/newsMonitor.ts`. **100%.**
+
+---
+
+## 0. Files to work from
+
+| File | What it is |
+|---|---|
+| `step27-target.png` | **The target.** Render and match it. |
+| `step27-target.html` | Same page, self-contained — open it and inspect computed styles. |
+| `step27-markup.html` | The target DOM alone. Class names and element order are normative. |
+| `kyp-base-patch-27-development.css` | The only CSS this step adds. Seven rules, appended to the **end** of `client/src/kyp-base.css`. |
+
+The target was built against the **live** `kyp-base.css` at `90364cb` (123,912 bytes), which already
+contains the Step 25b and Step 26 patches.
+
+---
+
+## 1. What this step does
+
+**Two accordion rows become one.** §New Construction is deleted as a row and becomes subsection .1
+of §Nearby Development & Construction.
+
+```
+BEFORE                                  AFTER
+§ New Construction            (row)     § Nearby Development & Construction   (row)
+  nearby permits · mix · volume           ┌ unit pipeline (3 blocks, no subhead) ┐
+                                          │ under construction · potential ·     │
+§ Nearby Development & …      (row)       │ commercial proposals                 │
+  Upcoming Real Estate Developments       └──────────────────────────────────────┘
+    ├ Section Summary        ◄ DELETE     .1 Permits
+    ├ DPD Application Signals                mix · annual volume · list w/ GC+architect
+    ├ Development News                    .2 Proposed Projects   (DPD)
+    ├ New Construction Permits ◄ DEAD     .3 Zoning Board Activity
+    └ Zoning Board Activity               .4 Development News     (logo rows)
+```
+
+**The purpose of the section is a unit count**, not four lists. The pipeline strip is the answer;
+.1–.4 are the evidence.
+
+---
+
+## 2. Deletions
+
+| Lines | What | Why |
+|---|---|---|
+| `17731–17789` | "New Construction Permits" sub-collapsible | **Dead code** — the gate at `17731` begins `false &&`. It has never rendered. ~58 lines. |
+| `17441–17592` | "Section Summary" and its whole bullet engine | A takeaway. Its own warning at `17554` reads *"do not add these unit counts to the others above"* — the product knows the figures aren't additive. The useful part (cross-source matches) returns as a row tag, §6. |
+| `17584` | `text-amber-600 dark:text-amber-400` | **Amber is not in the palette.** This is the only live use in the report. |
+| `17396–17428` | the outer `Collapsible` / `Card` / `CardHeader` / `CardTitle` wrapper, incl. the title `Upcoming Real Estate Developments` and the three collapsed-state badges at `17409 / 17414 / 17419` | The accordion row is already the collapsible. A second one nested inside it is the pattern every other restyled section has removed. |
+| `17642`, `17732`, `17838` | the three sub-`Collapsible`s and their carets | Replaced by `KypSubhead`. |
+
+`isUpcomingDevelopmentsOpen`, `isDevNewsSubOpen`, `isNewConstructionSubOpen` and
+`isZbaActivitySubOpen` all become unused — remove the state declarations too.
+
+Keep `17429–17437` (the ½ mile / 1 mile `Select`) but render it as `.kyp-segrow` / `.kyp-seg`,
+inside .2 where it belongs. It currently sits above everything and appears to govern the whole
+section; it only governs the DPD radius.
+
+---
+
+## 3. The merge
+
+**`client/src/components/report/sectionRegistry.tsx`**
+
+1. `SECTION_ORDER` (`:13–16`) — remove `"newConstruction"`.
+2. Delete the `newConstruction` entry (`:46–48`).
+3. Rewrite `development` (`:64–66`):
+   ```ts
+   development: { id: "development", anchorId: "print-section-upcoming-developments",
+     title: "Nearby Development & Construction",
+     summary: "Units under construction and in the approval pipeline nearby.",
+     info: ["New-construction permits within one mile", "Plan Commission applications",
+            "Zoning Board decisions and hearings", "Development news coverage"] },
+   ```
+
+**`client/src/pages/RunDetail.tsx`**
+
+4. `ACC_DEFAULT_ORDER` (`:1283`) — remove `"newConstruction"`. **No migration needed**:
+   `mergeAccOrder` already drops saved ids that are not in the new default.
+5. Delete the `<AccordionSection {...accProps("newConstruction")}>` wrapper at `14823–14830` and
+   render `<NewConstructionSection …>` inside the development section, under subhead .1.
+6. Keep `id="print-section-new-construction"` on the NewConstructionSection root so the existing
+   print checkbox and the "New Construction" jump-link keep working. Point the jump-link's
+   `setSectionOpen` at `development`.
+7. `4266–4267` — the two jump-links labelled `Upcoming Real Estate Developments` and `ZBA Activity`
+   must stop calling `setSectionOpen('upcomingDevelopments' | 'zbaActivitySub')`; those states no
+   longer exist. Open `development` and scroll to the subhead anchor.
+
+**`client/src/components/report/scanBuilder.tsx`**
+
+8. `dyn.newConstruction` (`:180–188`) becomes `dyn.development`. Change its hero from
+   `{ value: constructionCount, label: "permits" }` to the pipeline's units-under-construction
+   figure, `label: "units"` — the row badge should lead with the section's purpose.
+   Keep the trend verdict as `tone: "context"`; permit volume has no polarity.
+
+---
+
+## 4. Server work
+
+### 4a. Architect — already parsed, just not passed through
+
+`server/chicagoPermits.ts:95–104` already extracts `ownerName`, `architectName` **and**
+`contractorName`. `NewConstructionSection.tsx:77` renders only the contractor. Carry `architectName`
+through the `/api/new-construction` response. **No new parsing, no new request.**
+
+### 4b. Corridor tag
+
+`CORRIDOR_KEYWORDS` (`server/newsMonitor.ts:224`) is an exported table of **34 corridors**, each with
+`names[]`, `tier`, `description`, a bounding box, and for three diagonals a `line`.
+
+Add `corridor: { key, name, tier } | null` to each permit, DPD application, ZBA case and development
+news item. The rule is **both tests, not either**:
+
+1. the record's address string matches one of `names[]`, **and**
+2. the record's point falls inside that corridor's bbox (or within ~120 m of `line` where present).
+
+Name alone tags a permit at 7000 W Chicago Ave as the West Town Chicago Avenue corridor. Bbox alone
+tags a side-street project as being on Broadway when its frontage is not. **Both, or no tag.**
+Compute this server-side — the table lives there and the client never sees it.
+
+### 4c. The unit pipeline — one address, one stage
+
+This is the substantive work. Return three figures plus a per-record `stage`.
+
+**Furthest stage wins.** For each normalised address across permits, DPD applications and ZBA cases:
+
+| Stage | Condition | Counts toward |
+|---|---|---|
+| `permitted` | an issued new-construction permit exists | **Units under construction** when issued within 18 months |
+| `proposed` | a DPD application exists **and no permit** | Potential future units |
+| `zoning` | a ZBA case exists **and no permit and no DPD application** | Potential future units |
+| `coverage` | a news article only | **nothing** |
+
+`normalizeAddrForMatch` already exists (`server/routes.ts` ~`:9790`) and already does article↔permit
+and article↔ZBA. Extend it to permit↔DPD and permit↔ZBA. Reuse it; do not write a second matcher.
+
+Return:
+
+```ts
+pipeline: {
+  unitsUnderConstruction: number;   // from the permit record's units field — STRUCTURED
+  activePermitCount: number;        // permits behind that figure
+  potentialUnits: number;           // DPD + ZBA units at non-permitted addresses — PARSED
+  potentialAmbiguous: boolean;      // true if any contributing record is unitsAmbiguous
+  commercialProposals: number;      // ZBA/DPD business-use cases
+}
+```
+
+**Only `unitsUnderConstruction` is structured.** DPD units come from `parseUnits(description)` with
+its own `unitsAmbiguous` flag (`server/dpdApplications.ts:22–23, 70`); ZBA units are regex-read from
+the case `subject`; news units are regex-read from a headline.
+
+> **Do not emit a combined total.** Adding one structured count to three parsed ones produces a
+> number the product cannot defend. Render the two figures separately, exactly as the target does,
+> and prefix the parsed one with `~`.
+
+---
+
+## 5. The pipeline strip
+
+Three `.kyp-block` in a plain `<div class="kyp-blocks">` (already 3-up at top level; the single
+column is inside `@media (max-width:640px)`), above subhead .1, **with no subhead of its own** —
+the same way §19's commercial KPI strip opens its run.
+
+| Block | Tone | `.bv` | `.bl` | `.bd` |
+|---|---|---|---|---|
+| 1 | `ind` | `{unitsUnderConstruction}` | Units under construction | `across {activePermitCount} permits issued within 18 months · from the permit record` |
+| 2 | `slate` | `~{potentialUnits}` | Potential future units | `proposed or seeking zoning relief at addresses with no permit yet · as stated in application text` |
+| 3 | `slate` | `{commercialProposals}` | Commercial proposals | `special-use and map-amendment cases for business uses` |
+
+Indigo on the first because it is the section's headline fact; slate on the others. **Not green or
+red** — construction volume has no polarity.
+
+Then one `.kyp-src pipefoot` carrying the counting rule, verbatim from the target:
+
+> Each address is counted once, at its furthest stage: an issued permit outranks a Plan Commission
+> application, which outranks a zoning appeal. News coverage is never counted. **The two figures are
+> not added together** — the first is a field on the permit record, the second is read from
+> application text and can be wrong where a headline figure covers more than one phase.
+
+---
+
+## 6. The four subsections
+
+### .1 Permits — `NewConstructionSection`
+
+**Keep the permit mix and the annual permit volume exactly as they are.** Both already render as
+`.kyp-hbar` lists under `KypSubhead` and need no change.
+
+Two changes only:
+
+1. **Hero blocks drop from three to two.** `Nearby permits` and `Median reported cost` stay, in
+   `<div class="kyp-blocks two">`. **`Likely still building` is removed** — it answers the same
+   question as the pipeline's *units under construction*, in permits rather than units. The count is
+   not lost: it is the `{activePermitCount}` in that block's `.bd`.
+2. **Each permit row gains GC and architect**, in a second `.kyp-biz-cardmeta` row:
+   ```jsx
+   <span className="kyp-pro"><i>GC</i>
+     <a href={`/discovery?view=gc-rankings&search=${encodeURIComponent(permit.contractorName)}`}>
+       {permit.contractorName}</a></span>
+   <span className="kyp-pro"><i>Architect</i>
+     <a href={`/discovery?view=architect-rankings&search=${encodeURIComponent(permit.architectName)}`}>
+       {permit.architectName}</a></span>
+   ```
+   Render each only when the permit has it — many have one and not the other. Those two view types
+   and the `search` param already exist (`Discovery.tsx:849`, `:888`).
+3. Replace `button.more` with `.kyp-morelink`. `.more` is scoped to `.ecbox` in `index.css`, so
+   inside `.kyp-biz` it is an **unstyled native button** today.
+
+The corridor tag goes first in the first `.kyp-biz-cardmeta` row.
+
+### .2 Proposed Projects — DPD
+
+`KypSubhead` counter-text `Plan Commission · {radius}`. The ½ / 1 mile control moves here as
+`.kyp-segrow`. Rows keep address, application type, distance, status, applicant, proposal text,
+hearing date and the official-hearing link. Status takes `.kyp-pill ind` — a procedural state, not a
+verdict.
+
+### .3 Zoning Board Activity
+
+Two columns in `.kyp-twocol`: Recent Decisions beside Upcoming Appearances. Keep the per-case fields,
+the `<details>` "Full application text", and both empty states. Decision pill takes `.kyp-pill ind`.
+
+### .4 Development News — logo rows
+
+Use the `.kyp-archrow` format from §News, with `LogoTile` (`RunDetail.tsx:1059`) for the publisher
+logo: bundled SVG from `SOURCE_LOGOS` → favicon → coloured plate. Row is logo, then
+`.kyp-archkick` (corridor tag · status pill · *also a permit* tag), then `.kyp-archtitle`, then
+address and parsed chips.
+
+**The units/storeys chips here never feed the pipeline.** Where an article shares an address with a
+record in .1–.3, render `<span class="kyp-alsoin">• also a permit in {n}.1</span>` — that is the
+whole of what the deleted Section Summary was telling you, attached to the row it is about.
+
+---
+
+## 7. Footers — one per block, at the end
+
+Five in total: one under the pipeline strip, one at the end of each subsection. All `.kyp-src`.
+No scope note before or between any panel. Text verbatim in `step27-markup.html`; .4's ends:
+
+> Units, storeys and developer are read from the article text, not from a permit or application, and
+> are not comparable with the counts in .1–.3.
+
+---
+
+## 8. CSS — `kyp-base-patch-27-development.css`
+
+Seven rules, appended to the **end** of `client/src/kyp-base.css`. Parser-verified against the live
+stylesheet: **0 parse errors, 0 collisions with the 1,220 existing rules, 0 unresolved tokens,
+no amber.**
+
+```css
+.kyp-corridor      { /* soft indigo chip — a corridor is a classification, not a verdict */ }
+.kyp-pill.ind      { background: var(--kyp-indigoSoft); color: var(--kyp-indigo) }
+.kyp-alsoin        { /* mono, muted — states that two sources share an address */ }
+.kyp-pro, .kyp-pro i, .kyp-pro a { /* role label + Discovery link */ }
+.kyp-src.pipefoot  { margin-top: 10px }
+.kyp-twocol        { 1fr 1fr, single column under 720px }
+```
+
+**Do not put `kyp-` rules anywhere but `kyp-base.css`, and do not hoist its tokens to `:root`.**
+
+---
+
+## 9. Verify before reporting done
+
+- **One** accordion row where there were two; `newConstruction` appears in neither `SECTION_ORDER`
+  nor `ACC_DEFAULT_ORDER`, and a saved custom order that contained it still loads.
+- **Zero** `Collapsible` / `Card` / `CardHeader` / `Badge` in `17389–17946`.
+- **Zero** occurrences of `amber` in `RunDetail.tsx`.
+- **Zero** occurrences of `false &&` left behind from the dead permits block.
+- Exactly **five** `.kyp-src` in the section; no scope note above or between panels.
+- Subheads are `.1–.4`, all from `KypSubhead subsection={n}`, and renumber if the row is dragged.
+- The permit mix and annual-permit-volume charts render **unchanged** from today.
+- A permit with a contractor but no architect renders one `.kyp-pro`, not an empty label.
+- Clicking a GC name lands on Discovery's GC rankings with that name in the search box.
+- Corridor tags appear only where the address matches a corridor name **and** falls in its box.
+  Spot-check: on a Broadway address the tag reads `BROADWAY`; on a side street it is absent.
+- **The pipeline arithmetic**: pick an address that has both a permit and a DPD application and
+  confirm its units are counted **once**, under units-under-construction, and **not** in
+  potential-future-units.
+- No combined units total renders anywhere.
+- Chart inventory: **2 horizontal bar lists** (permit mix, annual volume), **1 permit list**,
+  **1 DPD list**, **2 ZBA columns**, **1 news list**. Nothing converted to a different form.
+- Every figure that renders today still renders somewhere.
+
+---
+
+## 10. Not in this step
+
+- **Corridor Intelligence stays separate.** `withoutRepeatedNews` (`RunDetail.tsx:3058`) still dedupes
+  Corridor against News only, and **not** against this section — so a Block Club article can appear
+  both here and in Corridor Intelligence. That is a real gap; it is the next step, not this one.
+- §25 Neighborhood & People is **partly done**: the Step 25b CSS shipped, but `kyp-cxtile` still
+  appears 5 times in `RunDetail.tsx`, so Daytime Economy's four tiles were never converted to
+  `.kyp-block`. Their numerals are still 24px against the section's 36px. One-line fix — §5d of
+  `REPLIT_STEP25B_people.md`.
+
+---
+
+## ⚠ Separate from this step, and still outstanding
+
+Three live API keys are committed in `.replit` lines 65–71 and present in four commits —
+`RENTCAST_API_KEY`, `GOOGLE_PLACES_API_KEY`, `APIFY_API_TOKEN`. `.gitignore` has a missing newline
+(`*.tar.gzserver/cache/`), so **neither pattern works.** Rotate all three, move them to Replit
+Secrets, `git rm --cached .replit`, and fix the newline.

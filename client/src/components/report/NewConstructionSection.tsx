@@ -10,8 +10,9 @@ interface Props {
 
 const label: Record<string, string> = { singleFamily: "Single family", multifamily: "Multifamily", commercial: "Commercial" };
 const money = (value: number | null | undefined) => value == null ? "—" : `$${Math.round(value).toLocaleString()}`;
+const sourceNote = "Describes permits within 1 mile, not this address. Source: Chicago Building Permits. Only “Permit - New Construction” records within one mile are counted; garages, temporary and accessory structures are excluded. “Likely still building” is an 18-month issued-permit proxy, not a construction-status verification. Unit counts are estimated from permit descriptions. Corridor tags require both a matching street address and the corridor's mapped geography.";
 
-export function NewConstructionSection({ data, isLoading, isError, subjectUnits }: Props) {
+export function NewConstructionSection({ data, isLoading, isError, subjectUnits: subjectUnitsInput }: Props) {
   const [filter, setFilter] = useState<string | null>(null);
   const [showAllPermits, setShowAllPermits] = useState(false);
   const permits = useMemo(
@@ -22,58 +23,58 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits 
     setShowAllPermits(false);
   }, [data?.permits]);
 
-  if (isLoading) return <div className="kyp-biz-loading" aria-live="polite"><span /><span /><span /></div>;
-  if (isError) return <div className="kyp-status-empty unknown">Construction permit records could not be loaded. The nearby construction result is unknown rather than zero.</div>;
-  if (!data) return <div className="kyp-status-empty unknown">Construction data is not available for this address.</div>;
+  if (isLoading || isError || !data) return <div id="print-section-new-construction" className="kyp-biz" data-testid="card-new-construction">
+    {isLoading ? <div className="kyp-biz-loading" aria-live="polite"><span /><span /><span /></div> : <div className="kyp-status-empty unknown">{isError ? "Construction permit records could not be loaded. The nearby construction result is unknown rather than zero." : "Construction data is not available for this address."}</div>}
+    <p className="kyp-src kyp-construction-notes" data-testid="new-construction-notes">{sourceNote}</p>
+  </div>;
 
   const stats = data.subject;
   const categories = Object.entries(stats.byCategory || {}) as Array<[string, number]>;
   const maxCategory = Math.max(1, ...categories.map(([, count]) => Number(count)));
   const years = Object.entries(stats.annual || {}).filter(([year]) => /^\d{4}$/.test(year)).sort(([a], [b]) => b.localeCompare(a)) as Array<[string, any]>;
   const maxYear = Math.max(1, ...years.map(([, row]) => row.total));
-  const supplyRatio = subjectUnits && stats.permittedUnits ? stats.permittedUnits / subjectUnits : null;
-  const supplyGate = subjectUnits != null && subjectUnits > 0 && stats.permittedUnits >= 12 && supplyRatio != null && supplyRatio >= 2;
+  const subjectUnits = Number(subjectUnitsInput ?? 0) || null;
+  const permittedUnits = Number(stats.permittedUnits || 0);
+  const supplyRatio = subjectUnits && permittedUnits ? permittedUnits / subjectUnits : null;
+  const supplyGate = !!subjectUnits && permittedUnits >= 12 && !!supplyRatio && supplyRatio >= 2;
   const trend = data.trend;
 
   return (
     <div id="print-section-new-construction" className="kyp-biz" data-testid="card-new-construction">
-      <div className="kyp-biz-topline"><span className="kyp-biz-radius">1 mile · issued permits</span></div>
-      <div className="kyp-blocks kyp-biz-heroes">
+      <div className="kyp-blocks two kyp-biz-heroes">
         <div className="kyp-block ind"><div className="bv">{stats.totalPermits}</div><div><div className="bl">Nearby permits</div><div className="bd">issued in the past 3 years</div></div></div>
-        <div className="kyp-block slate"><div className="bv">{data.activePermitCount}</div><div><div className="bl">Likely still building</div><div className="bd">issued within 18 months</div></div></div>
         <div className="kyp-block slate"><div className="bv">{money(stats.medianReportedCost)}</div><div><div className="bl">Median reported cost</div><div className="bd">declared permit value</div></div></div>
       </div>
 
-      <KypSubhead className="fam-green" subsection={1}><span className="lbl">Permit mix</span><span className="ct">select a type to filter records</span><span className="rule" /></KypSubhead>
+      <KypSubhead className="fam-green"><span className="lbl">Permit mix</span><span className="ct">select a type to filter records</span><span className="rule" /></KypSubhead>
       <div className="kyp-biz-mix">
         {categories.map(([category, count]) => <button key={category} type="button" className={`kyp-hbar${filter === category ? " active" : ""}`} onClick={() => { setFilter(filter === category ? null : category); setShowAllPermits(false); }}>
           <span className="hl">{label[category] || category}</span><span className="htrack"><i className="ind" style={{ width: `${Number(count) / maxCategory * 100}%` }}><b className="hbar-count">{count}</b></i></span>
         </button>)}
       </div>
 
-      {years.length > 0 && <><KypSubhead className="fam-green" subsection={2}><span className="lbl">Annual permit volume</span><span className="ct">three-year source period</span><span className="rule" /></KypSubhead>
+      {years.length > 0 && <><KypSubhead className="fam-green"><span className="lbl">Annual permit volume</span><span className="ct">three-year source period</span><span className="rule" /></KypSubhead>
         <div className="kyp-biz-mix">{years.map(([year, row]) => <div className="kyp-hbar yr" key={year}><span className="hl">{year}</span><span className="htrack"><i className="ind" style={{ width: `${row.total / maxYear * 100}%` }}><b className="hbar-count">{row.total}</b></i></span></div>)}</div>
       </>}
-      <KypSubhead className="fam-green" subsection={years.length > 0 ? 3 : 2}><span className="lbl">{permits.length} nearby permit{permits.length === 1 ? "" : "s"}</span><span className="ct">nearest first</span><span className="rule" /></KypSubhead>
+      <KypSubhead className="fam-green"><span className="lbl">{permits.length} nearby permit{permits.length === 1 ? "" : "s"}</span><span className="ct">nearest first</span><span className="rule" /></KypSubhead>
       <div className="kyp-biz-list">{(showAllPermits ? permits : permits.slice(0, 12)).map((permit: any, index: number) => <article key={permit.permitNumber} className="kyp-biz-card" data-testid={`row-new-construction-${index}`}>
-        <div><b>{permit.address}</b><span>{label[permit.category]} · issued {permit.issueDate || "date unavailable"}{permit.likelyStillBuilding ? " · likely still building" : ""}</span></div>
+        <div><b>{permit.address}</b><span>{label[permit.category]} · issued {permit.issueDate || "date unavailable"}</span></div>
         <span className="kyp-biz-distance">{permit.distanceMiles.toFixed(2)} mi</span>
-        <div className="kyp-biz-cardmeta">{permit.units ? <span>{permit.units} units</span> : null}{permit.stories ? <span>{permit.stories} stories</span> : null}{permit.reportedCost > 0 ? <span>{money(permit.reportedCost)}</span> : null}{permit.contractorName ? <span>Contractor: {permit.contractorName}</span> : null}</div>
+        <div className="kyp-biz-cardmeta">{permit.corridor?.name && <span className="kyp-corridor">{permit.corridor.name}</span>}{permit.units ? <span>{permit.units} units</span> : null}{permit.stories ? <span>{permit.stories} stories</span> : null}{permit.reportedCost > 0 ? <span>{money(permit.reportedCost)}</span> : null}</div>
+        {(permit.contractorName || permit.architectName) && <div className="kyp-biz-cardmeta">{permit.contractorName && <span className="kyp-pro"><i>GC</i><a href={`/discovery?view=gc-rankings&search=${encodeURIComponent(permit.contractorName)}`}>{permit.contractorName}</a></span>}{permit.architectName && <span className="kyp-pro"><i>Architect</i><a href={`/discovery?view=architect-rankings&search=${encodeURIComponent(permit.architectName)}`}>{permit.architectName}</a></span>}</div>}
       </article>)}</div>
       {permits.length > 12 && (
-        <button type="button" className="more" data-testid="button-new-construction-show-more" aria-expanded={showAllPermits} onClick={() => setShowAllPermits((current) => !current)}>
+        <button type="button" className="kyp-morelink" data-testid="button-new-construction-show-more" aria-expanded={showAllPermits} onClick={() => setShowAllPermits((current) => !current)}>
           {showAllPermits ? "Show fewer ↑" : `Show all ${permits.length} nearby permits →`}
         </button>
       )}
       <div className="kyp-src kyp-construction-notes" data-testid="new-construction-notes">
-        {(data.communityBenchmark || supplyGate) && (
-          <p>
-            Nearby construction: {data.communityBenchmark ? `The ${data.communityBenchmark.name} community area recorded ${data.communityBenchmark.totalPermits} qualifying permits over the same three-year source period.` : ""}
-            {supplyGate ? ` Nearby permits identify ${stats.permittedUnits.toLocaleString()} units, or ${supplyRatio!.toFixed(1)}× the subject’s ${subjectUnits} units; this is a competing-supply and construction-disruption flag, not a statement that projects are currently active.` : ""}
-          </p>
-        )}
+        {(data.communityBenchmark || supplyGate) && <p>
+          Nearby construction: {data.communityBenchmark ? `The ${data.communityBenchmark.name} community area recorded ${data.communityBenchmark.totalPermits} qualifying permits over the same three-year source period.` : ""}
+          {supplyGate ? ` Nearby permit records identify ${permittedUnits.toLocaleString()} units, or ${supplyRatio!.toFixed(1)}× the subject’s ${subjectUnits} units; this is a competing-supply and construction-disruption context, not a statement of active construction. The 18-month issued-permit window remains a proxy.` : ""}
+        </p>}
         <p>12-month trend: {trend.suppressed ? `Trend is not shown because only ${trend.current12Months + trend.prior12Months} permits fall in the two comparison years; at least four combined permits are needed.` : `${trend.current12Months} permits in the trailing 12 months versus ${trend.prior12Months} in the prior 12 months (${trend.changePct! > 0 ? "+" : ""}${trend.changePct}%).`}</p>
-        <p>Source: Chicago Building Permits. Only “Permit - New Construction” records within one mile are counted. Garages, temporary structures, and other accessory structures are excluded. “Likely still building” is an 18-month issued-permit proxy, not a construction-status verification.</p>
+        <p>{sourceNote}</p>
       </div>
     </div>
   );

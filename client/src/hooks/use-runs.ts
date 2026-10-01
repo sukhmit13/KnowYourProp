@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
 import type { ListingClaim } from "@shared/listingChecks";
 import { api, buildUrl, type RunInput, type ScenarioInput, type LookupInput } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
@@ -3570,6 +3571,24 @@ export function useSchoolsNearby(lat: number | undefined, lon: number | undefine
   });
 }
 
+const UPCOMING_DEVELOPMENTS_REFRESH_INTERVAL_MS = 10_000;
+const UPCOMING_DEVELOPMENTS_MAX_REFRESH_MS = 90_000;
+
+export function getUpcomingDevelopmentsRefetchInterval(data: unknown, elapsedMs: number): number | false {
+  const snapshot = data as {
+    pipeline?: {
+      sourceCoverage?: {
+        zbaActivity?: { refreshing?: boolean } | null;
+      } | null;
+    } | null;
+  } | null | undefined;
+  const isRefreshing = snapshot?.pipeline?.sourceCoverage?.zbaActivity?.refreshing === true;
+
+  return isRefreshing && elapsedMs < UPCOMING_DEVELOPMENTS_MAX_REFRESH_MS
+    ? UPCOMING_DEVELOPMENTS_REFRESH_INTERVAL_MS
+    : false;
+}
+
 export function useUpcomingDevelopments(
   neighborhood: string | undefined,
   communityArea: string | undefined,
@@ -3577,9 +3596,11 @@ export function useUpcomingDevelopments(
   lon?: number | null,
   radiusMi: 0.5 | 1 = 0.5,
 ) {
+  const pendingSnapshotStartedAt = useRef<{ queryHash: string; startedAt: number } | null>(null);
+
   return useQuery<any>({
     queryKey: ['/api/upcoming-developments', neighborhood, communityArea, lat, lon, radiusMi],
-    enabled: !!(neighborhood || communityArea),
+    enabled: !!(neighborhood || communityArea || (lat != null && lon != null)),
     queryFn: async () => {
       const params = new URLSearchParams();
       if (neighborhood) params.set('neighborhood', neighborhood);
@@ -3590,6 +3611,22 @@ export function useUpcomingDevelopments(
       const res = await fetch(`/api/upcoming-developments?${params}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch upcoming developments');
       return await res.json();
+    },
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (getUpcomingDevelopmentsRefetchInterval(data, 0) === false) {
+        pendingSnapshotStartedAt.current = null;
+        return false;
+      }
+
+      if (pendingSnapshotStartedAt.current?.queryHash !== query.queryHash) {
+        pendingSnapshotStartedAt.current = { queryHash: query.queryHash, startedAt: Date.now() };
+      }
+
+      return getUpcomingDevelopmentsRefetchInterval(
+        data,
+        Date.now() - pendingSnapshotStartedAt.current.startedAt,
+      );
     },
     staleTime: 1000 * 60 * 60 * 4,
     refetchOnWindowFocus: false,

@@ -9707,11 +9707,28 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       const { getUpcomingDevelopments, filterDevelopmentsByNeighborhood, isDevelopmentArticle, parseUnits, parseStories, extractStatus, parseUseType, parseDeveloper, detectNeighborhoods, parseAddress } = await import('./upcomingDevelopments');
       const { summarizeDevelopmentUnits } = await import('@shared/developmentUnitCoverage');
       const { getBorderingAreas, findRelevantArticles } = await import('./newsMonitor');
+      const { buildDevelopmentPipeline, normalizeAddrForMatch, addressesMatchForPipeline } = await import('./developmentPipeline');
+      const hasSubjectPoint = Number.isFinite(subjectLat) && Number.isFinite(subjectLon);
+      const subjectWard = hasSubjectPoint ? lookupWardByCoordinates(subjectLat!, subjectLon!).ward : null;
+      const wardNumber = subjectWard && /^\d+$/.test(subjectWard) ? Number(subjectWard) : null;
 
-      const [all, dpdResult] = await Promise.all([
+      const constructionPromise = hasSubjectPoint
+        ? import('./newConstruction').then(({ getNearbyNewConstruction }) =>
+            getNearbyNewConstruction(subjectLat!, subjectLon!, communityArea, 1))
+        : Promise.resolve(null);
+      const zbaPromise = hasSubjectPoint
+        ? import('./zbaApprovals').then(({ getAllZbaActivitySnapshot }) => getAllZbaActivitySnapshot())
+        : Promise.resolve(null);
+      const [allSettled, dpdSettled, constructionSettled, zbaSettled] = await Promise.allSettled([
         getUpcomingDevelopments(),
         import('./dpdApplications').then(({ getDpdApplications }) => getDpdApplications()),
+        constructionPromise,
+        zbaPromise,
       ]);
+      const all = allSettled.status === 'fulfilled' ? allSettled.value : [];
+      const dpdResult = dpdSettled.status === 'fulfilled' ? dpdSettled.value : null;
+      const constructionResult = constructionSettled.status === 'fulfilled' ? constructionSettled.value : null;
+      const zbaResult = zbaSettled.status === 'fulfilled' ? zbaSettled.value : null;
 
       // Augment with multi-source neighborhood articles (Crain's, YIMBY, Real Deal, Block Club neighborhood feeds)
       // These are already neighborhood-scoped by findRelevantArticles — just filter to dev keywords
@@ -9730,6 +9747,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
             augmented.push({
               id: `news-${article.url}`,
               source: 'blockclub',
+              publisher: article.source,
               stage: 2,
               title: article.title,
               url: article.url,
@@ -9767,72 +9785,200 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
 
       // Annotate each development with distance from subject property
       const filteredWithDistance = filtered.map(d => {
-        if (subjectLat && subjectLon && d.lat && d.lon) {
-          const distanceMi = haversineDistanceMi(subjectLat, subjectLon, d.lat, d.lon);
+        if (hasSubjectPoint && d.lat != null && d.lon != null) {
+          const distanceMi = haversineDistanceMi(subjectLat!, subjectLon!, d.lat, d.lon);
           return { ...d, distanceMi: Math.round(distanceMi * 100) / 100 };
         }
         return d;
       });
 
-      const stage2 = filteredWithDistance.filter(d => d.stage === 2);
-      const stage1 = filteredWithDistance.filter(d => d.stage === 1);
-      const dpdApplications = subjectLat != null && subjectLon != null
+      const stage2 = filteredWithDistance.filter(d => Number(d.stage) === 2);
+      const stage1 = filteredWithDistance.filter(d => Number(d.stage) === 1);
+      const dpdApplications = hasSubjectPoint && dpdResult
         ? dpdResult.applications
           .filter(application => application.latitude != null && application.longitude != null)
           .map(application => ({
             ...application,
-            distanceMi: Math.round(haversineDistanceMi(subjectLat, subjectLon, application.latitude!, application.longitude!) * 100) / 100,
+            distanceMi: Math.round(haversineDistanceMi(subjectLat!, subjectLon!, application.latitude!, application.longitude!) * 100) / 100,
           }))
           .filter(application => application.distanceMi <= radiusMi)
         : [];
-
-      // Normalize an address string down to "NUMBER STREETNAME" for fuzzy cross-referencing
-      function normalizeAddrForMatch(addr: string): string {
-        return addr.toUpperCase()
-          .replace(/\b(NORTH|SOUTH|EAST|WEST|N\.?|S\.?|E\.?|W\.?)\b\.?\s*/g, ' ')
-          .replace(/\b(AVENUE|AVE|STREET|ST|ROAD|RD|BOULEVARD|BLVD|DRIVE|DR|PLACE|PL|COURT|CT|LANE|LN|PARKWAY|PKY)\b\.?/g, '')
-          .replace(/[^A-Z0-9 ]/g, '')
-          .replace(/\s+/g, ' ')
-          .trim();
-      }
+      const dpdGeocodedCount = dpdResult?.coverage.geocodedCount ?? 0;
+      const dpdUngeocodedCount = dpdResult
+        ? Math.max(0, dpdResult.applications.length - dpdGeocodedCount)
+        : null;
+      const dpdCoverageStatus = !dpdResult || !hasSubjectPoint || dpdResult.coverage.successfulPageCount === 0
+        ? 'unavailable'
+        : Boolean(dpdResult.coverage.complete) &&
+            dpdResult.coverage.successfulPageCount === dpdResult.coverage.pageCount &&
+            dpdUngeocodedCount === 0
+          ? 'available'
+          : 'partial';
+      const pipelineDpdAvailable = dpdCoverageStatus === 'available';
 
       // Cross-reference Block Club article addresses with permit addresses
       // to detect articles that are likely reporting on a project that already has a permit
       const stage1Addrs = new Set(
-        stage1.filter(d => d.address).map(d => normalizeAddrForMatch(d.address!))
+        [
+          ...stage1.filter(d => d.address).map(d => normalizeAddrForMatch(d.address!)),
+          ...(constructionResult?.permits || []).filter(permit => permit.address).map(permit => normalizeAddrForMatch(permit.address)),
+        ]
       );
       let articlePermitOverlapCount = 0;
       for (const article of stage2) {
         if (!article.address) continue;
-        const norm = normalizeAddrForMatch(article.address);
-        // Match on street number + at least one street name token
-        const numMatch = norm.match(/^(\d+)\s+(.+)$/);
-        if (!numMatch) continue;
-        const [, num, street] = numMatch;
-        const streetTokens = street.split(' ').filter(t => t.length > 2);
-        const overlaps = Array.from(stage1Addrs).some(pAddr => {
-          if (!pAddr.startsWith(num + ' ')) return false;
-          return streetTokens.some(tok => pAddr.includes(tok));
-        });
+        const overlaps = Array.from(stage1Addrs).some(pAddr => addressesMatchForPipeline(article.address, pAddr));
         if (overlaps) articlePermitOverlapCount++;
       }
 
       // Official proposal totals come only from nearby Plan Commission applications.
       // Article counts remain a separate leading indicator; permits carry no unit total.
-      const dpdUnitsNearby = summarizeDevelopmentUnits(dpdApplications);
-      const nearbyPermitCount = stage1.filter((d: any) => d.distanceMi !== undefined && d.distanceMi <= radiusMi).length;
+      const dpdUnitsNearby = pipelineDpdAvailable
+        ? summarizeDevelopmentUnits(dpdApplications)
+        : null;
+      const nearbyPermitCount = constructionResult?.permits.length ?? null;
+      const hasZbaCoordinates = (item: { lat?: number; lon?: number }): item is { lat: number; lon: number } =>
+        Number.isFinite(item.lat) && Number.isFinite(item.lon);
+
+      const wardRecentApprovals = zbaResult && wardNumber != null
+        ? zbaResult.recentApprovals.filter(approval => approval.ward === wardNumber).map(approval => {
+            const distanceMi = hasZbaCoordinates(approval)
+              ? haversineDistanceMi(subjectLat!, subjectLon!, approval.lat, approval.lon)
+              : null;
+            return { ...approval, distanceMi: distanceMi == null ? null : Math.round(distanceMi * 100) / 100 };
+          })
+        : [];
+      const wardUpcomingCases = zbaResult && wardNumber != null
+        ? zbaResult.upcomingCases.filter(caseItem => caseItem.ward === wardNumber).map(caseItem => {
+            const distanceMi = hasZbaCoordinates(caseItem)
+              ? haversineDistanceMi(subjectLat!, subjectLon!, caseItem.lat, caseItem.lon)
+              : null;
+            return { ...caseItem, distanceMi: distanceMi == null ? null : Math.round(distanceMi * 100) / 100 };
+          })
+        : [];
+      const recentApprovals = wardRecentApprovals.filter(approval =>
+        hasZbaCoordinates(approval) &&
+        haversineDistanceMi(subjectLat!, subjectLon!, approval.lat, approval.lon) <= 1);
+      const upcomingCases = wardUpcomingCases.filter(caseItem =>
+        hasZbaCoordinates(caseItem) &&
+        haversineDistanceMi(subjectLat!, subjectLon!, caseItem.lat, caseItem.lon) <= 1);
+      const zbaWardMissingCoordinateCount = [...wardRecentApprovals, ...wardUpcomingCases]
+        .filter(item => !hasZbaCoordinates(item)).length;
+      const zbaFetchCoverageKnown = !!zbaResult &&
+        !zbaResult.coverage.note.startsWith('Loaded the last-good database snapshot') &&
+        !zbaResult.coverage.note.startsWith('Refreshing a stale snapshot') &&
+        !zbaResult.coverage.note.startsWith('Refresh failed;');
+      const zbaFetchComplete = !!zbaResult && zbaFetchCoverageKnown &&
+        zbaResult.coverage.agenda.successfulMonths === zbaResult.coverage.agenda.expectedMonths &&
+        zbaResult.coverage.decisions.successfulMonths === zbaResult.coverage.decisions.expectedMonths;
+      const zbaCoverageStatus = !zbaResult || !hasSubjectPoint || wardNumber == null ||
+        zbaResult.coverage.status === 'unavailable'
+        ? 'unavailable'
+        : !zbaFetchComplete || zbaWardMissingCoordinateCount > 0
+          ? 'partial'
+          : 'available';
+      const pipelineResult = buildDevelopmentPipeline({
+        permits: constructionResult?.permits || [],
+        dpdApplications,
+        recentApprovals,
+        upcomingCases,
+        zbaEvidenceRecentApprovals: wardRecentApprovals,
+        zbaEvidenceUpcomingCases: wardUpcomingCases,
+        developments: filteredWithDistance,
+        additionalPermitRecords: stage1,
+      });
+      const pipelinePermits = constructionResult ? pipelineResult.permits : null;
+      const annotatedDevelopments = pipelineResult.developments;
+      const pipelinePermitAvailable = !!constructionResult && hasSubjectPoint;
+      const pipelineZbaAvailable = zbaCoverageStatus === 'available';
+      const observedPipelineAvailable = pipelinePermitAvailable &&
+        (dpdCoverageStatus !== 'unavailable' || zbaCoverageStatus !== 'unavailable');
+      const pipeline = {
+        ...pipelineResult.metrics,
+        unitsUnderConstruction: pipelinePermitAvailable ? pipelineResult.metrics.unitsUnderConstruction : null,
+        activePermitCount: pipelinePermitAvailable ? pipelineResult.metrics.activePermitCount : null,
+        observedPotentialUnits: observedPipelineAvailable ? pipelineResult.metrics.potentialUnits : null,
+        observedCommercialProposals: observedPipelineAvailable ? pipelineResult.metrics.commercialProposals : null,
+        potentialUnits: pipelinePermitAvailable && pipelineDpdAvailable && pipelineZbaAvailable
+          ? pipelineResult.metrics.potentialUnits
+          : null,
+        commercialProposals: pipelinePermitAvailable && pipelineDpdAvailable && pipelineZbaAvailable
+          ? pipelineResult.metrics.commercialProposals
+          : null,
+        sourceCoverage: {
+          permits: {
+            status: pipelinePermitAvailable ? 'available' : 'unavailable',
+            recordCount: constructionResult?.permits.length ?? null,
+            ...(constructionSettled.status === 'rejected' ? { error: (constructionSettled.reason as Error)?.message || 'Permit source failed' } : {}),
+            ...(!hasSubjectPoint ? { note: 'Subject coordinates are required to select the one-mile permit scope.' } : {}),
+            unitsSource: 'description',
+          },
+          dpdApplications: {
+            status: dpdCoverageStatus,
+            recordCount: dpdCoverageStatus === 'unavailable' ? null : dpdApplications.length,
+            ...(dpdResult ? { coverage: dpdResult.coverage } : {}),
+            missingCoordinateCount: dpdUngeocodedCount,
+            ...(dpdSettled.status === 'rejected' ? { error: (dpdSettled.reason as Error)?.message || 'DPD source failed' } : {}),
+            ...(!hasSubjectPoint ? { note: 'Subject coordinates are required to apply the DPD radius.' } : {}),
+          },
+          zbaActivity: {
+            status: zbaCoverageStatus,
+            refreshing: zbaResult?.coverage.refreshing ?? false,
+            recordCount: zbaResult && wardNumber != null ? wardRecentApprovals.length + wardUpcomingCases.length : null,
+            missingCoordinateCount: zbaResult && wardNumber != null ? zbaWardMissingCoordinateCount : null,
+            ward: wardNumber,
+            radiusMiles: 1,
+            geographicallyEligibleCount: recentApprovals.length + upcomingCases.length,
+            beyondRadiusCount: wardRecentApprovals.filter(item =>
+              hasZbaCoordinates(item) &&
+              haversineDistanceMi(subjectLat!, subjectLon!, item.lat, item.lon) > 1).length +
+              wardUpcomingCases.filter(item =>
+                hasZbaCoordinates(item) &&
+                haversineDistanceMi(subjectLat!, subjectLon!, item.lat, item.lon) > 1).length,
+            ...(zbaResult ? { coverage: zbaResult.coverage } : {}),
+            ...(zbaSettled.status === 'rejected' ? { error: (zbaSettled.reason as Error)?.message || 'ZBA source failed' } : {}),
+            ...(!hasSubjectPoint ? { note: 'Subject coordinates are required to identify the report ward and one-mile pipeline scope.' } : {}),
+            ...(wardNumber == null && hasSubjectPoint ? { note: 'A report ward could not be resolved from the subject coordinates.' } : {}),
+            ...(zbaResult ? { note: zbaResult.coverage.note } : {}),
+          },
+          developmentNews: {
+            status: allSettled.status === 'fulfilled' ? 'partial' : 'unavailable',
+            recordCount: allSettled.status === 'fulfilled' ? all.length : null,
+            ...(allSettled.status === 'rejected' ? { error: (allSettled.reason as Error)?.message || 'Development news source failed' } : {}),
+            note: 'The existing RSS loader can suppress per-feed failures; news is annotated for context only and excluded from pipeline arithmetic.',
+          },
+        },
+      };
+      const annotatedNearestPermit = constructionResult?.nearestActivePermit
+        ? pipelineResult.permits.find(permit => permit.permitNumber === constructionResult.nearestActivePermit!.permitNumber) || {
+            ...constructionResult.nearestActivePermit,
+            corridor: null,
+            pipelineStage: 'permitted' as const,
+          }
+        : null;
+      const newConstruction = constructionResult
+        ? { ...constructionResult, permits: pipelineResult.permits, nearestActivePermit: annotatedNearestPermit }
+        : null;
 
       res.json({
         total: filtered.length,
         stage2Count: stage2.length,
         stage1Count: stage1.length,
-        developments: filteredWithDistance,
-        dpdApplications,
-        dpdCoverage: dpdResult.coverage,
+        developments: annotatedDevelopments,
+        dpdApplications: pipelineResult.dpdApplications,
+        dpdCoverage: dpdResult?.coverage ?? null,
         citywideFallback,
         dpdUnitsNearby,
         nearbyPermitCount,
         articlePermitOverlapCount,
+        pipeline,
+        sourceCoverage: pipeline.sourceCoverage,
+        pipelinePermits,
+        newConstruction,
+        zbaActivity: {
+          recentApprovals: pipelineResult.recentApprovals,
+          upcomingCases: pipelineResult.upcomingCases,
+        },
       });
     } catch (err) {
       console.error('[UPCOMING DEV] Route error:', err);

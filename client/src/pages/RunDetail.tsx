@@ -5,7 +5,7 @@ import { buildScanSections } from "@/components/report/scanBuilder";
 import { REPORT_SECTION_TITLES } from "@/components/report/sectionRegistry";
 import { AccordionSection, buildSubsectionNumbers, KypSubhead, SectionNumberContext } from "@/components/report/AccordionSection";
 import { NewBusinessLicensesSection } from "@/components/report/NewBusinessLicensesSection";
-import { NewConstructionSection } from "@/components/report/NewConstructionSection";
+import { DevelopmentSection } from "@/components/report/DevelopmentSection";
 import { OwnershipTitleSection, deriveSaleHistory } from "@/components/report/OwnershipTitleSection";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -17,7 +17,6 @@ import { useListingSnapshot, useGenerateListingSnapshot, useUpdateRunLabel, useR
 import { buildDebtCardModel } from "@shared/debtCardModel";
 import { withoutRepeatedNews } from "@/components/report/newsArticleDedup";
 import { classifyArticle } from "@shared/articleSubject";
-import { normalizeDevelopmentAddress, summarizeDevelopmentUnits } from "@shared/developmentUnitCoverage";
 import { detectAssemblage, buildAssemblageTakeaway } from "@shared/assemblage";
 import { resolveDistress } from "@shared/lienDistress";
 import { buildListingChecks, classifyDisclosures, daysOnMarketVerdict, hasValidatedArmLengthSaleAfterFinding, listingClaimLabel } from "@shared/listingChecks";
@@ -605,7 +604,6 @@ interface SectionStates {
   transitAccess: boolean;
   projectTypeInfo: boolean;
   dob: boolean;
-  newConstruction: boolean;
   recentLicenses: boolean;
   landmark: boolean;
   parcel: boolean;
@@ -653,10 +651,6 @@ interface SectionStates {
   transactionTrends: boolean;
   hmdaBuyer: boolean;
   sbaLoans: boolean;
-  upcomingDevelopments: boolean;
-  devNewsSub: boolean;
-  newConstructionSub: boolean;
-  zbaActivitySub: boolean;
   recentlySoldComps: boolean;
   schools: boolean;
   airbnb: boolean;
@@ -806,7 +800,7 @@ const DEFAULT_SECTION_STATES: SectionStates = {
   locationIncentives: false, propertyDetails: false, developmentPotential: false,
   farAnalysis: true, fmrSubsection: true, vacantBuildings: false, cityOwnedLots: false,
   proximityDetails: false, transitAccess: false, projectTypeInfo: false,
-  dob: false, newConstruction: false, recentLicenses: false, landmark: false,
+  dob: false, recentLicenses: false, landmark: false,
   parcel: false, crime: false, proximity: false, entertainment: false,
   michelinSub: false, jbaSub: false, muralsSub: false, artGalleriesSub: false,
   landmarksDesignatedSub: false, tod: false, sbif: false, nmtc: false,
@@ -818,8 +812,7 @@ const DEFAULT_SECTION_STATES: SectionStates = {
   seniorPopulation: false, nearbyFillingStations: false, evRegistrations: false,
   evCharging: false, nearbyHotels: false, nearbyRestaurants: false,
   nearbyCoffee: false, nearbyBars: false, cannabisMarket: false,
-  hmdaStats: false, transactionTrends: false, hmdaBuyer: false, sbaLoans: false, upcomingDevelopments: false, zoningHistory: false,
-  devNewsSub: false, newConstructionSub: false, zbaActivitySub: false,
+  hmdaStats: false, transactionTrends: false, hmdaBuyer: false, sbaLoans: false, zoningHistory: false,
   recentlySoldComps: false, schools: false, airbnb: false, rentcast: true,
   loopnetSection: false,
   peerspaceSection: false,
@@ -1298,7 +1291,7 @@ export default function RunDetail() {
   const ACC_BEFORE_REORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "crime", "transit", "businessLicenses", "valuation", "listing", "overview", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "incentives", "news"];
   const ACC_BEFORE_HISTORIC_REORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
   const ACC_BEFORE_HISTORIC_CORRECTION = ["ownership", "zoning", "zoningHistory", "historic", "propertyTax", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
-  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
+  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
@@ -1476,8 +1469,6 @@ export default function RunDetail() {
   const setIsNeighborhoodNewsOpen = useCallback((v: boolean) => setSectionOpen('neighborhoodNews', v), [setSectionOpen]);
   const isCorridorNewsOpen = sectionStates.corridorNews;
   const setIsCorridorNewsOpen = useCallback((v: boolean) => setSectionOpen('corridorNews', v), [setSectionOpen]);
-  const isUpcomingDevelopmentsOpen = sectionStates.upcomingDevelopments;
-  const setIsUpcomingDevelopmentsOpen = useCallback((v: boolean) => setSectionOpen('upcomingDevelopments', v), [setSectionOpen]);
   const isAirbnbOpen = sectionStates.airbnb;
   const setIsAirbnbOpen = useCallback((v: boolean) => setSectionOpen('airbnb', v), [setSectionOpen]);
   const isLoopnetSectionOpen = sectionStates.loopnetSection;
@@ -1510,8 +1501,6 @@ export default function RunDetail() {
   const setIsTransitAccessOpen = useCallback((v: boolean) => setSectionOpen('transitAccess', v), [setSectionOpen]);
   const isProjectTypeInfoOpen = sectionStates.projectTypeInfo;
   const setIsProjectTypeInfoOpen = useCallback((v: boolean) => setSectionOpen('projectTypeInfo', v), [setSectionOpen]);
-  const isNewConstructionSectionOpen = sectionStates.newConstruction;
-  const setIsNewConstructionSectionOpen = useCallback((v: boolean) => setSectionOpen('newConstruction', v), [setSectionOpen]);
   const isRecentLicensesSectionOpen = sectionStates.recentLicenses;
   const setIsRecentLicensesSectionOpen = useCallback((v: boolean) => setSectionOpen('recentLicenses', v), [setSectionOpen]);
   const isLandmarkSectionOpen = sectionStates.landmark;
@@ -1584,12 +1573,6 @@ export default function RunDetail() {
   const setIsZoningHistoryOpen = useCallback((v: boolean) => setSectionOpen('zoningHistory', v), [setSectionOpen]);
   const isHmdaBuyerOpen = sectionStates.hmdaBuyer;
   const setIsHmdaBuyerOpen = useCallback((v: boolean) => setSectionOpen('hmdaBuyer', v), [setSectionOpen]);
-  const isDevNewsSubOpen = sectionStates.devNewsSub;
-  const setIsDevNewsSubOpen = useCallback((v: boolean) => setSectionOpen('devNewsSub', v), [setSectionOpen]);
-  const isNewConstructionSubOpen = sectionStates.newConstructionSub;
-  const setIsNewConstructionSubOpen = useCallback((v: boolean) => setSectionOpen('newConstructionSub', v), [setSectionOpen]);
-  const isZbaActivitySubOpen = sectionStates.zbaActivitySub;
-  const setIsZbaActivitySubOpen = useCallback((v: boolean) => setSectionOpen('zbaActivitySub', v), [setSectionOpen]);
   const isChildcareAccessOpen = sectionStates.childcareAccess;
   const setIsChildcareAccessOpen = useCallback((v: boolean) => setSectionOpen('childcareAccess', v), [setSectionOpen]);
   const isChildcareDemographicsOpen = sectionStates.childcareDemographics;
@@ -2963,7 +2946,7 @@ export default function RunDetail() {
   const { data: coParcelAddressNewsData, isLoading: isLoadingCoParcelAddressNews } = useAddressNews(coParcelAddress);
   const { data: neighborhoodNewsData, isLoading: isLoadingNeighborhoodNews } = useNeighborhoodNews(facts?.communityArea);
   const { data: corridorNewsData, isLoading: isLoadingCorridorNews } = useCorridorNews(facts?.lat, facts?.lon, run?.address, facts?.neighborhood, facts?.communityArea);
-  const { data: zbaApprovalsData, isLoading: isLoadingZbaApprovals } = useZbaApprovals(wardNumber);
+  const { data: zbaApprovalsData, isLoading: isLoadingZbaApprovals, isError: isErrorZbaApprovals } = useZbaApprovals(wardNumber);
   // Verified co-parcels (assemblage) are searched alongside the subject address —
   // ordinances for a double lot are often filed under the companion's number or a range.
   const zoningHistoryAlts = useMemo(
@@ -2983,7 +2966,7 @@ export default function RunDetail() {
     [zoningHistoryData?.coverage],
   );
   const { data: bizLicenseHistoryData, isLoading: isLoadingBizLicenseHistory } = useBusinessLicenseHistory(run?.address);
-  const { data: upcomingDevsData, isLoading: isLoadingUpcomingDevs } = useUpcomingDevelopments((facts as any)?.neighborhood ?? undefined, facts?.communityArea ?? undefined, facts?.lat, facts?.lon ?? undefined, upcomingRadiusMi);
+  const { data: upcomingDevsData, isLoading: isLoadingUpcomingDevs, isError: isErrorUpcomingDevs } = useUpcomingDevelopments((facts as any)?.neighborhood ?? undefined, facts?.communityArea ?? undefined, facts?.lat, facts?.lon ?? undefined, upcomingRadiusMi);
   const { data: hmdaData, isLoading: isLoadingHmda } = useHmdaStats(facts?.tractGeoid, facts?.communityArea);
   const { data: transactionTrendsData, isLoading: isLoadingTransactionTrends, isError: isTransactionTrendsError, refetch: refetchTransactionTrends } = useTransactionTrends(facts?.zipCode);
   const { data: schoolsData, isLoading: isLoadingSchools, isError: isSchoolsError } = useSchoolsNearby(facts?.lat, facts?.lon);
@@ -3422,6 +3405,10 @@ export default function RunDetail() {
     printInFlightRef.current = true;
     const allSectionIds = PRINT_SECTIONS.map(s => s.id);
     const getPrintTarget = (sectionId: string): HTMLElement | null => {
+      if (sectionId === 'new-construction') {
+        const permits = document.getElementById('development-permits');
+        return permits instanceof HTMLElement ? permits : null;
+      }
       const anchor = document.getElementById(`print-section-${sectionId}`);
       if (sectionId === 'project-type') {
         const row = document.getElementById('section-zoning');
@@ -3463,6 +3450,7 @@ export default function RunDetail() {
       const selectedMarketChild = ['hmda-stats', 'transaction-trends', 'comparable-sales', 'sba-loans']
         .some(sectionId => selectedSections.includes(sectionId));
       allSectionIds.forEach(sectionId => {
+        if (sectionId === 'new-construction' || sectionId === 'upcoming-developments') return;
         const el = getPrintTarget(sectionId);
         if (el) {
           const includeSection = selectedSections.includes(sectionId)
@@ -3474,6 +3462,16 @@ export default function RunDetail() {
           }
         }
       });
+      const developmentRoot = document.getElementById('print-section-upcoming-developments');
+      const permitPanel = document.getElementById('development-permits');
+      const developmentSelected = selectedSections.includes('upcoming-developments');
+      const permitsSelected = selectedSections.includes('new-construction');
+      const otherDevelopmentPanels = ['development-pipeline', 'development-proposed', 'development-zba', 'development-news']
+        .map(panelId => document.getElementById(panelId))
+        .filter((el): el is HTMLElement => el instanceof HTMLElement);
+      if (developmentRoot) developmentRoot.classList.toggle('print-exclude', !developmentSelected && !permitsSelected);
+      if (permitPanel) permitPanel.classList.toggle('print-exclude', !permitsSelected);
+      otherDevelopmentPanels.forEach(panel => panel.classList.toggle('print-exclude', !developmentSelected));
 
       // Exclude incentive sub-sections that are not eligible (they'd just add blank/not-eligible pages)
       const eligibility = incentiveEligibilityRef.current;
@@ -3493,6 +3491,8 @@ export default function RunDetail() {
           const el = getPrintTarget(sectionId);
           if (el) el.classList.remove('print-exclude');
         });
+        ['print-section-upcoming-developments', 'development-permits', 'development-pipeline', 'development-proposed', 'development-zba', 'development-news']
+          .forEach(id => document.getElementById(id)?.classList.remove('print-exclude'));
         INCENTIVE_SUBSECTION_IDS.forEach(subId => {
           const el = document.getElementById(`print-section-${subId}`);
           if (el) el.classList.remove('print-exclude');
@@ -3937,7 +3937,7 @@ export default function RunDetail() {
     lienData,
     isLoadingLiens: isCheckingTitle,
     businessLicenses: nearbyLicensesData,
-    newConstruction: newConstructionData,
+    development: upcomingDevsData,
   });
   const ACC_CUSTOM_META: Record<string, { title: string; summary: string; info: string[] }> = {
     listing: { title: "Active Listing", summary: "Live listing status for this address — price, status and terms.", info: ["AI listing lookup", "Price, status & broker", "Rent roll / unit mix when published"] },
@@ -4175,7 +4175,6 @@ export default function RunDetail() {
     transit: isLoadingTransit && !transitData,
     crime: isLoadingCrime && !crimeData && !crimeTractData,
     newBusinessLicenses: isLoadingNearbyLicenses && !nearbyLicensesData,
-    newConstruction: isLoadingNewConstruction && !newConstructionData,
     incentives: (isLoadingIncentives || isLoadingLocationIncentives) && !incentivesData && !locationIncentivesData,
   };
   // New badges fill only previously blank headers. A missing response is never a zero.
@@ -4281,8 +4280,6 @@ export default function RunDetail() {
     },
     newBusinessLicenses: { loading: isLoadingNearbyLicenses, error: isErrorNearbyLicenses, checked: headerHasCoordinates,
       hasData: !!nearbyLicensesData, emptyLabel: "Status not verified" },
-    newConstruction: { loading: isLoadingNewConstruction, error: isErrorNewConstruction, checked: headerHasCoordinates,
-      hasData: !!newConstructionData, emptyLabel: "Status not verified" },
     market: {
       loading: isLoadingHmda || isLoadingComps || isLoadingTransactionTrends || isLoadingSBALoans,
       checked: !!facts?.tractGeoid || !!facts?.communityArea || !!facts?.zipCode,
@@ -4454,9 +4451,9 @@ export default function RunDetail() {
           ] : []),
           { label: 'Short-Term Rentals (Airbnb)', icon: Home, action: () => { setSectionOpen('developmentPotential', true); setSectionOpen('airbnb', true); return 'section-airbnb'; } },
           { label: 'Market Rent Estimates', icon: DollarSign, action: () => { setSectionOpen('developmentPotential', true); setSectionOpen('rentcast', true); return 'section-rentcast'; } },
-          { label: 'Upcoming Real Estate Developments', icon: HardHat, action: () => { setSectionOpen('upcomingDevelopments', true); return 'print-section-upcoming-developments'; } },
-          { label: 'ZBA Activity', icon: Gavel, action: () => { setSectionOpen('upcomingDevelopments', true); setSectionOpen('zbaActivitySub', true); return 'print-section-upcoming-developments'; } },
-            { label: 'New Construction', icon: HardHat, action: () => 'section-newConstruction' },
+          { label: 'Upcoming Real Estate Developments', icon: HardHat, action: () => { setAccOpen((m) => ({ ...m, development: true })); return 'development-proposed'; } },
+          { label: 'ZBA Activity', icon: Gavel, action: () => { setAccOpen((m) => ({ ...m, development: true })); return 'development-zba'; } },
+            { label: 'New Construction', icon: HardHat, action: () => { setAccOpen((m) => ({ ...m, development: true })); return 'print-section-new-construction'; } },
           { label: 'Neighborhood Amenities', icon: Star, action: () => { setSectionOpen('entertainment', true); setAccOpen((m) => ({ ...m, entCulture: true })); return 'print-section-entertainment-culture'; } },
           { label: 'Michelin Star Restaurants', icon: Star, action: () => { setAccOpen((m) => ({ ...m, entCulture: true })); setSectionOpen('entertainment', true); return 'ec-michelin'; } },
           { label: 'Public Art & Murals', icon: Palette, action: () => { setAccOpen((m) => ({ ...m, entCulture: true })); setSectionOpen('entertainment', true); return 'ec-murals'; } },
@@ -15017,15 +15014,6 @@ export default function RunDetail() {
             />
           </AccordionSection>
 
-          <AccordionSection {...accProps("newConstruction")}>
-            <NewConstructionSection
-              data={newConstructionData}
-              isLoading={isLoadingNewConstruction}
-              isError={isErrorNewConstruction}
-              subjectUnits={(propertyTaxData as any)?.units ?? pinLookupData?.characteristicsData?.units ?? null}
-            />
-          </AccordionSection>
-
           <AccordionSection {...accProps("crime")}>
             <div id="print-section-crime">
                       <div>
@@ -17594,563 +17582,37 @@ export default function RunDetail() {
 
           {/* Upcoming Developments Section */}
           <AccordionSection {...accProps("development")}>
-          {!!(facts?.neighborhood || facts?.communityArea) ? (
+          {!!(facts?.neighborhood || facts?.communityArea || (facts?.lat != null && facts?.lon != null)) ? (
             <motion.div
-              id="print-section-upcoming-developments"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.205 }}
             >
-              <Collapsible open={isUpcomingDevelopmentsOpen} onOpenChange={setIsUpcomingDevelopmentsOpen}>
-                <Card className="border border-border overflow-visible">
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover-elevate pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="chead flex items-center gap-2">
-                          Upcoming Real Estate Developments
-                        </CardTitle>
-                        <span className="text-muted-foreground text-sm">{isUpcomingDevelopmentsOpen ? '▼' : '▶'}</span>
-                      </div>
-                      {!isUpcomingDevelopmentsOpen && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {upcomingDevsData?.stage2Count > 0 && (
-                            <Badge className="text-xs" data-testid="badge-upcoming-dev-stage2">
-                              {upcomingDevsData.stage2Count} {upcomingDevsData.stage2Count === 1 ? 'Project' : 'Projects'} with Details
-                            </Badge>
-                          )}
-                          {upcomingDevsData?.stage1Count > 0 && (
-                            <Badge variant="outline" className="text-xs" data-testid="badge-upcoming-dev-stage1">
-                              {upcomingDevsData.stage1Count} New Construction {upcomingDevsData.stage1Count === 1 ? 'Permit' : 'Permits'}
-                            </Badge>
-                          )}
-                          {((zbaApprovalsData?.approvals?.length || 0) + (zbaApprovalsData?.upcoming?.length || 0)) > 0 && (
-                            <Badge variant="outline" className="text-xs" data-testid="badge-upcoming-dev-zba">
-                              {(zbaApprovalsData.approvals?.length || 0) + (zbaApprovalsData.upcoming?.length || 0)} Zoning {((zbaApprovalsData.approvals?.length || 0) + (zbaApprovalsData.upcoming?.length || 0)) === 1 ? 'Appeal' : 'Appeals'}
-                            </Badge>
-                          )}
-                        </div>
-                      )}
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <CardContent className="pt-0 space-y-3">
-                      <div className="flex items-center justify-between gap-3 rounded-md bg-muted/40 px-3 py-2 text-xs">
-                        <span className="text-muted-foreground">DPD application search radius</span>
-                        <Select value={String(upcomingRadiusMi)} onValueChange={(value) => setUpcomingRadiusMi(value === '1' ? 1 : 0.5)}>
-                          <SelectTrigger className="h-7 w-[108px] text-xs" data-testid="select-dpd-radius"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="0.5">½ mile</SelectItem>
-                            <SelectItem value="1">1 mile</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* ── Upcoming Developments Summary ── */}
-                      {!isLoadingUpcomingDevs && (() => {
-                        const stage2Devs = (upcomingDevsData?.developments || []).filter((d: any) => d.stage === 2);
-                        const stage1Count = upcomingDevsData?.stage1Count || 0;
-                        const zbaCount = (zbaApprovalsData?.approvals?.length || 0) + (zbaApprovalsData?.upcoming?.length || 0);
-                        const dpdApplications = upcomingDevsData?.dpdApplications || [];
-                        if (stage1Count === 0 && stage2Devs.length === 0 && zbaCount === 0 && dpdApplications.length === 0) return null;
-                        const permitAddresses: string[] = (nearbyConstructionData?.permits || [])
-                          .map((permit: any) => permit.address).filter(Boolean);
-                        const normalizedPermits = new Set(permitAddresses.map(normalizeDevelopmentAddress));
-                        const overlapCount = stage2Devs.filter((article: any) =>
-                          article.address && normalizedPermits.has(normalizeDevelopmentAddress(article.address))
-                        ).length;
-
-                        // Parse unit counts from ZBA subject text
-                        const zbaUnitPattern = /(\d[\d,]*)\s*(?:[-–]\s*)?(?:dwelling\s+)?unit/i;
-                        const allZbaCases = [
-                          ...(zbaApprovalsData?.approvals || []),
-                          ...(zbaApprovalsData?.upcoming || []),
-                        ];
-                        let zbaUnits = 0;
-                        let zbaCasesWithUnits = 0;
-                        for (const c of allZbaCases) {
-                          const m = (c.subject || '').match(zbaUnitPattern);
-                          if (m) {
-                            const n = parseInt((m[1] || '').replace(/,/g, ''));
-                            if (n >= 1 && n <= 2000) { zbaUnits += n; zbaCasesWithUnits++; }
-                          }
-                        }
-
-                        // Cross-reference article addresses against ZBA case addresses
-                        // (same normalization logic as server-side permit overlap check)
-                        function normalizeAddrSummary(addr: string): string {
-                          return addr.toUpperCase()
-                            .replace(/\b(NORTH|SOUTH|EAST|WEST|N\.?|S\.?|E\.?|W\.?)\b\.?\s*/g, ' ')
-                            .replace(/\b(AVENUE|AVE|STREET|ST|ROAD|RD|BOULEVARD|BLVD|DRIVE|DR|PLACE|PL|COURT|CT|LANE|LN|PARKWAY|PKY)\b\.?/g, '')
-                            .replace(/[^A-Z0-9 ]/g, '')
-                            .replace(/\s+/g, ' ')
-                            .trim();
-                        }
-                        const zbaAddrs = new Set(
-                          allZbaCases.filter((c: any) => c.address).map((c: any) => normalizeAddrSummary(c.address))
-                        );
-                        let articleZbaOverlapCount = 0;
-                        for (const article of stage2Devs) {
-                          if (!article.address) continue;
-                          const norm = normalizeAddrSummary(article.address);
-                          const numMatch = norm.match(/^(\d+)\s+(.+)$/);
-                          if (!numMatch) continue;
-                          const [, num, street] = numMatch;
-                          const streetTokens = street.split(' ').filter((t: string) => t.length > 2);
-                          const overlaps = Array.from(zbaAddrs).some((zAddr: string) => {
-                            if (!zAddr.startsWith(num + ' ')) return false;
-                            return streetTokens.some((tok: string) => zAddr.includes(tok));
-                          });
-                          if (overlaps) articleZbaOverlapCount++;
-                        }
-
-                        type SummaryBullet = { label: string; content: string; source: string; warning?: string };
-                        const bullets: SummaryBullet[] = [];
-
-                        if (dpdApplications.length > 0) {
-                          const official = upcomingDevsData?.dpdUnitsNearby;
-                          bullets.push({
-                            label: 'Filed DPD applications',
-                            content: official?.total > 0
-                              ? `${official.total} dwelling units proposed at ${official.projects} distinct address${official.projects !== 1 ? 'es' : ''}${official.ambiguousProjects ? ` · ${official.ambiguousProjects} proposal${official.ambiguousProjects !== 1 ? 's have' : ' has'} multiple reported counts` : ''} (Plan Commission records; not a count of all area construction)`
-                              : 'Unit counts not specified in nearby Plan Commission application text',
-                            source: 'Chicago DPD Plan Commission',
-                          });
-                        }
-
-                        // --- PERMIT BULLET: merge ½mi + neighborhood, explicitly show subset ---
-                        if (stage1Count > 0 || (upcomingDevsData?.nearbyPermitCount || 0) > 0) {
-                          const nearbyCount = upcomingDevsData?.nearbyPermitCount ?? 0;
-
-                          let content = '';
-                          if (stage1Count > 0 && nearbyCount > 0 && nearbyCount < stage1Count) {
-                            content = `${stage1Count} permit${stage1Count !== 1 ? 's' : ''} in ${facts?.neighborhood || 'neighborhood'}, ${nearbyCount} of which are within ½mi of this address`;
-                          } else if (stage1Count > 0 && nearbyCount === 0) {
-                            content = `${stage1Count} new construction permit${stage1Count !== 1 ? 's' : ''} in ${facts?.neighborhood || 'neighborhood'}`;
-                          } else if (nearbyCount > 0) {
-                            content = `${nearbyCount} permit${nearbyCount !== 1 ? 's' : ''} within ½mi of this address`;
-                          }
-
-                          if (content) {
-                            bullets.push({ label: 'New construction permits', content, source: 'City Building Permits' });
-                          }
-                        }
-
-                        // --- ARTICLES: one count per known address, excluding permit matches ---
-                        if (stage2Devs.length > 0) {
-                          const coverage = summarizeDevelopmentUnits(stage2Devs, permitAddresses);
-                          const unitNote = coverage.total > 0
-                            ? ` · ${coverage.total} dwelling unit${coverage.total !== 1 ? 's' : ''} referenced at ${coverage.projects} unmatched project address${coverage.projects !== 1 ? 'es' : ''} (largest count per address; articles without an address or with a matching permit are excluded${coverage.ambiguousProjects ? `; ${coverage.ambiguousProjects} ambiguous` : ''})`
-                            : ' · No article unit counts at known addresses without a matching permit';
-
-                          const totalArticleOverlap = overlapCount + articleZbaOverlapCount;
-                          const overlapParts: string[] = [];
-                          if (overlapCount > 0) overlapParts.push(`${overlapCount} match a building permit`);
-                          if (articleZbaOverlapCount > 0) overlapParts.push(`${articleZbaOverlapCount} match a zoning appeal`);
-                          const overlapNote = overlapParts.length > 0
-                            ? ` · ${totalArticleOverlap} article${totalArticleOverlap !== 1 ? 's' : ''} share an address with another source above (${overlapParts.join(', ')}) — likely the same project`
-                            : '';
-
-                          const warningParts: string[] = [];
-                          if (overlapCount > 0) warningParts.push(`${overlapCount} article${overlapCount !== 1 ? 's' : ''} likely describe the same project as a permit already counted above`);
-                          if (articleZbaOverlapCount > 0) warningParts.push(`${articleZbaOverlapCount} article${articleZbaOverlapCount !== 1 ? 's' : ''} likely describe the same project as a zoning appeal above`);
-
-                          bullets.push({
-                            label: `${stage2Devs.length} development article${stage2Devs.length !== 1 ? 's' : ''} in ${facts?.neighborhood || 'neighborhood'}`,
-                            content: `Projects in planning, approval, or construction stage${unitNote}${overlapNote}`,
-                            source: 'Development News',
-                            warning: warningParts.length > 0
-                              ? `${warningParts.join(' · ')} — do not add these unit counts to the others above`
-                              : undefined,
-                          });
-                        }
-
-                        // --- ZBA zoning appeals: parse unit counts from subject text ---
-                        if (zbaCount > 0) {
-                          const unitNote = zbaUnits > 0
-                            ? ` · ${zbaUnits} dwelling unit${zbaUnits !== 1 ? 's' : ''} mentioned across ${zbaCasesWithUnits} case${zbaCasesWithUnits !== 1 ? 's' : ''} (from application subject text)`
-                            : ' · Unit counts not specified in application text';
-                          bullets.push({
-                            label: `${zbaCount} zoning appeal${zbaCount !== 1 ? 's' : ''} for Ward ${wardNumber}`,
-                            content: `Recent decisions and upcoming hearings${unitNote}`,
-                            source: 'Zoning Board of Appeals',
-                          });
-                        }
-
-                        if (bullets.length === 0) return null;
-
-                        return (
-                          <div className="border-b pb-3 mb-2 space-y-1.5" data-testid="upcoming-dev-summary">
-                            <p className="text-xs font-jbmono font-bold uppercase tracking-wider text-muted-foreground mb-2">Section Summary</p>
-                            <ul className="space-y-2.5 text-sm">
-                              {bullets.map((b, i) => (
-                                <li key={i} className="flex items-start gap-2" data-testid={`upcoming-takeaway-${i}`}>
-                                  <span className="mt-0.5 shrink-0 text-muted-foreground">•</span>
-                                  <span>
-                                    <strong>{b.label}:</strong> {b.content}
-                                    <span className="ml-1.5 text-xs text-muted-foreground font-normal">(via {b.source})</span>
-                                    {b.warning && (
-                                      <span className="block mt-0.5 text-xs text-amber-600 dark:text-amber-400">⚠ {b.warning}</span>
-                                    )}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        );
-                      })()}
-
-                      {isLoadingUpcomingDevs ? (
-                        <div className="space-y-3">
-                          {[1, 2, 3].map(i => (
-                            <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
-                          ))}
-                        </div>
-                      ) : upcomingDevsData?.total === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          No upcoming developments currently tracked for this neighborhood. Check back as new projects are announced.
-                        </p>
-                      ) : (
-                        <>
-                          {upcomingDevsData?.citywideFallback && (
-                            <div className="flex items-start gap-2 rounded-md bg-secondary border border-border px-3 py-2 text-xs text-muted-foreground mb-1" data-testid="notice-citywide-fallback">
-                              <span className="shrink-0 mt-0.5">ℹ️</span>
-                              <span>No neighborhood-specific results found — showing recent Chicago-wide new construction activity.</span>
-                            </div>
-                          )}
-                          {(upcomingDevsData?.dpdApplications?.length || 0) > 0 && (
-                            <div className="space-y-2" data-testid="upcoming-dpd-applications">
-                              <div className="flex items-center gap-2 border-t border-border/40 pt-3">
-                                <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                                <h4 className="chead">DPD Application Signals</h4>
-                                <Badge variant="secondary" className="text-xs">{upcomingDevsData.dpdApplications.length}</Badge>
-                              </div>
-                              <p className="text-xs text-muted-foreground">Recent Chicago Plan Commission hearing-page records within {upcomingRadiusMi === 1 ? '1 mile' : '½ mile'}. Applications are not approvals, permits, or proof of construction.</p>
-                              {upcomingDevsData.dpdApplications.map((application: any) => (
-                                <div key={application.id} className="rounded-lg border border-border/40 p-3 space-y-1.5">
-                                  <div className="flex items-start justify-between gap-2">
-                                    <div>
-                                      <a href={application.applicationUrl || application.hearingUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-primary hover:underline">{application.address}</a>
-                                      <p className="text-xs text-muted-foreground mt-0.5">{application.applicationType} · {application.distanceMi.toFixed(2)} mi</p>
-                                    </div>
-                                    <Badge variant="outline" className="text-xs">{application.status}</Badge>
-                                  </div>
-                                  {application.applicant && <p className="text-xs text-muted-foreground">Applicant: {application.applicant}</p>}
-                                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{application.proposal}</p>
-                                  <div className="flex flex-wrap gap-3 text-xs">
-                                    {application.hearingDate && <span className="text-muted-foreground">Hearing page: {new Date(`${application.hearingDate}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
-                                    <a className="text-primary hover:underline" href={application.hearingUrl} target="_blank" rel="noopener noreferrer">Official hearing page</a>
-                                  </div>
-                                </div>
-                              ))}
-                              <p className="text-xs text-muted-foreground">{upcomingDevsData?.dpdCoverage?.note}</p>
-                            </div>
-                          )}
-                          {/* Stage 2 — Rich details from Block Club */}
-                          {upcomingDevsData?.developments?.filter((d: any) => d.stage === 2).length > 0 && (
-                            <Collapsible open={isDevNewsSubOpen} onOpenChange={setIsDevNewsSubOpen}>
-                              <CollapsibleTrigger asChild>
-                                <div className="flex items-center justify-between cursor-pointer hover-elevate p-2 -mx-2 border-t border-border/40" data-testid="trigger-dev-news-sub">
-                                  <h4 className="chead chead-icon">
-                                    <Newspaper className="w-3.5 h-3.5" />
-                                    Development News
-                                  </h4>
-                                  <div className="flex items-center gap-2">
-                                    {!isDevNewsSubOpen && (
-                                      <Badge variant="secondary" className="text-xs">{upcomingDevsData.developments.filter((d: any) => d.stage === 2).length} projects</Badge>
-                                    )}
-                                    <span className="text-muted-foreground text-sm">{isDevNewsSubOpen ? '▼' : '▶'}</span>
-                                  </div>
-                                </div>
-                              </CollapsibleTrigger>
-                              <CollapsibleContent>
-                                <div className="pt-2 space-y-2">
-                                  {upcomingDevsData.developments.filter((d: any) => d.stage === 2).map((dev: any) => (
-                                    <div key={dev.id} className="rounded-lg border border-border/40 p-3 space-y-2">
-                                      <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1 min-w-0">
-                                          <a
-                                            href={dev.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-sm font-medium hover:text-primary hover:underline line-clamp-2"
-                                            data-testid={`link-upcoming-dev-${dev.id}`}
-                                          >
-                                            {dev.title}
-                                          </a>
-                                          {dev.address && (
-                                            <p className="text-xs text-muted-foreground mt-0.5">
-                                              {dev.address}
-                                              {(nearbyConstructionData?.permits || []).some((permit: any) =>
-                                                permit.address && normalizeDevelopmentAddress(permit.address) === normalizeDevelopmentAddress(dev.address)
-                                              ) && <span> · A permit has been filed at this address</span>}
-                                            </p>
-                                          )}
-                                        </div>
-                                        <div className="flex flex-col items-end gap-1 shrink-0">
-                                          <Badge
-                                            variant="outline"
-                                            className={`text-xs ${
-                                              dev.status === 'Approved' ? 'bg-secondary text-foreground border-border' :
-                                              dev.status === 'Under Construction' ? 'bg-secondary text-foreground border-border' :
-                                              dev.status === 'Zoning Review' ? 'bg-secondary text-foreground border-border' :
-                                              'bg-secondary text-muted-foreground border-border'
-                                            }`}
-                                            data-testid={`badge-dev-status-${dev.id}`}
-                                          >
-                                            {dev.status}
-                                          </Badge>
-                                          <Badge variant="secondary" className="text-xs" data-testid={`badge-dev-source-${dev.id}`}>
-                                            {dev.source === 'blockclub' ? 'Block Club' : dev.source === 'permits' ? 'City Permit' : 'YIMBY'}
-                                          </Badge>
-                                        </div>
-                                      </div>
-                                      {(dev.units || dev.stories || dev.developer) && (
-                                        <div className="flex flex-wrap gap-2">
-                                          {dev.units && (
-                                            <span className="inline-flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded-full" data-testid={`text-dev-units-${dev.id}`}>
-                                              <Building2 className="w-3 h-3" />{dev.units} units
-                                            </span>
-                                          )}
-                                          {dev.stories && (
-                                            <span className="inline-flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded-full" data-testid={`text-dev-stories-${dev.id}`}>
-                                              <Layers className="w-3 h-3" />{dev.stories} {dev.stories === 1 ? 'story' : 'stories'}
-                                            </span>
-                                          )}
-                                          {dev.developer && (
-                                            <span className="inline-flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded-full" data-testid={`text-dev-developer-${dev.id}`}>
-                                              <Users className="w-3 h-3" />{dev.developer}
-                                            </span>
-                                          )}
-                                        </div>
-                                      )}
-                                      {dev.publishDate && (
-                                        <p className="text-xs text-muted-foreground">
-                                          {new Date(dev.publishDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                        </p>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              </CollapsibleContent>
-                            </Collapsible>
-                          )}
-
-                          {/* Stage 1 — Chicago Data Portal new construction permits */}
-                          {false && upcomingDevsData?.developments?.filter((d: any) => d.stage === 1).length > 0 && (
-                            <Collapsible open={isNewConstructionSubOpen} onOpenChange={setIsNewConstructionSubOpen}>
-                              <CollapsibleTrigger asChild>
-                                <div className="flex items-center justify-between cursor-pointer hover-elevate p-2 -mx-2 border-t border-border/40" data-testid="trigger-new-construction-sub">
-                                  <h4 className="chead chead-icon">
-                                    <HardHat className="w-3.5 h-3.5" />
-                                    New Construction Permits
-                                    <span className="text-xs text-muted-foreground font-normal normal-case">City Records</span>
-                                  </h4>
-                                  <div className="flex items-center gap-2">
-                                    {!isNewConstructionSubOpen && (
-                                      <Badge variant="secondary" className="text-xs">{upcomingDevsData.developments.filter((d: any) => d.stage === 1).length} permits</Badge>
-                                    )}
-                                    <span className="text-muted-foreground text-sm">{isNewConstructionSubOpen ? '▼' : '▶'}</span>
-                                  </div>
-                                </div>
-                              </CollapsibleTrigger>
-                              <CollapsibleContent>
-                                <div className="pt-2 space-y-2">
-                                  {upcomingDevsData.developments.filter((d: any) => d.stage === 1).map((dev: any) => (
-                                    <div key={dev.id} className="rounded-lg border border-border/40 p-3 space-y-1">
-                                      <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1 min-w-0">
-                                          {dev.address ? (
-                                            <a
-                                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dev.address + ', Chicago, IL')}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-sm font-medium hover:text-primary hover:underline line-clamp-2"
-                                              data-testid={`link-upcoming-permit-${dev.id}`}
-                                            >
-                                              {dev.address}
-                                            </a>
-                                          ) : (
-                                            <p className="text-sm font-medium line-clamp-2">{dev.title}</p>
-                                          )}
-                                          {dev.description && (
-                                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{dev.description}</p>
-                                          )}
-                                        </div>
-                                        <Badge variant="outline" className="text-xs shrink-0">
-                                          {dev.status}
-                                        </Badge>
-                                      </div>
-                                      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                                        {dev.publishDate && (
-                                          <span>Issued {new Date(dev.publishDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                        )}
-                                        {dev.ward && <span>· Ward {dev.ward}</span>}
-                                        {dev.units && <span>· {dev.units} units</span>}
-                                        {dev.ordinanceId && <span>· Permit #{dev.ordinanceId}</span>}
-                                        <span className="text-foreground">· Chicago Building Dept</span>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </CollapsibleContent>
-                            </Collapsible>
-                          )}
-                        </>
-                      )}
-                      {/* ZBA Zoning Activity subsection */}
-                      {(() => {
-                        const zbaHav2 = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-                          const R = 3958.8, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
-                          const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-                          return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                        };
-                        const pLat = geocode.data?.lat, pLon = geocode.data?.lon;
-                        const distMi2 = (item: { lat?: number; lon?: number }) =>
-                          (!pLat || !pLon || !item.lat || !item.lon) ? 99 : zbaHav2(pLat, pLon, item.lat, item.lon);
-                        const allZba = [
-                          ...(zbaApprovalsData?.approvals || []).map((a: any) => ({ ...a, isDecision: true })),
-                          ...(zbaApprovalsData?.upcoming || []).filter((u: any) => { if (!u.hearingDate) return true; const hd = new Date(u.hearingDate + 'T12:00:00'); const tod = new Date(); tod.setHours(0,0,0,0); return hd >= tod; }).map((a: any) => ({ ...a, isDecision: false })),
-                        ].map((item: any) => ({ ...item, _d: distMi2(item) }))
-                          .sort((a: any, b: any) => a._d - b._d);
-                        if (!isLoadingZbaApprovals && allZba.length === 0) return null;
-                        const zba2Badge = (decision: string) => {
-                          if (decision === 'Approved') return <span className="text-xs font-medium font-body bg-secondary text-foreground/70 border [border-color:hsl(var(--tag-line))] rounded-full px-2.5 py-0.5">Approved</span>;
-                          if (decision === 'Denied') return <span className="text-xs font-medium font-body bg-secondary text-foreground/70 border [border-color:hsl(var(--tag-line))] rounded-full px-2.5 py-0.5">Denied</span>;
-                          return <span className="text-xs font-medium font-body bg-secondary text-foreground/70 border [border-color:hsl(var(--tag-line))] rounded-full px-2.5 py-0.5">{decision}</span>;
-                        };
-                        const zba2Parse = (subject: string) => {
-                          if (!subject) return { appType: '', proposed: '', building: '' };
-                          let appType = '';
-                          if (/special use/i.test(subject)) appType = 'Special Use';
-                          else if (/variation/i.test(subject)) appType = 'Variation';
-                          else if (/appeal/i.test(subject)) appType = 'Appeal';
-                          else if (/amendment/i.test(subject)) appType = 'Amendment';
-                          const establishM = subject.match(/to establish\s+(?:a\s+|an\s+)?([\s\S]+?)(?:\.|with\s+\d|located|in\s+an?\s+existing|$)/i);
-                          const reduceM = subject.match(/to\s+(reduce|increase|allow|permit|change|modify|convert|expand|demolish)\s+([\s\S]+?)(?:\.|for\s+a\s+proposed|in\s+an?\s+existing|$)/i);
-                          let proposed = '';
-                          if (establishM) proposed = establishM[1].replace(/\s+/g, ' ').trim();
-                          else if (reduceM) proposed = `${reduceM[1]} ${reduceM[2]}`.replace(/\s+/g, ' ').trim();
-                          if (proposed.length > 200) proposed = proposed.slice(0, 200).trim();
-                          const buildingParts: string[] = [];
-                          const storyM = subject.match(/(\d[\d,]*(?:\s*-\s*story|\s+stor(?:y|ies)))/i);
-                          if (storyM) buildingParts.push(storyM[1].replace(/\s+/g, ' '));
-                          const unitM = subject.match(/(\d[\d,]*)\s*(?:-|–)?\s*(?:dwelling\s+)?unit/i);
-                          if (unitM) buildingParts.push(`${unitM[1]} units`);
-                          const sqftM = subject.match(/([\d,]+)\s*(?:square\s*feet|sq\.?\s*ft)/i);
-                          if (sqftM) buildingParts.push(`${sqftM[1]} sq ft`);
-                          return { appType, proposed, building: buildingParts.join(' · ') };
-                        };
-                        const zba2Gmaps = (addr: string) =>
-                          `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr + ', Chicago, IL')}`;
-                        return (
-                          <Collapsible open={isZbaActivitySubOpen} onOpenChange={setIsZbaActivitySubOpen}>
-                            <CollapsibleTrigger asChild>
-                              <div className="flex items-center justify-between cursor-pointer hover-elevate p-2 -mx-2 border-t border-border/40" data-testid="trigger-zba-activity-sub">
-                                <h4 className="chead chead-icon">
-                                  <Scale className="w-3.5 h-3.5" />
-                                  Zoning Board Activity
-                                  <span className="text-xs text-muted-foreground font-normal normal-case">Ward {wardNumber}</span>
-                                </h4>
-                                <div className="flex items-center gap-2">
-                                  {!isZbaActivitySubOpen && !isLoadingZbaApprovals && (
-                                    <Badge variant="secondary" className="text-xs">{allZba.length} cases</Badge>
-                                  )}
-                                  {isLoadingZbaApprovals && <span className="text-xs text-muted-foreground">Loading…</span>}
-                                  <span className="text-muted-foreground text-sm">{isZbaActivitySubOpen ? '▼' : '▶'}</span>
-                                </div>
-                              </div>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                              <div className="pt-2">
-                            {isLoadingZbaApprovals ? (
-                              <p className="text-xs text-muted-foreground">Loading ZBA decisions...</p>
-                            ) : (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
-                                <div>
-                                  <p className="font-jbmono text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Recent Decisions</p>
-                                  {allZba.filter((i: any) => i.isDecision).length === 0
-                                    ? <p className="text-xs text-muted-foreground">None found in last 4 months.</p>
-                                    : allZba.filter((i: any) => i.isDecision).map((item: any, idx: number) => {
-                                        const { appType, proposed, building } = zba2Parse(item.subject || '');
-                                        return (
-                                          <div key={idx} className="space-y-0.5 py-2 border-b border-border/30 last:border-b-0">
-                                            <div className="flex items-start justify-between gap-2">
-                                              <a href={zba2Gmaps(item.address)} target="_blank" rel="noopener noreferrer"
-                                                className="text-xs font-semibold text-foreground uppercase tracking-wide leading-snug flex-1 min-w-0 underline decoration-border hover:decoration-foreground">
-                                                {item.address}
-                                              </a>
-                                              {item._d < 99 && <span className="text-xs text-muted-foreground shrink-0 tabular-nums">{item._d.toFixed(2)} mi</span>}
-                                            </div>
-                                            <div className="flex items-center gap-1.5 flex-wrap">
-                                              {appType && <span className="text-xs font-jbmono font-bold uppercase tracking-wide text-muted-foreground">{appType}</span>}
-                                              {item.zoningDistrict && <span className="text-xs font-jbmono text-muted-foreground">{item.zoningDistrict}</span>}
-                                              <span className="text-xs text-muted-foreground/50">#{item.caseNumber}</span>
-                                              <span className="text-xs text-muted-foreground">{item.meetingMonth}</span>
-                                              {zba2Badge(item.decision)}
-                                            </div>
-                                            {proposed && <p className="text-xs text-foreground font-medium leading-snug capitalize">{proposed}</p>}
-                                            {building && <p className="text-xs text-muted-foreground font-jbmono leading-snug">{building}</p>}
-                                            {item.subject && (
-                                              <details className="text-xs text-muted-foreground leading-snug">
-                                                <summary className="cursor-pointer text-muted-foreground/60 hover:text-muted-foreground select-none">Full application text</summary>
-                                                <p className="mt-1 leading-relaxed">{item.subject}</p>
-                                              </details>
-                                            )}
-                                          </div>
-                                        );
-                                      })
-                                  }
-                                </div>
-                                <div className="mt-3 sm:mt-0">
-                                  <p className="font-jbmono text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Upcoming Appearances</p>
-                                  {allZba.filter((i: any) => !i.isDecision).length === 0
-                                    ? <p className="text-xs text-muted-foreground">No upcoming hearings for this ward.</p>
-                                    : allZba.filter((i: any) => !i.isDecision).map((item: any, idx: number) => {
-                                        const { appType, proposed, building } = zba2Parse(item.subject || '');
-                                        return (
-                                          <div key={idx} className="space-y-0.5 py-2 border-b border-border/30 last:border-b-0">
-                                            <div className="flex items-start justify-between gap-2">
-                                              <a href={zba2Gmaps(item.address)} target="_blank" rel="noopener noreferrer"
-                                                className="text-xs font-semibold text-foreground uppercase tracking-wide leading-snug flex-1 min-w-0 underline decoration-border hover:decoration-foreground">
-                                                {item.address}
-                                              </a>
-                                              {item._d < 99 && <span className="text-xs text-muted-foreground shrink-0 tabular-nums">{item._d.toFixed(2)} mi</span>}
-                                            </div>
-                                            <div className="flex items-center gap-1.5 flex-wrap">
-                                              {appType && <span className="text-xs font-jbmono font-bold uppercase tracking-wide text-muted-foreground">{appType}</span>}
-                                              {item.zoningDistrict && <span className="text-xs font-jbmono text-muted-foreground">{item.zoningDistrict}</span>}
-                                              <span className="text-xs text-muted-foreground/50">#{item.caseNumber}</span>
-                                              <span className="text-xs text-muted-foreground">{item.hearingMonth}</span>
-                                              <span className="text-xs font-medium font-body bg-secondary text-foreground/70 border [border-color:hsl(var(--tag-line))] rounded-full px-2.5 py-0.5">Upcoming</span>
-                                            </div>
-                                            {proposed && <p className="text-xs text-foreground font-medium leading-snug capitalize">{proposed}</p>}
-                                            {building && <p className="text-xs text-muted-foreground font-jbmono leading-snug">{building}</p>}
-                                            {item.subject && (
-                                              <details className="text-xs text-muted-foreground leading-snug">
-                                                <summary className="cursor-pointer text-muted-foreground/60 hover:text-muted-foreground select-none">Full application text</summary>
-                                                <p className="mt-1 leading-relaxed">{item.subject}</p>
-                                              </details>
-                                            )}
-                                          </div>
-                                        );
-                                      })
-                                  }
-                                </div>
-                              </div>
-                            )}
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        );
-                      })()}
-                    </CardContent>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
+              <DevelopmentSection
+                pipelineData={upcomingDevsData}
+                pipelineLoading={isLoadingUpcomingDevs}
+                pipelineError={isErrorUpcomingDevs}
+                permitData={upcomingDevsData?.newConstruction || (newConstructionData ? { ...newConstructionData, permits: upcomingDevsData?.pipelinePermits || newConstructionData.permits } : newConstructionData)}
+                permitLoading={!upcomingDevsData?.newConstruction && isLoadingNewConstruction}
+                permitError={!upcomingDevsData?.newConstruction && isErrorNewConstruction}
+                dpdData={upcomingDevsData ? { ...upcomingDevsData, sourceCoverage: upcomingDevsData.pipeline?.sourceCoverage } : undefined}
+                dpdLoading={isLoadingUpcomingDevs}
+                dpdError={isErrorUpcomingDevs}
+                zbaData={upcomingDevsData ? { ...upcomingDevsData, sourceCoverage: upcomingDevsData.pipeline?.sourceCoverage } : undefined}
+                zbaLoading={isLoadingUpcomingDevs}
+                zbaError={isErrorUpcomingDevs}
+                radiusMi={upcomingRadiusMi}
+                onRadiusChange={setUpcomingRadiusMi}
+                ward={wardNumber}
+                lat={facts?.lat}
+                lon={facts?.lon}
+                subjectUnits={(propertyTaxData as any)?.units ?? (pinLookupData as any)?.characteristicsData?.units ?? null}
+                renderLogo={(item) => <LogoTile url={item.url} source={item.publisher || item.sourceName || (item.source === "blockclub" ? "Block Club Chicago" : item.source === "yimby" ? "Chicago YIMBY" : item.source) || "Development news"} date={newsFmtD(item.publishDate || item.date)} />}
+              />
             </motion.div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Neighborhood or community-area data is not available, so nearby development records cannot be scoped.
+              Location data is not available, so nearby development records cannot be scoped.
             </p>
           )}
           </AccordionSection>

@@ -75,7 +75,7 @@ test("approved report titles are bound consistently to section, print, and jump 
 
 test("canonical title updates preserve the established report section order", () => {
   assert.deepEqual(SECTION_ORDER, [
-    "countyRecord", "permits", "ownership", "historic", "zoning", "valuation", "market", "incentives", "transit", "newBusinessLicenses", "newConstruction",
+    "countyRecord", "permits", "ownership", "historic", "zoning", "valuation", "market", "incentives", "transit", "newBusinessLicenses",
     "crime", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
   ]);
   const runDetail = readFileSync(new URL("../../pages/RunDetail.tsx", import.meta.url), "utf8");
@@ -83,7 +83,7 @@ test("canonical title updates preserve the established report section order", ()
   assert.ok(defaultOrder, "accordion default order remains declared");
   assert.deepEqual([...defaultOrder[1].matchAll(/"([^"]+)"/g)].map(([, id]) => id), [
     "ownership", "propertyTax", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing",
-    "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
+    "countyRecord", "permits", "analysis", "newBusinessLicenses", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
   ]);
 });
 
@@ -124,9 +124,10 @@ test("persisted report orders drop the retired section and preserve custom order
     { compilerOptions: { target: ts.ScriptTarget.ES2022 } },
   );
   const merge = new Function("saved", "id", "localStorage", `${outputText}\nreturn result;`);
-  const saved = ["news", "ownership", "debt", "market", "people"];
+  const saved = ["news", "ownership", "debt", "newConstruction", "development", "market", "people"];
   const result: string[] = merge(saved, "fixture", { getItem: () => "done" });
   assert.ok(!result.includes("debt"));
-  assert.deepEqual(result.filter((id) => saved.includes(id)), ["news", "ownership", "market", "people"]);
+  assert.ok(!result.includes("newConstruction"));
+  assert.deepEqual(result.filter((id) => saved.includes(id)), ["news", "ownership", "development", "market", "people"]);
   assert.ok(result.includes("propertyTax"));
 });

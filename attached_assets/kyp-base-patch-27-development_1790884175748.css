@@ -1,0 +1,86 @@
+/* ============================================================
+   Step 27 — §Nearby Development & Construction (merged)
+   Append to the END of client/src/kyp-base.css.
+
+   Three rules. Everything else in this step is markup, deletions
+   and one server-side field.
+   ============================================================ */
+
+/* 1. Corridor tag. A corridor is a CLASSIFICATION, not a verdict, so it is
+      indigo — never green/orange/red. Soft fill, matching the treatment
+      .kyp-refrow .ro.passed already uses, because this chip can repeat on
+      many rows and a filled pill would shout.                            */
+.kyp-corridor {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--kyp-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  background: var(--kyp-indigoSoft);
+  color: var(--kyp-indigo);
+  border-radius: 5px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+
+/* 2. A procedural STATUS — "Approved", "Under review", "Proposed", "Scheduled"
+      — is a state, not a verdict, so it takes indigo. .kyp-pill ships
+      .good/.att/.bad only; this adds the no-claim tone.                   */
+.kyp-pill.ind { background: var(--kyp-indigoSoft); color: var(--kyp-indigo); }
+
+/* 3. A record row that another source also describes. Slate, not a verdict:
+      it states that two sources point at one address, nothing more.
+      Replaces the prose reconciliation in the deleted Section Summary.    */
+.kyp-alsoin {
+  font-family: var(--kyp-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--kyp-muted);
+  white-space: nowrap;
+}
+
+/* 4. Professionals on a permit row. The permit record already carries
+      architectName and contractorName (chicagoPermits.ts:95-104); only the
+      contractor was ever rendered. Each name links into Discovery's existing
+      ranking list, pre-filtered.                                          */
+.kyp-pro {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.kyp-pro i {
+  font-style: normal;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--kyp-muted);
+}
+.kyp-pro a {
+  font-family: var(--kyp-sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--kyp-indigo);
+  text-decoration: none;
+}
+.kyp-pro a:hover { text-decoration: underline; }
+
+/* 5. The pipeline strip's footnote carries the counting rule, so it sits
+      tight under the blocks rather than a subsection's width apart.      */
+.kyp-src.pipefoot { margin-top: 10px; }
+
+/* 6. Two-column records layout for Zoning Board Activity (decisions beside
+      upcoming hearings). Collapses on narrow screens.                     */
+.kyp-twocol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 28px;
+}
+@media (max-width: 720px) {
+  .kyp-twocol { grid-template-columns: 1fr; }
+}

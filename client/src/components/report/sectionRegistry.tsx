@@ -11,7 +11,7 @@ export const REPORT_SECTION_TITLES = {
 } as const;
 
 export const SECTION_ORDER = [
-  "countyRecord", "permits", "ownership", "historic", "zoning", "valuation", "market", "incentives", "transit", "newBusinessLicenses", "newConstruction",
+  "countyRecord", "permits", "ownership", "historic", "zoning", "valuation", "market", "incentives", "transit", "newBusinessLicenses",
   "crime", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
 ] as const;
 
@@ -43,9 +43,6 @@ export const SECTION_META: Record<string, SectionMeta> = {
   newBusinessLicenses: { id: "newBusinessLicenses", anchorId: "section-newBusinessLicenses", title: REPORT_SECTION_TITLES.newBusinessLicenses,
     summary: "Businesses receiving new licenses within one mile, not confirmed openings.",
     info: ["Businesses receiving new licenses, not confirmed openings", "Current and prior 12-month issuance periods", "New-issuance license mix", "Nearest businesses receiving licenses"] },
-  newConstruction: { id: "newConstruction", anchorId: "print-section-new-construction", title: "New Construction",
-    summary: "Nearby new-construction permits, permit mix, and building activity within one mile.",
-    info: ["One-mile parcel-specific permit scope", "Permit mix, unit counts and median reported cost", "18-month likely-still-building proxy", "Community area count is benchmark context only"] },
   crime: { id: "crime", anchorId: "section-crime", title: "Safety & Crime",
     summary: "Area crime levels, percentile vs the city, and trend.",
     info: ["Area crime statistics", "Tract percentile vs city", "Trend over time"] },
@@ -62,8 +59,8 @@ export const SECTION_META: Record<string, SectionMeta> = {
     summary: "New license issuances and news on the nearby commercial corridors.",
     info: ["New business licenses on the corridor", "Corridor news coverage", "Neighborhood news"] },
   development: { id: "development", anchorId: "print-section-upcoming-developments", title: "Nearby Development & Construction",
-    summary: "New-construction permits and proposed projects nearby.",
-    info: ["New-construction permits (radius-wide)", "Upcoming / proposed developments"] },
+    summary: "Units under construction and in the approval pipeline nearby.",
+    info: ["New-construction permits within one mile", "Plan Commission applications", "Zoning Board decisions and hearings", "Development news coverage"] },
   people: { id: "people", anchorId: "print-section-demographics", title: "Neighborhood & People",
     summary: "Who lives here, what they earn, where they work and how they vote.",
     info: ["Demographic trends", "Languages spoken", "Vehicle ownership", "Senior population", "Jobs & workforce", "Voting & civic lean (context only)"] },

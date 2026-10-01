@@ -43,6 +43,7 @@ export interface NewConstructionPermit {
   contractorName?: string;
   stories?: number;
   units?: number;
+  unitsAmbiguous?: boolean;
   parkingSpaces?: number;
   buildingUse?: string;
 }
@@ -71,7 +72,9 @@ export function isAccessoryStructure(workDescription = ""): boolean {
 function parseDetails(workDescription: string) {
   const description = workDescription.toUpperCase();
   const stories = description.match(/\b(\d+)[\s-](?:STORY|STORIES|STOR|FL(?:OOR)?S?)\b/)?.[1];
-  const units = description.match(/\b(\d+)\s*(?:D\.?U\.?|DWELLING\s*UNITS?|UNITS?(?:\s+RESID)?|APARTMENTS?)\b/)?.[1];
+  const unitMatches = Array.from(description.matchAll(/\b(\d+)\s*(?:D\.?U\.?|DWELLING\s*UNITS?|UNITS?(?:\s+RESID)?|APARTMENTS?)\b/g));
+  const units = unitMatches[0]?.[1];
+  const reportedUnitCounts = new Set(unitMatches.map(match => Number(match[1])).filter(value => value > 0));
   const parkingSpaces = description.match(/\b(\d+)[\s-](?:PARKING\s*SPACES?|CAR\s*GARAGE|CAR\s*PARKING|STALLS?)\b/)?.[1];
   let buildingUse: string | undefined;
   if (/\bMIXED[- ]USE\b/.test(description)) buildingUse = "Mixed Use";
@@ -87,6 +90,7 @@ function parseDetails(workDescription: string) {
   return {
     stories: stories ? Number(stories) : undefined,
     units: units && Number(units) > 0 ? Number(units) : undefined,
+    unitsAmbiguous: reportedUnitCounts.size > 1,
     parkingSpaces: parkingSpaces ? Number(parkingSpaces) : undefined,
     buildingUse,
   };
