@@ -1466,7 +1466,9 @@ button.kyp-morelink { background: none; border: 0; padding: 0; }
 .kyp-hmda-panel .kyp-mixcard,
 .kyp-hmda-buyer .kyp-mixcard { border-radius:9px; padding:10px 12px; }
 .kyp-hmda-panel .kyp-mixcard .mh,
-.kyp-hmda-buyer .kyp-mixcard .mh { margin-bottom:6px; font-size:9px; }
+.kyp-hmda-buyer .kyp-mixcard .mh { display:flex; align-items:center; gap:6px; margin-bottom:6px; font-size:9px; }
+.kyp-hmda-panel .kyp-mixcard .mh > svg,
+.kyp-hmda-buyer .kyp-mixcard .mh > svg { flex:none; }
 .kyp-hmda-panel .kyp-donut,
 .kyp-hmda-buyer .kyp-donut { gap:8px; }
 .kyp-hmda-panel .kyp-mixrow,
