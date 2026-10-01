@@ -19,7 +19,7 @@ export const SECTION_META: Record<string, SectionMeta> = {
   historic: { id: "historic", anchorId: "print-section-historic-status", title: "Historic Status",
     summary: "Chicago Historic Resources Survey rating and designation signals.",
     info: ["CHRS survey rating", "Municipal designation signals", "Demolition-hold rule", "Credit eligibility requirements"] },
-  countyRecord: { id: "countyRecord", anchorId: "print-section-county-record", title: "COUNTY RECORD",
+  countyRecord: { id: "countyRecord", anchorId: "print-section-county-record", title: "Parcel & Building Details",
     summary: "Cook County Assessor and Treasurer record for the subject parcel.",
     info: ["Parcel and structure facts", "Recorded unit configuration", "Assessor valuation inputs", "PIN and source links"] },
   permits: { id: "permits", anchorId: "section-permits", title: "Permits & Violations",

@@ -283,6 +283,7 @@ export function CountyRecordSection({
 
   const provenance = hasPin ? (
     <div className="kyp-src" data-testid="county-record-source">
+      <span>Source: Cook County Open Data Portal. Values may differ from the official Assessor website.</span>
       <span className={pinLookupData?.confidence === "medium" ? "kyp-yn-note" : "kyp-src-ok"}>{pinLookupData?.confidence === "medium" ? "⚠ PIN matched — verify" : "✓ PIN resolved"}</span>
       <span>PIN <b>{pinLabel(pinLookupData?.pin || propertyTaxData?.pin || submittedPin)}</b></span>
       {lookupSource && <span>{sourceLabel(lookupSource)}</span>}
@@ -290,7 +291,6 @@ export function CountyRecordSection({
       {submittedPin && <button type="button" className="kyp-morelink no-print" onClick={() => { setPropertyPin(""); setSubmittedPin(null); setForcePinEntry(true); }}>Wrong parcel? Enter a PIN →</button>}
       {assessorUrl && <a href={assessorUrl} target="_blank" rel="noopener noreferrer" data-testid="link-assessor-detail"><ExternalLink className="w-3 h-3" />Verify on Assessor site</a>}
       {treasurerUrl && <a href={treasurerUrl} target="_blank" rel="noopener noreferrer" data-testid="link-treasurer-bill"><ExternalLink className="w-3 h-3" />Tax bill (Treasurer)</a>}
-      {submittedPin && <button type="button" className="kyp-morelink no-print" onClick={() => refreshPropertyTax.mutate(submittedPin)} disabled={refreshPropertyTax.isPending}><RefreshCw className={refreshPropertyTax.isPending ? "animate-spin" : ""} /> Refresh</button>}
     </div>
   ) : null;
 
@@ -412,8 +412,11 @@ export function CountyRecordSection({
   return (
     <div id="print-section-county-record" data-testid="county-record-section">
       {caveats}
-      {provenance}
-      <KypSubhead subsection={isCommercial ? 1 : undefined}><span className="lbl">What the county records</span>{taxYear && <span className="ct">assessment year {taxYear}</span>}</KypSubhead>
+      <KypSubhead className="kyp-parcel-heading" subsection={isCommercial ? 1 : undefined}>
+        <span className="lbl">What the county records</span>
+        {taxYear && <span className="ct">assessment year {taxYear}</span>}
+        {submittedPin && <button type="button" className="kyp-morelink no-print kyp-parcel-refresh" data-testid="button-refresh-parcel-record" onClick={() => refreshPropertyTax.mutate(submittedPin)} disabled={refreshPropertyTax.isPending}><RefreshCw className={refreshPropertyTax.isPending ? "animate-spin" : ""} /> Refresh</button>}
+      </KypSubhead>
       <div className="kyp-tiles">
         <Tile label="Land" value={landSf !== null ? fmtNumber(landSf) : "—"} sub={landSf !== null ? "sq ft" : "not recorded"} tone="ind" />
         <Tile label="Building" value={buildingSf !== null ? fmtNumber(buildingSf) : "—"} sub={buildingSf !== null ? "sq ft" : "not recorded"} />
@@ -425,7 +428,7 @@ export function CountyRecordSection({
       {recordedBooleans}
       {manualEntry}
       {modelled}
-      <div className="kyp-src"><span>Source: Cook County Open Data Portal. Values may differ from the official Assessor website.</span>{assessorUrl && <a href={assessorUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-3 h-3" />Verify official record</a>}{treasurerUrl && <a href={treasurerUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-3 h-3" />View tax bill (Treasurer)</a>}</div>
+      {provenance}
     </div>
   );
 }

@@ -849,6 +849,14 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-modhd .w{font-size:12.5px;color:var(--kyp-ink2);line-height:1.5}
 .kyp-modhd .w b{color:var(--kyp-ink)}
 
+#print-section-county-record .kyp-parcel-heading{flex-wrap:wrap}
+#print-section-county-record .kyp-parcel-refresh{display:inline-flex;align-items:center;gap:5px;margin:0 0 0 auto;flex:none}
+#print-section-county-record .kyp-parcel-refresh svg{width:14px;height:14px}
+@media(max-width:640px){
+  #print-section-county-record .kyp-parcel-heading .lbl{flex:1;min-width:0}
+  #print-section-county-record .kyp-parcel-heading .ct{order:1;flex-basis:100%}
+}
+
 /* ---------- 16b — .kyp-units : draw the units, and draw the alternative ----------
    Unit configuration is a claim about a division, and the honest content is not
    a sentence — it is the set of splits consistent with the county's totals.
