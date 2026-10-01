@@ -272,6 +272,11 @@ try {
   assert.match(await tone("listing"), /\bg\b/, "Keep an existing badge tone");
   assert.equal(await label("countyRecord"), "TAX RECORD");
   assert.match(await tone("countyRecord"), /\bo\b/);
+  assert.equal(
+    await page.locator('[data-testid="accsec-countyRecord"] .badge').evaluate(element => getComputedStyle(element).color),
+    "rgb(255, 255, 255)",
+    "Orange summary badges must use white text",
+  );
   await page.screenshot({ path: "/tmp/summary-badges-desktop.png", fullPage: true });
 
   const ownershipRow = page.locator('[data-testid="accsec-ownership"]');

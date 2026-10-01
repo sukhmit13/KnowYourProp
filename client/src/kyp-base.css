@@ -529,7 +529,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-acchd .tk em{font-family:var(--kyp-disp);font-style:italic;font-weight:400;font-size:1.1em;color:var(--kyp-green)}
 .kyp-acchd .tk em.o{color:var(--kyp-orange)}
 .kyp-acchd .badge{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;border-radius:7px;padding:5px 11px;white-space:nowrap;flex:none;margin-top:2px}
-.kyp-acchd .badge.g{background:var(--kyp-green)}.kyp-acchd .badge.o{background:var(--kyp-orange);color:var(--kyp-ink)}.kyp-acchd .badge.c{background:var(--kyp-slate)}
+.kyp-acchd .badge.g{background:var(--kyp-green)}.kyp-acchd .badge.o{background:var(--kyp-orange);color:#fff}.kyp-acchd .badge.c{background:var(--kyp-slate)}
 .kyp-acchd .badge.r{background:var(--kyp-bad)}
 .kyp-acchd .badge.indigo{background:var(--kyp-indigo)}
 .kyp-acchd .ico{width:27px;height:27px;border-radius:7px;border:1px solid #c9cfee;display:flex;align-items:center;justify-content:center;color:#2b3a9e;font-size:12px;flex:none;background:var(--kyp-card);margin-top:2px}
