@@ -38,6 +38,13 @@ Use the served app HTML as a fixture's shell, retain its React Refresh bootstrap
 
 **How to apply:** when testing a report fragment outside the authenticated page, preserve the generated shell, dependency interop, and required app providers before diagnosing product failures.
 
+## Verify that reused styles actually apply
+Preserve the production ancestor/wrapper arrangement in browser fixtures, and check computed styles and rendered geometry—not just the presence of shared class names.
+
+**Why:** Worship rows had the expected school-style classes, but the styles required a schools-only ancestor. Earlier row-count/class assertions passed while the live list remained unstyled.
+
+**How to apply:** When reusing another section's visual primitives, verify weight, text sizes, spacing, dividers, and mobile wrapping without adding the donor section's wrapper to the fixture.
+
 ## Source attribution in supplied mocks
 Match a mock's visual treatment, but keep source labels consistent with the actual data provider and response metadata.
 

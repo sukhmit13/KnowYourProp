@@ -256,6 +256,126 @@ try {
   await page.locator("#section-people .kyp-subhead").first().waitFor();
   await page.waitForTimeout(500);
   const people = page.locator("#section-people");
+  const worshipCssContext = await people.locator("#print-section-worship").evaluate((section) => ({
+    hasSchoolBoxAncestor: section.closest(".schbox") !== null,
+    productionIndexCssLoaded: [...document.styleSheets].some((sheet) => {
+      if (!sheet.href) return false;
+      const url = new URL(sheet.href);
+      return url.pathname === "/src/index.css" && url.searchParams.has("direct");
+    }),
+  }));
+  assert.equal(worshipCssContext.hasSchoolBoxAncestor, false,
+    "The AST-extracted worship subtree must not gain a synthetic .schbox ancestor");
+  assert.equal(worshipCssContext.productionIndexCssLoaded, true,
+    "Worship styling is checked against the production global index.css");
+
+  async function worshipLayoutSnapshot() {
+    return people.locator("#print-section-worship").evaluate((section) => {
+      const rect = (element) => {
+        const { left, right, top, bottom, width } = element.getBoundingClientRect();
+        return { left, right, top, bottom, width };
+      };
+      return {
+        viewportWidth: window.innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+        rows: [...section.querySelectorAll(".srow.step23-list-row")].map((row) => {
+          const name = row.querySelector(".step23-name");
+          const meta = row.querySelector(".step23-meta");
+          const rowStyle = getComputedStyle(row);
+          const nameStyle = getComputedStyle(name);
+          const metaStyle = getComputedStyle(meta);
+          return {
+            display: rowStyle.display,
+            flexWrap: rowStyle.flexWrap,
+            paddingTop: rowStyle.paddingTop,
+            paddingBottom: rowStyle.paddingBottom,
+            borderBottomWidth: rowStyle.borderBottomWidth,
+            borderBottomStyle: rowStyle.borderBottomStyle,
+            borderBottomColor: rowStyle.borderBottomColor,
+            scrollWidth: row.scrollWidth,
+            clientWidth: row.clientWidth,
+            rect: rect(row),
+            name: {
+              fontSize: nameStyle.fontSize,
+              fontWeight: nameStyle.fontWeight,
+              color: nameStyle.color,
+              rect: rect(name),
+            },
+            meta: {
+              fontSize: metaStyle.fontSize,
+              color: metaStyle.color,
+              flexBasis: metaStyle.flexBasis,
+              rect: rect(meta),
+            },
+          };
+        }),
+        groups: [...section.querySelectorAll(".subwrap > .kyp-subhead")].map((header) => {
+          const count = header.querySelector(".ct");
+          return {
+            countText: count.innerText.trim(),
+            countMarginLeft: getComputedStyle(count).marginLeft,
+            countTextAlign: getComputedStyle(count).textAlign,
+            headerRect: rect(header),
+            countRect: rect(count),
+          };
+        }),
+      };
+    });
+  }
+
+  function assertWorshipLayout(snapshot, context, { mobile = false } = {}) {
+    assert.equal(snapshot.rows.length, fixture.placesOfWorshipData.places.length,
+      `${context}: all production worship rows are styled`);
+    for (const row of snapshot.rows) {
+      assert.equal(row.display, "flex", `${context}: worship row uses flex layout`);
+      assert.equal(row.flexWrap, "wrap", `${context}: worship row can wrap`);
+      assert.equal(row.paddingTop, "9px", `${context}: worship row has 9px top padding`);
+      assert.equal(row.paddingBottom, "9px", `${context}: worship row has 9px bottom padding`);
+      assert.equal(row.borderBottomWidth, "1px", `${context}: worship row has a fine bottom rule`);
+      assert.equal(row.borderBottomStyle, "solid", `${context}: worship bottom rule is solid`);
+      assert.equal(row.borderBottomColor, "rgb(240, 238, 231)", `${context}: worship bottom rule uses #f0eee7`);
+      assert.equal(row.name.fontSize, "13.5px", `${context}: worship names use school-list sizing`);
+      assert.equal(row.name.fontWeight, "600", `${context}: worship names are bold`);
+      assert.equal(row.meta.fontSize, "11.5px", `${context}: worship addresses use the smaller metadata size`);
+      assert.notEqual(row.meta.color, row.name.color,
+        `${context}: worship addresses are muted relative to names`);
+      assert.ok(row.name.rect.width > 0 && row.meta.rect.width > 0,
+        `${context}: names and addresses have separate visible boxes`);
+      assert.ok(row.scrollWidth <= row.clientWidth + 1,
+        `${context}: worship row content does not overflow its own width`);
+    }
+    assert.equal(snapshot.groups.length, 4, `${context}: each religion group has a heading`);
+    for (const group of snapshot.groups) {
+      // Flex auto margins resolve to pixel widths; verify alignment from rendered geometry.
+      assert.equal(group.countTextAlign, "right", `${context}: religion count text is right-aligned`);
+      assert.ok(Math.abs(group.countRect.right - group.headerRect.right) <= 1.5,
+        `${context}: religion count aligns with the right edge of its heading`);
+    }
+
+    if (mobile) {
+      assert.ok(snapshot.documentWidth <= snapshot.viewportWidth,
+        `${context}: the page has no horizontal overflow`);
+      for (const row of snapshot.rows) {
+        assert.equal(row.meta.flexBasis, "100%", `${context}: address takes a full flex line`);
+        assert.ok(row.meta.rect.top >= row.name.rect.bottom - 0.5,
+          `${context}: address wraps beneath, rather than concatenating with, its name`);
+        assert.ok(row.rect.left >= 0 && row.rect.right <= snapshot.viewportWidth,
+          `${context}: worship row stays within the viewport`);
+      }
+    } else {
+      let sameLineRows = 0;
+      for (const row of snapshot.rows) {
+        const sameLine = row.name.rect.top < row.meta.rect.bottom
+          && row.meta.rect.top < row.name.rect.bottom;
+        if (sameLine) {
+          sameLineRows += 1;
+          assert.ok(row.meta.rect.left - row.name.rect.right >= 8,
+            `${context}: adjacent name and address have a visible 8px gap`);
+        }
+      }
+      assert.ok(sameLineRows > 0, `${context}: desktop keeps at least one name and address on the same line`);
+    }
+  }
 
   assert.equal(await people.locator(".kyp-src").count(), 5, "Exactly one source footer per subsection");
   assert.deepEqual(await people.locator(".kyp-subhead .n").allTextContents(), ["25.1", "25.2", "25.3", "25.4", "25.5"]);
@@ -379,7 +499,11 @@ try {
   const worshipLinks = people.locator("#print-section-worship .step23-name");
   assert.equal(await worshipLinks.count(), fixture.placesOfWorshipData.places.length);
   for (const place of fixture.placesOfWorshipData.places) {
-    const link = people.getByTestId(`row-worship-${place.id}`).locator("a.step23-name");
+    const row = people.getByTestId(`row-worship-${place.id}`);
+    const link = row.locator("a.step23-name");
+    assert.equal(await link.innerText(), place.name, `Keep the fixture name for ${place.id}`);
+    assert.equal(await row.locator(".step23-meta").innerText(), place.address,
+      `Keep the fixture address for ${place.id}`);
     assert.equal(await link.getAttribute("href"),
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.name} Chicago IL`)}`);
     assert.equal(await link.getAttribute("target"), "_blank");
@@ -393,6 +517,11 @@ try {
     const lastGroup = groups[groups.length - 1];
     return !!lastGroup && Boolean(lastGroup.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING);
   }), true, "The worship footer follows the final religion group");
+  assert.deepEqual(await groupHeaders.locator(".lbl").allTextContents(),
+    ["Christian", "Muslim", "Jewish", "Spiritualist / Meditation"],
+    "Production religion grouping and ordering remain unchanged");
+  assert.deepEqual(await groupHeaders.locator(".ct").allTextContents(), ["2", "1", "1", "1"],
+    "Religion counts continue to reflect the original worship fixture");
   await page.evaluate((placesOfWorshipData) => window.renderFixture({ placesOfWorshipData }), {
     ...fixture.placesOfWorshipData,
     source: "Fixture-provided source attribution",
@@ -403,15 +532,39 @@ try {
   await page.evaluate(() => window.renderFixture());
   await page.waitForTimeout(150);
 
+  assertWorshipLayout(await worshipLayoutSnapshot(), "Desktop worship styling");
+  await people.locator("#print-section-worship").screenshot({ path: "/tmp/worship-styling-desktop.png" });
+  await page.emulateMedia({ media: "print" });
+  const printWorshipStyles = await people.locator("#print-section-worship .srow.step23-list-row").evaluateAll((rows) =>
+    rows.map((row) => {
+      const name = row.querySelector(".step23-name");
+      const style = getComputedStyle(name);
+      return {
+        display: getComputedStyle(row).display,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+      };
+    }));
+  assert.equal(printWorshipStyles.length, fixture.placesOfWorshipData.places.length,
+    "All worship rows remain present in print media");
+  for (const style of printWorshipStyles) {
+    assert.equal(style.display, "flex", "Worship rows remain flex rows in print media");
+    assert.equal(style.fontSize, "13.5px", "Worship names retain 13.5px styling in print media");
+    assert.equal(style.fontWeight, "600", "Worship names remain bold in print media");
+  }
+  await page.emulateMedia({ media: "screen" });
+
   assert.deepEqual(errors, []);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "/tmp/step25b-people-desktop-top.png" });
   await page.screenshot({ path: "/tmp/step25b-people-desktop-full.png", fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(300);
+  assertWorshipLayout(await worshipLayoutSnapshot(), "Mobile worship styling", { mobile: true });
   const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   await page.screenshot({ path: "/tmp/step25b-people-mobile-top.png" });
   await page.screenshot({ path: "/tmp/step25b-people-mobile-full.png", fullPage: true });
+  await people.locator("#print-section-worship").screenshot({ path: "/tmp/worship-styling-mobile.png" });
   assert.equal(mobileOverflow, false, "No mobile horizontal overflow (including the existing wide demographics table)");
   console.log("Step25b browser checks passed: dynamic numbering, scope toggles/footers, section inventory, daytime tiles, worship list/attribution, and mobile width.");
 } finally {
