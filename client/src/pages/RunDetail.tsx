@@ -58,7 +58,7 @@ import StatTile from "@/components/StatTile";
 import InsightReportSection from "@/components/InsightReportSection";
 import { CountyRecordSection } from "@/components/report/CountyRecordSection";
 import { trackEvent } from "@/lib/analytics";
-import { fallbackSummaryBadge, headerBadgeNumber, headerCountyUnitCount, headerFarCeilingBadge, type HeaderBadgeState } from "@/lib/sectionHeaderBadges";
+import { fallbackSummaryBadge, headerBadgeNumber, headerCountyRecordBadge, headerFarCeilingBadge, type HeaderBadgeState } from "@/lib/sectionHeaderBadges";
 
 function proRoleIcon(role: string) {
   const r = (role || '').toLowerCase();
@@ -4210,13 +4210,18 @@ export default function RunDetail() {
     companionLotSf: headerCompanionLotSf,
     manualCombinedLot: !!run?.manualLandSqFt,
   });
-  const headerCountyUnits = headerCountyUnitCount(propertyTaxData?.apartments, pinLookupData?.commercialData?.totalUnits);
-  const headerCountyYear = headerBadgeNumber(propertyTaxData?.yearBuilt ?? pinLookupData?.characteristicsData?.yearBuilt);
-  const headerCountyFacts = [
-    headerCountyUnits != null ? `${headerCountyUnits} unit${headerCountyUnits === 1 ? "" : "s"}` : null,
-    headerCountyYear != null && headerCountyYear >= 1700 && headerCountyYear <= new Date().getFullYear()
-      ? `Built ${headerCountyYear}` : null,
-  ].filter(Boolean).join(" · ");
+  const headerCountyFacts = headerCountyRecordBadge({
+    years: [
+      propertyTaxData?.yearBuilt,
+      pinLookupData?.characteristicsData?.yearBuilt,
+      pinLookupData?.commercialData?.yearBuilt,
+    ],
+    buildingAreas: [
+      propertyTaxData?.buildingSquareFeet,
+      pinLookupData?.characteristicsData?.buildingSf,
+      pinLookupData?.commercialData?.bldgSf,
+    ],
+  });
   const headerSchoolIds = new Set([
     ...(schoolsData?.elementary ?? []), ...(schoolsData?.middle ?? []), ...(schoolsData?.high ?? []),
   ].map((school, index) => school.schoolId != null ? `id-${school.schoolId}` : `record-${index}`));
@@ -4287,7 +4292,7 @@ export default function RunDetail() {
     },
     countyRecord: {
       loading: isLoadingPinLookup || isLoadingPropertyTax, checked: !!submittedPin || !!pinLookupData?.pin,
-      hasData: !!pinLookupData || !!propertyTaxData, label: headerCountyFacts || undefined, emptyLabel: "Record incomplete",
+      hasData: !!pinLookupData || !!propertyTaxData, label: headerCountyFacts, emptyLabel: "Year / area unavailable",
     },
     permits: { loading: isLoadingPermitsViolations, hasData: !!combinedPermitViolations, emptyLabel: "Status not verified" },
     analysis: {

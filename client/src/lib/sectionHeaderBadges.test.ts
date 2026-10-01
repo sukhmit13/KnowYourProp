@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { fallbackSummaryBadge, headerBadgeNumber, headerCountyUnitCount, headerFarCeilingBadge } from "./sectionHeaderBadges";
+import { fallbackSummaryBadge, headerBadgeNumber, headerCountyRecordBadge, headerCountyUnitCount, headerFarCeilingBadge } from "./sectionHeaderBadges";
 
 test("FAR ceiling badge retains the known subject ceiling when companion data is missing", () => {
   for (const companionLotSf of [undefined, null, "", " ", 0, -1, NaN]) {
@@ -102,4 +102,29 @@ test("headerCountyUnitCount preserves zero, parses word counts, and falls back o
   assert.equal(headerCountyUnitCount("Two", 4), 2);
   assert.equal(headerCountyUnitCount("not recorded", 4), 4);
   assert.equal(headerCountyUnitCount("not recorded", null), null);
+});
+
+test("county record badge includes commercial years and prefers year built over square footage", () => {
+  assert.equal(headerCountyRecordBadge({ years: [null, undefined, 1898], buildingAreas: [null, undefined, 10040] }, 2026), "Built 1898");
+  assert.equal(headerCountyRecordBadge({ years: [1920, 1910, 1898], buildingAreas: [2000] }, 2026), "Built 1920");
+  assert.equal(headerCountyRecordBadge({ years: [" 1898 "], buildingAreas: [10040] }, 2026), "Built 1898");
+});
+
+test("invalid primary years do not hide a valid recorded fallback year", () => {
+  for (const year of [undefined, null, "", " ", 0, -1, 1699, 2027, 1898.5, NaN, Infinity, true, "unknown"]) {
+    assert.equal(headerCountyRecordBadge({ years: [year, 1898], buildingAreas: [10040] }, 2026), "Built 1898");
+  }
+});
+
+test("county record badge falls back to positive recorded building square footage", () => {
+  assert.equal(headerCountyRecordBadge({ years: [null, undefined], buildingAreas: [null, undefined, 10040] }, 2026), "10,040 sq ft");
+  assert.equal(headerCountyRecordBadge({ years: [0, 2027], buildingAreas: [0, "1,250", 10040] }, 2026), "1,250 sq ft");
+});
+
+test("missing or invalid year and area remain unknown, not an incomplete-record claim", () => {
+  for (const area of [undefined, null, "", " ", 0, -1, NaN, Infinity, true, "unknown"]) {
+    const label = headerCountyRecordBadge({ years: [null, 0], buildingAreas: [area] }, 2026);
+    assert.equal(label, undefined);
+    assert.equal(fallbackSummaryBadge({ hasData: true, label, emptyLabel: "Year / area unavailable" }).label, "Year / area unavailable");
+  }
 });

@@ -37,6 +37,24 @@ export function headerBadgeNumber(value: unknown): number | null {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
 }
 
+/** Recorded county facts only: prefer a valid year, then a positive building area. */
+export function headerCountyRecordBadge(
+  inputs: { years: readonly unknown[]; buildingAreas: readonly unknown[] },
+  currentYear = new Date().getFullYear(),
+): string | undefined {
+  for (const value of inputs.years) {
+    const year = headerBadgeNumber(value);
+    if (year != null && Number.isInteger(year) && year >= 1700 && year <= currentYear) {
+      return `Built ${year}`;
+    }
+  }
+  for (const value of inputs.buildingAreas) {
+    const area = headerBadgeNumber(value);
+    if (area != null && area > 0) return `${area.toLocaleString("en-US")} sq ft`;
+  }
+  return undefined;
+}
+
 export interface HeaderFarCeilingInputs {
   lotSf: unknown;
   maxFar: unknown;
