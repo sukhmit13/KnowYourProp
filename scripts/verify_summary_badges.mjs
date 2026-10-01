@@ -277,6 +277,25 @@ try {
     "rgb(255, 255, 255)",
     "Orange summary badges must use white text",
   );
+  const zoningChipColors = await page.evaluate(() => {
+    const ruling = document.createElement("div");
+    ruling.className = "kyp-verdict watch";
+    const chip = document.createElement("span");
+    chip.className = "vk";
+    chip.textContent = "Special use required";
+    ruling.append(chip);
+    document.body.append(ruling);
+    const style = getComputedStyle(chip);
+    const colors = {
+      color: style.color,
+      background: style.backgroundColor,
+      expectedBackground: getComputedStyle(document.querySelector('[data-testid="accsec-countyRecord"] .badge')).backgroundColor,
+    };
+    ruling.remove();
+    return colors;
+  });
+  assert.equal(zoningChipColors.color, "rgb(255, 255, 255)", "Orange zoning chips must use white text");
+  assert.equal(zoningChipColors.background, zoningChipColors.expectedBackground, "Keep the existing orange fill");
   await page.screenshot({ path: "/tmp/summary-badges-desktop.png", fullPage: true });
 
   const ownershipRow = page.locator('[data-testid="accsec-ownership"]');

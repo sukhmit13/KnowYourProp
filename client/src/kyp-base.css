@@ -1130,7 +1130,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-verdict.no{border-left-color:var(--kyp-bad)}
 .kyp-verdict .vk{display:inline-block;font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;border-radius:5px;padding:3px 8px;background:var(--kyp-slate)}
 .kyp-verdict.ok .vk{background:var(--kyp-green)}
-.kyp-verdict.watch .vk{background:var(--kyp-orange);color:var(--kyp-ink)}
+.kyp-verdict.watch .vk{background:var(--kyp-orange);color:#fff}
 .kyp-verdict.no .vk{background:var(--kyp-bad)}
 .kyp-verdict .vh{font-family:var(--kyp-disp);font-size:24px;color:var(--kyp-ink);line-height:1.08;margin:10px 0 7px}
 .kyp-verdict .vp{font-size:12.5px;color:var(--kyp-ink2);line-height:1.55;margin:0}
