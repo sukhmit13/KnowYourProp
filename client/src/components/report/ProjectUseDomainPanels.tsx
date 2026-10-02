@@ -298,7 +298,7 @@ export function EVRegistrationTrends({ data, loading, error, onRetry, zipCode }:
       {countySeries.length ? <TrendChart points={countySeries} dataKey="cookCounty" title="Cook County" color="var(--kyp-indigoL)" /> : <div className="kyp-status-empty">Cook County registration rows are not available.</div>}
       {zipSeries.length ? <TrendChart points={zipSeries} dataKey="zipCode" title={`ZIP ${zipCode}`} color="var(--kyp-orange)" /> : <div className="kyp-status-empty">ZIP registration rows are not available.</div>}
     </div>
-    <div className="kyp-src">Scope: Cook County and ZIP {data.zipCode || zipCode}; each chart has an independent count axis. Source windows from returned monthly rows: Cook County {displayWindow(countySeries)}; ZIP {displayWindow(zipSeries)}. Source: Illinois Secretary of State monthly EV registration reports{data.sourceUrl ? <> · <a href={data.sourceUrl} target="_blank" rel="noopener noreferrer">Source record</a></> : ""}. Missing months remain null gaps and are not interpolated. Data last updated {data.lastUpdated || "date unavailable"}.</div>
+    <div className="kyp-src">Scope: Cook County and ZIP {data.zipCode || zipCode}; each chart has an independent count axis. Counts are registered electric vehicles, not households that own EVs. Source windows from returned monthly rows: Cook County {displayWindow(countySeries)}; ZIP {displayWindow(zipSeries)}. Source: Illinois Secretary of State monthly EV registration reports{data.sourceUrl ? <> · <a href={data.sourceUrl} target="_blank" rel="noopener noreferrer">Source record</a></> : ""}. Missing months remain null gaps and are not interpolated. Data last updated {data.lastUpdated || "date unavailable"}.</div>
   </>;
 }
 

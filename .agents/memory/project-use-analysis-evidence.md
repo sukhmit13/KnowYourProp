@@ -32,3 +32,9 @@ Do not substitute a sum of a partial ZIP inventory for the official Cook County 
 **Why:** The legacy EV builder's ZIP-derived county aggregate and the official county observations are different coverage sets, even though both can be labeled Cook County.
 
 **How to apply:** Keep the county series tied to official county observations. An unavailable series is preferable to a silently substituted narrower geography when changing EV ingest or refresh behavior.
+
+Gas Station Project Use Analysis must include historical EV registration trends, not just nearby charging stations.
+
+**Why:** The user expects EV history when researching a gas station and reported its absence.
+
+**How to apply:** Preserve that project-use scope when revising the panel layout. Registration counts describe vehicles, not the number of households that own EVs.

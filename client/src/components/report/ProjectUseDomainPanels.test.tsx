@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { load } from "cheerio";
@@ -113,6 +114,17 @@ test("EV trends have separate monthly chart frames, real endpoint windows, and l
   assert.doesNotMatch(markup, /past 2 years|over 24 months|Infinity|NaN/);
   assert.equal($(".kyp-blocks.two .bv").last().text(), "0");
   assert.equal($(".kyp-src").length, 1);
+  assert.match($(".kyp-src").text(), /registered electric vehicles, not households/);
+});
+
+test("gas stations enable EV history fetching, numbering, and rendering independently of vehicle ownership", () => {
+  const source = readFileSync("client/src/pages/RunDetail.tsx", "utf8");
+  assert.match(source, /const isAutoService = isGasStation \|\| isAutoRepair \|\| isAutoBody;/);
+  assert.match(source, /const hasEVRegistrationPanel = isAutoService;/);
+  assert.match(source, /useEVRegistrations\(facts\?\.zipCode, hasEVRegistrationPanel\)/);
+  assert.match(source, /\["evRegistrations", hasEVRegistrationPanel\]/);
+  assert.match(source, /\{hasEVRegistrationPanel && \(\s*<div id="print-section-ev-registrations">/);
+  assert.match(source, /const hasAutoOwnershipPanel = isAutoRepair \|\| isAutoBody;/);
 });
 
 test("ZIP observations are not discarded when the county series is missing", () => {

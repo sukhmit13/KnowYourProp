@@ -2323,6 +2323,7 @@ export default function RunDetail() {
   const isAutoBody = selectedProjectType === 'Auto Body Shop';
   const isAutoService = isGasStation || isAutoRepair || isAutoBody;
   const hasAutoOwnershipPanel = isAutoRepair || isAutoBody;
+  const hasEVRegistrationPanel = isAutoService;
   const isHotel = selectedProjectType === 'Hotel';
   const isRestaurant = selectedProjectType === 'Restaurant (No Liquor)' || selectedProjectType === 'Restaurant (With Liquor)';
   const isCoffeeShop = selectedProjectType === 'Coffee Shop / Cafe';
@@ -2345,7 +2346,7 @@ export default function RunDetail() {
     ["vehicle", hasAutoOwnershipPanel],
     ["seniors", isSeniorCare],
     ["gasStations", isGasStation],
-    ["evRegistrations", hasAutoOwnershipPanel],
+    ["evRegistrations", hasEVRegistrationPanel],
     ["evStations", isGasStation],
     ["hotels", isHotel],
     ["restaurants", isRestaurant],
@@ -2362,7 +2363,7 @@ export default function RunDetail() {
   const { data: coffeeShopsData, isLoading: isLoadingCoffeeShops, isError: isCoffeeShopsError, refetch: refetchCoffeeShops } = useCoffeeShops(facts?.lat, facts?.lon, isCoffeeShop);
   const { data: barsData, isLoading: isLoadingBars } = useBars(facts?.lat, facts?.lon, isBar);
   const { data: nearbyDayCaresData, isLoading: isLoadingNearbyDayCares, isError: isNearbyDayCaresError, refetch: refetchNearbyDayCares } = useNearbyDayCares(facts?.lat, facts?.lon, isDaycare);
-  const { data: evRegistrationsData, isLoading: isLoadingEvRegistrations, isError: isEvRegistrationsError, refetch: refetchEvRegistrations } = useEVRegistrations(facts?.zipCode, hasAutoOwnershipPanel);
+  const { data: evRegistrationsData, isLoading: isLoadingEvRegistrations, isError: isEvRegistrationsError, refetch: refetchEvRegistrations } = useEVRegistrations(facts?.zipCode, hasEVRegistrationPanel);
 
   // Cannabis dispensary data - uses ZIP code
   const { data: cannabisData, isLoading: isLoadingCannabis } = useCannabisDispensariesByZip(
@@ -6736,7 +6737,7 @@ export default function RunDetail() {
             </div>
           )}
 
-          {hasAutoOwnershipPanel && (
+          {hasEVRegistrationPanel && (
             <div id="print-section-ev-registrations">
               <KypSubhead subsection={projectUseSubsections.evRegistrations}><span className="lbl">EV registration trends</span></KypSubhead>
               <div className="px-4"><EVRegistrationTrends data={evRegistrationsData} loading={isLoadingEvRegistrations} error={isEvRegistrationsError} onRetry={() => refetchEvRegistrations()} zipCode={facts?.zipCode ?? "unavailable"} /></div>
