@@ -2088,3 +2088,13 @@ button.kyp-morelink { background: none; border: 0; padding: 0; }
 .kyp-charttitle.first{margin-top:4px}
 @media(max-width:860px){.kyp-blocks.four{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.kyp-blocks.four{grid-template-columns:1fr}}
+
+/* ============================================================
+   PATCH 33 — §25 Professional Record
+   ============================================================ */
+.kyp-biz-card.pro .addr{color:var(--kyp-ink2);font-weight:600}
+.kyp-biz-card.pro .kyp-biz-distance{white-space:nowrap;font-variant-numeric:tabular-nums}
+.kyp-biz-card.pro .f+.f::before{content:"\00B7";margin-right:6px;opacity:.55}
+.kyp-biz-list.pro{margin-bottom:4px}
+.kyp-professional-identity{min-width:0;overflow-wrap:anywhere}
+@media(max-width:520px){.kyp-biz-card.pro{grid-template-columns:minmax(0,1fr)}.kyp-biz-card.pro .kyp-biz-distance{white-space:normal}}

@@ -23,6 +23,8 @@ interface BuildingPermit {
   architectType: string | null;
   expediterName: string | null;
   contractors: ContractorInfo[];
+  /** All four contact slots, including engineers and other design contacts. */
+  contacts?: ContractorInfo[];
 }
 
 interface BuildingViolation {
@@ -287,7 +289,7 @@ export async function fetchPermitHistory(address: string): Promise<PermitSummary
       let expediterName: string | null = null;
       const contractors: ContractorInfo[] = [];
       
-      for (let i = 1; i <= 3; i++) {
+      for (let i = 1; i <= 4; i++) {
         const contactType = (p[`contact_${i}_type`] || '').toUpperCase();
         const contactName = p[`contact_${i}_name`] || null;
         
@@ -345,7 +347,11 @@ export async function fetchPermitHistory(address: string): Promise<PermitSummary
         architectName,
         architectType,
         expediterName,
-        contractors
+        contractors,
+        contacts: Array.from({ length: 4 }, (_, n) => ({
+          type: p[`contact_${n + 1}_type`] || "",
+          name: p[`contact_${n + 1}_name`] || "",
+        })).filter(c => c.name)
       };
     });
 

@@ -3,21 +3,12 @@ import { zbaCases, repVerifications, zbaIndexRuns, ardcVerifications } from '@sh
 import type { ZbaCase, RepVerification, RepresentativeSummary, ZbaSummaryResponse, RepVerificationStatus } from '@shared/schema';
 import { eq, gte, desc, sql, and } from 'drizzle-orm';
 import * as cheerio from 'cheerio';
+import { normalizeProName as normalizeRepName } from '@shared/normalizeProName';
 
 const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 const ARDC_CACHE_DAYS = 30; // Cache ARDC results for 30 days
 let wardSummaryCache: Map<number, { data: ZbaSummaryResponse; timestamp: number }> = new Map();
 let citySummaryCache: { data: ZbaSummaryResponse; timestamp: number } | null = null;
-
-function normalizeRepName(raw: string | null): string {
-  if (!raw) return '';
-  return raw
-    .toUpperCase()
-    .replace(/,?\s*(ESQ\.?|ATTORNEY|ATTY\.?|JR\.?|SR\.?|III|II|IV)/gi, '')
-    .replace(/[^\w\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 function getHeuristic(
   representativeRaw: string | null,

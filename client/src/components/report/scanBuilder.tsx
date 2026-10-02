@@ -62,6 +62,8 @@ export interface ScanCtx {
   businessLicenses?: { totalCount: number; priorPeriodCount: number; changePct: number | null } | null;
   newConstruction?: { subject?: { totalPermits?: number }; activePermitCount?: number; trend?: { changePct?: number | null; suppressed?: boolean } } | null;
   development?: { pipeline?: { unitsUnderConstruction?: number | null; observedUnitsUnderConstruction?: number | null; permitUnitsUnknownAddressCount?: number; permitUnitsSource?: string; potentialUnits?: number | null } | null } | null;
+  professionalCount?: number | null;
+  professionGroups?: number | null;
 }
 
 type Dyn = Partial<Pick<ScanSection, "takeaway" | "verdict" | "hero">>;
@@ -226,6 +228,16 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
     takeaway: mdEmph(ctx.nnTakeaway.takeaway.title),
     verdict: /high/i.test(ctx.nnTakeaway?.kpis?.momentumLabel || "") ? { tone: "good", label: "High momentum" } : undefined,
   };
+
+  if (ctx.professionalCount != null) {
+    dyn.professionals = {
+      takeaway: <><em>{ctx.professionalCount} name{ctx.professionalCount === 1 ? "" : "s"}</em> on the public record that {ctx.professionalCount === 1 ? "has" : "have"} worked on this address.</>,
+      verdict: ctx.professionGroups != null
+        ? { tone: "context", label: `${ctx.professionGroups} profession${ctx.professionGroups === 1 ? "" : "s"}` }
+        : undefined,
+      hero: { value: String(ctx.professionalCount), label: ctx.professionalCount === 1 ? "name" : "names" },
+    };
+  }
 
   // (valuation, proximity, development intentionally unwired — no concise
   //  generated one-liner in scope at the mount point, so they show their muted summary.)

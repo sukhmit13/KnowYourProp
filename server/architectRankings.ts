@@ -271,6 +271,17 @@ export interface GeneralContractorEntry {
 
 let gcCache: { data: GeneralContractorEntry[]; fetchedAt: number } | null = null;
 
+/** Membership only, without triggering a rankings refresh or publishing its counts. */
+export function cachedProfessionalDirectory() {
+  const names = (cache: { data: Array<{ name: string }>; fetchedAt: number } | null) =>
+    cache && Date.now() - cache.fetchedAt < CACHE_TTL ? cache.data.map(e => e.name) : [];
+  return {
+    contractors: names(gcCache),
+    design: names(architectCache),
+    expediters: names(expeditorCache),
+  };
+}
+
 export async function getGeneralContractorRankings(): Promise<GeneralContractorEntry[]> {
   if (gcCache && Date.now() - gcCache.fetchedAt < CACHE_TTL) {
     return gcCache.data;

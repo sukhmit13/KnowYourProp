@@ -1,0 +1,519 @@
+# Step 33 — §25 Professional Record (new section)
+
+Audited against **`a0d5c3b`** (origin/main).
+
+New files: `ProfessionalRecordSection.tsx`, `server/professionalRecord.ts`,
+`ProfessionalRecordSection.test.tsx`.
+Edited: `RunDetail.tsx`, `sectionRegistry.tsx`, `kyp-base.css`, `permits.ts`.
+
+**v1 deliberately ships without the Discovery citywide counts.** See Part F for why, and for the
+three contact-slot bugs that have to be fixed before those counts can be trusted.
+
+### `pro25-markup.html` — reference only, do not add it to the repo
+
+A static HTML file accompanies this step: the target section rendered with mock data for 1126 W.
+Bryn Mawr Ave. It exists so the nesting can be checked against something concrete. It is a
+reference picture, not source — do not import it, do not commit it, and do not copy its literal
+values into a component. Every real value comes from the expressions in this document.
+
+---
+
+## What the section is
+
+Everyone on the public record who has worked on this address, grouped by profession, most recent
+first. The reader is a buyer doing diligence: *who already knows this building?*
+
+It is the property-scoped mirror of Discovery, which already ranks the same professions citywide
+(`Discovery.tsx:670` — `gc-rankings`, `architect-rankings`, `expeditor-rankings`,
+`lender-rankings`, `commercial-lender-rankings`, plus tax-appeal attorneys at
+`routes.ts:8226`). Nothing here is a new concept; it is an existing directory, scoped to one
+parcel.
+
+### The one rule that governs the whole section
+
+**No verdict colors anywhere in §25.** Every block is `.ind` or `.slate`; every chip is a
+`.kyp-pill ind` or a `.kyp-tag rec`. Nothing in this section has an outside authority classifying
+it with a polarity:
+
+- A contractor with 212 permits is not thereby good.
+- A granted variation is good for whoever applied — usually the previous owner. Whether it is good
+  for this reader depends on what they intend to do with the parcel, so polarity depends on
+  intended use → slate.
+- ARDC verification looks like an authority but has no polarity: `not_attorney` only means the
+  representative was not a lawyer, which is often the owner appearing for themselves.
+
+If a later change introduces `.grn` / `.orange` / `.red` into §25, it is wrong.
+
+### Outcomes, and the line this section does not cross
+
+The section shows **the outcome of a matter**, attached to the matter, in the words of the body
+that decided it: `GRANTED`, `DENIED`, `2 OF 3 DECREASED`.
+
+It must never show **a success rate for a person**. Not "1 for 1", not a win percentage, not a
+rank. Three reasons, and all three hold:
+
+1. The outcome belongs to the *application*, not to the lawyer. Attributing it to them is our
+   inference, not the record's.
+2. On a single property n is almost always 1–3. Any rate computed from that is noise.
+3. It would publish a performance statistic about a named individual — a "0%" derived from one
+   denial is a real liability, not a theoretical one.
+
+The group counter-text carries the attribution (`outcome as the Board recorded it`), which is why
+there is no footer paragraph saying it.
+
+---
+
+## Part A — register the section at position 25
+
+`RunDetail.tsx:1345` — append to `ACC_DEFAULT_ORDER`:
+
+```ts
+const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "countyRecord", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "permits", "analysis", "newBusinessLicenses", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news", "professionals"];
+```
+
+The number is **derived from array position** (`accProps` at `:4327–4331`,
+`index: accOrder.indexOf(rowId) + 1`). Appending makes it 25. **Do not hardcode 25 anywhere.**
+`mergeAccOrder` at `:1349` already slots a new default id in at its default position for users who
+have dragged their rows, so existing saved orders pick it up without migration.
+
+`RunDetail.tsx:3924` — add to `ACC_CUSTOM_META`:
+
+```ts
+    professionals: { title: "Professional Record", summary: "Everyone on the public record who has worked on this address, by profession.", info: ["Permit contacts — contractors, architects, expediters", "Zoning attorneys and Board representatives", "Tax appeal attorneys", "Recorded lenders"] },
+```
+
+`sectionRegistry.tsx:13` — append `"professionals"` to `SECTION_ORDER`, and add to `SECTION_META`:
+
+```tsx
+  professionals: { id: "professionals", anchorId: "print-section-professional-record", title: "Professional Record",
+    summary: "Everyone on the public record who has worked on this address, by profession.",
+    info: ["Chicago permit contact fields", "DPD zoning applications and ZBA appearances", "Cook County tax appeals", "Cook County Recorder mortgages"] },
+```
+
+Render it in `RunDetail.tsx` beside the other sections:
+
+```tsx
+          <AccordionSection {...accProps("professionals")}>
+            <ProfessionalRecordSection
+              permitData={permitData} zoningHistoryData={zoningHistoryData}
+              zbaData={zbaData} lienData={lienData} taxAppealData={propertyTaxData}
+              loading={professionalsLoading} error={professionalsError} />
+          </AccordionSection>
+```
+
+**Section kicker.** Add to `scanBuilder.tsx` beside the other dynamic takeaways:
+
+```tsx
+  if (professionalCount != null) {
+    dyn.professionals = {
+      takeaway: <><em>{professionalCount} name{professionalCount === 1 ? "" : "s"}</em> on the public record that {professionalCount === 1 ? "has" : "have"} worked on this address.</>,
+      verdict: { tone: "context", label: `${professionGroups} profession${professionGroups === 1 ? "" : "s"}` },
+      hero: { value: String(professionalCount), label: professionalCount === 1 ? "name" : "names" },
+    };
+  }
+```
+
+---
+
+## Part B — the server roll-up
+
+New file `server/professionalRecord.ts`. It reads sources that already exist and emits one shape.
+
+```ts
+export type ProfessionKey = "contractors" | "design" | "expediters" | "zoningAttorneys"
+  | "taxAttorneys" | "lenders";
+
+export interface ProfessionalEntry {
+  /** Display name, in the spelling of the most recent record. */
+  name: string;
+  /** Normalized key used for grouping. Never shown. */
+  key: string;
+  /** "General Contractor", "Self-Certified Architect", "Zoning attorney", … */
+  role: string;
+  /** Firm, when a source carries one separately from the name. */
+  firm?: string;
+  /** ISO date of the most recent record here. Drives the sort and the right rail. */
+  lastSeen: string;
+  /** Granularity of lastSeen — tax appeals are year-only. */
+  lastSeenPrecision: "day" | "month" | "year";
+  recordCount: number;
+  /** Up to two short facts. More than two is a design error, not a data question. */
+  facts: string[];
+  /** Outcome of the matter, in the deciding body's words. Never a rate. */
+  outcome?: string;
+  /** Only "ARDC verified" today. */
+  tag?: string;
+  /** Lenders only. */
+  position?: "Current" | "Prior";
+  /** Discovery deep link, or undefined when the firm is not in that index. */
+  discoveryUrl?: string;
+}
+
+export interface ProfessionalRecord {
+  groups: Array<{ key: ProfessionKey; label: string; note?: string; entries: ProfessionalEntry[] }>;
+  totalNames: number;
+  groupCount: number;
+  firstYear: number | null;
+  lastYear: number | null;
+  sourceCoverage: Record<string, { status: "available" | "partial" | "unavailable" }>;
+}
+```
+
+### Sources, each already in the codebase
+
+| Group | Source | Fields |
+|---|---|---|
+| Contractors | `permits.ts:280–350` | `contractors[{type,name}]` — the type is already classified as *General / Electrical / Plumbing Contractor*, and as **"Owner as General Contractor"** when the owner self-performed |
+| Design | `permits.ts:286, 300–307` + `zoningHistory.ts:265` | `architectName` + `architectType` (`"Self-Certified"` or `"Architect"`); zoning gives `ZoningContact {name, firm, email}` |
+| Expediters | `permits.ts:328` | `expediterName` |
+| Zoning attorneys | `zoningHistory.ts:273` + `zba/index.ts` | `zoningAttorney {name, firm, email}`; ZBA `representativeRaw`, `applicantName`, ARDC verification |
+| Tax attorneys | Cook County `7pny-nedm`, filtered to this PIN | `attorney_firstname/lastname/firmname`, `result`, `tax_year` |
+| Lenders | `shared/schema.ts:435` | `LienDocument` where `category === "mortgage"` — `grantee`, `amount`, `recordedDate`, `isReleased` |
+
+**Owner as General Contractor is kept as its own role, not folded into General Contractor.** It
+tells a buyer the work was self-performed, which is a real diligence signal and it is free.
+
+### Name normalization — this is the whole build
+
+The same firm will arrive as `NORCON INC`, `NORCON, INC.` and `NORCON`. A roll-up that does not
+dedupe will look broken on first glance, and nothing else in the section matters if this fails.
+
+`zba/index.ts:12` already has the normalizer. **Move it to `shared/` and use it everywhere** rather
+than writing a second one:
+
+```ts
+export function normalizeProName(raw: string | null): string {
+  if (!raw) return "";
+  return raw
+    .toUpperCase()
+    .replace(/,?\s*(ESQ\.?|ATTORNEY|ATTY\.?|JR\.?|SR\.?|III|II|IV)/gi, "")
+    .replace(/,?\s*\b(INC|LLC|LLP|LTD|CO|CORP|COMPANY|PC|PLLC)\b\.?/gi, "")
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+```
+
+The entity-suffix clause is new — `zba/index.ts` strips honorifics because it was written for
+people, and §25 groups firms too. Update `zba/index.ts` to import the shared one so the two never
+diverge. Group on the normalized key; **display the spelling from the most recent record**, which
+is the one most likely to still be current.
+
+`lienSearch.ts:92` has a third normalizer, `lenderNamesMatch`. Leave it alone for now — it does
+fuzzy *matching* between two names, not canonicalization, and changing it would touch
+release-reconciliation logic that is not in this step's blast radius.
+
+---
+
+## Part C — the component
+
+New file `client/src/components/report/ProfessionalRecordSection.tsx`.
+
+**Fixed group order, always the same six.** A group with no entries renders nothing — no heading,
+no empty state. Subsection numbers are computed from the groups that survive, so a thin property
+shows `25.1` only.
+
+```tsx
+const GROUPS: Array<{ key: ProfessionKey; label: string; note?: string }> = [
+  { key: "contractors",     label: "Contractors" },
+  { key: "design",          label: "Architects & Engineers" },
+  { key: "expediters",      label: "Permit Expediters" },
+  { key: "zoningAttorneys", label: "Zoning Attorneys", note: "outcome as the Board recorded it" },
+  { key: "taxAttorneys",    label: "Tax Appeal Attorneys", note: "outcome as the Assessor recorded it" },
+  { key: "lenders",         label: "Lenders", note: "parties with a claim, not hired work" },
+];
+```
+
+The group list is **fixed and never reordered by data**. Two reports of two addresses must put the
+same profession at the same number, or they cannot be compared and no anchor is stable.
+
+The `note` appears only where the relationship differs from the section's default — the two
+attorney groups, because they carry an outcome from an outside body, and Lenders, because they did
+not do work. Everywhere else the counter-text is just the sort.
+
+```tsx
+      {groups.map((g, i) => {
+        const n = g.entries.length;
+        return <section key={g.key} aria-label={g.label}>
+          <KypSubhead subsection={i + 1} className={i === 0 ? "first" : undefined}>
+            <span className="lbl">{g.label}</span>
+            <span className="ct">{n} name{n === 1 ? "" : "s"} · {g.note || "most recent first"}</span>
+          </KypSubhead>
+          <div className="kyp-biz-list pro">
+            {g.entries.map((e) => <div className="kyp-biz-card pro" key={e.key}>
+              <div>
+                {e.discoveryUrl
+                  ? <a className="nm" href={e.discoveryUrl}><b>{e.name}</b><span className="ext">↗</span></a>
+                  : <b>{e.name}</b>}
+                <span className="addr">{e.firm ? `${e.role} · ${e.firm}` : e.role}</span>
+              </div>
+              <span className="kyp-biz-distance">{e.lastSeenLabel}</span>
+              <div className="kyp-biz-cardmeta">
+                {e.position && <span className="kyp-pill ind">{e.position}</span>}
+                {e.outcome && <span className="kyp-pill ind">{e.outcome}</span>}
+                {e.tag && <span className="kyp-tag rec">{e.tag}</span>}
+                {e.facts.slice(0, 2).map((f) => <span className="f" key={f}>{f}</span>)}
+              </div>
+            </div>)}
+          </div>
+        </section>;
+      })}
+```
+
+**Exactly one anchor per row**, and when `discoveryUrl` is absent the name is plain text — never a
+dead link. That state is common, not exceptional; see Part F.
+
+**At most two facts per row.** The row already carries name, role, firm, date, outcome and tag. A
+third fact is where this section starts looking like §22 did before Step 32.
+
+### The preamble
+
+```tsx
+  <div className="kyp-blocks">
+    <div className="kyp-block ind"><div className="bv">{totalNames}</div>
+      <div className="bl">Name{totalNames === 1 ? "" : "s"} on record</div>
+      <div className="bd">permits, zoning, liens and tax appeals</div></div>
+    <div className="kyp-block slate"><div className="bv">{groupCount}</div>
+      <div className="bl">Profession{groupCount === 1 ? "" : "s"} represented</div>
+      <div className="bd">a profession with no record is not shown</div></div>
+    <div className="kyp-block slate"><div className="bv txt">{yearSpan}</div>
+      <div className="bl">Years covered</div>
+      <div className="bd">{firstYear === lastYear ? "one filing on record" : "earliest and latest filing"}</div></div>
+  </div>
+```
+
+`.bv.txt` (`kyp-base.css:1680`) is the 24px variant, for `2016–2026` rather than a numeral.
+
+### The footer — sources only, one paragraph
+
+```tsx
+  <div className="kyp-src">
+    <p>Sources: Chicago Building Permits (contact fields), Chicago DPD zoning applications, Zoning Board of Appeals, Cook County Recorder, Cook County tax appeal records. Names are normalized before grouping, so one firm filed under several spellings appears once.</p>
+  </div>
+```
+
+There is no caveat paragraph. The "not a recommendation" claim is carried by the design — nothing
+is ranked and nothing takes a verdict color — and the outcome attribution is carried by the group
+counter-text, beside the pills it qualifies.
+
+---
+
+## Part D — where things deliberately do NOT live
+
+**Tax appeal dollars stay in Property Taxes.** `ACC_CUSTOM_META.propertyTax` at `RunDetail.tsx:3935`
+already declares *"Board of Review appeals and outcomes"* as its scope. §25 carries the attorney's
+name and a count of matters (`2 of 3 decreased`); Property Taxes carries the year-by-year assessed
+values. One number stated once in each place at a different resolution. If the dollars appear in
+both, they will drift.
+
+**Per-filing zoning detail stays in Recorded Zoning Actions.** `ACC_CUSTOM_META.zoningHistory` at
+`:3927` already claims *"Filing documents and named professionals"*. §25 is the roll-up; that
+section is the detail. §25 links across rather than restating the filing.
+
+**Loan terms stay in Ownership & Title.** §25 shows the lender name, the amount and whether a
+release is on record — enough to identify the party. Rate, maturity and reconciliation stay where
+they are.
+
+---
+
+## Part E — CSS
+
+Append `kyp-base-patch-33-professional.css` to the END of `client/src/kyp-base.css`.
+**Requires patch 32** (`.kyp-src p` / `.kyp-src p+p`) — ship Step 32 first.
+
+Four rules. The section is built almost entirely from `.kyp-biz-card`, the one-row-per-entity shape
+already used by competitors, nearby permits and DPD applications; it needs only to carry a role
+instead of an address and a date instead of a distance.
+
+```css
+/* ============================================================
+   PATCH 33 — §25 Professional Record
+   Append to client/src/kyp-base.css, AFTER patch 32.
+
+   Four rules. The section is deliberately built almost entirely
+   from primitives that already ship — .kyp-biz-card is the
+   one-row-per-entity shape used by competitors, permits and DPD
+   applications, and it needs only a small adjustment to carry a
+   ROLE instead of an address and a DATE instead of a distance.
+
+   REQUIRES patch 32 for `.kyp-src p` / `.kyp-src p+p` — the
+   two-line footer. Ship Step 32 first.
+
+   NO VERDICT COLOURS ANYWHERE IN THIS SECTION. Nothing here has
+   an outside authority classifying it: a contractor with eight
+   permits is not thereby good, and an attorney who filed one
+   appeal is not thereby bad. Every block is indigo or slate,
+   every chip is a tag or a pill. If a future change introduces
+   .grn / .orange / .red into §25, it is wrong.
+   ============================================================ */
+
+/* ── a row that carries a role and a date ────────────────────
+   .kyp-biz-card already lays out name / sub-line / right-hand
+   figure / meta chips. In §25 the sub-line is a ROLE, not an
+   address, so it takes the ink color rather than the muted one
+   — the role is the second most important thing in the row and
+   today's .addr is styled to recede.                           */
+.kyp-biz-card.pro .addr{color:var(--kyp-ink2);font-weight:600}
+
+/* The right-hand slot holds "last seen here", which is the sort
+   key for this section. .kyp-biz-distance is sized for "0.34 mi"
+   and needs room for "Aug 2016".                               */
+.kyp-biz-card.pro .kyp-biz-distance{white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* ── meta facts need a visible divider ───────────────────────
+   .kyp-biz-cardmeta is a flex row with gap:6px and no separator.
+   That reads fine for "61 units  12 stories" and badly for
+   "3 records here  212 Chicago permits", which runs together as
+   one sentence. Plain facts carry .f and take a middot between
+   them; pills and tags do not, so they keep sitting apart.
+
+   Exactly one anchor per row — the name, pointing at that firm's
+   Discovery page. The citywide count beside it is a fact, not a
+   second route to the same destination.                         */
+.kyp-biz-card.pro .f+.f::before{content:"\00B7";margin-right:6px;opacity:.55}
+
+/* ── a profession group with one row must not look broken ────
+   Most addresses yield two or three names in total. The list
+   keeps its own bottom margin so a single-row group sits the
+   same distance from the next subhead as a four-row group.     */
+.kyp-biz-list.pro{margin-bottom:4px}
+```
+
+The one rule worth reading: `.kyp-biz-cardmeta` is a flex row with `gap:6px` and no separator,
+which reads fine for `61 units  12 stories` and badly for `3 records here  212 Chicago permits`.
+Plain facts carry `.f` and take a middot between them; pills and tags do not, so they keep sitting
+apart.
+
+---
+
+## Part F — three contact-slot bugs, and why v1 has no citywide counts
+
+The design calls for a citywide permit count beside each name — not as a ranking, but as a
+reachability signal: a GC with 212 permits can be called, a GC with one is probably gone. **It is
+not in v1,** because all three of these are true today:
+
+1. **`permits.ts:291` loops `for (let i = 1; i <= 3; i++)`** while `chicagoPermits.ts:21–28`
+   declares `contact_1` through `contact_4`. **The fourth contact is dropped on every permit.** On
+   a permit carrying owner, GC, architect and expediter, one of them is silently lost.
+2. **Discovery's rankings read `contact_1_*` only.** `architectRankings.ts:280` filters
+   `contact_1_type in (...)` and groups on `contact_1_name`. Discovery sees the first slot and
+   nothing else, so a firm that filed in slot 2 is absent from the citywide index however large it
+   is.
+3. **Discovery is scoped to `FIVE_YEARS_AGO`.** Anything before roughly 2021 will never match.
+
+Together these mean a §25 row would say *"not in the citywide index"* about an active firm with
+hundreds of permits — which makes the whole page look wrong and is the section's worst failure
+mode. Fix the slots in their own step, then add the counts.
+
+**Fix 1 is a one-character change and should go in this step** (`i <= 3` → `i <= 4`), because §25
+is what makes the loss visible. Fixes 2 and 3 are Discovery changes with their own blast radius.
+
+### Also broken, and in scope for whoever touches tax appeals next
+
+`server/data/build_tax_appeal_attorneys.mjs:48–49`:
+
+```js
+    totalAppeals: a.wins, // approximation — we have wins count only
+    winRate: 0,           // omitted since we don't have total appeals
+```
+
+The builder queries `result='Decrease'` only and never fetches the denominator, so
+`wins === totalAppeals` by construction and `winRate` is hardcoded to zero. Anything rendering
+those fields shows either 0% or a fabricated 100%. Separately, `wins` counts PIN-year rows, not
+matters — one appeal covering 300 parcels counts 300 times.
+
+**No citywide attorney success rate can be shown until this is fixed.** §25's `2 of 3 decreased`
+is computed from the raw `7pny-nedm` rows for this PIN, not from this rollup, which is why it is
+safe.
+
+---
+
+## Part G — tests
+
+New `ProfessionalRecordSection.test.tsx`:
+
+```ts
+test("groups are fixed in order and an empty group renders nothing", () => {
+  const html = render({ groups: [contractorsOnly] });
+  assert.match(html, /25\.1|>Contractors</);
+  assert.doesNotMatch(html, /Lenders|Permit Expediters/);
+  assert.doesNotMatch(html, /No .* on record|kyp-emptypanel/);
+});
+
+test("no verdict color anywhere in the section", () => {
+  const html = render(fullFixture);
+  assert.doesNotMatch(html, /kyp-block [^"]*\b(grn|orange|red|bad)\b/);
+  assert.doesNotMatch(html, /kyp-pill (good|watch|bad)/);
+});
+
+test("outcomes are the body's words, never a rate for a person", () => {
+  const html = render(fullFixture);
+  assert.match(html, /GRANTED|Granted/);
+  assert.doesNotMatch(html, /win rate|success rate|\d+ for \d+|\d+% of (cases|appeals)/i);
+});
+
+test("a firm missing from the citywide index renders as plain text, not a dead link", () => {
+  const html = render({ groups: [{ ...contractors, entries: [{ ...gc, discoveryUrl: undefined }] }] });
+  assert.doesNotMatch(html, /<a[^>]*class="nm"/);
+  assert.match(html, /Diaz Plumbing/);
+});
+
+test("one firm filed under several spellings appears once", () => {
+  const rec = rollUp({ permits: [p("NORCON INC"), p("NORCON, INC."), p("NORCON")] });
+  assert.equal(rec.groups[0].entries.length, 1);
+  assert.equal(rec.totalNames, 1);
+});
+
+test("no row carries more than two plain facts", () => {
+  const html = render(fullFixture);
+  for (const meta of html.match(/<div class="kyp-biz-cardmeta">.*?<\/div>/g) ?? []) {
+    assert.ok((meta.match(/class="f"/g) ?? []).length <= 2, meta);
+  }
+});
+```
+
+Add to `server/professionalRecord.test.ts` the fourth-contact case, which fails before the
+`i <= 4` fix:
+
+```ts
+test("a fourth permit contact is not dropped", () => {
+  const rec = rollUp({ permits: [{ contact_1_type: "OWNER", contact_1_name: "A",
+    contact_2_type: "CONTRACTOR-GENERAL CONTRACTOR", contact_2_name: "B",
+    contact_3_type: "ARCHITECT", contact_3_name: "C",
+    contact_4_type: "EXPEDITER", contact_4_name: "D" }] });
+  assert.ok(rec.groups.some((g) => g.key === "expediters" && g.entries[0].name === "D"));
+});
+```
+
+---
+
+## Not part of this step — for the repo owner, not the agent
+
+Do not act on either of these as part of Step 33.
+
+**Three live API keys** in `.replit` lines 65–71, present in four commits, with a `.gitignore`
+whose missing newline (`*.tar.gzserver/cache/`) means neither pattern matches. Rotate all three,
+move them to Replit Secrets, `git rm --cached .replit`, fix the newline. Rotating matters more than
+removing the file — they are already in history.
+
+**British spellings in shipped copy.** `RunDetail.tsx:3932` has *"Chicago business licenses"* in
+`ACC_CUSTOM_META.entCulture`. Worth a sweep; not this step.
+
+`REPLIT_STEP31_cleanup` and `REPLIT_STEP32_development` are both still unrun. Step 32 is a
+**dependency** of this one for the `.kyp-src p` rules.
+
+---
+
+## Verify
+
+- `grep -c '"professionals"' client/src/pages/RunDetail.tsx` → at least **3** (order, meta, render)
+- No literal `25` as a section number anywhere in `ProfessionalRecordSection.tsx` → `grep -c '>25\.' ` = **0**
+- `grep -c 'i <= 3' server/permits.ts` → **0**
+- `grep -rc 'normalizeRepName' server/zba/index.ts` → imports the shared one, defines **0**
+- `ProfessionalRecordSection.tsx` contains no `grn`, `orange`, `red` or `bad` class
+- Every `.kyp-biz-card.pro` has exactly **one** `<a>`, or none
+- Visual, rich: six groups, 25.1 Contractors through 25.6 Lenders, one granted and one denied pill
+  reading as equal-weight facts
+- Visual, thin: one group, one row, three preamble blocks, a one-line footer — and it does not look
+  broken
+- Visual, phone: rows stack, the date stays on its own line, no horizontal scroll

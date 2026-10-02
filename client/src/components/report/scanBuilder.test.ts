@@ -26,6 +26,22 @@ test("Business License scan describes license issuances without asserting busine
   assert.equal(section?.verdict?.label, "+100% business count change");
 });
 
+test("Professional Record scan kicker is dynamic and uses neutral context language", () => {
+  const sections = buildScanSections({ professionalCount: 1, professionGroups: 1 });
+  const section = sections.find(({ id }) => id === "professionals");
+  const text = renderToStaticMarkup(React.createElement(React.Fragment, null, section?.takeaway));
+  assert.match(text, /<em>1 name<\/em> on the public record that has worked on this address/);
+  assert.deepEqual(section?.hero, { value: "1", label: "name" });
+  assert.deepEqual(section?.verdict, { tone: "context", label: "1 profession" });
+  assert.equal(buildScanSections({ professionalCount: 4, professionGroups: 3 }).find(({ id }) => id === "professionals")?.verdict?.tone, "context");
+  assert.deepEqual(
+    buildScanSections({ professionalCount: 7 }).find(({ id }) => id === "professionals")?.hero,
+    { value: "7", label: "names" },
+  );
+  assert.equal(buildScanSections({ professionalCount: 7 }).find(({ id }) => id === "professionals")?.verdict, undefined);
+  assert.equal(buildScanSections({}).find(({ id }) => id === "professionals")?.hero, undefined);
+});
+
 test("merged development scan leads with recent-permit units, not permit counts or combined units", () => {
   const sections = buildScanSections({
     newConstruction: { subject: { totalPermits: 55 }, trend: { changePct: 12, suppressed: false } },

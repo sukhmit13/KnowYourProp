@@ -51,3 +51,4 @@
 - [Accordion order migrations](accordion-order-migrations.md) — Fast Refresh preserves old state; mark per-run reorders complete only after their intended placement is applied.
 - [Project-use analysis evidence](project-use-analysis-evidence.md) — one area scope; ranks follow the displayed source value; local labor-force bands need an explicit planning-convention disclaimer.
 - [EV source reports](ev-source-reports.md) — monthly PDFs contain county and place-and-ZIP tables; discover published links rather than assuming filename dates.
+- [Professional Record evidence](professional-record-evidence.md) — neutral property-scoped directory; no named-person success rates, and citywide counts stay withheld until Discovery coverage is reliable.

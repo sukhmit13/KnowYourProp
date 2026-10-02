@@ -48,6 +48,7 @@ import { derivePlacesSearchTerm } from "@shared/placesSearch";
 import { getVehicleOwnership, getSeniorsData } from "./localDemographics";
 import { getHmdaRankings } from "./hmdaRankings";
 import { resolveUserFromToken } from "./auth";
+import { registerProfessionalRecordRoutes } from "./professionalRecordRoutes";
 import { buildPropertyInsightContentPrompt } from "./prompts/reportPromptBuilder";
 import { validateInsightReportContent, renderInsightReport } from "./insightReportTemplate";
 import fs from 'fs';
@@ -1598,6 +1599,17 @@ export async function registerRoutes(
     if (!run || (run.userId ?? '').toLowerCase() !== (req.user.email ?? '').toLowerCase()) { res.status(404).json({ message: 'Run not found' }); return null; }
     return run;
   };
+
+  registerProfessionalRecordRoutes(app, async (req, res, publicView) => {
+    if (!publicView) return loadOwnedRun(req, res);
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id) || id <= 0) { res.status(404).json({ message: "Report not found" }); return null; }
+    const run = await storage.getRun(id);
+    if (!run) { res.status(404).json({ message: "Report not found" }); return null; }
+    // Same public access boundary as /api/public/run/:runId.
+    if (!run.purchasedAt) { res.status(403).json({ message: "This report has not been purchased" }); return null; }
+    return run;
+  });
 
   app.get('/api/runs/:id/listing-snapshot', async (req, res) => {
     const run = await loadOwnedRun(req, res);

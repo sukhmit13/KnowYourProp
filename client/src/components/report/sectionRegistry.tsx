@@ -12,7 +12,7 @@ export const REPORT_SECTION_TITLES = {
 
 export const SECTION_ORDER = [
   "countyRecord", "permits", "ownership", "historic", "zoning", "valuation", "market", "incentives", "transit", "newBusinessLicenses",
-  "crime", "proximity", "schools", "entCulture", "corridor", "development", "people", "news",
+  "crime", "proximity", "schools", "entCulture", "corridor", "development", "people", "news", "professionals",
 ] as const;
 
 export const SECTION_META: Record<string, SectionMeta> = {
@@ -70,4 +70,7 @@ export const SECTION_META: Record<string, SectionMeta> = {
   news: { id: "news", anchorId: "section-address-news", title: "News on This Property",
     summary: "Any news coverage that names this specific property.",
     info: ["Articles naming the subject parcel", "Current-status check vs the record"] },
+  professionals: { id: "professionals", anchorId: "print-section-professional-record", title: "Professional Record",
+    summary: "Everyone on the public record who has worked on this address, by profession.",
+    info: ["Chicago permit contact fields", "DPD zoning applications and ZBA appearances", "Cook County tax appeals", "Cook County Recorder mortgages"] },
 };

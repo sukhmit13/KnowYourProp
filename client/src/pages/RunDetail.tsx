@@ -6,6 +6,8 @@ import { REPORT_SECTION_TITLES } from "@/components/report/sectionRegistry";
 import { AccordionSection, buildSubsectionNumbers, KypSubhead, SectionNumberContext } from "@/components/report/AccordionSection";
 import { NewBusinessLicensesSection } from "@/components/report/NewBusinessLicensesSection";
 import { DevelopmentSection } from "@/components/report/DevelopmentSection";
+import { ProfessionalRecordSection } from "@/components/report/ProfessionalRecordSection";
+import type { ProfessionalRecord } from "@shared/professionalRecord";
 import { OwnershipTitleSection, deriveSaleHistory } from "@/components/report/OwnershipTitleSection";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -624,6 +626,7 @@ const PRINT_SECTIONS: PrintSection[] = [
 
   // Property Details
   { id: 'permits', label: 'Permits & Violations', defaultChecked: true, group: 'Permits & Violations' },
+  { id: 'professional-record', label: 'Professional Record', defaultChecked: true, group: 'Professional Record' },
   { id: 'ownership', label: 'Ownership & Title', defaultChecked: true, group: 'Ownership & Title' },
   { id: 'business-licenses', label: REPORT_SECTION_TITLES.businessLicenses, defaultChecked: true, group: 'Ownership & Title' },
   { id: 'mortgage-lending', label: 'Mortgage & Lending Market', defaultChecked: true, group: 'Mortgage & Lending' },
@@ -1342,7 +1345,7 @@ export default function RunDetail() {
   const ACC_BEFORE_HISTORIC_REORDER = ["ownership", "propertyTax", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "historic", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
   const ACC_BEFORE_HISTORIC_CORRECTION = ["ownership", "zoning", "zoningHistory", "historic", "propertyTax", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "newConstruction", "debt", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
   const ACC_BEFORE_COUNTY_REORDER = ["ownership", "propertyTax", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "countyRecord", "permits", "analysis", "newBusinessLicenses", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
-  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "countyRecord", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "permits", "analysis", "newBusinessLicenses", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news"];
+  const ACC_DEFAULT_ORDER = ["ownership", "propertyTax", "countyRecord", "historic", "zoning", "zoningHistory", "potential", "incentives", "transit", "crime", "businessLicenses", "valuation", "listing", "permits", "analysis", "newBusinessLicenses", "market", "proximity", "schools", "entCulture", "corridor", "development", "people", "news", "professionals"];
   // Merge a saved order with the default list: drop unknown ids, and slot any
   // NEW default ids in at their default position (right after their default
   // predecessor) rather than dumping them at the end of the user's order.
@@ -3453,7 +3456,7 @@ export default function RunDetail() {
         if (row instanceof HTMLElement) return row;
       }
       if (!anchor) return null;
-      if (['business-licenses', 'zoning-history'].includes(sectionId)) {
+      if (['business-licenses', 'zoning-history', 'professional-record'].includes(sectionId)) {
         const row = anchor.closest('.kyp-accrow');
         return row instanceof HTMLElement ? row : anchor;
       }
@@ -3747,6 +3750,57 @@ export default function RunDetail() {
     return { headline, openViolations: openViol, notClosedCount: d.notClosedCount };
   }, [dobDerived, violationsData]);
 
+  // Reuse settled property-specific evidence. This roll-up never re-scrapes Recorder
+  // documents or fetches citywide counts, and all hooks precede the early returns.
+  const professionalSources = useMemo(() => ({
+    city: facts?.city,
+    permitData: permitsData ? {
+      permits: permitsData.permits,
+      olderPermits: permitsData.olderPermits,
+      apiError: (permitsData as any).apiError,
+      parseError: (permitsData as any).parseError,
+      olderPermitsSummary: permitsData.olderPermitsSummary,
+    } : null,
+    zoningHistoryData: zoningHistoryData ? {
+      items: zoningHistoryData.items?.map((i: any) => ({
+        type: i.type, date: i.date, ordinanceId: i.ordinanceId, attachmentUrl: i.attachmentUrl,
+        architect: i.architect, zoningAttorney: i.zoningAttorney, decision: i.decision, matchedAddress: i.matchedAddress,
+      })), coverage: zoningHistoryData.coverage,
+    } : null,
+    // pinResolver already filters raw 7pny-nedm rows to the subject PIN.
+    // Property-tax bill data and the citywide attorney roll-up are not this source.
+    taxAppealData: pinLookupData?.appealHistory ?? null,
+    lienData: lienData ? {
+      pin: lienData.pin, searchFailed: lienData.searchFailed, scrapedAt: lienData.scrapedAt,
+      documents: (lienData.documents ?? lienData.mortgages ?? []).filter((d: any) => d.category === "mortgage").map((d: any) => ({
+        category: d.category, documentNumber: d.documentNumber, recordedDate: d.recordedDate,
+        grantee: d.grantee, amount: d.amount, isReleased: d.isReleased,
+      })),
+    } : null,
+  }), [facts?.city, permitsData, zoningHistoryData, pinLookupData?.appealHistory, lienData]);
+  const professionalSourcesLoading = isLoadingFacts || isLoadingPermitsViolations || isLoadingZoningHistory || isLoadingPinLookup || isLoadingLiens;
+  const { data: professionalRecord, isLoading: isProfessionalRecordLoading, isError: professionalsError } = useQuery<ProfessionalRecord>({
+    queryKey: ["professional-record", run?.id, isStandaloneReport, professionalSources, debtSnapRec?.snapHash],
+    enabled: !!run?.id && !isRunLoading && !professionalSourcesLoading,
+    queryFn: async ({ signal }) => {
+      const token = localStorage.getItem("kyp_auth_token");
+      const response = await fetch(`${isStandaloneReport ? "/api/public/run" : "/api/runs"}/${run!.id}/professional-record`, {
+        method: "POST", credentials: "include", signal,
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(professionalSources),
+      });
+      if (!response.ok) throw new Error("Professional records could not be loaded");
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+  const professionalsLoading = professionalSourcesLoading || isProfessionalRecordLoading;
+  const knownProfessionalCount = professionalRecord && (
+    professionalRecord.totalNames > 0 ||
+    Object.values(professionalRecord.sourceCoverage).every(source => source.status === "available")
+  ) ? professionalRecord.totalNames : undefined;
+
   if (isRunLoading) {
     return (
       <div className="flex h-screen bg-background">
@@ -3920,8 +3974,11 @@ export default function RunDetail() {
     isLoadingLiens: isCheckingTitle,
     businessLicenses: nearbyLicensesData,
     development: upcomingDevsData,
+    professionalCount: knownProfessionalCount,
+    professionGroups: professionalRecord?.groupCount,
   });
   const ACC_CUSTOM_META: Record<string, { title: string; summary: string; info: string[] }> = {
+    professionals: { title: "Professional Record", summary: "Everyone on the public record who has worked on this address, by profession.", info: ["Permit contacts — contractors, architects, expediters", "Zoning attorneys and Board representatives", "Tax appeal attorneys", "Recorded lenders"] },
     listing: { title: "Active Listing", summary: "Live listing status for this address — price, status and terms.", info: ["AI listing lookup", "Price, status & broker", "Rent roll / unit mix when published"] },
     businessLicenses: { title: REPORT_SECTION_TITLES.businessLicenses, summary: "Every business ever licensed at this address.", info: ["City of Chicago license records", "Operator, term and license class", "Active, expired and revoked"] },
     zoningHistory: { title: REPORT_SECTION_TITLES.zoningHistory, summary: "Recorded City Council and Zoning Board actions for this parcel.", info: ["City Council filings", "Zoning Board decisions", "Filing documents and named professionals"] },
@@ -4153,6 +4210,7 @@ export default function RunDetail() {
     zoningHistory: isLoadingZoningHistory && !zoningHistoryData,
     historic: isLoadingLandmark && !landmarkData,
     permits: isLoadingPermitsViolations && !combinedPermitViolations,
+    professionals: professionalsLoading && !professionalRecord,
     market: (isLoadingHmda || isLoadingComps) && !hmdaData && !compsData && !hmdaTakeaway?.headline,
     transit: isLoadingTransit && !transitData,
     crime: isLoadingCrime && !crimeData && !crimeTractData,
@@ -14571,6 +14629,10 @@ export default function RunDetail() {
               Location data is not available, so nearby development records cannot be scoped.
             </p>
           )}
+          </AccordionSection>
+
+          <AccordionSection {...accProps("professionals")}>
+            <ProfessionalRecordSection data={professionalRecord} loading={professionalsLoading} error={professionalsError} />
           </AccordionSection>
 
            {/* Neighborhood & People */}
