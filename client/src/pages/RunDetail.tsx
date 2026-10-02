@@ -42,7 +42,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Building2, Ruler, Map as MapIcon, Layers, CheckCircle2, XCircle, Home, Store, Factory, AlertTriangle, ClipboardCheck, Baby, Info, DollarSign, ExternalLink, User, Vote, Train, Bus, RefreshCw, Receipt, Zap, Fuel, Hotel, Utensils, Coffee, Wine, ShoppingCart, Mail, Eye, Globe, Briefcase, TrendingUp, TrendingDown, Star, Users, ChevronDown, ChevronUp, ChevronRight, Landmark, Building, Award, Calculator, TreePine, Pencil, Plus, History, FileText, Scale, Waves, Bike, Plane, BarChart3, HardHat, Navigation, Palette, Newspaper, GraduationCap, Link2, CreditCard, Lock, Mic, Gavel, Car, Tag, Copy, BookOpen, EyeOff, Calendar } from "lucide-react";
 import { yearsTile, heightTile, parkingTile, zoningMeaningBullets } from "@/lib/wardZoningDisplay";
 import { CHICAGO_ZONING_DATA } from "@shared/zoningData";
@@ -59,6 +58,7 @@ import InsightReportSection from "@/components/InsightReportSection";
 import { CountyRecordSection } from "@/components/report/CountyRecordSection";
 import { DaycareAnalysis } from "@/components/report/DaycareAnalysis";
 import { ProjectUseAreaControl, ProjectUseBusinessList, ProjectUseCountBlocks, ProjectUseGoogleMaps } from "@/components/report/ProjectUseAnalysisSpine";
+import { EVChargingTable, EVRegistrationTrends, FoodAccessPanel, GroceryLicenseList, getEVChargingSiteCount, HotelShortTermRentalGroup, LicensedBusinessPanel, SeniorPopulationPanel, VehicleOwnershipPanel } from "@/components/report/ProjectUseDomainPanels";
 import { trackEvent } from "@/lib/analytics";
 import { fallbackSummaryBadge, headerBadgeNumber, headerCountyRecordBadge, headerFarCeilingBadge, type HeaderBadgeState } from "@/lib/sectionHeaderBadges";
 
@@ -2056,8 +2056,8 @@ export default function RunDetail() {
 
   // Grocery hooks - fetch when Grocery Store project use is selected (with lat/lon for distance)
   const isGrocery = selectedProjectType === 'Grocery Store';
-  const { data: groceryData, isLoading: isLoadingGrocery } = useGroceryAccess(isGrocery ? facts?.zipCode : undefined, facts?.lat, facts?.lon);
-  const { data: communityGroceryData, isLoading: isLoadingCommunityGrocery } = useCommunityAreaGroceryAccess(isGrocery ? facts?.communityArea : undefined, facts?.lat, facts?.lon);
+  const { data: groceryData, isLoading: isLoadingGrocery, isError: isGroceryError, refetch: refetchGrocery } = useGroceryAccess(isGrocery ? facts?.zipCode : undefined, facts?.lat, facts?.lon);
+  const { data: communityGroceryData, isLoading: isLoadingCommunityGrocery, isError: isCommunityGroceryError, refetch: refetchCommunityGrocery } = useCommunityAreaGroceryAccess(isGrocery ? facts?.communityArea : undefined, facts?.lat, facts?.lon);
 
   // GIS returns sentinel strings ('Not in TIF District', 'Data not configured') instead of
   // null when the parcel isn't in a TIF — treat those as "no TIF" everywhere downstream.
@@ -2267,6 +2267,7 @@ export default function RunDetail() {
   const isAutoRepair = selectedProjectType === 'Auto Repair Shop';
   const isAutoBody = selectedProjectType === 'Auto Body Shop';
   const isAutoService = isGasStation || isAutoRepair || isAutoBody;
+  const hasAutoOwnershipPanel = isAutoRepair || isAutoBody;
   const isHotel = selectedProjectType === 'Hotel';
   const isRestaurant = selectedProjectType === 'Restaurant (No Liquor)' || selectedProjectType === 'Restaurant (With Liquor)';
   const isCoffeeShop = selectedProjectType === 'Coffee Shop / Cafe';
@@ -2285,10 +2286,11 @@ export default function RunDetail() {
     ["siteDetails", isDaycareOrSchool && !isDaycare],
     ["ccap", hasSchoolCcap],
     ["grocery", isGrocery],
-    ["vehicle", isAutoService],
+    ["groceryLicenses", isGrocery],
+    ["vehicle", hasAutoOwnershipPanel],
     ["seniors", isSeniorCare],
     ["gasStations", isGasStation],
-    ["evRegistrations", isAutoService],
+    ["evRegistrations", hasAutoOwnershipPanel],
     ["evStations", isGasStation],
     ["hotels", isHotel],
     ["restaurants", isRestaurant],
@@ -2298,14 +2300,14 @@ export default function RunDetail() {
     ["google", !isDaycare && !!selectedProjectType],
   ]);
 
-  const { data: evStationsData, isLoading: isLoadingEvStations } = useEvStations(facts?.lat, facts?.lon, isGasStation);
+  const { data: evStationsData, isLoading: isLoadingEvStations, isError: isEvStationsError, refetch: refetchEvStations } = useEvStations(facts?.lat, facts?.lon, isGasStation);
   const { data: gasStationsData, isLoading: isLoadingGasStations } = useGasStations(facts?.lat, facts?.lon, isGasStation);
-  const { data: hotelsData, isLoading: isLoadingHotels } = useHotels(facts?.lat, facts?.lon, isHotel);
-  const { data: restaurantsData, isLoading: isLoadingRestaurants } = useRestaurants(facts?.lat, facts?.lon, isRestaurant);
-  const { data: coffeeShopsData, isLoading: isLoadingCoffeeShops } = useCoffeeShops(facts?.lat, facts?.lon, isCoffeeShop);
+  const { data: hotelsData, isLoading: isLoadingHotels, isError: isHotelsError, refetch: refetchHotels } = useHotels(facts?.lat, facts?.lon, isHotel);
+  const { data: restaurantsData, isLoading: isLoadingRestaurants, isError: isRestaurantsError, refetch: refetchRestaurants } = useRestaurants(facts?.lat, facts?.lon, isRestaurant);
+  const { data: coffeeShopsData, isLoading: isLoadingCoffeeShops, isError: isCoffeeShopsError, refetch: refetchCoffeeShops } = useCoffeeShops(facts?.lat, facts?.lon, isCoffeeShop);
   const { data: barsData, isLoading: isLoadingBars } = useBars(facts?.lat, facts?.lon, isBar);
   const { data: nearbyDayCaresData, isLoading: isLoadingNearbyDayCares, isError: isNearbyDayCaresError, refetch: refetchNearbyDayCares } = useNearbyDayCares(facts?.lat, facts?.lon, isDaycare);
-  const { data: evRegistrationsData, isLoading: isLoadingEvRegistrations } = useEVRegistrations(facts?.zipCode, isAutoService);
+  const { data: evRegistrationsData, isLoading: isLoadingEvRegistrations, isError: isEvRegistrationsError, refetch: refetchEvRegistrations } = useEVRegistrations(facts?.zipCode, hasAutoOwnershipPanel);
 
   // Cannabis dispensary data - uses ZIP code
   const { data: cannabisData, isLoading: isLoadingCannabis } = useCannabisDispensariesByZip(
@@ -2839,15 +2841,15 @@ export default function RunDetail() {
   const { data: electionData, isLoading: isLoadingElection } = useElectionData(facts?.communityArea);
 
   // Vehicle ownership hook - fetch when auto service project use is selected
-  const { data: vehicleData, isLoading: isLoadingVehicle } = useVehicleOwnership(
-    isAutoService ? facts?.communityArea : null
+  const { data: vehicleData, isLoading: isLoadingVehicle, isError: isVehicleError, refetch: refetchVehicle } = useVehicleOwnership(
+    hasAutoOwnershipPanel ? facts?.communityArea : null
   );
 
   // Seniors data hooks - fetch only for senior care project uses (not daycare)
-  const { data: seniorsData, isLoading: isLoadingSeniors } = useSeniorsData(
+  const { data: seniorsData, isLoading: isLoadingSeniors, isError: isSeniorsError, refetch: refetchSeniors } = useSeniorsData(
     isSeniorCare ? facts?.communityArea : null
   );
-  const { data: seniorsZipData, isLoading: isLoadingSeniorsZip } = useSeniorsZipData(
+  const { data: seniorsZipData, isLoading: isLoadingSeniorsZip, isError: isSeniorsZipError, refetch: refetchSeniorsZip } = useSeniorsZipData(
     isSeniorCare ? facts?.zipCode : null
   );
 
@@ -6599,215 +6601,57 @@ export default function RunDetail() {
           {/* Grocery Access Section - Only shown when Grocery is selected */}
           {isGrocery && (
             <div id="print-section-grocery">
-              <KypSubhead subsection={projectUseSubsections.grocery}><span className="lbl">Grocery access</span></KypSubhead>
+              <KypSubhead subsection={projectUseSubsections.grocery}><span className="lbl">Food Access</span></KypSubhead>
                 <div className="px-4">
-                  <Tabs value={areaViewMode} onValueChange={(value) => setAreaViewMode(value as 'zip' | 'community')} className="w-full">
-                    <TabsList className="hidden">
-                      <TabsTrigger
-                        value="zip"
-                        data-testid="tab-grocery-zip"
-                        className="h-full text-sm font-semibold data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-                      >
-                        <MapPin className="w-4 h-4" />
-                        By ZIP Code
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="community"
-                        data-testid="tab-grocery-community"
-                        className="h-full text-sm font-semibold data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-                      >
-                        <MapIcon className="w-4 h-4" />
-                        By Neighborhood
-                      </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="zip">
-                      {isLoadingGrocery ? (
-                        <div className="space-y-3">
-                          <Skeleton className="h-6 w-2/3" />
-                          <Skeleton className="h-4 w-full" />
-                        </div>
-                      ) : groceryData ? (
-                        <div className="space-y-4">
-                          <ProjectUseCountBlocks counts={[{ value: groceryData.stores.length, label: `Stores in ZIP ${facts?.zipCode ?? "—"}` }]} />
-                          <ProjectUseBusinessList listKey={`grocery-zip-${facts?.zipCode ?? ""}`} rows={groceryData.stores.map(store => ({
-                            name: store.name, address: store.address, distance: store.distance ?? null,
-                            meta: store.squareFeet ? [`${store.squareFeet.toLocaleString()} sq ft`] : [],
-                          }))} />
-
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">
-                          Grocery store data not available for this ZIP code.
-                        </p>
-                      )}
-                      <div className="kyp-src">Scope: ZIP {facts?.zipCode ?? "unavailable"}; this is an area aggregate, not a radius search. Source: {groceryData?.sources?.dataSource ?? "source detail unavailable"}{groceryData?.sources?.dataYear ? ` (${groceryData.sources.dataYear})` : ""}. Business names open Google Maps search results.</div>
-                    </TabsContent>
-
-                    <TabsContent value="community">
-                      {isLoadingCommunityGrocery ? (
-                        <div className="space-y-3">
-                          <Skeleton className="h-6 w-2/3" />
-                          <Skeleton className="h-4 w-full" />
-                        </div>
-                      ) : communityGroceryData ? (
-                        <div className="space-y-4">
-                          <ProjectUseCountBlocks counts={[{ value: communityGroceryData.stores.length, label: `Stores in ${facts?.communityArea ?? "community area"}` }]} />
-                          <ProjectUseBusinessList listKey={`grocery-community-${facts?.communityArea ?? ""}`} rows={communityGroceryData.stores.map(store => ({
-                            name: store.name, address: store.address, distance: store.distance ?? null,
-                            meta: store.squareFeet ? [`${store.squareFeet.toLocaleString()} sq ft`] : [],
-                          }))} />
-
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">
-                          Grocery store data not available for this neighborhood.
-                        </p>
-                      )}
-                      <div className="kyp-src">Scope: {facts?.communityArea ?? "community area unavailable"}; this is an area aggregate, not a radius search. Source: {communityGroceryData?.sources?.dataSource ?? "source detail unavailable"}{communityGroceryData?.sources?.dataYear ? ` (${communityGroceryData.sources.dataYear})` : ""}. Business names open Google Maps search results.</div>
-                    </TabsContent>
-                  </Tabs>
+                  <FoodAccessPanel data={areaViewMode === "zip" ? groceryData : communityGroceryData} loading={areaViewMode === "zip" ? isLoadingGrocery : isLoadingCommunityGrocery} error={areaViewMode === "zip" ? isGroceryError : isCommunityGroceryError} onRetry={areaViewMode === "zip" ? () => refetchGrocery() : () => refetchCommunityGrocery()} scope={areaViewMode} areaLabel={areaViewMode === "zip" ? facts?.zipCode ?? "unavailable" : facts?.communityArea ?? "unavailable"} />
                 </div>
+            </div>
+          )}
+
+          {isGrocery && (
+            <div id="print-section-grocery-licenses">
+              <KypSubhead subsection={projectUseSubsections.groceryLicenses}><span className="lbl">Licensed Grocery Stores</span></KypSubhead>
+              <div className="px-4">
+                <GroceryLicenseList
+                  data={areaViewMode === "zip" ? groceryData : communityGroceryData}
+                  loading={areaViewMode === "zip" ? isLoadingGrocery : isLoadingCommunityGrocery}
+                  error={areaViewMode === "zip" ? isGroceryError : isCommunityGroceryError}
+                  onRetry={areaViewMode === "zip" ? () => refetchGrocery() : () => refetchCommunityGrocery()}
+                  scope={areaViewMode}
+                  areaLabel={areaViewMode === "zip" ? facts?.zipCode ?? "unavailable" : facts?.communityArea ?? "unavailable"}
+                  coordinatesAvailable={facts?.lat != null && facts?.lon != null}
+                />
+              </div>
             </div>
           )}
 
           {/* Vehicle Ownership Section - Only shown for auto service project uses */}
-          {isAutoService && (
+          {hasAutoOwnershipPanel && (
             <div id="print-section-vehicle-ownership">
               <KypSubhead subsection={projectUseSubsections.vehicle}><span className="lbl">Vehicle ownership</span></KypSubhead>
-                <div className="px-4">
-                  {isLoadingVehicle ? (
-                    <div className="space-y-3">
-                      <Skeleton className="h-6 w-2/3" />
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                    </div>
-                  ) : vehicleData ? (
-                    <div className="space-y-4">
-                      <ProjectUseCountBlocks counts={[
-                        { value: vehicleData.avgVehiclesPerHousehold.toFixed(2), label: "Vehicles per household" },
-                        { value: vehicleData.totalHouseholds.toLocaleString(), label: "Households" },
-                      ]} />
-
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <div className="space-y-1 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">No vehicle</span>
-                              <span className="font-medium">{vehicleData.pctNoVehicle}%</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">1 vehicle</span>
-                              <span className="font-medium">{(100 - vehicleData.pctNoVehicle - ((vehicleData.twoVehicles + vehicleData.threePlusVehicles) / vehicleData.totalHouseholds * 100)).toFixed(1)}%</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">2+ vehicles</span>
-                              <span className="font-medium">{((vehicleData.twoVehicles + vehicleData.threePlusVehicles) / vehicleData.totalHouseholds * 100).toFixed(1)}%</span>
-                            </div>
-                          </div>
-                        </div>
-
-                      </div>
-
-                      <div className="kyp-src">Scope: Community area {facts?.communityArea ?? "unavailable"}. Source: American Community Survey 5-Year Estimates, 2019–2023.</div>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-sm text-muted-foreground">Vehicle ownership data not available for this area.</p>
-                      <div className="kyp-src">Scope: Community area {facts?.communityArea ?? "unavailable"}. Expected source: American Community Survey 5-Year Estimates, 2019–2023; no data response was returned.</div>
-                    </>
-                  )}
-                </div>
+              <div className="px-4"><VehicleOwnershipPanel data={vehicleData} loading={isLoadingVehicle} error={isVehicleError} onRetry={() => refetchVehicle()} areaLabel={facts?.communityArea ?? "unavailable"} /></div>
             </div>
           )}
-
           {/* Senior Population Section - Shown only for senior care project uses */}
           {isSeniorCare && (
             <div id="print-section-seniors">
               <KypSubhead subsection={projectUseSubsections.seniors}><span className="lbl">Senior population</span></KypSubhead>
-                <div className="px-4">
-                  {(areaViewMode === 'zip' ? isLoadingSeniorsZip : isLoadingSeniors) ? (
-                    <div className="space-y-3">
-                      <Skeleton className="h-6 w-2/3" />
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                    </div>
-                  ) : (() => {
-                    const currentSeniorsData = areaViewMode === 'zip' ? seniorsZipData : seniorsData;
-                    if (!currentSeniorsData) {
-                      return (
-                        <>
-                          <p className="text-sm text-muted-foreground">Senior population data not available for this {areaViewMode === 'zip' ? 'ZIP code' : 'area'}.</p>
-                          <div className="kyp-src">Scope: ZIP {facts?.zipCode ?? "unavailable"} or {facts?.communityArea ?? "community area"}, per the selected area control. Expected source: American Community Survey 5-Year Estimates, 2019–2023; no data response was returned.</div>
-                        </>
-                      );
-                    }
-                    const areaLabel = areaViewMode === 'zip'
-                      ? `ZIP ${(currentSeniorsData as any).zipCode}`
-                      : (currentSeniorsData as any).communityArea;
-                    return (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3" data-testid="seniors-stats-grid">
-                        <div className="p-3 rounded-xl bg-secondary border border-border">
-                          <div className="text-2xl font-bold text-foreground" data-testid="text-population-65-plus">
-                            {currentSeniorsData.population65Plus.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-foreground">Population 65+</div>
-                          <div className="text-xs text-muted-foreground">({currentSeniorsData.pct65Plus}% of area)</div>
-                        </div>
-                        <div className="p-3 rounded-xl bg-secondary border border-border">
-                          <div className="text-2xl font-bold text-foreground" data-testid="text-seniors-living-alone">
-                            {currentSeniorsData.seniorsLivingAlone.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-foreground">Living Alone</div>
-                          <div className="text-xs text-muted-foreground">({currentSeniorsData.pctSeniorsLivingAlone}% of seniors)</div>
-                        </div>
-                        <div className="p-3 rounded-xl bg-secondary border border-border">
-                          <div className="text-2xl font-bold text-foreground" data-testid="text-age-85-plus">
-                            {currentSeniorsData.age85Plus.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-foreground">Age 85+</div>
-                          <div className="text-xs text-muted-foreground">residents</div>
-                        </div>
-                        <div className="p-3 rounded-xl bg-secondary border border-border">
-                          <div className="text-2xl font-bold text-foreground" data-testid="text-total-population">
-                            {currentSeniorsData.totalPopulation.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-foreground">Total Population</div>
-                          <div className="text-xs text-muted-foreground">{areaLabel}</div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <h4 className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651]">Age Breakdown (65+)</h4>
-                        <div className="grid grid-cols-3 gap-2 text-sm">
-                          <div className="p-2 bg-secondary rounded-lg border border-border">
-                            <div className="font-medium">{currentSeniorsData.age65to74.toLocaleString()}</div>
-                            <div className="text-xs text-muted-foreground">65-74 years</div>
-                          </div>
-                          <div className="p-2 bg-secondary rounded-lg border border-border">
-                            <div className="font-medium">{currentSeniorsData.age75to84.toLocaleString()}</div>
-                            <div className="text-xs text-muted-foreground">75-84 years</div>
-                          </div>
-                          <div className="p-2 bg-secondary rounded-lg border border-border">
-                            <div className="font-medium">{currentSeniorsData.age85Plus.toLocaleString()}</div>
-                            <div className="text-xs text-muted-foreground">85+ years</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="kyp-src">Scope: {areaViewMode === 'zip' ? `ZIP ${(currentSeniorsData as any).zipCode ?? facts?.zipCode ?? "unavailable"}` : (currentSeniorsData as any).communityArea ?? facts?.communityArea ?? "community area unavailable"}. Source: American Community Survey 5-Year Estimates, 2019–2023.</div>
-                    </div>
-                    );
-                  })()}
-                </div>
+              <div className="px-4">
+                <SeniorPopulationPanel
+                  data={areaViewMode === "zip" ? seniorsZipData : seniorsData}
+                  loading={areaViewMode === "zip" ? isLoadingSeniorsZip : isLoadingSeniors}
+                  error={areaViewMode === "zip" ? isSeniorsZipError : isSeniorsError}
+                  onRetry={areaViewMode === "zip" ? () => refetchSeniorsZip() : () => refetchSeniors()}
+                  scope={areaViewMode}
+                  areaLabel={areaViewMode === "zip" ? facts?.zipCode ?? "unavailable" : facts?.communityArea ?? "unavailable"}
+                />
+              </div>
             </div>
           )}
-
           {/* Existing Gas Stations Section - Only shown when Gas Station is selected - FIRST */}
           {isGasStation && (
             <div id="print-section-nearby-business">
-              <KypSubhead subsection={projectUseSubsections.gasStations}><span className="lbl">Filling stations</span></KypSubhead>
+              <KypSubhead subsection={projectUseSubsections.gasStations}><span className="lbl">Licensed Filling Stations</span></KypSubhead>
                 <div className="px-4">
                   {isLoadingGasStations ? (
                     <div className="space-y-3">
@@ -6818,9 +6662,9 @@ export default function RunDetail() {
                   ) : gasStationsData && gasStationsData.stations.length > 0 ? (
                     <div className="space-y-4">
                       <ProjectUseCountBlocks counts={[
-                        { value: gasStationsData.stations.filter(s => s.distanceMiles != null && s.distanceMiles <= 1).length, label: "Within 1 mile" },
-                        { value: gasStationsData.stations.filter(s => s.distanceMiles != null && s.distanceMiles <= 2).length, label: "Within 2 miles" },
-                        { value: gasStationsData.stations.filter(s => s.distanceMiles != null && s.distanceMiles <= 3).length, label: "Within 3 miles" },
+                        { value: gasStationsData.within1Mile ?? gasStationsData.stations.filter(s => s.distanceMiles != null && s.distanceMiles <= 1).length, label: "Within 1 mile" },
+                        { value: gasStationsData.within2Miles ?? gasStationsData.stations.filter(s => s.distanceMiles != null && s.distanceMiles <= 2).length, label: "Within 2 miles" },
+                        { value: gasStationsData.within3Miles ?? gasStationsData.totalFound, label: "Within 3 miles" },
                       ]} />
                       <ProjectUseBusinessList listKey={`gas-${facts?.lat}-${facts?.lon}`} rows={gasStationsData.stations.filter(station => station.distanceMiles == null || station.distanceMiles <= 3).map(station => ({
                         name: station.name, address: `${station.address}${station.neighborhood ? `, ${station.neighborhood}` : ""}`,
@@ -6837,181 +6681,18 @@ export default function RunDetail() {
             </div>
           )}
 
-          {/* EV Registrations Trend Chart - Shown for all auto service project uses */}
-          {isAutoService && (
+          {hasAutoOwnershipPanel && (
             <div id="print-section-ev-registrations">
               <KypSubhead subsection={projectUseSubsections.evRegistrations}><span className="lbl">EV registration trends</span></KypSubhead>
-                <div className="px-4">
-                  {isLoadingEvRegistrations ? (
-                    <div className="space-y-3">
-                      <Skeleton className="h-48 w-full" />
-                    </div>
-                  ) : evRegistrationsData?.cookCountyData ? (
-                    <div className="space-y-4">
-                      <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart
-                            data={evRegistrationsData.cookCountyData.map((d) => ({
-                              date: `${d.month}/${d.year}`,
-                              year: d.year,
-                              month: d.month,
-                              cookCounty: d.count,
-                              zipCode: evRegistrationsData.zipCodeData?.find(
-                                (z) => z.year === d.year && z.month === d.month
-                              )?.count || null,
-                            }))}
-                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                          >
-                            <CartesianGrid stroke="#eae8e2" vertical={false} />
-                            <XAxis
-                              dataKey="date"
-                              tick={{ fontSize: 10, fontFamily: 'var(--font-jbmono)', fill: '#8b8a84' }}
-                              tickLine={false}
-                              axisLine={{ stroke: '#eae8e2' }}
-                              tickFormatter={(val) => {
-                                const parts = val.split('/');
-                                const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                return `${monthNames[parseInt(parts[0])]} '${parts[1].slice(-2)}`;
-                              }}
-                              interval={2}
-                            />
-                            <YAxis
-                              tick={{ fontSize: 10, fontFamily: 'var(--font-jbmono)', fill: '#8b8a84' }}
-                              tickLine={false}
-                              axisLine={false}
-                              tickFormatter={(val) => val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}
-                            />
-                            <Tooltip
-                              formatter={(value: number, name: string) => [
-                                value.toLocaleString(),
-                                name === 'cookCounty' ? 'Cook County' : `ZIP ${facts?.zipCode}`
-                              ]}
-                              labelFormatter={(label) => {
-                                const parts = label.split('/');
-                                const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                return `${monthNames[parseInt(parts[0])]} ${parts[1]}`;
-                              }}
-                            />
-                            <Legend
-                              formatter={(value) => value === 'cookCounty' ? 'Cook County' : `ZIP ${facts?.zipCode}`}
-                            />
-                            <Line
-                              type="monotone"
-                              dataKey="cookCounty"
-                              stroke="#3f51c5"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              dot={false}
-                              name="cookCounty"
-                            />
-                            {evRegistrationsData.zipCodeData && (
-                              <Line
-                                type="monotone"
-                                dataKey="zipCode"
-                                stroke="#f4610a"
-                                strokeWidth={2}
-                                strokeLinecap="round"
-                                dot={{ r: 3, fill: "#f4610a" }}
-                                connectNulls={true}
-                                name="zipCode"
-                              />
-                            )}
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-
-                      {evRegistrationsData.zipCodeData && (
-                        <div className="grid grid-cols-2 gap-4 mt-4">
-                          <div className="p-3 rounded-lg bg-secondary border border-border">
-                            <p className="text-xs text-muted-foreground mb-1">Cook County (Latest)</p>
-                            <p className="font-semibold text-foreground text-lg">
-                              {evRegistrationsData.cookCountyData[evRegistrationsData.cookCountyData.length - 1]?.count.toLocaleString()} EVs
-                            </p>
-                          </div>
-                          <div className="p-3 rounded-lg bg-secondary border border-border">
-                            <p className="text-xs text-muted-foreground mb-1">ZIP {facts?.zipCode} (Latest)</p>
-                            <p className="font-semibold text-foreground text-lg">
-                              {evRegistrationsData.zipCodeData[evRegistrationsData.zipCodeData.length - 1]?.count.toLocaleString()} EVs
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      EV registration data not available for this area.
-                    </p>
-                  )}
-                  <div className="kyp-src">
-                    Scope: Cook County monthly trend and ZIP {facts?.zipCode ?? "when available"} series. Source:{" "}
-                    {evRegistrationsData?.sourceUrl ? (
-                      <a href={evRegistrationsData.sourceUrl} target="_blank" rel="noopener noreferrer" data-testid="link-ev-stats-source">
-                        <ExternalLink className="inline h-3 w-3" /> Illinois Secretary of State, Electric Vehicle Statistics.
-                      </a>
-                    ) : "Illinois Secretary of State, Electric Vehicle Statistics (source link unavailable)."}
-                  </div>
-                </div>
+              <div className="px-4"><EVRegistrationTrends data={evRegistrationsData} loading={isLoadingEvRegistrations} error={isEvRegistrationsError} onRetry={() => refetchEvRegistrations()} zipCode={facts?.zipCode ?? "unavailable"} /></div>
             </div>
           )}
-
-          {/* EV Charging Stations Section - Only shown when Gas Station is selected - THIRD */}
           {isGasStation && (
             <div id="print-section-nearby-business-ev">
-              <KypSubhead subsection={projectUseSubsections.evStations}><span className="lbl">EV charging stations</span></KypSubhead>
-                <div className="px-4">
-                  {isLoadingEvStations ? (
-                    <div className="space-y-3">
-                      <Skeleton className="h-6 w-2/3" />
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                    </div>
-                  ) : evStationsData && evStationsData.stations.length > 0 ? (
-                    (() => {
-                      const deduped = evStationsData.stations.reduce((acc: typeof evStationsData.stations, station) => {
-                        const existing = acc.find(s => s.address.toLowerCase().trim() === station.address.toLowerCase().trim());
-                        if (existing) {
-                          existing.evLevel2Count = (existing.evLevel2Count || 0) + (station.evLevel2Count || 0);
-                          existing.dcFastCount = (existing.dcFastCount || 0) + (station.dcFastCount || 0);
-                        } else {
-                          acc.push({ ...station });
-                        }
-                        return acc;
-                      }, []);
-                      const within1 = deduped.filter(s => s.distanceMiles != null && s.distanceMiles <= 1).length;
-                      const within2 = deduped.filter(s => s.distanceMiles != null && s.distanceMiles <= 2).length;
-                      const within3 = deduped.filter(s => s.distanceMiles != null && s.distanceMiles <= 3).length;
-                      const displayedStations = deduped.filter(s => s.distanceMiles == null || s.distanceMiles <= 3);
-                      return (
-                    <div className="space-y-4">
-                      <ProjectUseCountBlocks counts={[
-                        { value: within1, label: "Within 1 mile" },
-                        { value: within2, label: "Within 2 miles" },
-                        { value: within3, label: "Within 3 miles" },
-                      ]} />
-                      <ProjectUseBusinessList listKey={`ev-${facts?.lat}-${facts?.lon}`} rows={displayedStations.map(station => ({
-                        name: station.name, address: station.address, distance: station.distanceMiles ?? null,
-                        meta: [
-                          station.evNetwork || "Network unknown",
-                          `Level 2: ${station.evLevel2Count ?? 0}`,
-                          `DC fast: ${station.dcFastCount ?? 0}`,
-                          ...(station.accessDays ? [`Access: ${station.accessDays}`] : []),
-                          ...(station.dateLastConfirmed ? [`Confirmed ${new Date(station.dateLastConfirmed).toLocaleDateString()}`] : []),
-                        ],
-                      }))} />
-                    </div>
-                      );
-                    })()
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No EV charging stations found within 3 miles of this location.
-                    </p>
-                  )}
-                  <div className="kyp-src">Scope: returned public charging stations within 3 miles plus records with unknown distance; unknown distances are excluded from radius counts. Source: U.S. Department of Energy via Chicago Data Portal. Duplicate addresses are combined. Names open Google Maps search results.</div>
-                </div>
+              <KypSubhead subsection={projectUseSubsections.evStations}><span className="lbl">EV Charging</span>{!isLoadingEvStations && !isEvStationsError && evStationsData && <span className="ct">{getEVChargingSiteCount(evStationsData.stations)} sites within 3 miles</span>}</KypSubhead>
+              <div className="px-4"><EVChargingTable stations={evStationsData?.stations} loading={isLoadingEvStations} error={isEvStationsError} onRetry={() => refetchEvStations()} /></div>
             </div>
           )}
-
           {/* Nearby Hotels Section - Only shown when Hotel is selected */}
           {isHotel && (
             <div id="print-section-nearby-business-hotels">
@@ -7023,118 +6704,57 @@ export default function RunDetail() {
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-4 w-3/4" />
                     </div>
-                  ) : hotelsData && (hotelsData.locations.length > 0 || hotelsData.shortTermRentals?.totalFound > 0) ? (
+                  ) : isHotelsError ? (
+                    <div className="kyp-status-empty" role="alert">Hotel license records could not be loaded.<div className="kyp-btnrow"><button type="button" className="kyp-btn ghost" onClick={() => refetchHotels()}>Retry</button></div></div>
+                  ) : hotelsData ? (
                     <div className="space-y-4">
                       {/* Traditional Hotels/Motels */}
                       <div>
                         <p className="text-sm font-medium text-foreground mb-2">Hotels & Motels</p>
                         <ProjectUseCountBlocks counts={[
-                          { value: hotelsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 1).length, label: "Within 1 mile" },
-                          { value: hotelsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 2).length, label: "Within 2 miles" },
-                          { value: hotelsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 3).length, label: "Within 3 miles" },
+                          { value: hotelsData.within1Mile ?? hotelsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 1).length, label: "Within 1 mile" },
+                          { value: hotelsData.within2Miles ?? hotelsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 2).length, label: "Within 2 miles" },
+                          { value: hotelsData.within3Miles ?? hotelsData.totalFound, label: "Within 3 miles" },
                         ]} />
                       </div>
-
-                      {/* Short-Term Rentals (Airbnb, Vacation, Shared Housing) */}
-                      {hotelsData.shortTermRentals && (
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground mb-2">Short-Term Rentals (Airbnb, Vacation, Shared Housing)</p>
-                          <div className="flex flex-wrap gap-3 text-sm">
-                            <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                              {hotelsData.shortTermRentals.within1Mile || 0} within 1 mi
-                            </span>
-                            <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                              {hotelsData.shortTermRentals.within2Miles || 0} within 2 mi
-                            </span>
-                            <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                              {hotelsData.shortTermRentals.within3Miles || hotelsData.shortTermRentals.totalFound} within 3 mi
-                            </span>
-                          </div>
-                        </div>
-                      )}
 
                       {hotelsData.locations.length > 0 && <ProjectUseBusinessList listKey={`hotels-${facts?.lat}-${facts?.lon}`} rows={hotelsData.locations.filter(l => l.distanceMiles == null || l.distanceMiles <= 3).map(loc => ({
                         name: loc.name, address: `${loc.address}${loc.neighborhood ? `, ${loc.neighborhood}` : ""}`, distance: loc.distanceMiles ?? null,
                       }))} />}
+                      {!hotelsData.locations.length && <div className="kyp-status-empty" role="status">No hotel license rows were returned.</div>}
+                      {/* Rental totals have no corresponding listing rows. */}
+                      {hotelsData.shortTermRentals && (
+                        <HotelShortTermRentalGroup counts={hotelsData.shortTermRentals} />
+                      )}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       No hotels found within 3 miles of this location.
                     </p>
                   )}
-                  <div className="kyp-src">Scope: hotel license rows within 3 miles plus records with unknown distance; unknown distances are excluded from radius counts. Source: Chicago Business Licenses, Hotel permits. Vacation-rental counts are a separate returned dataset, with source details not identified in this response. Names open Google Maps search results.</div>
+                  <div className="kyp-src">Scope: hotel license matches within 3 miles plus records with unknown distance; unknown distances are excluded from radius counts. Source radius totals are retained even when the detail list is capped. Source: Chicago Business Licenses, Hotel permits. Airbnb, vacation rentals and shared housing are excluded from the hotel-permit list and counted separately. Short-term rental figures count matched listing records, with categories inferred heuristically from name patterns; they are not Airbnb units. Rental source details are not identified in this response. Names open Google Maps search results.</div>
                 </div>
             </div>
           )}
 
-          {/* Nearby Restaurants Section - Only shown when Restaurant is selected */}
-          {isRestaurant && (
-            <div id="print-section-nearby-business-restaurants">
-              <KypSubhead subsection={projectUseSubsections.restaurants}><span className="lbl">Nearby restaurants</span></KypSubhead>
-                <div className="px-4">
-                  {isLoadingRestaurants ? (
-                    <div className="space-y-3">
-                      <Skeleton className="h-6 w-2/3" />
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                    </div>
-                  ) : restaurantsData && restaurantsData.locations.length > 0 ? (() => {
-                    const within1mi = restaurantsData.locations.filter(l => l.distanceMiles == null || l.distanceMiles <= 1);
-                    return (
-                    <div className="space-y-4">
-                      <ProjectUseCountBlocks counts={[{ value: restaurantsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 1).length, label: "Within 1 mile" }]} />
-                      <ProjectUseBusinessList listKey={`restaurants-${facts?.lat}-${facts?.lon}`} rows={within1mi.map(loc => ({
-                        name: loc.name, address: `${loc.address}${loc.neighborhood ? `, ${loc.neighborhood}` : ""}`, distance: loc.distanceMiles ?? null,
-                      }))} />
-                      {within1mi.length === 0 && (
-                        <p className="text-sm text-muted-foreground">No restaurants found within 1 mile.</p>
-                      )}
-                    </div>
-                    );
-                  })() : (
-                    <p className="text-sm text-muted-foreground">
-                      No restaurants found within 1 mile of this location.
-                    </p>
-                  )}
-                  <div className="kyp-src">Scope: restaurant license rows within 1 mile plus records with unknown distance; unknown distances are excluded from the within-1-mile count. Source: Chicago Business Licenses, Food Establishment permits. Names open Google Maps search results.</div>
-                </div>
+          {(isRestaurant || isCoffeeShop) && (
+            <div id={isRestaurant ? "print-section-nearby-business-restaurants" : "print-section-nearby-business-coffee"}>
+              <KypSubhead subsection={isRestaurant ? projectUseSubsections.restaurants : projectUseSubsections.coffee}>
+                <span className="lbl">{isRestaurant ? "Nearby restaurants" : "Nearby coffee shops"}</span>
+              </KypSubhead>
+              <div className="px-4">
+                <LicensedBusinessPanel
+                  data={isRestaurant ? restaurantsData : coffeeShopsData}
+                  loading={isRestaurant ? isLoadingRestaurants : isLoadingCoffeeShops}
+                  error={isRestaurant ? isRestaurantsError : isCoffeeShopsError}
+                  onRetry={isRestaurant ? () => refetchRestaurants() : () => refetchCoffeeShops()}
+                  category={isRestaurant ? "Restaurant" : "Coffee and cafe"}
+                  source={isRestaurant ? "Chicago Business Licenses, Retail Food Establishment and Limited Business License records, filtered for restaurants" : "Chicago Business Licenses, food-establishment records filtered for coffee/cafe names"}
+                  listKey={`${isRestaurant ? "restaurants" : "coffee"}-${facts?.lat}-${facts?.lon}`}
+                />
+              </div>
             </div>
           )}
-
-          {/* Nearby Coffee Shops Section - Only shown when Coffee Shop is selected */}
-          {isCoffeeShop && (
-            <div id="print-section-nearby-business-coffee">
-              <KypSubhead subsection={projectUseSubsections.coffee}><span className="lbl">Nearby coffee shops</span></KypSubhead>
-                <div className="px-4">
-                  {isLoadingCoffeeShops ? (
-                    <div className="space-y-3">
-                      <Skeleton className="h-6 w-2/3" />
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                    </div>
-                  ) : coffeeShopsData && coffeeShopsData.locations.length > 0 ? (() => {
-                    const within1mi = coffeeShopsData.locations.filter(l => l.distanceMiles == null || l.distanceMiles <= 1);
-                    return (
-                    <div className="space-y-4">
-                      <ProjectUseCountBlocks counts={[{ value: coffeeShopsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 1).length, label: "Within 1 mile" }]} />
-                      <ProjectUseBusinessList listKey={`coffee-${facts?.lat}-${facts?.lon}`} rows={within1mi.map(loc => ({
-                        name: loc.name, address: `${loc.address}${loc.neighborhood ? `, ${loc.neighborhood}` : ""}`, distance: loc.distanceMiles ?? null,
-                      }))} />
-                      {within1mi.length === 0 && (
-                        <p className="text-sm text-muted-foreground">No coffee shops found within 1 mile.</p>
-                      )}
-                    </div>
-                    );
-                  })() : (
-                    <p className="text-sm text-muted-foreground">
-                      No coffee shops found within 1 mile of this location.
-                    </p>
-                  )}
-                  <div className="kyp-src">Scope: coffee/cafe license rows within 1 mile plus records with unknown distance; unknown distances are excluded from the within-1-mile count. Source: Chicago Business Licenses, coffee/cafe establishments. Names open Google Maps search results.</div>
-                </div>
-            </div>
-          )}
-
           {/* Nearby Bars/Taverns Section - Only shown when Bar/Tavern is selected */}
           {isBar && (
             <div id="print-section-nearby-business-bars">

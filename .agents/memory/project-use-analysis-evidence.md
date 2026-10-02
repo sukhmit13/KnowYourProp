@@ -20,3 +20,15 @@ The labor-force delta bands at 5 and 12 percentage points are a deliberate user-
 **Why:** The user requested those existing cut points and the explicit disclaimer while retaining the published childcare-supply classification logic.
 
 **How to apply:** Do not present these bands as an official childcare-access or Census classification, and do not introduce additional local thresholds without clear attribution.
+
+The supplied Project Use Analysis HTML examples are visual references, not replacements for audited source definitions when those disagree.
+
+**Why:** The domain-panel audit found example ranks and cut points that described a different measurement from the live provider. Matching an illustrative screenshot's numbers would silently change the meaning of the report.
+
+**How to apply:** Check the provider's actual ranked input, denominator and classification rules before implementing a mockup. Preserve those semantics and disclose planning estimates or partial inventory coverage rather than imply independently observed counts.
+
+Do not substitute a sum of a partial ZIP inventory for the official Cook County EV series just to fill an unavailable chart.
+
+**Why:** The legacy EV builder's ZIP-derived county aggregate and the official county observations are different coverage sets, even though both can be labeled Cook County.
+
+**How to apply:** Keep the county series tied to official county observations. An unavailable series is preferable to a silently substituted narrower geography when changing EV ingest or refresh behavior.

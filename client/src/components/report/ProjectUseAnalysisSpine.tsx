@@ -7,6 +7,7 @@ export interface ProjectUseBusinessRowProps {
   url?: string | null;
   meta?: ReactNode[];
   testId?: string;
+  showDistance?: boolean;
 }
 
 function mapsSearchUrl(name: string, address: string): string {
@@ -34,6 +35,7 @@ export function ProjectUseBusinessRow({
   url,
   meta,
   testId,
+  showDistance = true,
 }: ProjectUseBusinessRowProps) {
   const mapsUrl = googleMapsUrl(url) ?? mapsSearchUrl(name, address);
   return (
@@ -44,9 +46,9 @@ export function ProjectUseBusinessRow({
         </a>
         <span className="addr">{address}</span>
       </div>
-      <span className="kyp-biz-distance">
+      {showDistance && <span className="kyp-biz-distance">
         {distance != null && Number.isFinite(distance) ? `${distance.toFixed(1)} mi` : "distance unknown"}
-      </span>
+      </span>}
       {!!meta?.length && (
         <div className="kyp-biz-cardmeta">
           {meta.map((item, index) => <span key={index}>{item}</span>)}
@@ -63,6 +65,7 @@ export interface ProjectUseBusinessListRow {
   url?: string | null;
   meta?: ReactNode[];
   testId?: string;
+  showDistance?: boolean;
 }
 
 export interface ProjectUseBusinessListProps {
@@ -116,9 +119,9 @@ export interface ProjectUseCountBlock {
   meta?: ReactNode;
 }
 
-export function ProjectUseCountBlocks({ counts }: { counts: ProjectUseCountBlock[] }) {
+export function ProjectUseCountBlocks({ counts, className }: { counts: ProjectUseCountBlock[]; className?: string }) {
   return (
-    <div className="kyp-blocks">
+    <div className={["kyp-blocks", className].filter(Boolean).join(" ")}>
       {counts.map(({ value, label, text, meta }, index) => (
         <div className="kyp-block slate count" key={`${label}-${index}`}>
           <div>
