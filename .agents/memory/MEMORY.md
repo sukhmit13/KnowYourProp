@@ -50,3 +50,4 @@
 - [Corridor layout decision](corridor-layout-decision.md) — user chose the compact-row visual target over contradictory counts-only wording.
 - [Accordion order migrations](accordion-order-migrations.md) — Fast Refresh preserves old state; mark per-run reorders complete only after their intended placement is applied.
 - [Project-use analysis evidence](project-use-analysis-evidence.md) — one area scope; ranks follow the displayed source value; local labor-force bands need an explicit planning-convention disclaimer.
+- [EV source reports](ev-source-reports.md) — monthly PDFs contain county and place-and-ZIP tables; discover published links rather than assuming filename dates.
