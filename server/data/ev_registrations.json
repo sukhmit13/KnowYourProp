@@ -1,8 +1,8 @@
 {
-  "lastUpdated": "2026-01-17T00:00:00.000Z",
+  "lastUpdated": "2026-10-02T18:37:00.907Z",
   "dataSource": "Illinois Secretary of State - Electric Vehicle Statistics",
   "sourceUrl": "https://www.ilsos.gov/departments/vehicles/statistics/electric.html",
-  "note": "Data extracted from official Illinois SOS monthly PDFs. Covers January 2024 through January 2026 (2 years).",
+  "note": "Official monthly county and ZIP report observations; missing ZIP months are not filled or interpolated.",
   "cookCountyMonthly": [
     {
       "year": 2024,
@@ -128,6 +128,46 @@
       "year": 2026,
       "month": 1,
       "count": 44557
+    },
+    {
+      "year": 2026,
+      "month": 2,
+      "count": 45203
+    },
+    {
+      "year": 2026,
+      "month": 3,
+      "count": 45511
+    },
+    {
+      "year": 2026,
+      "month": 4,
+      "count": 45958
+    },
+    {
+      "year": 2026,
+      "month": 5,
+      "count": 46679
+    },
+    {
+      "year": 2026,
+      "month": 6,
+      "count": 47328
+    },
+    {
+      "year": 2026,
+      "month": 7,
+      "count": 48183
+    },
+    {
+      "year": 2026,
+      "month": 8,
+      "count": 48921
+    },
+    {
+      "year": 2026,
+      "month": 9,
+      "count": 49576
     }
   ],
   "chicagoMonthly": [
@@ -255,6 +295,46 @@
       "year": 2026,
       "month": 1,
       "count": 26657
+    },
+    {
+      "year": 2026,
+      "month": 2,
+      "count": 26213
+    },
+    {
+      "year": 2026,
+      "month": 3,
+      "count": 26068
+    },
+    {
+      "year": 2026,
+      "month": 4,
+      "count": 26337
+    },
+    {
+      "year": 2026,
+      "month": 5,
+      "count": 26790
+    },
+    {
+      "year": 2026,
+      "month": 6,
+      "count": 27130
+    },
+    {
+      "year": 2026,
+      "month": 7,
+      "count": 27650
+    },
+    {
+      "year": 2026,
+      "month": 8,
+      "count": 28014
+    },
+    {
+      "year": 2026,
+      "month": 9,
+      "count": 28458
     }
   ],
   "byZipCode": {
@@ -383,6 +463,46 @@
         "year": 2026,
         "month": 1,
         "count": 386
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 387
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 393
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 397
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 407
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 417
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 423
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 432
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 439
       }
     ],
     "60602": [
@@ -510,6 +630,46 @@
         "year": 2026,
         "month": 1,
         "count": 51
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 52
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 52
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 54
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 54
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 57
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 56
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 56
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 58
       }
     ],
     "60603": [
@@ -637,6 +797,46 @@
         "year": 2026,
         "month": 1,
         "count": 56
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 57
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 58
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 57
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 57
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 58
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 61
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 61
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 62
       }
     ],
     "60604": [
@@ -764,6 +964,46 @@
         "year": 2026,
         "month": 1,
         "count": 24
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 24
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 24
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 23
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 22
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 20
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 20
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 20
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 20
       }
     ],
     "60605": [
@@ -891,6 +1131,46 @@
         "year": 2026,
         "month": 1,
         "count": 781
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 788
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 792
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 800
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 805
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 810
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 825
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 834
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 858
       }
     ],
     "60606": [
@@ -1018,6 +1298,46 @@
         "year": 2026,
         "month": 1,
         "count": 124
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 128
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 129
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 127
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 129
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 129
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 130
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 130
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 129
       }
     ],
     "60607": [
@@ -1145,6 +1465,46 @@
         "year": 2026,
         "month": 1,
         "count": 830
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 837
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 846
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 855
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 870
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 873
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 893
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 902
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 916
       }
     ],
     "60608": [
@@ -1272,6 +1632,46 @@
         "year": 2026,
         "month": 1,
         "count": 713
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 715
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 718
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 720
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 736
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 749
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 773
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 783
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 788
       }
     ],
     "60609": [
@@ -1399,6 +1799,46 @@
         "year": 2026,
         "month": 1,
         "count": 524
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 527
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 524
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 531
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 548
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 557
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 564
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 569
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 542
       }
     ],
     "60610": [
@@ -1526,6 +1966,46 @@
         "year": 2026,
         "month": 1,
         "count": 685
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 690
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 689
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 694
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 706
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 708
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 710
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 706
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 708
       }
     ],
     "60611": [
@@ -1653,6 +2133,46 @@
         "year": 2026,
         "month": 1,
         "count": 836
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 838
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 835
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 835
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 839
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 846
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 863
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 878
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 891
       }
     ],
     "60612": [
@@ -1780,6 +2300,46 @@
         "year": 2026,
         "month": 1,
         "count": 403
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 401
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 405
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 407
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 414
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 421
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 431
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 434
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 441
       }
     ],
     "60613": [
@@ -1907,6 +2467,46 @@
         "year": 2026,
         "month": 1,
         "count": 627
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 631
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 637
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 640
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 657
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 661
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 678
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 678
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 683
       }
     ],
     "60614": [
@@ -2034,6 +2634,46 @@
         "year": 2026,
         "month": 1,
         "count": 1553
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 1564
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 1569
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 1586
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 1607
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 1623
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 1633
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 1649
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 1672
       }
     ],
     "60615": [
@@ -2161,6 +2801,46 @@
         "year": 2026,
         "month": 1,
         "count": 432
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 440
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 446
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 452
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 458
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 458
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 466
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 469
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 466
       }
     ],
     "60616": [
@@ -2288,6 +2968,46 @@
         "year": 2026,
         "month": 1,
         "count": 836
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 839
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 842
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 847
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 869
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 880
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 893
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 904
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 924
       }
     ],
     "60617": [
@@ -2415,6 +3135,46 @@
         "year": 2026,
         "month": 1,
         "count": 245
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 250
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 251
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 252
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 260
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 264
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 269
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 278
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 280
       }
     ],
     "60618": [
@@ -2542,6 +3302,46 @@
         "year": 2026,
         "month": 1,
         "count": 1398
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 1415
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 1422
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 1448
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 1476
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 1490
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 1517
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 1537
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 1567
       }
     ],
     "60619": [
@@ -2669,6 +3469,46 @@
         "year": 2026,
         "month": 1,
         "count": 205
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 215
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 215
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 222
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 232
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 235
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 242
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 251
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 259
       }
     ],
     "60620": [
@@ -2796,6 +3636,46 @@
         "year": 2026,
         "month": 1,
         "count": 181
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 184
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 185
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 190
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 200
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 205
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 210
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 213
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 218
       }
     ],
     "60621": [
@@ -2923,6 +3803,46 @@
         "year": 2026,
         "month": 1,
         "count": 232
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 232
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 232
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 234
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 243
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 245
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 248
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 248
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 249
       }
     ],
     "60622": [
@@ -3050,6 +3970,46 @@
         "year": 2026,
         "month": 1,
         "count": 1093
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 1093
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 1096
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 1095
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 1113
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 1126
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 1147
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 1160
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 1183
       }
     ],
     "60623": [
@@ -3177,6 +4137,46 @@
         "year": 2026,
         "month": 1,
         "count": 232
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 234
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 235
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 242
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 251
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 252
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 260
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 271
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 282
       }
     ],
     "60624": [
@@ -3304,6 +4304,46 @@
         "year": 2026,
         "month": 1,
         "count": 76
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 76
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 76
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 81
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 83
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 85
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 90
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 96
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 98
       }
     ],
     "60625": [
@@ -3431,6 +4471,46 @@
         "year": 2026,
         "month": 1,
         "count": 781
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 793
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 807
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 808
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 824
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 833
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 845
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 852
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 865
       }
     ],
     "60626": [
@@ -3558,6 +4638,46 @@
         "year": 2026,
         "month": 1,
         "count": 331
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 329
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 328
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 331
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 341
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 349
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 350
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 354
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 353
       }
     ],
     "60628": [
@@ -3685,6 +4805,46 @@
         "year": 2026,
         "month": 1,
         "count": 381
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 382
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 386
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 393
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 396
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 398
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 408
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 410
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 492
       }
     ],
     "60629": [
@@ -3812,6 +4972,46 @@
         "year": 2026,
         "month": 1,
         "count": 259
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 260
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 264
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 274
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 285
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 289
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 295
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 301
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 311
       }
     ],
     "60630": [
@@ -3939,6 +5139,46 @@
         "year": 2026,
         "month": 1,
         "count": 629
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 635
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 641
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 650
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 665
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 673
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 685
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 688
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 697
       }
     ],
     "60631": [
@@ -4066,6 +5306,46 @@
         "year": 2026,
         "month": 1,
         "count": 315
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 317
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 324
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 327
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 330
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 332
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 339
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 350
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 353
       }
     ],
     "60632": [
@@ -4193,6 +5473,46 @@
         "year": 2026,
         "month": 1,
         "count": 451
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 450
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 454
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 459
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 467
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 476
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 491
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 498
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 520
       }
     ],
     "60633": [
@@ -4320,6 +5640,46 @@
         "year": 2026,
         "month": 1,
         "count": 49
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 49
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 51
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 54
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 57
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 59
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 60
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 64
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 64
       }
     ],
     "60634": [
@@ -4447,6 +5807,46 @@
         "year": 2026,
         "month": 1,
         "count": 530
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 534
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 545
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 548
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 561
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 571
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 582
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 595
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 606
       }
     ],
     "60636": [
@@ -4574,6 +5974,46 @@
         "year": 2026,
         "month": 1,
         "count": 66
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 69
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 70
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 78
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 81
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 83
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 88
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 91
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 95
       }
     ],
     "60637": [
@@ -4701,6 +6141,46 @@
         "year": 2026,
         "month": 1,
         "count": 280
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 280
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 286
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 291
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 297
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 304
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 309
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 316
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 321
       }
     ],
     "60638": [
@@ -4828,6 +6308,46 @@
         "year": 2026,
         "month": 1,
         "count": 268
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 276
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 280
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 287
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 301
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 304
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 324
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 333
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 339
       }
     ],
     "60639": [
@@ -4955,6 +6475,46 @@
         "year": 2026,
         "month": 1,
         "count": 228
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 229
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 232
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 237
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 250
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 261
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 267
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 270
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 276
       }
     ],
     "60640": [
@@ -5082,6 +6642,46 @@
         "year": 2026,
         "month": 1,
         "count": 702
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 713
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 720
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 728
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 750
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 751
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 769
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 776
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 784
       }
     ],
     "60641": [
@@ -5209,6 +6809,46 @@
         "year": 2026,
         "month": 1,
         "count": 595
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 597
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 605
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 615
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 627
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 647
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 660
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 663
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 680
       }
     ],
     "60642": [
@@ -5271,6 +6911,31 @@
         "year": 2024,
         "month": 12,
         "count": 208
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 595
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 618
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 624
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 626
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 633
       }
     ],
     "60643": [
@@ -5398,6 +7063,46 @@
         "year": 2026,
         "month": 1,
         "count": 399
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 401
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 402
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 406
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 419
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 428
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 434
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 444
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 449
       }
     ],
     "60644": [
@@ -5525,6 +7230,46 @@
         "year": 2026,
         "month": 1,
         "count": 92
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 93
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 96
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 96
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 96
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 103
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 109
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 114
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 119
       }
     ],
     "60645": [
@@ -5652,6 +7397,46 @@
         "year": 2026,
         "month": 1,
         "count": 422
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 427
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 425
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 429
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 432
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 442
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 456
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 467
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 470
       }
     ],
     "60646": [
@@ -5779,6 +7564,46 @@
         "year": 2026,
         "month": 1,
         "count": 473
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 485
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 485
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 491
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 500
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 506
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 519
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 529
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 531
       }
     ],
     "60647": [
@@ -5906,6 +7731,46 @@
         "year": 2026,
         "month": 1,
         "count": 1173
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 1176
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 1187
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 1199
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 1213
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 1226
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 1228
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 1244
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 1251
       }
     ],
     "60649": [
@@ -6033,6 +7898,46 @@
         "year": 2026,
         "month": 1,
         "count": 178
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 181
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 184
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 187
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 192
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 196
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 199
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 204
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 208
       }
     ],
     "60651": [
@@ -6160,6 +8065,46 @@
         "year": 2026,
         "month": 1,
         "count": 162
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 162
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 163
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 167
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 170
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 172
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 174
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 179
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 182
       }
     ],
     "60652": [
@@ -6287,6 +8232,46 @@
         "year": 2026,
         "month": 1,
         "count": 187
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 192
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 194
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 194
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 202
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 206
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 209
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 209
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 212
       }
     ],
     "60653": [
@@ -6414,6 +8399,46 @@
         "year": 2026,
         "month": 1,
         "count": 322
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 320
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 322
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 327
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 333
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 337
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 349
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 358
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 361
       }
     ],
     "60654": [
@@ -6541,6 +8566,46 @@
         "year": 2026,
         "month": 1,
         "count": 514
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 520
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 516
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 518
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 521
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 526
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 534
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 542
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 547
       }
     ],
     "60655": [
@@ -6668,6 +8733,46 @@
         "year": 2026,
         "month": 1,
         "count": 147
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 146
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 149
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 150
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 148
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 152
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 159
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 161
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 163
       }
     ],
     "60656": [
@@ -6795,6 +8900,46 @@
         "year": 2026,
         "month": 1,
         "count": 269
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 271
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 273
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 275
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 275
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 275
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 282
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 291
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 294
       }
     ],
     "60657": [
@@ -6922,6 +9067,46 @@
         "year": 2026,
         "month": 1,
         "count": 1076
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 1082
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 1095
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 1099
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 1111
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 1125
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 1158
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 1159
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 1174
       }
     ],
     "60659": [
@@ -7049,6 +9234,46 @@
         "year": 2026,
         "month": 1,
         "count": 395
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 400
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 417
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 426
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 433
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 440
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 443
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 459
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 461
       }
     ],
     "60660": [
@@ -7176,6 +9401,46 @@
         "year": 2026,
         "month": 1,
         "count": 376
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 382
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 386
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 395
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 395
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 400
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 412
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 420
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 428
       }
     ],
     "60661": [
@@ -7303,7 +9568,95 @@
         "year": 2026,
         "month": 1,
         "count": 303
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "count": 302
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "count": 301
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "count": 304
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "count": 300
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "count": 301
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "count": 308
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "count": 311
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "count": 312
       }
     ]
+  },
+  "reports": {
+    "2026-02": {
+      "url": "https://www.ilsos.gov/content/dam/departments/vehicles/statistics/electric/2026/electric021526.pdf",
+      "reportDate": "2026-02-15",
+      "zipTableComplete": false
+    },
+    "2026-03": {
+      "url": "https://www.ilsos.gov/content/dam/departments/vehicles/statistics/electric/2026/electric031526.pdf",
+      "reportDate": "2026-03-15",
+      "zipTableComplete": true
+    },
+    "2026-04": {
+      "url": "https://www.ilsos.gov/content/dam/departments/vehicles/statistics/electric/2026/electric041526.pdf",
+      "reportDate": "2026-04-15",
+      "zipTableComplete": true
+    },
+    "2026-05": {
+      "url": "https://www.ilsos.gov/content/dam/departments/vehicles/statistics/electric/2026/electric051526.pdf",
+      "reportDate": "2026-05-18",
+      "zipTableComplete": true
+    },
+    "2026-06": {
+      "url": "https://www.ilsos.gov/content/dam/departments/vehicles/statistics/electric/2026/electric061526.pdf",
+      "reportDate": "2026-06-15",
+      "zipTableComplete": true
+    },
+    "2026-07": {
+      "url": "https://www.ilsos.gov/content/dam/departments/vehicles/statistics/electric/2026/electric071526.pdf",
+      "reportDate": "2026-07-15",
+      "zipTableComplete": true
+    },
+    "2026-08": {
+      "url": "https://www.ilsos.gov/content/dam/departments/vehicles/statistics/electric/2026/electric081526.pdf",
+      "reportDate": "2026-08-15",
+      "zipTableComplete": true
+    },
+    "2026-09": {
+      "url": "https://www.ilsos.gov/content/dam/departments/vehicles/statistics/electric/2026/electric091526.pdf",
+      "reportDate": "2026-09-15",
+      "sourceLastModified": "Fri, 18 Sep 2026 21:45:16 GMT",
+      "zipTableComplete": true
+    }
+  },
+  "refresh": {
+    "lastCheckedAt": "2026-10-02T18:37:00.907Z",
+    "nextCheckAt": "2026-10-19T11:00:00.000Z",
+    "lateChecks": 0
   }
 }

@@ -8060,6 +8060,8 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         zipCodeData,
         cookCountyData,
         lastUpdated: data.lastUpdated,
+        latestReportDate: Object.values(data.reports || {}).map((report: any) => report.reportDate).sort().at(-1) || null,
+        refreshStatus: data.refresh || null,
         sourceUrl: data.sourceUrl || 'https://www.ilsos.gov/departments/vehicles/statistics/electric.html'
       });
     } catch (err) {
@@ -8697,8 +8699,8 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       const { type } = req.params;
       
       if (type === 'evs') {
-        // Get EV registrations by ZIP for January 2026
-        const evRegPath = path.join(__dirname, 'data', 'ev_registrations.json');
+        // Compare ZIPs at the latest official county report month, never mixed vintages.
+        const evRegPath = path.join(process.cwd(), 'server', 'data', 'ev_registrations.json');
         if (!fs.existsSync(evRegPath)) {
           return res.json({ error: 'EV registration data not available', byZip: [], byCommunityArea: [] });
         }
@@ -8706,13 +8708,15 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         const evData = JSON.parse(fs.readFileSync(evRegPath, 'utf-8'));
         const byZipCode = evData.byZipCode || {};
         
-        // Get latest count (Jan 2026) for each ZIP
+        const latestMonth = [...(evData.cookCountyMonthly || [])].sort((a, b) => a.year - b.year || a.month - b.month).at(-1);
+        const period = latestMonth ? new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
+          .format(new Date(Date.UTC(latestMonth.year, latestMonth.month - 1, 15))) : 'date unavailable';
         const zipRankings: { zip: string; count: number }[] = [];
         for (const [zip, monthlyData] of Object.entries(byZipCode)) {
           const data = monthlyData as Array<{year: number; month: number; count: number}>;
-          const jan2026 = data.find(d => d.year === 2026 && d.month === 1);
-          if (jan2026) {
-            zipRankings.push({ zip, count: jan2026.count });
+          const observation = latestMonth && data.find(d => d.year === latestMonth.year && d.month === latestMonth.month);
+          if (observation) {
+            zipRankings.push({ zip, count: observation.count });
           }
         }
         
@@ -8720,7 +8724,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
         
         res.json({
           type: 'evs',
-          label: 'EV Registrations (Jan 2026)',
+          label: `EV Registrations (${period})`,
           byZip: zipRankings.slice(0, 10),
           byCommunityArea: [] // No community area data for EV registrations
         });

@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
+import { refreshEVRegistrations } from './evRegistrations';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(__dirname, 'data');
@@ -726,6 +727,8 @@ async function runAllRefreshes(): Promise<void> {
   if (g.__dataRefreshing) return;
   g.__dataRefreshing = true;
   try {
+    // Its own calendar schedule is independent of other datasets' age thresholds.
+    await refreshEVRegistrations().catch(e => console.error('[ev-refresh]', e.message));
     // Monthly
     await refreshGrocery().catch(e => console.error('[data-refresh] grocery error:', e.message));
     await sleep(1000);
@@ -782,6 +785,8 @@ function maybeRefreshForZba(): void {
 }
 
 export function scheduleDataRefresh(): void {
+  // Also catch a due monthly check on startup/hot reload when other files are fresh.
+  void refreshEVRegistrations().catch(e => console.error('[ev-refresh]', e.message));
   if (g.__dataRefreshScheduled) {
     if (!g.__dataRefreshing) {
       const needsNow =

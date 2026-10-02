@@ -1,177 +1,29 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as https from 'https';
+import fs from 'fs';
+import path from 'path';
+import { importEVReports, refreshEVRegistrations } from '../server/evRegistrations';
+import { parseEVReport, type EVReport } from '../server/evRegistrationSource';
 
-const OUTPUT_DIR = path.join(process.cwd(), 'server', 'data');
-const OUTPUT_FILE = path.join(OUTPUT_DIR, 'ev_registrations.json');
-
-const BASE_URL = 'https://www.ilsos.gov/content/dam/departments/vehicles/statistics/electric';
-
-interface EVDataPoint {
-  year: number;
-  month: number;
-  zipCode: string;
-  count: number;
-}
-
-interface EVRegistrationData {
-  lastUpdated: string;
-  cookCountyTotal: { year: number; month: number; count: number }[];
-  byZipCode: Record<string, { year: number; month: number; count: number }[]>;
-}
-
-function getMonthlyPdfUrls(startYear: number, endYear: number): { year: number; month: number; url: string }[] {
-  const urls: { year: number; month: number; url: string }[] = [];
-  
-  for (let year = startYear; year <= endYear; year++) {
-    for (let month = 1; month <= 12; month++) {
-      if (year === 2026 && month > 1) continue;
-      if (year === 2017 && month < 11) continue;
-      
-      const monthStr = month.toString().padStart(2, '0');
-      const yearStr = year.toString().slice(-2);
-      const filename = `electric${monthStr}15${yearStr}.pdf`;
-      urls.push({
-        year,
-        month,
-        url: `${BASE_URL}/${year}/${filename}`
-      });
-    }
+// Normal builds discover real publisher links. Text import is only for an
+// independently verified backfill when SOS blocks this runtime's network.
+const textDirIndex = process.argv.indexOf('--verified-text-dir');
+async function main() {
+  if (textDirIndex < 0) {
+    await refreshEVRegistrations(true);
+    return;
   }
-  
-  return urls;
-}
-
-async function downloadPdf(url: string): Promise<Buffer | null> {
-  return new Promise((resolve) => {
-    const timeout = setTimeout(() => {
-      console.log(`Timeout downloading: ${url}`);
-      resolve(null);
-    }, 30000);
-
-    https.get(url, { timeout: 25000 }, (res) => {
-      if (res.statusCode !== 200) {
-        clearTimeout(timeout);
-        console.log(`Failed to download ${url}: ${res.statusCode}`);
-        resolve(null);
-        return;
-      }
-      
-      const chunks: Buffer[] = [];
-      res.on('data', (chunk) => chunks.push(chunk));
-      res.on('end', () => {
-        clearTimeout(timeout);
-        resolve(Buffer.concat(chunks));
-      });
-      res.on('error', () => {
-        clearTimeout(timeout);
-        resolve(null);
-      });
-    }).on('error', () => {
-      clearTimeout(timeout);
-      resolve(null);
-    });
-  });
-}
-
-async function parsePdfForEVData(pdfBuffer: Buffer, year: number, month: number): Promise<EVDataPoint[]> {
-  try {
-    const pdfParse = require('pdf-parse');
-    const data = await pdfParse(pdfBuffer);
-    const text = data.text;
-    
-    const dataPoints: EVDataPoint[] = [];
-    const lines = text.split('\n');
-    
-    let inZipSection = false;
-    
-    for (const line of lines) {
-      if (line.includes('ZIP') || line.includes('Zip')) {
-        inZipSection = true;
-        continue;
-      }
-      
-      if (inZipSection) {
-        const zipMatch = line.match(/^(\d{5})\s+(\d+)/);
-        if (zipMatch) {
-          const zipCode = zipMatch[1];
-          const count = parseInt(zipMatch[2], 10);
-          
-          if (zipCode.startsWith('606') || zipCode.startsWith('607') || zipCode.startsWith('608')) {
-            dataPoints.push({ year, month, zipCode, count });
-          }
-        }
-      }
-    }
-    
-    return dataPoints;
-  } catch (err) {
-    console.error('Error parsing PDF:', err);
-    return [];
+  const directory = process.argv[textDirIndex + 1];
+  if (!directory) throw new Error('--verified-text-dir requires a directory');
+  const manifest = JSON.parse(fs.readFileSync(path.join(directory, 'manifest.json'), 'utf8'));
+  const reports: EVReport[] = [];
+  for (const entry of manifest) {
+    const text = fs.readFileSync(path.join(directory, `${entry.year}-${String(entry.month).padStart(2, '0')}.txt`), 'utf8');
+    reports.push(parseEVReport(text, entry, entry.sourceLastModified, true));
   }
+  if (!reports.length) throw new Error('No verified EV reports supplied');
+  const data = importEVReports(reports);
+  console.log(`Imported ${reports.length} official monthly reports; county latest ${data.cookCountyMonthly.at(-1)?.year}-${data.cookCountyMonthly.at(-1)?.month}`);
 }
-
-async function buildEVRegistrationsData() {
-  console.log('Building EV registrations data...');
-  
-  if (!fs.existsSync(OUTPUT_DIR)) {
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-  }
-  
-  const currentYear = new Date().getFullYear();
-  const startYear = currentYear - 5;
-  
-  const urls = getMonthlyPdfUrls(startYear, currentYear);
-  console.log(`Found ${urls.length} PDFs to process`);
-  
-  const allData: EVDataPoint[] = [];
-  
-  for (const { year, month, url } of urls) {
-    console.log(`Processing ${year}-${month.toString().padStart(2, '0')}...`);
-    
-    const pdfBuffer = await downloadPdf(url);
-    if (!pdfBuffer) {
-      console.log(`  Skipped (download failed)`);
-      continue;
-    }
-    
-    const dataPoints = await parsePdfForEVData(pdfBuffer, year, month);
-    console.log(`  Found ${dataPoints.length} Chicago zip codes`);
-    allData.push(...dataPoints);
-    
-    await new Promise(r => setTimeout(r, 1000));
-  }
-  
-  const byZipCode: Record<string, { year: number; month: number; count: number }[]> = {};
-  const cookCountyTotals: Map<string, number> = new Map();
-  
-  for (const dp of allData) {
-    if (!byZipCode[dp.zipCode]) {
-      byZipCode[dp.zipCode] = [];
-    }
-    byZipCode[dp.zipCode].push({ year: dp.year, month: dp.month, count: dp.count });
-    
-    const key = `${dp.year}-${dp.month}`;
-    cookCountyTotals.set(key, (cookCountyTotals.get(key) || 0) + dp.count);
-  }
-  
-  const cookCountyTotal = Array.from(cookCountyTotals.entries())
-    .map(([key, count]) => {
-      const [year, month] = key.split('-').map(Number);
-      return { year, month, count };
-    })
-    .sort((a, b) => a.year - b.year || a.month - b.month);
-  
-  const result: EVRegistrationData = {
-    lastUpdated: new Date().toISOString(),
-    cookCountyTotal,
-    byZipCode
-  };
-  
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(result, null, 2));
-  console.log(`\nSaved to ${OUTPUT_FILE}`);
-  console.log(`Total zip codes: ${Object.keys(byZipCode).length}`);
-  console.log(`Total data points: ${allData.length}`);
-}
-
-buildEVRegistrationsData().catch(console.error);
+main().catch(() => {
+  console.error('EV import failed; verified data retained. Check source access, report format, and scraping credentials.');
+  process.exitCode = 1;
+});
