@@ -17,9 +17,9 @@ Ranks are contextual, not verdicts. The ranked input must equal the displayed me
 
 The labor-force delta bands at 5 and 12 percentage points are a deliberate user-approved exception to the outside-authority color rule. Their footer must identify them as the product's own planning convention, not a published standard.
 
-**Why:** The user requested those existing cut points and the explicit disclaimer while retaining the published childcare-supply classification logic.
+**Why:** The user requested those existing cut points and the explicit disclaimer while retaining the published childcare-supply classification logic. They separately rejected Area Detail's red large-delta badge and demand interpretation because the threshold was a product invention.
 
-**How to apply:** Do not present these bands as an official childcare-access or Census classification, and do not introduce additional local thresholds without clear attribution.
+**How to apply:** Do not present these bands as an official childcare-access or Census classification, and do not introduce additional local thresholds without clear attribution. Area Detail keeps a neutral numeric delta in percentage points, without inferring daycare demand or applying a red threshold verdict.
 
 The supplied Project Use Analysis HTML examples are visual references, not replacements for audited source definitions when those disagree.
 

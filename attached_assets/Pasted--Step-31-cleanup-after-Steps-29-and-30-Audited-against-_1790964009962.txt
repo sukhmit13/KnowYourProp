@@ -1,0 +1,172 @@
+# Step 31 — cleanup after Steps 29 and 30
+
+Audited against **`86431b7`** (origin/main, 2026-10-02). This supersedes `REPLIT_STEP30A` — it is
+the same three valuation items plus four residuals from Step 29, in one pass.
+
+---
+
+## Steps 29a / 29b / 29c — what landed
+
+Nothing substantive is missing. Verified in code:
+
+| Spec item | Status |
+|---|---|
+| One competitor row, name-as-link, one anchor | `ProjectUseAnalysisSpine.tsx:30` — `googleMapsUrl(url) ?? mapsSearchUrl(...)`, with a protocol and hostname guard that was **not** in the spec |
+| Cannabis silent truncation (`.slice(0,10)`, no count) | fixed — it routes through `ProjectUseBusinessList`, which carries `.kyp-morelink` |
+| `?? 999` distance fallback | gone; rows render `distance unknown` |
+| Bars `text-rose-900` / `rose-700` | gone |
+| CCAP hard-coded `|| 55` | gone |
+| `deltaInterpretation` in the report | gone |
+| `daycareOpportunityScore`, `marketInsight` | never rendered |
+| Senior Market Assessment, Primary/Secondary Target, `age85Plus * 0.5` | gone |
+| "Strong demand for fuel sales", "consider location carefully", "Food Desert" prose | gone |
+| "best for longer/quick stops", "(Highest care needs)" | gone — the only matches left are `assert.doesNotMatch` guards in the tests |
+| Seven dead three-arm ternaries | gone |
+| `.sch-dc` / `.sch-track` / `.sch-seg`, `.cmp-row` / `.cmp-facts` / `.cmp-star` | no consumers |
+| Ranks, bands, form primitives, two-chart EV split | all present |
+| **`hybridInc`** | **0 references** — the 468 lines of dead code were removed, which the spec had listed as out of scope |
+
+Tests shipped for all three: `ProjectUseAnalysisSpine.test.tsx`, `DaycareAnalysis.test.tsx`,
+`ProjectUseDomainPanels.test.tsx`, `scripts/test-pua-sections.mjs`, `scripts/test-pua-domains.mjs`.
+
+Four residuals follow. None of them breaks anything.
+
+---
+
+## 1. The Simple / Detailed toggle is the wrong primitive — §Valuation
+
+The one visible difference between the shipped calculator and the targets.
+
+Four sites build the switch out of `.kyp-block`:
+
+```
+ValuationCalculator.tsx:399, 400   business Simple / Detailed
+ValuationCalculator.tsx:494        tier Simple
+ValuationCalculator.tsx:537, 538   tier Simple / Detailed
+```
+
+```tsx
+<button type="button" className={`kyp-block ${tier === "simple" ? "ind" : "wash"}`} …>Simple</button>
+```
+
+`.kyp-block` is the **headline-statistic** primitive, sized for a 36px display numeral. Used as a
+two-state switch it produces two large filled slabs where the targets have a compact segmented
+control.
+
+`grep -c 'kyp-seg' client/src/components/report/Valuation*.tsx` → **0**, while
+`ProjectUseAnalysisSpine.tsx` and `DevelopmentSection.tsx` already use it. Same primitive here:
+
+```tsx
+<div className="kyp-segrow">
+  <div className="kyp-seg">
+    <button type="button" className={tier === "simple" ? "on" : ""}
+      aria-pressed={tier === "simple"} onClick={() => setTier("simple")}>Simple</button>
+    <button type="button" className={tier === "advanced" ? "on" : ""}
+      aria-pressed={tier === "advanced"} onClick={() => setTier("advanced")}>Detailed</button>
+  </div>
+  <div className="spacer" />
+  <div className="kyp-scopenote">{/* the one-line note opposite the control */}</div>
+</div>
+```
+
+All four sites. Keep `aria-pressed`. Reference: `val-dc-target.html`, `val-mf-target.html`.
+
+---
+
+## 2. Coverage Check has a third row that repeats its own header — §Valuation
+
+`ValuationCoverage.tsx:31–35` ships a header plus three rows; the target has a header plus two.
+
+| Shipped | Target | Why |
+|---|---|---|
+| header `Coverage check` / `1.14×` | header `Your NOI` / `$103,596` / `per year` | the header states the quantity being tested. DSCR is already a block in Deal at a Glance and a lit band directly below |
+| `Annual debt service` — sub `NOI required for 1.00× coverage` | `Your debt payment` — sub `1.00× — what the loan actually costs` | the sub-line should say what the bar *is* |
+| `Common commercial floor` — sub `NOI required for 1.25× coverage` | `Lender minimum` — sub `1.25× — the floor most commercial lenders underwrite to` | names whose rule it is |
+| `NOI entered or derived` | **delete** | it is the header value; a third row says it twice |
+| pill `Gap $-49,737` | pill `−$49,737` | "Gap" plus a signed number reads twice, and the pill color already says which side |
+
+---
+
+## 3. One hardcoded step number — §Valuation
+
+`ValuationCalculator.tsx:535`:
+
+```tsx
+<Step number={3} title="Income → NOI" note="selected scenario and property costs" />
+```
+
+Every sibling derives it (`number={isDaycare ? 3 : 2}`). Correct today on the day care branch, so
+nothing looks wrong, but it will drift the moment that branch is reused. Match the pattern.
+
+---
+
+## 4. Dead CSS — 19 rules with no consumers
+
+Steps 29 and 30 replaced these families but left the rules in `index.css`:
+
+| Family | Rules | Consumers in `.tsx` |
+|---|---|---|
+| `.sch-badge` | 6 | 0 |
+| `.val-step` | 4 | 0 |
+| `.val-cov` | 1 | 0 |
+| `.val-mt` | 6 | 0 |
+| `.val-formula` | 1 | 0 |
+| `.calc-inputs` | 1 | 0 |
+
+Delete them. Re-grep after deleting rather than trusting this table — `.sch-badge` in particular
+is the kind of name another surface may still use.
+
+---
+
+## 5. `AreaDetail.tsx` still renders a deleted takeaway
+
+Not a Step 29 miss — §Area Detail was never in scope — but it is the same banned string surviving
+on another surface. `client/src/pages/AreaDetail.tsx:600–608`:
+
+```tsx
+<Badge variant={deltaLevel === 'small' ? 'default' : deltaLevel === 'moderate' ? 'secondary' : 'destructive'}>
+  {delta}%
+</Badge>
+…
+<p className="text-sm text-muted-foreground">{enhancedData.deltaInterpretation}</p>
+```
+
+Two problems. `deltaInterpretation` is the prose takeaway the report already deleted. And
+`variant="destructive"` paints a large labor-force delta red — a verdict color on a threshold this
+product invented, which is exactly what the report version replaced with a slate-and-band
+treatment.
+
+Either apply the §17.2 pattern here, or drop the interpretation and keep the number. Do not leave
+the red badge.
+
+---
+
+## Still open — neither is fixed by this step
+
+**The caution-color convergence.** `--kyp-orange-deep` still has 4 references, `#c0651e` is still
+hardcoded 10 times, and `--kyp-orangeInk` exists but is barely used. This was deliberately scoped
+out of Steps 29 and 30 so it would have its own revert point — see `AMBER_ORANGE_AUDIT.md`. It is
+~30 lines in `kyp-base.css` and 3 markup sites.
+
+**27 of the 28 valuation inputs do not persist.** Only the purchase price saves. Set a rate, a
+vacancy percentage and six expense lines, reload, and all of it is gone — while a Save button
+beside the price implies otherwise. Either persist the input set alongside `askingPrice` or
+relabel the button.
+
+**Three live API keys** in `.replit` lines 65–71, in four commits, with a `.gitignore` whose
+missing newline (`*.tar.gzserver/cache/`) means neither pattern matches. Rotate all three, move to
+Replit Secrets, `git rm --cached .replit`, fix the newline. Rotating matters more than removing
+the file — they are already in history.
+
+---
+
+## Verify
+
+- `grep -c 'kyp-seg' client/src/components/report/Valuation*.tsx` → 4 or more
+- `grep -c 'kyp-block.*Simple\|kyp-block.*Detailed' client/src/components/report/Valuation*.tsx` → 0
+- `ValuationCoverage.tsx` renders exactly two `.kyp-covrow`
+- No `<Step number={` with a bare integer except `number={1}`
+- `grep -c 'sch-badge\|val-step\|val-cov\|val-mt\|val-formula\|calc-inputs' client/src/index.css` → 0
+- `grep -c 'deltaInterpretation' client/src/pages/AreaDetail.tsx` → 0
+- Visual: open a 6-unit property and a day care — the Simple/Detailed switch is a small pill pair,
+  not two filled cards

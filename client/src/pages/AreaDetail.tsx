@@ -556,7 +556,6 @@ export default function AreaDetail({ type }: AreaDetailPageProps) {
                       }
                       
                       const delta = enhancedData.laborForceDelta;
-                      const deltaLevel = delta <= 5 ? 'small' : delta <= 10 ? 'moderate' : 'large';
                       
                       return (
                         <div className="space-y-6">
@@ -597,20 +596,18 @@ export default function AreaDetail({ type }: AreaDetailPageProps) {
                             </div>
                             
                             {/* Labor Force Delta */}
-                            <div className="p-4 border border-border bg-secondary">
-                              <div className="flex items-center justify-between mb-2">
+                            <div className="p-4 border border-border bg-secondary" data-testid="area-labor-force-delta">
+                              <div className="flex items-center justify-between gap-4">
                                 <span className="text-sm font-semibold">Labor Force Delta:</span>
-                                <Badge variant={deltaLevel === 'small' ? 'default' : deltaLevel === 'moderate' ? 'secondary' : 'destructive'}>
-                                  {delta}%
-                                </Badge>
+                                <span className="text-sm font-semibold text-foreground">
+                                  {delta} percentage points
+                                </span>
                               </div>
-                              <p className="text-sm text-muted-foreground">{enhancedData.deltaInterpretation}</p>
                             </div>
                           </div>
                           
                           <p className="text-xs text-muted-foreground pt-2">
-                            Data source: American Community Survey 5-Year Estimates (B09001, B23008)<br/>
-                            <span className="italic">Small delta = Parents work regardless of child age (higher daycare demand). Large delta = Many parents stay home with young children.</span>
+                            Data source: American Community Survey 5-Year Estimates (B09001, B23008)
                           </p>
                         </div>
                       );

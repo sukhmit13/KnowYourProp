@@ -1037,13 +1037,8 @@ body[data-print-expanding] .recharts-responsive-container > .recharts-wrapper > 
 .sbawrap .lb .track{height:8px;background:var(--paper);border:1px solid var(--line);border-radius:5px;overflow:hidden}
 .sbawrap .lb .track i{display:block;height:100%;background:var(--indigo);border-radius:5px 0 0 5px}
 .sbawrap .src{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.03em;padding-top:14px;border-top:1px solid var(--line)}
-.val-step{display:flex;align-items:center;gap:11px;margin:4px 0 11px}
-.val-step .n{width:25px;height:25px;border-radius:7px;background:#2b3a9e;color:#fff;font-family:var(--font-jbmono);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
-.val-step .t{font-family:var(--font-jbmono);font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#141414}
-.val-step .note{margin-left:auto;font-size:11px;color:#8b8a84}
 .val-seclbl{font-family:var(--font-jbmono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8b8a84;margin:20px 0 4px}
 .val-secsub{font-size:11.5px;color:#8b8a84;margin-bottom:10px}
-.val-cov{background:#fff;border:1px solid var(--sb-line);border-radius:13px;padding:6px 20px 8px;box-shadow:0 1px 3px rgba(20,20,20,.04)}
 .val-noihdr{display:flex;align-items:baseline;justify-content:space-between;padding:14px 0 12px;border-bottom:1px solid var(--sb-line)}
 .val-noihdr .l{font-size:12px;color:#54544f}
 .val-noihdr .v{font-family:var(--font-serif);font-size:24px;color:#141414}
@@ -1061,13 +1056,7 @@ body[data-print-expanding] .recharts-responsive-container > .recharts-wrapper > 
 .val-readline{font-size:12px;color:#54544f;line-height:1.5;padding:12px 0 4px;border-top:1px solid var(--sb-line)}
 .val-readline b{color:#141414;font-weight:600}
 .val-ref{background:var(--sb-paper);border:1px solid var(--sb-line);border-radius:12px;padding:15px 18px 16px}
-.val-mtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.val-mt{border:1px solid var(--sb-line);background:#fff;border-radius:10px;padding:12px 14px}
-.val-mt .l{font-family:var(--font-jbmono);font-size:8.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#8b8a84;margin-bottom:7px}
-.val-mt .n{font-family:var(--font-serif);font-size:23px;line-height:1;color:#141414}
-.val-mt .s{font-size:10.5px;color:#8b8a84;margin-top:5px}
-.val-formula{font-family:var(--font-jbmono);font-size:10px;color:#8b8a84;text-align:center;margin-top:14px;line-height:1.6}
-@media(max-width:640px){.val-mtiles{grid-template-columns:1fr}.val-hrow{grid-template-columns:1fr;gap:6px}}
+@media(max-width:640px){.val-hrow{grid-template-columns:1fr;gap:6px}}
 @media(max-width:640px){.sbawrap .kpis{grid-template-columns:repeat(2,1fr)}.sbawrap .take-row{flex-wrap:wrap}.sbawrap .take-chip{margin-left:17px}}
 @media(max-width:640px){.cmp-stats{grid-template-columns:1fr}.cmp-cbot{margin-left:0}.cmp-detail{margin-left:0}}.market-tier{display:grid;grid-template-columns:78px 1fr 105px;gap:10px;align-items:center;padding:8px 0}.market-tier-name{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#565651}.market-tier-swatch{width:8px;height:8px;border-radius:2px}.market-tier-track{height:8px;background:#efeee9;border-radius:5px;position:relative}.market-tier-bar{height:100%;border-radius:5px;position:absolute}.market-tier-range{text-align:right;font-family:var(--font-jbmono);font-size:10px;color:#565651}.market-tier-axis{display:flex;justify-content:space-between;margin-left:88px;font-family:var(--font-jbmono);font-size:10px;color:#8b8a84}.market-table{width:100%;border-collapse:collapse;font-size:12.5px}.market-table th{text-align:right;padding:0 0 9px;border-bottom:1px solid var(--sb-line)}.market-table th:first-child,.market-table td:first-child{text-align:left}.market-table td{padding:10px 0;border-bottom:1px solid var(--sb-line);text-align:right;color:#141414;font-variant-numeric:tabular-nums}.market-table td:first-child{color:#565651;font-weight:600}.market-table tr:last-child td{border-bottom:0}.market-scope{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--sb-paper);border:1px solid var(--sb-line);border-radius:10px}.market-scope strong{font-family:var(--font-jbmono);font-size:11px;color:#141414}.market-scope span{font-size:12px;color:#565651}.market-up{color:#2f7d3f!important;font-weight:700}.market-down{color:#d13b26!important;font-weight:700}.airbnb-occ{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}.airbnb-occ-track{width:42px;height:5px;background:#efeee9;border-radius:4px;overflow:hidden}.airbnb-occ-fill{height:100%;background:#3f51c5;border-radius:4px}.market-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.far-rule{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#565651}.far-rule-in{color:#2f7d3f}.far-rule-out{color:#8b8a84}@media(max-width:700px){.market-fmr-tiles{grid-template-columns:repeat(3,1fr)}.market-tier{grid-template-columns:70px 1fr 88px}.market-facts{grid-template-columns:repeat(2,1fr)}}@media(max-width:450px){.market-fmr-tiles{grid-template-columns:repeat(2,1fr)}}
 .market-fmr-tile>.market-fmr-label{font-family:var(--font-jbmono);font-size:10px;line-height:1.2;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#565651}
@@ -1163,7 +1152,7 @@ body[data-print-expanding] .recharts-responsive-container > .recharts-wrapper > 
 .dsc-seg button{padding:5px 12px;font-size:12px;font-weight:600;color:#565651;background:transparent;border:0;cursor:pointer}
 .dsc-seg button.active{background:#2b3a9e;color:#fff}
 @media(max-width:640px){.lodes-rb{grid-template-columns:120px 1fr 30px;gap:8px}}
-.calc-inputs{background:var(--sb-paper);border:1px solid var(--sb-line);border-radius:12px;padding:16px 18px}.calc-label{font-family:var(--font-jbmono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#565651}.calc-inputs input:focus,.calc-inputs select:focus{border-color:#2b3a9e;box-shadow:0 0 0 3px rgba(43,58,158,.12)}.calc-results-label{font-family:var(--font-jbmono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#565651}.calc-primary,.subsection-text p.calc-primary{font-family:var(--font-serif);font-size:34px;line-height:.9;color:#141414}.calc-secondary{border:1px solid var(--sb-line);border-radius:10px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center}.calc-secondary-label,.subsection-text p.calc-secondary-label{font-family:var(--font-jbmono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#565651}.calc-secondary-value,.subsection-text p.calc-secondary-value{font-family:var(--font-serif);font-size:24px;color:#141414}.calc-positive,.subsection-text p.calc-positive{color:#2f7d3f}.calc-negative,.subsection-text p.calc-negative{color:#d13b26}.calc-caution,.subsection-text p.calc-caution{color:#d98c00}.calc-tag{display:inline-block;margin-top:8px;font-size:10.5px;font-weight:700;border-radius:5px;padding:3px 8px;background:#f1efe9;color:#565651}.calc-tag-positive{background:#edf6ef;color:#2f7d3f}.calc-tag-negative{background:#fbecea;color:#d13b26}.calc-tag-caution{background:#fdf5e2;color:#d98c00}
+.calc-label{font-family:var(--font-jbmono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#565651}.calc-results-label{font-family:var(--font-jbmono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#565651}.calc-primary,.subsection-text p.calc-primary{font-family:var(--font-serif);font-size:34px;line-height:.9;color:#141414}.calc-secondary{border:1px solid var(--sb-line);border-radius:10px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center}.calc-secondary-label,.subsection-text p.calc-secondary-label{font-family:var(--font-jbmono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#565651}.calc-secondary-value,.subsection-text p.calc-secondary-value{font-family:var(--font-serif);font-size:24px;color:#141414}.calc-positive,.subsection-text p.calc-positive{color:#2f7d3f}.calc-negative,.subsection-text p.calc-negative{color:#d13b26}.calc-caution,.subsection-text p.calc-caution{color:#d98c00}.calc-tag{display:inline-block;margin-top:8px;font-size:10.5px;font-weight:700;border-radius:5px;padding:3px 8px;background:#f1efe9;color:#565651}.calc-tag-positive{background:#edf6ef;color:#2f7d3f}.calc-tag-negative{background:#fbecea;color:#d13b26}.calc-tag-caution{background:#fdf5e2;color:#d98c00}
 
 /* ===== Ward & Alderperson + Zoning Details cards (.wz-*) ===== */
 .wz-ward{font-family:var(--font-jbmono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ref-blue);background:var(--indigo-soft);border-radius:6px;padding:4px 10px;display:inline-block;margin-bottom:10px}
@@ -1239,18 +1228,12 @@ body[data-print-expanding] .recharts-responsive-container > .recharts-wrapper > 
 .lmap-lgi b{color:var(--sb-ink);font-weight:600}
 
 /* ===== Schools section (.sch-*) ===== */
-.sch-badge{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;border-radius:999px;padding:4px 12px 4px 10px;background:#fff;border:1px solid;white-space:nowrap}
-.sch-badge .bd{width:7px;height:7px;border-radius:50%;flex:none}
-.sch-badge.good{color:var(--ref-green);border-color:#bcdcc4}.sch-badge.good .bd{background:var(--ref-green)}
-.sch-badge.caution{color:#96600a;border-color:#ecd49a}.sch-badge.caution .bd{background:#f0a41c}
-.sch-badge.bad{color:#b3311f;border-color:#eab5ac}.sch-badge.bad .bd{background:var(--ref-red,#d13b26)}
 .sch-ov{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
 .sch-lvl{border:1px solid var(--sb-line);border-radius:13px;padding:16px 18px;background:#fff;box-shadow:0 1px 3px rgba(20,20,20,.04)}
 .sch-lvltop{display:flex;align-items:center;gap:9px;margin-bottom:14px}
 .sch-lvltop .ic{width:26px;height:26px;border-radius:7px;background:#eef0fb;display:flex;align-items:center;justify-content:center;flex:none}
 .sch-lvltop .ic svg{width:15px;height:15px;stroke:#2b3a9e;fill:none}
 .sch-lvltop .nm{font-family:var(--font-jbmono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--sb-ink)}
-.sch-lvltop .sch-badge{margin-left:auto}
 .sch-metric{display:flex;align-items:baseline;gap:7px;margin-bottom:3px}
 .sch-metric .big{font-family:var(--font-serif);font-size:30px;line-height:1;color:var(--sb-ink)}
 .sch-metric .u{font-size:12px;color:var(--sb-ink-2)}
