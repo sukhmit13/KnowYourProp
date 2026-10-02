@@ -35,6 +35,6 @@ Do not substitute a sum of a partial ZIP inventory for the official Cook County 
 
 Gas Station Project Use Analysis must include historical EV registration trends, not just nearby charging stations.
 
-**Why:** The user expects EV history when researching a gas station and reported its absence.
+**Why:** The user confirmed that gas-station research should pair nearby charging infrastructure with EV adoption history, rather than show charging locations alone.
 
 **How to apply:** Preserve that project-use scope when revising the panel layout. Registration counts describe vehicles, not the number of households that own EVs.
