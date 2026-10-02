@@ -1,0 +1,174 @@
+# Step 29c — §Project Use Analysis: the domain panels
+
+**Run 29a first.** Five panels across five uses, each becoming subsection `.1` of its use with 29a's competitor subsections following.
+
+Target renders: `gro-target.html` (Grocery — banded domain panel), `auto-target.html` (Auto Repair — ownership + the EV charts), `sen-target.html` (Assisted Living — population + age breakdown), each with its `-sbs.html`.
+
+---
+
+Audited against `5855bc9`. Section is `accProps("analysis")`, `RunDetail.tsx` **6163–8646**.
+
+Supporting files:
+
+| File | What it is |
+|---|---|
+| `kyp-base-patch-29-pua.css` | the only CSS to add — append verbatim to `client/src/styles/kyp-base.css` |
+| `bar-target.html` | target render, Bar / Tavern — the spine every simple use follows |
+| `gro-target.html` | target render, Grocery Store — spine plus a banded domain panel |
+| `auto-target.html` | target render, Auto Repair / Auto Body — vehicle ownership + the EV trend charts |
+| `sen-target.html` | target render, Assisted Living — senior population + age breakdown |
+| `pua-target.html` | target render, Day Care Center |
+| `bar-sbs.html` · `gro-sbs.html` · `pua-sbs.html` | current vs new, side by side |
+| `pua-bands.html` | every state the banded scale can be in |
+| `PUA_DAYCARE_FIELD_ACCOUNTING.md` | every live daycare field and where it lands |
+
+---
+
+---
+
+## Rules that apply to all three prompts
+
+1. **No takeaways.** Delete every sentence that tells the reader what the data means. Numbers,
+   classifications from an outside authority, and sources stay. Judgements go.
+2. **Scope and source notes go at the END of each subsection, once**, in a `.kyp-src`. Never above
+   the data, never between panels.
+3. **Chart forms do not change.** A line chart stays a line chart.
+4. **Verdict colour needs an outside authority.** Green = good, orange = watch, red = bad,
+   slate = context, indigo = no claim. If the cut points are ours, the footer says so.
+   A rank is context and takes slate, never a verdict colour.
+5. **Do not invent CSS.** Everything needed is in `kyp-base.css` plus the patch file.
+6. **Do not label a chart with what the chart already draws.**
+
+---
+
+Five panels across five uses. Each becomes subsection `.1` of its use, with the spine's competitor
+subsections following it. Target for the shape: `gro-target.html`.
+
+## Grocery Store — `:7167`
+
+Becomes **17.1 Food Access**, then the spine's 17.2 licence list and 17.3 Google Maps.
+
+- `.kyp-blocks two`: store count (toned by band) and combined selling floor
+- `.kyp-bands b3`: `0 stores` food desert (no) · `1–2 stores` limited (watch) · `3+ stores` good (ok)
+- The three verdict strings at `:7238–7242` are **deleted as prose** and become the band names
+
+> **The 0 / 1–2 / 3+ cut points are this product's own**, computed from `storeCount` at
+> `:7217–7219`. They are not a USDA or City of Chicago food-access designation. The footer says so,
+> the same way 17.2 of the daycare target does. Do not imply an outside authority that does not
+> exist.
+
+The ZIP and Neighborhood bodies at `:7208–7304` and `:7306–7402` are duplicated code. Collapse
+them to one body reading `areaViewMode`.
+
+## Auto Repair / Auto Body — `:7411`
+
+Becomes **17.1 Vehicle Ownership**.
+
+- `.kyp-blocks`: `avgVehiclesPerHousehold`, `pctNoVehicle`, 2+ vehicles
+- `.kyp-bands b3` on `autoDependencyLevel` — low · moderate · high
+- **Polarity note:** high auto dependency is *good* for an auto-service use and *bad* for a
+  transit-oriented one. Because the polarity depends on the use, this scale takes **slate**, not
+  green/orange/red, and the bands show position only.
+- Delete `"Strong demand for fuel sales"`, `"Moderate fuel demand"`,
+  `"Limited market - high transit usage"` (`:7518–7522`) and
+  `"Smaller vehicle market - consider location carefully"` (`:7535`). No replacement — they are the
+  product deciding for the reader.
+- The `100 - …` derivation for "1 vehicle" (`:7497`) stays but shows its working in the footer.
+
+Then **17.2 EV Registration Trends** (`:7834`). See `auto-target.html`.
+
+Still a monthly line chart — the form does not change. Restyle axes and grid to `--kyp-*`; the
+county series takes `var(--kyp-indigoL)`, the ZIP series `var(--kyp-orange)` in place of `#f4610a`.
+
+**Split the one chart into two, side by side, each with its own axis.** Today both series share a
+single `<YAxis>` (`:7902`), and the county runs in tens of thousands while the ZIP runs in
+hundreds — so the ZIP line is pinned flat against the baseline and tells you nothing. Putting them
+on two y-axes in one frame would be worse: it makes two incomparable levels look comparable. Two
+charts, same form, is the only option that loses nothing. Keep the two latest-value blocks above
+them, which is where the levels actually belong.
+
+The `"past 2 years"` caption (`:7869`) is a hardcoded claim about a window the data defines.
+Derive it from the first and last row, or drop it.
+
+Then the spine's Google Maps subsection.
+
+## Gas Station — `:7754` + `:7989`
+
+**17.1 Licensed Filling Stations** — the spine list, unchanged in content.
+
+**17.2 EV Charging** — the one place the shared row shape does not fit. The seven-column table
+(station, distance, network, Level 2, DC Fast, access, confirmed) carries real infrastructure
+attributes, so it stays a `.kyp-dtab` table rather than collapsing into `.kyp-biz-card`. Fold
+network / Level 2 / DC Fast into the row meta only if you can do it without losing a column.
+
+- Keep the client-side dedup (`:8018–8027`); make the badge count the deduped set
+- Delete `"best for longer stops"` / `"best for quick stops"` (`:8104–8105`) — advisory. The port
+  type and count stay; what they are *best for* depends on the operator's plan.
+
+Then the spine's Google Maps subsection.
+
+## Senior Care — `:7561`
+
+Becomes **17.1 Senior Population**.
+
+- `.kyp-blocks four`: `population65Plus` (+ `pct65Plus`), `seniorsLivingAlone`
+  (+ `pctSeniorsLivingAlone`), `age85Plus`, `totalPopulation`
+- Age breakdown 65–74 / 75–84 / 85+ as `.kyp-hbar` rows
+- `rankDescription` becomes a slate `.chip.rank`, not a sentence
+- `.kyp-bands b3` on `seniorDemandLevel` — **in slate, not in verdict colours**
+
+> **Why slate.** 17.1 of the daycare target earns green/orange/red because it has both sides of the
+> question: children *per licensed slot*. This panel counts demand with no supply beside it. A high
+> senior share with twelve operators already inside a mile is not the same opportunity as the same
+> share with none, and nothing in this panel can tell them apart. Colouring it would be the product
+> making a call it has not earned. Same reasoning as auto dependency, different reason —
+> there the polarity depends on the use; here the data is only half the question.
+> The band names change from "Strong / Moderate / Limited demand" to "High / Moderate / Low share"
+> for the same reason: the panel measures a share, not a demand.
+
+**Delete the Market Assessment block (`:7719–7735`) entirely.**
+
+`Estimated Addressable Market = seniorsLivingAlone + age85Plus * 0.5` (`:7733`). The `0.5` is not
+sourced, not explained on screen, and not attributable to anyone outside this product — and the
+result is rendered as a count of real people. `"Primary Target"` and `"Secondary Target"` are the
+same two numbers already shown in the blocks above, relabelled as advice.
+
+Keep the counts. Delete the arithmetic and the labels.
+
+Also delete `"(Highest care needs)"` (`:7690`) — it is a judgement attached to a count.
+
+## Hotel — `:8132`
+
+The spine list, plus one extra: the short-term-rental counts (`:8178–8191`) have **no rows**, only
+1/2/3-mile totals. Keep them as a second `.kyp-blocks` count row under its own `KypSubhead`
+(unnumbered `.subwrap`, since it is a grouping inside the subsection, not a subsection).
+
+The existing caveat — hotel permits exclude Airbnb, vacation rentals and shared housing — moves to
+the closing `.kyp-src`. It is the reason the second row exists and must not be lost.
+
+## Restaurants · Coffee · Bars · Cannabis — `:8239`, `:8319`, `:8399`, `:8566`
+
+Pure spine. No domain panel. Each is one licence subsection plus the Google Maps subsection.
+`bar-target.html` is the reference render for all four.
+
+Restaurants and Coffee are structural clones of each other (`:8259–8311` and `:8339–8391` are the
+same code with different labels and sources). After 29a they should be literally the same
+component with different props. If they are not, the conversion is not finished.
+
+---
+
+---
+
+## Still outstanding — unrelated to this step
+
+Three live API keys in `.replit` lines 65–71, present in four commits:
+
+```
+RENTCAST_API_KEY      = "83b88a99ee…"
+GOOGLE_PLACES_API_KEY = "AIzaSyA4di…"
+APIFY_API_TOKEN       = "apify_api_kgNfTbi7…"
+```
+
+`.gitignore` has a missing newline — `*.tar.gzserver/cache/` — so **neither pattern matches**.
+Rotate all three, move them to Replit Secrets, `git rm --cached .replit`, fix the `.gitignore`
+newline. Rotating matters more than removing the file: the keys are already in the history.

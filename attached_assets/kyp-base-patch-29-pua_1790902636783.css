@@ -1,0 +1,114 @@
+/* ============================================================
+   PATCH 29 — §Project Use Analysis (Day Care Center)
+   Append to client/src/styles/kyp-base.css. Two families.
+
+   (A) .kyp-bands — a banded scale. Draws a classification that an
+       OUTSIDE authority already made: the bands and their cut points
+       are published, we only light the one the value falls in. This
+       is the only place the verdict palette is allowed on a scale.
+       Replaces the one-off .sch-dc / .sch-track / .sch-seg family,
+       which is on the older --sb-* / --ref-* tokens.
+
+   (B) .kyp-form / .kyp-field / .kyp-input / .kyp-btn — the form
+       primitives the design system did not have. §Project Use
+       Analysis needs them for manual building entry; §Valuation
+       needs the same four for its 28 inputs. Built once, here.
+   ============================================================ */
+
+/* ── (A0) the caution colour ───────────────────────────────
+   One value, --kyp-orange #e07a2e, already consumed by 32 rules.
+   Nothing about it changes.
+
+   .kyp-block.orange stops using --kyp-orange-deep (#d74100), which
+   had exactly one consumer, and joins the rest of the block family
+   on --kyp-orange with white text. --kyp-orange-deep is then
+   unreferenced and gets deleted.
+
+   CONTRAST NOTE, unresolved: white on #e07a2e is 3.00:1. That clears
+   AA-large (3.0) for the 36px .bv but not AA (4.5) for the 9px .bl
+   and 10.5px .bd. Every other block fill passes with white —
+   .ind 6.38, .grn 5.09, .slate 11.42, .bad 5.44 — so orange is the
+   one exception. See the audit for three ways to close it.
+
+   --kyp-orangeInk #a85c23 is for TEXT ON PAPER, a separate problem:
+   #e07a2e used as a text colour is 2.85:1, below AA and AA-large,
+   and it is used that way in 11 rules today plus 9 hardcoded
+   #c0651e (3.89:1). #a85c23 is the same hue at 4.73:1.             */
+:root{ --kyp-orangeInk:#a85c23 }
+.kyp-block.orange{background:var(--kyp-orange);color:#fff}
+
+/* ── (A) banded scale ───────────────────────────────────────── */
+.kyp-bands{display:grid;gap:8px;margin:13px 0 0}
+.kyp-bands.b4{grid-template-columns:repeat(4,1fr)}
+.kyp-bands.b3{grid-template-columns:repeat(3,1fr)}
+.kyp-band .bar{height:9px;border-radius:999px;background:#dcd8cd}
+.kyp-band .bl{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--kyp-muted);margin-top:8px;text-align:center;line-height:1.35}
+.kyp-band .br{font-family:var(--kyp-mono);font-size:9px;color:#b3b2ac;margin-top:3px;text-align:center}
+.kyp-band.on.ok .bar{background:var(--kyp-green)}
+.kyp-band.on.ok .bl{color:var(--kyp-green)}
+.kyp-band.on.watch .bar{background:var(--kyp-orange)}
+.kyp-band.on.watch .bl{color:var(--kyp-orangeInk)}
+.kyp-band.on.no .bar{background:var(--kyp-bad)}
+.kyp-band.on.no .bl{color:var(--kyp-bad)}
+.kyp-bandfoot{font-size:11.5px;color:var(--kyp-ink2);margin-top:12px;line-height:1.55}
+.kyp-bandfoot b{color:var(--kyp-ink);font-weight:600}
+
+/* ── (B) form primitives ────────────────────────────────────── */
+.kyp-form{background:var(--kyp-wash);border:1px solid var(--kyp-line);border-radius:12px;
+  padding:15px 17px;margin:14px 0 0}
+.kyp-form .fh{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--kyp-ink2);margin:0 0 12px}
+.kyp-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.kyp-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.kyp-input{font-family:var(--kyp-sans);font-size:13.5px;color:var(--kyp-ink);background:var(--kyp-card);
+  border:1px solid var(--kyp-line);border-radius:8px;padding:9px 11px;width:100%;box-sizing:border-box}
+.kyp-input::placeholder{color:var(--kyp-muted)}
+.kyp-input:focus-visible{outline:2px solid var(--kyp-indigoL);outline-offset:-1px;
+  border-color:var(--kyp-indigoL)}
+.kyp-btnrow{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap;align-items:center}
+.kyp-btn{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;border-radius:8px;padding:9px 14px;border:1px solid var(--kyp-ink);
+  background:var(--kyp-ink);color:#fff;cursor:pointer}
+.kyp-btn.ghost{background:var(--kyp-card);color:var(--kyp-ink2);border-color:var(--kyp-line)}
+.kyp-btn[disabled]{opacity:.45;cursor:default}
+
+/* ── (C) rank chip ──────────────────────────────────────────
+   A rank is CONTEXT, never a verdict: it says where the value sits in
+   the city, not whether that is good. It therefore never takes a
+   verdict colour — it rides inside whatever block it belongs to,
+   using the existing .kyp-block .chip. Only the sizing is new.      */
+.kyp-block .chip.rank{font-size:9px;letter-spacing:.05em;text-transform:uppercase;
+  margin-top:11px;align-self:flex-start}
+
+/* ── (D) competitor row link ────────────────────────────────
+   Every competitor and nearby-business row links to that business on
+   Google. The NAME carries the link; the address stays plain text, so
+   there is exactly ONE anchor per row. A nested anchor is auto-closed
+   by the browser and everything after it loses its styling.
+
+   .kyp-biz-card b is display:block, so .nm b is re-inlined to let the
+   ↗ marker sit on the same line as the name.                        */
+.kyp-biz-card .nm{display:block;color:var(--kyp-ink);text-decoration:none}
+.kyp-biz-card .nm b{display:inline}
+.kyp-biz-card .nm:hover b{color:var(--kyp-indigo);text-decoration:underline}
+.kyp-biz-card .nm .ext{font-family:var(--kyp-mono);font-size:9px;font-weight:700;
+  color:var(--kyp-muted);margin-left:6px;vertical-align:1px}
+.kyp-biz-card .nm:hover .ext{color:var(--kyp-indigo)}
+.kyp-biz-card .addr{display:block;font-size:11.5px;color:var(--kyp-muted);margin-top:2px}
+
+/* ── (E) two charts side by side ────────────────────────────
+   For two series that differ by orders of magnitude. A shared axis
+   pins the small one to the baseline; a second axis makes two
+   incomparable levels look comparable. Two frames, same chart form,
+   each with its own axis, loses nothing. Used by §17.2 of the auto
+   target (Cook County vs this ZIP).                                */
+.kyp-twochart{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:4px}
+@media (max-width:640px){.kyp-twochart{grid-template-columns:1fr}}
+
+/* ── mobile ─────────────────────────────────────────────────── */
+@media (max-width:640px){
+  .kyp-bands.b4{grid-template-columns:repeat(2,1fr)}
+  .kyp-bands.b3{grid-template-columns:1fr}
+  .kyp-fields{grid-template-columns:1fr}
+}

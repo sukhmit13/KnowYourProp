@@ -1,3 +1,5 @@
+import { manualPropertyPatchSchema } from "./manualPropertyPatch";
+import { childcareCitywideCcapStats } from "./childcareCcapStats";
 
 import type { Express, Request, Response, NextFunction } from "express";
 import type { Run } from "@shared/schema";
@@ -36,6 +38,7 @@ import { findNearbyEvStations, findNearbyGasStations, findNearbyHotels, findNear
 import { getDemographicTrends, warmDemographicsCache, getCachedDemographics } from "./demographics";
 import { fetchPermitHistory, fetchViolationHistory, fetchCrimeStats, fetchCrimeTractRanking, categorizePermitType } from "./permits";
 import { getContractorSearchMatch } from "./utils/contractorSearch";
+import { alignChildcareChildrenUnder5, getChildcareEnhancedRanks } from "./childcareEnhancedRanks";
 import { getNewConstructionStats, getNearbyNewConstruction } from "./newConstruction";
 import { getSBALoans, getCookCountyCommercialLenders } from "./sbaLoans";
 import { readCachedCrexi } from "./crexi";
@@ -1500,17 +1503,11 @@ export async function registerRoutes(
 
   // Update manual property data (user-entered square footage, stories, etc.)
   app.patch('/api/runs/:id/manual-property', async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(404).json({ message: "Invalid ID" });
-    
-    const { manualBuildingSqFt, manualLandSqFt, manualStories, sourceListingUrl, askingPrice } = req.body;
-    const run = await storage.updateRunManualProperty(id, {
-      manualBuildingSqFt: manualBuildingSqFt != null ? parseInt(manualBuildingSqFt) : null,
-      manualLandSqFt: manualLandSqFt != null ? parseInt(manualLandSqFt) : null,
-      manualStories: manualStories != null ? parseFloat(manualStories) : null,
-      sourceListingUrl: sourceListingUrl || null,
-      askingPrice: askingPrice != null ? parseInt(askingPrice) : null,
-    });
+    const owned = await loadOwnedRun(req, res);
+    if (!owned) return;
+    const parsed = manualPropertyPatchSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: "Invalid property measurements", errors: parsed.error.flatten() });
+    const run = await storage.updateRunManualProperty(owned.id, parsed.data);
     if (!run) return res.status(404).json({ message: "Run not found" });
     
     res.json(run);
@@ -4455,18 +4452,7 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
   
   // Calculate citywide CCAP stats from CCA data
   function getCitywideCcapStats() {
-    const data = loadCapacityCcaData();
-    let totalCcapChildren = 0;
-    let totalCapacity = 0;
-    for (const area of data) {
-      totalCcapChildren += area.ccap_children_total || 0;
-      totalCapacity += area.total_capacity || 0;
-    }
-    return {
-      citywide_ccap_children: totalCcapChildren,
-      citywide_capacity: totalCapacity,
-      citywide_pct_ccap: totalCapacity > 0 ? Math.round((totalCcapChildren / totalCapacity) * 100) : 0
-    };
+    return childcareCitywideCcapStats(loadCapacityCcaData());
   }
 
   app.get('/api/childcare-capacity/:communityArea', async (req, res) => {
@@ -4613,7 +4599,13 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       return res.status(404).json({ message: "No enhanced childcare data available for this community area" });
     }
     
-    res.json(areaData);
+    const accessRecords = await Promise.all(data.map(async (record: any) => {
+      const access = await getCommunityAreaChildcareAccess(record.communityArea);
+      return { communityArea: record.communityArea, childrenUnder5: access?.childrenUnder5 ?? null };
+    }));
+    const rankingData = alignChildcareChildrenUnder5(data, accessRecords, "communityArea");
+    const comparison = getChildcareEnhancedRanks(rankingData, areaData, "communityArea");
+    res.json({ ...areaData, ...comparison });
   });
 
   // ZIP-level enhanced childcare data
@@ -4646,7 +4638,8 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
       return res.status(404).json({ message: "No enhanced childcare data available for this ZIP code" });
     }
     
-    res.json(zipData);
+    const comparison = getChildcareEnhancedRanks(data, zipData, "zipCode");
+    res.json({ ...zipData, ...comparison });
   });
 
   // === ELECTION DATA ===

@@ -1,0 +1,160 @@
+# Step 29b — §Project Use Analysis: Day Care Center
+
+**Run 29a first.** This step consumes the competitor row, the scope control and the count row that 29a defines.
+
+Target renders: `pua-target.html`, `pua-sbs.html`, `pua-bands.html` (every state the banded scale can take). Field-by-field map: `PUA_DAYCARE_FIELD_ACCOUNTING.md` — read it first; nothing in it may be dropped silently.
+
+---
+
+Audited against `5855bc9`. Section is `accProps("analysis")`, `RunDetail.tsx` **6163–8646**.
+
+Supporting files:
+
+| File | What it is |
+|---|---|
+| `kyp-base-patch-29-pua.css` | the only CSS to add — append verbatim to `client/src/styles/kyp-base.css` |
+| `bar-target.html` | target render, Bar / Tavern — the spine every simple use follows |
+| `gro-target.html` | target render, Grocery Store — spine plus a banded domain panel |
+| `auto-target.html` | target render, Auto Repair / Auto Body — vehicle ownership + the EV trend charts |
+| `sen-target.html` | target render, Assisted Living — senior population + age breakdown |
+| `pua-target.html` | target render, Day Care Center |
+| `bar-sbs.html` · `gro-sbs.html` · `pua-sbs.html` | current vs new, side by side |
+| `pua-bands.html` | every state the banded scale can be in |
+| `PUA_DAYCARE_FIELD_ACCOUNTING.md` | every live daycare field and where it lands |
+
+---
+
+---
+
+## Rules that apply to all three prompts
+
+1. **No takeaways.** Delete every sentence that tells the reader what the data means. Numbers,
+   classifications from an outside authority, and sources stay. Judgements go.
+2. **Scope and source notes go at the END of each subsection, once**, in a `.kyp-src`. Never above
+   the data, never between panels.
+3. **Chart forms do not change.** A line chart stays a line chart.
+4. **Verdict colour needs an outside authority.** Green = good, orange = watch, red = bad,
+   slate = context, indigo = no claim. If the cut points are ours, the footer says so.
+   A rank is context and takes slate, never a verdict colour.
+5. **Do not invent CSS.** Everything needed is in `kyp-base.css` plus the patch file.
+6. **Do not label a chart with what the chart already draws.**
+
+---
+
+Target: `pua-target.html`. Side-by-side: `pua-sbs.html`. Field-by-field map:
+`PUA_DAYCARE_FIELD_ACCOUNTING.md` — read it before starting; it lists every live field and where
+it lands, and nothing in it may be dropped silently.
+
+Seven subsections, replacing nine panels:
+
+| # | Title | Replaces |
+|---|---|---|
+| 17.1 | Childcare Supply | Childcare Access (`:6226`) |
+| 17.2 | Demographics & Labor Force | Demographics (`:6267`) + Parents in Labor Force (`:6350`) |
+| 17.3 | Slot Gap Estimator ◄ liftable | Needs Estimator (`:6450`) |
+| 17.4 | CCAP Participation ◄ liftable | CCAP (`:6865`) |
+| 17.5 | Site Capacity | Site Details (`:6614`) |
+| 17.6 | Licensed Competitors | Nearby Day Cares (`:6988`) |
+| 17.7 | Google Maps Competitors | Google Places daycare (`:7073`) |
+
+17.3 and 17.4 are adjacent on purpose: they are the two panels that may move to another section
+later, and they move as one block.
+
+### 17.1 — the banded supply scale
+
+The live `ChildcareDemandMeter` component (`client/src/components/ChildcareDemandMeter.tsx`) keeps
+its classification logic exactly as written — `>3.0` desert, `1.5–3.0` underserved, `1.0–1.5`
+adequate, `<1.0` plentiful — and loses its `.sch-*` markup. Rebuild its body as:
+
+- a `.kyp-block` whose tone follows the band: `red` desert · `orange` underserved · `grn`
+  adequate and plentiful. `.bv` is the ratio, `.bd` is the band name.
+- a `.kyp-bands b4` beneath, in the component's own `TRACK` order, with the active band `on`
+- a `.kyp-bandfoot` carrying the slot gap to the adequate threshold — and **only** that; the three
+  blocks already carry the children and slot counts
+
+Keep the `noSlotsDesert` case (children counted, zero licensed slots): it reports as a desert with
+no ratio, never as a ratio of zero.
+
+Retire `ChildcareDemandMeter.tsx` and the 23 `.sch-*` rules (`index.css:1255–1277`) once nothing
+references them.
+
+### 17.2 — the labor-force band
+
+`laborForceDelta` gets the same treatment: a `.kyp-block` toned by band and a `.kyp-bands b3`
+beneath — `≤5 pts` minimal (ok) · `6–12 pts` moderate (watch) · `>12 pts` large (no). These are
+the thresholds already encoded in the live icon swap at `:7445–7475`.
+
+**The footer must say the cut points are ours.** Unlike 17.1, nobody outside this product
+published them. The exact sentence is in `pua-target.html`.
+
+**Delete `deltaInterpretation`** (`:6423`). It is a takeaway. The bands say which state it is.
+
+### 17.3 — the estimator
+
+Three `.kyp-facts`-free inputs as a `.kyp-block.slate.count` row (children under 5, total slots,
+children per slot), then one `.kyp-block` per ratio carrying **both** the centers needed and the
+slot gap. A ratio with no gap renders a green `Met` block stating the slots and the target.
+
+**Read the counts from the same source as 17.1.** Today `:6239` and `:6493` compute the same ratio
+independently and `:6465` / `:6497` the same gap.
+
+### 17.4 — CCAP
+
+**Delete the hard-coded `55` fallback** (`:6924`). Where no citywide figure is published, omit the
+comparison block rather than compare against a number nobody published.
+
+### 17.5 — site capacity
+
+The three `<Input>`s and the Save / Cancel / Edit buttons become `.kyp-form` / `.kyp-field` /
+`.kyp-input` / `.kyp-btn` from the patch. The form is **always present**, not only in the
+no-record state, so the separate "Edit Building Details" button goes. The three DCFS caveats
+(`:6753`, `:6786`, `:6842`) merge into the one closing `.kyp-src`.
+
+> These four primitives are the ones §Valuation needs for its 28 inputs. They are built here once.
+
+### 17.6 and 17.7 stay separate
+
+They look like one list and are not. 17.6 is the DCFS licence field; 17.7 is what a parent finds
+searching, which picks up home-based and unlicensed operators the licence list misses and drops
+licensed centers with no Maps listing. Merging them makes one list that is wrong about both. Each
+footer says what it covers.
+
+### Ranks
+
+Four, all slate `.chip.rank`, all computed in-memory from data the endpoint already loads:
+
+| Subsection | Field | Chip |
+|---|---|---|
+| 17.1 | `childrenUnder5` | `{n}th-most of {N}` |
+| 17.2 | `pct0to2` | `{n}th-highest share of {N}` |
+| 17.2 | `laborForceDelta` | `{n}th-widest of {N}` |
+| 17.2 | `parentsInLaborForcePct0to5` | `{n}th-highest rate of {N}` |
+
+`/api/childcare-enhanced-zip/:zip` (`routes.ts:4577`) already loads all **55** Chicago ZIPs into
+`childcareEnhancedZipData` and returns one; `/api/childcare-enhanced/:area` (`:4542`) loads all
+**77** community areas. Sort the loaded array and return `rank` and `total` alongside the record.
+No new data source, no new request.
+
+**`N` differs between the two views (55 vs 77), so the footer states the comparison set.** Do not
+write "the city" and leave the reader to guess.
+
+`childcare_enhanced*.json` also carries `daycareOpportunityScore` and `marketInsight`. Neither is
+rendered today. **Do not start rendering them** — they are takeaway engines in a data file.
+
+---
+
+---
+
+## Still outstanding — unrelated to this step
+
+Three live API keys in `.replit` lines 65–71, present in four commits:
+
+```
+RENTCAST_API_KEY      = "83b88a99ee…"
+GOOGLE_PLACES_API_KEY = "AIzaSyA4di…"
+APIFY_API_TOKEN       = "apify_api_kgNfTbi7…"
+```
+
+`.gitignore` has a missing newline — `*.tar.gzserver/cache/` — so **neither pattern matches**.
+Rotate all three, move them to Replit Secrets, `git rm --cached .replit`, fix the `.gitignore`
+newline. Rotating matters more than removing the file: the keys are already in the history.

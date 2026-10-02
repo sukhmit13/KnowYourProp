@@ -1,3 +1,4 @@
+import { manualPropertyColumns } from "./manualPropertyPatch";
 
 import { db } from "./db";
 import {
@@ -80,7 +81,7 @@ export interface IStorage {
   updateRunLabel(id: number, label: string | null): Promise<Run | undefined>;
   findRecentListingSnapshotForAddress(userId: string, address: string, excludeRunId: number, maxAgeMs: number): Promise<any | null>;
   updateRunFunnelAnswers(id: number, data: FunnelAnswersData): Promise<Run | undefined>;
-  updateRunManualProperty(id: number, data: ManualPropertyData): Promise<Run | undefined>;
+  updateRunManualProperty(id: number, data: Partial<ManualPropertyData>): Promise<Run | undefined>;
   updateRunReportContext(id: number, data: ReportContextData): Promise<Run | undefined>;
   markRunAsPurchased(id: number): Promise<Run | undefined>;
   decrementTrialReport(userId: number): Promise<void>;
@@ -242,18 +243,14 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async updateRunManualProperty(id: number, data: ManualPropertyData): Promise<Run | undefined> {
+  async updateRunManualProperty(id: number, data: Partial<ManualPropertyData>): Promise<Run | undefined> {
     const [run] = await db.select().from(runs).where(eq(runs.id, id)).limit(1);
     if (!run) return undefined;
+    const columns = manualPropertyColumns(data);
+    if (Object.keys(columns).length === 0) return run;
     
     const [updated] = await db.update(runs)
-      .set({
-        manualBuildingSqFt: data.manualBuildingSqFt,
-        manualLandSqFt: data.manualLandSqFt,
-        manualStories: data.manualStories?.toString() || null,
-        sourceListingUrl: data.sourceListingUrl,
-        askingPrice: data.askingPrice,
-      })
+      .set(columns)
       .where(eq(runs.id, id))
       .returning();
     return updated;

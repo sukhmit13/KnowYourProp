@@ -241,9 +241,10 @@ export function useUpdateManualProperty() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: ManualPropertyData }) => {
+      const token = localStorage.getItem("kyp_auth_token");
       const res = await fetch(`/api/runs/${id}/manual-property`, { 
         method: 'PATCH', 
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify(data),
         credentials: "include" 
       });
@@ -2475,6 +2476,19 @@ export function useLanguageZipData(zipCode: string | null | undefined) {
   });
 }
 
+export interface ChildcareEnhancedRank {
+  rank: number;
+  total: number;
+  sourceValue?: number;
+}
+
+export interface ChildcareEnhancedRanks {
+  childrenUnder5: ChildcareEnhancedRank | null;
+  pct0to2: ChildcareEnhancedRank | null;
+  laborForceDelta: ChildcareEnhancedRank | null;
+  parentsInLaborForcePct0to5: ChildcareEnhancedRank | null;
+}
+
 export interface ChildcareEnhancedData {
   communityArea: string;
   communityNumber: number;
@@ -2491,6 +2505,8 @@ export interface ChildcareEnhancedData {
   deltaInterpretation: string;
   daycareOpportunityScore: 'excellent' | 'good' | 'moderate' | 'low';
   marketInsight: string;
+  ranks: ChildcareEnhancedRanks;
+  comparisonTotal: number;
 }
 
 export function useChildcareEnhancedData(communityArea: string | null | undefined) {
@@ -2523,6 +2539,8 @@ export interface ChildcareEnhancedZipData {
   deltaInterpretation: string;
   daycareOpportunityScore: 'excellent' | 'good' | 'moderate' | 'low';
   marketInsight: string;
+  ranks: ChildcareEnhancedRanks;
+  comparisonTotal: number;
 }
 
 export function useChildcareEnhancedZipData(zipCode: string | null | undefined) {
@@ -2842,8 +2860,8 @@ export interface ChildcareCapacityData {
   pct_ccap: number;
   pct_excelrate: number;
   pct_slots_ccap: number;
-  citywide_pct_ccap: number;
-  citywide_capacity: number;
+  citywide_pct_ccap: number | null;
+  citywide_capacity: number | null;
 }
 
 export function useChildcareCapacity(communityArea: string | null | undefined) {
@@ -2901,8 +2919,8 @@ export interface ChildcareCapacityZipData {
   pct_ccap: number;
   pct_excelrate: number;
   pct_slots_ccap: number;
-  citywide_pct_ccap: number;
-  citywide_capacity: number;
+  citywide_pct_ccap: number | null;
+  citywide_capacity: number | null;
 }
 
 export function useChildcareCapacityZip(zipCode: string | null | undefined) {

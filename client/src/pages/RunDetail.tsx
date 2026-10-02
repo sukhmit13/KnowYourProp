@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef, memo, useMemo, useContext, Fragment } from "react";
+import React, { useEffect, useState, useCallback, useRef, memo, useMemo, useContext, Fragment } from "react";
 import ReactDOM from "react-dom";
 import { useRoute, useLocation } from "wouter";
 import { buildScanSections } from "@/components/report/scanBuilder";
@@ -57,6 +57,8 @@ import { computeValuationMetrics, computeNoiModel, computeDscrLoanRatio, type Va
 import StatTile from "@/components/StatTile";
 import InsightReportSection from "@/components/InsightReportSection";
 import { CountyRecordSection } from "@/components/report/CountyRecordSection";
+import { DaycareAnalysis } from "@/components/report/DaycareAnalysis";
+import { ProjectUseAreaControl, ProjectUseBusinessList, ProjectUseCountBlocks, ProjectUseGoogleMaps } from "@/components/report/ProjectUseAnalysisSpine";
 import { trackEvent } from "@/lib/analytics";
 import { fallbackSummaryBadge, headerBadgeNumber, headerCountyRecordBadge, headerFarCeilingBadge, type HeaderBadgeState } from "@/lib/sectionHeaderBadges";
 
@@ -602,7 +604,6 @@ interface SectionStates {
   cityOwnedLots: boolean;
   proximityDetails: boolean;
   transitAccess: boolean;
-  projectTypeInfo: boolean;
   dob: boolean;
   recentLicenses: boolean;
   landmark: boolean;
@@ -629,24 +630,6 @@ interface SectionStates {
   ctaBus: boolean;
   ctaBusRidership: boolean;
   metraRidership: boolean;
-  childcareAccess: boolean;
-  childcareDemographics: boolean;
-  parentsLaborForce: boolean;
-  daycareEstimator: boolean;
-  siteDaycareDetails: boolean;
-  ccap: boolean;
-  nearbyDayCares: boolean;
-  groceryAccess: boolean;
-  autoDependency: boolean;
-  seniorPopulation: boolean;
-  nearbyFillingStations: boolean;
-  evRegistrations: boolean;
-  evCharging: boolean;
-  nearbyHotels: boolean;
-  nearbyRestaurants: boolean;
-  nearbyCoffee: boolean;
-  nearbyBars: boolean;
-  cannabisMarket: boolean;
   hmdaStats: boolean;
   transactionTrends: boolean;
   hmdaBuyer: boolean;
@@ -799,19 +782,13 @@ const DEFAULT_SECTION_STATES: SectionStates = {
   addressNews: false, neighborhoodNews: false, corridorNews: false,
   locationIncentives: false, propertyDetails: false, developmentPotential: false,
   farAnalysis: true, fmrSubsection: true, vacantBuildings: false, cityOwnedLots: false,
-  proximityDetails: false, transitAccess: false, projectTypeInfo: false,
+  proximityDetails: false, transitAccess: false,
   dob: false, recentLicenses: false, landmark: false,
   parcel: false, crime: false, proximity: false, entertainment: false,
   michelinSub: false, jbaSub: false, muralsSub: false, artGalleriesSub: false,
   landmarksDesignatedSub: false, tod: false, sbif: false, nmtc: false,
   mmrp: false, enterpriseZone: false, nof: false, investSw: false, hubzone: false, qct: false, chaOpportunity: false, class6b: false, class7: false, cdg: false, adu: false, ctaRail: false, ctaRidership: false, metra: false,
   ctaBus: false, ctaBusRidership: false, metraRidership: false,
-  childcareAccess: false, childcareDemographics: false, parentsLaborForce: false,
-  daycareEstimator: false, siteDaycareDetails: false, ccap: false,
-  nearbyDayCares: false, groceryAccess: false, autoDependency: false,
-  seniorPopulation: false, nearbyFillingStations: false, evRegistrations: false,
-  evCharging: false, nearbyHotels: false, nearbyRestaurants: false,
-  nearbyCoffee: false, nearbyBars: false, cannabisMarket: false,
   hmdaStats: false, transactionTrends: false, hmdaBuyer: false, sbaLoans: false, zoningHistory: false,
   recentlySoldComps: false, schools: false, airbnb: false, rentcast: true,
   loopnetSection: false,
@@ -1206,12 +1183,11 @@ export default function RunDetail() {
   };
   const [sectionSearchOpen, setSectionSearchOpen] = useState(false);
   const [sectionSearchQuery, setSectionSearchQuery] = useState('');
-  const [childcareViewMode, setChildcareViewMode] = useState<'zip' | 'community'>('zip');
+  const [areaViewMode, setAreaViewMode] = useState<'zip' | 'community'>('zip');
   const [demoViewMode, setDemoViewMode] = useState<'zip' | 'tract'>('zip');
   const [ecShowAll, setEcShowAll] = useState<Record<string, boolean>>({});
   const [newConstructionViewMode, setNewConstructionViewMode] = useState<'community' | 'zip' | 'nearby'>('community');
   const [nearbyPermitFilter, setNearbyPermitFilter] = useState<'singleFamily' | 'multifamily' | 'commercial' | null>(null);
-  const [seniorsViewMode, setSeniorsViewMode] = useState<'zip' | 'community'>('zip');
   const [languagesViewMode, setLanguagesViewMode] = useState<'zip' | 'community'>('zip');
   const [licenseFilter, setLicenseFilter] = useState<string | null>(null);
   const [showAllBiz, setShowAllBiz] = useState(false);
@@ -1511,8 +1487,6 @@ export default function RunDetail() {
   const setIsProximityDetailsOpen = useCallback((v: boolean) => setSectionOpen('proximityDetails', v), [setSectionOpen]);
   const isTransitAccessOpen = sectionStates.transitAccess;
   const setIsTransitAccessOpen = useCallback((v: boolean) => setSectionOpen('transitAccess', v), [setSectionOpen]);
-  const isProjectTypeInfoOpen = sectionStates.projectTypeInfo;
-  const setIsProjectTypeInfoOpen = useCallback((v: boolean) => setSectionOpen('projectTypeInfo', v), [setSectionOpen]);
   const isRecentLicensesSectionOpen = sectionStates.recentLicenses;
   const setIsRecentLicensesSectionOpen = useCallback((v: boolean) => setSectionOpen('recentLicenses', v), [setSectionOpen]);
   const isLandmarkSectionOpen = sectionStates.landmark;
@@ -1585,42 +1559,6 @@ export default function RunDetail() {
   const setIsZoningHistoryOpen = useCallback((v: boolean) => setSectionOpen('zoningHistory', v), [setSectionOpen]);
   const isHmdaBuyerOpen = sectionStates.hmdaBuyer;
   const setIsHmdaBuyerOpen = useCallback((v: boolean) => setSectionOpen('hmdaBuyer', v), [setSectionOpen]);
-  const isChildcareAccessOpen = sectionStates.childcareAccess;
-  const setIsChildcareAccessOpen = useCallback((v: boolean) => setSectionOpen('childcareAccess', v), [setSectionOpen]);
-  const isChildcareDemographicsOpen = sectionStates.childcareDemographics;
-  const setIsChildcareDemographicsOpen = useCallback((v: boolean) => setSectionOpen('childcareDemographics', v), [setSectionOpen]);
-  const isParentsLaborForceOpen = sectionStates.parentsLaborForce;
-  const setIsParentsLaborForceOpen = useCallback((v: boolean) => setSectionOpen('parentsLaborForce', v), [setSectionOpen]);
-  const isDaycareEstimatorOpen = sectionStates.daycareEstimator;
-  const setIsDaycareEstimatorOpen = useCallback((v: boolean) => setSectionOpen('daycareEstimator', v), [setSectionOpen]);
-  const isSiteDaycareDetailsOpen = sectionStates.siteDaycareDetails;
-  const setIsSiteDaycareDetailsOpen = useCallback((v: boolean) => setSectionOpen('siteDaycareDetails', v), [setSectionOpen]);
-  const isCcapOpen = sectionStates.ccap;
-  const setIsCcapOpen = useCallback((v: boolean) => setSectionOpen('ccap', v), [setSectionOpen]);
-  const isNearbyDayCaresOpen = sectionStates.nearbyDayCares;
-  const setIsNearbyDayCaresOpen = useCallback((v: boolean) => setSectionOpen('nearbyDayCares', v), [setSectionOpen]);
-  const isGroceryAccessOpen = sectionStates.groceryAccess;
-  const setIsGroceryAccessOpen = useCallback((v: boolean) => setSectionOpen('groceryAccess', v), [setSectionOpen]);
-  const isAutoDependencyOpen = sectionStates.autoDependency;
-  const setIsAutoDependencyOpen = useCallback((v: boolean) => setSectionOpen('autoDependency', v), [setSectionOpen]);
-  const isSeniorPopulationOpen = sectionStates.seniorPopulation;
-  const setIsSeniorPopulationOpen = useCallback((v: boolean) => setSectionOpen('seniorPopulation', v), [setSectionOpen]);
-  const isNearbyFillingStationsOpen = sectionStates.nearbyFillingStations;
-  const setIsNearbyFillingStationsOpen = useCallback((v: boolean) => setSectionOpen('nearbyFillingStations', v), [setSectionOpen]);
-  const isEvRegistrationsOpen = sectionStates.evRegistrations;
-  const setIsEvRegistrationsOpen = useCallback((v: boolean) => setSectionOpen('evRegistrations', v), [setSectionOpen]);
-  const isEvChargingOpen = sectionStates.evCharging;
-  const setIsEvChargingOpen = useCallback((v: boolean) => setSectionOpen('evCharging', v), [setSectionOpen]);
-  const isNearbyHotelsOpen = sectionStates.nearbyHotels;
-  const setIsNearbyHotelsOpen = useCallback((v: boolean) => setSectionOpen('nearbyHotels', v), [setSectionOpen]);
-  const isNearbyRestaurantsOpen = sectionStates.nearbyRestaurants;
-  const setIsNearbyRestaurantsOpen = useCallback((v: boolean) => setSectionOpen('nearbyRestaurants', v), [setSectionOpen]);
-  const isNearbyCoffeeOpen = sectionStates.nearbyCoffee;
-  const setIsNearbyCoffeeOpen = useCallback((v: boolean) => setSectionOpen('nearbyCoffee', v), [setSectionOpen]);
-  const isNearbyBarsOpen = sectionStates.nearbyBars;
-  const setIsNearbyBarsOpen = useCallback((v: boolean) => setSectionOpen('nearbyBars', v), [setSectionOpen]);
-  const isCannabisMarketOpen = sectionStates.cannabisMarket;
-  const setIsCannabisMarketOpen = useCallback((v: boolean) => setSectionOpen('cannabisMarket', v), [setSectionOpen]);
 
   const { data: regularRun, isLoading: isRegularRunLoading } = useRun(isStandaloneReport ? null : id);
   const { data: publicRun, isLoading: isPublicRunLoading } = usePublicRun(isStandaloneReport ? id : null);
@@ -1944,9 +1882,9 @@ export default function RunDetail() {
     updateManualProperty.mutate({
       id,
       data: {
-        manualBuildingSqFt: manualBuildingSqFt ? parseInt(manualBuildingSqFt) : null,
-        manualLandSqFt: manualLandSqFt ? parseInt(manualLandSqFt) : null,
-        manualStories: manualStories ? parseFloat(manualStories) : null,
+        manualBuildingSqFt: manualBuildingSqFt.trim() !== "" ? parseInt(manualBuildingSqFt, 10) : null,
+        manualLandSqFt: manualLandSqFt.trim() !== "" ? parseInt(manualLandSqFt, 10) : null,
+        manualStories: manualStories.trim() !== "" ? parseFloat(manualStories) : null,
         sourceListingUrl: run?.sourceListingUrl || null,
       }
     });
@@ -2030,9 +1968,9 @@ export default function RunDetail() {
             referralNeeds: (run as any).lastReferralNeeds ?? null,
           },
           manualProperty: {
-            manualBuildingSqFt: manualBuildingSqFt ? parseInt(manualBuildingSqFt) : null,
-            manualLandSqFt: manualLandSqFt ? parseInt(manualLandSqFt) : null,
-            manualStories: manualStories ? parseFloat(manualStories) : null,
+            manualBuildingSqFt: manualBuildingSqFt.trim() !== "" ? parseInt(manualBuildingSqFt, 10) : null,
+            manualLandSqFt: manualLandSqFt.trim() !== "" ? parseInt(manualLandSqFt, 10) : null,
+            manualStories: manualStories.trim() !== "" ? parseFloat(manualStories) : null,
             sourceListingUrl: run?.sourceListingUrl || null,
             askingPrice: valuationPurchasePrice ? Math.round(parseFormattedNumber(valuationPurchasePrice)) : null,
           },
@@ -2109,12 +2047,12 @@ export default function RunDetail() {
   const isDaycare = selectedProjectType === 'Day Care Center';
   const isDaycareOrSchool = isDaycare || selectedProjectType === 'School (Private)';
   // Childcare access fetches for EVERY search (also shown under Schools → Day Care for primary-residence buyers)
-  const { data: childcareData, isLoading: isLoadingChildcare, isError: isChildcareError } = useChildcareAccess(facts?.zipCode);
-  const { data: communityChildcareData, isLoading: isLoadingCommunityChildcare, isError: isCommunityChildcareError } = useCommunityAreaChildcareAccess(facts?.communityArea);
-  const { data: childcareEnhancedData, isLoading: isLoadingChildcareEnhanced } = useChildcareEnhancedData(isDaycareOrSchool ? facts?.communityArea : undefined);
-  const { data: childcareEnhancedZipData, isLoading: isLoadingChildcareEnhancedZip } = useChildcareEnhancedZipData(isDaycareOrSchool ? facts?.zipCode : undefined);
-  const { data: childcareCapacityData, isLoading: isLoadingCapacity } = useChildcareCapacity(isDaycareOrSchool ? facts?.communityArea : undefined);
-  const { data: childcareCapacityZipData, isLoading: isLoadingCapacityZip } = useChildcareCapacityZip(isDaycareOrSchool ? facts?.zipCode : undefined);
+  const { data: childcareData, isLoading: isLoadingChildcare, isError: isChildcareError, refetch: refetchChildcare } = useChildcareAccess(facts?.zipCode);
+  const { data: communityChildcareData, isLoading: isLoadingCommunityChildcare, isError: isCommunityChildcareError, refetch: refetchCommunityChildcare } = useCommunityAreaChildcareAccess(facts?.communityArea);
+  const { data: childcareEnhancedData, isLoading: isLoadingChildcareEnhanced, isError: isChildcareEnhancedError, refetch: refetchChildcareEnhanced } = useChildcareEnhancedData(isDaycareOrSchool ? facts?.communityArea : undefined);
+  const { data: childcareEnhancedZipData, isLoading: isLoadingChildcareEnhancedZip, isError: isChildcareEnhancedZipError, refetch: refetchChildcareEnhancedZip } = useChildcareEnhancedZipData(isDaycareOrSchool ? facts?.zipCode : undefined);
+  const { data: childcareCapacityData, isLoading: isLoadingCapacity, isError: isChildcareCapacityError, refetch: refetchChildcareCapacity } = useChildcareCapacity(isDaycareOrSchool ? facts?.communityArea : undefined);
+  const { data: childcareCapacityZipData, isLoading: isLoadingCapacityZip, isError: isChildcareCapacityZipError, refetch: refetchChildcareCapacityZip } = useChildcareCapacityZip(isDaycareOrSchool ? facts?.zipCode : undefined);
 
   // Grocery hooks - fetch when Grocery Store project use is selected (with lat/lon for distance)
   const isGrocery = selectedProjectType === 'Grocery Store';
@@ -2338,6 +2276,27 @@ export default function RunDetail() {
     selectedProjectType === 'Assisted Living (Elderly Custodial Care)' ||
     selectedProjectType === 'Nursing Home / Skilled Nursing Care' ||
     selectedProjectType === 'Home Health Agency';
+  const hasSchoolCcap = isDaycareOrSchool && !isDaycare && !!(childcareCapacityZipData || childcareCapacityData);
+  const projectUseSubsections = buildSubsectionNumbers([
+    ["childcareAccess", isDaycareOrSchool && !isDaycare],
+    ["childcareDemographics", isDaycareOrSchool && !isDaycare && !!(childcareEnhancedZipData || childcareEnhancedData)],
+    ["parentsLabor", isDaycareOrSchool && !isDaycare && !!(childcareEnhancedZipData || childcareEnhancedData)],
+    ["daycareEstimator", isDaycareOrSchool && !isDaycare && !!(childcareData || communityChildcareData)],
+    ["siteDetails", isDaycareOrSchool && !isDaycare],
+    ["ccap", hasSchoolCcap],
+    ["grocery", isGrocery],
+    ["vehicle", isAutoService],
+    ["seniors", isSeniorCare],
+    ["gasStations", isGasStation],
+    ["evRegistrations", isAutoService],
+    ["evStations", isGasStation],
+    ["hotels", isHotel],
+    ["restaurants", isRestaurant],
+    ["coffee", isCoffeeShop],
+    ["bars", isBar],
+    ["cannabis", isCannabis],
+    ["google", !isDaycare && !!selectedProjectType],
+  ]);
 
   const { data: evStationsData, isLoading: isLoadingEvStations } = useEvStations(facts?.lat, facts?.lon, isGasStation);
   const { data: gasStationsData, isLoading: isLoadingGasStations } = useGasStations(facts?.lat, facts?.lon, isGasStation);
@@ -2345,7 +2304,7 @@ export default function RunDetail() {
   const { data: restaurantsData, isLoading: isLoadingRestaurants } = useRestaurants(facts?.lat, facts?.lon, isRestaurant);
   const { data: coffeeShopsData, isLoading: isLoadingCoffeeShops } = useCoffeeShops(facts?.lat, facts?.lon, isCoffeeShop);
   const { data: barsData, isLoading: isLoadingBars } = useBars(facts?.lat, facts?.lon, isBar);
-  const { data: nearbyDayCaresData, isLoading: isLoadingNearbyDayCares } = useNearbyDayCares(facts?.lat, facts?.lon, isDaycare);
+  const { data: nearbyDayCaresData, isLoading: isLoadingNearbyDayCares, isError: isNearbyDayCaresError, refetch: refetchNearbyDayCares } = useNearbyDayCares(facts?.lat, facts?.lon, isDaycare);
   const { data: evRegistrationsData, isLoading: isLoadingEvRegistrations } = useEVRegistrations(facts?.zipCode, isAutoService);
 
   // Cannabis dispensary data - uses ZIP code
@@ -2719,7 +2678,7 @@ export default function RunDetail() {
   useEffect(() => {
     if (run) {
       // Only populate if manual data is not already set
-      if (!run.manualBuildingSqFt) {
+      if (run.manualBuildingSqFt == null) {
         if (propertyTaxData?.buildingSquareFeet) {
           setManualBuildingSqFt(propertyTaxData.buildingSquareFeet.toString());
         } else if (pinLookupData?.commercialData?.bldgSf) {
@@ -2728,16 +2687,16 @@ export default function RunDetail() {
           setManualBuildingSqFt(coParcelLookupData.commercialData.bldgSf.toString());
         }
       }
-      if (!run.manualLandSqFt) {
-        if (propertyTaxData?.landSquareFeet) {
+      if (run.manualLandSqFt == null) {
+        if (propertyTaxData?.landSquareFeet != null) {
           setManualLandSqFt(propertyTaxData.landSquareFeet.toString());
-        } else if (pinLookupData?.commercialData?.landSf) {
+        } else if (pinLookupData?.commercialData?.landSf != null) {
           setManualLandSqFt(pinLookupData.commercialData.landSf.toString());
-        } else if (coParcelLookupData?.commercialData?.landSf) {
+        } else if (coParcelLookupData?.commercialData?.landSf != null) {
           setManualLandSqFt(coParcelLookupData.commercialData.landSf.toString());
         }
       }
-      if (!run.manualStories && propertyTaxData?.stories) {
+      if (run.manualStories == null && propertyTaxData?.stories) {
         setManualStories(propertyTaxData.stories.toString());
       }
     }
@@ -2931,7 +2890,7 @@ export default function RunDetail() {
   const googlePlacesSearchTerm = selectedProjectType && !isDaycare && placesConfirmed
     ? derivePlacesSearchTerm(selectedProjectType, confirmedFreeform)
     : null;
-  const { data: googlePlacesData, isLoading: isLoadingGooglePlaces } = useGooglePlaces(
+  const { data: googlePlacesData, isLoading: isLoadingGooglePlaces, isError: isGooglePlacesError, refetch: refetchGooglePlaces } = useGooglePlaces(
     geocode.data?.lat,
     geocode.data?.lon,
     googlePlacesSearchTerm,
@@ -2942,7 +2901,7 @@ export default function RunDetail() {
   const daycareSearchTerm = isDaycare
     ? derivePlacesSearchTerm(selectedProjectType, confirmedFreeform)
     : null;
-  const { data: googlePlacesDaycareData, isLoading: isLoadingGooglePlacesDaycare } = useGooglePlaces(
+  const { data: googlePlacesDaycareData, isLoading: isLoadingGooglePlacesDaycare, isError: isGooglePlacesDaycareError, refetch: refetchGooglePlacesDaycare } = useGooglePlaces(
     geocode.data?.lat,
     geocode.data?.lon,
     daycareSearchTerm,
@@ -3396,24 +3355,13 @@ export default function RunDetail() {
     }
   }, [pinLookupData?.pin, pinManuallyEdited, run?.id]);
 
-  // Auto-open nearby business sub-sections when their data loads
-  useEffect(() => {
-    if (isCoffeeShop && coffeeShopsData?.locations?.length) setIsNearbyCoffeeOpen(true);
-  }, [isCoffeeShop, coffeeShopsData]);
-  useEffect(() => {
-    if (isRestaurant && restaurantsData?.locations?.length) setIsNearbyRestaurantsOpen(true);
-  }, [isRestaurant, restaurantsData]);
-  useEffect(() => {
-    if (isBar && barsData?.locations?.length) setIsNearbyBarsOpen(true);
-  }, [isBar, barsData]);
-
   // Auto-open Nearby Competitors (Google Places) when a search fires or data arrives
   useEffect(() => {
     if (!googlePlacesSearchTerm) return;
     if (isLoadingGooglePlaces || googlePlacesData) {
       // If this project use has a dedicated analysis card, open that; otherwise open Development Potential
       if (isDaycareOrSchool || isGrocery || isGasStation || isAutoService || isSeniorCare || isHotel || isRestaurant || isCoffeeShop || isBar || isCannabis) {
-        setSectionOpen('projectTypeInfo', true);
+        setAccOpen((current) => ({ ...current, analysis: true }));
       } else {
         setSectionOpen('developmentPotential', true);
       }
@@ -3881,69 +3829,17 @@ export default function RunDetail() {
   };
 
 
-  // Childcare Access tabs — shared by the Day Care project-type suite and the always-on
-  // Schools → Day Care block (families evaluating a primary residence need this too)
+  // Childcare readers follow the single Project Use Analysis area selector.
   const childcareAccessTabs = (
-    <Tabs value={childcareViewMode} onValueChange={(v) => setChildcareViewMode(v as 'zip' | 'community')} className="w-full">
-      <TabsList className="inline-flex w-auto mb-1 h-auto p-[3px] gap-[3px] bg-secondary border border-border rounded-[10px]">
-        <TabsTrigger
-          value="zip"
-          data-testid="tab-childcare-zip"
-          className="text-[12.5px] font-semibold px-4 py-[7px] rounded-lg data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-        >
-          <MapPin className="w-[13px] h-[13px]" />
-          By ZIP Code
-        </TabsTrigger>
-        <TabsTrigger
-          value="community"
-          data-testid="tab-childcare-community"
-          className="text-[12.5px] font-semibold px-4 py-[7px] rounded-lg data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-        >
-          <MapIcon className="w-[13px] h-[13px]" />
-          By Neighborhood
-        </TabsTrigger>
-      </TabsList>
-
-      <div className="sch-ctx">
-        ZIP <b>{facts?.zipCode || 'N/A'}</b> · Neighborhood <b>{facts?.communityArea || 'N/A'}</b>{facts?.ward ? <> · Ward <b>{facts.ward}</b></> : null} — boundaries differ, so metrics may vary between views.
-      </div>
-
-      <TabsContent value="zip">
-        {isLoadingChildcare ? (
-          <div className="space-y-3">
-            <Skeleton className="h-6 w-2/3" />
-            <Skeleton className="h-4 w-full" />
-          </div>
-        ) : childcareData ? (
-          <ChildcareDemandMeter
-            data={childcareData}
-            locationLabel={`ZIP ${facts?.zipCode ?? ''}`}
-          />
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Childcare access data not available for this ZIP code.
-          </p>
-        )}
-      </TabsContent>
-
-      <TabsContent value="community">
-        {isLoadingCommunityChildcare ? (
-          <div className="space-y-3">
-            <Skeleton className="h-6 w-2/3" />
-            <Skeleton className="h-4 w-full" />
-          </div>
-        ) : communityChildcareData ? (
-          <ChildcareDemandMeter
-            data={communityChildcareData}
-            locationLabel={facts?.communityArea ?? 'Community Area'}
-          />
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Childcare access data not available for this neighborhood.
-          </p>
-        )}
-      </TabsContent>
-    </Tabs>
+    areaViewMode === 'zip' ? (
+        isLoadingChildcare ? <Skeleton className="h-20 w-full" /> : childcareData ? (
+        <ChildcareDemandMeter data={childcareData} locationLabel={`ZIP ${facts?.zipCode ?? ''}`} showInterpretation={false} />
+      ) : <div className="kyp-status-empty" role={isChildcareError ? "alert" : "status"}>Childcare access data not available for this ZIP code.</div>
+    ) : (
+        isLoadingCommunityChildcare ? <Skeleton className="h-20 w-full" /> : communityChildcareData ? (
+        <ChildcareDemandMeter data={communityChildcareData} locationLabel={facts?.communityArea ?? 'Community Area'} showInterpretation={false} />
+      ) : <div className="kyp-status-empty" role={isCommunityChildcareError ? "alert" : "status"}>Childcare access data not available for this community area.</div>
+    )
   );
 
   // ---- Step 5: accordion row metadata (single source: scanBuilder + registry) ----
@@ -4479,8 +4375,8 @@ export default function RunDetail() {
           { label: 'Schools Nearby', icon: GraduationCap, action: () => { setAccOpen((m) => ({ ...m, schools: true })); setSectionOpen('schools', true); return 'print-section-schools-daycare'; } },
           { label: 'Day Care / Childcare Access', icon: Baby, action: () => { setAccOpen((m) => ({ ...m, proximity: true, schools: true })); setSectionOpen('schools', true); return 'print-section-schools-daycare'; } },
           ...(isDaycareOrSchool ? [
-            { label: 'Childcare Access (Project Analysis)', icon: Baby, action: () => { setSectionOpen('projectTypeInfo', true); setSectionOpen('childcareAccess', true); return 'print-section-childcare'; } },
-            { label: 'Childcare Demographics', icon: Users, action: () => { setSectionOpen('projectTypeInfo', true); setSectionOpen('childcareDemographics', true); return 'print-section-childcare-demographics'; } },
+            { label: 'Childcare Access (Project Analysis)', icon: Baby, action: () => { setAccOpen((current) => ({ ...current, analysis: true })); return 'print-section-childcare'; } },
+            { label: 'Childcare Demographics', icon: Users, action: () => { setAccOpen((current) => ({ ...current, analysis: true })); return 'print-section-childcare-demographics'; } },
           ] : []),
           { label: 'Short-Term Rentals (Airbnb)', icon: Home, action: () => { setSectionOpen('developmentPotential', true); setSectionOpen('airbnb', true); return 'section-airbnb'; } },
           { label: 'Market Rent Estimates', icon: DollarSign, action: () => { setSectionOpen('developmentPotential', true); setSectionOpen('rentcast', true); return 'section-rentcast'; } },
@@ -4497,7 +4393,7 @@ export default function RunDetail() {
           ...((googlePlacesSearchTerm || (isDaycare && placesConfirmed)) ? [{ label: 'Nearby Competitors (Google Maps)', icon: MapPin, action: () => {
             setAccOpen((m) => ({ ...m, analysis: true }));
             setAccHidden((m) => ({ ...m, analysis: false }));
-            setSectionOpen('projectTypeInfo', true);
+            setAccOpen((current) => ({ ...current, analysis: true }));
             setSectionOpen(isDaycare ? 'googlePlacesDaycareSection' : 'googlePlacesSection', true);
             return isDaycare ? 'section-google-places-daycare' : 'section-google-places-inline';
           } }] : []),
@@ -5507,7 +5403,7 @@ export default function RunDetail() {
                           </div>
                         )}
 
-                        <p className="cmp-src mt-4">
+                        <p className="kyp-src mt-4">
                           Public ZBA resolutions, Ward {wardNumber} (last 5 years). Top {zbaTopReps.length} of {zbaWardData.totalRepresentatives} representatives shown. Other includes withdrawn, denied, and unrecorded outcomes (including continued cases). Counts are factual public records — <b className="text-[#565651] font-semibold">not endorsements, rankings, or predictions of outcome</b>. Sorted by {zbaSort === 'latest' ? 'most recent case' : 'case volume'}. Click "Check ARDC" to verify an attorney's license status on IARDC.
                         </p>
                       </div>
@@ -5530,7 +5426,7 @@ export default function RunDetail() {
                     const goToCompetitors = () => {
                       setAccOpen((m) => ({ ...m, analysis: true }));
                       setAccHidden((m) => ({ ...m, analysis: false }));
-                      setSectionOpen('projectTypeInfo', true);
+                      setAccOpen((current) => ({ ...current, analysis: true }));
                       if (isDaycare) {
                         setSectionOpen('googlePlacesDaycareSection', true);
                         revealAnchor('section-google-places-daycare');
@@ -6200,152 +6096,92 @@ export default function RunDetail() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.15 }}
           >
-            <Collapsible open={isProjectTypeInfoOpen} onOpenChange={setIsProjectTypeInfoOpen}>
-              <Card className="border border-border overflow-visible">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover-elevate pb-3" data-testid="trigger-project-type-analysis">
-                    <div className="flex items-center justify-between gap-2">
-                      <CardTitle className="chead flex items-center gap-2">
-                        {selectedProjectType} Analysis
-                      </CardTitle>
-                      <span className="text-muted-foreground text-sm">{isProjectTypeInfoOpen ? '▼' : '▶'}</span>
-                    </div>
-                    {!isProjectTypeInfoOpen && (
-                      <div className="flex flex-wrap gap-2 mt-2" data-testid="badges-project-type-summary">
-                        {isDaycareOrSchool && (
-                          <>
-                            <Badge variant="secondary" className="text-xs">Childcare Access</Badge>
-                            <Badge variant="secondary" className="text-xs">Demographics</Badge>
-                            <Badge variant="secondary" className="text-xs">Needs Estimator</Badge>
-                            <Badge variant="secondary" className="text-xs">Site Details</Badge>
-                            <Badge variant="secondary" className="text-xs">CCAP</Badge>
-                            {isDaycare && <Badge variant="secondary" className="text-xs">Nearby Daycares</Badge>}
-                          </>
-                        )}
-                        {isGrocery && (
-                          <Badge variant="secondary" className="text-xs">Grocery Access</Badge>
-                        )}
-                        {isAutoService && (
-                          <>
-                            <Badge variant="secondary" className="text-xs">Auto Dependency</Badge>
-                            <Badge variant="secondary" className="text-xs">EV Trends</Badge>
-                          </>
-                        )}
-                        {isGasStation && (
-                          <>
-                            <Badge variant="secondary" className="text-xs">Filling Stations</Badge>
-                            <Badge variant="secondary" className="text-xs">EV Stations</Badge>
-                          </>
-                        )}
-                        {isSeniorCare && (
-                          <Badge variant="secondary" className="text-xs">Senior Population</Badge>
-                        )}
-                        {isHotel && <Badge variant="secondary" className="text-xs">Nearby Hotels</Badge>}
-                        {isRestaurant && <Badge variant="secondary" className="text-xs">Nearby Restaurants</Badge>}
-                        {isCoffeeShop && <Badge variant="secondary" className="text-xs">Nearby Coffee Shops</Badge>}
-                        {isBar && <Badge variant="secondary" className="text-xs">Nearby Bars</Badge>}
-                        {isCannabis && <Badge variant="secondary" className="text-xs">Cannabis Market</Badge>}
-                      </div>
-                    )}
-                  </CardHeader>
-                </CollapsibleTrigger>
-
-                <CollapsibleContent>
-                  <CardContent className="pt-0 flex flex-col gap-6">
+            {isDaycare ? (
+              <DaycareAnalysis
+                scope={areaViewMode}
+                onScopeChange={setAreaViewMode}
+                areaData={areaViewMode === "zip" ? childcareData : communityChildcareData}
+                enhancedData={areaViewMode === "zip" ? childcareEnhancedZipData : childcareEnhancedData}
+                capacityData={areaViewMode === "zip" ? childcareCapacityZipData : childcareCapacityData}
+                communityArea={facts?.communityArea}
+                zipCode={facts?.zipCode}
+                ward={facts?.ward}
+                isAccessLoading={areaViewMode === "zip" ? isLoadingChildcare : isLoadingCommunityChildcare}
+                isAccessError={areaViewMode === "zip" ? isChildcareError : isCommunityChildcareError}
+                onAccessRetry={areaViewMode === "zip" ? () => refetchChildcare() : () => refetchCommunityChildcare()}
+                isEnhancedLoading={areaViewMode === "zip" ? isLoadingChildcareEnhancedZip : isLoadingChildcareEnhanced}
+                isEnhancedError={areaViewMode === "zip" ? isChildcareEnhancedZipError : isChildcareEnhancedError}
+                onEnhancedRetry={areaViewMode === "zip" ? () => refetchChildcareEnhancedZip() : () => refetchChildcareEnhanced()}
+                isCapacityLoading={areaViewMode === "zip" ? isLoadingCapacityZip : isLoadingCapacity}
+                isCapacityError={areaViewMode === "zip" ? isChildcareCapacityZipError : isChildcareCapacityError}
+                onCapacityRetry={areaViewMode === "zip" ? () => refetchChildcareCapacityZip() : () => refetchChildcareCapacity()}
+                nearbyData={isDaycare ? nearbyDayCaresData : undefined}
+                isNearbyLoading={isDaycare && isLoadingNearbyDayCares}
+                isNearbyError={isDaycare && isNearbyDayCaresError}
+                onNearbyRetry={() => refetchNearbyDayCares()}
+                googleData={isDaycare ? googlePlacesDaycareData : undefined}
+                isGoogleLoading={isDaycare && isLoadingGooglePlacesDaycare}
+                isGoogleError={isDaycare && isGooglePlacesDaycareError}
+                onGoogleRetry={() => refetchGooglePlacesDaycare()}
+                googleConfirmed={isDaycare && !!daycareSearchTerm && placesConfirmed}
+                googleSearchTerm={daycareSearchTerm || undefined}
+                buildingSqFt={run?.manualBuildingSqFt ?? propertyTaxData?.buildingSquareFeet ?? pinLookupData?.commercialData?.bldgSf ?? coParcelLookupData?.commercialData?.bldgSf ?? null}
+                buildingType={propertyTaxData?.buildingType ?? null}
+                landSqFt={run?.manualLandSqFt ?? propertyTaxData?.landSquareFeet ?? pinLookupData?.commercialData?.landSf ?? coParcelLookupData?.commercialData?.landSf ?? null}
+                stories={run?.manualStories ?? propertyTaxData?.stories ?? null}
+                buildingSource={run?.manualBuildingSqFt != null ? "Manual entry" : propertyTaxData?.buildingSquareFeet != null ? "Cook County Assessor" : pinLookupData?.commercialData?.bldgSf != null || coParcelLookupData?.commercialData?.bldgSf != null ? "Commercial property record" : undefined}
+                landSource={run?.manualLandSqFt != null ? "Manual entry" : propertyTaxData?.landSquareFeet != null ? "Cook County Assessor" : pinLookupData?.commercialData?.landSf != null || coParcelLookupData?.commercialData?.landSf != null ? "Commercial property record" : undefined}
+                storiesSource={run?.manualStories != null ? "Manual entry" : propertyTaxData?.stories != null ? "Cook County Assessor" : undefined}
+                updateProperty={({ id: propertyId, data }) => updateManualProperty.mutateAsync({ id: propertyId, data: data as any })}
+                updatePending={updateManualProperty.isPending}
+                runId={run?.id}
+              />
+            ) : (
+            <React.Fragment>
+          {(
+            (isGrocery && !!(groceryData || communityGroceryData))
+            || (isSeniorCare && !!(seniorsData || seniorsZipData))
+            || (isDaycareOrSchool && !isDaycare && !!(
+              childcareData || communityChildcareData
+              || childcareEnhancedZipData || childcareEnhancedData
+              || childcareCapacityZipData || childcareCapacityData
+            ))
+          ) && (
+            <ProjectUseAreaControl
+              value={areaViewMode}
+              onChange={setAreaViewMode}
+              zipCode={facts?.zipCode}
+              communityArea={facts?.communityArea}
+              ward={facts?.ward}
+            />
+          )}
 
           {/* Childcare Access Section - Only shown when Day Care or School is selected */}
-          {isDaycareOrSchool && (
+          {isDaycareOrSchool && !isDaycare && (
           <div id="print-section-childcare">
-            <Collapsible open={isChildcareAccessOpen} onOpenChange={setIsChildcareAccessOpen}>
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                  <h3 className="chead chead-icon">
-                    <Baby className="w-4 h-4" />
-                    Childcare Access (Estimated)
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {!isChildcareAccessOpen && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {(() => {
-                          const accessData = childcareViewMode === 'zip' ? childcareData : communityChildcareData;
-                          if (accessData) {
-                            const ratio = accessData.licensedSlots > 0 ? (accessData.childrenUnder5 / accessData.licensedSlots).toFixed(1) : 'N/A';
-                            return (
-                              <>
-                                <Badge variant="outline" className="text-xs">{ratio} children/slot</Badge>
-                                <Badge variant="secondary" className="text-xs">{accessData.licensedSlots.toLocaleString()} slots</Badge>
-                              </>
-                            );
-                          }
-                          return <Badge variant="secondary" className="text-xs">Loading...</Badge>;
-                        })()}
-                      </div>
-                    )}
-                    <span className="text-muted-foreground text-sm">{isChildcareAccessOpen ? '▼' : '▶'}</span>
-                  </div>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
+            <KypSubhead subsection={projectUseSubsections.childcareAccess}><span className="lbl">Childcare access</span></KypSubhead>
               <div className="px-4">
                 {childcareAccessTabs}
+                {!((areaViewMode === "zip" ? childcareData : communityChildcareData))
+                  && !(areaViewMode === "zip" ? isLoadingChildcare : isLoadingCommunityChildcare) && (
+                  <div className="kyp-src">Scope: ZIP {facts?.zipCode ?? "unavailable"} or {facts?.communityArea ?? "community area"}, per the selected area control. Source detail is unavailable because no childcare-access response was returned.</div>
+                )}
               </div>
-              </CollapsibleContent>
-            </Collapsible>
           </div>
           )}
 
           {/* Enhanced Childcare Demographics - Age Breakdown & Parent Labor Force */}
-          {isDaycareOrSchool && (childcareEnhancedZipData || childcareEnhancedData) && (
+          {isDaycareOrSchool && !isDaycare && (childcareEnhancedZipData || childcareEnhancedData) && (
           <div id="print-section-childcare-demographics">
-            <Collapsible open={isChildcareDemographicsOpen} onOpenChange={setIsChildcareDemographicsOpen}>
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                  <h3 className="chead chead-icon">
-                    <Users className="w-4 h-4" />
-                    Childcare Demographics
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {!isChildcareDemographicsOpen && (
-                      <div className="flex flex-wrap gap-1.5">
-                        <Badge variant="outline" className="text-xs">
-                          {childcareViewMode === 'zip' ? `ZIP ${facts?.zipCode}` : facts?.communityArea}
-                        </Badge>
-                        <Badge variant="secondary" className="text-xs">Age Breakdown</Badge>
-                      </div>
-                    )}
-                    <span className="text-muted-foreground text-sm">{isChildcareDemographicsOpen ? '▼' : '▶'}</span>
-                  </div>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
+            <KypSubhead subsection={projectUseSubsections.childcareDemographics}><span className="lbl">Childcare demographics</span></KypSubhead>
               <div className="px-4 space-y-6">
-                <Tabs value={childcareViewMode} onValueChange={(v) => setChildcareViewMode(v as 'zip' | 'community')} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-4 h-10 p-1 bg-secondary border border-border">
-                    <TabsTrigger
-                      value="zip"
-                      data-testid="tab-demographics-zip"
-                      className="h-full text-sm font-medium data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-                    >
-                      <MapPin className="w-4 h-4" />
-                      By ZIP Code
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="community"
-                      data-testid="tab-demographics-community"
-                      className="h-full text-sm font-medium data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-                    >
-                      <MapIcon className="w-4 h-4" />
-                      By Neighborhood
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-                {(childcareViewMode === 'zip' ? isLoadingChildcareEnhancedZip : isLoadingChildcareEnhanced) ? (
+                {(areaViewMode === 'zip' ? isLoadingChildcareEnhancedZip : isLoadingChildcareEnhanced) ? (
                   <div className="space-y-3">
                     <Skeleton className="h-6 w-2/3" />
                     <Skeleton className="h-4 w-full" />
                   </div>
                 ) : (() => {
-                  const enhancedData = childcareViewMode === 'zip' ? childcareEnhancedZipData : childcareEnhancedData;
+                  const enhancedData = areaViewMode === 'zip' ? childcareEnhancedZipData : childcareEnhancedData;
                   if (!enhancedData) return null;
                   return (
                   <>
@@ -6362,69 +6198,29 @@ export default function RunDetail() {
                       </div>
                     </div>
 
-                    <div className="text-xs text-muted-foreground space-y-1 pt-2">
-                      <p className="flex items-center gap-1">
-                        <Info className="w-3 h-3" />
-                        Data source: American Community Survey 5-Year Estimates (B09001)
-                      </p>
-                    </div>
                   </>
                   );
                 })()}
               </div>
-              </CollapsibleContent>
-            </Collapsible>
+              <div className="kyp-src">Scope: ZIP {facts?.zipCode ?? "unavailable"} or {facts?.communityArea ?? "community area"}, per the selected area control. Source: American Community Survey 5-Year Estimates, table B09001.</div>
           </div>
           )}
 
           {/* Parents in Labor Force */}
-          {isDaycareOrSchool && (childcareEnhancedZipData || childcareEnhancedData) && (
+          {isDaycareOrSchool && !isDaycare && (childcareEnhancedZipData || childcareEnhancedData) && (
           <div id="print-section-parents-labor">
-            <Collapsible open={isParentsLaborForceOpen} onOpenChange={setIsParentsLaborForceOpen}>
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                  <h3 className="chead chead-icon">
-                    <Briefcase className="w-4 h-4" />
-                    Parents in Labor Force
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {!isParentsLaborForceOpen && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {(() => {
-                          const enhancedData = childcareViewMode === 'zip' ? childcareEnhancedZipData : childcareEnhancedData;
-                          if (enhancedData) {
-                            return (
-                              <>
-                                <Badge variant="outline" className="text-xs">
-                                  {enhancedData.parentsInLaborForcePct0to5}% Ages 0-5
-                                </Badge>
-                                <Badge variant="secondary" className="text-xs">
-                                  Delta {enhancedData.laborForceDelta}%
-                                </Badge>
-                              </>
-                            );
-                          }
-                          return null;
-                        })()}
-                      </div>
-                    )}
-                    <span className="text-muted-foreground text-sm">{isParentsLaborForceOpen ? '▼' : '▶'}</span>
-                  </div>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
+            <KypSubhead subsection={projectUseSubsections.parentsLabor}><span className="lbl">Parents in labor force</span></KypSubhead>
               <div className="px-4 space-y-4">
                 {(() => {
-                  const enhancedData = childcareViewMode === 'zip' ? childcareEnhancedZipData : childcareEnhancedData;
+                  const enhancedData = areaViewMode === 'zip' ? childcareEnhancedZipData : childcareEnhancedData;
                   if (!enhancedData) return null;
                   return (
                   <>
-                    <p className="text-sm text-muted-foreground">Both Parents or Single Parent Working</p>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-secondary rounded-xl border border-border p-4">
                         <p className="text-xs font-jbmono text-muted-foreground uppercase font-semibold">Children 0-5 Years</p>
                         <p className="text-2xl font-bold text-foreground">{enhancedData.parentsInLaborForcePct0to5}%</p>
-                        <p className="text-sm text-muted-foreground">{enhancedData.parentsInLaborForce0to5.toLocaleString()} children</p>
+                        <p className="text-sm text-muted-foreground">Source-derived count proxy: {enhancedData.parentsInLaborForce0to5.toLocaleString()}</p>
                       </div>
                       <div className="bg-secondary rounded-xl border border-border p-4">
                         <p className="text-xs font-jbmono text-muted-foreground uppercase font-semibold">Children 6-17 Years</p>
@@ -6433,91 +6229,24 @@ export default function RunDetail() {
                       </div>
                     </div>
 
-                    <div className={`p-4 rounded-lg border ${
-                      enhancedData.laborForceDelta <= 5
-                        ? 'bg-secondary border-border'
-                        : enhancedData.laborForceDelta <= 12
-                        ? 'bg-secondary border-border'
-                        : 'bg-secondary border-border'
-                    }`}>
-                      <div className="flex items-start gap-3">
-                        {enhancedData.laborForceDelta <= 5 ? (
-                          <TrendingUp className="w-5 h-5 text-foreground mt-0.5 flex-shrink-0" />
-                        ) : enhancedData.laborForceDelta <= 12 ? (
-                          <AlertTriangle className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                        ) : (
-                          <TrendingDown className="w-5 h-5 text-foreground mt-0.5 flex-shrink-0" />
-                        )}
-                        <div>
-                          <p className="font-semibold">
-                            Labor Force Delta: {enhancedData.laborForceDelta}%
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {enhancedData.deltaInterpretation}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <ProjectUseCountBlocks counts={[{ value: `${enhancedData.laborForceDelta} pts`, label: "Difference between age cohorts" }]} />
 
-                    <div className="text-xs text-muted-foreground space-y-1 pt-2">
-                      <p className="flex items-center gap-1">
-                        <Info className="w-3 h-3" />
-                        Data source: American Community Survey 5-Year Estimates (B23008)
-                      </p>
-                      <p className="text-xs italic mt-1">
-                        Small delta = Parents work regardless of child age (higher daycare demand). Large delta = Many parents stay home with young children.
-                      </p>
-                    </div>
                   </>
                   );
                 })()}
               </div>
-              </CollapsibleContent>
-            </Collapsible>
+              <div className="kyp-src">Scope: ZIP {facts?.zipCode ?? "unavailable"} or {facts?.communityArea ?? "community area"}, per the selected area control. Source: American Community Survey 5-Year Estimates, table B23008. The count proxy is calculated in the source extract as children under 5 × the working-parent rate for ages 0–5 (under 6), rounded. These cohorts differ; this is not an observed ACS count, and an exact matching cohort total is not supplied. Difference is the app-calculated percentage-point gap between the displayed age cohorts; it is not a demand classification.</div>
           </div>
           )}
 
           {/* Day Care Needs Estimator - Right after Childcare Demographics */}
-          {isDaycareOrSchool && (childcareData || communityChildcareData) && (
+          {isDaycareOrSchool && !isDaycare && (childcareData || communityChildcareData) && (
           <div id="print-section-daycare-estimator">
-            <Collapsible open={isDaycareEstimatorOpen} onOpenChange={setIsDaycareEstimatorOpen}>
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                  <h3 className="chead chead-icon">
-                    <Calculator className="w-4 h-4" />
-                    Day Care Needs Estimator
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {!isDaycareEstimatorOpen && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {(() => {
-                          const accessData = childcareViewMode === 'zip' ? childcareData : communityChildcareData;
-                          if (accessData) {
-                            const totalChildren = accessData.childrenUnder5;
-                            const totalSlots = accessData.licensedSlots;
-                            const gap = totalChildren - totalSlots;
-                            return (
-                              <Badge variant={gap > 0 ? "default" : "secondary"} className="text-xs">
-                                {gap > 0 ? `${gap.toLocaleString()} slot gap` : 'No gap'}
-                              </Badge>
-                            );
-                          }
-                          return null;
-                        })()}
-                        <Badge variant="outline" className="text-xs">
-                          {childcareViewMode === 'zip' ? `ZIP ${facts?.zipCode}` : facts?.communityArea}
-                        </Badge>
-                      </div>
-                    )}
-                    <span className="text-muted-foreground text-sm">{isDaycareEstimatorOpen ? '▼' : '▶'}</span>
-                  </div>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
+            <KypSubhead subsection={projectUseSubsections.daycareEstimator}><span className="lbl">Day care needs estimator</span></KypSubhead>
               <div className="px-4">
                 {(() => {
                   // Use same data source as Childcare Access for consistency
-                  const accessData = childcareViewMode === 'zip' ? childcareData : communityChildcareData;
+                  const accessData = areaViewMode === 'zip' ? childcareData : communityChildcareData;
 
                   if (!accessData) return <p className="text-sm text-muted-foreground">Insufficient data for estimator.</p>;
 
@@ -6563,11 +6292,7 @@ export default function RunDetail() {
                       {/* Daycares Needed - Three Targets */}
                       <div className="grid grid-cols-3 gap-3">
                         {/* 1:1 Target */}
-                        <div className={`rounded-lg p-3 text-center ${
-                          daycares1to1 > 0
-                            ? 'bg-secondary border border-border'
-                            : 'bg-secondary border border-border'
-                        }`}>
+                        <div className="rounded-lg p-3 text-center bg-secondary border border-border">
                           <p className="text-xs font-jbmono text-muted-foreground uppercase font-semibold mb-1">1:1 Ratio</p>
                           <p className="text-xs text-muted-foreground mb-2">(1 slot per child)</p>
                           {daycares1to1 > 0 ? (
@@ -6578,18 +6303,13 @@ export default function RunDetail() {
                             </>
                           ) : (
                             <>
-                              <CheckCircle2 className="w-6 h-6 text-foreground mx-auto mb-1" />
-                              <p className="text-xs font-medium text-foreground">Already Met</p>
+                              <p className="text-xs font-medium text-foreground">0 modeled sites</p>
                             </>
                           )}
                         </div>
 
                         {/* 1:1.5 Target */}
-                        <div className={`rounded-lg p-3 text-center ${
-                          daycares1to1_5 > 0
-                            ? 'bg-secondary border border-border'
-                            : 'bg-secondary border border-border'
-                        }`}>
+                        <div className="rounded-lg p-3 text-center bg-secondary border border-border">
                           <p className="text-xs font-jbmono text-muted-foreground uppercase font-semibold mb-1">1:1.5 Ratio</p>
                           <p className="text-xs text-muted-foreground mb-2">(1.5 children per slot)</p>
                           {daycares1to1_5 > 0 ? (
@@ -6600,18 +6320,13 @@ export default function RunDetail() {
                             </>
                           ) : (
                             <>
-                              <CheckCircle2 className="w-6 h-6 text-foreground mx-auto mb-1" />
-                              <p className="text-xs font-medium text-foreground">Already Met</p>
+                              <p className="text-xs font-medium text-foreground">0 modeled sites</p>
                             </>
                           )}
                         </div>
 
                         {/* 1:1.75 Target */}
-                        <div className={`rounded-lg p-3 text-center ${
-                          daycares1to1_75 > 0
-                            ? 'bg-secondary border border-border'
-                            : 'bg-secondary border border-border'
-                        }`}>
+                        <div className="rounded-lg p-3 text-center bg-secondary border border-border">
                           <p className="text-xs font-jbmono text-muted-foreground uppercase font-semibold mb-1">1:1.75 Ratio</p>
                           <p className="text-xs text-muted-foreground mb-2">(1.75 children per slot)</p>
                           {daycares1to1_75 > 0 ? (
@@ -6622,61 +6337,24 @@ export default function RunDetail() {
                             </>
                           ) : (
                             <>
-                              <CheckCircle2 className="w-6 h-6 text-foreground mx-auto mb-1" />
-                              <p className="text-xs font-medium text-muted-foreground">Already Met</p>
+                              <p className="text-xs font-medium text-muted-foreground">0 modeled sites</p>
                             </>
                           )}
                         </div>
                       </div>
 
-                      <p className="text-xs text-muted-foreground text-center">
-                        Formula: (Target slots - Current slots) ÷ 78 avg capacity = Daycares needed
-                      </p>
                     </div>
                   );
                 })()}
+                <div className="kyp-src">Model only: scenario targets use the displayed 1:1, 1:1.5, and 1:1.75 ratios and an app-set planning assumption of 78 children per site. Formula: positive target-slot gap ÷ 78. This is not a licensed-capacity determination. Inputs are the selected ZIP or community-area access estimates.</div>
               </div>
-              </CollapsibleContent>
-            </Collapsible>
           </div>
           )}
 
           {/* Site Specific Day Care Details - Always show when day care is selected */}
-          {isDaycareOrSchool && (
+          {isDaycareOrSchool && !isDaycare && (
           <div id="print-section-site-daycare-details">
-            <Collapsible open={isSiteDaycareDetailsOpen} onOpenChange={setIsSiteDaycareDetailsOpen}>
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                  <h3 className="chead chead-icon">
-                    <Building2 className="w-4 h-4" />
-                    Site Specific Day Care Details
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {!isSiteDaycareDetailsOpen && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {(() => {
-                          const buildingSqFt = run?.manualBuildingSqFt || propertyTaxData?.buildingSquareFeet || pinLookupData?.commercialData?.bldgSf || coParcelLookupData?.commercialData?.bldgSf || 0;
-                          if (buildingSqFt) {
-                            const capacity = Math.floor(buildingSqFt / 75);
-                            return (
-                              <>
-                                <Badge variant="outline" className="text-xs">{buildingSqFt.toLocaleString()} sq ft</Badge>
-                                <Badge variant="secondary" className="text-xs">Capacity: ~{capacity}</Badge>
-                              </>
-                            );
-                          }
-                          return <Badge variant="secondary" className="text-xs">No Building Data</Badge>;
-                        })()}
-                        {run?.manualBuildingSqFt && !propertyTaxData?.buildingSquareFeet && (
-                          <Badge variant="outline" className="text-xs">Manual Data</Badge>
-                        )}
-                      </div>
-                    )}
-                    <span className="text-muted-foreground text-sm">{isSiteDaycareDetailsOpen ? '▼' : '▶'}</span>
-                  </div>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
+            <KypSubhead subsection={projectUseSubsections.siteDetails}><span className="lbl">Site details</span></KypSubhead>
               <div className="px-4">
                 {(() => {
                   // Priority: manual/listing data first, then property tax API, then commercial data (primary then co-parcel)
@@ -6781,11 +6459,6 @@ export default function RunDetail() {
                           </div>
                         </div>
 
-                        <div className="bg-muted rounded-lg border border-border p-3">
-                          <p className="text-xs text-muted-foreground">
-                            <span className="font-semibold">DCFS Requirement:</span> 35 sq ft per child minimum. However, once you account for support spaces (bathrooms, kitchens, hallways, foyers, storage), the practical space need typically doubles to 75-90 sq ft per child.
-                          </p>
-                        </div>
                       </div>
                     );
                   }
@@ -6800,25 +6473,20 @@ export default function RunDetail() {
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="rounded-lg p-4 bg-secondary border border-border text-center">
-                          <p className="text-xs font-jbmono text-muted-foreground uppercase font-semibold mb-1">Efficient Capacity</p>
-                          <p className="text-xs text-muted-foreground mb-2">(75 sq ft/child)</p>
+                          <p className="text-xs font-jbmono text-muted-foreground uppercase font-semibold mb-1">75 sq ft / child</p>
+                          <p className="text-xs text-muted-foreground mb-2">planning assumption</p>
                           <p className="text-3xl font-bold text-foreground">{efficientCapacity.toLocaleString()}</p>
                           <p className="text-xs text-muted-foreground">max children</p>
                         </div>
 
                         <div className="rounded-lg p-4 bg-secondary border border-border text-center">
-                          <p className="text-xs font-jbmono text-muted-foreground uppercase font-semibold mb-1">Comfortable Capacity</p>
-                          <p className="text-xs text-muted-foreground mb-2">(90 sq ft/child)</p>
+                          <p className="text-xs font-jbmono text-muted-foreground uppercase font-semibold mb-1">90 sq ft / child</p>
+                          <p className="text-xs text-muted-foreground mb-2">planning assumption</p>
                           <p className="text-3xl font-bold text-foreground">{comfortableCapacity.toLocaleString()}</p>
                           <p className="text-xs text-muted-foreground">max children</p>
                         </div>
                       </div>
 
-                      <div className="bg-muted rounded-lg border border-border p-3">
-                        <p className="text-xs text-muted-foreground">
-                          <span className="font-semibold">DCFS Requirement:</span> 35 sq ft per child minimum. However, once you account for support spaces (bathrooms, kitchens, hallways, foyers, storage), the practical space need typically doubles to 75-90 sq ft per child.
-                        </p>
-                      </div>
 
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="space-y-1">
@@ -6870,12 +6538,6 @@ export default function RunDetail() {
                             </div>
                           </div>
 
-                          {estimatedOutdoorSpace > 0 && (
-                            <p className="text-xs text-muted-foreground mt-3">
-                              This outdoor area could be used for play space, parking, or pick-up/drop-off zones. DCFS requires 75 sq ft of outdoor space per child for licensed facilities.
-                            </p>
-                          )}
-
                           {stories > 1 && (
                             <p className="text-xs text-muted-foreground mt-2">
                               <span className="font-medium">Note:</span> Building footprint estimated from {stories}-story structure ({buildingSqFt.toLocaleString()} ÷ {stories} = ~{buildingFootprint.toLocaleString()} sq ft).
@@ -6886,340 +6548,61 @@ export default function RunDetail() {
                     </div>
                   );
                 })()}
+                <div className="kyp-src">Field values use available Cook County property/assessor records or manually entered listing data. Missing building area, land area, and stories are not inferred; stories default to one for the footprint estimate. Capacity at 75 and 90 sq ft per child is an app planning model, not a licensing or occupancy determination.</div>
               </div>
-              </CollapsibleContent>
-            </Collapsible>
           </div>
           )}
 
           {/* Childcare Capacity & Quality Section */}
-          {isDaycareOrSchool && (childcareCapacityZipData || childcareCapacityData) && (
+          {hasSchoolCcap && (
           <div id="print-section-childcare-capacity">
-            <Collapsible open={isCcapOpen} onOpenChange={setIsCcapOpen}>
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                  <h3 className="chead chead-icon">
-                    <DollarSign className="w-4 h-4" />
-                    CCAP Participation
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {!isCcapOpen && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {(() => {
-                          const capData = childcareViewMode === 'zip' ? childcareCapacityZipData : childcareCapacityData;
-                          if (capData) {
-                            return (
-                              <>
-                                <Badge variant="outline" className="text-xs">
-                                  {capData.pct_slots_ccap != null ? Math.round(capData.pct_slots_ccap) : '?'}% CCAP Rate
-                                </Badge>
-                              </>
-                            );
-                          }
-                          return null;
-                        })()}
-                        <Badge variant="outline" className="text-xs">
-                          {childcareViewMode === 'zip' ? `ZIP ${facts?.zipCode}` : facts?.communityArea}
-                        </Badge>
-                      </div>
-                    )}
-                    <span className="text-muted-foreground text-sm">{isCcapOpen ? '▼' : '▶'}</span>
-                  </div>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
+            <KypSubhead subsection={projectUseSubsections.ccap}><span className="lbl">CCAP participation</span></KypSubhead>
               <div className="px-4 space-y-4">
-                <Tabs value={childcareViewMode} onValueChange={(v) => setChildcareViewMode(v as 'zip' | 'community')} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-4 h-10 p-1 bg-secondary border border-border">
-                    <TabsTrigger
-                      value="zip"
-                      data-testid="tab-ccap-zip"
-                      className="h-full text-sm font-medium data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-                    >
-                      <MapPin className="w-4 h-4" />
-                      By ZIP Code
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="community"
-                      data-testid="tab-ccap-community"
-                      className="h-full text-sm font-medium data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-                    >
-                      <MapIcon className="w-4 h-4" />
-                      By Neighborhood
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
                 {(() => {
-                  const capData = childcareViewMode === 'zip' ? childcareCapacityZipData : childcareCapacityData;
-                  if (!capData) return <p className="text-sm text-muted-foreground">No CCAP data available for this {childcareViewMode === 'zip' ? 'ZIP code' : 'community area'}.</p>;
+                  const capData = areaViewMode === 'zip' ? childcareCapacityZipData : childcareCapacityData;
+                  if (!capData) return (
+                    <>
+                      <p className="text-sm text-muted-foreground">No CCAP data available for this {areaViewMode === 'zip' ? 'ZIP code' : 'community area'}.</p>
+                      <div className="kyp-src">Scope: ZIP {facts?.zipCode ?? "unavailable"} or {facts?.communityArea ?? "community area"}, per the selected area control. Expected source: Illinois DCFS ECE Service Data, FY2024; no data response was returned.</div>
+                    </>
+                  );
 
-                  const pctSlotsCcap = capData.pct_slots_ccap || 0;
-                  const citywidePct = capData.citywide_pct_ccap || 55;
-                  const diff = pctSlotsCcap - citywidePct;
-                  const isAboveAvg = diff > 0;
-                  const isAtAvg = diff === 0;
+                  const pctSlotsCcap = capData.pct_slots_ccap;
+                  const citywidePct = capData.citywide_pct_ccap;
 
                   return (
                     <div className="space-y-4">
                       {/* Main CCAP Percentage Display */}
-                      <div className={`rounded-lg p-6 border ${
-                        pctSlotsCcap >= 50
-                          ? 'bg-secondary border-border'
-                          : pctSlotsCcap >= 25
-                          ? 'bg-secondary border-border'
-                          : 'bg-secondary border-border'
-                      }`}>
+                      <div className="rounded-lg p-6 border bg-secondary border-border">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm text-muted-foreground mb-1">Slots Serving CCAP Children</p>
-                            <p className="text-4xl font-bold">{pctSlotsCcap}%</p>
+                            <p className="text-4xl font-bold">{pctSlotsCcap == null ? "—" : `${pctSlotsCcap}%`}</p>
                           </div>
-                          <div className="text-right">
-                            <p className="text-sm text-muted-foreground mb-1">Chicago Average</p>
-                            <p className="text-2xl font-semibold text-muted-foreground">{citywidePct}%</p>
-                          </div>
-                        </div>
-
-                        {/* Comparison Badge */}
-                        <div className="mt-4 pt-4 border-t border-border/50">
-                          {isAtAvg ? (
-                            <p className="text-sm text-muted-foreground">This area is at the city average for CCAP participation.</p>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant={isAboveAvg ? "default" : "secondary"}
-                                className={`text-sm ${isAboveAvg ? 'bg-foreground' : 'bg-foreground'}`}
-                              >
-                                {isAboveAvg ? '+' : ''}{diff}%
-                              </Badge>
-                              <span className="text-sm text-muted-foreground">
-                                {isAboveAvg ? 'above' : 'below'} city average
-                              </span>
+                          {citywidePct != null && (
+                            <div className="text-right">
+                              <p className="text-sm text-muted-foreground mb-1">Chicago Average</p>
+                              <p className="text-2xl font-semibold text-muted-foreground">{citywidePct}%</p>
                             </div>
                           )}
                         </div>
                       </div>
 
-                      <div className="text-xs text-muted-foreground">
-                        <p className="flex items-center gap-1">
-                          <Info className="w-3 h-3" />
-                          CCAP = Child Care Assistance Program. Data source: Illinois DCFS ECE Service Data FY2024
-                        </p>
-                      </div>
+                      <div className="kyp-src">CCAP = Child Care Assistance Program. Scope: ZIP {facts?.zipCode ?? "unavailable"} or {facts?.communityArea ?? "community area"}, per the selected area control. Source: Illinois DCFS ECE Service Data, FY2024. The citywide comparison is shown only when the source returns it.</div>
                     </div>
                   );
                 })()}
               </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </div>
-          )}
-
-          {/* Nearby Day Care Centers - For Day Care projects (competitive landscape) */}
-          {isDaycare && (
-          <div id="print-section-nearby-business-daycare-centers">
-            <Collapsible open={isNearbyDayCaresOpen} onOpenChange={setIsNearbyDayCaresOpen}>
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                  <h3 className="chead chead-icon">
-                    <Baby className="w-4 h-4" />
-                    Nearby Day Care Centers
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {!isNearbyDayCaresOpen && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {nearbyDayCaresData ? (
-                          <>
-                            <Badge variant="secondary" className="text-xs">
-                              {nearbyDayCaresData.totalFound} Found
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {nearbyDayCaresData.within1Mile || 0} within 1 mi
-                            </Badge>
-                          </>
-                        ) : isLoadingNearbyDayCares ? (
-                          <Badge variant="secondary" className="text-xs">Loading...</Badge>
-                        ) : null}
-                      </div>
-                    )}
-                    <span className="text-muted-foreground text-sm">{isNearbyDayCaresOpen ? '▼' : '▶'}</span>
-                  </div>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-              <div className="px-4">
-                {isLoadingNearbyDayCares ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                  </div>
-                ) : nearbyDayCaresData && nearbyDayCaresData.locations.length > 0 ? (
-                  <div className="space-y-4">
-                    <div className="flex flex-wrap gap-3 text-sm">
-                      <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                        {nearbyDayCaresData.within1Mile || 0} within 1 mi
-                      </span>
-                      <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                        {nearbyDayCaresData.within2Miles || 0} within 2 mi
-                      </span>
-                      <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                        {nearbyDayCaresData.within3Miles || nearbyDayCaresData.totalFound} within 3 mi
-                      </span>
-                    </div>
-                    <div className="space-y-1">
-                      {nearbyDayCaresData.locations.slice(0, 10).map((loc) => (
-                        <a
-                          key={loc.id}
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${loc.name} ${loc.address}`)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex justify-between items-start text-sm py-2 px-2 bg-secondary rounded-lg border border-border hover:bg-muted transition-colors cursor-pointer"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate text-foreground hover:underline">{loc.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">{loc.address}</p>
-                          </div>
-                          <Badge variant="outline" className="ml-2 shrink-0 text-pink-700 border-pink-300">
-                            {loc.distanceMiles?.toFixed(1) || '?'} mi
-                          </Badge>
-                        </a>
-                      ))}
-                    </div>
-                    {nearbyDayCaresData.totalFound > 10 && (
-                      <p className="text-xs text-muted-foreground italic">
-                        Showing 10 of {nearbyDayCaresData.totalFound} nearby day care centers
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No licensed day care centers found within 3 miles.</p>
-                )}
-              </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </div>
-          )}
-
-          {/* Nearby Day Care Centers (Google Maps) */}
-          {isDaycare && (
-          <div id="section-google-places-daycare">
-            <Collapsible open={isGooglePlacesDaycareOpen} onOpenChange={setIsGooglePlacesDaycareOpen}>
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1" data-testid="button-google-places-daycare-toggle">
-                  <h3 className="chead chead-icon">
-                    <MapPin className="w-4 h-4" />
-                    Nearby Day Care Competitors
-                    <span className="text-xs font-normal text-muted-foreground normal-case tracking-normal">(Google Maps)</span>
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {!isGooglePlacesDaycareOpen && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {isLoadingGooglePlacesDaycare || (googlePlacesDaycareData && googlePlacesDaycareData.status === 'pending') ? (
-                          <Badge variant="secondary" className="text-xs animate-pulse">Fetching…</Badge>
-                        ) : googlePlacesDaycareData && googlePlacesDaycareData.count > 0 ? (
-                          <>
-                            <Badge variant="secondary" className="text-xs">{googlePlacesDaycareData.count} Found</Badge>
-                            {googlePlacesDaycareData.avgRating && (
-                              <Badge variant="outline" className="text-xs">Avg ★ {googlePlacesDaycareData.avgRating}</Badge>
-                            )}
-                          </>
-                        ) : googlePlacesDaycareData ? (
-                          <Badge variant="secondary" className="text-xs text-muted-foreground">None found</Badge>
-                        ) : null}
-                      </div>
-                    )}
-                    <span className="text-muted-foreground text-sm">{isGooglePlacesDaycareOpen ? '▼' : '▶'}</span>
-                  </div>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-4 mt-1 pb-3">
-                  {(isLoadingGooglePlacesDaycare || (googlePlacesDaycareData && googlePlacesDaycareData.status === 'pending')) && (
-                    <p className="text-sm text-muted-foreground animate-pulse">Searching Google Maps for nearby day care centers — updates in ~90s…</p>
-                  )}
-                  {!isLoadingGooglePlacesDaycare && !googlePlacesDaycareData && (
-                    <p className="text-sm text-muted-foreground">Nearby day care competitors could not be loaded. Try again later.</p>
-                  )}
-                  {googlePlacesDaycareData && !isLoadingGooglePlacesDaycare && googlePlacesDaycareData.status !== 'pending' && (() => {
-                    if (!googlePlacesDaycareData.count || googlePlacesDaycareData.count === 0) {
-                      return <p className="text-sm text-muted-foreground">No day care centers found within 1 mile on Google Maps.</p>;
-                    }
-                    return (
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
-                          <div className="bg-secondary rounded-xl border border-border p-2 text-xs">
-                            <div className="text-muted-foreground">Within 1 mi</div>
-                            <div className="font-semibold text-sm">{googlePlacesDaycareData.count}</div>
-                          </div>
-                          {googlePlacesDaycareData.avgRating && (
-                            <div className="bg-secondary rounded-xl border border-border p-2 text-xs">
-                              <div className="text-muted-foreground">Avg Rating</div>
-                              <div className="font-semibold text-sm">★ {googlePlacesDaycareData.avgRating}</div>
-                            </div>
-                          )}
-                          {daycareSearchTerm && (
-                            <div className="bg-secondary rounded-xl border border-border p-2 text-xs">
-                              <div className="text-muted-foreground">Searched For</div>
-                              <div className="font-semibold text-sm">{daycareSearchTerm}</div>
-                            </div>
-                          )}
-                        </div>
-                        <div className="space-y-1">
-                          {googlePlacesDaycareData.places.map((p: any, i: number) => (
-                            <div key={i} className="flex items-start justify-between gap-2 rounded-lg bg-secondary border border-border px-2 py-1.5 text-xs" data-testid={`gplaces-daycare-${i}`}>
-                              <div className="min-w-0">
-                                <div className="font-medium truncate">
-                                  {p.url ? (
-                                    <a href={p.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">{p.name}</a>
-                                  ) : p.name}
-                                </div>
-                                <div className="text-muted-foreground flex gap-2 flex-wrap mt-0.5">
-                                  {p.address && <span>{p.address}</span>}
-                                  {p.distanceMiles != null && <span>{p.distanceMiles} mi away</span>}
-                                  {p.reviewsCount != null && <span>{p.reviewsCount.toLocaleString()} reviews</span>}
-                                </div>
-                              </div>
-                              {p.rating != null && <div className="shrink-0 font-semibold">★ {p.rating}</div>}
-                            </div>
-                          ))}
-                        </div>
-                        <div className="flex items-start gap-1.5 text-xs text-muted-foreground mt-2">
-                          <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                          <span>Source: Google Maps · Places within 1 mile · Sorted by distance</span>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
           </div>
           )}
 
           {/* Grocery Access Section - Only shown when Grocery is selected */}
           {isGrocery && (
             <div id="print-section-grocery">
-              <Collapsible open={isGroceryAccessOpen} onOpenChange={setIsGroceryAccessOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <ShoppingCart className="w-4 h-4" />
-                      Grocery Store Access
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isGroceryAccessOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          <Badge variant="outline" className="text-xs">{groceryData?.storeCount || communityGroceryData?.storeCount || 0} stores</Badge>
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isGroceryAccessOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+              <KypSubhead subsection={projectUseSubsections.grocery}><span className="lbl">Grocery access</span></KypSubhead>
                 <div className="px-4">
-                  <Tabs defaultValue="zip" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-4 h-12 p-1.5 bg-secondary border border-border">
+                  <Tabs value={areaViewMode} onValueChange={(value) => setAreaViewMode(value as 'zip' | 'community')} className="w-full">
+                    <TabsList className="hidden">
                       <TabsTrigger
                         value="zip"
                         data-testid="tab-grocery-zip"
@@ -7246,94 +6629,19 @@ export default function RunDetail() {
                         </div>
                       ) : groceryData ? (
                         <div className="space-y-4">
-                          <div className={`p-4 rounded-lg flex items-start gap-3 ${
-                            groceryData.storeCount === 0
-                              ? 'bg-secondary border border-border'
-                              : groceryData.storeCount <= 2
-                              ? 'bg-secondary border border-border'
-                              : 'bg-secondary border border-border'
-                          }`}>
-                            {groceryData.storeCount === 0 ? (
-                              <XCircle className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                            ) : groceryData.storeCount <= 2 ? (
-                              <AlertTriangle className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                            ) : (
-                              <CheckCircle2 className="w-5 h-5 text-foreground mt-0.5 flex-shrink-0" />
-                            )}
-                            <div>
-                              <p className={`font-semibold ${
-                                groceryData.storeCount === 0
-                                  ? 'text-muted-foreground'
-                                  : groceryData.storeCount <= 2
-                                  ? 'text-muted-foreground'
-                                  : 'text-foreground'
-                              }`}>
-                                {groceryData.storeCount === 0
-                                  ? 'Food Desert (No Grocery Stores)'
-                                  : groceryData.storeCount <= 2
-                                  ? 'Limited Grocery Access'
-                                  : 'Good Grocery Access'}
-                              </p>
-                              <p className="text-sm mt-1 text-muted-foreground">
-                                ZIP Code: {facts?.zipCode}
-                              </p>
-                            </div>
-                          </div>
+                          <ProjectUseCountBlocks counts={[{ value: groceryData.stores.length, label: `Stores in ZIP ${facts?.zipCode ?? "—"}` }]} />
+                          <ProjectUseBusinessList listKey={`grocery-zip-${facts?.zipCode ?? ""}`} rows={groceryData.stores.map(store => ({
+                            name: store.name, address: store.address, distance: store.distance ?? null,
+                            meta: store.squareFeet ? [`${store.squareFeet.toLocaleString()} sq ft`] : [],
+                          }))} />
 
-                          <div className="bg-secondary rounded-lg border border-border p-3">
-                            <p className="text-xs font-jbmono text-muted-foreground uppercase font-semibold">Grocery Stores in ZIP</p>
-                            <p className="text-xl font-bold">{groceryData.storeCount}</p>
-                          </div>
-
-                          {groceryData.stores.length > 0 && (
-                            <div className="space-y-2">
-                              <p className="font-jbmono text-xs font-bold uppercase tracking-wider text-foreground">Stores in this ZIP</p>
-                              <div className="space-y-1 max-h-48 overflow-y-auto">
-                                {groceryData.stores.slice(0, 10).map((store, idx) => (
-                                  <div key={idx} className="flex justify-between items-start text-sm py-2 px-2 rounded-xl bg-secondary border border-border">
-                                    <div className="flex-1 min-w-0">
-                                      <span className="font-medium text-foreground block truncate">
-                                        {store.name}
-                                      </span>
-                                      <span className="text-muted-foreground text-xs block truncate">
-                                        {store.address}
-                                      </span>
-                                    </div>
-                                    <div className="flex flex-col items-end ml-2">
-                                      {store.distance > 0 && (
-                                        <span className="text-muted-foreground whitespace-nowrap font-medium">
-                                          {store.distance.toFixed(1)} mi
-                                        </span>
-                                      )}
-                                      {store.squareFeet && (
-                                        <span className="text-muted-foreground whitespace-nowrap text-xs">
-                                          {store.squareFeet.toLocaleString()} sq ft
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                              {groceryData.stores.length > 10 && (
-                                <p className="text-xs text-muted-foreground italic">
-                                  Showing 10 of {groceryData.stores.length} stores
-                                </p>
-                              )}
-                            </div>
-                          )}
-
-                          <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
-                            <p className="flex items-center gap-1">
-                              <Info className="w-3 h-3" />
-                              Source: {groceryData.sources.dataSource} ({groceryData.sources.dataYear})
-                            </p>
-                          </div>
                         </div>
                       ) : (
                         <p className="text-sm text-muted-foreground">
                           Grocery store data not available for this ZIP code.
                         </p>
                       )}
+                      <div className="kyp-src">Scope: ZIP {facts?.zipCode ?? "unavailable"}; this is an area aggregate, not a radius search. Source: {groceryData?.sources?.dataSource ?? "source detail unavailable"}{groceryData?.sources?.dataYear ? ` (${groceryData.sources.dataYear})` : ""}. Business names open Google Maps search results.</div>
                     </TabsContent>
 
                     <TabsContent value="community">
@@ -7344,128 +6652,29 @@ export default function RunDetail() {
                         </div>
                       ) : communityGroceryData ? (
                         <div className="space-y-4">
-                          <div className={`p-4 rounded-lg flex items-start gap-3 ${
-                            communityGroceryData.storeCount === 0
-                              ? 'bg-secondary border border-border'
-                              : communityGroceryData.storeCount <= 2
-                              ? 'bg-secondary border border-border'
-                              : 'bg-secondary border border-border'
-                          }`}>
-                            {communityGroceryData.storeCount === 0 ? (
-                              <XCircle className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                            ) : communityGroceryData.storeCount <= 2 ? (
-                              <AlertTriangle className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                            ) : (
-                              <CheckCircle2 className="w-5 h-5 text-foreground mt-0.5 flex-shrink-0" />
-                            )}
-                            <div>
-                              <p className={`font-semibold ${
-                                communityGroceryData.storeCount === 0
-                                  ? 'text-muted-foreground'
-                                  : communityGroceryData.storeCount <= 2
-                                  ? 'text-muted-foreground'
-                                  : 'text-foreground'
-                              }`}>
-                                {communityGroceryData.storeCount === 0
-                                  ? 'Food Desert (No Grocery Stores)'
-                                  : communityGroceryData.storeCount <= 2
-                                  ? 'Limited Grocery Access'
-                                  : 'Good Grocery Access'}
-                              </p>
-                              <p className="text-sm mt-1 text-muted-foreground">
-                                Neighborhood: {facts?.communityArea}
-                              </p>
-                            </div>
-                          </div>
+                          <ProjectUseCountBlocks counts={[{ value: communityGroceryData.stores.length, label: `Stores in ${facts?.communityArea ?? "community area"}` }]} />
+                          <ProjectUseBusinessList listKey={`grocery-community-${facts?.communityArea ?? ""}`} rows={communityGroceryData.stores.map(store => ({
+                            name: store.name, address: store.address, distance: store.distance ?? null,
+                            meta: store.squareFeet ? [`${store.squareFeet.toLocaleString()} sq ft`] : [],
+                          }))} />
 
-                          <div className="bg-secondary rounded-lg border border-border p-3">
-                            <p className="text-xs font-jbmono text-muted-foreground uppercase font-semibold">Grocery Stores in Neighborhood</p>
-                            <p className="text-xl font-bold">{communityGroceryData.storeCount}</p>
-                          </div>
-
-                          {communityGroceryData.stores.length > 0 && (
-                            <div className="space-y-2">
-                              <p className="font-jbmono text-xs font-bold uppercase tracking-wider text-foreground">Stores in this Neighborhood</p>
-                              <div className="space-y-1 max-h-48 overflow-y-auto">
-                                {communityGroceryData.stores.slice(0, 10).map((store, idx) => (
-                                  <div key={idx} className="flex justify-between items-start text-sm py-2 px-2 rounded-xl bg-secondary border border-border">
-                                    <div className="flex-1 min-w-0">
-                                      <span className="font-medium text-foreground block truncate">
-                                        {store.name}
-                                      </span>
-                                      <span className="text-muted-foreground text-xs block truncate">
-                                        {store.address}
-                                      </span>
-                                    </div>
-                                    <div className="flex flex-col items-end ml-2">
-                                      {store.distance > 0 && (
-                                        <span className="text-muted-foreground whitespace-nowrap font-medium">
-                                          {store.distance.toFixed(1)} mi
-                                        </span>
-                                      )}
-                                      {store.squareFeet && (
-                                        <span className="text-muted-foreground whitespace-nowrap text-xs">
-                                          {store.squareFeet.toLocaleString()} sq ft
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                              {communityGroceryData.stores.length > 10 && (
-                                <p className="text-xs text-muted-foreground italic">
-                                  Showing 10 of {communityGroceryData.stores.length} stores
-                                </p>
-                              )}
-                            </div>
-                          )}
-
-                          <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
-                            <p className="flex items-center gap-1">
-                              <Info className="w-3 h-3" />
-                              Source: {communityGroceryData.sources.dataSource} ({communityGroceryData.sources.dataYear})
-                            </p>
-                          </div>
                         </div>
                       ) : (
                         <p className="text-sm text-muted-foreground">
                           Grocery store data not available for this neighborhood.
                         </p>
                       )}
+                      <div className="kyp-src">Scope: {facts?.communityArea ?? "community area unavailable"}; this is an area aggregate, not a radius search. Source: {communityGroceryData?.sources?.dataSource ?? "source detail unavailable"}{communityGroceryData?.sources?.dataYear ? ` (${communityGroceryData.sources.dataYear})` : ""}. Business names open Google Maps search results.</div>
                     </TabsContent>
                   </Tabs>
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           )}
 
           {/* Vehicle Ownership Section - Only shown for auto service project uses */}
           {isAutoService && (
             <div id="print-section-vehicle-ownership">
-              <Collapsible open={isAutoDependencyOpen} onOpenChange={setIsAutoDependencyOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead">
-                      <svg className="w-4 h-4 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
-                        <circle cx="7" cy="17" r="2" />
-                        <circle cx="17" cy="17" r="2" />
-                      </svg>
-                      Auto Dependency Analysis
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isAutoDependencyOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {vehicleData?.autoDependencyLevel && <Badge variant="outline" className="text-xs">{vehicleData.autoDependencyLevel}</Badge>}
-                          {vehicleData?.avgVehiclesPerHousehold && <Badge variant="secondary" className="text-xs">{vehicleData.avgVehiclesPerHousehold.toFixed(2)} veh/hh</Badge>}
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isAutoDependencyOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+              <KypSubhead subsection={projectUseSubsections.vehicle}><span className="lbl">Vehicle ownership</span></KypSubhead>
                 <div className="px-4">
                   {isLoadingVehicle ? (
                     <div className="space-y-3">
@@ -7475,51 +6684,13 @@ export default function RunDetail() {
                     </div>
                   ) : vehicleData ? (
                     <div className="space-y-4">
-                      <div className={`p-4 rounded-lg border-2 ${
-                        vehicleData.autoDependencyLevel === 'high'
-                          ? 'bg-secondary border-foreground'
-                          : vehicleData.autoDependencyLevel === 'moderate'
-                          ? 'bg-secondary border-foreground'
-                          : 'bg-secondary border-foreground'
-                      }`} data-testid="auto-dependency-banner">
-                        <div className="flex items-center gap-2 mb-2">
-                          {vehicleData.autoDependencyLevel === 'high' ? (
-                            <>
-                              <CheckCircle2 className="w-5 h-5 text-foreground" />
-                              <span className="font-bold text-foreground">
-                                High Auto Dependency
-                              </span>
-                            </>
-                          ) : vehicleData.autoDependencyLevel === 'moderate' ? (
-                            <>
-                              <AlertTriangle className="w-5 h-5 text-muted-foreground" />
-                              <span className="font-bold text-foreground">
-                                Moderate Auto Dependency
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <XCircle className="w-5 h-5 text-foreground" />
-                              <span className="font-bold text-foreground">
-                                Low Auto Dependency (Transit-Oriented)
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        <p className={`text-sm ${
-                          vehicleData.autoDependencyLevel === 'high'
-                            ? 'text-muted-foreground'
-                            : vehicleData.autoDependencyLevel === 'moderate'
-                            ? 'text-muted-foreground'
-                            : 'text-muted-foreground'
-                        }`}>
-                          {vehicleData.avgVehiclesPerHousehold.toFixed(2)} vehicles per household ({vehicleData.comparedToCityAvg})
-                        </p>
-                      </div>
+                      <ProjectUseCountBlocks counts={[
+                        { value: vehicleData.avgVehiclesPerHousehold.toFixed(2), label: "Vehicles per household" },
+                        { value: vehicleData.totalHouseholds.toLocaleString(), label: "Households" },
+                      ]} />
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                          <h4 className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651]">Vehicle Ownership</h4>
                           <div className="space-y-1 text-sm">
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">No vehicle</span>
@@ -7536,170 +6707,46 @@ export default function RunDetail() {
                           </div>
                         </div>
 
-                        <div className="space-y-2">
-                          <h4 className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651]">Market Assessment</h4>
-                          <div className="text-sm">
-                            {isGasStation && (
-                              <div className={`p-2 rounded ${
-                                vehicleData.autoDependencyLevel === 'high'
-                                  ? 'bg-secondary text-foreground border border-border'
-                                  : vehicleData.autoDependencyLevel === 'moderate'
-                                  ? 'bg-secondary text-muted-foreground border border-border'
-                                  : 'bg-secondary text-muted-foreground border border-border'
-                              }`}>
-                                {vehicleData.autoDependencyLevel === 'high' ? (
-                                  <>Strong demand for fuel sales</>
-                                ) : vehicleData.autoDependencyLevel === 'moderate' ? (
-                                  <>Moderate fuel demand</>
-                                ) : (
-                                  <>Limited market - high transit usage</>
-                                )}
-                              </div>
-                            )}
-                            {(isAutoRepair || isAutoBody) && (
-                              <div className={`p-2 rounded ${
-                                vehicleData.autoDependencyLevel === 'high' || vehicleData.autoDependencyLevel === 'moderate'
-                                  ? 'bg-secondary text-foreground border border-border'
-                                  : 'bg-secondary text-muted-foreground border border-border'
-                              }`}>
-                                {vehicleData.autoDependencyLevel === 'high' || vehicleData.autoDependencyLevel === 'moderate' ? (
-                                  <>~{Math.round(vehicleData.totalHouseholds * vehicleData.avgVehiclesPerHousehold).toLocaleString()} vehicles in service area</>
-                                ) : (
-                                  <>Smaller vehicle market - consider location carefully</>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
                       </div>
 
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-muted-foreground">
-                          Source: American Community Survey 5-Year Estimates by Community Area (ACS 2019-2023)
-                        </p>
-                      </div>
+                      <div className="kyp-src">Scope: Community area {facts?.communityArea ?? "unavailable"}. Source: American Community Survey 5-Year Estimates, 2019–2023.</div>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Vehicle ownership data not available for this area.
-                    </p>
+                    <>
+                      <p className="text-sm text-muted-foreground">Vehicle ownership data not available for this area.</p>
+                      <div className="kyp-src">Scope: Community area {facts?.communityArea ?? "unavailable"}. Expected source: American Community Survey 5-Year Estimates, 2019–2023; no data response was returned.</div>
+                    </>
                   )}
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           )}
 
           {/* Senior Population Section - Shown only for senior care project uses */}
           {isSeniorCare && (
             <div id="print-section-seniors">
-              <Collapsible open={isSeniorPopulationOpen} onOpenChange={setIsSeniorPopulationOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <User className="w-4 h-4" />
-                      Senior Population Analysis
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isSeniorPopulationOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          <Badge variant="outline" className="text-xs">{(seniorsViewMode === 'zip' ? seniorsZipData : seniorsData)?.population65Plus?.toLocaleString()} seniors</Badge>
-                          <Badge variant="secondary" className="text-xs">{(seniorsViewMode === 'zip' ? seniorsZipData : seniorsData)?.pct65Plus}%</Badge>
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isSeniorPopulationOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+              <KypSubhead subsection={projectUseSubsections.seniors}><span className="lbl">Senior population</span></KypSubhead>
                 <div className="px-4">
-                  <Tabs value={seniorsViewMode} onValueChange={(v) => setSeniorsViewMode(v as 'zip' | 'community')} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-4 h-10 p-1 bg-secondary border border-border">
-                      <TabsTrigger
-                        value="zip"
-                        data-testid="tab-seniors-zip"
-                        className="h-full text-sm font-medium data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-                      >
-                        <MapPin className="w-4 h-4" />
-                        By ZIP Code
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="community"
-                        data-testid="tab-seniors-community"
-                        className="h-full text-sm font-medium data-[state=active]:bg-[#2b3a9e] data-[state=active]:text-white gap-2"
-                      >
-                        <MapIcon className="w-4 h-4" />
-                        By Neighborhood
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-
-                  {(seniorsViewMode === 'zip' ? isLoadingSeniorsZip : isLoadingSeniors) ? (
+                  {(areaViewMode === 'zip' ? isLoadingSeniorsZip : isLoadingSeniors) ? (
                     <div className="space-y-3">
                       <Skeleton className="h-6 w-2/3" />
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-4 w-3/4" />
                     </div>
                   ) : (() => {
-                    const currentSeniorsData = seniorsViewMode === 'zip' ? seniorsZipData : seniorsData;
+                    const currentSeniorsData = areaViewMode === 'zip' ? seniorsZipData : seniorsData;
                     if (!currentSeniorsData) {
                       return (
-                        <p className="text-sm text-muted-foreground">
-                          Senior population data not available for this {seniorsViewMode === 'zip' ? 'ZIP code' : 'area'}.
-                        </p>
+                        <>
+                          <p className="text-sm text-muted-foreground">Senior population data not available for this {areaViewMode === 'zip' ? 'ZIP code' : 'area'}.</p>
+                          <div className="kyp-src">Scope: ZIP {facts?.zipCode ?? "unavailable"} or {facts?.communityArea ?? "community area"}, per the selected area control. Expected source: American Community Survey 5-Year Estimates, 2019–2023; no data response was returned.</div>
+                        </>
                       );
                     }
-                    const areaLabel = seniorsViewMode === 'zip'
-                      ? `ZIP ${currentSeniorsData.zipCode}`
+                    const areaLabel = areaViewMode === 'zip'
+                      ? `ZIP ${(currentSeniorsData as any).zipCode}`
                       : (currentSeniorsData as any).communityArea;
                     return (
                     <div className="space-y-4">
-                      {isSeniorCare && (
-                        <div className={`p-3 rounded-lg border ${
-                          currentSeniorsData.seniorDemandLevel === 'high'
-                            ? 'bg-secondary border-border'
-                            : currentSeniorsData.seniorDemandLevel === 'moderate'
-                            ? 'bg-secondary border-border'
-                            : 'bg-secondary border-border'
-                        }`}>
-                          <div className="flex items-center gap-2">
-                            <span className={`font-semibold text-sm ${
-                              currentSeniorsData.seniorDemandLevel === 'high'
-                                ? 'text-foreground'
-                                : currentSeniorsData.seniorDemandLevel === 'moderate'
-                                ? 'text-foreground'
-                                : 'text-foreground'
-                            }`}>
-                              {currentSeniorsData.seniorDemandLevel === 'high'
-                                ? 'Strong Demand for Senior Care'
-                                : currentSeniorsData.seniorDemandLevel === 'moderate'
-                                ? 'Moderate Demand for Senior Care'
-                                : 'Limited Demand for Senior Care'}
-                            </span>
-                          </div>
-                          <p className={`text-sm mt-1 ${
-                            currentSeniorsData.seniorDemandLevel === 'high'
-                              ? 'text-muted-foreground'
-                              : currentSeniorsData.seniorDemandLevel === 'moderate'
-                              ? 'text-muted-foreground'
-                              : 'text-muted-foreground'
-                          }`}>
-                            {currentSeniorsData.pctSeniorsLivingAlone}% of seniors live alone • {currentSeniorsData.comparedToCityAvg}
-                          </p>
-                          {currentSeniorsData.rankDescription && (
-                            <p className={`text-xs mt-1 font-medium ${
-                              currentSeniorsData.seniorDemandLevel === 'high'
-                                ? 'text-foreground'
-                                : currentSeniorsData.seniorDemandLevel === 'moderate'
-                                ? 'text-muted-foreground'
-                                : 'text-foreground'
-                            }`} data-testid="text-seniors-rank">
-                              {currentSeniorsData.rankDescription} for senior care demand
-                            </p>
-                          )}
-                        </div>
-                      )}
-
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3" data-testid="seniors-stats-grid">
                         <div className="p-3 rounded-xl bg-secondary border border-border">
                           <div className="text-2xl font-bold text-foreground" data-testid="text-population-65-plus">
@@ -7720,7 +6767,7 @@ export default function RunDetail() {
                             {currentSeniorsData.age85Plus.toLocaleString()}
                           </div>
                           <div className="text-xs text-foreground">Age 85+</div>
-                          <div className="text-xs text-muted-foreground">(Highest care needs)</div>
+                          <div className="text-xs text-muted-foreground">residents</div>
                         </div>
                         <div className="p-3 rounded-xl bg-secondary border border-border">
                           <div className="text-2xl font-bold text-foreground" data-testid="text-total-population">
@@ -7749,61 +6796,18 @@ export default function RunDetail() {
                         </div>
                       </div>
 
-                      {isSeniorCare && (
-                        <div className="space-y-2 pt-2 border-t">
-                          <h4 className="font-jbmono text-[11px] font-bold uppercase tracking-[0.14em] text-[#565651]">Market Assessment</h4>
-                          <div className="text-sm space-y-1">
-                            <p>
-                              <span className="font-medium">Primary Target:</span>{' '}
-                              {currentSeniorsData.seniorsLivingAlone.toLocaleString()} seniors living alone
-                            </p>
-                            <p>
-                              <span className="font-medium">Secondary Target:</span>{' '}
-                              {currentSeniorsData.age85Plus.toLocaleString()} residents 85+ (regardless of living arrangement)
-                            </p>
-                            <p>
-                              <span className="font-medium">Estimated Addressable Market:</span>{' '}
-                              {Math.round(currentSeniorsData.seniorsLivingAlone + currentSeniorsData.age85Plus * 0.5).toLocaleString()} potential clients
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-muted-foreground">
-                          Source: American Community Survey 5-Year Estimates {seniorsViewMode === 'zip' ? 'by ZIP Code' : 'by Community Area'} (ACS 2019-2023)
-                        </p>
-                      </div>
+                      <div className="kyp-src">Scope: {areaViewMode === 'zip' ? `ZIP ${(currentSeniorsData as any).zipCode ?? facts?.zipCode ?? "unavailable"}` : (currentSeniorsData as any).communityArea ?? facts?.communityArea ?? "community area unavailable"}. Source: American Community Survey 5-Year Estimates, 2019–2023.</div>
                     </div>
                     );
                   })()}
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           )}
 
           {/* Existing Gas Stations Section - Only shown when Gas Station is selected - FIRST */}
           {isGasStation && (
             <div id="print-section-nearby-business">
-              <Collapsible open={isNearbyFillingStationsOpen} onOpenChange={setIsNearbyFillingStationsOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <Fuel className="w-4 h-4" />
-                      Nearby Filling Stations
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isNearbyFillingStationsOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          <Badge variant="outline" className="text-xs">{gasStationsData?.within1Mile || 0} within 1 mi</Badge>
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isNearbyFillingStationsOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+              <KypSubhead subsection={projectUseSubsections.gasStations}><span className="lbl">Filling stations</span></KypSubhead>
                 <div className="px-4">
                   {isLoadingGasStations ? (
                     <div className="space-y-3">
@@ -7813,84 +6817,30 @@ export default function RunDetail() {
                     </div>
                   ) : gasStationsData && gasStationsData.stations.length > 0 ? (
                     <div className="space-y-4">
-                      <div className="flex flex-wrap gap-3 text-sm">
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {gasStationsData.within1Mile || 0} within 1 mi
-                        </span>
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {gasStationsData.within2Miles || 0} within 2 mi
-                        </span>
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {gasStationsData.within3Miles || gasStationsData.totalFound} within 3 mi
-                        </span>
-                      </div>
-                      <div className="space-y-1">
-                        {gasStationsData.stations.slice(0, 10).map((station) => (
-                          <div key={station.id} className="flex justify-between items-start text-sm py-2 px-2 bg-secondary rounded-xl border border-border">
-                            <div className="flex-1 min-w-0">
-                              <span className="font-medium text-foreground block truncate">
-                                {station.name}
-                              </span>
-                              <span className="text-muted-foreground text-xs block truncate">
-                                {station.address}{station.neighborhood ? `, ${station.neighborhood}` : ''}
-                              </span>
-                            </div>
-                            <span className="text-muted-foreground whitespace-nowrap ml-2 font-medium">
-                              {station.distanceMiles} mi
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                      {gasStationsData.totalFound > 10 && (
-                        <p className="text-xs text-muted-foreground italic">
-                          Showing 10 of {gasStationsData.totalFound} filling stations
-                        </p>
-                      )}
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-muted-foreground">
-                          Source: Chicago Business Licenses - Filling Station permits
-                        </p>
-                      </div>
+                      <ProjectUseCountBlocks counts={[
+                        { value: gasStationsData.stations.filter(s => s.distanceMiles != null && s.distanceMiles <= 1).length, label: "Within 1 mile" },
+                        { value: gasStationsData.stations.filter(s => s.distanceMiles != null && s.distanceMiles <= 2).length, label: "Within 2 miles" },
+                        { value: gasStationsData.stations.filter(s => s.distanceMiles != null && s.distanceMiles <= 3).length, label: "Within 3 miles" },
+                      ]} />
+                      <ProjectUseBusinessList listKey={`gas-${facts?.lat}-${facts?.lon}`} rows={gasStationsData.stations.filter(station => station.distanceMiles == null || station.distanceMiles <= 3).map(station => ({
+                        name: station.name, address: `${station.address}${station.neighborhood ? `, ${station.neighborhood}` : ""}`,
+                        distance: station.distanceMiles ?? null,
+                      }))} />
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       No filling stations found within 3 miles of this location.
                     </p>
                   )}
+                  <div className="kyp-src">Scope: returned filling-station records within 3 miles plus any records with unknown distance; only known distances contribute to the radius counts. Source: Chicago Business Licenses, Filling Station permits. Names open Google Maps search results.</div>
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           )}
 
           {/* EV Registrations Trend Chart - Shown for all auto service project uses */}
           {isAutoService && (
             <div id="print-section-ev-registrations">
-              <Collapsible open={isEvRegistrationsOpen} onOpenChange={setIsEvRegistrationsOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <Zap className="w-4 h-4" />
-                      EV Registration Trends (Cook County)
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isEvRegistrationsOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {evRegistrationsData?.zipCodeData && evRegistrationsData.zipCodeData.length > 0 ? (
-                            <Badge variant="outline" className="text-xs">ZIP {facts?.zipCode}: {evRegistrationsData.zipCodeData[evRegistrationsData.zipCodeData.length - 1]?.count.toLocaleString()} EVs</Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-xs">Cook County</Badge>
-                          )}
-                          {evRegistrationsData?.cookCountyData && evRegistrationsData.cookCountyData.length > 0 && (
-                            <Badge variant="secondary" className="text-xs">{evRegistrationsData.cookCountyData[evRegistrationsData.cookCountyData.length - 1]?.count.toLocaleString()} county EVs</Badge>
-                          )}
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isEvRegistrationsOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+              <KypSubhead subsection={projectUseSubsections.evRegistrations}><span className="lbl">EV registration trends</span></KypSubhead>
                 <div className="px-4">
                   {isLoadingEvRegistrations ? (
                     <div className="space-y-3">
@@ -7898,13 +6848,6 @@ export default function RunDetail() {
                     </div>
                   ) : evRegistrationsData?.cookCountyData ? (
                     <div className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        Monthly EV registrations in Cook County over the past 2 years
-                        {evRegistrationsData.zipCodeData && facts?.zipCode && (
-                          <span> (with ZIP {facts.zipCode} highlighted)</span>
-                        )}
-                      </p>
-
                       <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart
@@ -7994,51 +6937,28 @@ export default function RunDetail() {
                         </div>
                       )}
 
-                      <div className="pt-2 border-t">
-                        <a
-                          href={evRegistrationsData.sourceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-primary hover:underline flex items-center gap-1"
-                          data-testid="link-ev-stats-source"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          Source: Illinois Secretary of State - Electric Vehicle Statistics
-                        </a>
-                      </div>
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       EV registration data not available for this area.
                     </p>
                   )}
+                  <div className="kyp-src">
+                    Scope: Cook County monthly trend and ZIP {facts?.zipCode ?? "when available"} series. Source:{" "}
+                    {evRegistrationsData?.sourceUrl ? (
+                      <a href={evRegistrationsData.sourceUrl} target="_blank" rel="noopener noreferrer" data-testid="link-ev-stats-source">
+                        <ExternalLink className="inline h-3 w-3" /> Illinois Secretary of State, Electric Vehicle Statistics.
+                      </a>
+                    ) : "Illinois Secretary of State, Electric Vehicle Statistics (source link unavailable)."}
+                  </div>
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           )}
 
           {/* EV Charging Stations Section - Only shown when Gas Station is selected - THIRD */}
           {isGasStation && (
             <div id="print-section-nearby-business-ev">
-              <Collapsible open={isEvChargingOpen} onOpenChange={setIsEvChargingOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <Zap className="w-4 h-4" />
-                      Nearby EV Charging Stations
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isEvChargingOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          <Badge variant="outline" className="text-xs">{evStationsData?.stations?.length || 0} stations</Badge>
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isEvChargingOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+              <KypSubhead subsection={projectUseSubsections.evStations}><span className="lbl">EV charging stations</span></KypSubhead>
                 <div className="px-4">
                   {isLoadingEvStations ? (
                     <div className="space-y-3">
@@ -8058,95 +6978,27 @@ export default function RunDetail() {
                         }
                         return acc;
                       }, []);
-                      const within1 = deduped.filter(s => s.distanceMiles <= 1).length;
-                      const within2 = deduped.filter(s => s.distanceMiles <= 2).length;
-                      const within3 = deduped.length;
+                      const within1 = deduped.filter(s => s.distanceMiles != null && s.distanceMiles <= 1).length;
+                      const within2 = deduped.filter(s => s.distanceMiles != null && s.distanceMiles <= 2).length;
+                      const within3 = deduped.filter(s => s.distanceMiles != null && s.distanceMiles <= 3).length;
+                      const displayedStations = deduped.filter(s => s.distanceMiles == null || s.distanceMiles <= 3);
                       return (
                     <div className="space-y-4">
-                      <div className="flex flex-wrap gap-3 text-sm">
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {within1} within 1 mi
-                        </span>
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {within2} within 2 mi
-                        </span>
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {within3} within 3 mi
-                        </span>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b text-left">
-                              <th className="py-2 pr-2 font-medium text-muted-foreground">Station</th>
-                              <th className="py-2 px-2 font-medium text-muted-foreground text-center whitespace-nowrap">Distance</th>
-                              <th className="py-2 px-2 font-medium text-muted-foreground text-center whitespace-nowrap">Network</th>
-                              <th className="py-2 px-2 font-medium text-foreground text-center whitespace-nowrap">Level 2</th>
-                              <th className="py-2 px-2 font-medium text-muted-foreground text-center whitespace-nowrap">DC Fast</th>
-                              <th className="py-2 px-2 font-medium text-muted-foreground text-center whitespace-nowrap">Access</th>
-                              <th className="py-2 pl-2 font-medium text-muted-foreground text-center whitespace-nowrap">Confirmed</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {deduped
-                              .slice(0, 10)
-                              .map((station) => (
-                              <tr key={station.id} className="border-b border-border hover-elevate">
-                                <td className="py-2 pr-2">
-                                  <div className="font-medium text-foreground truncate max-w-[200px]">
-                                    {station.name}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                    {station.address}
-                                  </div>
-                                </td>
-                                <td className="py-2 px-2 text-center font-medium text-muted-foreground whitespace-nowrap">
-                                  {station.distanceMiles} mi
-                                </td>
-                                <td className="py-2 px-2 text-center">
-                                  <span className="text-xs px-1.5 py-0.5 bg-secondary border border-border text-foreground rounded whitespace-nowrap">
-                                    {station.evNetwork || 'Unknown'}
-                                  </span>
-                                </td>
-                                <td className="py-2 px-2 text-center">
-                                  {station.evLevel2Count && station.evLevel2Count > 0 ? (
-                                    <span className="font-bold text-muted-foreground">{station.evLevel2Count}</span>
-                                  ) : (
-                                    <span className="text-muted-foreground">-</span>
-                                  )}
-                                </td>
-                                <td className="py-2 px-2 text-center">
-                                  {station.dcFastCount && station.dcFastCount > 0 ? (
-                                    <span className="font-bold text-muted-foreground">{station.dcFastCount}</span>
-                                  ) : (
-                                    <span className="text-muted-foreground">-</span>
-                                  )}
-                                </td>
-                                <td className="py-2 px-2 text-center text-xs text-muted-foreground whitespace-nowrap max-w-[100px] truncate" title={station.accessDays || ''}>
-                                  {station.accessDays || '-'}
-                                </td>
-                                <td className="py-2 pl-2 text-center text-xs text-muted-foreground whitespace-nowrap">
-                                  {station.dateLastConfirmed ? new Date(station.dateLastConfirmed).toLocaleDateString() : '-'}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                      <div className="mt-3 p-3 bg-secondary rounded-lg border border-border text-xs space-y-1">
-                        <p><span className="font-semibold text-foreground">Level 2:</span> Standard charging (10-30 miles of range per hour) - best for longer stops</p>
-                        <p><span className="font-semibold text-muted-foreground">DC Fast:</span> Rapid charging (100+ miles in 20-30 min) - best for quick stops</p>
-                      </div>
-                      {within3 > 10 && (
-                        <p className="text-xs text-muted-foreground italic">
-                          Showing 10 of {within3} EV charging stations
-                        </p>
-                      )}
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-muted-foreground">
-                          Source: U.S. Dept. of Energy via Chicago Data Portal (Public EV Stations Only)
-                        </p>
-                      </div>
+                      <ProjectUseCountBlocks counts={[
+                        { value: within1, label: "Within 1 mile" },
+                        { value: within2, label: "Within 2 miles" },
+                        { value: within3, label: "Within 3 miles" },
+                      ]} />
+                      <ProjectUseBusinessList listKey={`ev-${facts?.lat}-${facts?.lon}`} rows={displayedStations.map(station => ({
+                        name: station.name, address: station.address, distance: station.distanceMiles ?? null,
+                        meta: [
+                          station.evNetwork || "Network unknown",
+                          `Level 2: ${station.evLevel2Count ?? 0}`,
+                          `DC fast: ${station.dcFastCount ?? 0}`,
+                          ...(station.accessDays ? [`Access: ${station.accessDays}`] : []),
+                          ...(station.dateLastConfirmed ? [`Confirmed ${new Date(station.dateLastConfirmed).toLocaleDateString()}`] : []),
+                        ],
+                      }))} />
                     </div>
                       );
                     })()
@@ -8155,33 +7007,15 @@ export default function RunDetail() {
                       No EV charging stations found within 3 miles of this location.
                     </p>
                   )}
+                  <div className="kyp-src">Scope: returned public charging stations within 3 miles plus records with unknown distance; unknown distances are excluded from radius counts. Source: U.S. Department of Energy via Chicago Data Portal. Duplicate addresses are combined. Names open Google Maps search results.</div>
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           )}
 
           {/* Nearby Hotels Section - Only shown when Hotel is selected */}
           {isHotel && (
             <div id="print-section-nearby-business-hotels">
-              <Collapsible open={isNearbyHotelsOpen} onOpenChange={setIsNearbyHotelsOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <Hotel className="w-4 h-4" />
-                      Nearby Hotels
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isNearbyHotelsOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          <Badge variant="outline" className="text-xs">{hotelsData?.totalFound || 0} hotels</Badge>
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isNearbyHotelsOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+              <KypSubhead subsection={projectUseSubsections.hotels}><span className="lbl">Nearby hotels</span></KypSubhead>
                 <div className="px-4">
                   {isLoadingHotels ? (
                     <div className="space-y-3">
@@ -8194,17 +7028,11 @@ export default function RunDetail() {
                       {/* Traditional Hotels/Motels */}
                       <div>
                         <p className="text-sm font-medium text-foreground mb-2">Hotels & Motels</p>
-                        <div className="flex flex-wrap gap-3 text-sm">
-                          <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                            {hotelsData.within1Mile || 0} within 1 mi
-                          </span>
-                          <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                            {hotelsData.within2Miles || 0} within 2 mi
-                          </span>
-                          <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                            {hotelsData.within3Miles || hotelsData.totalFound} within 3 mi
-                          </span>
-                        </div>
+                        <ProjectUseCountBlocks counts={[
+                          { value: hotelsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 1).length, label: "Within 1 mile" },
+                          { value: hotelsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 2).length, label: "Within 2 miles" },
+                          { value: hotelsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 3).length, label: "Within 3 miles" },
+                        ]} />
                       </div>
 
                       {/* Short-Term Rentals (Airbnb, Vacation, Shared Housing) */}
@@ -8225,70 +7053,24 @@ export default function RunDetail() {
                         </div>
                       )}
 
-                      {hotelsData.locations.length > 0 && (
-                        <>
-                          <div className="space-y-1">
-                            {hotelsData.locations.slice(0, 10).map((loc) => (
-                              <div key={loc.id} className="flex justify-between items-start text-sm py-2 px-2 rounded-xl bg-secondary border border-border">
-                                <div className="flex-1 min-w-0">
-                                  <span className="font-medium text-foreground block truncate">
-                                    {loc.name}
-                                  </span>
-                                  <span className="text-muted-foreground text-xs block truncate">
-                                    {loc.address}{loc.neighborhood ? `, ${loc.neighborhood}` : ''}
-                                  </span>
-                                </div>
-                                <span className="text-muted-foreground whitespace-nowrap ml-2 font-medium">
-                                  {loc.distanceMiles} mi
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                          {hotelsData.totalFound > 10 && (
-                            <p className="text-xs text-muted-foreground italic">
-                              Showing 10 of {hotelsData.totalFound} hotels/motels
-                            </p>
-                          )}
-                        </>
-                      )}
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-muted-foreground">
-                          Source: Chicago Business Licenses - Hotel permits (excludes Airbnb, vacation rentals, shared housing)
-                        </p>
-                      </div>
+                      {hotelsData.locations.length > 0 && <ProjectUseBusinessList listKey={`hotels-${facts?.lat}-${facts?.lon}`} rows={hotelsData.locations.filter(l => l.distanceMiles == null || l.distanceMiles <= 3).map(loc => ({
+                        name: loc.name, address: `${loc.address}${loc.neighborhood ? `, ${loc.neighborhood}` : ""}`, distance: loc.distanceMiles ?? null,
+                      }))} />}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       No hotels found within 3 miles of this location.
                     </p>
                   )}
+                  <div className="kyp-src">Scope: hotel license rows within 3 miles plus records with unknown distance; unknown distances are excluded from radius counts. Source: Chicago Business Licenses, Hotel permits. Vacation-rental counts are a separate returned dataset, with source details not identified in this response. Names open Google Maps search results.</div>
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           )}
 
           {/* Nearby Restaurants Section - Only shown when Restaurant is selected */}
           {isRestaurant && (
             <div id="print-section-nearby-business-restaurants">
-              <Collapsible open={isNearbyRestaurantsOpen} onOpenChange={setIsNearbyRestaurantsOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <Utensils className="w-4 h-4" />
-                      Nearby Restaurants
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isNearbyRestaurantsOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          <Badge variant="outline" className="text-xs">{restaurantsData?.totalFound || 0} nearby</Badge>
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isNearbyRestaurantsOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+              <KypSubhead subsection={projectUseSubsections.restaurants}><span className="lbl">Nearby restaurants</span></KypSubhead>
                 <div className="px-4">
                   {isLoadingRestaurants ? (
                     <div className="space-y-3">
@@ -8297,44 +7079,16 @@ export default function RunDetail() {
                       <Skeleton className="h-4 w-3/4" />
                     </div>
                   ) : restaurantsData && restaurantsData.locations.length > 0 ? (() => {
-                    const within1mi = restaurantsData.locations.filter(l => (l.distanceMiles ?? 999) <= 1);
+                    const within1mi = restaurantsData.locations.filter(l => l.distanceMiles == null || l.distanceMiles <= 1);
                     return (
                     <div className="space-y-4">
-                      <div className="flex flex-wrap gap-3 text-sm">
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {within1mi.length} within 1 mi
-                        </span>
-                      </div>
-                      <div className="space-y-1">
-                        {within1mi.slice(0, 10).map((loc) => (
-                          <div key={loc.id} className="flex justify-between items-start text-sm py-2 px-2 bg-secondary rounded-xl border border-border">
-                            <div className="flex-1 min-w-0">
-                              <span className="font-medium text-foreground block truncate">
-                                {loc.name}
-                              </span>
-                              <span className="text-muted-foreground text-xs block truncate">
-                                {loc.address}{loc.neighborhood ? `, ${loc.neighborhood}` : ''}
-                              </span>
-                            </div>
-                            <span className="text-muted-foreground whitespace-nowrap ml-2 font-medium">
-                              {loc.distanceMiles} mi
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                      {within1mi.length > 10 && (
-                        <p className="text-xs text-muted-foreground italic">
-                          Showing 10 of {within1mi.length} restaurants within 1 mile
-                        </p>
-                      )}
+                      <ProjectUseCountBlocks counts={[{ value: restaurantsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 1).length, label: "Within 1 mile" }]} />
+                      <ProjectUseBusinessList listKey={`restaurants-${facts?.lat}-${facts?.lon}`} rows={within1mi.map(loc => ({
+                        name: loc.name, address: `${loc.address}${loc.neighborhood ? `, ${loc.neighborhood}` : ""}`, distance: loc.distanceMiles ?? null,
+                      }))} />
                       {within1mi.length === 0 && (
                         <p className="text-sm text-muted-foreground">No restaurants found within 1 mile.</p>
                       )}
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-muted-foreground">
-                          Source: Chicago Business Licenses - Food Establishment permits
-                        </p>
-                      </div>
                     </div>
                     );
                   })() : (
@@ -8342,33 +7096,15 @@ export default function RunDetail() {
                       No restaurants found within 1 mile of this location.
                     </p>
                   )}
+                  <div className="kyp-src">Scope: restaurant license rows within 1 mile plus records with unknown distance; unknown distances are excluded from the within-1-mile count. Source: Chicago Business Licenses, Food Establishment permits. Names open Google Maps search results.</div>
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           )}
 
           {/* Nearby Coffee Shops Section - Only shown when Coffee Shop is selected */}
           {isCoffeeShop && (
             <div id="print-section-nearby-business-coffee">
-              <Collapsible open={isNearbyCoffeeOpen} onOpenChange={setIsNearbyCoffeeOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <Coffee className="w-4 h-4" />
-                      Nearby Coffee Shops
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isNearbyCoffeeOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          <Badge variant="outline" className="text-xs">{coffeeShopsData?.totalFound || 0} nearby</Badge>
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isNearbyCoffeeOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+              <KypSubhead subsection={projectUseSubsections.coffee}><span className="lbl">Nearby coffee shops</span></KypSubhead>
                 <div className="px-4">
                   {isLoadingCoffeeShops ? (
                     <div className="space-y-3">
@@ -8377,44 +7113,16 @@ export default function RunDetail() {
                       <Skeleton className="h-4 w-3/4" />
                     </div>
                   ) : coffeeShopsData && coffeeShopsData.locations.length > 0 ? (() => {
-                    const within1mi = coffeeShopsData.locations.filter(l => (l.distanceMiles ?? 999) <= 1);
+                    const within1mi = coffeeShopsData.locations.filter(l => l.distanceMiles == null || l.distanceMiles <= 1);
                     return (
                     <div className="space-y-4">
-                      <div className="flex flex-wrap gap-3 text-sm">
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {within1mi.length} within 1 mi
-                        </span>
-                      </div>
-                      <div className="space-y-1">
-                        {within1mi.slice(0, 10).map((loc) => (
-                          <div key={loc.id} className="flex justify-between items-start text-sm py-2 px-2 bg-secondary rounded-xl border border-border">
-                            <div className="flex-1 min-w-0">
-                              <span className="font-medium text-foreground block truncate">
-                                {loc.name}
-                              </span>
-                              <span className="text-muted-foreground text-xs block truncate">
-                                {loc.address}{loc.neighborhood ? `, ${loc.neighborhood}` : ''}
-                              </span>
-                            </div>
-                            <span className="text-muted-foreground whitespace-nowrap ml-2 font-medium">
-                              {loc.distanceMiles} mi
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                      {within1mi.length > 10 && (
-                        <p className="text-xs text-muted-foreground italic">
-                          Showing 10 of {within1mi.length} coffee shops within 1 mile
-                        </p>
-                      )}
+                      <ProjectUseCountBlocks counts={[{ value: coffeeShopsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 1).length, label: "Within 1 mile" }]} />
+                      <ProjectUseBusinessList listKey={`coffee-${facts?.lat}-${facts?.lon}`} rows={within1mi.map(loc => ({
+                        name: loc.name, address: `${loc.address}${loc.neighborhood ? `, ${loc.neighborhood}` : ""}`, distance: loc.distanceMiles ?? null,
+                      }))} />
                       {within1mi.length === 0 && (
                         <p className="text-sm text-muted-foreground">No coffee shops found within 1 mile.</p>
                       )}
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-muted-foreground">
-                          Source: Chicago Business Licenses - Coffee/Cafe establishments
-                        </p>
-                      </div>
                     </div>
                     );
                   })() : (
@@ -8422,33 +7130,15 @@ export default function RunDetail() {
                       No coffee shops found within 1 mile of this location.
                     </p>
                   )}
+                  <div className="kyp-src">Scope: coffee/cafe license rows within 1 mile plus records with unknown distance; unknown distances are excluded from the within-1-mile count. Source: Chicago Business Licenses, coffee/cafe establishments. Names open Google Maps search results.</div>
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           )}
 
           {/* Nearby Bars/Taverns Section - Only shown when Bar/Tavern is selected */}
           {isBar && (
             <div id="print-section-nearby-business-bars">
-              <Collapsible open={isNearbyBarsOpen} onOpenChange={setIsNearbyBarsOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <Wine className="w-4 h-4" />
-                      Nearby Bars & Taverns
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isNearbyBarsOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          <Badge variant="outline" className="text-xs">{barsData?.totalFound || 0} nearby</Badge>
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isNearbyBarsOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+              <KypSubhead subsection={projectUseSubsections.bars}><span className="lbl">Nearby bars</span></KypSubhead>
                 <div className="px-4">
                   {isLoadingBars ? (
                     <div className="space-y-3">
@@ -8458,214 +7148,72 @@ export default function RunDetail() {
                     </div>
                   ) : barsData && barsData.locations.length > 0 ? (
                     <div className="space-y-4">
-                      <div className="flex flex-wrap gap-3 text-sm">
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {barsData.within1Mile || 0} within 1 mi
-                        </span>
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {barsData.within2Miles || 0} within 2 mi
-                        </span>
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {barsData.within3Miles || barsData.totalFound} within 3 mi
-                        </span>
-                      </div>
-                      <div className="space-y-1">
-                        {barsData.locations.slice(0, 10).map((loc) => (
-                          <div key={loc.id} className="flex justify-between items-start text-sm py-2 px-2 bg-secondary rounded-lg border border-border">
-                            <div className="flex-1 min-w-0">
-                              <span className="font-medium text-rose-900 block truncate">
-                                {loc.name}
-                              </span>
-                              <span className="text-rose-700 text-xs block truncate">
-                                {loc.address}{loc.neighborhood ? `, ${loc.neighborhood}` : ''}
-                              </span>
-                            </div>
-                            <span className="text-rose-700 whitespace-nowrap ml-2 font-medium">
-                              {loc.distanceMiles} mi
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                      {barsData.totalFound > 10 && (
-                        <p className="text-xs text-muted-foreground italic">
-                          Showing 10 of {barsData.totalFound} bars/taverns
-                        </p>
-                      )}
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-muted-foreground">
-                          Source: Chicago Business Licenses - Tavern permits
-                        </p>
-                      </div>
+                      <ProjectUseCountBlocks counts={[
+                        { value: barsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 1).length, label: "Within 1 mile" },
+                        { value: barsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 2).length, label: "Within 2 miles" },
+                        { value: barsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 3).length, label: "Within 3 miles" },
+                      ]} />
+                      <ProjectUseBusinessList listKey={`bars-${facts?.lat}-${facts?.lon}`} rows={barsData.locations.filter(l => l.distanceMiles == null || l.distanceMiles <= 3).map(loc => ({
+                        name: loc.name, address: `${loc.address}${loc.neighborhood ? `, ${loc.neighborhood}` : ""}`,
+                        distance: loc.distanceMiles ?? null,
+                      }))} />
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       No bars/taverns found within 3 miles of this location.
                     </p>
                   )}
+                  <div className="kyp-src">Scope: tavern license rows within 3 miles plus records with unknown distance; unknown distances are excluded from radius counts. Source: Chicago Business Licenses, Tavern permits. Names open Google Maps search results.</div>
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          )}
-
-          {/* Nearby Competitors (Google Maps) — inside project use analysis for all applicable types */}
-          {!isDaycare && googlePlacesSearchTerm && (
-            <div id="section-google-places-inline">
-              <Collapsible open={isGooglePlacesOpen} onOpenChange={setIsGooglePlacesOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <MapPin className="w-4 h-4" />
-                      {(() => { const t = selectedProjectType || run?.lastProjectType; return t ? `Nearby ${t} Competitors` : 'Nearby Competitors'; })()}
-                      <span className="text-xs font-normal text-muted-foreground">(Google Maps)</span>
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isGooglePlacesOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {isLoadingGooglePlaces || (googlePlacesData?.status === 'pending') ? (
-                            <Badge variant="secondary" className="text-xs animate-pulse">Fetching…</Badge>
-                          ) : googlePlacesData && googlePlacesData.count > 0 ? (
-                            <>
-                              <Badge variant="outline" className="text-xs">{googlePlacesData.count} nearby</Badge>
-                              {googlePlacesData.avgRating && (
-                                <Badge variant="outline" className="text-xs">Avg ★ {googlePlacesData.avgRating}</Badge>
-                              )}
-                            </>
-                          ) : (
-                            <Badge variant="secondary" className="text-xs text-muted-foreground">None found</Badge>
-                          )}
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isGooglePlacesOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="px-4 pb-3">
-                    {(isLoadingGooglePlaces || googlePlacesData?.status === 'pending') && (
-                      <p className="text-sm text-muted-foreground animate-pulse">Searching Google Maps for "{googlePlacesSearchTerm}"…</p>
-                    )}
-                    {!isLoadingGooglePlaces && !googlePlacesData && (
-                      <p className="text-sm text-muted-foreground">Nearby competitors could not be loaded. Try again later.</p>
-                    )}
-                    {googlePlacesData && !isLoadingGooglePlaces && googlePlacesData.status !== 'pending' && (() => {
-                      if (!googlePlacesData.count) return <p className="text-sm text-muted-foreground">No "{googlePlacesSearchTerm}" found within 1 mile.</p>;
-                      return (
-                        <div className="space-y-2">
-                          <div className="cmp-facts">
-                            <div className="cmp-fact">
-                              <div className="cmp-l">Within 1 mi</div>
-                              <div className="cmp-v">{googlePlacesData.count} competitor{googlePlacesData.count === 1 ? '' : 's'}</div>
-                            </div>
-                            {googlePlacesData.avgRating && (
-                              <div className="cmp-fact">
-                                <div className="cmp-l">Avg Rating</div>
-                                <div className="cmp-v"><span className="cmp-star">★</span> {googlePlacesData.avgRating}</div>
-                              </div>
-                            )}
-                            <div className="cmp-fact">
-                              <div className="cmp-l">Searched For</div>
-                              <div className="cmp-v">{googlePlacesData.searchTerm}</div>
-                            </div>
-                          </div>
-                          <div>
-                            {googlePlacesData.places.map((p: any, i: number) => (
-                              <div key={i} className="cmp-row" data-testid={`gplaces-inline-place-${i}`}>
-                                <div className="min-w-0">
-                                  {p.url ? (
-                                    <a href={p.url} target="_blank" rel="noopener noreferrer" className="cmp-nm">{p.name}</a>
-                                  ) : <span className="cmp-nm">{p.name}</span>}
-                                  {p.address && <div className="cmp-addr truncate">{p.address}</div>}
-                                </div>
-                                <div className="cmp-r">
-                                  {p.rating && <><span className="cmp-star font-bold">★</span> {p.rating}</>}
-                                  {p.rating && p.distanceMiles != null && ' · '}
-                                  {p.distanceMiles != null && <>{p.distanceMiles} mi</>}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                          <div className="cmp-src">Source: Google Maps Places API. Ratings and distances are third-party data, refreshed periodically.</div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           )}
 
           {/* Cannabis Dispensary Section */}
           {isCannabis && (
             <div id="print-section-cannabis">
-              <Collapsible open={isCannabisMarketOpen} onOpenChange={setIsCannabisMarketOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                    <h3 className="chead chead-icon">
-                      <Leaf className="w-4 h-4" />
-                      Cannabis Dispensary Market
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {!isCannabisMarketOpen && (
-                        <div className="flex flex-wrap gap-1.5">
-                          <Badge variant="outline" className="text-xs">{cannabisData?.count || 0} dispensaries</Badge>
-                        </div>
-                      )}
-                      <span className="text-muted-foreground text-sm">{isCannabisMarketOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+              <KypSubhead subsection={projectUseSubsections.cannabis}><span className="lbl">Licensed dispensaries</span></KypSubhead>
                 <div className="px-4">
                   {isLoadingCannabis ? (
                     <div className="space-y-3">
                       <Skeleton className="h-6 w-2/3" />
                       <Skeleton className="h-20 w-full" />
                     </div>
-                  ) : cannabisData && cannabisData.count > 0 ? (
+                  ) : cannabisData && cannabisData.locations.length > 0 ? (
                     <div className="space-y-4">
-                      <div className="flex flex-wrap gap-3 text-sm">
-                        <span className="px-2.5 py-1 bg-secondary border [border-color:hsl(var(--tag-line))] rounded-full text-foreground/70 text-xs font-medium font-body">
-                          {cannabisData.count} dispensar{cannabisData.count === 1 ? 'y' : 'ies'} in ZIP {facts?.zipCode}
-                        </span>
-                      </div>
-                      {cannabisData.locations.length > 0 && (
-                        <div className="space-y-1">
-                          {cannabisData.locations.slice(0, 10).map((loc, idx) => (
-                            <div key={idx} className="flex justify-between items-start text-sm py-2 px-2 rounded-xl bg-secondary border border-border">
-                              <div className="flex-1 min-w-0">
-                                <span className="font-medium text-foreground block truncate">
-                                  {loc.name}
-                                </span>
-                                <span className="text-muted-foreground text-xs block truncate">
-                                  {loc.address}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-muted-foreground">
-                          Source: Illinois IDFPR Licensed Dispensaries
-                        </p>
-                      </div>
+                      <ProjectUseCountBlocks counts={[{ value: cannabisData.locations.length, label: `In ZIP ${facts?.zipCode ?? "—"}` }]} />
+                      <ProjectUseBusinessList listKey={`cannabis-${facts?.zipCode ?? ""}`} rows={cannabisData.locations.map(loc => ({
+                        name: loc.name, address: loc.address, distance: null,
+                      }))} />
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       No cannabis dispensaries found in this ZIP code.
                     </p>
                   )}
+                  <div className="kyp-src">Scope: licensed dispensary records in ZIP {facts?.zipCode ?? "unavailable"}; this is not a radius count. Source: Illinois IDFPR Licensed Dispensaries. Names open Google Maps search results.</div>
                 </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           )}
 
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
+          {/* Google Maps is the final, source-explicit subsection for every non-daycare use. */}
+          {!isDaycare && selectedProjectType && (
+            <div id="section-google-places-inline">
+              <KypSubhead subsection={projectUseSubsections.google}>
+                <span className="lbl">Nearby {selectedProjectType} · Google Maps</span>
+              </KypSubhead>
+              <ProjectUseGoogleMaps
+                data={googlePlacesData}
+                isLoading={isLoadingGooglePlaces}
+                isError={isGooglePlacesError}
+                confirmed={!!googlePlacesSearchTerm}
+                searchTerm={googlePlacesSearchTerm || undefined}
+                onRetry={() => refetchGooglePlaces()}
+              />
+            </div>
+          )}
+
+            </React.Fragment>
+            )}
           </motion.div>
           ) : (
             <p className="text-sm text-muted-foreground">
@@ -13643,54 +12191,13 @@ export default function RunDetail() {
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                               <div className="px-4 mt-2 pb-3">
-                                {(isLoadingGooglePlaces || (googlePlacesData && googlePlacesData.status === 'pending')) && (
-                                  <p className="text-sm text-muted-foreground animate-pulse">Searching Google Maps for "{googlePlacesSearchTerm}"…</p>
-                                )}
-                                {googlePlacesData && !isLoadingGooglePlaces && googlePlacesData.status !== 'pending' && (() => {
-                                  if (!googlePlacesData.count || googlePlacesData.count === 0) {
-                                    return <p className="text-sm text-muted-foreground">No "{googlePlacesSearchTerm}" found within 1 mile.</p>;
-                                  }
-                                  return (
-                                    <div className="space-y-2">
-                                      <div className="cmp-facts">
-                                        <div className="cmp-fact" data-testid="gplaces-count">
-                                          <div className="cmp-l">Within 1 mi</div>
-                                          <div className="cmp-v">{googlePlacesData.count} competitor{googlePlacesData.count === 1 ? '' : 's'}</div>
-                                        </div>
-                                        {googlePlacesData.avgRating && (
-                                          <div className="cmp-fact" data-testid="gplaces-avg-rating">
-                                            <div className="cmp-l">Avg Rating</div>
-                                            <div className="cmp-v"><span className="cmp-star">★</span> {googlePlacesData.avgRating}</div>
-                                          </div>
-                                        )}
-                                        <div className="cmp-fact" data-testid="gplaces-search-term">
-                                          <div className="cmp-l">Searched For</div>
-                                          <div className="cmp-v">{googlePlacesData.searchTerm}</div>
-                                        </div>
-                                      </div>
-                                      <div>
-                                        {googlePlacesData.places.map((p: any, i: number) => (
-                                          <div key={i} className="cmp-row" data-testid={`gplaces-place-${i}`}>
-                                            <div className="min-w-0">
-                                              {p.url ? (
-                                                <a href={p.url} target="_blank" rel="noopener noreferrer" className="cmp-nm">{p.name}</a>
-                                              ) : <span className="cmp-nm">{p.name}</span>}
-                                              <div className="cmp-addr">
-                                                {p.address}{p.reviewsCount != null && <> · {p.reviewsCount.toLocaleString()} reviews</>}
-                                              </div>
-                                            </div>
-                                            <div className="cmp-r">
-                                              {p.rating != null && <><span className="cmp-star font-bold">★</span> {p.rating}</>}
-                                              {p.rating != null && p.distanceMiles != null && ' · '}
-                                              {p.distanceMiles != null && <>{p.distanceMiles} mi</>}
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                      <div className="cmp-src">Source: Google Maps Places API. Ratings and distances are third-party data, refreshed periodically.</div>
-                                    </div>
-                                  );
-                                })()}
+                                <ProjectUseGoogleMaps
+                                  data={googlePlacesData}
+                                  isLoading={isLoadingGooglePlaces}
+                                  isError={isGooglePlacesError}
+                                  confirmed={!!googlePlacesSearchTerm}
+                                  searchTerm={googlePlacesSearchTerm || undefined}
+                                />
                               </div>
                             </CollapsibleContent>
                           </Collapsible>
@@ -14347,7 +12854,7 @@ export default function RunDetail() {
                             const middle = [...((schoolsData?.middle ?? []).filter((s: any) => !otherIds.has(s.schoolId)))].sort(bySort);
                             const high = [...(schoolsData?.high ?? [])].sort(bySort);
                             const radius = schoolsData?.radiusMiles ?? 1.5;
-                            const dcData = childcareViewMode === 'zip' ? childcareData : communityChildcareData;
+                            const dcData = areaViewMode === 'zip' ? childcareData : communityChildcareData;
                             const cps = dcData?.childrenPerSlot ?? null;
                             const noSlotsDesert = dcData != null && cps == null && dcData.status === 'desert';
                             const dcCat: 'desert' | 'underserved' | 'adequate' | 'plentiful' | null =
@@ -14382,49 +12889,14 @@ export default function RunDetail() {
                                 {/* ---- Day Care ---- */}
                                 <div className="subwrap" id="daycare">
                                   <KypSubhead subsection={schoolSubsections.childcare}><span className="lbl">Childcare</span><span className="ct">licensed early-childhood supply</span></KypSubhead>
-                                  <div className="toggle" role="group" aria-label="Childcare area">
-                                    <button type="button" aria-pressed={childcareViewMode === 'zip'} className={`tg${childcareViewMode === 'zip' ? ' on' : ''}`} data-testid="tab-childcare-zip" onClick={() => setChildcareViewMode('zip')}>
-                                      <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                      By ZIP Code
-                                    </button>
-                                    <button type="button" aria-pressed={childcareViewMode === 'community'} className={`tg${childcareViewMode === 'community' ? ' on' : ''}`} data-testid="tab-childcare-community" onClick={() => setChildcareViewMode('community')}>
-                                      <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 3-6 2v16l6-2 6 2 6-2V3l-6 2-6-2z"/><path d="M9 3v16"/><path d="M15 5v16"/></svg>
-                                      By Neighborhood
-                                    </button>
-                                  </div>
-                                  <div className="scopeline">
-                                    ZIP <b>{facts?.zipCode || 'N/A'}</b> · Neighborhood <b>{facts?.communityArea || 'N/A'}</b>{facts?.ward ? <> · Ward <b>{facts.ward}</b></> : null} — boundaries differ, so metrics may vary between views.
-                                  </div>
-                                  {(childcareViewMode === 'zip' ? isLoadingChildcare : isLoadingCommunityChildcare) ? (
-                                    <p className="text-sm text-muted-foreground">Loading...</p>
-                                  ) : dcData && dcCat ? (
-                                    <div className="dcard step23-childcare" data-testid="childcare-demand-meter">
-                                      <span className="sr-only" data-testid="badge-childcare-status">{dcCat === 'desert' ? 'Childcare desert' : dcCat === 'underserved' ? 'Underserved' : dcCat === 'adequate' ? 'Adequate' : 'Plentiful'}: {cps != null ? `${cps.toFixed(1)} children under 5 per licensed slot` : 'no licensed slots'}</span>
-                                      <div className="gauge">
-                                        {(['desert', 'underserved', 'adequate', 'plentiful'] as const).map(seg => (
-                                          <div key={seg} className={`gs${dcCat === seg ? ` on${seg === 'adequate' || seg === 'plentiful' ? ' g' : seg === 'desert' ? ' b' : ''}` : ''}`} />
-                                        ))}
-                                      </div>
-                                      <div className="glabels">
-                                        {([['desert', 'Childcare desert', '> 3.0'], ['underserved', 'Underserved', '1.5 – 3.0'], ['adequate', 'Adequate', '1.0 – 1.5'], ['plentiful', 'Plentiful', '< 1.0']] as const).map(([key, label, range]) => (
-                                          <div key={key} className={`gl${dcCat === key ? ` on${key === 'adequate' || key === 'plentiful' ? ' g' : key === 'desert' ? ' b' : ''}` : ''}`}>
-                                            <div className="n">{label}</div>
-                                            <div className="r">{range}</div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                      <div className="step23-childcare-stats">
-                                        <div><span>Children under 5</span><strong>{dcData.childrenUnder5.toLocaleString()}</strong></div>
-                                        <div><span>Licensed slots</span><strong>{dcData.licensedSlots.toLocaleString()}</strong></div>
-                                        <div><span>Center slots</span><strong>{dcData.centerSlots.toLocaleString()}</strong></div>
-                                        <div><span>Family-home slots</span><strong>{dcData.familyHomeSlots.toLocaleString()}</strong></div>
-                                      </div>
-                                      <div className="dsrc">
-                                        {dcGap > 0 ? `Roughly a ${dcGap.toLocaleString()}-slot gap to reach adequate coverage.` : 'Capacity meets the adequate threshold.'} Source: {dcData.sources.childrenSource} {dcData.sources.childrenYear} · {dcData.sources.childcareSource} {dcData.sources.childcareYear}.
-                                      </div>
-                                    </div>
+                                  {dcData ? (
+                                    <ChildcareDemandMeter data={dcData} locationLabel={areaViewMode === 'zip' ? `ZIP ${facts?.zipCode ?? ''}` : facts?.communityArea ?? 'Community area'} />
                                   ) : (
-                            <p className="text-sm text-muted-foreground">{(childcareViewMode === 'zip' ? isChildcareError : isCommunityChildcareError) ? 'Daycare data unavailable: the source could not be reached.' : `Daycare data unavailable for this ${childcareViewMode === 'zip' ? 'ZIP code' : 'neighborhood'}.`}</p>
+                                    <div className="kyp-status-empty" role={(areaViewMode === 'zip' ? isChildcareError : isCommunityChildcareError) ? "alert" : "status"}>
+                                      {(areaViewMode === 'zip' ? isLoadingChildcare : isLoadingCommunityChildcare)
+                                        ? "Childcare supply records are loading."
+                                        : "Childcare supply records are unavailable."}
+                                    </div>
                                   )}
                                 </div>
 

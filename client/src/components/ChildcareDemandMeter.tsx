@@ -1,7 +1,9 @@
+import React from "react";
+
 interface ChildcareData {
   status: string;
   statusLabel: string;
-  zipCode: string;
+  zipCode?: string;
   childrenUnder5: number;
   licensedSlots: number;
   childrenPerSlot: number | null;
@@ -44,9 +46,13 @@ const TRACK: Array<{ key: DcCategory; label: string; range: string }> = [
 export function ChildcareDemandMeter({
   data,
   locationLabel,
+  supplyRank,
+  showInterpretation = true,
 }: {
   data: ChildcareData;
   locationLabel?: string;
+  supplyRank?: string;
+  showInterpretation?: boolean;
 }) {
   const cps = data.childrenPerSlot;
   // Server contract (server/childcare.ts):
@@ -59,47 +65,67 @@ export function ChildcareDemandMeter({
   const meta = category ? CATEGORY_META[category] : null;
 
   // Slot gap to reach the adequate threshold (1.5 children per slot)
-  const targetSlots = data.childrenUnder5 / 1.5;
-  const gap = Math.round(targetSlots - data.licensedSlots);
+  const targetSlots = Math.ceil(data.childrenUnder5 / 1.5);
+  const gap = Math.max(0, targetSlots - data.licensedSlots);
+  const ratioTone = !showInterpretation
+    ? 'slate'
+    : category === 'desert'
+    ? 'red'
+    : category === 'underserved'
+      ? 'orange'
+      : category
+        ? 'grn'
+        : 'ind';
+  const ratioLabel = cps == null
+    ? noSlotsDesert ? 'No licensed slots' : 'Ratio unavailable'
+    : `${cps.toFixed(1)}`;
 
   return (
-    <div className="sch-dc" data-testid="childcare-demand-meter">
-      <div className="sch-dchead">
-        {meta && (
-          <span className={`sch-badge ${meta.badge}`} data-testid="badge-childcare-status">
-            <span className="bd"></span>{meta.label}
-          </span>
-        )}
-        <span className="sch-dcnum">
-          {cps != null ? (
-            <><b>{cps.toFixed(1)}</b> children under 5 per licensed slot</>
-          ) : noSlotsDesert ? (
-            <><b>{data.childrenUnder5.toLocaleString()}</b> children under 5 — no licensed slots in this area</>
-          ) : (
-            'Children-per-slot data unavailable for this area.'
-          )}
-        </span>
+    <div data-testid="childcare-demand-meter">
+      <div className="kyp-blocks hero">
+        <div className={`kyp-block ${ratioTone}`}>
+          <div className="bv">{ratioLabel}</div>
+          <div className="bl">Children per licensed slot</div>
+          {showInterpretation && meta && <div className="bd">{meta.label}</div>}
+        </div>
+        <div className="kyp-block slate">
+          <div className="bv">{data.licensedSlots.toLocaleString()}</div>
+          <div className="bl">Licensed slots</div>
+          <div className="bd">{data.centerSlots.toLocaleString()} center · {data.familyHomeSlots.toLocaleString()} family-home</div>
+        </div>
+        <div className="kyp-block slate">
+          <div className="bv">{data.childrenUnder5.toLocaleString()}</div>
+          <div className="bl">Children under 5</div>
+          {locationLabel && <div className="bd">{locationLabel}</div>}
+          {supplyRank && <div className="chip rank">{supplyRank}</div>}
+        </div>
       </div>
 
-      <div className="sch-track">
-        {TRACK.map(seg => (
-          <div key={seg.key} className={`sch-seg ${seg.key}${category === seg.key ? ' on' : ''}`}>
-            <div className="bar"></div>
-            <div className="lb">{seg.label}</div>
-            <div className="rg">{seg.range}</div>
+      {showInterpretation && (
+        <>
+          <div className="kyp-bands b4">
+            {TRACK.map(seg => (
+              <div key={seg.key} className={`kyp-band ${seg.key === "desert" ? "no" : seg.key === "underserved" ? "watch" : "ok"}${category === seg.key ? " on" : ""}`}>
+                <div className="bar" />
+                <div className="bl">{seg.label}</div>
+                <div className="br">{seg.range}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="sch-dcfacts">
-        <b>{data.childrenUnder5.toLocaleString()}</b> children under 5 ·{' '}
-        <b>{data.licensedSlots.toLocaleString()}</b> licensed slots ({data.centerSlots.toLocaleString()} center · {data.familyHomeSlots.toLocaleString()} home)
-        {gap > 0
-          ? <> · roughly a <b>{gap.toLocaleString()}-slot gap</b> to reach adequate coverage</>
-          : <> · capacity meets the adequate threshold</>}
-        <span className="sch-dcsrc">
-          Source: {data.sources.childrenSource} {data.sources.childrenYear} · {data.sources.childcareSource} {data.sources.childcareYear}
-        </span>
+          <div className="kyp-bandfoot">
+            {gap > 0
+              ? <>Slot gap to the 1.5-children-per-slot threshold: <b>{gap.toLocaleString()} additional licensed slots</b> (target {targetSlots.toLocaleString()}).</>
+              : <>1.5-children-per-slot threshold met: {data.licensedSlots.toLocaleString()} licensed slots (target {targetSlots.toLocaleString()}).</>}
+          </div>
+        </>
+      )}
+      <div className="kyp-src">
+        Area: {locationLabel || "unavailable"}.
+        {showInterpretation && <> The four band thresholds are the published childcare-access thresholds.</>}
+        {showInterpretation && noSlotsDesert && <> Children are counted but licensed slots are zero; the area is classified as a desert without assigning a zero ratio.</>}
+        {showInterpretation && supplyRank && <> Rank compares the children-under-5 counts in the selected geography's childcare-access snapshot, not the separate enhanced demographic extract.</>}
+        {" "}Sources: {data.sources.childrenSource} {data.sources.childrenYear} · {data.sources.childcareSource} {data.sources.childcareYear}.
       </div>
     </div>
   );

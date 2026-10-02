@@ -1,0 +1,218 @@
+# Step 29a — §Project Use Analysis: the spine
+
+Applies to all 11 project types. **Run this before 29b or 29c** — it defines the primitives they consume.
+
+Target renders for this step: `bar-target.html` (the shape ten of the eleven uses follow) and `bar-sbs.html` (current vs new).
+
+---
+
+Audited against `5855bc9`. Section is `accProps("analysis")`, `RunDetail.tsx` **6163–8646**.
+
+Supporting files:
+
+| File | What it is |
+|---|---|
+| `kyp-base-patch-29-pua.css` | the only CSS to add — append verbatim to `client/src/styles/kyp-base.css` |
+| `bar-target.html` | target render, Bar / Tavern — the spine every simple use follows |
+| `gro-target.html` | target render, Grocery Store — spine plus a banded domain panel |
+| `auto-target.html` | target render, Auto Repair / Auto Body — vehicle ownership + the EV trend charts |
+| `sen-target.html` | target render, Assisted Living — senior population + age breakdown |
+| `pua-target.html` | target render, Day Care Center |
+| `bar-sbs.html` · `gro-sbs.html` · `pua-sbs.html` | current vs new, side by side |
+| `pua-bands.html` | every state the banded scale can be in |
+| `PUA_DAYCARE_FIELD_ACCOUNTING.md` | every live daycare field and where it lands |
+
+---
+
+---
+
+## Rules that apply to all three prompts
+
+1. **No takeaways.** Delete every sentence that tells the reader what the data means. Numbers,
+   classifications from an outside authority, and sources stay. Judgements go.
+2. **Scope and source notes go at the END of each subsection, once**, in a `.kyp-src`. Never above
+   the data, never between panels.
+3. **Chart forms do not change.** A line chart stays a line chart.
+4. **Verdict colour needs an outside authority.** Green = good, orange = watch, red = bad,
+   slate = context, indigo = no claim. If the cut points are ours, the footer says so.
+   A rank is context and takes slate, never a verdict colour.
+5. **Do not invent CSS.** Everything needed is in `kyp-base.css` plus the patch file.
+6. **Do not label a chart with what the chart already draws.**
+
+---
+
+Applies to all 11 project types. Nothing here is use-specific.
+
+## 1. Add the CSS
+
+Append `kyp-base-patch-29-pua.css` verbatim to the end of `client/src/styles/kyp-base.css`.
+It adds four families: the banded scale (`.kyp-bands` / `.kyp-band`), the form primitives
+(`.kyp-form` / `.kyp-field` / `.kyp-input` / `.kyp-btn`), the rank chip, and the caution-colour
+fix. Add nothing else.
+
+## 2. Replace the section container
+
+`RunDetail.tsx:6170`. The `<Collapsible isProjectTypeInfoOpen>` wrapping a `<Card>` /
+`<CardHeader>` / `<CardTitle className="chead">` goes. The section already sits inside
+`<AccordionSection {...accProps("analysis")}>`, which draws its own header — the inner Card is a
+second header inside the first.
+
+Replace the whole wrapper with a plain `<div className="kyp-accbody">`. Keep
+`projectAnalysisApplicable` as the outer gate. Delete `isProjectTypeInfoOpen` /
+`setIsProjectTypeInfoOpen` and the `badges-project-type-summary` block (`:6180–6212`) — the
+subsection numbers are the index now.
+
+## 3. One scope control, not three
+
+There are three today:
+
+| Panel | Line | Pattern |
+|---|---|---|
+| Grocery Access | `7188` | `<Tabs defaultValue="zip">` — **uncontrolled**, resets on re-render |
+| Senior Population | `7583` | controlled by `seniorsViewMode` |
+| Childcare (×3 strips) | `3860`, `6279`, `6898` | `childcareViewMode`, written by 2 panels, read by 5 |
+
+Replace all of them with **one control at the top of the section body**, before the first
+subhead, reading and writing a single `useState<'zip'|'community'>('zip')` named `areaViewMode`.
+Delete `seniorsViewMode` and `childcareViewMode`.
+
+```jsx
+<div className="kyp-segrow">
+  <div className="kyp-seg">
+    <button className={areaViewMode === 'zip' ? 'on' : ''} onClick={() => setAreaViewMode('zip')}>
+      ZIP {facts?.zipCode}
+    </button>
+    <button className={areaViewMode === 'community' ? 'on' : ''} onClick={() => setAreaViewMode('community')}>
+      {facts?.communityArea}
+    </button>
+  </div>
+  <div className="spacer" />
+  <div className="kyp-scopenote">
+    ZIP <b>{facts?.zipCode}</b> · Neighborhood <b>{facts?.communityArea}</b>
+    {facts?.ward ? <> · Ward <b>{facts.ward}</b></> : null} — boundaries differ
+  </div>
+</div>
+```
+
+Render it **only** when at least one subsection on screen is area-scoped (childcare, grocery,
+seniors). A Bar / Tavern report has nothing area-scoped, so it shows no control — see
+`bar-target.html`.
+
+## 4. One competitor row, replacing five
+
+Today there are five row shapes. See `PROJECT_USE_ANALYSIS_MATRIX.md` for the table. All five
+become `.kyp-biz-card`:
+
+```jsx
+<div className="kyp-biz-card">
+  <div><b>{name}</b><a href={mapsUrl} target="_blank" rel="noopener noreferrer">{address}</a></div>
+  <span className="kyp-biz-distance">{distance != null ? `${distance.toFixed(1)} mi` : 'distance unknown'}</span>
+  {meta.length > 0 && (
+    <div className="kyp-biz-cardmeta">{meta.map((m, i) => <span key={i}>{m}</span>)}</div>
+  )}
+</div>
+```
+
+`meta` carries whatever that source actually has and nothing more — `★ 4.4` and `3,210 reviews`
+for Google Places, `52,000 sq ft` for grocery, the licence category where there is one, nothing
+for a plain licence list.
+
+### Every row links to that business on Google
+
+The **name** carries the link, the address is plain text, so there is exactly one anchor per row.
+
+Two link grades, both already in the codebase:
+
+| Grade | When | URL |
+|---|---|---|
+| **place page** | the payload carried a Google `place_id` | `https://www.google.com/maps/place/?q=place_id:{placeId}` — already built server-side at `server/google-places.ts:100` and returned as `url` |
+| **Maps search** | no `place_id` — every licence-derived list | `https://www.google.com/maps/search/?api=1&query={encodeURIComponent(`${name}, ${address}, Chicago, IL`)}` — the pattern already used at `:7040`, `:14349`, `NewBusinessLicensesSection.tsx:99` |
+
+```jsx
+const placeUrl = p.url
+  ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${p.name}, ${p.address}, Chicago, IL`)}`;
+…
+<a className="nm" href={placeUrl} target="_blank" rel="noopener noreferrer">
+  <b>{p.name}</b><span className="ext" aria-hidden="true">↗</span>
+</a>
+<span className="addr">{p.address}</span>
+```
+
+`google-places.ts:100` returns `url: null` when Google gives no `place_id`, so **always fall
+through to the search URL** — never render a dead or missing link.
+
+Each footer states which grade that list uses. A Maps search is not the same promise as a place
+page, and saying so costs one clause.
+
+> **Do not nest anchors.** The row is a `<div>` and only the name is a link. An `<a>` containing
+> an `<a>` is auto-closed by the browser, and every element after it loses its styling.
+
+## 5. One distance convention
+
+Three conventions today: 1/2/3-mile triples, a single 1-mile chip (Restaurants, Coffee), and a
+ZIP-scoped count (Cannabis). Use one `.kyp-blocks` row of `.kyp-block.slate.count` everywhere the
+data supports it:
+
+```jsx
+<div className="kyp-blocks">
+  <div className="kyp-block slate count"><div className="bv">{within1}</div><div className="bl">Within 1 mile</div></div>
+  <div className="kyp-block slate count"><div className="bv">{within2}</div><div className="bl">Within 2 miles</div></div>
+  <div className="kyp-block slate count"><div className="bv">{within3}</div><div className="bl">Within 3 miles</div></div>
+</div>
+```
+
+Where a source is genuinely ZIP-scoped (Cannabis), show one block labelled
+`In ZIP {facts?.zipCode}` rather than faking a radius.
+
+## 6. The Google Maps subsection
+
+`:8479–8563`. This renders for **every** non-daycare use, so it is part of the spine. It becomes
+the **last numbered subsection** of whatever use is selected:
+
+- Summary row: `Within 1 mile` (count) · `Average rating` (`avgRating`) · `Searched for`
+  (`searchTerm`, in a `.bv.txt`)
+- Rows: `.kyp-biz-card`, meta = `★ {rating}` and `{reviewsCount} reviews`
+- **Add the review count** — it is in the payload and the current panel drops it
+- **Slice to 10 with a `.kyp-morelink`** — this list is currently unsliced and renders every result
+- Footer: the standard Google Maps `.kyp-src` (see `bar-target.html`)
+
+Retire the `.cmp-*` family (`index.css:1111–1123`) once nothing references it.
+
+## 7. Fix these while you are in here
+
+| # | Where | Problem | Fix |
+|---|---|---|---|
+| 1 | `:8601` Cannabis | `.slice(0, 10)` with **no** "showing N of M" line — the only sliced list without one | add the `.kyp-morelink` |
+| 2 | `:8251`, `:8331` | Restaurants / Coffee badge shows `totalFound` (3-mile) while the body filters to 1 mile | count the same set the body renders |
+| 3 | `:8443`, `:8446`, `:8450` | Bars rows render `text-rose-900` / `text-rose-700` — the only red-family Tailwind in the range | gone with `.kyp-biz-card` |
+| 4 | `:8267`, `:8347` | `?? 999` — a place with no distance is treated as 999 miles and silently dropped | keep the row, render `distance unknown` |
+| 5 | `:8001` vs `:8018–8027` | EV Charging badge counts the raw array, body counts the deduped one | count after dedup |
+| 6 | `7216`, `7314`, `7445`, `7476`, `7625`, `7633`, `7647` | three-arm `className` ternaries, every arm identical | delete the ternary, keep the string |
+| 7 | `:1221` | `const hybridInc: boolean = true` — 468 lines of unreachable `!hybridInc` code | out of scope here, still outstanding |
+
+## 8. Verify
+
+- No `<Card>`, `<CardHeader>`, `<CardTitle>`, `<Collapsible>` or `chead` inside `6163–8646`
+- `grep -c 'cmp-row\|cmp-facts\|cmp-fact\b' RunDetail.tsx` → 0
+- `grep -c 'rose-' RunDetail.tsx` → 0 in this range
+- `grep -c 'childcareViewMode\|seniorsViewMode' RunDetail.tsx` → 0
+- Switch project type with the section open — every subsection renumbers from `.1` with no gaps
+- A use with no area-scoped panel renders **no** scope control
+
+---
+
+---
+
+## Still outstanding — unrelated to this step
+
+Three live API keys in `.replit` lines 65–71, present in four commits:
+
+```
+RENTCAST_API_KEY      = "83b88a99ee…"
+GOOGLE_PLACES_API_KEY = "AIzaSyA4di…"
+APIFY_API_TOKEN       = "apify_api_kgNfTbi7…"
+```
+
+`.gitignore` has a missing newline — `*.tar.gzserver/cache/` — so **neither pattern matches**.
+Rotate all three, move them to Replit Secrets, `git rm --cached .replit`, fix the `.gitignore`
+newline. Rotating matters more than removing the file: the keys are already in the history.
