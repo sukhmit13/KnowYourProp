@@ -41,13 +41,13 @@ const permits=Array.from({length:15},(_,i)=>({
   ...(i===0?{contractorName:"Alpha & Sons",architectName:"Design Studio"}:
      i===1?{contractorName:"GC Only"}:i===2?{architectName:"Architect Only"}:{})
 }));
-const permitData={permits,subject:{totalPermits:55,medianReportedCost:412000,permittedUnits:48,byCategory:{multifamily:37,singleFamily:14,commercial:4},annual:{"2026":{total:18},"2025":{total:20},"2024":{total:17}}},trend:{suppressed:false,current12Months:21,prior12Months:19,changePct:11}};
+const permitData={permits,subject:{totalPermits:55,medianReportedCost:412000,permittedUnits:48,byCategory:{multifamily:37,singleFamily:14,commercial:4},annual:{"2026":{total:18},"2025":{total:20},"2024":{total:17}}},trend:{suppressed:false,current12Months:18,prior12Months:8,changePct:125},communityBenchmark:{name:"Edgewater",totalPermits:40}};
 function Fixture(){
   const [radius,setRadius]=useState(.5);
-  const [index,setIndex]=useState(23);
+   const [index,setIndex]=useState(22);
   window.developmentFixtureSetIndex=setIndex;
   const application={id:"application",address:"5801 N Broadway",applicant:"Broadway Partners",proposal:"A mixed-use development with 187 dwelling units.",applicationType:"Map amendment",status:"Plan Commission application",hearingDate:"2026-10-15",hearingUrl:"https://www.chicago.gov/",units:187,distanceMi:.7,corridor:{name:"Broadway"}};
-  const pipeline={unitsUnderConstruction:48,activePermitCount:7,potentialUnits:radius===1?187:120,commercialProposals:3,permitUnitsSource:"description",sourceCoverage:{permits:{status:"available"},dpdApplications:{status:"available"},zbaActivity:{status:"available"},news:{status:"available"}}};
+   const pipeline={unitsUnderConstruction:48,activePermitCount:7,permitUnitsUnknownAddressCount:4,potentialUnits:radius===1?187:120,commercialProposals:3,permitUnitsSource:"description",sourceCoverage:{permits:{status:"available"},dpdApplications:{status:"available"},zbaActivity:{status:"available"},news:{status:"available"}}};
   const response={pipeline,dpdApplications:radius===1?[application]:[],developments:[
     {id:"article",stage:2,source:"blockclub",title:"Nine-story apartment building proposed for Broadway in Edgewater",address:"5520 N Broadway",url:"https://blockclubchicago.org/test",status:"Proposed",pipelineStage:"permitted",units:64,stories:9,developer:"Broadway Partners",publishDate:"2026-07-01",corridor:{name:"Broadway"}}
   ],sourceCoverage:pipeline.sourceCoverage};
@@ -55,7 +55,7 @@ function Fixture(){
   return React.createElement("div",{className:"kyp-report",style:{maxWidth:1100,margin:"20px auto",padding:"0 12px"}},
     React.createElement("div",{className:"kyp-acc"},
       React.createElement(AccordionSection,{id:"development",index,eyebrow:"Nearby Development & Construction",takeaway:"Units under construction and in the approval pipeline nearby.",open:true,onToggle:()=>{},verdict:"context",badge:"~48 units"},
-        React.createElement(DevelopmentSection,{pipelineData:response,permitData,permitLoading:false,permitError:false,dpdData:response,dpdLoading:false,dpdError:false,zbaData,zbaLoading:false,zbaError:false,radiusMi:radius,onRadiusChange:setRadius,ward:48,lat:41.98,lon:-87.66,renderLogo:item=>React.createElement(LogoTile,{url:item.url,source:"Block Club Chicago"})}))));
+         React.createElement(DevelopmentSection,{pipelineData:response,permitData,permitLoading:false,permitError:false,subjectUnits:20,dpdData:response,dpdLoading:false,dpdError:false,zbaData,zbaLoading:false,zbaError:false,radiusMi:radius,onRadiusChange:setRadius,ward:48,lat:41.98,lon:-87.66,renderLogo:item=>React.createElement(LogoTile,{url:item.url,source:"Block Club Chicago"})}))));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(Fixture));
 `;
@@ -72,11 +72,21 @@ page.on("pageerror", (error) => errors.push(error.message));
 await page.route("**/development-qa-entry.js", (route) => route.fulfill({ contentType: "application/javascript", body: entry }));
 await page.route("**/development-qa", (route) => route.fulfill({ contentType: "text/html", body: fixtureHtml }));
 try {
-  for (const width of [1200, 390]) {
+  for (const width of [1200, 860, 640, 520, 390]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.goto(`${base}/development-qa`);
     await page.locator("#development-news .kyp-archrow").waitFor();
     assert.equal(await page.locator(".kyp-src").count(), 5);
+    assert.equal(await page.locator(".kyp-src > p").count(), 10, "Every section note has scope and source paragraphs");
+    assert.equal(await page.locator('#development-pipeline > .kyp-src').count(), 1);
+    assert.equal(await page.locator('[data-testid="development-pipeline"] .kyp-block').count(), 1);
+    assert.equal(await page.locator('[data-testid="development-proposals"] .kyp-block.slate').count(), 2);
+    assert.equal(await page.locator('[data-testid="development-pipeline"] .bv + div > .bl').count(), 1, "Count block keeps its text wrapper");
+    assert.equal(await page.locator('#development-permits .kyp-biz-heroes .kyp-block').count(), 4);
+    assert.equal(await page.locator('#development-permits .kyp-block.slate').filter({ hasText: "+125%" }).count(), 1);
+    assert.match(await page.locator('[data-testid="development-pipeline"] .bd').innerText(), /7 permits · 4 with no unit count/);
+    assert.match(await page.locator('#development-permits .kyp-construction-notes').innerText(), /2\.4× the subject’s 20/);
+    assert.doesNotMatch(await page.locator('#print-section-upcoming-developments').innerText(), /not added together|12-month trend:|Corridor tags require|storeys/);
     assert.equal(await page.locator(".kyp-hbar").count(), 6);
     assert.equal(await page.locator('[data-testid^="row-new-construction-"]').count(), 12);
     assert.equal(await page.locator(".kyp-pro").count(), 4);
@@ -99,15 +109,25 @@ try {
     const geometry = await page.evaluate(() => ({
       overflow: document.documentElement.scrollWidth > innerWidth,
       zbaColumns: getComputedStyle(document.querySelector(".kyp-twocol")).gridTemplateColumns.split(" ").length,
-      pipelineColumns: getComputedStyle(document.querySelector(".kyp-blocks.pipeline")).gridTemplateColumns.split(" ").length,
+      pipelineColumns: getComputedStyle(document.querySelector('[data-testid="development-pipeline"]')).gridTemplateColumns.split(" ").length,
+      proposalColumns: getComputedStyle(document.querySelector('[data-testid="development-proposals"]')).gridTemplateColumns.split(" ").length,
+      heroColumns: getComputedStyle(document.querySelector(".kyp-biz-heroes")).gridTemplateColumns.split(" ").length,
+      footerMargins: [...document.querySelectorAll(".kyp-src p+p")].map(p => ({
+        left: getComputedStyle(p).marginLeft, top: getComputedStyle(p).marginTop,
+      })),
       corridor: getComputedStyle(document.querySelector(".kyp-corridor")).color,
       logo: document.querySelector(".kyp-archlogo img")?.naturalWidth > 0,
     }));
     assert.equal(geometry.overflow, false, "No horizontal overflow");
-    assert.equal(geometry.zbaColumns, width === 390 ? 1 : 2);
-    assert.equal(geometry.pipelineColumns, width === 390 ? 1 : 3);
+    assert.equal(geometry.zbaColumns, width <= 640 ? 1 : 2);
+    assert.equal(geometry.pipelineColumns, 1);
+    assert.equal(geometry.proposalColumns, 2);
+    assert.equal(geometry.heroColumns, width <= 520 ? 1 : width <= 860 ? 2 : 4);
+    assert.ok(geometry.footerMargins.every(margin => margin.left === "0px" && margin.top === "5px"));
     assert.equal(geometry.logo, true);
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: `/tmp/development-section-${width}.png`, fullPage: true });
+    await page.screenshot({ path: `/tmp/development-section-top-${width}.png` });
     for (const selected of [["new-construction"], ["upcoming-developments"], ["new-construction", "upcoming-developments"], []]) {
       const visible = await page.evaluate(({ snippet, selected }) => {
         new Function("selectedSections", snippet)(selected);

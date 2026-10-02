@@ -15,10 +15,10 @@ Expanded subsections should primarily present records and measurements, not repe
 **Why:** repeated gray instructions next to visible tax bills and released lien records cluttered the report and implied an unresolved state the evidence did not establish.
 **How to apply:** before removing explanatory copy, distinguish redundant advice from material source limitations, and preserve document/status facts without inferring release or payoff from a title alone.
 
-Supporting trend comparisons and geographic benchmark notes should use the same light-gray footer treatment as other report sections, alongside source information, rather than separate green-shaded callouts between charts.
+Supporting commentary and geographic context notes should use the same light-gray footer treatment as other report sections, alongside source information, rather than separate green-shaded callouts between charts.
 
 **Why:** The user wants these details at the bottom without giving them the visual prominence of primary findings.
-**How to apply:** Preserve meaningful comparison windows, geographic scope, and evidence caveats, but use the shared source-note typography and spacing without a colored background or decorative icon.
+**How to apply:** Preserve meaningful comparison windows, geographic scope, and evidence caveats, but use the shared source-note typography and spacing without a colored background or decorative icon. For Nearby Development & Construction, the user subsequently distinguished measured permit trends and named community-area comparisons from commentary: those belong beside the other measurements, not buried in the footer. Keep facts about the number beside it and explanations of how it was obtained once at the end.
 
 Every report row needs a summary badge even when the section has no findings, has not been checked, is unavailable, or is not applicable. A data/applicability guard should not remove the entire row header.
 

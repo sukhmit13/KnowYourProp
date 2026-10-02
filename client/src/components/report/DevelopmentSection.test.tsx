@@ -37,7 +37,18 @@ test("development report renders separate pipeline evidence and estimate provena
   assert.match(html, /~48/);
   assert.match(html, /~187/);
   assert.match(html, /estimated from permit descriptions/);
-  assert.match(html, /two figures are not added together/);
+  // The permitted figure and the proposed figure must never share a block row.
+  const rows = html.split('class="kyp-blocks');
+  assert.equal(rows.filter((r) => /Units under construction/.test(r) && /Potential future units/.test(r)).length, 0);
+  assert.match(html, /Permitted — issued in the last 18 months/);
+  assert.match(html, /Proposed — no permit issued/);
+  assert.match(html, /11 permits/);
+  assert.match(html, /proposed or seeking zoning relief/);
+  assert.match(html, /an 18-month issued permit is a proxy, not verified construction/);
+  assert.match(html, /at least one application here reports more than one possible unit count/);
+  const pipeline = html.match(/<section id="development-pipeline">([\s\S]*?)<\/section>/)?.[1] || "";
+  assert.equal((pipeline.match(/class="kyp-src"/g) || []).length, 1);
+  assert.doesNotMatch(pipeline, /pipefoot/);
   assert.doesNotMatch(html, /235 units|total pipeline units/i);
 });
 
@@ -69,6 +80,28 @@ test("unknown upstream coverage renders unknown values rather than zeros", () =>
   assert.match(html, /Plan Commission applications could not be loaded/);
   assert.match(html, /Zoning Board records could not be loaded/);
   assert.doesNotMatch(html, />0</);
+});
+
+test("available zero pipeline values remain distinct from unavailable coverage", () => {
+  const html = renderToStaticMarkup(React.createElement(DevelopmentSection, props({
+    pipelineData: {
+      pipeline: {
+        unitsUnderConstruction: 0,
+        activePermitCount: 0,
+        potentialUnits: 0,
+        commercialProposals: 0,
+        sourceCoverage: {
+          permits: { status: "available" },
+          dpdApplications: { status: "available" },
+          zbaActivity: { status: "available" },
+        },
+      },
+    },
+  })));
+  assert.match(html, /class="bv">0<\/div>/);
+  assert.match(html, /0 permits/);
+  assert.equal((html.match(/None in the record/g) || []).length, 2);
+  assert.doesNotMatch(html, /Permit source coverage is unknown/);
 });
 
 test("report integration removes the standalone new-construction accordion and fixes jump targets", () => {
@@ -133,11 +166,11 @@ test("observed partial proposals stay visible without claiming complete counts o
         sourceCoverage: { permits: { status: "available" }, dpdApplications: { status: "partial" }, zbaActivity: { status: "partial" } } } },
     })));
     assert.match(html, /~12/);
-    assert.match(html, /units unknown at 2 permitted addresses/);
+    assert.match(html, /4 permits · 2 with no unit count/);
     assert.match(html, /source coverage is incomplete/);
     if (observed > 0) assert.match(html, /~187/);
     else {
-      assert.match(html, /No readable units identified/);
+      assert.match(html, /None in the record/);
       assert.doesNotMatch(html, /class="bv">~?0</);
     }
   }

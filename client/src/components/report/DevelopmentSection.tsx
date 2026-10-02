@@ -63,12 +63,39 @@ function PermitPipeline({ data, loading, error }: { data?: any; loading?: boolea
   const unknownPermitUnits = pipeline?.permitUnitsUnknownAddressCount || 0;
   const estimated = pipeline?.permitUnitsSource === "description";
   return <section id="development-pipeline">
-    <div className="kyp-blocks pipeline" data-testid="development-pipeline" aria-live="polite">
-      <div className="kyp-block ind"><div className="bv">{loading ? "…" : !permitsUnknown && typeof units === "number" ? `${estimated ? "~" : ""}${fmtCount(units)}` : "—"}</div><div className="bl">Units under construction</div><div className="bd">{loading ? "Loading nearby permit evidence" : !permitsUnknown && typeof pipeline.activePermitCount === "number" ? `across ${fmtCount(pipeline.activePermitCount)} permits issued within 18 months · from the permit record${estimated ? " · unit count estimated from permit descriptions" : ""}${unknownPermitUnits ? ` · units unknown at ${unknownPermitUnits} permitted address${unknownPermitUnits === 1 ? "" : "es"}; only readable counts shown` : ""}` : error || permitsUnknown ? "Permit source coverage is unknown; no count reported" : "18-month issued-permit proxy; construction activity is not verified"}</div></div>
-      <div className="kyp-block slate"><div className="bv">{loading ? "…" : !applicationsUnknown && (!observedApplications || potential > 0) ? `~${fmtCount(potential)}` : "—"}</div><div className="bl">Potential future units</div><div className="bd">{applicationsUnknown ? "Application-source coverage is unknown; no count reported" : observedApplications ? `${potential === 0 ? "No readable units identified" : "Observed application estimates only"} · source coverage is incomplete; projects may be missing or at an earlier stage` : "proposed or seeking zoning relief at addresses with no permit yet · as stated in application text"}</div></div>
-      <div className="kyp-block slate"><div className="bv">{loading ? "…" : !permitsUnknown && typeof commercial === "number" && (observedCommercial || !applicationSourcesIncomplete) && (!observedCommercial || commercial > 0) ? fmtCount(commercial) : "—"}</div><div className="bl">Commercial proposals</div><div className="bd">{typeof commercial !== "number" || permitsUnknown ? "Proposal-source coverage is unknown; no count reported" : observedCommercial ? `${commercial === 0 ? "No business-use cases identified in available records" : "Observed business-use cases only"} · source coverage is incomplete` : "special-use and map-amendment cases for business uses"}</div></div>
+    <div className="kyp-charttitle first">Permitted — issued in the last 18 months</div>
+    <div className="kyp-blocks one" data-testid="development-pipeline" aria-live="polite">
+      <div className="kyp-block ind count">
+        <div className="bv">{loading ? "…" : !permitsUnknown && typeof units === "number" ? `${estimated ? "~" : ""}${fmtCount(units)}` : "—"}</div>
+        <div>
+          <div className="bl">Units under construction</div>
+          <div className="bd">{loading ? "Loading nearby permit evidence"
+            : error || permitsUnknown ? "Permit source coverage is unknown"
+            : typeof pipeline.activePermitCount === "number"
+              ? `${fmtCount(pipeline.activePermitCount)} permits${unknownPermitUnits ? ` · ${unknownPermitUnits} with no unit count` : ""}`
+              : "None in the record"}</div>
+        </div>
+      </div>
     </div>
-    <p className="kyp-src pipefoot">Each address is counted once, at its furthest stage: an issued permit outranks a Plan Commission application, which outranks a zoning appeal. News coverage is never counted. <b>The two figures are not added together</b> — {estimated ? "the first is estimated from permit descriptions" : "the first comes from permit records"}, the second is read from application text and can be wrong where a headline figure covers more than one phase. An issued permit within 18 months is a proxy, not confirmation that construction is underway.{pipeline?.potentialAmbiguous ? " At least one application reports multiple possible unit counts; the potential figure is an estimate." : ""}</p>
+
+    <div className="kyp-charttitle">Proposed — no permit issued</div>
+    <div className="kyp-blocks two" data-testid="development-proposals" aria-live="polite">
+      <div className="kyp-block slate">
+        <div className="bv">{loading ? "…" : !applicationsUnknown && (!observedApplications || potential > 0) ? `~${fmtCount(potential)}` : "—"}</div>
+        <div className="bl">Potential future units</div>
+        <div className="bd">{applicationsUnknown ? "Application-source coverage is unknown" : potential === 0 ? "None in the record" : "proposed or seeking zoning relief"}</div>
+      </div>
+      <div className="kyp-block slate">
+        <div className="bv">{loading ? "…" : !permitsUnknown && typeof commercial === "number" && (observedCommercial || !applicationSourcesIncomplete) && (!observedCommercial || commercial > 0) ? fmtCount(commercial) : "—"}</div>
+        <div className="bl">Commercial proposals</div>
+        <div className="bd">{typeof commercial !== "number" || permitsUnknown ? "Proposal-source coverage is unknown" : commercial === 0 ? "None in the record" : "special-use and map-amendment cases"}</div>
+      </div>
+    </div>
+
+    <div className="kyp-src">
+      <p>Describes records within 1 mile, not this address. Each address is counted once, at its furthest stage; news coverage is never counted.{applicationSourcesIncomplete ? " Application-source coverage is incomplete; proposals may be missing or at an earlier stage." : ""}</p>
+      <p>Permitted units are {estimated ? "estimated from permit descriptions" : "read from permit records"}; an 18-month issued permit is a proxy, not verified construction. Proposed units are read from application text{pipeline?.potentialAmbiguous ? ", and at least one application here reports more than one possible unit count" : ""}.</p>
+    </div>
   </section>;
 }
 
@@ -90,7 +117,10 @@ function DpdPanel({ dpdData: data, dpdLoading: loading, dpdError: error, radiusM
       <div className="kyp-biz-cardmeta">{app.hearingDate && <span>Hearing {dateLabel(app.hearingDate)}</span>}{(app.hearingUrl || app.applicationUrl) && <a className="kyp-morelink" style={{ margin: 0 }} href={app.hearingUrl || app.applicationUrl} target="_blank" rel="noopener noreferrer">Official hearing page →</a>}</div>
     </article>)}
     {coverage?.status === "partial" && <p className="kyp-status-empty unknown">Application coverage is incomplete. The records shown may omit pages or addresses that could not be located.</p>}
-    <p className="kyp-src">Describes applications within {radiusMi === 1 ? "1 mile" : "½ mile"}, not this address. Source: Chicago Department of Planning and Development, Plan Commission hearing-page records. <b>Applications are not approvals, permits, or proof of construction.</b> Unit counts are as stated in the application text.</p>
+    <div className="kyp-src">
+      <p>Describes applications within {radiusMi === 1 ? "1 mile" : "½ mile"}, not this address. <b>Applications are not approvals, permits, or proof of construction.</b></p>
+      <p>Source: Chicago Department of Planning and Development, Plan Commission hearing-page records. Unit counts are as stated in the application text.</p>
+    </div>
   </section>;
 }
 
@@ -135,7 +165,10 @@ function ZbaPanel({ zbaData: data, zbaLoading: loading, zbaError: error, ward, l
       <div><div className="kyp-charttitle">Upcoming Appearances</div>{caseColumn(items.filter((item: any) => !item._decision), false)}</div>
     </div>}
     {coverage?.status === "partial" && <p className="kyp-status-empty unknown">Zoning Board coverage is incomplete; an empty list does not confirm no ward activity.</p>}
-    <p className="kyp-src">Describes Ward {ward ?? "activity"}, not this address. Source: Chicago Zoning Board of Appeals. Decisions cover the last four months. Unit and floor-area figures shown here are read from the application subject text and are not independently verified.</p>
+    <div className="kyp-src">
+      <p>Describes Ward {ward ?? "activity"}, not this address. Decisions cover the last four months.</p>
+      <p>Source: Chicago Zoning Board of Appeals. Unit and floor-area figures are read from the application subject text and are not independently verified.</p>
+    </div>
   </section>;
 }
 
@@ -168,7 +201,10 @@ export function DevelopmentSection(props: Props) {
         </div>
       </article>)}
       {newsCoverage?.status === "partial" && <p className="kyp-status-empty unknown">News-feed coverage may be incomplete; an empty list does not confirm no development coverage.</p>}
-      <p className="kyp-src">Describes news coverage of nearby projects, not this address, and not city records. Sources: {sourceNames || "development news publishers"}. Units, storeys and developer are read from the article text, not from a permit or application, and are not comparable with the counts in .1–.3. Rows marked <i>also a permit</i> share an address with a record above and are likely the same project.</p>
+       <div className="kyp-src">
+         <p>Describes news coverage of nearby projects — not this address, and not city records.</p>
+         <p>Sources: {sourceNames || "development news publishers"}. Units, stories and developer are read from the article text and are not comparable with the counts in .1–.3. Rows marked <i>also a permit</i> share an address with a record above and are likely the same project.</p>
+       </div>
     </section>
   </div>;
 }

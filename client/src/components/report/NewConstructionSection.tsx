@@ -10,7 +10,7 @@ interface Props {
 
 const label: Record<string, string> = { singleFamily: "Single family", multifamily: "Multifamily", commercial: "Commercial" };
 const money = (value: number | null | undefined) => value == null ? "—" : `$${Math.round(value).toLocaleString()}`;
-const sourceNote = "Describes permits within 1 mile, not this address. Source: Chicago Building Permits. Only “Permit - New Construction” records within one mile are counted; garages, temporary and accessory structures are excluded. “Likely still building” is an 18-month issued-permit proxy, not a construction-status verification. Unit counts are estimated from permit descriptions. Corridor tags require both a matching street address and the corridor's mapped geography.";
+const sourceNote = "Source: Chicago Building Permits — “Permit - New Construction” records only; garages, temporary and accessory structures are excluded. Unit counts are estimated from permit descriptions.";
 
 export function NewConstructionSection({ data, isLoading, isError, subjectUnits: subjectUnitsInput }: Props) {
   const [filter, setFilter] = useState<string | null>(null);
@@ -25,7 +25,9 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits:
 
   if (isLoading || isError || !data) return <div id="print-section-new-construction" className="kyp-biz" data-testid="card-new-construction">
     {isLoading ? <div className="kyp-biz-loading" aria-live="polite"><span /><span /><span /></div> : <div className="kyp-status-empty unknown">{isError ? "Construction permit records could not be loaded. The nearby construction result is unknown rather than zero." : "Construction data is not available for this address."}</div>}
-    <p className="kyp-src kyp-construction-notes" data-testid="new-construction-notes">{sourceNote}</p>
+    <div className="kyp-src kyp-construction-notes" data-testid="new-construction-notes">
+      <p>Describes permits within 1 mile, not this address.</p><p>{sourceNote}</p>
+    </div>
   </div>;
 
   const stats = data.subject;
@@ -38,12 +40,26 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits:
   const supplyRatio = subjectUnits && permittedUnits ? permittedUnits / subjectUnits : null;
   const supplyGate = !!subjectUnits && permittedUnits >= 12 && !!supplyRatio && supplyRatio >= 2;
   const trend = data.trend;
+  const benchmark = data.communityBenchmark;
+  const heroes = [
+    { cls: "ind", bv: String(stats.totalPermits), bl: "Nearby permits", bd: "issued in the past 3 years" },
+    { cls: "slate", bv: money(stats.medianReportedCost), bl: "Median reported cost", bd: "declared permit value" },
+  ];
+  if (trend) heroes.push(trend.suppressed || trend.changePct == null
+    ? { cls: "slate", bv: "—", bl: "12-month change", bd: "too few permits to compare" }
+    : { cls: "slate", bv: `${trend.changePct > 0 ? "+" : ""}${trend.changePct}%`, bl: "12-month change",
+        bd: `${trend.current12Months} permits vs ${trend.prior12Months} the year before` });
+  if (benchmark) heroes.push({ cls: "slate", bv: String(benchmark.totalPermits),
+    bl: `${benchmark.name} community area`, bd: "same 3-year window" });
+  const heroCols = heroes.length === 4 ? " four" : heroes.length === 2 ? " two" : "";
 
   return (
     <div id="print-section-new-construction" className="kyp-biz" data-testid="card-new-construction">
-      <div className="kyp-blocks two kyp-biz-heroes">
-        <div className="kyp-block ind"><div className="bv">{stats.totalPermits}</div><div><div className="bl">Nearby permits</div><div className="bd">issued in the past 3 years</div></div></div>
-        <div className="kyp-block slate"><div className="bv">{money(stats.medianReportedCost)}</div><div><div className="bl">Median reported cost</div><div className="bd">declared permit value</div></div></div>
+      <div className={`kyp-blocks${heroCols} kyp-biz-heroes`}>
+        {heroes.map((h) => <div className={`kyp-block ${h.cls}`} key={h.bl}>
+          <div className="bv">{h.bv}</div>
+          <div><div className="bl">{h.bl}</div><div className="bd">{h.bd}</div></div>
+        </div>)}
       </div>
 
       <KypSubhead className="fam-green"><span className="lbl">Permit mix</span><span className="ct">select a type to filter records</span><span className="rule" /></KypSubhead>
@@ -69,11 +85,7 @@ export function NewConstructionSection({ data, isLoading, isError, subjectUnits:
         </button>
       )}
       <div className="kyp-src kyp-construction-notes" data-testid="new-construction-notes">
-        {(data.communityBenchmark || supplyGate) && <p>
-          Nearby construction: {data.communityBenchmark ? `The ${data.communityBenchmark.name} community area recorded ${data.communityBenchmark.totalPermits} qualifying permits over the same three-year source period.` : ""}
-          {supplyGate ? ` Nearby permit records identify ${permittedUnits.toLocaleString()} units, or ${supplyRatio!.toFixed(1)}× the subject’s ${subjectUnits} units; this is a competing-supply and construction-disruption context, not a statement of active construction. The 18-month issued-permit window remains a proxy.` : ""}
-        </p>}
-        <p>12-month trend: {trend.suppressed ? `Trend is not shown because only ${trend.current12Months + trend.prior12Months} permits fall in the two comparison years; at least four combined permits are needed.` : `${trend.current12Months} permits in the trailing 12 months versus ${trend.prior12Months} in the prior 12 months (${trend.changePct! > 0 ? "+" : ""}${trend.changePct}%).`}</p>
+        <p>Describes permits within 1 mile, not this address.{supplyGate ? ` They identify ${permittedUnits.toLocaleString()} units, ${supplyRatio!.toFixed(1)}× the subject’s ${subjectUnits} — competing supply, not confirmed construction.` : ""}</p>
         <p>{sourceNote}</p>
       </div>
     </div>

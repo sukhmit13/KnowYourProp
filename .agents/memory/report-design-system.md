@@ -5,6 +5,14 @@ description: Durable rules for report styling, evidence-scoped section names, an
 
 # Report design system
 
+## Neutral measurement comparisons
+
+A measurement block takes a verdict color only when an outside authority has classified the value and established its polarity. If whether a change is good or bad depends on the reader's intended use, keep the block slate and do not add an arrow glyph.
+
+**Why:** The user explained that nearby permit growth can mean momentum to a developer but competing supply to an owner; a positive percentage is not itself an authoritative favorable verdict.
+
+**How to apply:** Distinguish a signed numerical change from a judgment. Preserve the actual value and named comparison set without inventing thresholds or favorable/unfavorable meanings.
+
 ## Controls versus headline statistics
 
 Use compact segmented controls for Simple/Detailed switches, not filled headline-statistic cards.

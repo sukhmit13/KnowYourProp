@@ -1752,10 +1752,6 @@ button.kyp-morelink { background: none; border: 0; padding: 0; }
 }
 .kyp-pro a:hover { text-decoration: underline; }
 
-/* 5. The pipeline strip's footnote carries the counting rule, so it sits
-       tight under the blocks rather than a subsection's width apart.      */
-.kyp-src.pipefoot { margin-top: 10px; }
-
 /* 6. Two-column records layout for Zoning Board Activity (decisions beside
        upcoming hearings). Collapses on narrow screens.                     */
 .kyp-twocol {
@@ -2083,3 +2079,12 @@ button.kyp-morelink { background: none; border: 0; padding: 0; }
   .kyp-lrow{grid-template-columns:1fr auto}
   .kyp-lrow .v{grid-column:2}
 }
+
+/* ============================================================
+   PATCH 32 — §Nearby Development & Construction
+   ============================================================ */
+.kyp-src p{margin:0}
+.kyp-src p+p{margin-top:5px;margin-left:0}
+.kyp-charttitle.first{margin-top:4px}
+@media(max-width:860px){.kyp-blocks.four{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.kyp-blocks.four{grid-template-columns:1fr}}
