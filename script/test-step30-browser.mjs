@@ -80,7 +80,9 @@ try {
   assert.ok(initial && initial.selectedNoi > 0, "rent build-up provides an income snapshot");
   const numbers = await page.locator(".kyp-calcstep .n").allTextContents();
   assert.deepEqual(numbers, ["20.1", "20.2", "20.3", "20.4", "20.5"]);
-  await page.getByRole("button", { name: "Advanced", exact: true }).click();
+  assert.equal(await page.locator(".kyp-seg").count(), 1, "rental uses a compact segmented control");
+  await page.getByRole("button", { name: "Detailed", exact: true }).click();
+  assert.equal(await page.locator('.kyp-seg button.on[aria-pressed="true"]').textContent(), "Detailed");
   assert.equal((await snapshot()).selectedNoi, initial.selectedNoi, "tier changes do not change NOI");
   await fill("Annual property taxes", 15000);
   assert.ok(await page.locator(".kyp-tag").filter({ hasText: "Edited" }).count(), "tax edit changes provenance");
@@ -92,6 +94,13 @@ try {
   await page.getByLabel("NOI source", { exact: true }).selectOption("direct");
   await fill("Annual NOI entered directly", -5000);
   assert.equal((await snapshot()).selectedNoi, -5000, "entered losses remain signed");
+  assert.match(await page.locator(".kyp-covhd").textContent(), /Your NOI.*−\$5,000.*per year/);
+  assert.equal(await page.locator(".kyp-covrow").count(), 2, "coverage has only the two reference rows");
+  assert.deepEqual(await page.locator(".kyp-covrow .rl").allTextContents(), [
+    "Your debt payment1.00× — what the loan actually costs",
+    "Lender minimum1.25× — the floor most commercial lenders underwrite to",
+  ]);
+  assert.equal(await page.locator(".kyp-covrow .kyp-pill").filter({hasText:/Gap/}).count(), 0, "signed gap pills omit the redundant prefix");
   assert.equal(await page.locator(".kyp-ledger").count(), 0, "manual NOI suppresses the build-up statement");
   await page.getByRole("button", { name: /Restore/i }).click();
   assert.equal((await snapshot()).selectedNoi, edited.selectedNoi);
@@ -134,6 +143,7 @@ try {
   assert.equal(daycare.metrics.annualOperatingCosts, 0);
 
   await mount("sba");
+  assert.equal(await page.locator(".kyp-seg").count(), 1, "SBA uses a compact segmented control");
   await fill("Annual operating expenses", 500000);
   await fill("Third-party leased-space rent · annual", 0);
   const business = await snapshot();
@@ -176,6 +186,8 @@ try {
   await page.getByRole("button", { name: "Detailed", exact: true }).click();
   assert.equal((await snapshot()).selectedNoi, simpleDaycare.selectedNoi, "daycare detail toggle is view-only");
   assert.equal(await page.locator(".kyp-ledger").count(), 2, "daycare income separates business and property");
+  assert.equal(await page.locator(".kyp-seg").count(), 1, "daycare uses a compact segmented control");
+  await page.screenshot({ path: "/tmp/step30-verification/daycare-desktop.png", fullPage: true });
 
   await mount("rental", { initialPurchasePrice: "", sectionNumber: 27 });
   assert.equal((await snapshot()).calculationComplete, false, "missing price is not a modeled zero-cost acquisition");
@@ -199,7 +211,8 @@ try {
   await page.getByRole("button", { name: /Restore/i }).click();
   assert.equal((await snapshot()).noiSource, "noi_model:actual");
   assert.equal((await snapshot()).selectedNoi, priorBasis.selectedNoi);
-  await mount("rental");
+  await mount("rental", { initialUnitCount: 6 });
+  await page.screenshot({ path: "/tmp/step30-verification/rental-six-unit-desktop.png", fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(100);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
@@ -211,6 +224,10 @@ try {
   assert.ok(css.indexOf("PATCH 30") > css.indexOf("PATCH 29"));
   const runDetail = fs.readFileSync("client/src/pages/RunDetail.tsx", "utf8");
   assert.doesNotMatch(runDetail, /isCashflowCalculatorOpen|isValuationCalculatorOpen|cashflowExpensePercent|val-step|val-cov|val-ref|val-mt|val-formula|calc-inputs|val-hrow|val-chip/);
+  const calculator = fs.readFileSync("client/src/components/report/ValuationCalculator.tsx", "utf8");
+  assert.ok((calculator.match(/kyp-seg/g) || []).length >= 4, "every tier switch uses the existing segmented primitive");
+  assert.doesNotMatch(calculator, /kyp-block[^\n]*(?:>Simple<|>Detailed<|>Advanced<)/);
+  assert.doesNotMatch(calculator, /<Step number=\{(?!1\})\d+\}/, "subsection numbers other than the first derive from the branch");
   console.log("Step 30 browser, integration-source, and responsive checks passed");
 } catch (error) {
   console.error("Browser errors:", errors);

@@ -5,6 +5,14 @@ description: Durable rules for report styling, evidence-scoped section names, an
 
 # Report design system
 
+## Controls versus headline statistics
+
+Use compact segmented controls for Simple/Detailed switches, not filled headline-statistic cards.
+
+**Why:** The user identified statistic cards used as view controls as the main visual mismatch in the valuation report.
+
+**How to apply:** Keep control state and accessibility intact while reusing existing segmented-control styles. Reserve headline-statistic blocks for displayed metrics; choosing the right primitive should not require new CSS.
+
 Restyles must reuse the shared primitives already in the global stylesheet (section headers, stat tiles, viz lists, directory fact tiles/rows, market tables/ladders) — grep the stylesheet before inventing new classes. Style via explicit classes on JSX; broad legacy-Tailwind descendant selectors or `!important` overrides get failed in review as scope leaks.
 
 **Trend/delta colors are sign-based only:** green #2f7d3f positive, red #d13b26 negative — never amber/magnitude thresholds. Exclusion-type markers (e.g. "doesn't count toward FAR") are muted, not red. Labels/column headers use dark ink #565651 wt 600–700; faint #8b8a84 is reserved for source lines and secondary qualifiers.

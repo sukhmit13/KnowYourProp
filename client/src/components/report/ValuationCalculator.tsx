@@ -395,9 +395,13 @@ export function ValuationCalculator({
         <div className="kyp-calcgrid two">
           <div className="kyp-calccol"><div className="ch">Business half</div>
             {listingRevenue != null && <p className="kyp-calchelp">Revenue prefilled from active listing · seller claim</p>}
-            <div className="kyp-blocks two">
-              <button type="button" className={`kyp-block ${businessDetail === "simple" ? "ind" : "slate"}`} aria-pressed={businessDetail === "simple"} onClick={() => setBusinessDetail("simple")}>Simple</button>
-              <button type="button" className={`kyp-block ${businessDetail === "detailed" ? "ind" : "slate"}`} aria-pressed={businessDetail === "detailed"} onClick={() => setBusinessDetail("detailed")}>Detailed</button>
+            <div className="kyp-segrow">
+              <div className="kyp-seg">
+                <button type="button" className={businessDetail === "simple" ? "on" : ""} aria-pressed={businessDetail === "simple"} onClick={() => setBusinessDetail("simple")}>Simple</button>
+                <button type="button" className={businessDetail === "detailed" ? "on" : ""} aria-pressed={businessDetail === "detailed"} onClick={() => setBusinessDetail("detailed")}>Detailed</button>
+              </div>
+              <div className="spacer" />
+              <div className="kyp-scopenote">Business income basis</div>
             </div>
             {businessDetail === "simple" ? <>
               <NumberField label="Annual business revenue" value={businessRevenue} onChange={setBusinessRevenue} />
@@ -479,7 +483,7 @@ export function ValuationCalculator({
               isDirect ? <><NumberField label="Annual NOI entered directly" value={directNoi} onChange={setDirectNoi} /><p className="kyp-calchelp">Blank is unknown and not a reported zero. An entered NOI is treated as fully net of property taxes and insurance.</p></> :
               <LedgerRow label="Selected rent basis" detail={selectedSource?.source ?? "No rent source"} tag={<ValuationTag kind={selectedSource?.basis === "actual" ? "rec" : "est"}>{selectedSource?.basis === "actual" ? "Actual · listing" : selectedSource?.basis === "market" ? "Market estimate" : "Manual"}</ValuationTag>} value={fmt(effectiveRent)} />}
             {!isDirect && !isListingNoi && <NumberField label="Residential rent override · annual" value={rentalOverride} onChange={setRentalOverride} />}
-            {commercialOnly && !isDirect && !isListingNoi && <p className="kyp-calchelp">The existing property is commercial-only. Residential market-rent estimates are not counted; enter commercial rent in Advanced, or use an actual listing income basis.</p>}
+            {commercialOnly && !isDirect && !isListingNoi && <p className="kyp-calchelp">The existing property is commercial-only. Residential market-rent estimates are not counted; enter commercial rent in Detailed, or use an actual listing income basis.</p>}
             {tier === "advanced" && !isListingNoi && !isDirect && <>
               {commercialIncomeAllowed && <NumberField label="Commercial rent · annual" value={commercialRent} onChange={setCommercialRent} />}
               <NumberField label="Other income · annual" value={otherIncome} onChange={setOtherIncome} />
@@ -490,11 +494,14 @@ export function ValuationCalculator({
               <NumberField label="Utilities · annual" value={utilities} onChange={setUtilities} placeholder={`Default ${fmt(units * 750)}`} />
               <NumberField label="Reserves per unit · annual" value={reservesPerUnit} onChange={setReservesPerUnit} />
             </>}
-            <div className="kyp-blocks two">
-              <button type="button" className={`kyp-block ${tier === "simple" ? "ind" : "slate"}`} aria-pressed={tier === "simple"} onClick={() => setTier("simple")}>Simple</button>
-              <button type="button" className={`kyp-block ${tier === "advanced" ? "ind" : "slate"}`} aria-pressed={tier === "advanced"} onClick={() => setTier("advanced")}>Advanced</button>
+            <div className="kyp-segrow">
+              <div className="kyp-seg">
+                <button type="button" className={tier === "simple" ? "on" : ""} aria-pressed={tier === "simple"} onClick={() => setTier("simple")}>Simple</button>
+                <button type="button" className={tier === "advanced" ? "on" : ""} aria-pressed={tier === "advanced"} onClick={() => setTier("advanced")}>Detailed</button>
+              </div>
+              <div className="spacer" />
+              <div className="kyp-scopenote">Edit assumptions in Detailed.</div>
             </div>
-            {tier === "simple" && <p className="kyp-calchelp">Edit assumptions in Advanced.</p>}
           </div>
           <div className="kyp-calccol"><div className="ch">Property costs</div>
             <LedgerRow label="County property taxes" tag={<ValuationTag kind={taxEdited ? "assume" : enteredCost(taxString) ? "rec" : "est"}>{taxEdited ? "Edited" : enteredCost(taxString) ? "From record" : "Unavailable"}</ValuationTag>} value={enteredCost(taxString) ? fmt(parse(taxString)) : "Unknown"} />
@@ -519,7 +526,7 @@ export function ValuationCalculator({
           <LedgerRow label="Net operating income" variant="total" value={incomeStatementComplete ? fmt(rentalModel.noi) : "Unknown"} negative={rentalModel.noi < 0} />
         </ValuationLedger>}
         {tier === "simple" && !isListingNoi && !isDirect && <div className="kyp-ledger">
-          <div className="lh">Assumptions in use · same arithmetic as Advanced</div>
+          <div className="lh">Assumptions in use · same arithmetic as Detailed</div>
           <LedgerRow label="Residential vacancy" tag={<ValuationTag kind="assume">Assumption</ValuationTag>} value={`${vacancyResidential}%`} />
           {commercialIncomeAllowed && <LedgerRow label="Commercial vacancy" tag={<ValuationTag kind="assume">Assumption</ValuationTag>} value={`${vacancyCommercial}%`} />}
           <LedgerRow label="Management" tag={<ValuationTag kind="assume">Imputed</ValuationTag>} value={`${managementPct}% of EGI`} />
@@ -527,15 +534,19 @@ export function ValuationCalculator({
         </div>}
         {directNoi && isDirect && rentalSources.length > 0 && <button type="button" className="kyp-btn" onClick={() => { setDirectNoi(""); setRentSource(rentalSources.find(source => source.key === lastBuildUpSource.current)?.key ?? rentalSources[0].key); setHasChosenRentSource(true); }}>Restore build-up</button>}
         {isDirect && <p className="kyp-calchelp">Direct NOI is treated as fully net of property taxes and insurance; the county figure remains visible for comparison.</p>}
-        <div className="kyp-src">County taxes are the property record, never a listing tax figure. Insurance is a floor-area estimate until replaced by a quote. Space leased to others generates property rent; owner-occupied space does not. Unit count: {unitCountSource}; property-class counts are estimates within a class range, not an exact record. Simple and Advanced are views of the same arithmetic.</div>
+        <div className="kyp-src">County taxes are the property record, never a listing tax figure. Insurance is a floor-area estimate until replaced by a quote. Space leased to others generates property rent; owner-occupied space does not. Unit count: {unitCountSource}; property-class counts are estimates within a class range, not an exact record. Simple and Detailed are views of the same arithmetic.</div>
       </>}
     </>}
 
     {isDaycare && <>
-      <Step number={3} title="Income → NOI" note="selected scenario and property costs" />
-      <div className="kyp-blocks two">
-        <button type="button" className={`kyp-block ${tier === "simple" ? "ind" : "wash"}`} aria-pressed={tier === "simple"} onClick={() => setTier("simple")}>Simple</button>
-        <button type="button" className={`kyp-block ${tier === "advanced" ? "ind" : "wash"}`} aria-pressed={tier === "advanced"} onClick={() => setTier("advanced")}>Detailed</button>
+      <Step number={isDaycare ? 3 : 2} title="Income → NOI" note="selected scenario and property costs" />
+      <div className="kyp-segrow">
+        <div className="kyp-seg">
+          <button type="button" className={tier === "simple" ? "on" : ""} aria-pressed={tier === "simple"} onClick={() => setTier("simple")}>Simple</button>
+          <button type="button" className={tier === "advanced" ? "on" : ""} aria-pressed={tier === "advanced"} onClick={() => setTier("advanced")}>Detailed</button>
+        </div>
+        <div className="spacer" />
+        <div className="kyp-scopenote">Simple and Detailed show the same arithmetic. Detailed exposes the two income halves.</div>
       </div>
       <NumberField label="Annual business operating expenses" value={daycareExpense} onChange={setDaycareExpense} tag={<ValuationTag kind="assume">{daycareBusinessExpenseKnown ? "Entered" : "Unknown"}</ValuationTag>} />
       <p className="kyp-calchelp">Excluding occupancy, property taxes and building insurance. Blank is unknown; enter 0 only as an explicit assumption.</p>
@@ -551,7 +562,7 @@ export function ValuationCalculator({
       <LedgerRow label="Building insurance · estimate" tag={<ValuationTag kind={insuranceEdited ? "assume" : "est"}>{insuranceEdited ? "Edited" : "Floor-area estimate"}</ValuationTag>} value={`−${fmt(parse(insuranceString))}`} negative />
       <LedgerRow label="Property NOI" variant="total" value={propertyCostsComplete ? fmt(daycarePropertyNoi) : "Unknown"} negative />
       </ValuationLedger>
-      </> : <p className="kyp-calchelp">Simple and Detailed show the same arithmetic. Detailed exposes the two income halves.</p>}
+      </> : null}
       <div className="kyp-blocks three">
         <div className="kyp-block wash"><span className="bl">Business operating income</span><span className="bv">{daycareBusinessExpenseKnown ? fmt(daycareBusinessIncome) : "—"}</span></div>
         <div className="kyp-block wash"><span className="bl">Property NOI</span><span className="bv">{propertyCostsComplete ? fmt(daycarePropertyNoi) : "—"}</span></div>

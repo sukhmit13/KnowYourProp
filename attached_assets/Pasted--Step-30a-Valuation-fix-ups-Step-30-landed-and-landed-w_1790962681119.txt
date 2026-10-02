@@ -1,0 +1,126 @@
+# Step 30a — §Valuation fix-ups
+
+Step 30 landed, and landed well. This is a short punch list against what shipped, not a re-run.
+
+Audited against **`86431b7`** (origin/main, 2026-10-02), scoped to:
+
+```
+client/src/components/report/ValuationCalculator.tsx
+client/src/components/report/ValuationCoverage.tsx
+client/src/components/report/ValuationInputs.tsx
+client/src/components/report/ValuationLedger.tsx
+client/src/components/report/ValuationResults.tsx
+```
+
+## What is right — do not touch
+
+- Extraction into five components with a clean prop interface. Better than the spec asked for.
+- Every piece of old chrome is gone: **0** `<Card>`, **0** `<Collapsible>`, **0** `<Badge>`,
+  **0** `chead`, **0** `val-*`, **0** inline hex values.
+- 41 `<LedgerRow>`, 38 `<NumberField>`, 37 `<ValuationTag>` call sites. The statement is fully
+  populated.
+- Provenance tags are **edit-aware**, which the spec only asked for on one field:
+  `kind={taxEdited ? "assume" : "rec"}` and `kind={insuranceEdited ? "assume" : "est"}`.
+  Defect #5 from Step 30 §5 is closed.
+- `.kyp-bands b3` renders the DSCR bands at `ValuationCoverage.tsx:14`.
+- Step numbering derives from `SectionNumberContext` and offsets correctly for the day care path.
+- `taxRecordLabel`, `listingRevenue`, `listingSde`, `listingEbitda` props added — the data-layer
+  note was picked up.
+
+Three things to change. Only the first is visible.
+
+---
+
+## 1. The Simple / Detailed toggle is the wrong primitive
+
+This is almost certainly why the section does not look like the targets.
+
+Four sites build the switch out of `.kyp-block`:
+
+```
+ValuationCalculator.tsx:399, 400   business Simple / Detailed
+ValuationCalculator.tsx:494        tier Simple
+ValuationCalculator.tsx:537, 538   tier Simple / Detailed
+```
+
+```tsx
+<button type="button" className={`kyp-block ${tier === "simple" ? "ind" : "wash"}`} …>Simple</button>
+```
+
+`.kyp-block` is the **headline-statistic** primitive — a filled card sized for a 36px display
+numeral. Using it for a two-state switch produces two large colored slabs where the targets have a
+compact segmented control, and it is the single biggest visual difference from the mockups.
+
+`grep -c 'kyp-seg' ValuationCalculator.tsx` → **0**, while `DevelopmentSection.tsx` and
+`ProjectUseAnalysisSpine.tsx` both already use it. Use the same primitive here:
+
+```tsx
+<div className="kyp-segrow">
+  <div className="kyp-seg">
+    <button type="button" className={tier === "simple" ? "on" : ""}
+      aria-pressed={tier === "simple"} onClick={() => setTier("simple")}>Simple</button>
+    <button type="button" className={tier === "advanced" ? "on" : ""}
+      aria-pressed={tier === "advanced"} onClick={() => setTier("advanced")}>Detailed</button>
+  </div>
+  <div className="spacer" />
+  <div className="kyp-scopenote">{/* the one-line note opposite the control */}</div>
+</div>
+```
+
+Apply at all four sites. Keep `aria-pressed`. Reference: `val-dc-target.html`,
+`val-mf-target.html`.
+
+---
+
+## 2. Coverage Check has a third row that repeats the header
+
+`ValuationCoverage.tsx:31–35` ships a header plus three rows. The target has a header plus two.
+
+| Shipped | Target | Why |
+|---|---|---|
+| header `Coverage check` / value `1.14×` | header `Your NOI` / value `$103,596` / `per year` | the header states the quantity being tested. DSCR is already a block in Deal at a Glance and a lit band immediately below |
+| row `Annual debt service` — sub `NOI required for 1.00× coverage` | `Your debt payment` — sub `1.00× — what the loan actually costs` | the sub-line should say what the bar *is* |
+| row `Common commercial floor` — sub `NOI required for 1.25× coverage` | `Lender minimum` — sub `1.25× — the floor most commercial lenders underwrite to` | names whose rule it is |
+| row `NOI entered or derived` | **delete it** | it is the header value; a third row says it twice |
+| pill `Gap $-49,737` | pill `−$49,737` | "Gap" plus a signed number reads twice, and the pill color already says which side |
+
+Reference: `val-mf-target.html` §20.4.
+
+---
+
+## 3. One hardcoded step number
+
+`ValuationCalculator.tsx:535`:
+
+```tsx
+<Step number={3} title="Income → NOI" note="selected scenario and property costs" />
+```
+
+Every sibling derives it — `number={isDaycare ? 3 : 2}`. This one is a literal. It happens to be
+correct on the day care branch, which is why nothing is visibly wrong, but it will drift the
+moment that branch is reused. Make it match the pattern.
+
+---
+
+## Still open from Step 30 — not fixed here
+
+**27 of the 28 inputs do not persist.** Only the purchase price saves, through
+`handleSaveAskingPrice`. Set a rate, a vacancy percentage and six expense lines, reload, and all
+of it is gone — while a Save button beside the price implies otherwise. Either persist the input
+set alongside `askingPrice`, or relabel the button so it reads as price-only.
+
+**Three live API keys** in `.replit` lines 65–71, in four commits, with a `.gitignore` whose
+missing newline (`*.tar.gzserver/cache/`) means neither pattern matches. Rotate all three, move
+them to Replit Secrets, `git rm --cached .replit`, fix the newline. Rotating matters more than
+removing the file — they are already in the history.
+
+---
+
+## Verify
+
+- `grep -c 'kyp-seg' client/src/components/report/Valuation*.tsx` → 4 or more
+- `grep -c 'kyp-block.*Simple\|kyp-block.*Detailed' client/src/components/report/Valuation*.tsx` → 0
+- `ValuationCoverage.tsx` renders exactly two `.kyp-covrow`
+- No `<Step number={` with a bare integer except `number={1}`
+- Visual: open a 6-unit property and a day care; the Simple/Detailed switch is a small pill pair,
+  not two filled cards
