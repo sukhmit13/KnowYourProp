@@ -3,17 +3,67 @@
 // exactly the numbers shown on screen.
 
 export function parseFormattedNumber(value: string): number {
-  return parseFloat(value.replace(/,/g, '')) || 0;
+  const parsed = parseFloat(value.replace(/,/g, ''));
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 // PMT helper - rate is passed as percentage (e.g., 6.0 for 6%)
 export function calculatePMT(principal: number, rate: number, years: number): number {
-  const monthlyRate = rate / 100 / 12;
-  const numPayments = years * 12;
-  if (monthlyRate > 0 && principal > 0) {
-    return (principal * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+  const safePrincipal = Number.isFinite(principal) ? Math.max(0, principal) : 0;
+  const safeYears = Number.isFinite(years) ? Math.min(100, Math.max(1, years)) : 1;
+  const safeRate = Number.isFinite(rate) ? Math.min(100, Math.max(0, rate)) : 0;
+  const monthlyRate = safeRate / 100 / 12;
+  const numPayments = safeYears * 12;
+  if (safePrincipal <= 0) return 0;
+  if (monthlyRate > 0) {
+    const denominator = 1 - Math.exp(-numPayments * Math.log1p(monthlyRate));
+    const payment = (safePrincipal * monthlyRate) / denominator;
+    return Number.isFinite(payment) ? payment : safePrincipal;
   }
-  return principal > 0 ? principal / numPayments : 0;
+  return safePrincipal / numPayments;
+}
+
+function finiteInput(value: number, fallback: number): number {
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function finiteOutput(value: number): number {
+  if (Number.isFinite(value)) return value;
+  if (Number.isNaN(value)) return 0;
+  return value < 0 ? -Number.MAX_VALUE : Number.MAX_VALUE;
+}
+
+function parsedInput(value: string, fallback: number, minimum: number, maximum: number): number {
+  const parsed = parseFloat(value);
+  const valid = Number.isFinite(parsed) && parsed >= 0;
+  return Math.min(maximum, Math.max(minimum, valid ? parsed : fallback));
+}
+
+function parsePercentageInput(value: string, fallback: number): number {
+  const trimmed = value.trim();
+  if (!trimmed) return fallback;
+  const parsed = parseFloat(trimmed);
+  return Number.isFinite(parsed) && parsed >= 0
+    ? Math.min(100, parsed)
+    : fallback;
+}
+
+function parseDownPaymentPercent(value: string, fallback: number): number {
+  const trimmed = value.trim();
+  if (!trimmed) return fallback;
+  const parsed = parseFloat(trimmed);
+  return Number.isFinite(parsed)
+    ? Math.min(100, Math.max(0, parsed))
+    : fallback;
+}
+
+function resolveDownPaymentPercent(value: number): number {
+  return Math.min(100, Math.max(0, finiteInput(value, 20)));
+}
+
+function resolveTermYears(value: number, fallback: number): number {
+  const valid = Number.isFinite(value) && value >= 1;
+  return Math.min(100, Math.max(1, valid ? value : fallback));
 }
 
 export interface ValuationInputs {
@@ -36,6 +86,8 @@ export interface ValuationInputs {
   selectedNoi: number;
   annualTaxesInput: string;
   annualInsuranceInput: string;
+  /** True when selectedNoi already includes property taxes and insurance. */
+  noiIncludesPropertyExpenses?: boolean;
 }
 
 export interface ValuationMetrics {
@@ -66,6 +118,7 @@ export function computeValuationMetrics(i: ValuationInputs): ValuationMetrics {
 
   const annualTaxesRaw = Math.max(0, parseFormattedNumber(i.annualTaxesInput));
   const annualInsuranceRaw = Math.max(0, parseFormattedNumber(i.annualInsuranceInput));
+  const selectedNoi = finiteInput(i.selectedNoi, 0);
 
   let purchasePrice: number;
   let downPayment: number;
@@ -81,12 +134,12 @@ export function computeValuationMetrics(i: ValuationInputs): ValuationMetrics {
     const realEstatePrice = isSbaBusinessOnly ? 0 : Math.max(0, parseFormattedNumber(i.sbaRealEstatePrice));
     purchasePrice = businessPrice + realEstatePrice;
 
-    const businessDownPct = Math.max(0, parseFloat(i.sbaBusinessDownPercent) || 10) / 100;
-    const businessTermYrs = Math.max(1, parseFloat(i.sbaBusinessTermYears) || 10);
-    const businessRate = parseFloat(i.sbaBusinessInterestRate) || 10.25; // Business uses prime + 2.75%
-    const realEstateDownPct = Math.max(0, parseFloat(i.sbaRealEstateDownPercent) || 10) / 100;
-    const realEstateTermYrs = Math.max(1, parseFloat(i.sbaRealEstateTermYears) || 25);
-    const realEstateRate = parseFloat(i.sbaRealEstateInterestRate) || 6.0; // SBA 504 rate
+    const businessDownPct = parseDownPaymentPercent(i.sbaBusinessDownPercent, 10) / 100;
+    const businessTermYrs = parsedInput(i.sbaBusinessTermYears, 10, 1, 100);
+    const businessRate = parsePercentageInput(i.sbaBusinessInterestRate, 10.25); // Business uses prime + 2.75%
+    const realEstateDownPct = parseDownPaymentPercent(i.sbaRealEstateDownPercent, 10) / 100;
+    const realEstateTermYrs = parsedInput(i.sbaRealEstateTermYears, 25, 1, 100);
+    const realEstateRate = parsePercentageInput(i.sbaRealEstateInterestRate, 6.0); // SBA 504 rate
 
     const businessDown = businessPrice * businessDownPct;
     const realEstateDown = realEstatePrice * realEstateDownPct;
@@ -103,9 +156,9 @@ export function computeValuationMetrics(i: ValuationInputs): ValuationMetrics {
   } else {
     // Non-SBA: simple single loan
     purchasePrice = Math.max(0, parseFormattedNumber(i.purchasePriceInput));
-    const downPaymentPercent = i.presetDownPaymentPercent || 20;
-    const termYears = i.presetTermYears || 30;
-    const ratePercent = parseFloat(i.interestRateInput) || 7.5;
+    const downPaymentPercent = resolveDownPaymentPercent(i.presetDownPaymentPercent);
+    const termYears = resolveTermYears(i.presetTermYears, 30);
+    const ratePercent = parsePercentageInput(i.interestRateInput, 7.5);
 
     downPayment = purchasePrice * (downPaymentPercent / 100);
     loanAmount = purchasePrice - downPayment;
@@ -114,14 +167,18 @@ export function computeValuationMetrics(i: ValuationInputs): ValuationMetrics {
     annualDebtService = monthlyPayment * 12;
   }
 
-  // Annual operating costs (taxes + insurance)
-  // - SBA business-only: zeroed (factored into lease/NOI from tenant)
-  // - Any loan type with NOI filled: zeroed (NOI already nets taxes & insurance)
-  // - No NOI (owner-occupied): show PITI breakdown, deduct taxes & insurance from cash flow
-  const hasNoi = i.selectedNoi > 0;
-  const noiCoversExpenses = !isSba && hasNoi;
-  const annualTaxes = (isSbaBusinessOnly || noiCoversExpenses) ? 0 : annualTaxesRaw;
-  const annualInsurance = (isSbaBusinessOnly || noiCoversExpenses) ? 0 : annualInsuranceRaw;
+  // Property costs are shown in PITI and deducted from cash flow unless NOI
+  // explicitly says it already contains them. With the flag absent, retain
+  // the legacy behavior for existing callers.
+  const hasNoi = selectedNoi > 0;
+  // Keep historical behavior for existing callers. New callers can state
+  // explicitly whether property expenses are already represented in NOI,
+  // independent of whether the NOI is positive, zero, negative, or SBA.
+  const noiCoversExpenses = typeof i.noiIncludesPropertyExpenses === 'boolean'
+    ? i.noiIncludesPropertyExpenses
+    : (!isSba && hasNoi) || isSbaBusinessOnly;
+  const annualTaxes = noiCoversExpenses ? 0 : annualTaxesRaw;
+  const annualInsurance = noiCoversExpenses ? 0 : annualInsuranceRaw;
   const annualOperatingCosts = annualTaxes + annualInsurance;
   const monthlyPI = annualDebtService / 12;
   const monthlyTaxes = annualTaxes / 12;
@@ -129,34 +186,116 @@ export function computeValuationMetrics(i: ValuationInputs): ValuationMetrics {
   const monthlyPITI = monthlyPI + monthlyTaxes + monthlyInsurance;
 
   // Annual cash flow (after debt service, taxes, and insurance)
-  const annualCashFlow = i.selectedNoi - annualDebtService - annualOperatingCosts;
+  const annualCashFlow = selectedNoi - annualDebtService - annualOperatingCosts;
 
   // Key metrics
-  const dscr = annualDebtService > 0 ? i.selectedNoi / annualDebtService : 0;
-  const capRate = purchasePrice > 0 ? (i.selectedNoi / purchasePrice) * 100 : 0;
+  const dscr = annualDebtService > 0 ? selectedNoi / annualDebtService : 0;
+  const capRate = purchasePrice > 0 ? (selectedNoi / purchasePrice) * 100 : 0;
   const roi = downPayment > 0 ? (annualCashFlow / downPayment) * 100 : 0; // Cash-on-cash return
 
   return {
-    purchasePrice,
-    downPayment,
-    loanAmount,
-    annualDebtService,
-    sbaBusinessMonthly,
-    sbaRealEstateMonthly,
-    annualTaxes,
-    annualInsurance,
-    annualOperatingCosts,
-    monthlyPI,
-    monthlyTaxes,
-    monthlyInsurance,
-    monthlyPITI,
-    annualCashFlow,
-    dscr,
-    capRate,
-    roi,
+    purchasePrice: finiteOutput(purchasePrice),
+    downPayment: finiteOutput(downPayment),
+    loanAmount: finiteOutput(loanAmount),
+    annualDebtService: finiteOutput(annualDebtService),
+    sbaBusinessMonthly: finiteOutput(sbaBusinessMonthly),
+    sbaRealEstateMonthly: finiteOutput(sbaRealEstateMonthly),
+    annualTaxes: finiteOutput(annualTaxes),
+    annualInsurance: finiteOutput(annualInsurance),
+    annualOperatingCosts: finiteOutput(annualOperatingCosts),
+    monthlyPI: finiteOutput(monthlyPI),
+    monthlyTaxes: finiteOutput(monthlyTaxes),
+    monthlyInsurance: finiteOutput(monthlyInsurance),
+    monthlyPITI: finiteOutput(monthlyPITI),
+    annualCashFlow: finiteOutput(annualCashFlow),
+    dscr: finiteOutput(dscr),
+    capRate: finiteOutput(capRate),
+    roi: finiteOutput(roi),
     hasNoi,
     noiCoversExpenses,
   };
+}
+
+/** SBA ownership rule: real estate is dominant at a 51% share of combined price. */
+export function isSbaRealEstateDominant(businessPrice: number, realEstatePrice: number): boolean {
+  const business = Number.isFinite(businessPrice) ? Math.max(0, businessPrice) : 0;
+  const realEstate = Number.isFinite(realEstatePrice) ? Math.max(0, realEstatePrice) : 0;
+  const total = business + realEstate;
+  return total > 0 && realEstate / total >= 0.51;
+}
+
+export interface BusinessIncomeInputs {
+  detailMode: 'simple' | 'detailed';
+  revenueAnnual: number;
+  operatingExpensesAnnual: number;
+  costOfGoodsSoldAnnual: number;
+  payrollAnnual: number;
+  otherOperatingExpensesAnnual: number;
+  ownerSalaryAnnual: number;
+  ownerPersonalExpensesAnnual: number;
+  oneTimeItemsAnnual: number;
+  managerSalaryAnnual: number;
+}
+
+export interface BusinessIncomeResult {
+  bookOperatingProfit: number;
+  sde: number;
+  businessOperatingIncome: number;
+}
+
+/** Calculate business earnings separately from property expenses and debt service. */
+export function computeBusinessIncome(i: BusinessIncomeInputs): BusinessIncomeResult {
+  if (i.detailMode === 'simple') {
+    const profit = i.revenueAnnual - i.operatingExpensesAnnual;
+    return { bookOperatingProfit: profit, sde: profit, businessOperatingIncome: profit };
+  }
+  const bookOperatingProfit = i.revenueAnnual -
+    i.costOfGoodsSoldAnnual -
+    i.payrollAnnual -
+    i.otherOperatingExpensesAnnual;
+  const sde = bookOperatingProfit +
+    i.ownerSalaryAnnual +
+    i.ownerPersonalExpensesAnnual +
+    i.oneTimeItemsAnnual;
+  const businessOperatingIncome = sde - i.managerSalaryAnnual;
+  return { bookOperatingProfit, sde, businessOperatingIncome };
+}
+
+export interface DaycareScenario {
+  key: '100_efficient' | '100_comfortable' | '75_efficient' | '75_comfortable';
+  label: string;
+  capacity: number;
+  children: number;
+  monthlyRevenue: number;
+  annualRevenue: number;
+}
+
+export function computeDaycareScenarios(input: {
+  buildingSqFt: number;
+  revenuePerChildMonthly: number;
+}): DaycareScenario[] {
+  const sqft = Number.isFinite(input.buildingSqFt) ? Math.max(0, input.buildingSqFt) : 0;
+  const revenuePerChild = Number.isFinite(input.revenuePerChildMonthly)
+    ? Math.max(0, input.revenuePerChildMonthly)
+    : 0;
+  const capacities = {
+    efficient: Math.floor(sqft / 75),
+    comfortable: Math.floor(sqft / 90),
+  };
+  const scenarios: Array<Omit<DaycareScenario, 'monthlyRevenue' | 'annualRevenue'>> = [
+    { key: '100_efficient', label: '100% · Efficient (75 sq ft/child)', capacity: capacities.efficient, children: capacities.efficient },
+    { key: '100_comfortable', label: '100% · Comfortable (90 sq ft/child)', capacity: capacities.comfortable, children: capacities.comfortable },
+    { key: '75_efficient', label: '75% · Efficient (75 sq ft/child)', capacity: capacities.efficient, children: Math.floor(capacities.efficient * 0.75) },
+    { key: '75_comfortable', label: '75% · Comfortable (90 sq ft/child)', capacity: capacities.comfortable, children: Math.floor(capacities.comfortable * 0.75) },
+  ];
+  return scenarios.map(scenario => {
+    const monthlyRevenue = finiteOutput(scenario.children * revenuePerChild);
+    return {
+      ...scenario,
+      monthlyRevenue,
+      annualRevenue: finiteOutput(monthlyRevenue * 12),
+    };
+  });
 }
 
 // ── Transparent NOI build-up (Investor · buy-to-lease mode) ────────────────
@@ -230,8 +369,21 @@ export interface NoiModelSnapshot {
 }
 
 export interface ValuationSnapshot {
+  /** False when an income or financing input is unknown; numeric outputs are not evidence. */
+  calculationComplete?: boolean;
   selectedNoi: number;
   noiSource: string;
   metrics: ValuationMetrics;
   noiModel?: NoiModelSnapshot | null;
+  businessIncomeModel?: {
+    detailMode: 'simple' | 'detailed';
+    inputs: BusinessIncomeInputs;
+    result: BusinessIncomeResult;
+  } | null;
+  daycareModel?: {
+    buildingSqFt: number;
+    revenuePerChildMonthly: number;
+    scenarios: DaycareScenario[];
+  } | null;
+  inputSnapshot?: Record<string, unknown>;
 }

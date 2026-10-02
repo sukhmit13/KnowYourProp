@@ -4034,6 +4034,10 @@ export interface ListingSnapshotData {
   rentRoll: Array<{ unit: string | null; beds: number | null; baths: number | null; monthlyRent: number | null }>;
   grossAnnualIncome: number | null;
   statedNoi: number | null;
+  /** Optional so older cached JSONB snapshots remain valid. */
+  revenue?: number | null;
+  sde?: number | null;
+  ebitda?: number | null;
   checkedAt: string;
 }
 

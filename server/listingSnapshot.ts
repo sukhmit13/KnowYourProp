@@ -38,14 +38,17 @@ export interface ListingSnapshot {
   grossAnnualIncome: number | null;
   /** NOI the listing itself states */
   statedNoi: number | null;
+  /** Annual business revenue explicitly stated in the listing; never inferred. */
+  revenue: number | null;
+  /** Annual seller's discretionary earnings stated in the listing. */
+  sde: number | null;
+  /** Annual EBITDA stated in the listing. */
+  ebitda: number | null;
   checkedAt: string;
 }
 
-export async function fetchListingSnapshot(address: string): Promise<ListingSnapshot> {
-  const { default: Anthropic } = await import('@anthropic-ai/sdk');
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-  const prompt = `Search the web for the current real-estate listing for this exact address:
+export function buildListingSnapshotPrompt(address: string): string {
+  return `Search the web for the current real-estate listing for this exact address:
 
 ${address}
 
@@ -87,7 +90,10 @@ Then respond with ONLY a JSON object (no markdown fences, no commentary) matchin
   "unitCount": number | null,
   "rentRoll": [{"unit": "unit label like '1F' or 'Unit 2'" | null, "beds": number | null, "baths": number | null, "monthlyRent": number | null}],
   "grossAnnualIncome": number | null,
-  "statedNoi": number | null
+   "statedNoi": number | null,
+   "revenue": number | null,
+   "sde": number | null,
+   "ebitda": number | null
 }
 
 Rules:
@@ -96,9 +102,24 @@ Rules:
 - keyFacts must be COMPREHENSIVE: include every concrete claim the listing makes, e.g. price per SF, cap rate, GRM, NOI or gross income, number of units and unit mix (beds/baths per unit), current rents, building sqft, lot size, year built / renovated, number of stories, stated zoning, parking, quoted taxes, HOA, occupancy/tenancy, utilities/mechanicals, and the listing brokerage/agent name. One short string per fact.
 - claims is a separate machine-checkable list. For every listing fact about unit count, year built, lot size in square feet, annual taxes, renovation year, or gross annual income, ALSO include a claims entry. raw MUST quote the listing sentence verbatim. Never infer or manufacture a claim; leave claims empty when the listing is silent. Keep the same fact in keyFacts.
 - unitCount / rentRoll / grossAnnualIncome / statedNoi: fill ONLY from what the LISTING states (not tax records or third-party estimates). rentRoll: one entry per unit if the listing shows per-unit beds/baths/rents (current or projected rents count — note "projected" in keyFacts if so). If the listing states annual gross income or NOI, put the numbers in grossAnnualIncome / statedNoi. Use null / [] when not published.
+- revenue, sde, and ebitda are separate annual business-listing fields, not aliases for grossAnnualIncome or statedNoi. Populate only when the listing explicitly states that annual metric; do not derive one from another. revenue must be a finite nonnegative number. SDE and EBITDA may be negative only when the listing explicitly states a loss; preserve that signed value.
 - Do NOT report "off_market"/delisted based on search-result snippets, cached previews, or aggregator pages — those are often stale. Only call a listing delisted/off-market if the CURRENT listing page itself (or the source site's own status banner on that page) confirms it. If you cannot open the listing page to confirm, and a recent listing exists, prefer "active" with a note in keyFacts that the status could not be re-verified.
 - Report only what listings actually say. Do NOT infer, estimate, or fill gaps — use null / empty arrays when the information is not shown.
 - Always include sourceUrl when you found a listing.`;
+}
+
+export function normalizeAnnualListingValue(value: unknown, allowNegative = false): number | null {
+  return typeof value === 'number' &&
+    Number.isFinite(value) &&
+    (allowNegative || value >= 0)
+    ? value
+    : null;
+}
+
+export async function fetchListingSnapshot(address: string): Promise<ListingSnapshot> {
+  const { default: Anthropic } = await import('@anthropic-ai/sdk');
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const prompt = buildListingSnapshotPrompt(address);
 
   const stream = client.messages.stream({
     model: MODEL,
@@ -172,6 +193,9 @@ Rules:
       : [],
     grossAnnualIncome: Number.isFinite(parsed.grossAnnualIncome) && parsed.grossAnnualIncome > 0 ? parsed.grossAnnualIncome : null,
     statedNoi: Number.isFinite(parsed.statedNoi) && parsed.statedNoi > 0 ? parsed.statedNoi : null,
+    revenue: normalizeAnnualListingValue(parsed.revenue),
+    sde: normalizeAnnualListingValue(parsed.sde, true),
+    ebitda: normalizeAnnualListingValue(parsed.ebitda, true),
     checkedAt: new Date().toISOString(),
   };
 }

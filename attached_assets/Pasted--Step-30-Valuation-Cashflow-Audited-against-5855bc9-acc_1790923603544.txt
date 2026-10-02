@@ -1,0 +1,456 @@
+# Step 30 — §Valuation & Cashflow
+
+Audited against `5855bc9`. `accProps("valuation")`, `RunDetail.tsx` **18075–19545** (1,471 lines)
+read in full, plus `client/src/lib/valuation.ts`, the local `Tag` / `Row` helpers at `:19091` and
+`:19099`, and `ValuationMetricBridge`.
+
+**Run Step 29 first.** This step uses `.kyp-form` / `.kyp-field` / `.kyp-input` / `.kyp-btn` and
+`.kyp-bands` from `kyp-base-patch-29-pua.css`. Patch 30 adds only what a calculator needs on top.
+
+| File | What it is |
+|---|---|
+| `kyp-base-patch-30-valuation.css` | append to `kyp-base.css` **after** patch 29. 56 rules, parser-verified, 0 errors, every `var()` resolves |
+| `val-mf-target.html` | multifamily / mixed-use — the richest shape |
+| `val-mf-sbs.html` | current vs new |
+| `val-sf-target.html` | 2–4 unit residential, with the DSCR-loan convention |
+| `val-sba-target.html` | SBA business & real estate — two notes, two income streams |
+| `val-noi-model.html` | **read this first** — one NOI statement for every deal, and the three rules behind it |
+| `val-sba-income.html` | the SBA Detailed view — the SDE ladder, for when a deal needs it |
+| `val-dc-target.html` | Day Care Center — the four site-cashflow scenarios as a selectable 2×2 |
+| `val-financing.html` | **all four financing paths** and what changes between them |
+| `val-states.html` | the four ways NOI reaches the metrics |
+
+---
+
+## What this section actually is
+
+Not a display section. **28 `<Input>`, 3 `<Select>`, 6 buttons, four financing paths, three NOI
+bases and two detail tiers.** It is also running **three styling systems at once**:
+
+- shadcn `Card` / `Collapsible` / `Badge` / `Input` / `Label` / `Select` chrome
+- a bespoke `.val-*` family in `index.css`
+- ad-hoc Tailwind with **29 distinct inline hex values**, including two dark `#232d6e` bands built
+  independently at `:18269` and `:19326`
+
+**Not one `kyp-` class appears in 18075–19545.** The low shadcn marker count in the conversion
+status table was misleading — the section is not half-converted, it is unconverted and bespoke.
+
+---
+
+## Rules for this step
+
+1. **Classify, don't advise.** This is the one section where the product has standing to speak,
+   because the reader typed the inputs and 1.25× DSCR is a real lender floor. See §4.
+2. **Scope and source notes go at the END of each subsection**, once, in `.kyp-src`.
+3. **Never print a number that was not derived from an input or a source.** Several are today.
+4. **No new CSS.** Patch 29 + patch 30 is the whole budget.
+5. **American spellings.**
+
+---
+
+## 1. The structure
+
+Two top-level `<Collapsible><Card>` panels become numbered subsections of one accordion body.
+Delete `isCashflowCalculatorOpen` and `isValuationCalculatorOpen` — the accordion already opens
+and closes the section, and a collapsible inside a collapsible inside a card is three chromes
+deep.
+
+Non-daycare (`val-mf-target.html`, `val-sf-target.html`):
+
+| # | Title | Replaces |
+|---|---|---|
+| 20.1 | Deal Inputs | `calc-inputs` block, `:18703–19058` |
+| 20.2 | Income → NOI | Step 2, `:19061–19292` |
+| 20.3 | Deal at a Glance | the `#232d6e` band, `:19295–19379` |
+| 20.4 | Coverage Check | `.val-cov`, `:19381–19481` |
+| 20.5 | How It's Calculated | `.val-ref`, `:19483–19536` |
+
+Day Care (`val-dc-target.html`) inserts **20.1 Site Cashflow** ahead of these and renumbers. See
+§3d for what changes inside it.
+
+SBA keeps all five. 20.2 is a **different** build-up, not an absent one — see §3b.
+
+Subsection numbers come from the live index, never hard-coded. The code already does this at
+`:19325` (`{showIncomeStep ? 3 : 2}`); keep that behaviour.
+
+---
+
+## 2. The four financing paths
+
+`loanTypePresets` (`:1740–1745`). See `val-financing.html` — all four rendered side by side.
+
+| Path | Purchase column | Financing column | Taxes & insurance |
+|---|---|---|---|
+| **Conventional** | one price + Save | rate input + locked `20% down` / `30-yr term` | deducted inside NOI |
+| **FHA / VA** | one price + Save | rate input + locked `5% down` / `30-yr term` | deducted inside NOI |
+| **SBA — business only** | business price only | down / term / rate, one note | **zeroed** (`isSbaBusinessOnly`) |
+| **SBA — business & RE** | business price + RE price | two sets of down / term / rate | deducted from cash flow |
+
+Conventional and FHA/VA are the **same shape**; only the preset values differ. Build one component
+and pass the preset. SBA business-only and SBA business & RE each change the Purchase column too.
+
+### Two honesty items on the FHA/VA path
+
+The rate shown is the Freddie Mac **conventional** 30-year average (`mortgageRateData`), applied
+unchanged to FHA and VA. And FHA carries mortgage insurance that is not in the payment. Both go in
+the 20.1 footer — see `val-financing.html`.
+
+Also: FHA and VA are **owner-occupant** products. The 1.25× commercial coverage floor is not the
+test a lender applies to them. The 20.3 footer says so on this path.
+
+### A defect to fix
+
+Two different tests decide the same thing:
+
+- `:18355` — `reIsDominant` uses `reVal / total > 0.51`
+- `:1850–1884` — the effect that rewrites the SBA term uses `realEstatePercent >= 51`
+
+At exactly 51% they disagree, so the note "Business share uses RE terms" can render while the
+terms have **not** been rewritten. One test, used in both places.
+
+---
+
+## 3a. One NOI statement, for every deal
+
+Read `val-noi-model.html` before building anything in §3b or §3d. It is the whole model on one
+page, and it exists because the alternative — a different income shape per use — is how this
+section became unreadable in the first place.
+
+**Every deal is the same statement, in two halves.**
+
+| Half | Who supplies it | Varies by deal? |
+|---|---|---|
+| **Property** | us — taxes from the Cook County record, insurance estimated from floor area, rent from the selected basis | no |
+| **Business** | the operator — revenue, and one operating-expense figure | yes, and we have no data for it either way |
+
+**Three rules. They are what make the double-counting question go away.**
+
+1. **Property taxes and building insurance live in the property half only.** Taxes always from the
+   county record; insurance estimated from floor area until a quote replaces it. They never appear
+   in the business half.
+2. **The business expense line is labelled on screen as excluding occupancy, property taxes and
+   building insurance.** That is what makes a trade ratio safe to paste in — the reader knows what
+   to take out of it first.
+3. **Debt service is subtracted once, after NOI, never inside either half.** Owning the building
+   is the mortgage; it is not an operating expense.
+
+A corollary that settles the last ambiguity: **every square foot is in exactly one half.** Space
+the business occupies produces no rent and sits in the business half as part of its cost of
+operating. Space leased to someone else produces rent and sits in the property half.
+
+### The business half is ONE line, not an itemised P&L
+
+An earlier draft of this spec itemised six day-care expense lines — payroll, food, supplies,
+program, utilities, repairs. **Drop them.** They were defaults with no source, for a cost
+structure the operator knows and we do not, and they made the day care read as a different
+calculator from every other deal. One entered figure with a stated exclusion carries the same
+information.
+
+The one exception is **SBA Detailed** (§3b): there the lender underwrites from SDE and the
+add-backs have to be visible, so the business half gets a **Simple / Detailed** toggle. Simple —
+revenue and one expense line — is the default. This is the same control the rental build-up
+already has at `:18686`, in the same place; it is not a new concept.
+
+---
+
+## 3b. SBA needs its own income build-up — this does not exist today
+
+**The gap.** The build-up at `:19194–19287` is a *rental* statement: residential rent, commercial
+rent, vacancy, management, repairs, utilities, reserves. There is **no business-income model
+anywhere in the section.** `rentalNoiOptions` (`:18447–18519`) contains only rent bases, so on a
+business acquisition with no leased space `hasRentalOptions` is false, Step 2 never renders, and
+the only route to NOI is typing one number into `valuationManualNoi`.
+
+That is wrong for both SBA paths, and worst for business & real estate, where there are **two**
+income streams and the live code models neither.
+
+Build it as the two halves from §3a. **Simple is the default** — revenue and one expense line.
+The ladder below is the **Detailed** view, for an SBA acquisition where the lender underwrites
+from SDE; it is in `val-sba-income.html`.
+
+### 20.2a — Business operating income, Detailed view
+
+| Line | Source |
+|---|---|
+| Revenue | pre-fills from the listing when one is active and states it |
+| Cost of goods sold · Payroll · Other operating expenses | entered |
+| **Book operating profit** | subtotal |
+| Add back: owner salary · owner personal expenses · one-time items | entered, tagged as add-backs |
+| **Seller's discretionary earnings (SDE)** | subtotal |
+| Less: market manager salary | entered — what it costs to replace the owner |
+| **Business operating income (adjusted EBITDA)** | total |
+
+SBA 7(a) underwrites from SDE **less a market manager salary**, which is why that line is
+subtracted rather than left in. Add-backs are the seller's claims until a quality-of-earnings
+review tests them; tag them, do not verify them.
+
+### 20.2b — Real estate income
+
+The existing rental statement, unchanged, covering **only space leased to someone else**. Space
+the business occupies itself produces no rent.
+
+### 20.2c — Combined
+
+Three blocks: business operating income, real estate NOI, total. Total NOI is what 20.3 and 20.4
+measure against both notes.
+
+> **The double-count to avoid.** If the business occupies the building, its P&L already reflects
+> that occupancy — it was either paying rent to the former landlord or paying none. Charging a
+> market rent for the same space in 20.2b while leaving the business's earnings unadjusted counts
+> the space twice. The panel must state which convention is in use. The target charges rent for
+> the leased portion only and says so.
+
+> **A combined cap rate is not a real-estate cap rate.** Dividing a blended business-plus-property
+> NOI by a price that includes goodwill produces a number that looks like a cap rate and is not
+> comparable to one. The 20.3 footer says so on this path.
+
+### What the data layer needs
+
+`listingSnapshot` (`server/listingSnapshot.ts:36–40`) extracts `rentRoll`, `grossAnnualIncome`
+and `statedNoi` — all rent-oriented. A business-for-sale listing states revenue, SDE or cash flow,
+and none of those have a field. **Add `revenue`, `sde` and `ebitda` to the extraction schema and
+to the prompt at `:88`** so 20.2a can pre-fill the way the rental path already does. Until that
+lands, only Revenue pre-fills, through `grossAnnualIncome`.
+
+---
+
+## 3d. Day Care — revenue, then an explicit NOI statement
+
+Two changes, and the second matters more.
+
+### The four scenarios become a 2×2, not a dropdown
+
+`noiOptions` (`:18340–18345`) holds four: 100% efficient, 100% comfortable, 75% efficient, 75%
+comfortable. Today they are a `<Select>` at `:18961–18974` — pick one, see one.
+
+It is a **2×2**: capacity (efficient / comfortable) × enrolment (full / 75%). A dropdown is the
+wrong form for a matrix the data already has. Render all four as selectable blocks, with the one
+driving the metrics marked selected. See `val-dc-target.html`.
+
+- Four `.kyp-block` elements in `.kyp-blocks.two`, laid out 2×2
+- The selected one takes `aria-pressed="true"` and `.ind`; the rest take `.wash`
+- `.kyp-block[aria-pressed="true"]` is **already in `kyp-base.css`** (`outline:2.5px solid
+  var(--kyp-ink)`), so the selected state needs no new CSS — and a control with no visible
+  selected state is broken
+- Each block carries monthly net, children at that scenario, the annual figure, and the revenue
+  and expense lines behind it in a `.bbreak`
+- A `.kyp-bandfoot` states the range the four span and names the selected one
+
+The range is context, not a takeaway: it says what the spread is, not whether the deal is good.
+
+The blocks now show **revenue only**. Expenses move to their own statement — see below.
+
+### The 75% expense ratio is replaced by an itemised NOI
+
+This is the real fix. Today `monthlyExpense = monthlyRevenue × (expensePercent/100)` (`:18107`),
+and the result is handed downstream as an NOI. **Nothing says what is inside that 75%**, and the
+model behaves very differently depending on what is:
+
+- If the ratio **excludes** property taxes and building insurance, then zeroing them downstream
+  (`valuation.ts:123–124`, because `noiCoversExpenses = !isSba && hasNoi` is true on this path)
+  means they are never charged at all. The deal looks better than it is.
+- If the ratio **includes rent** — which a childcare operating ratio quoted in the trade usually
+  does, because most operators lease — then occupancy is charged twice: once inside the ratio, and
+  again as debt service. That one is a genuine double count.
+
+Neither is visible, and no footnote resolves it.
+
+**Replace the ratio with the two halves from §3a** — five lines total, in two blocks, with the
+same **Simple / Detailed** toggle every other path has:
+
+| Half | Line | Source |
+|---|---|---|
+| Business | Revenue | the selected scenario — children × rate × 12 |
+| Business | Operating expenses | entered — one line, labelled on screen **excluding occupancy, property taxes and building insurance** |
+| Property | Rent from leased space | 0 — the business occupies the whole building |
+| Property | Property taxes | **Cook County record** |
+| Property | Building insurance | estimated from floor area |
+
+Total NOI = business operating income + property NOI. Because the day care occupies the whole
+building, its property half earns no rent and carries only the two costs of owning — which is why
+property NOI is negative here, and should be.
+
+That makes the downstream zeroing at `valuation.ts:123–124` correct *and verifiable* rather than
+correct *by assumption*: taxes and insurance are visibly inside NOI, in one place, so they are
+rightly not subtracted again from cash flow.
+
+### Then 20.3 reads the result
+
+Operating income on the Deal Inputs row **reads** the NOI from 20.2 rather than offering a second
+control. `childcareViewMode`-style drift — one state written in one place, read in another — is
+the bug Step 29 removed from §Project Use Analysis; do not reintroduce it here.
+
+---
+
+## 3c. Property taxes always come from our record
+
+A standing rule, and it applies on every path:
+
+- **Property taxes are read from the Cook County record** (`propertyTaxData`), never from the
+  listing. A broker's tax figure is the seller's current bill.
+- The field stays editable — the user may know something the record does not — but the tag must
+  change from `From record` to `Edited` the moment it does. Today it does not (`:19231`); the
+  insurance field already does this correctly (`:19030`) and is the pattern to copy.
+- Cook County reassesses on transfer, so the current bill usually understates a buyer's. That
+  caveat stays in the footer.
+- On the **listing-stated NOI** path the taxes line is bypassed entirely, because the broker's NOI
+  is "already net" (`:18530`). Show the county tax figure beside it anyway, so the reader can see
+  whether the stated NOI is plausible. A listing NOI built on the seller's current bill is the
+  single most common reason a stated NOI does not survive closing.
+
+---
+
+## 3. The four NOI bases
+
+See `val-states.html`. `rentalNoiOptions` is built at `:18447–18519`.
+
+| State | Gate | What renders |
+|---|---|---|
+| **Build-up, Advanced** | `noiModelPath && effectiveTier === 'advanced'` | the full ledger, every line editable and tagged |
+| **Build-up, Simple** | `noiModelPath && effectiveTier === 'simple'` | NOI + the list of defaults in use + "Edit assumptions → Advanced" |
+| **Entered directly** | `isDirectNoi` or `valuationManualNoi` set | one input, statement suppressed |
+| **From the listing** | `isListingNoi` | the broker's stated NOI, read-only |
+
+`isManualRental` at `:18528` tests `=== 'manual'`, and `'manual'` is **never a key** in
+`rentalNoiOptions`. Dead branch — delete it.
+
+Simple and Advanced are the same arithmetic; Simple hides rows, it does not shorten the formula.
+Say so once in the 20.2 footer and drop the sentence currently at `:18696`.
+
+---
+
+## 4. Takeaway prose — classify, don't advise
+
+The section carries **~40 interpretive strings**, including a five-branch `verdictText` engine at
+`:19306–19322`. The no-takeaways rule applies differently here than anywhere else, because the
+reader supplies the inputs and 1.25× DSCR is published lender practice, not our opinion.
+
+**Keep — these are classifications against an outside authority:**
+
+- DSCR banded against 1.00× and 1.25× (`.kyp-bands b3`, see every target)
+- The coverage rows: what the debt costs, what the lender floor needs, and the gap to each
+- Honesty caveats: "estimate only, verify with a quote", "may reassess on sale", "imputed even if
+  self-managed". These are **disclosure**, not interpretation. They stay.
+- The formula receipts. Showing the arithmetic is not a takeaway.
+
+**Delete — these tell the reader what to do:**
+
+| Line | String |
+|---|---|
+| `:19308–19321` | the whole five-branch `verdictText`, including "expect financing pushback unless price or terms improve" and "the deal clears the bank's 1.25× minimum comfortably" |
+| `:19401–19407` | the four Coverage Check paragraphs ("the deal is short at these terms", "with room to spare") |
+| `:18218–18223` | the four daycare cashflow verdicts ("Cash-flow positive in every scenario", "adjust revenue or expenses above") |
+| `:19363` | "a cap this high usually means an assumption is off" — keep a neutral note that cap rate above 10% is unusual, drop the diagnosis |
+| `:19300–19304` | `'✓ Well-covered'`, `'! Below 1.25× lender min'`, `'✕ Doesn't cover debt'` — the band label carries this without the tick and cross |
+
+**Replace the colour constants.** `KB = { good:'#7ee0a0', amber:'#f0c85a', bad:'#f2938c',
+neu:'#9aa0cc' }` at `:19305` and the same four at `:18203–18224` go. Use `.kyp-block.grn` /
+`.orange` / `.red` / `.slate`. `#f0c85a` is a tenth warm hex that exists nowhere else in the
+design system.
+
+> **Why this matters beyond house style.** "Expect financing pushback" and "the deal qualifies"
+> are the outputs in this report a reader is most likely to act on. Stating the ratio against the
+> published floor is a fact. Telling them what will happen to their financing is advice this
+> product is not positioned to give. The 20.3 footer should say the section is not investment
+> advice — it does not say so anywhere today.
+
+---
+
+## 5. Numbers presented as facts that are assumptions
+
+Fix these; they are not styling.
+
+| # | Line | Problem | Fix |
+|---|---|---|---|
+| 1 | `:18164`, `:18179` | "Chicago avg · $2,275/mo" and "Industry avg · 75%" assert provenance for two `useState` defaults (`:1656–1657`). No source, no date, no dataset. | Label them as defaults. The wording in `val-dc-target.html` is "Default only — not a published average." |
+| 2 | `:18187`, `:18192` | Capacity printed under a **🔒 lock** with "Derived from the parcel's usable area — not editable". It is `floor(sqft/75)` — a divisor convention, shown as a locked parcel fact, over a 4-deep sq ft fallback that can land on a **co-parcel's** building area. | Keep the lock (it is set elsewhere) but say what set it and that 75/90 is a planning convention above the DCFS 35 minimum |
+| 3 | `:18107–18124` | **The expense model has no fixed component.** Operating expenses are `monthlyRevenue × (expensePercent/100)` — purely variable — so every cost is assumed to fall in step with enrolment. Rent, payroll, insurance and utilities do not. The lower-enrolment scenarios are therefore the optimistic version of a downside, not a downside. *(The `× 0.75` applied to net cash flow at `:18123` is arithmetically identical to applying it to revenue under this model, so it is not itself the defect — the model is.)* | Minimum: say it in the footer, as the target does. Better: add an optional fixed-cost input so the low-enrolment scenario is real |
+| 4 | `:18375–18382` | `CLASS_UNIT_COUNT` turns a Cook County class into an exact unit count (213 → 7, 214 → 13) and multiplies rent by it (`:18501`, `:18508`). A class is a **range**. | Keep the estimate, tag the unit count with its source, and say in the footer that a class code gives a range |
+| 5 | `:19231` | `<Tag kind="rec">From record</Tag>` on property taxes stays "From record" after the user overwrites the field. Insurance does the opposite correctly (`:19030` clears `insuranceEstimated`). | Clear the tag on edit, the way insurance does |
+| 6 | `:19200` | `<Tag kind="parcel">From parcel</Tag>` on residential rent, where the rent came from RentCast or HUD FMR | Tag the actual source |
+| 7 | `:18909` | "SBA 504 est. ≈ {rate}% (10-Yr Treasury {t}% + {spread}%)" uses `?? 1.5` when the API omits the spread — an invented number inside a quoted derivation | Omit the derivation when the spread is missing |
+| 8 | `:18102–18108` vs `:18323–18327` | **The daycare capacity and revenue math is computed twice, independently.** Same divisors, same fallbacks, two copies. They can drift. | One computation, read twice |
+| 9 | `:18659–18663` | `Est. DSCR {n}×` is pushed into the collapsed accordion header via `ValuationMetricBridge`, so a model output becomes the section's at-a-glance summary before anyone has seen an input | Keep it, but the badge should read as an estimate at the reader's inputs, not a property fact |
+
+---
+
+## 6. The markup
+
+### 20.1 Deal Inputs
+
+`.kyp-calcgrid` with one `.kyp-calccol` per part of the deal. Columns that do not apply to the
+selected path are **not rendered** — not hidden with CSS. Inputs are `.kyp-field` + `.kyp-input`
+from patch 29; `$` and `%` affixes use `.kyp-inprefix`. Preset values use `.kyp-lock`.
+
+### 20.2 Income → NOI
+
+`.kyp-ledger` replaces the local `Row` helper. Three columns: label (with `<s>` sub-line),
+provenance tag, value. `.kyp-lrow.sub` for subtotals, `.kyp-lrow.total` for NOI.
+
+`Tag` becomes `.kyp-tag` with `.rec` / `.est` / `.assume`. **Provenance is context, so these drop
+the verdict palette** — the live `rec` tag is green `#2f7d3f`, which reads as "good" when it only
+means "sourced". Indigo for sourced, slate for assumed, dashed border for optional.
+
+Both helpers are defined **inside the Step 2 IIFE** (`:19091`, `:19099`), so they are re-created
+on every render and exist only when `showIncomeStep` is true. Lift them out or, better, delete
+them in favour of the CSS.
+
+`Row`'s `value` and `neg` props are declared but **never passed** by any of the 9 call sites —
+every row supplies `edit` instead. Dead code.
+
+### 20.3 Deal at a Glance
+
+`.kyp-blocks.four` — cap rate and cash-on-cash in `.ind-deep`, monthly cash flow and DSCR toned by
+their band. Then `.kyp-bands b3` for DSCR. The `#232d6e` band and both `.val-tile` grids go.
+
+The ±$250 break-even window at `:19298` is **ours**, not a convention — the footer says so.
+
+### 20.4 Coverage Check
+
+`.kyp-cov` + `.kyp-covrow`, with `.kyp-pill good` / `att` / `bad` for the cushion. Then
+`.kyp-receipt` for the arithmetic. On the 1–4 unit path (`dscrLoanApplies`, `:18636`) a second
+receipt shows the DSCR-loan ratio — see `val-sf-target.html`. Keep the explanation of why the two
+numbers differ; drop the four verdict paragraphs.
+
+### 20.5 How It's Calculated
+
+`.kyp-blocks` of `.wash` blocks plus one `.kyp-receipt`. `.val-mtiles` / `.val-mt` /
+`.val-formula` go.
+
+---
+
+## 7. Persistence — the thing a user will notice first
+
+**27 of the 28 inputs are not saved.** Only `valuationPurchasePrice` persists, through
+`handleSaveAskingPrice` → `PATCH /api/runs/:id/manual-property` (`use-runs.ts:238–252`). No
+localStorage, no debounced mutation, no URL state.
+
+So a reader who sets a rate, a vacancy, a management percentage and six expense lines loses all of
+it on reload, and the Save button next to the price implies the rest saved too.
+
+This is out of scope for a restyle, and it is the largest real problem in the section. Either
+persist the whole input set alongside `askingPrice`, or label the Save button so it is clear it
+saves the price only. **Do not ship the restyle without doing one of the two** — the new layout
+makes the inputs look more like a saved model, not less.
+
+---
+
+## 8. Verify
+
+- `grep -c 'val-step\|val-cov\|val-ref\|val-mt\|val-formula\|calc-inputs\|val-hrow\|val-chip' RunDetail.tsx` → 0
+- No `<Card>`, `<CardHeader>`, `<CardTitle>`, `<Collapsible>` or `chead` in 18075–19545
+- `grep -c '#232d6e\|#7ee0a0\|#f0c85a\|#f2938c\|#9aa0cc' RunDetail.tsx` → 0
+- No inline `style={{ color` / `background` hex anywhere in the range
+- Switch all four loan types with the section open: columns appear and disappear, numbering stays
+  sequential, no empty column renders
+- Switch Simple ↔ Advanced: NOI is **identical** in both
+- Enter a manual NOI: the statement is suppressed and the restore button returns the build-up
+- Set DSCR above 1.25, between 1.0 and 1.25, and below 1.0: the band and the block tone track it
+
+---
+
+## Still outstanding — unrelated to this step
+
+Three live API keys in `.replit` lines 65–71, in four commits, with a `.gitignore` whose missing
+newline (`*.tar.gzserver/cache/`) means neither pattern matches. Rotate all three, move to Replit
+Secrets, `git rm --cached .replit`, fix the newline. Rotating matters more than removing the file.

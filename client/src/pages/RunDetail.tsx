@@ -52,7 +52,7 @@ import { motion } from "framer-motion";
 import { formatAddress } from "@/lib/formatAddress";
 import { derivePlacesSearchTerm } from "@shared/placesSearch";
 import { groupLicenseEstablishments, licenseEstablishmentKey, titleCaseBusiness as titleCaseBiz } from "@shared/businessLicenses";
-import { computeValuationMetrics, computeNoiModel, computeDscrLoanRatio, type ValuationSnapshot } from "@/lib/valuation";
+import { computeValuationMetrics, computeNoiModel, computeDscrLoanRatio, isSbaRealEstateDominant, type ValuationSnapshot } from "@/lib/valuation";
 import StatTile from "@/components/StatTile";
 import InsightReportSection from "@/components/InsightReportSection";
 import { CountyRecordSection } from "@/components/report/CountyRecordSection";
@@ -61,6 +61,7 @@ import { ProjectUseAreaControl, ProjectUseBusinessList, ProjectUseCountBlocks, P
 import { EVChargingTable, EVRegistrationTrends, FoodAccessPanel, GroceryLicenseList, getEVChargingSiteCount, HotelShortTermRentalGroup, LicensedBusinessPanel, SeniorPopulationPanel, VehicleOwnershipPanel } from "@/components/report/ProjectUseDomainPanels";
 import { trackEvent } from "@/lib/analytics";
 import { fallbackSummaryBadge, headerBadgeNumber, headerCountyRecordBadge, headerFarCeilingBadge, type HeaderBadgeState } from "@/lib/sectionHeaderBadges";
+import { ValuationCalculator } from "@/components/report/ValuationCalculator";
 
 function proRoleIcon(role: string) {
   const r = (role || '').toLowerCase();
@@ -91,6 +92,74 @@ function formatNumberWithCommas(value: string): string {
 // Helper to parse comma-formatted string to number
 function parseFormattedNumber(value: string): number {
   return parseFloat(value.replace(/,/g, '')) || 0;
+}
+
+function getValuationUnitEstimate(listingSnapshot: any, listingData: any, parcelUnits: unknown, propertyClass: unknown, commercialData: any) {
+  const classUnits: Record<string, number> = { '211': 2, '212': 3, '213': 7, '214': 13, '205': 6, '206': 13, '207': 4, '202': 1, '203': 1, '209': 1, '210': 1, '208': 1 };
+  const validPositive = (value: unknown) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  };
+  const snapshotUnits = validPositive(listingSnapshot?.unitCount);
+  const rentRollCount = Array.isArray(listingSnapshot?.rentRoll) && listingSnapshot.rentRoll.length > 1 ? listingSnapshot.rentRoll.length : null;
+  const listingCount = snapshotUnits ?? rentRollCount ?? validPositive(listingData?.unitCount);
+  const parsedParcel = validPositive(typeof parcelUnits === "string" ? parseInt(parcelUnits, 10) : parcelUnits);
+  const classCount = classUnits[String(propertyClass)] ?? null;
+  const commercialUnits = validPositive(commercialData?.totalUnits);
+  return {
+    count: listingCount ?? parsedParcel ?? classCount ?? commercialUnits ?? 1,
+    source: listingCount != null ? "listing" : parsedParcel != null ? "parcel record" : classCount != null ? "Cook County class-code range estimate" : commercialUnits != null ? "commercial record estimate" : "fallback estimate",
+  };
+}
+
+function buildValuationRentalSources(snapshot: any, radiusRentcast: any, rentcast: any, fmr: any, units: number) {
+  const sources: Array<{ key: string; label: string; annualRent: number; source: string; basis: "actual" | "market" | "manual" }> = [];
+  const expectedUnits = Number(snapshot?.unitCount) || units;
+  const seenUnits = new Set<string>();
+  const rentRoll = (Array.isArray(snapshot?.rentRoll) ? snapshot.rentRoll : []).filter((row: any) => {
+    if (!(Number(row.monthlyRent) > 0)) return false;
+    const unit = row.unit ? String(row.unit).trim().toLowerCase() : "";
+    if (unit && seenUnits.has(unit)) return false;
+    if (unit) seenUnits.add(unit);
+    return true;
+  });
+  const rollAnnual = Math.round(rentRoll.reduce((sum: number, row: any) => sum + Number(row.monthlyRent), 0) * 12);
+  if (rollAnnual > 0 && rentRoll.length >= expectedUnits) {
+    sources.push({ key: "listing_rentroll", label: `Listing rent roll · ${rentRoll.length} units · ${rollAnnual.toLocaleString()}/yr`, annualRent: rollAnnual, source: "Listing rent roll", basis: "actual" });
+  }
+  if (Number(snapshot?.grossAnnualIncome) > 0) {
+    sources.push({ key: "listing_gross", label: `Listing stated gross income · ${Number(snapshot.grossAnnualIncome).toLocaleString()}/yr`, annualRent: Math.round(Number(snapshot.grossAnnualIncome)), source: "Listing stated income", basis: "actual" });
+  }
+  const bedroomRents = radiusRentcast?.byBedroom?.length ? radiusRentcast.byBedroom : rentcast?.byBedroom ?? [];
+  for (const row of bedroomRents) {
+    if (Number(row.medianRent) > 0) {
+      const bedrooms = Number(row.bedrooms);
+      sources.push({
+        key: `rentcast_${bedrooms}`, label: `RentCast · ${bedrooms === 0 ? "studio" : `${bedrooms}BR`} × ${units} unit${units === 1 ? "" : "s"}`,
+        annualRent: Math.round(Number(row.medianRent) * units * 12), source: "RentCast market estimate", basis: "market",
+      });
+    }
+  }
+  const fmrBeds: Array<[string, number]> = [
+    ["efficiency", 0], ["oneBed", 1], ["twoBed", 2], ["threeBed", 3], ["fourBed", 4],
+  ];
+  for (const [key, bedrooms] of fmrBeds) {
+    const monthly = Number(fmr?.rents?.[key]);
+    if (monthly > 0) {
+      sources.push({
+        key: `fmr_${bedrooms}`, label: `HUD Fair Market Rent · ${bedrooms === 0 ? "efficiency" : `${bedrooms}BR`} × ${units} unit${units === 1 ? "" : "s"}`,
+        annualRent: Math.round(monthly * units * 12), source: "HUD FMR estimate", basis: "market",
+      });
+    }
+  }
+  if (rollAnnual > 0 && rentRoll.length < expectedUnits) {
+    sources.push({
+      key: "listing_rentroll_partial",
+      label: `Partial listing rent roll · ${rentRoll.length} of ${expectedUnits} units · not extrapolated`,
+      annualRent: rollAnnual, source: `Partial listing rent roll (${rentRoll.length} of ${expectedUnits}; not extrapolated)`, basis: "actual",
+    });
+  }
+  return sources;
 }
 
 function zoningHistoryDateLabel(value: unknown): string | null {
@@ -1403,8 +1472,6 @@ export default function RunDetail() {
   const expandAllSections = useCallback(() => {
     const allOpen = Object.keys(DEFAULT_SECTION_STATES).reduce((acc, key) => ({ ...acc, [key]: true }), {} as SectionStates);
     setSectionStates(allOpen);
-    setIsCashflowCalculatorOpen(true);
-    setIsValuationCalculatorOpen(true);
     setNaIncOpen(true);
     setIsTifCardOpen(true);
     setIsOppZoneCardOpen(true);
@@ -1418,8 +1485,6 @@ export default function RunDetail() {
 
   const collapseAllSections = useCallback(() => {
     setSectionStates({ ...DEFAULT_SECTION_STATES, farAnalysis: false, fmrSubsection: false });
-    setIsCashflowCalculatorOpen(false);
-    setIsValuationCalculatorOpen(false);
     setNaIncOpen(false);
     setIsTifCardOpen(false);
     setIsOppZoneCardOpen(false);
@@ -1602,11 +1667,6 @@ export default function RunDetail() {
   const [showAllPermits, setShowAllPermits] = useState(false);
   const [isEditingDaycareDetails, setIsEditingDaycareDetails] = useState(false);
 
-  // Quick Cashflow Calculator state (for daycare)
-  const [cashflowRevenuePerChild, setCashflowRevenuePerChild] = useState<string>("2275");
-  const [cashflowExpensePercent, setCashflowExpensePercent] = useState<string>("75");
-  const [isCashflowCalculatorOpen, setIsCashflowCalculatorOpen] = useState(true);
-
   // Freddie Mac mortgage rate
   const { data: mortgageRateData } = useMortgageRate();
   const [hasSetFreddieMacRate, setHasSetFreddieMacRate] = useState(false);
@@ -1622,20 +1682,6 @@ export default function RunDetail() {
   const [insuranceEstimated, setInsuranceEstimated] = useState(false);
   const [valuationGrossIncome, setValuationGrossIncome] = useState<string>("");
   const [valuationRentalNoiOption, setValuationRentalNoiOption] = useState<string>("");
-  const [isValuationCalculatorOpen, setIsValuationCalculatorOpen] = useState(true);
-
-  // Transparent NOI build-up (Investor mode) — line overrides. Empty string =
-  // use the default; the statement always renders the FULL expense model.
-  const [noiTier, setNoiTier] = useState<'simple' | 'advanced' | null>(null); // null = defaulted from funnel completeness
-  const [noiCommercialRent, setNoiCommercialRent] = useState<string>("");
-  const [noiOtherIncome, setNoiOtherIncome] = useState<string>("");
-  const [noiVacancyResiPct, setNoiVacancyResiPct] = useState<string>("5");
-  const [noiVacancyCommPct, setNoiVacancyCommPct] = useState<string>("10");
-  const [noiMgmtPct, setNoiMgmtPct] = useState<string>("6");
-  const [noiRepairs, setNoiRepairs] = useState<string>("");        // default $1,250/unit/yr
-  const [noiUtilities, setNoiUtilities] = useState<string>("");    // default $750/unit/yr
-  const [noiReservesPerUnit, setNoiReservesPerUnit] = useState<string>("250");
-  const [noiResiRentOverride, setNoiResiRentOverride] = useState<string>("");
 
   // SBA-specific state
   const [sbaBusinessPrice, setSbaBusinessPrice] = useState<string>("");
@@ -1805,8 +1851,6 @@ export default function RunDetail() {
 
     if (totalPrice === 0) return;
 
-    const realEstatePercent = (realEstatePrice / totalPrice) * 100;
-
     // SBA rules for term calculation:
     // 1. If RE = 0: Business only (10% down, 10yr)
     // 2. If RE >= 51% of total OR RE > Business: Entire amount at 10% down, 25yr
@@ -1818,7 +1862,7 @@ export default function RunDetail() {
       setSbaBusinessTermYears("10");
       setSbaRealEstateDownPercent("10");
       setSbaRealEstateTermYears("25");
-    } else if (realEstatePercent >= 51 || realEstatePrice > businessPrice) {
+    } else if (isSbaRealEstateDominant(businessPrice, realEstatePrice)) {
       // RE dominant: entire amount at 25 year terms
       setSbaBusinessDownPercent("10");
       setSbaBusinessTermYears("25");
@@ -1977,8 +2021,15 @@ export default function RunDetail() {
           valuation: (() => {
             const isSbaSave = valuationLoanType === 'sba_business' || valuationLoanType === 'sba_biz_re';
             const snap = valuationSnapshotRef.current;
-            const m = snap?.metrics;
+            const calculationComplete = snap !== null && snap.calculationComplete !== false;
+            const m = calculationComplete ? snap?.metrics : undefined;
             const round2 = (n: number) => Math.round(n * 100) / 100;
+            const inputSnapshot = snap?.inputSnapshot;
+            const calculatorInputs = !inputSnapshot ? null : calculationComplete ? inputSnapshot : Object.fromEntries(
+              Object.entries(inputSnapshot).filter(([key]) =>
+                !["selectedNoi", "noiSource", "fullyNetOfPropertyExpenses", "grossIncomeForReport"].includes(key),
+              ),
+            );
             return {
               purchasePrice: valuationPurchasePrice ? Math.round(parseFormattedNumber(valuationPurchasePrice)) : null,
               noiOption: valuationNoiOption || null,
@@ -1997,7 +2048,7 @@ export default function RunDetail() {
               sbaRealEstateDownPercent: isSbaSave ? (parseFloat(sbaRealEstateDownPercent) || null) : null,
               sbaRealEstateTermYears: isSbaSave ? (parseFloat(sbaRealEstateTermYears) || null) : null,
               sbaRealEstateInterestRate: isSbaSave ? (parseFloat(sbaRealEstateInterestRate) || null) : null,
-              noiModel: snap?.noiModel ? {
+              noiModel: calculationComplete && snap?.noiModel ? {
                 tier: snap.noiModel.tier,
                 mode: snap.noiModel.mode,
                 manualOverride: snap.noiModel.manualOverride,
@@ -2012,7 +2063,10 @@ export default function RunDetail() {
                   dscrLoanRatio: snap.noiModel.dscrLoanRatio,
                 },
               } : null,
-              computed: snap && m ? {
+              businessIncomeModel: calculationComplete ? snap?.businessIncomeModel ?? null : null,
+              daycareModel: calculationComplete ? snap?.daycareModel ?? null : null,
+              calculatorInputs,
+              computed: calculationComplete && snap && m ? {
                 purchasePrice: Math.round(m.purchasePrice),
                 selectedNoi: Math.round(snap.selectedNoi),
                 noiSource: snap.noiSource,
@@ -2020,9 +2074,10 @@ export default function RunDetail() {
                 loanAmount: Math.round(m.loanAmount),
                 annualDebtService: Math.round(m.annualDebtService),
                 annualCashFlow: Math.round(m.annualCashFlow),
-                dscr: round2(m.dscr),
-                capRate: round2(m.capRate),
-                roi: round2(m.roi),
+                 dscr: m.annualDebtService > 0 ? round2(m.dscr) : null,
+                 capRate: !isSbaSave && m.purchasePrice > 0 ? round2(m.capRate) : null,
+                 operatingYield: isSbaSave && m.purchasePrice > 0 ? round2(m.capRate) : null,
+                 roi: m.downPayment > 0 ? round2(m.roi) : null,
               } : null,
             };
           })(),
@@ -5108,7 +5163,7 @@ export default function RunDetail() {
                     </>)}
                   </div>
                   <button type="button" className={`cta ${s3 ? "ghost" : "pri"}`} data-testid="setup-step3"
-                    onClick={() => { setAccHidden((m) => ({ ...m, valuation: false })); setAccOpen((m) => ({ ...m, valuation: true })); setIsValuationCalculatorOpen(true); setTimeout(() => document.getElementById("valuation-calculator-section")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60); }}>
+                    onClick={() => { setAccHidden((m) => ({ ...m, valuation: false })); setAccOpen((m) => ({ ...m, valuation: true })); setTimeout(() => document.getElementById("valuation-calculator-section")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60); }}>
                     {s3 ? "Edit the deal" : "Enter the deal →"}
                   </button>
                 </div>
@@ -8971,9 +9026,9 @@ export default function RunDetail() {
                   )}
 
                   {pinLookupData && (
-                    <div className={`text-sm ${pinLookupData.pin ? (pinLookupData.source === 'geo_fallback' ? 'text-muted-foreground' : pinLookupData.source === 'exempt_api' ? 'text-foreground' : 'text-foreground') : 'text-muted-foreground'}`}>
+                    <div className={`text-sm ${pinLookupData.pin ? ((pinLookupData.source as string) === 'geo_fallback' ? 'text-muted-foreground' : (pinLookupData.source as string) === 'exempt_api' ? 'text-foreground' : 'text-foreground') : 'text-muted-foreground'}`}>
                       {pinLookupData.pin ? (
-                        pinLookupData.source === 'exempt_api' ? (
+                        (pinLookupData.source as string) === 'exempt_api' ? (
                           <div className="space-y-1">
                             <span className="flex items-center gap-1">
                               <CheckCircle2 className="w-4 h-4" />
@@ -8985,7 +9040,7 @@ export default function RunDetail() {
                               </span>
                             )}
                           </div>
-                        ) : pinLookupData.source === 'geo_fallback' ? (
+                        ) : (pinLookupData.source as string) === 'geo_fallback' ? (
                           <div className="space-y-1">
                             <span className="flex items-center gap-1">
                               <AlertTriangle className="w-4 h-4" />
@@ -14973,1475 +15028,86 @@ export default function RunDetail() {
           </AccordionSection>
 
           <AccordionSection {...accProps("valuation")}>
-          {/* Quick Cashflow Calculator for Day Care projects */}
-          {isDaycare && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <Collapsible open={isCashflowCalculatorOpen} onOpenChange={setIsCashflowCalculatorOpen}>
-                <Card className="border border-border">
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover-elevate">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="chead flex items-center gap-2">
-                          Quick Cashflow Calculator
-                          <Badge variant="outline" className="ml-2 text-xs">
-                            Day Care
-                          </Badge>
-                        </CardTitle>
-                        <span className="text-muted-foreground text-sm">{isCashflowCalculatorOpen ? '▼' : '▶'}</span>
-                      </div>
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <CardContent>
-                      {(() => {
-                        // Get building sq ft and calculate capacity (check commercial data as fallback, co-parcel last)
-                        const buildingSqFt = run?.manualBuildingSqFt || propertyTaxData?.buildingSquareFeet || pinLookupData?.commercialData?.bldgSf || coParcelLookupData?.commercialData?.bldgSf || 0;
-                        const efficientCapacity = buildingSqFt ? Math.floor(buildingSqFt / 75) : 0;
-                        const comfortableCapacity = buildingSqFt ? Math.floor(buildingSqFt / 90) : 0;
-
-                        // Parse editable values
-                        const revenuePerChild = parseFloat(cashflowRevenuePerChild) || 2275;
-                        const expensePercent = parseFloat(cashflowExpensePercent) || 75;
-
-                        // Calculate revenues
-                        const efficientMonthlyRevenue = efficientCapacity * revenuePerChild;
-                        const comfortableMonthlyRevenue = comfortableCapacity * revenuePerChild;
-
-                        // Calculate expenses (percentage of revenue)
-                        const efficientMonthlyExpense = efficientMonthlyRevenue * (expensePercent / 100);
-                        const comfortableMonthlyExpense = comfortableMonthlyRevenue * (expensePercent / 100);
-
-                        // Calculate cashflow at 100% occupancy
-                        const efficientMonthlyCashflow100 = efficientMonthlyRevenue - efficientMonthlyExpense;
-                        const comfortableMonthlyCashflow100 = comfortableMonthlyRevenue - comfortableMonthlyExpense;
-
-                        // Calculate cashflow at 75% occupancy (simply 75% of 100% cashflow)
-                        const efficientMonthlyCashflow75 = efficientMonthlyCashflow100 * 0.75;
-                        const comfortableMonthlyCashflow75 = comfortableMonthlyCashflow100 * 0.75;
-
-                        if (!buildingSqFt) {
-                          return (
-                            <div className="p-4 rounded-lg bg-secondary border border-border">
-                              <div className="flex items-start gap-3">
-                                <AlertTriangle className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                                <div>
-                                  <p className="text-sm font-medium text-foreground">
-                                    Building information needed
-                                  </p>
-                                  <p className="text-sm text-muted-foreground mt-1">
-                                    Enter building square footage in the Day Care Details section above to calculate cashflow projections.
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        }
-
-                        return (
-                          <div className="space-y-4">
-                            {/* ── INPUTS CARD — Revenue & Costs + locked site-capacity tiles ── */}
-                            <div className="bg-card border border-border rounded-[14px] px-5 py-5">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                  <div className="font-jbmono text-[9.5px] font-bold uppercase tracking-[0.06em] text-muted-foreground mb-3 pb-2 border-b border-border">Revenue &amp; Costs</div>
-                                  <div className="mb-3">
-                                    <Label htmlFor="revenue-per-child" className="text-[11px] font-semibold text-[#54544f]">Monthly Revenue per Child</Label>
-                                    <div className="relative mt-1">
-                                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                      <Input
-                                        id="revenue-per-child"
-                                        type="number"
-                                        value={cashflowRevenuePerChild}
-                                        onChange={(e) => setCashflowRevenuePerChild(e.target.value)}
-                                        className="pl-7 bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                        data-testid="input-revenue-per-child"
-                                      />
-                                    </div>
-                                    <p className="text-[10.5px] text-muted-foreground mt-1.5">Chicago avg · $2,275/mo</p>
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="expense-percent" className="text-[11px] font-semibold text-[#54544f]">Operating Expenses (% of revenue)</Label>
-                                    <div className="relative mt-1">
-                                      <Input
-                                        id="expense-percent"
-                                        type="number"
-                                        value={cashflowExpensePercent}
-                                        onChange={(e) => setCashflowExpensePercent(e.target.value)}
-                                        className="pr-7 bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                        data-testid="input-expense-percent"
-                                      />
-                                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
-                                    </div>
-                                    <p className="text-[10.5px] text-muted-foreground mt-1.5">Industry avg · 75%</p>
-                                  </div>
-                                </div>
-                                <div>
-                                  <div className="font-jbmono text-[9.5px] font-bold uppercase tracking-[0.06em] text-muted-foreground mb-3 pb-2 border-b border-border">Site Capacity · From Square Footage</div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div className="bg-[#f1f0ec] border border-border rounded-[11px] px-4 py-3">
-                                      <div className="font-jbmono text-[8.5px] font-bold uppercase tracking-[0.04em] text-muted-foreground mb-1.5"><span className="mr-1">🔒</span>Efficient</div>
-                                      <div className="text-[15px] font-bold text-foreground" data-testid="text-efficient-capacity">{efficientCapacity} children</div>
-                                      <div className="text-[10.5px] text-muted-foreground mt-0.5">75 sq ft / child</div>
-                                    </div>
-                                    <div className="bg-[#f1f0ec] border border-border rounded-[11px] px-4 py-3">
-                                      <div className="font-jbmono text-[8.5px] font-bold uppercase tracking-[0.04em] text-muted-foreground mb-1.5"><span className="mr-1">🔒</span>Comfortable</div>
-                                      <div className="text-[15px] font-bold text-foreground" data-testid="text-comfortable-capacity">{comfortableCapacity} children</div>
-                                      <div className="text-[10.5px] text-muted-foreground mt-0.5">90 sq ft / child</div>
-                                    </div>
-                                  </div>
-                                  <p className="text-[10.5px] text-muted-foreground mt-2">Derived from the parcel's usable area — not editable.</p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* ── CASHFLOW PROJECTION — full-width dark band ── */}
-                            {(() => {
-                              const GREEN = '#7ee0a0';
-                              const RED = '#f2938c';
-                              const cfColor = (v: number) => (v >= 0 ? GREEN : RED);
-                              const scenarios = [
-                                efficientMonthlyCashflow100, efficientMonthlyCashflow75,
-                                comfortableMonthlyCashflow100, comfortableMonthlyCashflow75,
-                              ];
-                              const annuals = scenarios.map(v => v * 12);
-                              const allPositive = scenarios.every(v => v > 0);
-                              const allNegative = scenarios.every(v => v < 0);
-                              const allBreakEven = scenarios.every(v => v === 0);
-                              const minA = Math.min(...annuals);
-                              const maxA = Math.max(...annuals);
-                              const fmtK = (v: number) => `$${Math.round(Math.abs(v) / 1000).toLocaleString()}K`;
-                              const verdictText = allPositive
-                                ? `Cash-flow positive in every scenario — ${fmtK(minA)} to ${fmtK(maxA)} annually depending on capacity and occupancy.`
-                                : allNegative
-                                  ? `Cash-flow negative in every scenario at these assumptions — expenses exceed revenue.`
-                                  : allBreakEven
-                                    ? `Break-even in every scenario — expenses equal revenue at these assumptions.`
-                                    : `Mixed results — some scenarios go negative at these assumptions; adjust revenue or expenses above.`;
-                              const verdictColor = allPositive ? GREEN : allNegative ? RED : '#f0c85a';
-                              const subCard = (
-                                name: string,
-                                count: number,
-                                monthlyRevenue: number,
-                                monthlyExpense: number,
-                                cf100: number,
-                                cf75: number,
-                                testId: string,
-                              ) => (
-                                <div className="rounded-[11px] px-4 py-3.5" style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)' }}>
-                                  <div className="flex items-baseline justify-between">
-                                    <div className="font-jbmono text-[9.5px] font-bold uppercase tracking-[0.05em]" style={{ color: '#aab0d8' }}>{name} Capacity</div>
-                                    <div className="text-[13px] font-bold text-white">{count} children</div>
-                                  </div>
-                                  <div className="text-[10.5px] mt-1" style={{ color: '#9aa0cc' }}>
-                                    Revenue ${monthlyRevenue.toLocaleString()}/mo · Expenses −${Math.round(monthlyExpense).toLocaleString()}/mo
-                                  </div>
-                                  <div className="flex items-center justify-between mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,.12)' }}>
-                                    <div>
-                                      <div className="text-[12px] font-semibold text-white">100% occupancy</div>
-                                      <div className="text-[10px]" style={{ color: '#9aa0cc' }}>fully enrolled</div>
-                                    </div>
-                                    <div className="text-right">
-                                      <div className="font-serif leading-none" style={{ fontSize: 26, color: cfColor(cf100) }} data-testid={`text-${testId}-cashflow-100`}>
-                                        {cf100 < 0 ? '−' : ''}${Math.abs(Math.round(cf100)).toLocaleString()}
-                                      </div>
-                                      <div className="text-[10px] mt-1" style={{ color: '#9aa0cc' }}>/mo · {cf100 < 0 ? '−' : ''}${Math.abs(Math.round(cf100 * 12)).toLocaleString()}/yr</div>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center justify-between mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,.12)' }}>
-                                    <div>
-                                      <div className="text-[12px] font-semibold text-white">75% occupancy</div>
-                                      <div className="text-[10px]" style={{ color: '#9aa0cc' }}>realistic ramp</div>
-                                    </div>
-                                    <div className="text-right">
-                                      <div className="font-serif leading-none" style={{ fontSize: 26, color: cfColor(cf75) }} data-testid={`text-${testId}-cashflow-75`}>
-                                        {cf75 < 0 ? '−' : ''}${Math.abs(Math.round(cf75)).toLocaleString()}
-                                      </div>
-                                      <div className="text-[10px] mt-1" style={{ color: '#9aa0cc' }}>/mo · {cf75 < 0 ? '−' : ''}${Math.abs(Math.round(cf75 * 12)).toLocaleString()}/yr</div>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                              return (
-                                <div className="rounded-[14px] px-5 py-5" style={{ background: '#232d6e' }}>
-                                  <div className="font-jbmono text-[10.5px] font-bold uppercase tracking-[0.08em] mb-3.5" style={{ color: '#aab0d8' }}>Cashflow Projection</div>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    {subCard('Efficient', efficientCapacity, efficientMonthlyRevenue, efficientMonthlyExpense, efficientMonthlyCashflow100, efficientMonthlyCashflow75, 'efficient')}
-                                    {subCard('Comfortable', comfortableCapacity, comfortableMonthlyRevenue, comfortableMonthlyExpense, comfortableMonthlyCashflow100, comfortableMonthlyCashflow75, 'comfortable')}
-                                  </div>
-                                  <div className="flex items-center gap-2.5 mt-4 pt-3.5 text-xs" style={{ borderTop: '1px solid rgba(255,255,255,.12)', color: '#dcdfef' }}>
-                                    <span className="w-2 h-2 rounded-full flex-none" style={{ background: verdictColor }} />
-                                    {verdictText}
-                                  </div>
-                                </div>
-                              );
-                            })()}
-
-                            <p className="text-xs text-muted-foreground">
-                              * Projections based on site-specific capacity. Revenue uses a weighted Chicago childcare average. Adjust the values above to match your business plan.
-                            </p>
-                          </div>
-                        );
-                      })()}
-                    </CardContent>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
-            </motion.div>
-          )}
-
-          {/* Valuation Calculator - shown for all properties */}
-          <motion.div
-            id="valuation-calculator-section"
-            style={{ scrollMarginTop: 90 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-          >
-            <Collapsible open={isValuationCalculatorOpen} onOpenChange={setIsValuationCalculatorOpen}>
-              <Card className="border border-border">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover-elevate">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="chead flex items-center gap-2">
-                        Valuation Calculator
-                        <Badge variant="outline" className="ml-2 text-xs">
-                          Investment Metrics
-                        </Badge>
-                      </CardTitle>
-                      <span className="text-muted-foreground text-sm">{isValuationCalculatorOpen ? '▼' : '▶'}</span>
-                    </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent>
-                    {(() => {
-                      // Calculate NOI options from Quick Cashflow Calculator values (if Day Care, check commercial data as fallback, co-parcel last)
-                      const buildingSqFt = run?.manualBuildingSqFt || propertyTaxData?.buildingSquareFeet || pinLookupData?.commercialData?.bldgSf || coParcelLookupData?.commercialData?.bldgSf || 0;
-                      const efficientCapacity = buildingSqFt ? Math.floor(buildingSqFt / 75) : 0;
-                      const comfortableCapacity = buildingSqFt ? Math.floor(buildingSqFt / 90) : 0;
-                      const revenuePerChild = parseFloat(cashflowRevenuePerChild) || 2275;
-                      const expensePercent = parseFloat(cashflowExpensePercent) || 75;
-
-                      const efficientMonthlyRevenue = efficientCapacity * revenuePerChild;
-                      const comfortableMonthlyRevenue = comfortableCapacity * revenuePerChild;
-                      const efficientMonthlyExpense = efficientMonthlyRevenue * (expensePercent / 100);
-                      const comfortableMonthlyExpense = comfortableMonthlyRevenue * (expensePercent / 100);
-
-                      const efficientMonthlyCashflow100 = efficientMonthlyRevenue - efficientMonthlyExpense;
-                      const comfortableMonthlyCashflow100 = comfortableMonthlyRevenue - comfortableMonthlyExpense;
-                      const efficientMonthlyCashflow75 = efficientMonthlyCashflow100 * 0.75;
-                      const comfortableMonthlyCashflow75 = comfortableMonthlyCashflow100 * 0.75;
-
-                      // NOI options (annual cashflows)
-                      const noiOptions: Record<string, { label: string; annualNoi: number }> = {
-                        "100_efficient": { label: `100% Efficient ($${(efficientMonthlyCashflow100 * 12).toLocaleString()}/yr)`, annualNoi: efficientMonthlyCashflow100 * 12 },
-                        "100_comfortable": { label: `100% Comfortable ($${(comfortableMonthlyCashflow100 * 12).toLocaleString()}/yr)`, annualNoi: comfortableMonthlyCashflow100 * 12 },
-                        "75_efficient": { label: `75% Efficient ($${Math.round(efficientMonthlyCashflow75 * 12).toLocaleString()}/yr)`, annualNoi: Math.round(efficientMonthlyCashflow75 * 12) },
-                        "75_comfortable": { label: `75% Comfortable ($${Math.round(comfortableMonthlyCashflow75 * 12).toLocaleString()}/yr)`, annualNoi: Math.round(comfortableMonthlyCashflow75 * 12) },
-                      };
-
-                      const hasCashflowData = isDaycare && buildingSqFt > 0;
-                      const isSba = valuationLoanType === "sba_business" || valuationLoanType === "sba_biz_re";
-                      const isSbaBusinessOnly = valuationLoanType === "sba_business";
-                      // If real estate is >51% of a combined SBA deal, business share uses RE terms
-                      const reIsDominant = (() => {
-                        const businessVal = parseFormattedNumber(sbaBusinessPrice);
-                        const reVal = parseFormattedNumber(sbaRealEstatePrice);
-                        const total = businessVal + reVal;
-                        return total > 0 && (reVal / total) > 0.51;
-                      })();
-
-                      // ── Rental NOI Options (non-daycare) ─────────────────────────────────
-                      // propertyTaxData.apartments is a string ("2", "2 (primary bldg of 2)") — parse to int
-                      // Cook County returns apartment count as words ("Two", "Three") or digits
-                      const APT_WORD_TO_NUM: Record<string, number> = {
-                        'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-                        'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-                      };
-                      const parsedParcelApts = (() => {
-                        const raw = propertyTaxData?.apartments;
-                        if (!raw) return null;
-                        const s = String(raw).toLowerCase().trim();
-                        if (APT_WORD_TO_NUM[s] != null) return APT_WORD_TO_NUM[s];
-                        const n = parseInt(s, 10);
-                        return isNaN(n) || n <= 0 ? null : n;
-                      })();
-
-                      // Class code as verification layer
-                      const CLASS_UNIT_COUNT: Record<string, number> = {
-                        '211': 2, '212': 3, '213': 7, '214': 13,
-                        '205': 6, '206': 13, '207': 4,
-                        '202': 1, '203': 1, '209': 1, '210': 1, '208': 1,
-                      };
-                      const classCodeUnits = propertyTaxData?.propertyClass
-                        ? (CLASS_UNIT_COUNT[String(propertyTaxData.propertyClass)] ?? null)
-                        : null;
-
-                      // Listing unit count is highest priority (active-listing snapshot first, then scraped listing data)
-                      const rawSnapUnitCount = (listingSnapshot as any)?.unitCount != null ? Number((listingSnapshot as any).unitCount) : null;
-                      const snapUnitCount = rawSnapUnitCount != null && Number.isFinite(rawSnapUnitCount) && rawSnapUnitCount > 0 ? rawSnapUnitCount : null;
-                      const snapRentRoll: Array<{ unit: string | null; beds: number | null; baths: number | null; monthlyRent: number | null }> =
-                        Array.isArray((listingSnapshot as any)?.rentRoll) ? (listingSnapshot as any).rentRoll : [];
-                      const listingUnitCount = snapUnitCount
-                        ?? (snapRentRoll.length > 1 ? snapRentRoll.length : null)
-                        ?? (() => {
-                          const parsed = listingData?.unitCount != null ? Number(listingData.unitCount) : null;
-                          return parsed != null && Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-                        })();
-
-                      // Infer unit count: listing > parcel char_apts > class code > commercial > null
-                      const inferredUnitCount: number | null =
-                        listingUnitCount
-                        ?? parsedParcelApts
-                        ?? classCodeUnits
-                        ?? ((pinLookupData?.commercialData as any)?.totalUnits != null
-                            ? Number((pinLookupData?.commercialData as any).totalUnits) : null)
-                        ?? null;
-
-                      // Source label and discrepancy flag
-                      const unitCountSource = listingUnitCount != null ? 'listing'
-                        : parsedParcelApts != null ? 'parcel'
-                        : classCodeUnits != null ? 'class code' : null;
-                      const unitCountDiscrepancy = listingUnitCount != null && parsedParcelApts != null
-                        && listingUnitCount !== parsedParcelApts;
-
-                      // Infer bedrooms per unit: listing rent roll avg > listing unitTypes avg > parcel total÷units
-                      let inferredBedroomsPerUnit: number | null = null;
-                      {
-                        const rrBeds = snapRentRoll.filter(u => u.beds != null).map(u => Number(u.beds));
-                        if (rrBeds.length > 0)
-                          inferredBedroomsPerUnit = Math.round(rrBeds.reduce((a, b) => a + b, 0) / rrBeds.length);
-                      }
-                      if (inferredBedroomsPerUnit == null && listingData?.unitTypes && listingData.unitTypes.length > 0) {
-                        const brCounts = (listingData.unitTypes as any[])
-                          .filter((u: any) => u.bedrooms != null)
-                          .map((u: any) => Number(u.bedrooms));
-                        if (brCounts.length > 0)
-                          inferredBedroomsPerUnit = Math.round(brCounts.reduce((a: number, b: number) => a + b, 0) / brCounts.length);
-                      }
-                      if (inferredBedroomsPerUnit == null && inferredUnitCount && pinLookupData?.characteristicsData?.bedrooms)
-                        inferredBedroomsPerUnit = Math.round(Number(pinLookupData.characteristicsData.bedrooms) / inferredUnitCount);
-
-                      // Infer bathrooms per unit (for display confirmation only)
-                      let inferredBathsPerUnit: number | null = null;
-                      if (inferredUnitCount && pinLookupData?.characteristicsData?.fullBaths)
-                        inferredBathsPerUnit = Math.round(Number(pinLookupData.characteristicsData.fullBaths) / inferredUnitCount);
-
-                      const fmrMap: Record<number, number | null> = {
-                        0: fmrData?.rents?.efficiency ?? null,
-                        1: fmrData?.rents?.oneBed ?? null,
-                        2: fmrData?.rents?.twoBed ?? null,
-                        3: fmrData?.rents?.threeBed ?? null,
-                        4: fmrData?.rents?.fourBed ?? null,
-                      };
-
-                      const getRcRent = (br: number): number | null =>
-                        (rentcastRadiusData?.byBedroom?.find((b: any) => b.bedrooms === br)
-                          ?? rentcastData?.byBedroom?.find((b: any) => b.bedrooms === br))?.medianRent ?? null;
-
-                      type RentalOption = { label: string; grossAnnual: number; source: string; bedrooms: number | null; units: number | null; monthlyPerUnit: number | null };
-                      const rentalNoiOptions: Record<string, RentalOption> = {};
-
-                      // Determine which bedroom counts to show
-                      const brsToShow: number[] = inferredBedroomsPerUnit != null
-                        ? [inferredBedroomsPerUnit]
-                        : ([1, 2, 3] as number[]).filter(br => getRcRent(br) || fmrMap[br]);
-
-                      const units = inferredUnitCount ?? 1;
-                      const brLabel = (br: number) => br === 0 ? 'Studio' : `${br}BR`;
-
-                      // Listing-stated income supersedes market estimates when the listing
-                      // publishes a rent roll, gross income, or NOI (added first = default).
-                      // Rent roll: dedupe by unit label, and only make it the DEFAULT when it
-                      // covers the listing's stated unit count — a partial rent roll is shown
-                      // below market options and clearly labeled, never extrapolated.
-                      const seenUnitLabels = new Set<string>();
-                      const rentRollRents = snapRentRoll.filter(u => {
-                        if (u.monthlyRent == null || !(u.monthlyRent > 0)) return false;
-                        const lbl = u.unit ? String(u.unit).trim().toLowerCase() : null;
-                        if (lbl) { if (seenUnitLabels.has(lbl)) return false; seenUnitLabels.add(lbl); }
-                        return true;
-                      });
-                      const rentRollComplete = snapUnitCount == null || rentRollRents.length >= snapUnitCount;
-                      const snapGrossIncome = typeof (listingSnapshot as any)?.grossAnnualIncome === 'number' ? (listingSnapshot as any).grossAnnualIncome : null;
-                      const snapStatedNoi = typeof (listingSnapshot as any)?.statedNoi === 'number' ? (listingSnapshot as any).statedNoi : null;
-                      const listingRentRollOption: RentalOption | null = rentRollRents.length > 0 ? (() => {
-                        const monthlyTotal = rentRollRents.reduce((s, u) => s + (u.monthlyRent as number), 0);
-                        const gross = Math.round(monthlyTotal * 12);
-                        const partial = !rentRollComplete ? ` (partial: ${rentRollRents.length} of ${snapUnitCount} units — not extrapolated)` : '';
-                        return {
-                          label: `Listing Rent Roll — $${monthlyTotal.toLocaleString()}/mo across ${rentRollRents.length} unit${rentRollRents.length !== 1 ? 's' : ''} = $${gross.toLocaleString()}/yr${partial}`,
-                          grossAnnual: gross, source: 'Listing rent roll', bedrooms: null, units: rentRollRents.length, monthlyPerUnit: Math.round(monthlyTotal / rentRollRents.length),
-                        };
-                      })() : null;
-                      if (listingRentRollOption && rentRollComplete) {
-                        rentalNoiOptions['listing_rentroll'] = listingRentRollOption;
-                      }
-                      if (snapGrossIncome) {
-                        rentalNoiOptions['listing_gross'] = {
-                          label: `Listing Stated Gross Income — $${snapGrossIncome.toLocaleString()}/yr`,
-                          grossAnnual: Math.round(snapGrossIncome), source: 'Listing stated income', bedrooms: null, units: inferredUnitCount, monthlyPerUnit: null,
-                        };
-                      }
-                      if (snapStatedNoi) {
-                        rentalNoiOptions['listing_noi'] = {
-                          label: `Listing Stated NOI — $${snapStatedNoi.toLocaleString()}/yr`,
-                          grossAnnual: 0, source: 'Listing stated NOI', bedrooms: null, units: inferredUnitCount, monthlyPerUnit: null,
-                        };
-                      }
-
-                      for (const br of brsToShow) {
-                        const rcRent = getRcRent(br);
-                        const fmrRent = fmrMap[br];
-                        if (rcRent) {
-                          const gross = Math.round(rcRent * units * 12);
-                          rentalNoiOptions[`rc_${br}br`] = {
-                            label: `Market Rate · ${brLabel(br)} — $${rcRent.toLocaleString()}/mo × ${units} unit${units !== 1 ? 's' : ''} = $${gross.toLocaleString()}/yr`,
-                            grossAnnual: gross, source: 'Rentcast (¾mi)', bedrooms: br, units, monthlyPerUnit: rcRent,
-                          };
-                        }
-                        if (fmrRent) {
-                          const gross = Math.round(fmrRent * units * 12);
-                          rentalNoiOptions[`fmr_${br}br`] = {
-                            label: `Fair Market Rent · ${brLabel(br)} — $${fmrRent.toLocaleString()}/mo × ${units} unit${units !== 1 ? 's' : ''} = $${gross.toLocaleString()}/yr`,
-                            grossAnnual: gross, source: 'HUD FMR', bedrooms: br, units, monthlyPerUnit: fmrRent,
-                          };
-                        }
-                      }
-                      // Partial rent roll goes AFTER market options — visible but never the default
-                      if (listingRentRollOption && !rentRollComplete) {
-                        rentalNoiOptions['listing_rentroll'] = listingRentRollOption;
-                      }
-                      rentalNoiOptions['noi_direct'] = { label: 'Enter NOI directly', grossAnnual: 0, source: 'noi_direct', bedrooms: null, units: null, monthlyPerUnit: null };
-
-                      const hasRentalOptions = !hasCashflowData && Object.keys(rentalNoiOptions).some(k => k !== 'noi_direct');
-
-                      // Auto-select first valid rental option when none selected yet
-                      const effectiveRentalOption = valuationRentalNoiOption && rentalNoiOptions[valuationRentalNoiOption]
-                        ? valuationRentalNoiOption
-                        : Object.keys(rentalNoiOptions)[0];
-
-                      const isManualRental = effectiveRentalOption === 'manual';
-                      const isDirectNoi = effectiveRentalOption === 'noi_direct';
-                      // Listing-stated NOI is already net — use it as-is, no tax/insurance subtraction
-                      const isListingNoi = effectiveRentalOption === 'listing_noi';
-
-                      const rentalGrossIncome = hasRentalOptions && !isManualRental && !isDirectNoi && !isListingNoi
-                        ? (rentalNoiOptions[effectiveRentalOption]?.grossAnnual ?? 0)
-                        : Math.max(0, parseFormattedNumber(valuationGrossIncome));
-
-                      const annualTaxesRaw = Math.max(0, parseFormattedNumber(valuationAnnualTaxes));
-                      const annualInsuranceRaw = Math.max(0, parseFormattedNumber(valuationAnnualInsurance));
-
-                      // ── Transparent NOI build-up (Investor · buy-to-lease) ──────────
-                      // NOI is BUILT from the full statement, never typed. Composition is
-                      // inferred from the Cook County property class (what EXISTS), not
-                      // zoning (what's allowed).
-                      const nmUnits = Math.max(1, inferredUnitCount ?? 1);
-                      const pcClassStr = String(propertyTaxData?.propertyClass ?? '');
-                      // 212 = mixed-use commercial/residential; 5xx = commercial
-                      const hasCommercialSpace = pcClassStr === '212' || pcClassStr.startsWith('5')
-                        || !!(pinLookupData?.commercialData as any)?.bldgSf;
-                      const isCommercialOnly = pcClassStr.startsWith('5') && !parsedParcelApts;
-                      // The build-up path: rental property with a rent basis selected.
-                      // Listing-stated NOI and "enter NOI directly" are manual escapes.
-                      const noiModelPath = !hasCashflowData && hasRentalOptions && !isDirectNoi && !isListingNoi;
-                      // The income step (Step 2) renders for ALL rental paths — the rent
-                      // basis + NOI live there, never in Step 1 (one source, no duplicates)
-                      const showIncomeStep = !hasCashflowData && hasRentalOptions;
-                      const nmRepairsDefault = nmUnits * 1250;
-                      const nmUtilitiesDefault = nmUnits * 750;
-                      const nmReservesPerUnit = noiReservesPerUnit !== '' ? Math.max(0, parseFormattedNumber(noiReservesPerUnit)) : 250;
-                      // Line-level rent override (Advanced) — replaces the basis-derived
-                      // rent in BOTH the NOI statement and the DSCR-loan numerator
-                      const resiRentOverrideVal = noiResiRentOverride !== '' ? Math.max(0, parseFormattedNumber(noiResiRentOverride)) : null;
-                      const effectiveResiRent = isCommercialOnly ? 0 : (resiRentOverrideVal ?? rentalGrossIncome);
-                      const noiModelInputs = {
-                        residentialRentAnnual: effectiveResiRent,
-                        commercialRentAnnual: hasCommercialSpace ? Math.max(0, parseFormattedNumber(noiCommercialRent)) : 0,
-                        otherIncomeAnnual: Math.max(0, parseFormattedNumber(noiOtherIncome)),
-                        vacancyResiPct: noiVacancyResiPct !== '' ? parseFloat(noiVacancyResiPct) || 0 : 5,
-                        vacancyCommPct: noiVacancyCommPct !== '' ? parseFloat(noiVacancyCommPct) || 0 : 10,
-                        annualTaxes: annualTaxesRaw,
-                        annualInsurance: annualInsuranceRaw,
-                        managementPctOfEgi: noiMgmtPct !== '' ? parseFloat(noiMgmtPct) || 0 : 6,
-                        repairsAnnual: noiRepairs !== '' ? Math.max(0, parseFormattedNumber(noiRepairs)) : nmRepairsDefault,
-                        utilitiesAnnual: noiUtilities !== '' ? Math.max(0, parseFormattedNumber(noiUtilities)) : nmUtilitiesDefault,
-                        reservesAnnual: nmReservesPerUnit * nmUnits,
-                      };
-                      const noiModel = computeNoiModel(noiModelInputs);
-                      // Manual override (Advanced escape for a real T-12) — wins, but is
-                      // clearly flagged "manual — not from the lines"
-                      const noiManualOverride = !hasCashflowData && !!valuationManualNoi;
-
-                      const rentalNoi = isListingNoi
-                        ? Math.max(0, snapStatedNoi ?? 0)
-                        : noiModelPath
-                          ? Math.max(0, noiModel.noi)
-                          : 0;
-
-                      // Get values for calculations — ONE NOI, computed once, read
-                      // everywhere (Step 1 summary, Glance, Coverage, How It's Calculated)
-                      const selectedNoi = hasCashflowData
-                        ? (noiOptions[valuationNoiOption]?.annualNoi || 0)
-                        : noiManualOverride
-                          ? Math.max(0, parseFormattedNumber(valuationManualNoi))
-                          : (hasRentalOptions && !isDirectNoi) ? rentalNoi : 0;
-                      // NOI source label saved with the report context so the AI report knows
-                      // exactly where the NOI figure came from
-                      const noiSource = hasCashflowData
-                        ? `daycare_cashflow:${valuationNoiOption}`
-                        : noiManualOverride
-                          ? 'manual'
-                          : isListingNoi
-                            ? `rental:${effectiveRentalOption}`
-                            : noiModelPath ? `noi_model:${effectiveRentalOption}` : 'none';
-
-                      // Tier: view of ONE model (Simple = collapsed, Advanced = editable).
-                      // Defaults from funnel completeness: filled deal inputs → Advanced.
-                      const effectiveTier: 'simple' | 'advanced' = noiTier
-                        ?? (valuationPurchasePrice ? 'advanced' : 'simple');
-                      const funnelProjectType = selectedProjectType || run?.lastProjectType || null;
-                      // Rent basis (market vs actual) from the selected NOI Basis option
-                      const rentBasisLabel = effectiveRentalOption?.startsWith('listing_') ? 'actual (listing)' : 'market';
-
-                      // All loan math lives in the shared pure module (client/src/lib/valuation.ts)
-                      // so the save handler snapshots the exact numbers rendered here.
-                      const loanPreset = loanTypePresets[valuationLoanType];
-                      const metrics = computeValuationMetrics({
-                        loanType: valuationLoanType,
-                        purchasePriceInput: valuationPurchasePrice,
-                        interestRateInput: valuationInterestRate,
-                        presetDownPaymentPercent: loanPreset?.downPaymentPercent || 20,
-                        presetTermYears: loanPreset?.termYears || 30,
-                        sbaBusinessPrice,
-                        sbaRealEstatePrice,
-                        sbaBusinessDownPercent,
-                        sbaBusinessTermYears,
-                        sbaBusinessInterestRate,
-                        sbaRealEstateDownPercent,
-                        sbaRealEstateTermYears,
-                        sbaRealEstateInterestRate,
-                        selectedNoi,
-                        annualTaxesInput: valuationAnnualTaxes,
-                        annualInsuranceInput: valuationAnnualInsurance,
-                      });
-                      // Two DSCR conventions — one source, two ratios. PITIA reuses the
-                      // SAME taxes & insurance the NOI statement uses; gross rent is the
-                      // residential-rent line before vacancy. 1–4 unit product only.
-                      const dscrLoanApplies = noiModelPath && !isSba && !hasCommercialSpace
-                        && nmUnits >= 1 && nmUnits <= 4 && metrics.annualDebtService > 0;
-                      const dscrLoanRatio = dscrLoanApplies
-                        ? computeDscrLoanRatio(effectiveResiRent, metrics.annualDebtService, annualTaxesRaw, annualInsuranceRaw)
-                        : 0;
-
-                      valuationSnapshotRef.current = {
-                        selectedNoi, noiSource, metrics,
-                        noiModel: (noiModelPath || (noiManualOverride && hasRentalOptions)) ? {
-                          tier: effectiveTier,
-                          mode: 'investor',
-                          inputs: noiModelInputs,
-                          result: noiModel,
-                          dscrLoanRatio: dscrLoanApplies ? Math.round(dscrLoanRatio * 100) / 100 : null,
-                          manualOverride: noiManualOverride,
-                        } : null,
-                      };
-                      const {
-                        purchasePrice, downPayment, loanAmount, annualDebtService,
-                        sbaBusinessMonthly, sbaRealEstateMonthly,
-                        annualOperatingCosts, monthlyPI, monthlyTaxes, monthlyInsurance, monthlyPITI,
-                        annualCashFlow, dscr, capRate, roi, noiCoversExpenses,
-                      } = metrics;
-                      const valuationBadgeMetric = Number.isFinite(metrics.purchasePrice) && metrics.purchasePrice > 0
-                        && Number.isFinite(metrics.annualDebtService) && metrics.annualDebtService > 0
-                        && Number.isFinite(dscr)
-                        ? `Est. DSCR ${dscr.toFixed(2)}×`
-                        : undefined;
-
-                      return (
-                        <div className="space-y-4">
-                          <ValuationMetricBridge
-                            runId={id}
-                            metric={valuationBadgeMetric}
-                            onMetric={handleValuationMetricBadge}
-                          />
-                          {/* ── Calc header: two knobs — MODE (the math) and TIER (the view) ── */}
-                          {!hasCashflowData && hasRentalOptions && (
-                            <div className="bg-card border border-border rounded-[13px] px-4 py-3.5" data-testid="noi-calc-header">
-                              <div className="flex items-center flex-wrap gap-x-4 gap-y-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-jbmono text-[8.5px] font-bold uppercase tracking-[0.04em] text-muted-foreground">Analyzing as</span>
-                                  <span className="flex items-center gap-1.5 text-[12px] font-bold text-[#141414]" data-testid="indicator-noi-mode">
-                                    <span className="inline-block w-2 h-2 rounded-full" style={{ background: '#2b3a9e' }} />
-                                    Investor · buy-to-lease
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2 ml-auto">
-                                  <span className="font-jbmono text-[8.5px] font-bold uppercase tracking-[0.04em] text-muted-foreground">View</span>
-                                  <div className="flex border border-border rounded-[8px] overflow-hidden text-[11px] font-semibold" data-testid="toggle-noi-tier">
-                                    <button type="button" onClick={() => setNoiTier('simple')} className={`px-3.5 py-1.5 ${effectiveTier === 'simple' ? 'bg-[#2b3a9e] text-white' : 'text-[#54544f]'}`} data-testid="tier-simple">Simple</button>
-                                    <button type="button" onClick={() => setNoiTier('advanced')} className={`px-3.5 py-1.5 border-l border-border ${effectiveTier === 'advanced' ? 'bg-[#2b3a9e] text-white' : 'text-[#54544f]'}`} data-testid="tier-advanced">Advanced</button>
-                                  </div>
-                                </div>
-                              </div>
-                              <p className="text-[10.5px] text-muted-foreground mt-2" data-testid="text-noi-defaults-note">
-                                {funnelProjectType
-                                  ? <>From your project use: <b className="text-[#54544f]">{funnelProjectType}</b> → Investor</>
-                                  : <>Investor · buy-to-lease</>}
-                                {noiTier == null && <> · {effectiveTier === 'advanced' ? 'Advanced view (you filled the deal inputs)' : 'Simple view (deal inputs skipped)'}</>}
-                                {' '}· change the view above in one click. Simple and Advanced are views of the same full-expense model — the NOI is identical.
-                              </p>
-                            </div>
-                          )}
-
-                          {/* ── STEP 1 — Enter the Deal ── */}
-                          <div className="val-step"><span className="n">1</span><span className="t">Enter the Deal</span><span className="note">{showIncomeStep ? 'purchase · financing' : 'purchase · financing · income'}</span></div>
-                          <div className="calc-inputs bg-card border border-border rounded-[13px] px-5 py-5" style={{ boxShadow: '0 1px 3px rgba(20,20,20,.04)' }}>
-                            <div className={`grid grid-cols-1 gap-6 ${showIncomeStep ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
-
-                              {/* PURCHASE */}
-                              <div>
-                                <div className="font-jbmono text-[9.5px] font-bold uppercase tracking-[0.06em] text-muted-foreground mb-3 pb-2 border-b border-border">Purchase</div>
-                                {isSba ? (
-                                  <>
-                                    <div className="mb-3">
-                                      <Label htmlFor="sba-business-price" className="text-[11px] font-semibold text-[#54544f]">Business Purchase Price</Label>
-                                      <div className="relative mt-1">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                        <Input
-                                          id="sba-business-price"
-                                          type="text"
-                                          inputMode="numeric"
-                                          value={sbaBusinessPrice}
-                                          onChange={(e) => setSbaBusinessPrice(formatNumberWithCommas(e.target.value))}
-                                          className="pl-7 bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                          placeholder="500,000"
-                                          data-testid="input-sba-business-price"
-                                        />
-                                      </div>
-                                    </div>
-                                    {!isSbaBusinessOnly && (
-                                      <div className="mb-1">
-                                        <Label htmlFor="sba-re-price" className="text-[11px] font-semibold text-[#54544f]">Real Estate Purchase Price</Label>
-                                        <div className="relative mt-1">
-                                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                          <Input
-                                            id="sba-re-price"
-                                            type="text"
-                                            inputMode="numeric"
-                                            value={sbaRealEstatePrice}
-                                            onChange={(e) => setSbaRealEstatePrice(formatNumberWithCommas(e.target.value))}
-                                            className="pl-7 bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                            placeholder="2,000,000"
-                                            data-testid="input-sba-re-price"
-                                          />
-                                        </div>
-                                        <p className="text-[10.5px] text-muted-foreground mt-1.5">Land + building</p>
-                                      </div>
-                                    )}
-                                    {run?.sourceListingUrl && (
-                                      <a
-                                        href={run.sourceListingUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-xs text-foreground hover:underline mt-1 inline-flex items-center gap-1"
-                                      >
-                                        <ExternalLink className="w-3 h-3" /> View original listing
-                                      </a>
-                                    )}
-                                  </>
-                                ) : (
-                                  <div>
-                                    <Label htmlFor="purchase-price" className="text-[11px] font-semibold text-[#54544f]">Purchase Price <span className="text-[#2b3a9e]">*</span></Label>
-                                    <div className="flex gap-2 mt-1">
-                                      <div className="relative flex-1">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                        <Input
-                                          id="purchase-price"
-                                          type="text"
-                                          inputMode="numeric"
-                                          value={valuationPurchasePrice}
-                                          onChange={(e) => setValuationPurchasePrice(formatNumberWithCommas(e.target.value))}
-                                          className="pl-7 bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                          placeholder="2,450,000"
-                                          data-testid="input-purchase-price"
-                                        />
-                                      </div>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={handleSaveAskingPrice}
-                                        disabled={updateManualProperty.isPending}
-                                        className="rounded-[8px]"
-                                        data-testid="button-save-asking-price"
-                                      >
-                                        Save
-                                      </Button>
-                                    </div>
-                                    <p className="text-[10.5px] text-muted-foreground mt-1.5">Asking price or your offer</p>
-                                    {run?.sourceListingUrl && (
-                                      <a
-                                        href={run.sourceListingUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-xs text-foreground hover:underline mt-1 inline-flex items-center gap-1"
-                                      >
-                                        <ExternalLink className="w-3 h-3" /> View original listing
-                                      </a>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* FINANCING */}
-                              <div>
-                                <div className="font-jbmono text-[9.5px] font-bold uppercase tracking-[0.06em] text-muted-foreground mb-3 pb-2 border-b border-border">Financing</div>
-                                <div className="mb-3">
-                                  <Label htmlFor="loan-type" className="text-[11px] font-semibold text-[#54544f]">Loan Type</Label>
-                                  <Select value={valuationLoanType} onValueChange={(newType) => {
-                                    setValuationLoanType(newType);
-                                    const isSwitchingToNonSba = newType !== 'sba_business' && newType !== 'sba_biz_re';
-                                    if (isSwitchingToNonSba && mortgageRateData?.rate) {
-                                      setValuationInterestRate(String(mortgageRateData.rate));
-                                    }
-                                  }}>
-                                    <SelectTrigger className="mt-1 bg-[#faf9f6] border-border rounded-[9px] font-semibold" data-testid="select-loan-type">
-                                      <SelectValue placeholder="Select loan type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {Object.entries(loanTypePresets).map(([key, { label }]) => (
-                                        <SelectItem key={key} value={key}>{label}</SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                {isSba ? (
-                                  <>
-                                    {/* Editable terms — SBA lets the user change them */}
-                                    {(isSbaBusinessOnly || !reIsDominant) && (
-                                      <div className="mb-3">
-                                        <div className="text-[11px] font-semibold text-[#54544f] mb-1">Business Terms</div>
-                                        <div className="grid grid-cols-3 gap-2">
-                                          <div>
-                                            <Label className="text-[10px] text-muted-foreground">Down %</Label>
-                                            <Input
-                                              type="number"
-                                              value={sbaBusinessDownPercent}
-                                              onChange={(e) => setSbaBusinessDownPercent(e.target.value)}
-                                              className="h-8 text-xs bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                              data-testid="input-sba-business-down"
-                                            />
-                                          </div>
-                                          <div>
-                                            <Label className="text-[10px] text-muted-foreground">Term</Label>
-                                            <Input
-                                              type="number"
-                                              value={sbaBusinessTermYears}
-                                              onChange={(e) => setSbaBusinessTermYears(e.target.value)}
-                                              className="h-8 text-xs bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                              data-testid="input-sba-business-term"
-                                            />
-                                          </div>
-                                          <div>
-                                            <Label className="text-[10px] text-muted-foreground">Rate %</Label>
-                                            <Input
-                                              type="number"
-                                              step="0.25"
-                                              value={sbaBusinessInterestRate}
-                                              onChange={(e) => setSbaBusinessInterestRate(e.target.value)}
-                                              className="h-8 text-xs bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                              data-testid="input-sba-business-rate"
-                                            />
-                                          </div>
-                                        </div>
-                                        <p className="text-[10.5px] text-muted-foreground mt-1.5">
-                                          {sbaRatesData?.sevenARate
-                                            ? <>Prime ({sbaRatesData.primeRate}%) + 2.75% = {sbaRatesData.sevenARate}%{sbaRatesData.asOf ? ` · as of ${sbaRatesData.asOf}` : ''}</>
-                                            : 'Prime + 2.75%'}
-                                        </p>
-                                      </div>
-                                    )}
-                                    {!isSbaBusinessOnly && reIsDominant && (
-                                      <p className="text-[10.5px] text-muted-foreground mb-3">Business share uses RE terms (real estate is over 51% of the deal)</p>
-                                    )}
-                                    {!isSbaBusinessOnly && (
-                                      <div>
-                                        <div className="text-[11px] font-semibold text-[#54544f] mb-1">Real Estate Terms</div>
-                                        <div className="grid grid-cols-3 gap-2">
-                                          <div>
-                                            <Label className="text-[10px] text-muted-foreground">Down %</Label>
-                                            <Input
-                                              type="number"
-                                              value={sbaRealEstateDownPercent}
-                                              onChange={(e) => setSbaRealEstateDownPercent(e.target.value)}
-                                              className="h-8 text-xs bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                              data-testid="input-sba-re-down"
-                                            />
-                                          </div>
-                                          <div>
-                                            <Label className="text-[10px] text-muted-foreground">Term</Label>
-                                            <Input
-                                              type="number"
-                                              value={sbaRealEstateTermYears}
-                                              onChange={(e) => setSbaRealEstateTermYears(e.target.value)}
-                                              className="h-8 text-xs bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                              data-testid="input-sba-re-term"
-                                            />
-                                          </div>
-                                          <div>
-                                            <Label className="text-[10px] text-muted-foreground">Rate %</Label>
-                                            <Input
-                                              type="number"
-                                              step="0.25"
-                                              value={sbaRealEstateInterestRate}
-                                              onChange={(e) => setSbaRealEstateInterestRate(e.target.value)}
-                                              className="h-8 text-xs bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                              data-testid="input-sba-re-rate"
-                                            />
-                                          </div>
-                                        </div>
-                                        <p className="text-[10.5px] text-muted-foreground mt-1.5">
-                                          {sbaRatesData?.fiveOhFourRate
-                                            ? <>SBA 504 est. ≈ {sbaRatesData.fiveOhFourRate}% (10-Yr Treasury {sbaRatesData.treasury10}% + {sbaRatesData.fiveOhFourSpread ?? 1.5}%){sbaRatesData.asOf ? ` · as of ${sbaRatesData.asOf}` : ''} — confirm with your CDC</>
-                                            : 'SBA 504 rate — confirm with your CDC'}
-                                        </p>
-                                      </div>
-                                    )}
-                                  </>
-                                ) : (
-                                  <div>
-                                    {/* Fixed by the loan type: down % and term shown as locked preset chips */}
-                                    <Label htmlFor="interest-rate" className="text-[11px] font-semibold text-[#54544f]">Interest Rate <span className="text-[#2b3a9e]">*</span></Label>
-                                    <div className="relative mt-1">
-                                      <Input
-                                        id="interest-rate"
-                                        type="number"
-                                        step="0.1"
-                                        value={valuationInterestRate}
-                                        onChange={(e) => setValuationInterestRate(e.target.value)}
-                                        placeholder={mortgageRateData?.rate ? String(mortgageRateData.rate) : "6.5"}
-                                        className="pr-7 bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                        data-testid="input-interest-rate"
-                                      />
-                                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
-                                    </div>
-                                    {mortgageRateData?.date && (
-                                      <p className="text-[10.5px] text-muted-foreground mt-1.5" data-testid="text-freddie-mac-rate">
-                                        Freddie Mac PMMS · {new Date(mortgageRateData.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                      </p>
-                                    )}
-                                    <div className="font-jbmono text-[8.5px] font-bold uppercase tracking-[0.04em] text-muted-foreground mt-2.5">Set by loan type</div>
-                                    <div className="flex flex-wrap gap-1.5 mt-2" data-testid="chips-loan-presets">
-                                      <span className="inline-flex items-center gap-1.5 bg-[#f1f0ec] border border-border rounded-[8px] px-2.5 py-1.5 text-[11.5px] font-semibold text-[#54544f]">
-                                        <span className="text-[10px] text-muted-foreground">🔒</span>{loanTypePresets[valuationLoanType]?.downPaymentPercent || 20}% down
-                                      </span>
-                                      <span className="inline-flex items-center gap-1.5 bg-[#f1f0ec] border border-border rounded-[8px] px-2.5 py-1.5 text-[11.5px] font-semibold text-[#54544f]">
-                                        <span className="text-[10px] text-muted-foreground">🔒</span>{loanTypePresets[valuationLoanType]?.termYears || 30}-yr term
-                                      </span>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* OPERATING INCOME (& COSTS) — hidden for rental paths: the
-                                  rent basis & NOI live in Step 2's statement (one source) */}
-                              {!showIncomeStep && (
-                              <div>
-                                <div className="font-jbmono text-[9.5px] font-bold uppercase tracking-[0.06em] text-muted-foreground mb-3 pb-2 border-b border-border">
-                                  {(isSbaBusinessOnly || noiCoversExpenses) ? 'Operating Income' : 'Operating Income & Costs'}
-                                </div>
-                                <div className="mb-3">
-                                  {hasCashflowData ? (
-                                    <>
-                                      <Label htmlFor="noi-option" className="text-[11px] font-semibold text-[#54544f]">NOI</Label>
-                                      <Select value={valuationNoiOption} onValueChange={setValuationNoiOption}>
-                                        <SelectTrigger className="mt-1 bg-[#faf9f6] border-border rounded-[9px] font-semibold" data-testid="select-noi-option">
-                                          <SelectValue placeholder="Select NOI scenario">
-                                            {noiOptions[valuationNoiOption] && (
-                                              <span>${noiOptions[valuationNoiOption].annualNoi.toLocaleString()}/yr</span>
-                                            )}
-                                          </SelectValue>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {Object.entries(noiOptions).map(([key, { label }]) => (
-                                            <SelectItem key={key} value={key}>{label}</SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Label htmlFor="noi-manual" className="text-[11px] font-semibold text-[#54544f]">NOI</Label>
-                                      <div className="relative mt-1">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                        <Input
-                                          id="noi-manual"
-                                          type="text"
-                                          inputMode="numeric"
-                                          value={valuationManualNoi}
-                                          onChange={(e) => setValuationManualNoi(formatNumberWithCommas(e.target.value))}
-                                          className="pl-7 bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                          placeholder="Annual NOI"
-                                          data-testid="input-manual-noi"
-                                        />
-                                      </div>
-                                      <p className="text-[10.5px] text-muted-foreground mt-1.5">Net operating income /yr</p>
-                                    </>
-                                  )}
-                                  {noiCoversExpenses && !isSbaBusinessOnly && !noiModelPath && !isListingNoi && (
-                                    <p className="text-[10.5px] text-muted-foreground mt-1.5">Net — taxes &amp; insurance already deducted</p>
-                                  )}
-                                  {isSbaBusinessOnly && (
-                                    <p className="text-[10.5px] text-muted-foreground mt-1.5">Net — taxes &amp; insurance already factored into the rental expense</p>
-                                  )}
-                                </div>
-                                {!isSbaBusinessOnly && !noiCoversExpenses && (
-                                  <div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <div>
-                                        <Label htmlFor="annual-taxes" className="text-[11px] font-semibold text-[#54544f]">Tax expense assumption</Label>
-                                        <div className="relative mt-1">
-                                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                          <Input
-                                            id="annual-taxes"
-                                            type="text"
-                                            inputMode="numeric"
-                                            value={valuationAnnualTaxes}
-                                            onChange={(e) => setValuationAnnualTaxes(formatNumberWithCommas(e.target.value))}
-                                            className="pl-7 bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                            placeholder="0"
-                                            data-testid="input-annual-taxes"
-                                          />
-                                        </div>
-                                      </div>
-                                      <div>
-                                        <Label htmlFor="annual-insurance" className="text-[11px] font-semibold text-[#54544f]">Insurance</Label>
-                                        <div className="relative mt-1">
-                                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                          <Input
-                                            id="annual-insurance"
-                                            type="text"
-                                            inputMode="numeric"
-                                            value={valuationAnnualInsurance}
-                                            onChange={(e) => { setInsuranceEstimated(false); setValuationAnnualInsurance(formatNumberWithCommas(e.target.value)); }}
-                                            className="pl-7 bg-[#faf9f6] border-border rounded-[9px] font-semibold"
-                                            placeholder="0"
-                                            data-testid="input-annual-insurance"
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <p className="text-[10.5px] text-muted-foreground mt-1.5">
-                                      {lastCompleteTaxYear
-                                        ? `Model input prefilled from the TY${lastCompleteTaxYear.year} complete bill in Property Taxes; edit it for your scenario.`
-                                        : 'Enter a modeling assumption; no complete Treasurer bill is available.'}
-                                    </p>
-                                    <p className="text-[10.5px] text-muted-foreground mt-1" data-testid="text-insurance-helper">
-                                      {insuranceEstimated
-                                        ? 'Insurance estimated from building size (sq ft × $200 × 0.007) — estimate only, verify with a quote.'
-                                        : 'Annual property insurance premium'}
-                                    </p>
-                                    {!isSba && (
-                                      <p className="text-[10.5px] text-muted-foreground italic mt-1">
-                                        If you enter a NOI above, taxes &amp; insurance are zeroed out automatically (NOI already covers them).
-                                      </p>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* ── STEP 2 — Income → NOI (built BEFORE the verdict that depends on it) ── */}
-                          {showIncomeStep && (() => {
-                            const fmtN = (n: number) => Math.round(n).toLocaleString();
-                            const opt = rentalNoiOptions[effectiveRentalOption];
-                            const rentSub = opt?.monthlyPerUnit != null && opt?.units != null
-                              ? `${opt.units} unit${opt.units !== 1 ? 's' : ''} × $${opt.monthlyPerUnit.toLocaleString()}/mo (${rentBasisLabel})`
-                              : `${rentBasisLabel} rent basis`;
-                            // Rent-basis selector — lives HERE (first line of the statement),
-                            // not in Step 1: one source for the rent, no duplicates
-                            const basisSelect = (
-                              <Select
-                                value={effectiveRentalOption}
-                                onValueChange={(key) => { setValuationRentalNoiOption(key); setValuationManualNoi(''); }}
-                              >
-                                <SelectTrigger className="h-8 w-auto max-w-[300px] bg-[#faf9f6] border-border rounded-[8px] text-[11px] font-semibold" data-testid="select-rental-noi-option">
-                                  <SelectValue placeholder="Select rent basis" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Object.entries(rentalNoiOptions).map(([key, o]) => (
-                                    <SelectItem key={key} value={key}>{o.label}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            );
-                            const unitsInfo = (inferredUnitCount || inferredBedroomsPerUnit) ? [
-                              inferredUnitCount ? `${inferredUnitCount} unit${inferredUnitCount !== 1 ? 's' : ''}` : null,
-                              inferredBedroomsPerUnit != null ? `${inferredBedroomsPerUnit}BR` : null,
-                              inferredBathsPerUnit != null ? `${inferredBathsPerUnit}BA` : null,
-                              unitCountSource ? `from ${unitCountSource}` : null,
-                            ].filter(Boolean).join(' · ') : null;
-                            const penCls = "w-24 h-7 text-right text-xs font-jbmono bg-[#faf9f6] border-border rounded-[7px]";
-                            const Tag = ({ kind, children }: { kind: 'rec' | 'est' | 'parcel' | 'assume'; children: React.ReactNode }) => (
-                              <span className={
-                                kind === 'rec' ? "font-jbmono text-[7.5px] font-bold uppercase rounded px-1.5 py-0.5 text-[#2f7d3f] bg-[#e9f4ec] border border-[#cfe6d6]"
-                                : kind === 'est' ? "font-jbmono text-[7.5px] font-bold uppercase rounded px-1.5 py-0.5 text-[#96600a] bg-[#fdf8f0] border border-[#e6cfa0]"
-                                : kind === 'parcel' ? "font-jbmono text-[7.5px] font-bold uppercase rounded px-1.5 py-0.5 text-[#2b3a9e] bg-[#eef0fb] border border-[#dfe3f7]"
-                                : "font-jbmono text-[7.5px] font-bold uppercase rounded px-1.5 py-0.5 text-[#54544f] bg-[#faf9f6] border border-border"
-                              }>{children}</span>
-                            );
-                            const Row = ({ label, sub, tag, value, neg, edit, testid }: { label: React.ReactNode; sub?: React.ReactNode; tag?: React.ReactNode; value?: React.ReactNode; neg?: boolean; edit?: React.ReactNode; testid?: string }) => (
-                              <div className="flex items-center gap-2.5 px-4 py-2 border-b border-border text-[12.5px]" data-testid={testid}>
-                                <div className="font-medium">
-                                  {label}
-                                  {sub && <div className="text-[10px] text-muted-foreground mt-0.5">{sub}</div>}
-                                </div>
-                                <div className="ml-auto flex items-center gap-2.5">
-                                  {tag}
-                                  {edit ?? <span className={`font-jbmono text-xs font-semibold ${neg ? 'text-[#c0392b]' : ''}`}>{value}</span>}
-                                </div>
-                              </div>
-                            );
-                            const chips = [
-                              { txt: 'Taxes from record', rec: true },
-                              { txt: 'Insurance est.', rec: false },
-                              { txt: `${noiModelInputs.vacancyResiPct}% vacancy`, rec: false },
-                              { txt: `${noiModelInputs.managementPctOfEgi}% mgmt`, rec: false },
-                              { txt: 'R&M', rec: false },
-                              { txt: 'Utilities', rec: false },
-                              { txt: `$${nmReservesPerUnit}/unit reserves`, rec: false },
-                            ];
-                            return (
-                              <div id="noi-statement-section" style={{ scrollMarginTop: 90 }}>
-                                <div className="val-step"><span className="n">2</span><span className="t">Income → NOI</span><span className="note">every line editable · sources shown</span></div>
-                                <p className="val-secsub">How we reach NOI — built before the verdict that depends on it. {nmUnits} unit{nmUnits !== 1 ? 's' : ''}{unitsInfo ? ` (${unitsInfo})` : ''}{unitCountDiscrepancy ? ` · ⚠ listing says ${listingUnitCount}, parcel says ${parsedParcelApts}` : ''} · Investor (buy-to-lease) mode.</p>
-
-                                {isDirectNoi ? (
-                                  <div className="bg-card border border-border rounded-[13px] px-4 py-4" data-testid="noi-direct-card">
-                                    <div className="flex items-center flex-wrap gap-3">
-                                      <div>
-                                        <Label className="text-[11px] font-semibold text-[#54544f]">Rent basis</Label>
-                                        <div className="mt-1">{basisSelect}</div>
-                                      </div>
-                                      <div>
-                                        <Label htmlFor="noi-input" className="text-[11px] font-semibold text-[#54544f]">NOI</Label>
-                                        <div className="relative mt-1">
-                                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                          <Input id="noi-input" type="text" inputMode="numeric" value={valuationManualNoi} onChange={(e) => setValuationManualNoi(formatNumberWithCommas(e.target.value))} className="pl-7 w-40 bg-[#faf9f6] border-border rounded-[9px] font-semibold" placeholder="Annual NOI" data-testid="input-noi-direct" />
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <p className="text-[10.5px] text-muted-foreground mt-2">Manual — not from a build-up. Pick a rent basis to use the transparent statement instead.</p>
-                                  </div>
-                                ) : isListingNoi ? (
-                                  <div className="bg-card border border-border rounded-[13px] px-4 py-4" data-testid="noi-listing-card">
-                                    <div className="flex items-center flex-wrap gap-3">
-                                      <div>
-                                        <Label className="text-[11px] font-semibold text-[#54544f]">Rent basis</Label>
-                                        <div className="mt-1">{basisSelect}</div>
-                                      </div>
-                                      <div>
-                                        <Label className="text-[11px] font-semibold text-[#54544f]">NOI · listing stated</Label>
-                                        <div className="border border-border rounded-[9px] px-3 py-1.5 mt-1 bg-[#faf9f6] font-jbmono text-sm font-semibold" data-testid="text-noi-listing-stated">${Math.round(selectedNoi).toLocaleString()}</div>
-                                      </div>
-                                    </div>
-                                    <p className="text-[10.5px] text-muted-foreground mt-2">Used as-is from the listing — already net of expenses. Pick a market basis to see the transparent build-up instead.</p>
-                                  </div>
-                                ) : (
-                                <>
-                                {noiManualOverride && (
-                                  <div className="flex items-center flex-wrap gap-2 rounded-[10px] px-3.5 py-2.5 mb-3 text-[11.5px]" style={{ background: '#fdf8f0', border: '1px solid #e6cfa0', color: '#96600a' }} data-testid="banner-noi-manual-override">
-                                    <b>Manual NOI in use — ${fmtN(selectedNoi)}/yr, not from the lines below.</b>
-                                    <button type="button" className="text-[#2b3a9e] font-semibold hover:underline" onClick={() => setValuationManualNoi('')} data-testid="button-clear-noi-override">
-                                      Use the build-up (${fmtN(noiModel.noi)}) instead
-                                    </button>
-                                  </div>
-                                )}
-
-                                {effectiveTier === 'simple' ? (
-                                  <div className="bg-card border border-border rounded-[13px] overflow-hidden" data-testid="noi-simple-card">
-                                    <div className="px-4 py-4 text-center border-b border-border">
-                                      <div className="font-jbmono text-[8.5px] font-bold uppercase tracking-[0.04em] text-muted-foreground mb-1.5">Net Operating Income{noiManualOverride ? ' · manual' : ''}</div>
-                                      <div className={`font-serif text-[30px] leading-none ${!noiManualOverride && noiModel.noi < 0 ? 'text-[#c0392b]' : 'text-[#2b3a9e]'}`} data-testid="text-noi-simple">{noiManualOverride ? `$${fmtN(selectedNoi)}` : `${noiModel.noi < 0 ? '−' : ''}$${fmtN(Math.abs(noiModel.noi))}`}</div>
-                                      <div className="text-[10px] text-muted-foreground mt-1.5">{noiManualOverride ? 'manual — not from the lines; clear it above to use the build-up' : 'rent − vacancy − full operating expenses (never just taxes & insurance)'}</div>
-                                      {!noiManualOverride && noiModel.noi < 0 && (
-                                        <div className="text-[10px] font-semibold text-[#c0392b] mt-1">expenses exceed income — metrics floor at $0</div>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border">
-                                      <span className="text-[11px] font-semibold text-[#54544f]">Rent basis</span>
-                                      {basisSelect}
-                                      {unitsInfo && <span className="text-[10px] text-muted-foreground">{unitsInfo}</span>}
-                                    </div>
-                                    <div className="px-4 py-3">
-                                      <div className="text-[10px] text-muted-foreground mb-2">Assumptions used (all defaults, all editable in Advanced):</div>
-                                      <div className="flex flex-wrap gap-1.5">
-                                        {chips.map((c) => (
-                                          <span key={c.txt} className={`font-jbmono text-[8.5px] rounded px-1.5 py-1 border ${c.rec ? 'text-[#2f7d3f] bg-[#e9f4ec] border-[#cfe6d6]' : 'text-[#54544f] bg-[#faf9f6] border-border'}`}>{c.txt}</span>
-                                        ))}
-                                      </div>
-                                    </div>
-                                    <button type="button" className="block w-full text-center text-[11.5px] font-semibold text-[#2b3a9e] py-2.5 border-t border-border hover:bg-[#eef0fb]" onClick={() => setNoiTier('advanced')} data-testid="button-edit-assumptions">
-                                      Edit assumptions → Advanced
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <div className="bg-card border border-border rounded-[13px] overflow-hidden" data-testid="noi-advanced-card">
-                                    <div className="font-jbmono text-[8.5px] font-bold uppercase tracking-[0.05em] text-muted-foreground px-4 pt-3 pb-1.5 bg-[#faf9f6]">Income</div>
-                                    <Row
-                                      label={<span className="flex items-center gap-2">Residential rent {basisSelect}</span>}
-                                      sub={resiRentOverrideVal != null ? <>edited — <button type="button" className="text-[#2b3a9e] font-semibold hover:underline" onClick={() => setNoiResiRentOverride('')} data-testid="button-clear-rent-override">restore {rentBasisLabel} basis (${fmtN(isCommercialOnly ? 0 : rentalGrossIncome)})</button></> : rentSub}
-                                      tag={resiRentOverrideVal != null ? <Tag kind="est">Edited</Tag> : <Tag kind="parcel">{effectiveRentalOption?.startsWith('listing_') ? 'From listing' : 'From parcel'}</Tag>}
-                                      edit={<div className="relative"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">$</span><Input type="text" inputMode="numeric" value={noiResiRentOverride} onChange={(e) => setNoiResiRentOverride(formatNumberWithCommas(e.target.value))} className={`${penCls} pl-5`} placeholder={fmtN(isCommercialOnly ? 0 : rentalGrossIncome)} data-testid="input-noi-resi-rent" /></div>}
-                                      testid="row-noi-resi-rent"
-                                    />
-                                    {hasCommercialSpace && (
-                                      <Row
-                                        label="Commercial rent" sub="mixed-use / commercial class — ground-floor lease"
-                                        tag={<Tag kind="parcel">Mixed-use</Tag>}
-                                        edit={<div className="relative"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">$</span><Input type="text" inputMode="numeric" value={noiCommercialRent} onChange={(e) => setNoiCommercialRent(formatNumberWithCommas(e.target.value))} className={`${penCls} pl-5`} placeholder="0" data-testid="input-noi-commercial-rent" /></div>}
-                                        testid="row-noi-commercial-rent"
-                                      />
-                                    )}
-                                    <Row
-                                      label="Other income" sub="parking · laundry · storage"
-                                      tag={<Tag kind="assume">Optional</Tag>}
-                                      edit={<div className="relative"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">$</span><Input type="text" inputMode="numeric" value={noiOtherIncome} onChange={(e) => setNoiOtherIncome(formatNumberWithCommas(e.target.value))} className={`${penCls} pl-5`} placeholder="0" data-testid="input-noi-other-income" /></div>}
-                                      testid="row-noi-other-income"
-                                    />
-                                    <Row
-                                      label="Less: vacancy & credit loss" sub={hasCommercialSpace && noiModelInputs.commercialRentAnnual > 0 ? `resi % below · commercial ${noiModelInputs.vacancyCommPct}%` : 'of gross residential rent'}
-                                      tag={<Tag kind="assume">Assumption · edit</Tag>}
-                                      edit={<div className="flex items-center gap-1.5"><div className="relative"><Input type="number" step="0.5" value={noiVacancyResiPct} onChange={(e) => setNoiVacancyResiPct(e.target.value)} className="w-16 h-7 text-right text-xs font-jbmono bg-[#faf9f6] border-border rounded-[7px] pr-5" data-testid="input-noi-vacancy-resi" /><span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">%</span></div>{hasCommercialSpace && noiModelInputs.commercialRentAnnual > 0 && <div className="relative"><Input type="number" step="0.5" value={noiVacancyCommPct} onChange={(e) => setNoiVacancyCommPct(e.target.value)} className="w-16 h-7 text-right text-xs font-jbmono bg-[#faf9f6] border-border rounded-[7px] pr-5" data-testid="input-noi-vacancy-comm" /><span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">%</span></div>}<span className="font-jbmono text-xs font-semibold text-[#c0392b]">−${fmtN(noiModel.vacancyLoss)}</span></div>}
-                                      testid="row-noi-vacancy"
-                                    />
-                                    <div className="flex items-center px-4 py-2 border-b border-border bg-[#f6f5f0] text-[12.5px] font-bold" data-testid="row-noi-egi">
-                                      Effective Gross Income<span className="ml-auto font-jbmono text-xs">${fmtN(noiModel.egi)}</span>
-                                    </div>
-
-                                    <div className="font-jbmono text-[8.5px] font-bold uppercase tracking-[0.05em] text-muted-foreground px-4 pt-3 pb-1.5 bg-[#faf9f6] border-t border-border">Operating expenses</div>
-                                    <Row
-                                      label="Property taxes" sub={<>may reassess on sale ⚠ — Cook County resets assessed value on transfer; the current bill can understate a buyer's taxes</>}
-                                      tag={<Tag kind="rec">From record</Tag>}
-                                      edit={<div className="relative"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">$</span><Input type="text" inputMode="numeric" value={valuationAnnualTaxes} onChange={(e) => setValuationAnnualTaxes(formatNumberWithCommas(e.target.value))} className={`${penCls} pl-5`} placeholder="0" data-testid="input-noi-taxes" /></div>}
-                                      testid="row-noi-taxes"
-                                    />
-                                    <Row
-                                      label="Insurance" sub="estimated — replace with a real quote"
-                                      tag={<Tag kind="est">Estimate · edit</Tag>}
-                                      edit={<div className="relative"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">$</span><Input type="text" inputMode="numeric" value={valuationAnnualInsurance} onChange={(e) => { setInsuranceEstimated(false); setValuationAnnualInsurance(formatNumberWithCommas(e.target.value)); }} className={`${penCls} pl-5`} placeholder="0" data-testid="input-noi-insurance" /></div>}
-                                      testid="row-noi-insurance"
-                                    />
-                                    <Row
-                                      label="Property management" sub={`${noiModelInputs.managementPctOfEgi}% of EGI (imputed even if self-managed)`}
-                                      tag={<Tag kind="assume">Assumption · edit</Tag>}
-                                      edit={<div className="flex items-center gap-1.5"><div className="relative"><Input type="number" step="0.5" value={noiMgmtPct} onChange={(e) => setNoiMgmtPct(e.target.value)} className="w-16 h-7 text-right text-xs font-jbmono bg-[#faf9f6] border-border rounded-[7px] pr-5" data-testid="input-noi-mgmt" /><span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">%</span></div><span className="font-jbmono text-xs font-semibold text-[#c0392b]">−${fmtN(noiModel.management)}</span></div>}
-                                      testid="row-noi-mgmt"
-                                    />
-                                    <Row
-                                      label="Repairs & maintenance" sub="turnover, upkeep"
-                                      tag={<Tag kind="est">Estimate · edit</Tag>}
-                                      edit={<div className="relative"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">$</span><Input type="text" inputMode="numeric" value={noiRepairs} onChange={(e) => setNoiRepairs(formatNumberWithCommas(e.target.value))} className={`${penCls} pl-5`} placeholder={fmtN(nmRepairsDefault)} data-testid="input-noi-repairs" /></div>}
-                                      testid="row-noi-repairs"
-                                    />
-                                    <Row
-                                      label="Utilities (owner-paid)" sub="common-area water, trash, gas"
-                                      tag={<Tag kind="est">Estimate · edit</Tag>}
-                                      edit={<div className="relative"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">$</span><Input type="text" inputMode="numeric" value={noiUtilities} onChange={(e) => setNoiUtilities(formatNumberWithCommas(e.target.value))} className={`${penCls} pl-5`} placeholder={fmtN(nmUtilitiesDefault)} data-testid="input-noi-utilities" /></div>}
-                                      testid="row-noi-utilities"
-                                    />
-                                    <Row
-                                      label="Replacement reserves" sub={`$/unit/yr × ${nmUnits} — roof, HVAC, capex`}
-                                      tag={<Tag kind="assume">Assumption · edit</Tag>}
-                                      edit={<div className="flex items-center gap-1.5"><div className="relative"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">$</span><Input type="text" inputMode="numeric" value={noiReservesPerUnit} onChange={(e) => setNoiReservesPerUnit(formatNumberWithCommas(e.target.value))} className="w-20 h-7 text-right text-xs font-jbmono bg-[#faf9f6] border-border rounded-[7px] pl-5" data-testid="input-noi-reserves" /></div><span className="font-jbmono text-xs font-semibold text-[#c0392b]">−${fmtN(noiModelInputs.reservesAnnual)}</span></div>}
-                                      testid="row-noi-reserves"
-                                    />
-                                    <div className="flex items-center px-4 py-2 border-b border-border bg-[#f6f5f0] text-[12.5px] font-bold" data-testid="row-noi-total-opex">
-                                      Total operating expenses<span className="ml-auto font-jbmono text-xs text-[#c0392b]">−${fmtN(noiModel.totalExpenses)}</span>
-                                    </div>
-                                    <div className="flex items-center px-4 py-3.5 text-white" style={{ background: '#2b3a9e' }} data-testid="row-noi-result">
-                                      <div>
-                                        <div className="font-serif text-[17px] leading-tight">Net Operating Income</div>
-                                        <div className="text-[10px]" style={{ color: '#c3caf0' }}>
-                                          {noiManualOverride
-                                            ? <>build-up result — NOT driving metrics; your manual ${fmtN(selectedNoi)} is</>
-                                            : noiModel.noi < 0
-                                              ? <>expenses exceed income — metrics floor at $0</>
-                                              : <>EGI − operating expenses · flows to Glance, Coverage &amp; How — one number, everywhere</>}
-                                        </div>
-                                      </div>
-                                      <span className="ml-auto font-serif text-[23px]" data-testid="text-noi-advanced">{noiModel.noi < 0 ? '−' : ''}${fmtN(Math.abs(noiModel.noi))}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 px-4 py-2.5 text-[10.5px] text-muted-foreground">
-                                      Have a real T-12?
-                                      <div className="relative"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px]">$</span><Input type="text" inputMode="numeric" value={valuationManualNoi} onChange={(e) => setValuationManualNoi(formatNumberWithCommas(e.target.value))} className="w-28 h-7 text-right text-xs font-jbmono bg-[#faf9f6] border-border rounded-[7px] pl-5" placeholder="Enter NOI" data-testid="input-noi-manual-override" /></div>
-                                      overrides the build-up and is flagged “manual — not from the lines.”
-                                    </div>
-                                  </div>
-                                )}
-                                </>
-                                )}
-                              </div>
-                            );
-                          })()}
-
-
-                          {/* ── DEAL AT A GLANCE — full-width dark results band ── */}
-                          {(() => {
-                            const monthlyCF = annualCashFlow / 12;
-                            const cfState: 'good' | 'amber' | 'bad' = Math.abs(monthlyCF) < 250 ? 'amber' : monthlyCF > 0 ? 'good' : 'bad';
-                            const dscrState: 'good' | 'amber' | 'bad' = dscr >= 1.25 ? 'good' : dscr >= 1.0 ? 'amber' : 'bad';
-                            const dscrLabel = dscr >= 1.4 ? '✓ Well-covered'
-                              : dscr >= 1.25 ? '✓ Clears 1.25× min'
-                              : dscr >= 1.0 ? '! Below 1.25× lender min'
-                              : '✕ Doesn\u2019t cover debt';
-                            const cfLabel = cfState === 'good' ? '✓ Positive' : cfState === 'amber' ? '! Break-even' : '✕ Negative';
-                            const KB: Record<string, string> = { good: '#7ee0a0', amber: '#f0c85a', bad: '#f2938c', neu: '#9aa0cc' };
-                            let verdictText: string; let verdictColor: string;
-                            if (dscr >= 1.4 && monthlyCF > 0) {
-                              verdictText = 'Positive cash flow, and NOI covers your debt payment with a wide cushion — the deal clears the bank\u2019s 1.25× minimum comfortably.';
-                              verdictColor = KB.good;
-                            } else if (dscr >= 1.25 && monthlyCF > 0) {
-                              verdictText = `Positive cash flow, and NOI covers your debt payment. But DSCR (${dscr.toFixed(2)}) sits right at the 1.25× lender minimum — the deal qualifies, with little financing buffer if income dips.`;
-                              verdictColor = KB.good;
-                            } else if (dscr < 1.0) {
-                              verdictText = 'NOI doesn\u2019t cover the debt payment at these terms — the deal falls short before any lender rule applies.';
-                              verdictColor = KB.bad;
-                            } else if (dscr >= 1.25 && monthlyCF <= 0) {
-                              verdictText = `DSCR (${dscr.toFixed(2)}) clears the 1.25× lender minimum, but cash flow turns negative after taxes and insurance.`;
-                              verdictColor = KB.amber;
-                            } else {
-                              verdictText = `NOI covers your debt payment, but DSCR (${dscr.toFixed(2)}) is below the bank\u2019s 1.25× approval floor — expect financing pushback unless price or terms improve.`;
-                              verdictColor = KB.amber;
-                            }
-                            return (
-                              <div>
-                                <div className="val-step"><span className="n">{showIncomeStep ? 3 : 2}</span><span className="t">Deal at a Glance</span><span className="note">the headline verdict</span></div>
-                                <div className="rounded-[14px] px-5 py-5" style={{ background: '#232d6e', boxShadow: '0 4px 16px rgba(35,45,110,.22)' }}>
-                                {purchasePrice > 0 ? (
-                                  <>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-                                      <div className="rounded-[11px] px-4 py-3.5" style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)' }}>
-                                        <div className="font-jbmono text-[9px] font-bold uppercase tracking-[0.04em] mb-2" style={{ color: '#9aa0cc' }}>Cap Rate</div>
-                                        <div className="font-serif leading-none text-white" style={{ fontSize: 32 }}>{capRate.toFixed(1)}%</div>
-                                        <div className="text-[10.5px] font-semibold mt-1.5" style={{ color: KB.neu }}>{isSba ? 'on total price' : 'on price'}</div>
-                                      </div>
-                                      <div className="rounded-[11px] px-4 py-3.5" style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)' }}>
-                                        <div className="font-jbmono text-[9px] font-bold uppercase tracking-[0.04em] mb-2" style={{ color: '#9aa0cc' }}>Cash-on-Cash</div>
-                                        <div className="font-serif leading-none text-white" style={{ fontSize: 32 }}>{roi.toFixed(1)}%</div>
-                                        <div className="text-[10.5px] font-semibold mt-1.5" style={{ color: KB.neu }}>yr-1 return</div>
-                                      </div>
-                                      <div className="rounded-[11px] px-4 py-3.5" style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)' }}>
-                                        <div className="font-jbmono text-[9px] font-bold uppercase tracking-[0.04em] mb-2" style={{ color: '#9aa0cc' }}>Monthly Cash Flow</div>
-                                        <div className="font-serif leading-none text-white" style={{ fontSize: 32 }}>
-                                          {monthlyCF >= 0 ? '+' : '−'}${Math.abs(monthlyCF).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                        </div>
-                                        <div className="text-[10.5px] font-semibold mt-1.5" style={{ color: KB[cfState] }}>{cfLabel}</div>
-                                      </div>
-                                      <div className="rounded-[11px] px-4 py-3.5" style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)' }}>
-                                        <div className="font-jbmono text-[9px] font-bold uppercase tracking-[0.04em] mb-2" style={{ color: '#9aa0cc' }}>DSCR</div>
-                                        <div className="font-serif leading-none text-white" style={{ fontSize: 32 }}>{dscr.toFixed(2)}</div>
-                                        <div className="text-[10.5px] font-semibold mt-1.5" style={{ color: KB[dscrState] }}>{dscrLabel}</div>
-                                        {noiModelPath && !noiManualOverride && (
-                                          <div className="text-[9.5px] mt-1" style={{ color: '#9aa0cc' }}>Economic — full operating expenses</div>
-                                        )}
-                                        {dscrLoanApplies && (
-                                          <div className="text-[10px] mt-1.5 pt-1.5" style={{ borderTop: '1px solid rgba(255,255,255,.14)', color: '#c3caf0' }} data-testid="text-dscr-loan-secondary">
-                                            DSCR-loan (1–4 unit): <b className="text-white">{dscrLoanRatio.toFixed(2)}</b> · rent ÷ PITIA
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                    {capRate > 10 && selectedNoi > 0 && (
-                                      <div className="flex items-center gap-2 mt-3 text-[11px] rounded-[9px] px-3 py-2" style={{ background: 'rgba(240,164,28,.12)', border: '1px solid rgba(240,164,28,.35)', color: '#f0c85a' }} data-testid="flag-high-cap-rate">
-                                        <span>⚠</span> Cap rate {capRate.toFixed(1)}% — a cap this high usually means an assumption is off. Verify your rent and expenses{noiModelPath ? ' in the breakdown below' : ''}.
-                                      </div>
-                                    )}
-                                    <div className="flex items-center gap-2.5 mt-4 pt-3.5 text-xs" style={{ borderTop: '1px solid rgba(255,255,255,.12)', color: '#dcdfef' }}>
-                                      <span className="w-2 h-2 rounded-full flex-none" style={{ background: verdictColor }} />
-                                      {verdictText}
-                                    </div>
-                                  </>
-                                ) : (
-                                  <div className="text-sm" style={{ color: '#dcdfef' }}>
-                                    Enter a purchase price to calculate investment metrics{run?.sourceListingUrl ? ' — check the original listing for the asking price.' : '.'}
-                                  </div>
-                                )}
-                                </div>
-                              </div>
-                            );
-                          })()}
-
-                          {/* 2. NOI vs. Coverage Requirements — white card */}
-                          {purchasePrice > 0 && annualDebtService > 0 && (() => {
-                            const fmt0 = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
-                            const need1x = Math.round(annualDebtService);
-                            const need125x = Math.round(annualDebtService * 1.25);
-                            const cushion1x = Math.round(selectedNoi - need1x);
-                            const cushion125x = Math.round(selectedNoi - need125x);
-                            // "thin margin" when cushion is under ~2% of the required NOI
-                            const chip1x = cushion1x >= 0
-                              ? (cushion1x < need1x * 0.02
-                                ? { cls: 'thin', txt: `+$${fmt0(cushion1x)} over breakeven` }
-                                : { cls: 'good', txt: `✓ +$${fmt0(cushion1x)} cushion` })
-                              : { cls: 'bad', txt: `−$${fmt0(Math.abs(cushion1x))} short` };
-                            const chip125x = cushion125x >= 0
-                              ? (cushion125x < need125x * 0.02
-                                ? { cls: 'thin', txt: `+$${fmt0(cushion125x)} over the floor` }
-                                : { cls: 'good', txt: `✓ +$${fmt0(cushion125x)} above the floor` })
-                              : { cls: 'bad', txt: `−$${fmt0(Math.abs(cushion125x))} short of the floor` };
-                            let readline: JSX.Element;
-                            if (cushion1x < 0) {
-                              readline = <>NOI doesn&rsquo;t cover your <b>actual debt payment</b> — the deal is short at these terms before any lender rule applies.</>;
-                            } else if (cushion125x < 0) {
-                              readline = <>You cover your <b>actual debt payment</b>, but fall short of the <b>bank&rsquo;s 1.25× approval floor</b> — that&rsquo;s a financing hurdle, not a day-to-day cash-flow problem.</>;
-                            } else if (chip125x.cls === 'thin') {
-                              readline = <>You clear your <b>actual debt payment</b> by a wide margin — operationally the deal is well-covered. The tight spot is only against the <b>bank&rsquo;s 1.25× approval floor</b>, which matters mainly for getting financing or holding a DSCR covenant, not day-to-day cash flow.</>;
-                            } else {
-                              readline = <>You clear both bars — your <b>actual debt payment</b> and the <b>bank&rsquo;s 1.25× approval floor</b> — with room to spare.</>;
-                            }
-                            return (
-                              <div>
-                                <div className="val-step"><span className="n">{showIncomeStep ? 4 : 3}</span><span className="t">Coverage Check</span><span className="note">NOI vs. what it must clear</span></div>
-                                <p className="val-secsub">Measured against two bars: what your debt actually costs, and the bank&rsquo;s approval rule.</p>
-                                <div className="val-cov">
-                                  <div className="val-noihdr">
-                                    <span className="l">Your NOI</span>
-                                    <span className="v">${fmt0(selectedNoi)}<small> /yr</small></span>
-                                  </div>
-                                  <div className="val-hrow">
-                                    <span className="rl">Your debt payment<small>Breakeven · 1.0× DSCR</small></span>
-                                    <span className="need">needs <b>${fmt0(need1x)}</b>/yr</span>
-                                    <span className={`val-chip ${chip1x.cls}`} data-testid="chip-coverage-breakeven">{chip1x.txt}</span>
-                                  </div>
-                                  <div className="val-hrow">
-                                    <span className="rl">Lender minimum<small>Bank rule · 1.25× DSCR</small></span>
-                                    <span className="need">needs <b>${fmt0(need125x)}</b>/yr</span>
-                                    <span className={`val-chip ${chip125x.cls}`} data-testid="chip-coverage-lender-min">{chip125x.txt}</span>
-                                  </div>
-                                  <div className="val-readline">{readline}</div>
-                                </div>
-                                {noiModelPath && (
-                                  <div className="bg-card border border-border rounded-[13px] overflow-hidden mt-3" data-testid="panel-dscr-conventions">
-                                    <div className="px-4 py-2.5 border-b border-border font-jbmono text-[9.5px] font-bold uppercase tracking-[0.05em]">Two ways lenders measure coverage</div>
-                                    <div className="px-4 py-3 border-b border-border">
-                                      <div className="flex items-center flex-wrap gap-2 mb-1.5">
-                                        <span className="text-[12.5px] font-bold">Economic DSCR</span>
-                                        <span className="font-jbmono text-[7.5px] font-bold uppercase rounded px-1.5 py-0.5 text-[#2b3a9e] bg-[#eef0fb] border border-[#dfe3f7]">Commercial · portfolio · 5+ unit</span>
-                                        <span className="ml-auto flex items-baseline gap-1.5">
-                                          <span className="font-serif text-[20px]" data-testid="text-dscr-economic">{dscr.toFixed(2)}</span>
-                                          <span className={`text-[10px] font-semibold ${dscr >= 1.25 ? 'text-[#2f7d3f]' : 'text-[#c0392b]'}`}>{dscr >= 1.25 ? '✓ ≥ 1.25×' : '✕ below 1.25× floor'}</span>
-                                        </span>
-                                      </div>
-                                      <div className="font-jbmono text-[10px] text-[#54544f] bg-[#faf9f6] border border-border rounded-[7px] px-2.5 py-1.5 mb-1.5">
-                                        NOI ÷ annual debt service = <b>${Math.round(selectedNoi).toLocaleString()} ÷ ${Math.round(annualDebtService).toLocaleString()}</b>
-                                      </div>
-                                      <div className="text-[10.5px] text-muted-foreground">True cash flow — full operating expenses (incl. imputed management &amp; reserves). How a bank underwrites the property's real coverage. 1.25× typical floor.</div>
-                                    </div>
-                                    {dscrLoanApplies ? (
-                                      <>
-                                        <div className="px-4 py-3">
-                                          <div className="flex items-center flex-wrap gap-2 mb-1.5">
-                                            <span className="text-[12.5px] font-bold">DSCR-loan ratio</span>
-                                            <span className="font-jbmono text-[7.5px] font-bold uppercase rounded px-1.5 py-0.5 text-[#2b3a9e] bg-[#eef0fb] border border-[#dfe3f7]">1–4 unit · non-QM investor loan</span>
-                                            <span className="ml-auto flex items-baseline gap-1.5">
-                                              <span className="font-serif text-[20px]" data-testid="text-dscr-loan-ratio">{dscrLoanRatio.toFixed(2)}</span>
-                                              <span className={`text-[10px] font-semibold ${dscrLoanRatio >= 1.0 ? 'text-[#2f7d3f]' : 'text-[#c0392b]'}`}>{dscrLoanRatio >= 1.25 ? '✓ ≥ 1.0–1.25×' : dscrLoanRatio >= 1.0 ? '✓ ≥ 1.0× (some floors 1.25×)' : '✕ below 1.0×'}</span>
-                                            </span>
-                                          </div>
-                                          <div className="font-jbmono text-[10px] text-[#54544f] bg-[#faf9f6] border border-border rounded-[7px] px-2.5 py-1.5 mb-1.5">
-                                            gross {resiRentOverrideVal != null ? 'edited' : rentBasisLabel} rent ÷ PITIA = <b>${Math.round(effectiveResiRent).toLocaleString()} ÷ ${Math.round(annualDebtService + annualTaxesRaw + annualInsuranceRaw).toLocaleString()}</b>
-                                            <br />PITIA = P&amp;I ${Math.round(annualDebtService).toLocaleString()} + taxes ${Math.round(annualTaxesRaw).toLocaleString()} + insurance ${Math.round(annualInsuranceRaw).toLocaleString()} — same values as the NOI statement
-                                          </div>
-                                          <div className="text-[10.5px] text-muted-foreground">Rent over the housing payment — skips vacancy, management &amp; reserves. What a residential DSCR-loan lender quotes. More generous by design.</div>
-                                        </div>
-                                        <div className="px-4 py-2.5 text-[11px] leading-relaxed" style={{ background: '#e9f4ec', borderTop: '1px solid #cfe6d6', color: '#54544f' }} data-testid="text-dscr-summary">
-                                          {dscr >= 1.25 && dscrLoanRatio >= 1.0
-                                            ? <><b className="text-[#141414]">Both clear.</b> The property truly covers at <b>{dscr.toFixed(2)}×</b> once real expenses are counted; a DSCR-loan lender will see <b>~{dscrLoanRatio.toFixed(2)}×</b> on their gross-rent formula. When they diverge, the economic number is the honest read and the loan ratio is the one on the term sheet.</>
-                                            : dscrLoanRatio >= 1.0
-                                              ? <><b className="text-[#141414]">They diverge.</b> A DSCR-loan lender may quote <b>~{dscrLoanRatio.toFixed(2)}×</b> on the gross-rent formula, but the property's true coverage with full expenses is <b>{dscr.toFixed(2)}×</b> — the economic number is the honest read; don't let the term-sheet ratio mask it.</>
-                                              : <><b className="text-[#141414]">Neither convention clears its floor</b> at these terms — the deal is short on both the honest read ({dscr.toFixed(2)}×) and the loan-product formula ({dscrLoanRatio.toFixed(2)}×).</>}
-                                        </div>
-                                      </>
-                                    ) : (
-                                      <div className="px-4 py-2.5 text-[10.5px] text-muted-foreground" data-testid="text-dscr-loan-na">
-                                        The 1–4 unit DSCR-loan product (gross rent ÷ PITIA) doesn't apply to this property — economic DSCR is the relevant measure.
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })()}
-
-                          {/* 3. How It's Calculated — light reference block */}
-                          {purchasePrice > 0 && (
-                            <div>
-                              <div className="val-step"><span className="n">{showIncomeStep ? 5 : 4}</span><span className="t">How It&rsquo;s Calculated</span><span className="note">reference</span></div>
-                              <div className="val-ref">
-                                <div className="val-mtiles">
-                                  <div className="val-mt">
-                                    <div className="l">{isSba ? "Total Purchase Price" : "Loan Amount"}</div>
-                                    <div className="n" data-testid="text-total-purchase-price">
-                                      ${isSba ? purchasePrice.toLocaleString(undefined, { maximumFractionDigits: 0 }) : loanAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                    </div>
-                                    <div className="s">
-                                      {isSba
-                                        ? `Loan: $${loanAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })} · Down: $${downPayment.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-                                        : `Down: $${downPayment.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-                                      }
-                                    </div>
-                                  </div>
-                                  <div className="val-mt">
-                                    <div className="l">{annualOperatingCosts > 0 ? 'Monthly PITI' : 'Monthly Debt Service'}</div>
-                                    <div className="n" data-testid="text-monthly-debt-service">
-                                      ${(annualOperatingCosts > 0 ? monthlyPITI : (sbaBusinessMonthly + sbaRealEstateMonthly) || monthlyPI).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                    </div>
-                                    {isSbaBusinessOnly ? (
-                                      <div className="s" data-testid="text-business-monthly">Business: ${sbaBusinessMonthly.toLocaleString(undefined, { maximumFractionDigits: 0 })}/mo</div>
-                                    ) : isSba ? (
-                                      <div className="s">
-                                        <span data-testid="text-business-monthly">Business: ${sbaBusinessMonthly.toLocaleString(undefined, { maximumFractionDigits: 0 })}/mo</span>
-                                        {' · '}
-                                        <span data-testid="text-re-monthly">RE: ${sbaRealEstateMonthly.toLocaleString(undefined, { maximumFractionDigits: 0 })}/mo</span>
-                                      </div>
-                                    ) : annualOperatingCosts > 0 ? (
-                                      <div className="s">
-                                        P+I: ${monthlyPI.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                        {monthlyTaxes > 0 && <> · Taxes: ${monthlyTaxes.toLocaleString(undefined, { maximumFractionDigits: 0 })}</>}
-                                        {monthlyInsurance > 0 && <> · Ins: ${monthlyInsurance.toLocaleString(undefined, { maximumFractionDigits: 0 })}</>}
-                                      </div>
-                                    ) : (
-                                      <div className="s">${annualDebtService.toLocaleString(undefined, { maximumFractionDigits: 0 })} / yr</div>
-                                    )}
-                                  </div>
-                                  <div className="val-mt">
-                                    <div className="l">Annual Cash Flow</div>
-                                    <div className="n">${annualCashFlow.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
-                                    <div className="s">${(annualCashFlow / 12).toLocaleString(undefined, { maximumFractionDigits: 0 })} / mo{annualOperatingCosts > 0 && <> · after ${annualOperatingCosts.toLocaleString()}/yr taxes &amp; insurance</>}</div>
-                                  </div>
-                                </div>
-                                <div className="val-formula">
-                                  DSCR = NOI ÷ Annual Debt Service &nbsp;·&nbsp; Cap Rate = NOI ÷ Purchase Price &nbsp;·&nbsp; ROI = Cash Flow ÷ Down Payment
-                                  {annualOperatingCosts > 0 && <><br />Cash Flow = NOI − Debt Service − Taxes − Insurance</>}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
-          </motion.div>
+          <ValuationCalculator
+            key={run?.id ?? "new-run"}
+            runId={id}
+            isDaycare={isDaycare}
+            buildingSqFt={run?.manualBuildingSqFt || propertyTaxData?.buildingSquareFeet || pinLookupData?.commercialData?.bldgSf || coParcelLookupData?.commercialData?.bldgSf || 0}
+            annualCountyTaxes={parseFormattedNumber(valuationAnnualTaxes)}
+            annualInsuranceEstimate={parseFormattedNumber(valuationAnnualInsurance)}
+            taxesInput={valuationAnnualTaxes}
+            insuranceInput={valuationAnnualInsurance}
+            insuranceEstimated={insuranceEstimated}
+            onTaxesChange={setValuationAnnualTaxes}
+            onInsuranceChange={(value) => { setInsuranceEstimated(false); setValuationAnnualInsurance(value); }}
+            initialPurchasePrice={valuationPurchasePrice}
+            onPurchasePriceChange={(value) => setValuationPurchasePrice(formatNumberWithCommas(value))}
+            onSavePrice={handleSaveAskingPrice}
+            savePending={updateManualProperty.isPending}
+            mortgageRate={mortgageRateData?.rate ?? null}
+            mortgageRateDate={mortgageRateData?.date ?? null}
+            sbaBusinessRate={sbaRatesData?.sevenARate ?? null}
+            sbaRealEstateRate={sbaRatesData?.fiveOhFourRate ?? null}
+            initialLoanType={valuationLoanType as "conventional" | "fha_va" | "sba_business" | "sba_biz_re"}
+            initialFinancing={{
+              purchasePrice: valuationPurchasePrice, interestRate: valuationInterestRate || (mortgageRateData?.rate != null ? String(mortgageRateData.rate) : ""),
+              businessPrice: sbaBusinessPrice, realEstatePrice: sbaRealEstatePrice,
+              businessDown: sbaBusinessDownPercent, businessTerm: sbaBusinessTermYears, businessRate: sbaBusinessInterestRate,
+              realEstateDown: sbaRealEstateDownPercent, realEstateTerm: sbaRealEstateTermYears, realEstateRate: sbaRealEstateInterestRate,
+            }}
+            initialUnitCount={getValuationUnitEstimate(listingSnapshot, listingData, propertyTaxData?.apartments, propertyTaxData?.propertyClass, pinLookupData?.commercialData).count}
+            unitCountSource={getValuationUnitEstimate(listingSnapshot, listingData, propertyTaxData?.apartments, propertyTaxData?.propertyClass, pinLookupData?.commercialData).source}
+            dscrLoanEligible={
+              !String(propertyTaxData?.propertyClass ?? "").startsWith("5")
+              && String(propertyTaxData?.propertyClass ?? "") !== "212"
+              && !(Number(pinLookupData?.commercialData?.bldgSf) > 0)
+              && getValuationUnitEstimate(listingSnapshot, listingData, propertyTaxData?.apartments, propertyTaxData?.propertyClass, pinLookupData?.commercialData).count <= 4
+            }
+            commercialIncomeAllowed={
+              String(propertyTaxData?.propertyClass ?? "").startsWith("5")
+              || String(propertyTaxData?.propertyClass ?? "") === "212"
+              || Number(pinLookupData?.commercialData?.bldgSf) > 0
+              || Number(coParcelLookupData?.commercialData?.bldgSf) > 0
+            }
+            commercialOnly={String(propertyTaxData?.propertyClass ?? "").startsWith("5") && !(/^(one|two|three|four|five|six|seven|eight|nine|ten)$/i.test(String(propertyTaxData?.apartments ?? "").trim()) || parseInt(String(propertyTaxData?.apartments ?? ""), 10) > 0)}
+            onLoanTypeChange={setValuationLoanType}
+            onFinancingChange={(next) => {
+              setSbaBusinessPrice(next.businessPrice);
+              setSbaRealEstatePrice(next.realEstatePrice);
+              setSbaBusinessDownPercent(next.businessDown);
+              setSbaBusinessTermYears(next.businessTerm);
+              setSbaBusinessInterestRate(next.businessRate);
+              setSbaRealEstateDownPercent(next.realEstateDown);
+              setSbaRealEstateTermYears(next.realEstateTerm);
+              setSbaRealEstateInterestRate(next.realEstateRate);
+              setValuationInterestRate(next.interestRate);
+            }}
+            onMetric={handleValuationMetricBadge}
+            onSnapshot={(snapshot) => {
+              valuationSnapshotRef.current = snapshot;
+              const inputs = snapshot.inputSnapshot as any;
+              const nextNoiOption = snapshot.daycareModel ? inputs.daycare.choice : "";
+              const nextManualNoi = inputs.directNoi ?? "";
+              const nextRentalNoi = inputs.rentSource === "direct" ? "" : inputs.rentSource;
+              const nextGrossIncome = inputs.grossIncomeForReport == null ? "" : String(Math.round(Number(inputs.grossIncomeForReport)));
+              setValuationNoiOption((current) => current === nextNoiOption ? current : nextNoiOption);
+              setValuationManualNoi((current) => current === nextManualNoi ? current : nextManualNoi);
+              setValuationRentalNoiOption((current) => current === nextRentalNoi ? current : nextRentalNoi);
+              setValuationGrossIncome((current) => current === nextGrossIncome ? current : nextGrossIncome);
+            }}
+            taxRecordLabel="Cook County property tax record"
+            listingStatedNoi={listingSnapshot?.status === "active" ? listingSnapshot.statedNoi ?? null : null}
+            listingRevenue={listingSnapshot?.status === "active" ? (listingSnapshot as any).revenue ?? null : null}
+            listingSde={listingSnapshot?.status === "active" ? (listingSnapshot as any).sde ?? null : null}
+            listingEbitda={listingSnapshot?.status === "active" ? (listingSnapshot as any).ebitda ?? null : null}
+            rentalSources={buildValuationRentalSources(
+              listingSnapshot?.status === "active" ? listingSnapshot : null,
+              rentcastRadiusData,
+              rentcastData,
+              fmrData,
+              getValuationUnitEstimate(listingSnapshot, listingData, propertyTaxData?.apartments, propertyTaxData?.propertyClass, pinLookupData?.commercialData).count,
+            )}
+          />
           </AccordionSection>
           </div>{/* /kyp-acc */}
 
@@ -16459,10 +15125,7 @@ export default function RunDetail() {
                       setCypModalOpen(true);
                     }}
                     onCompleteContext={() => setShowFunnelEdit(true)}
-                    onCompleteValuation={() => {
-                      setIsValuationCalculatorOpen(true);
-                      revealAnchor('valuation-calculator-section');
-                    }}
+                    onCompleteValuation={() => revealAnchor('valuation-calculator-section')}
                     registerTrigger={(fn) => { insightTriggerRef.current = fn; }}
                   />
             </div>

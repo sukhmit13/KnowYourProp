@@ -1941,3 +1941,145 @@ button.kyp-morelink { background: none; border: 0; padding: 0; }
   .kyp-bands.b3{grid-template-columns:1fr}
   .kyp-fields{grid-template-columns:1fr}
 }
+
+/* ============================================================
+   PATCH 30 — §Valuation & Cashflow
+   Append to client/src/styles/kyp-base.css, AFTER patch 29.
+   Patch 29 supplies .kyp-form / .kyp-field / .kyp-input / .kyp-btn
+   and .kyp-bands / .kyp-band; this patch adds only what a calculator
+   needs on top of them.
+
+   What it replaces. §Valuation runs three styling systems side by
+   side today: shadcn Card/Collapsible/Badge chrome, a bespoke .val-*
+   family, and ad-hoc Tailwind with 29 distinct inline hex values —
+   including two dark bands at #232d6e built independently at :18269
+   and :19326. Not one kyp- class appears in 18075-19545.
+
+   Retire once nothing references them: .val-step .val-secsub .val-cov
+   .val-noihdr .val-hrow .val-chip .val-readline .val-ref .val-mtiles
+   .val-mt .val-formula .calc-inputs, and the local Tag / Row helpers
+   at :19091 and :19099.
+   ============================================================ */
+
+/* ── numbered step header ────────────────────────────────────
+   The calculator is a sequence, not a set of panels. Steps carry
+   their own number because they renumber with the inputs shown
+   (Income → NOI only exists on the build-up path).               */
+.kyp-calcstep{display:flex;align-items:center;gap:11px;margin:30px 0 11px;
+  padding-top:11px;border-top:1px solid var(--kyp-ink)}
+.kyp-calcstep:first-child{margin-top:4px}
+.kyp-calcstep .n{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.04em;
+  background:var(--kyp-indigo);color:#fff;border-radius:6px;padding:4px 8px;flex:none}
+.kyp-calcstep .t{font-family:var(--kyp-mono);font-size:13px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--kyp-indigo)}
+.kyp-calcstep .note{font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-muted)}
+.kyp-calcsub{font-size:12.5px;color:var(--kyp-ink2);line-height:1.55;margin:0 0 13px}
+
+/* ── input grid ──────────────────────────────────────────────
+   Columns are the deal's parts — purchase, financing, income —
+   not a layout convenience. A column that does not apply to the
+   selected loan type is not rendered.                            */
+.kyp-calcgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  background:var(--kyp-card);border:1px solid var(--kyp-line);border-radius:14px;padding:17px 19px}
+.kyp-calcgrid.two{grid-template-columns:repeat(2,1fr)}
+.kyp-calccol{min-width:0;display:flex;flex-direction:column;gap:11px}
+.kyp-calccol+.kyp-calccol{border-left:1px solid var(--kyp-line);padding-left:17px}
+.kyp-calccol .ch{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--kyp-ink);padding-bottom:9px;
+  border-bottom:1px solid var(--kyp-line)}
+.kyp-calchelp{font-size:10.5px;color:var(--kyp-muted);line-height:1.45;margin:-2px 0 0}
+.kyp-calchelp a{color:var(--kyp-indigo);font-weight:600;text-decoration:none}
+.kyp-inprefix{display:flex;align-items:center;gap:0}
+.kyp-inprefix .fx{font-family:var(--kyp-mono);font-size:12px;color:var(--kyp-muted);
+  background:var(--kyp-wash);border:1px solid var(--kyp-line);border-right:0;
+  border-radius:8px 0 0 8px;padding:9px 10px;flex:none}
+.kyp-inprefix .kyp-input{border-radius:0 8px 8px 0}
+.kyp-inprefix.suf .kyp-input{border-radius:8px 0 0 8px}
+.kyp-inprefix.suf .fx{border:1px solid var(--kyp-line);border-left:0;border-radius:0 8px 8px 0}
+
+/* ── locked value, set by something else ─────────────────────
+   A lock means the number is not yours to type here, and the chip
+   says where it came from. It never means the number is a fact.  */
+.kyp-lock{display:inline-flex;align-items:center;gap:6px;font-family:var(--kyp-mono);
+  font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--kyp-ink2);
+  background:var(--kyp-wash);border:1px solid var(--kyp-line);border-radius:7px;padding:7px 10px}
+.kyp-lock .ic{opacity:.5}
+
+/* ── provenance tag ──────────────────────────────────────────
+   Where a line came from. Provenance is CONTEXT, never a verdict,
+   so these do not use the green/orange/red scale even though the
+   live .rec tag is green today. Indigo = sourced, slate = assumed. */
+.kyp-tag{display:inline-flex;align-items:center;font-family:var(--kyp-mono);font-size:8px;
+  font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;
+  padding:3px 6px;line-height:1.2;white-space:nowrap}
+.kyp-tag.rec{color:var(--kyp-indigo);background:var(--kyp-indigoSoft);border:1px solid #dfe3f7}
+.kyp-tag.est{color:var(--kyp-ink2);background:var(--kyp-wash);border:1px solid var(--kyp-line)}
+.kyp-tag.assume{color:var(--kyp-ink2);background:var(--kyp-card);border:1px dashed var(--kyp-line)}
+
+/* ── the NOI ledger ──────────────────────────────────────────
+   Every line editable, every line tagged with where it came from.
+   A statement, so it is a table: label, provenance, value.        */
+.kyp-ledger{border:1px solid var(--kyp-line);border-radius:12px;background:var(--kyp-card);
+  overflow:hidden;margin-top:12px}
+.kyp-ledger .lh{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--kyp-muted);background:var(--kyp-wash);
+  padding:9px 15px;border-bottom:1px solid var(--kyp-line)}
+.kyp-lrow{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px 13px;
+  padding:9px 15px;border-bottom:1px solid #f1efe9;font-size:12.5px}
+.kyp-lrow:last-child{border-bottom:0}
+.kyp-lrow .l{color:var(--kyp-ink);min-width:0}
+.kyp-lrow .l s{display:block;text-decoration:none;font-size:10px;color:var(--kyp-muted);
+  margin-top:2px;line-height:1.4}
+.kyp-lrow .v{font-family:var(--kyp-mono);font-size:12px;font-weight:700;color:var(--kyp-ink);
+  text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.kyp-lrow .v.neg{color:var(--kyp-bad)}
+.kyp-lrow .kyp-input{width:104px;padding:5px 8px;font-size:12px;text-align:right;
+  font-family:var(--kyp-mono)}
+.kyp-lrow.sub{background:var(--kyp-wash)}
+.kyp-lrow.sub .l,.kyp-lrow.sub .v{font-weight:700}
+.kyp-lrow.total{background:var(--kyp-indigoSoft);border-top:1px solid #dfe3f7}
+.kyp-lrow.total .l{font-weight:700;color:var(--kyp-indigo)}
+.kyp-lrow.total .v{font-family:var(--kyp-disp);font-size:21px;font-weight:400;
+  color:var(--kyp-indigo)}
+
+/* ── coverage check ──────────────────────────────────────────
+   NOI measured against two bars: what the debt actually costs,
+   and the lender's 1.25x floor. The 1.25x is an outside authority,
+   which is why this one may carry a verdict colour.              */
+.kyp-cov{border:1px solid var(--kyp-line);border-radius:13px;background:var(--kyp-card);
+  padding:17px 19px;margin-top:12px}
+.kyp-covhd{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;
+  padding-bottom:13px;border-bottom:1px solid var(--kyp-line);margin-bottom:4px}
+.kyp-covhd .l{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--kyp-muted)}
+.kyp-covhd .v{font-family:var(--kyp-disp);font-size:30px;line-height:1;color:var(--kyp-ink)}
+.kyp-covrow{display:grid;grid-template-columns:1fr 128px 112px;align-items:center;gap:13px;
+  padding:12px 0;border-bottom:1px solid #f1efe9}
+.kyp-covrow:last-child{border-bottom:0}
+.kyp-covrow .rl{font-size:13px;color:var(--kyp-ink);font-weight:600}
+.kyp-covrow .rl s{display:block;text-decoration:none;font-size:10.5px;color:var(--kyp-muted);
+  font-weight:400;margin-top:2px}
+.kyp-covrow .need{font-family:var(--kyp-mono);font-size:12px;color:var(--kyp-ink2);
+  text-align:right;font-variant-numeric:tabular-nums}
+
+/* ── formula receipt ─────────────────────────────────────────
+   The arithmetic, shown. It is a derivation, not a source — it
+   says how the number was reached, not that the inputs are right. */
+.kyp-receipt{font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-ink2);
+  background:var(--kyp-wash);border:1px solid var(--kyp-line);border-radius:9px;
+  padding:10px 13px;margin-top:10px;line-height:1.6;overflow-wrap:anywhere}
+.kyp-receipt b{color:var(--kyp-ink);font-weight:700}
+.kyp-receipt .op{color:var(--kyp-muted)}
+
+/* ── mobile ─────────────────────────────────────────────────── */
+@media (max-width:860px){
+  .kyp-calcgrid,.kyp-calcgrid.two{grid-template-columns:1fr}
+  .kyp-calccol+.kyp-calccol{border-left:0;padding-left:0;border-top:1px solid var(--kyp-line);
+    padding-top:14px}
+}
+@media (max-width:640px){
+  .kyp-covrow{grid-template-columns:1fr auto;gap:6px 11px}
+  .kyp-covrow .need{grid-column:1/-1;text-align:left}
+  .kyp-lrow{grid-template-columns:1fr auto}
+  .kyp-lrow .v{grid-column:2}
+}
