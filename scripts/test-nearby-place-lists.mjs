@@ -24,7 +24,7 @@ import {DaycareAnalysis} from "/src/components/report/DaycareAnalysis.tsx";
 import "/src/index.css";
 import "/src/kyp-base.css";
 const e=React.createElement;
-const names=["AMOCO OIL COMPANY","Test Hotel","Test Bar","Test Dispensary","Test Grocery Store","Test Licensed Shop"];
+const names=["AMOCO OIL COMPANY","BEST PLACE USA ROGERS PARK","Test Bar","Test Dispensary","Test Grocery Store","Test Licensed Shop"];
 const nearby=names.map((name,i)=>({name,address:(i+1)+" SAMPLE AVENUE, CHICAGO, IL",distance:i===5?null:.3,meta:["License record"],testId:"nearby-"+i}));
 const places=Array.from({length:13},(_,i)=>({name:"Test Competitor "+(i+1),address:(i+1)+" Example Street",distanceMiles:.5,rating:4.6,reviewsCount:i===0?0:17}));
 const stations=[
@@ -68,7 +68,8 @@ try {
     await page.locator("#nearby-ev").locator(rowSelector).first().waitFor();
     assert.equal(await page.locator("#nearby-places").locator(rowSelector).count(), 6);
     assert.equal(await page.locator("#nearby-places .kyp-project-use-nearby-name").first().textContent(), "Amoco Oil Company");
-    assert.equal(await page.locator("#nearby-places .kyp-project-use-nearby-address").first().textContent(), "1 Sample Avenue, Chicago, Il");
+    assert.equal(await page.locator("#nearby-places .kyp-project-use-nearby-address").first().textContent(), "1 Sample Avenue, Chicago, IL");
+    assert.equal(await page.locator("#nearby-places .kyp-project-use-nearby-name").nth(1).textContent(), "Best Place USA Rogers Park");
     assert.match(await page.locator("#nearby-places a").first().getAttribute("href"), /AMOCO%20OIL%20COMPANY/);
     assert.equal(await page.locator("#nearby-competitors").locator(rowSelector).count(), 10);
     assert.equal(await page.locator("#nearby-ev").locator(rowSelector).count(), 13, "All EV sites remain visible");

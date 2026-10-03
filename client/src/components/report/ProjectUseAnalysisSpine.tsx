@@ -1,10 +1,17 @@
 import React, { useEffect, useState, type ReactNode } from "react";
 
-function titleCaseNearbyText(value: string): string {
-  return value.toLocaleLowerCase("en-US").replace(
+const NEARBY_ACRONYMS = new Set("USA US UK LLC LLP LP INC LTD CO CORP BP EV DC AC HVAC BBQ".split(" "));
+const STATE_ABBREVIATIONS = new Set("AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY DC".split(" "));
+
+function titleCaseNearbyText(value: string, isAddress = false): string {
+  const titled = value.toLocaleLowerCase("en-US").replace(
     /(^|[^\p{L}\p{N}'’])(\p{L})/gu,
     (_, separator: string, letter: string) => separator + letter.toLocaleUpperCase("en-US"),
   );
+  return titled.replace(/[\p{L}\p{N}]+/gu, word => {
+    const upper = word.toLocaleUpperCase("en-US");
+    return NEARBY_ACRONYMS.has(upper) || (isAddress && STATE_ABBREVIATIONS.has(upper)) ? upper : word;
+  });
 }
 
 export interface ProjectUseBusinessRowProps {
@@ -52,7 +59,7 @@ export function ProjectUseBusinessRow({
           <a className="kyp-project-use-nearby-link" href={mapsUrl} target="_blank" rel="noopener noreferrer">
             <b className="kyp-project-use-nearby-name">{titleCaseNearbyText(name)}</b><span className="kyp-project-use-nearby-ext" aria-hidden="true">↗</span>
           </a>
-          <span className="kyp-project-use-nearby-address">{titleCaseNearbyText(address)}</span>
+          <span className="kyp-project-use-nearby-address">{titleCaseNearbyText(address, true)}</span>
           {!!meta?.length && (
             <div className="kyp-project-use-nearby-meta">
               {meta.map((item, index) => <span key={index}>{item}</span>)}

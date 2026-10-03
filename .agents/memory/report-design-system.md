@@ -113,8 +113,8 @@ Consolidate repeated daily opening hours into consecutive-day ranges rather than
 **How to apply:** Combine only days with matching reported hours; retain different weekend hours, closed days and access qualifications. This is a presentation change, not permission to infer missing hours or omit source details.
 
 ## Nearby-list capitalization
-Display nearby-list names and addresses with the first letter of each word capitalized and the remaining letters lowercase, rather than preserving all-caps company suffixes or acronyms.
+Display nearby-list names and addresses in title case, but preserve recognized acronyms and abbreviations in uppercase.
 
-**Why:** The user explicitly requested this casing to standardize inconsistent dataset capitalization.
+**Why:** The user requested consistent title case, then clarified that USA represents an acronym and acronyms/abbreviations should stay capitalized.
 
-**How to apply:** Apply this presentation rule to the accepted shared nearby lists. Preserve the original source strings for record matching and Maps searches; do not expand the rule to unrelated report sections.
+**How to apply:** Apply this presentation rule to the accepted shared nearby lists. Recognize known acronyms rather than treating all source-uppercase words as acronyms. Preserve source strings for record matching and Maps searches; do not expand the rule to unrelated sections.
