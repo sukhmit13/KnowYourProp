@@ -207,6 +207,21 @@ test("hotel rental grouping is unnumbered, preserves zeros, and has no invented 
   assert.equal($(".kyp-biz-card").length, 0);
 });
 
+test("EV access metadata consolidates equal daily hours without hiding weekend differences", () => {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const stations = [{
+    name: "Whole Foods Market", address: "3640 N Halsted St", distanceMiles: 2.5,
+    accessDays: days.map(day => `${day}: 8:00am-10:00pm`).join("; "),
+  }, {
+    name: "Different Weekend Hours", address: "1 W Test St", distanceMiles: 1,
+    accessDays: days.map((day, i) => `${day}: ${i < 5 ? "10am-8pm" : "11am-6pm"}`).join("; "),
+  }];
+  const $ = load(html(<EVChargingTable stations={stations} loading={false} />));
+  assert.match($(".kyp-project-use-nearby-row").first().text(), /Access: Mon–Sun 8am–10pm/);
+  assert.match($(".kyp-project-use-nearby-row").eq(1).text(), /Access: Mon–Fri 10am–8pm; Sat–Sun 11am–6pm/);
+  assert.doesNotMatch($(".kyp-project-use-nearby-row").first().text(), /Tue:|Wed:|Thu:/);
+});
+
 test("charging badge and shared rows share address dedup, repeated IDs do not inflate ports or lose metadata", () => {
   const stations = [
     { id: "a", name: "First", address: "100 W Chicago Ave", distanceMiles: 0.5, evLevel2Count: 2 },

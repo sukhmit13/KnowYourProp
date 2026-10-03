@@ -99,8 +99,15 @@ The top of a report section should contain summary badges and data. Qualificatio
 **How to apply:** Keep retrieval limitations and refresh qualifications in the section's source footer rather than adding a notice above populated data.
 
 ## Nearby-place list standard
-Use the compact entertainment/culture, murals, architectural-landmark and nearby-school row style for nearby places and competitors across selected project uses, including EV charging stations.
+Use the compact entertainment/culture, murals, architectural-landmark and nearby-school row style for nearby places and competitors across selected project uses, including EV charging, licensed filling stations and childcare/daycare lists.
 
 **Why:** The user approved this visual reference and explicitly limited this standardization to those lists; other list types will be reviewed independently.
 
 **How to apply:** Keep names prominent, supporting information muted, and distance right-aligned, while retaining source-specific details. Do not extend this approval to professional, news, financial, transit or other record lists without a new request.
+
+## Compact access schedules
+Consolidate repeated daily opening hours into consecutive-day ranges rather than listing every day separately.
+
+**Why:** The user identified the Whole Foods charging-station schedule as unnecessarily causing multiple lines and requested a concise day-range presentation.
+
+**How to apply:** Combine only days with matching reported hours; retain different weekend hours, closed days and access qualifications. This is a presentation change, not permission to infer missing hours or omit source details.

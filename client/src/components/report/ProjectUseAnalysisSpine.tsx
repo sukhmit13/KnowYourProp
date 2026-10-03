@@ -91,7 +91,7 @@ export function ProjectUseBusinessList({
   const visibleRows = isSliced ? rows.slice(0, limit) : rows;
 
   return (
-    <>
+    <div className="kyp-project-use-nearby-list">
       {visibleRows.map((row, index) => (
         <ProjectUseBusinessRow key={`${row.testId ?? row.name}-${index}`} {...row} />
       ))}
@@ -110,7 +110,7 @@ export function ProjectUseBusinessList({
           Show less ↑
         </button>
       )}
-    </>
+    </div>
   );
 }
 

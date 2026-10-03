@@ -18,8 +18,9 @@ const entry = `
 import React from ${JSON.stringify(react)};
 import ReactDOM from ${JSON.stringify(dom)};
 import {AccordionSection} from "/src/components/report/AccordionSection.tsx";
-import {ProjectUseBusinessList,ProjectUseGoogleMaps} from "/src/components/report/ProjectUseAnalysisSpine.tsx";
+import {ProjectUseBusinessList,ProjectUseCountBlocks,ProjectUseGoogleMaps} from "/src/components/report/ProjectUseAnalysisSpine.tsx";
 import {EVChargingTable} from "/src/components/report/ProjectUseDomainPanels.tsx";
+import {DaycareAnalysis} from "/src/components/report/DaycareAnalysis.tsx";
 import "/src/index.css";
 import "/src/kyp-base.css";
 const e=React.createElement;
@@ -32,6 +33,7 @@ const stations=[
  {id:"b",name:"Second Station Record",address:"1 Example Street",distanceMiles:.3,evNetwork:"Network C",evLevel2Count:3,dcFastCount:1},
  {id:"u",name:"Very Long Charging Station Name With International Corporate Campus Visitor Parking And Public Electric Vehicle Charging Infrastructure",address:"2 Example Street With A Long Building And Parking Garage Address",distanceMiles:null,evLevel2Count:null,dcFastCount:0},
  ...Array.from({length:10},(_,i)=>({id:"extra-"+i,name:"Extra Charging Station "+(i+1),address:(i+3)+" Example Street",distanceMiles:2,evLevel2Count:1,dcFastCount:0})),
+ {id:"foods",name:"Whole Foods Market",address:"3640 N Halsted St",distanceMiles:2.5,evNetwork:"eVgo Network",evLevel2Count:2,dcFastCount:1,accessDays:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(day=>day+": 8:00am-10:00pm").join("; ")},
  {id:"outside",name:"Outside Radius Station",address:"99 Other Street",distanceMiles:4},
 ];
 function Fixture(){
@@ -39,10 +41,15 @@ function Fixture(){
  window.setNearbyFixture=value=>setState(s=>({...s,...value}));
  const row=(id,index,title,child)=>e(AccordionSection,{id,index,eyebrow:title,open:true,onToggle:()=>{},verdict:"context",takeaway:"Nearby list presentation check"},child);
  return e("div",{className:"kyp-report",style:{maxWidth:1100,margin:"20px auto",padding:"0 12px"}},
-  row("nearby",1,"Nearby places",e("div",{id:"nearby-places"},e(ProjectUseBusinessList,{rows:nearby,listKey:state.key}))),
+  row("nearby",1,"Licensed filling stations",e("div",{id:"nearby-places",className:"space-y-4"},
+   e(ProjectUseCountBlocks,{counts:[{value:6,label:"Within 3 miles"}]}),
+   e(ProjectUseBusinessList,{rows:nearby,listKey:state.key}))),
   row("competitors",2,"Nearby competitors",e("div",{id:"nearby-competitors"},e(ProjectUseGoogleMaps,{confirmed:true,data:{places,count:places.length,searchTerm:state.key}}))),
   row("ev",3,"EV charging stations",e("div",{id:"nearby-ev"},e(EVChargingTable,{stations:state.evMode==="empty"?[]:stations,loading:state.evMode==="loading",error:state.evMode==="error",onRetry:()=>window.evRetried=true}))),
-  row("control",4,"Unchanged record styles",e("div",{id:"unchanged-control",className:"kyp-biz-card"},e("b",null,"Other Record Name"),e("span",{className:"kyp-biz-distance"},"2025")))
+  row("control",4,"Unchanged record styles",e("div",{id:"unchanged-control",className:"kyp-biz-card"},e("b",null,"Other Record Name"),e("span",{className:"kyp-biz-distance"},"2025"))),
+  row("daycare",5,"Childcare and daycare",e(DaycareAnalysis,{scope:"zip",onScopeChange:()=>{},areaData:null,enhancedData:null,capacityData:null,zipCode:"60660",
+   nearbyData:{locations:nearby.map((r,i)=>({...r,name:"Test Daycare "+i,distanceMiles:r.distance})),within1Mile:5,within2Miles:5,within3Miles:5},
+   googleConfirmed:true,googleData:{places:places.slice(0,3),count:3,searchTerm:"daycare"},runId:123}))
  );
 }
 ReactDOM.createRoot(document.getElementById("root")).render(e(Fixture));
@@ -61,7 +68,7 @@ try {
     await page.locator("#nearby-ev").locator(rowSelector).first().waitFor();
     assert.equal(await page.locator("#nearby-places").locator(rowSelector).count(), 6);
     assert.equal(await page.locator("#nearby-competitors").locator(rowSelector).count(), 10);
-    assert.equal(await page.locator("#nearby-ev").locator(rowSelector).count(), 12, "All EV sites remain visible");
+    assert.equal(await page.locator("#nearby-ev").locator(rowSelector).count(), 13, "All EV sites remain visible");
     assert.equal(await page.locator("#nearby-ev table").count(), 0, "EV stations no longer use the tiny-name table");
     const evText = await page.locator("#nearby-ev").innerText();
     assert.match(evText, /Network A.*Network B.*Network C/);
@@ -70,6 +77,16 @@ try {
     assert.match(evText, /24 hours.*Public/);
     assert.doesNotMatch(evText, /Outside Radius Station/);
     assert.match(evText, /distance unknown/);
+    const foods = page.locator("#nearby-ev").locator(rowSelector).filter({ hasText: "Whole Foods Market" });
+    assert.match(await foods.innerText(), /Access: Mon–Sun 8am–10pm/);
+    assert.doesNotMatch(await foods.innerText(), /Tue:|Wed:|Thu:/);
+    if (width >= 1200) assert.ok(await foods.evaluate(row => row.getBoundingClientRect().height) < 42, "Whole Foods fits a single wide desktop row");
+    assert.equal(await page.locator("#nearby-places").locator(`${rowSelector} ~ ${rowSelector}`).evaluateAll(rows =>
+      rows.every(row => getComputedStyle(row).marginTop === "0px")), true, "Outer space-y-4 does not add gaps between filling-station rows");
+    const daycare = page.locator("#print-section-nearby-business-daycare-centers");
+    assert.equal(await daycare.locator(rowSelector).count(), 6);
+    assert.equal(await daycare.locator(".kyp-project-use-nearby-name").first().evaluate(n => getComputedStyle(n).fontSize), "13.5px");
+    assert.equal(await daycare.locator(rowSelector).first().evaluate(n => getComputedStyle(n).paddingTop), "9px");
     for (const selector of ["#nearby-places", "#nearby-competitors", "#nearby-ev"]) {
       const fonts = await page.locator(selector).locator(rowSelector).first().evaluate(row => {
         const size = cls => getComputedStyle(row.querySelector(cls)).fontSize;

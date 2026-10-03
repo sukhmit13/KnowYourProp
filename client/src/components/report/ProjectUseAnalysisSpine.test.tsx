@@ -52,6 +52,27 @@ test("business list caps initial rows and exposes the visible count and expand a
   assert.match(markup, /\+ Show all 12/);
 });
 
+test("business list rows and expansion controls stay inside one compact list container", () => {
+  const rows = Array.from({ length: 12 }, (_, index) => ({
+    name: `Business ${index + 1}`,
+    address: `${index + 1} Main St`,
+    distance: index / 10,
+  }));
+  const markup = renderToStaticMarkup(<ProjectUseBusinessList rows={rows} />);
+  const listStart = markup.indexOf('<div class="kyp-project-use-nearby-list">');
+  const listEnd = markup.lastIndexOf("</div>");
+  const list = listStart >= 0 && listEnd > listStart
+    ? markup.slice(listStart, listEnd + "</div>".length)
+    : "";
+
+  assert.ok(listStart >= 0, "business rows should have a dedicated list wrapper");
+  assert.ok(listEnd > listStart, "the list wrapper should contain and close after its content");
+  assert.equal((list.match(/class="kyp-project-use-nearby-row"/g) ?? []).length, 10);
+  assert.match(list, /class="kyp-biz-overflow"/);
+  assert.match(list, /\+ Show all 12/);
+  assert.doesNotMatch(markup, /^<div class="kyp-project-use-nearby-row"/);
+});
+
 test("count blocks preserve zero, render null as a dash, and support text values", () => {
   const markup = renderToStaticMarkup(
     <ProjectUseCountBlocks counts={[

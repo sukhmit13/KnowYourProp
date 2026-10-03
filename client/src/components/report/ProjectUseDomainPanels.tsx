@@ -5,6 +5,7 @@ import {
   type ProjectUseBusinessListRow,
 } from "@/components/report/ProjectUseAnalysisSpine";
 import { KypSubhead } from "@/components/report/AccordionSection";
+import { compactAccessHours } from "./compactAccessHours";
 import type {
   EVDataPoint,
   EVRegistrationsData,
@@ -406,7 +407,7 @@ export function EVChargingTable({ stations, loading, error, onRetry }: {
       `Network: ${station.evNetwork || "Unknown"}`,
       `Level 2 ports: ${station.evLevel2Count ?? "Unknown"}`,
       `DC fast ports: ${station.dcFastCount ?? "Unknown"}`,
-      `Access: ${station.accessDays || "Unknown"}`,
+      `Access: ${compactAccessHours(station.accessDays)}`,
       `Confirmed: ${confirmedDate(station.dateLastConfirmed)}`,
     ],
   }));
