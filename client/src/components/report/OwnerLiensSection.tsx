@@ -41,12 +41,13 @@ export function OwnerLiensSection({
         <span className="rule" />
       </KypSubhead>
 
-      <div className="kyp-owner-lien-tools">
-        <div>
-          <span className="tool-label">Name searched</span>
-          <b>{recordedOwnerName || "Owner name unavailable"}</b>
-        </div>
-        <div className="kyp-owner-lien-actions no-print">
+      <div className="px-4">
+        <div className="kyp-owner-lien-tools">
+          <div>
+            <span className="tool-label">Name searched</span>
+            <b>{recordedOwnerName || "Owner name unavailable"}</b>
+          </div>
+          <div className="kyp-owner-lien-actions no-print">
           <Button
             type="button"
             variant="outline"
@@ -75,8 +76,8 @@ export function OwnerLiensSection({
           >
             {isEditingOwnerName ? "Cancel" : "Use another name"}
           </Button>
+          </div>
         </div>
-      </div>
 
       {isEditingOwnerName && (
         <div className="kyp-owner-lien-editor no-print">
@@ -124,6 +125,7 @@ export function OwnerLiensSection({
           Owner-name liens are a separate search. Run it before closing if the recorded owner is known.
         </div>
       )}
+      </div>
     </div>
   );
 }

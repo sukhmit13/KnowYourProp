@@ -105,6 +105,7 @@ function DpdPanel({ dpdData: data, dpdLoading: loading, dpdError: error, radiusM
   const unknown = coverage?.status === "unavailable" || (!Array.isArray(data?.dpdApplications) && !loading);
   return <section id="development-proposed" aria-label="Proposed projects">
     <KypSubhead subsection={2}><span className="lbl">Proposed Projects</span><span className="ct">Plan Commission · {radiusMi === 1 ? "1 mile" : "½ mile"}</span></KypSubhead>
+    <div className="px-4">
     <div className="kyp-segrow"><div className="kyp-seg" role="group" aria-label="DPD search radius">
       <button type="button" className={radiusMi === 0.5 ? "on" : ""} aria-pressed={radiusMi === 0.5} onClick={() => onRadiusChange(0.5)}>½ mile</button>
       <button type="button" className={radiusMi === 1 ? "on" : ""} aria-pressed={radiusMi === 1} onClick={() => onRadiusChange(1)}>1 mile</button>
@@ -120,6 +121,7 @@ function DpdPanel({ dpdData: data, dpdLoading: loading, dpdError: error, radiusM
     <div className="kyp-src">
       <p>Describes applications within {radiusMi === 1 ? "1 mile" : "½ mile"}, not this address. <b>Applications are not approvals, permits, or proof of construction.</b></p>
       <p>Source: Chicago Department of Planning and Development, Plan Commission hearing-page records. Unit counts are as stated in the application text.</p>
+    </div>
     </div>
   </section>;
 }
@@ -160,6 +162,7 @@ function ZbaPanel({ zbaData: data, zbaLoading: loading, zbaError: error, ward, l
   }, [data, approvals, upcoming, lat, lon]);
   return <section id="development-zba" aria-label="Zoning Board activity">
     <KypSubhead subsection={3}><span className="lbl">Zoning Board Activity</span><span className="ct">Ward {ward ?? "unavailable"}</span></KypSubhead>
+    <div className="px-4">
     {loading ? <div className="kyp-biz-loading" aria-live="polite"><span/><span/><span/></div> : error || unavailable ? <p className="kyp-status-empty unknown" role="alert">Zoning Board records could not be loaded. Ward activity is unknown rather than empty.</p> : <div className="kyp-twocol">
       <div><div className="kyp-charttitle">Recent Decisions</div>{caseColumn(items.filter((item: any) => item._decision), true)}</div>
       <div><div className="kyp-charttitle">Upcoming Appearances</div>{caseColumn(items.filter((item: any) => !item._decision), false)}</div>
@@ -168,6 +171,7 @@ function ZbaPanel({ zbaData: data, zbaLoading: loading, zbaError: error, ward, l
     <div className="kyp-src">
       <p>Describes Ward {ward ?? "activity"}, not this address. Decisions cover the last four months.</p>
       <p>Source: Chicago Zoning Board of Appeals. Unit and floor-area figures are read from the application subject text and are not independently verified.</p>
+    </div>
     </div>
   </section>;
 }
@@ -186,12 +190,15 @@ export function DevelopmentSection(props: Props) {
     <PermitPipeline data={props.pipelineData} loading={props.pipelineLoading} error={props.pipelineError} />
     <section id="development-permits">
       <KypSubhead subsection={1}><span className="lbl">Permits</span><span className="ct">1 mile · issued records</span></KypSubhead>
-      <NewConstructionSection data={props.permitData} isLoading={props.permitLoading} isError={props.permitError} subjectUnits={props.subjectUnits} />
+      <div className="px-4">
+        <NewConstructionSection data={props.permitData} isLoading={props.permitLoading} isError={props.permitError} subjectUnits={props.subjectUnits} />
+      </div>
     </section>
     <DpdPanel dpdData={props.dpdData} dpdLoading={props.dpdLoading} dpdError={props.dpdError} radiusMi={props.radiusMi} onRadiusChange={props.onRadiusChange} />
     <ZbaPanel zbaData={props.zbaData} zbaLoading={props.zbaLoading} zbaError={props.zbaError} ward={props.ward} lat={props.lat} lon={props.lon} />
     <section id="development-news" aria-label="Development news">
       <KypSubhead subsection={4}><span className="lbl">Development News</span><span className="ct">coverage, not records</span></KypSubhead>
+      <div className="px-4">
       {props.dpdLoading ? <div className="kyp-biz-loading" aria-live="polite"><span/><span/><span/></div> : props.dpdError || newsUnavailable ? <p className="kyp-status-empty unknown" role="alert">Development news could not be loaded.</p> : news.length === 0 ? <p className="kyp-emptypanel">No nearby development coverage found.</p> : news.map((item: any) => <article className="kyp-archrow" key={item.id || item.url || item.title}>
         {props.renderLogo(item)}
         <div className="kyp-archbody">
@@ -205,6 +212,7 @@ export function DevelopmentSection(props: Props) {
          <p>Describes news coverage of nearby projects — not this address, and not city records.</p>
          <p>Sources: {sourceNames || "development news publishers"}. Units, stories and developer are read from the article text and are not comparable with the counts in .1–.3. Rows marked <i>also a permit</i> share an address with a record above and are likely the same project.</p>
        </div>
+      </div>
     </section>
   </div>;
 }

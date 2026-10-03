@@ -580,6 +580,7 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
           )}
 
           <KypSubhead subsection={1}><span className="lbl">Market Position</span><span className="ct">{activeScope === 'tract' ? `Census Tract ${tractGeoid || 'selected'}` : `Community Area ${communityArea || 'selected'}`} vs. the city</span></KypSubhead>
+          <div className="px-4">
           {(() => {
             const rankData: HmdaRank | null = activeScope === 'tract'
               ? yearData?.tractRank ?? null
@@ -691,6 +692,7 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
               </div>
             );
           })()}
+          </div>
 
           {children?.({ scope: activeScope, year: activeYear, view, stats: activeStats })}
         </div>

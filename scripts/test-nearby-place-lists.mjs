@@ -17,7 +17,7 @@ const html = shell.replace(/<script[^>]+src="\/src\/main\.tsx[^"]*"[^>]*><\/scri
 const entry = `
 import React from ${JSON.stringify(react)};
 import ReactDOM from ${JSON.stringify(dom)};
-import {AccordionSection} from "/src/components/report/AccordionSection.tsx";
+import {AccordionSection,KypSubhead} from "/src/components/report/AccordionSection.tsx";
 import {ProjectUseBusinessList,ProjectUseCountBlocks,ProjectUseGoogleMaps} from "/src/components/report/ProjectUseAnalysisSpine.tsx";
 import {EVChargingTable} from "/src/components/report/ProjectUseDomainPanels.tsx";
 import {DaycareAnalysis} from "/src/components/report/DaycareAnalysis.tsx";
@@ -40,12 +40,14 @@ function Fixture(){
  const [state,setState]=React.useState({key:"initial",evMode:"ready"});
  window.setNearbyFixture=value=>setState(s=>({...s,...value}));
  const row=(id,index,title,child)=>e(AccordionSection,{id,index,eyebrow:title,open:true,onToggle:()=>{},verdict:"context",takeaway:"Nearby list presentation check"},child);
+  // Mirror the report's full-width heading and existing px-4 body treatment.
+  const subsection=(title,body,wrap=true)=>e(React.Fragment,null,e(KypSubhead,{subsection:1},e("span",{className:"lbl"},title)),wrap?e("div",{className:"px-4"},body):body);
  return e("div",{className:"kyp-report",style:{maxWidth:1100,margin:"20px auto",padding:"0 12px"}},
-  row("nearby",1,"Licensed filling stations",e("div",{id:"nearby-places",className:"space-y-4"},
+   row("nearby",1,"Licensed filling stations",subsection("Licensed filling stations",e("div",{id:"nearby-places",className:"space-y-4"},
    e(ProjectUseCountBlocks,{counts:[{value:6,label:"Within 3 miles"}]}),
-   e(ProjectUseBusinessList,{rows:nearby,listKey:state.key}))),
-  row("competitors",2,"Nearby competitors",e("div",{id:"nearby-competitors"},e(ProjectUseGoogleMaps,{confirmed:true,data:{places,count:places.length,searchTerm:state.key}}))),
-  row("ev",3,"EV charging stations",e("div",{id:"nearby-ev"},e(EVChargingTable,{stations:state.evMode==="empty"?[]:stations,loading:state.evMode==="loading",error:state.evMode==="error",onRetry:()=>window.evRetried=true}))),
+    e(ProjectUseBusinessList,{rows:nearby,listKey:state.key})))),
+   row("competitors",2,"Nearby competitors",subsection("Nearby competitors",e("div",{id:"nearby-competitors"},e(ProjectUseGoogleMaps,{contentInset:true,confirmed:true,data:{places,count:places.length,searchTerm:state.key}})),false)),
+   row("ev",3,"EV charging stations",subsection("EV Charging",e("div",{id:"nearby-ev"},e(EVChargingTable,{stations:state.evMode==="empty"?[]:stations,loading:state.evMode==="loading",error:state.evMode==="error",onRetry:()=>window.evRetried=true})))),
   row("control",4,"Unchanged record styles",e("div",{id:"unchanged-control",className:"kyp-biz-card"},e("b",null,"Other Record Name"),e("span",{className:"kyp-biz-distance"},"2025"))),
   row("daycare",5,"Childcare and daycare",e(DaycareAnalysis,{scope:"zip",onScopeChange:()=>{},areaData:null,enhancedData:null,capacityData:null,zipCode:"60660",
    nearbyData:{locations:nearby.map((r,i)=>({...r,name:"Test Daycare "+i,distanceMiles:r.distance})),within1Mile:5,within2Miles:5,within3Miles:5},
@@ -84,13 +86,31 @@ try {
     const foods = page.locator("#nearby-ev").locator(rowSelector).filter({ hasText: "Whole Foods Market" });
     assert.match(await foods.innerText(), /Access: Mon–Sun 8am–10pm/);
     assert.doesNotMatch(await foods.innerText(), /Tue:|Wed:|Thu:/);
-    if (width >= 1200) assert.ok(await foods.evaluate(row => row.getBoundingClientRect().height) < 42, "Whole Foods fits a single wide desktop row");
+    // The subsection inset narrows the row; allow one natural metadata wrap.
+    if (width >= 1200) assert.ok(await foods.evaluate(row => row.getBoundingClientRect().height) < 64, "Whole Foods stays compact with the subsection inset");
     assert.equal(await page.locator("#nearby-places").locator(`${rowSelector} ~ ${rowSelector}`).evaluateAll(rows =>
       rows.every(row => getComputedStyle(row).marginTop === "0px")), true, "Outer space-y-4 does not add gaps between filling-station rows");
     const daycare = page.locator("#print-section-nearby-business-daycare-centers");
     assert.equal(await daycare.locator(rowSelector).count(), 6);
     assert.equal(await daycare.locator(".kyp-project-use-nearby-name").first().evaluate(n => getComputedStyle(n).fontSize), "13.5px");
     assert.equal(await daycare.locator(rowSelector).first().evaluate(n => getComputedStyle(n).paddingTop), "9px");
+    for (const id of ["nearby", "competitors", "ev"]) {
+      const inset = await page.locator("#section-"+id).evaluate(section => {
+        const heading = section.querySelector(".kyp-subhead").getBoundingClientRect();
+        const content = section.querySelector(".kyp-blocks").getBoundingClientRect();
+        return {left: content.left-heading.left, right: heading.right-content.right};
+      });
+      assert.deepEqual(inset,{left:16,right:16},"Subsection content has one consistent inset beneath its full-width heading");
+    }
+    for (const body of await page.locator("#section-daycare .kyp-subhead").all()) {
+      const inset = await body.evaluate(heading => {
+        const wrapper=heading.nextElementSibling;
+        const rect=heading.getBoundingClientRect();
+        const content=wrapper.firstElementChild.getBoundingClientRect();
+        return {left:content.left-rect.left,right:rect.right-content.right};
+      });
+      assert.deepEqual(inset,{left:16,right:16},"Daycare numbered subsection content has the same inset");
+    }
     for (const selector of ["#nearby-places", "#nearby-competitors", "#nearby-ev"]) {
       const fonts = await page.locator(selector).locator(rowSelector).first().evaluate(row => {
         const size = cls => getComputedStyle(row.querySelector(cls)).fontSize;

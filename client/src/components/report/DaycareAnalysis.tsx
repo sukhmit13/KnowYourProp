@@ -241,14 +241,17 @@ export function DaycareAnalysis({
       />
       <section id="print-section-childcare">
         <KypSubhead subsection={subsections.supply}><span className="lbl">Childcare Supply</span><span className="ct">licensed slots · children under 5</span></KypSubhead>
+        <div className="px-4">
         {isAccessLoading ? <div className="space-y-3" aria-label="Loading childcare supply"><div className="h-8 w-2/3 animate-pulse rounded-md bg-muted" /><div className="h-16 w-full animate-pulse rounded-md bg-muted" /></div>
           : isAccessError ? <div className="kyp-status-empty" role="alert">Childcare supply records could not be loaded.<div className="kyp-btnrow"><RetryButton onRetry={onAccessRetry} /></div></div>
           : areaData ? <ChildcareDemandMeter data={areaData} locationLabel={currentArea} supplyRank={supplyRank} />
               : <div className="kyp-status-empty" role="status">Childcare supply records are not available for {currentArea}.</div>}
+        </div>
       </section>
 
       <section id="print-section-childcare-demographics">
         <KypSubhead subsection={subsections.demographics}><span className="lbl">Demographics &amp; Labor Force</span><span className="ct">American Community Survey</span></KypSubhead>
+        <div className="px-4">
         {isEnhancedLoading ? <div className="space-y-3" aria-label="Loading demographic records"><div className="h-8 w-full animate-pulse rounded-md bg-muted" /><div className="h-8 w-4/5 animate-pulse rounded-md bg-muted" /></div>
           : isEnhancedError && !enhancedData ? <div className="kyp-status-empty" role="alert">ACS demographic records could not be loaded.<div className="kyp-btnrow"><RetryButton onRetry={onEnhancedRetry} /></div></div>
           : enhancedData ? (
@@ -332,10 +335,12 @@ export function DaycareAnalysis({
               </Evidence>
             </>
           ) : <div className="kyp-status-empty" role="status">Demographic records are not available for {currentArea}.</div>}
+        </div>
       </section>
 
       <section id="print-section-daycare-estimator">
         <KypSubhead subsection={subsections.estimator}><span className="lbl">Slot Gap Estimator</span><span className="ct">target scenarios</span></KypSubhead>
+        <div className="px-4">
         {areaData ? (
           <>
             <ProjectUseCountBlocks counts={[
@@ -357,10 +362,12 @@ export function DaycareAnalysis({
             <Evidence>Area: {currentArea}. Target slots are the ceiling of children under 5 divided by the selected children-per-slot ratio. Slot gap = target slots − current licensed slots; center estimate = ceiling of positive slot gap ÷ 78, using the existing 78-slot planning assumption. The ratios are planning scenarios, not DCFS standards. Counts use the same childcare supply record as 17.1.</Evidence>
           </>
         ) : <div className="kyp-status-empty" role="status">Slot gap estimates are unavailable without childcare supply records.</div>}
+        </div>
       </section>
 
       <section id="print-section-childcare-capacity">
         <KypSubhead subsection={subsections.ccap}><span className="lbl">CCAP Participation</span><span className="ct">FY 2024</span></KypSubhead>
+        <div className="px-4">
         {isCapacityLoading ? <div className="space-y-3" aria-label="Loading CCAP records"><div className="h-8 w-full animate-pulse rounded-md bg-muted" /><div className="h-8 w-3/5 animate-pulse rounded-md bg-muted" /></div>
           : isCapacityError && !capacityData ? <div className="kyp-status-empty" role="alert">CCAP participation records could not be loaded.<div className="kyp-btnrow"><RetryButton onRetry={onCapacityRetry} /></div></div>
           : capacityData ? (
@@ -398,10 +405,12 @@ export function DaycareAnalysis({
               <Evidence>CCAP = Child Care Assistance Program. Source: Illinois DCFS ECE Service Data FY2024. Area: {currentArea}.</Evidence>
             </>
           ) : <div className="kyp-status-empty" role="status">CCAP participation records are not available for {currentArea}.</div>}
+        </div>
       </section>
 
       <section id="print-section-site-daycare-details">
         <KypSubhead subsection={subsections.capacity}><span className="lbl">Site Capacity</span><span className="ct">this building</span></KypSubhead>
+        <div className="px-4">
         <div className="kyp-blocks hero two">
           <div className="kyp-block ind">
           <div className="bv">{hasBuildingArea ? Math.floor((buildingSqFt as number) / 75).toLocaleString() : "—"}</div>
@@ -452,10 +461,12 @@ export function DaycareAnalysis({
           </div>
         </form>
         <Evidence>Building and land areas are from the source record unless entered here. DCFS requires 35 sq ft of indoor space per child; practical capacity scenarios use 75–90 sq ft per child. Estimated outdoor area is land area minus building footprint (building area ÷ stories); DCFS requires 75 sq ft of outdoor space per child.</Evidence>
+        </div>
       </section>
 
       <section id="print-section-nearby-business-daycare-centers">
         <KypSubhead subsection={subsections.licensed}><span className="lbl">Licensed Competitors</span><span className="ct">City business-license records</span></KypSubhead>
+        <div className="px-4">
         {isNearbyLoading ? <div className="space-y-3" aria-label="Loading licensed daycare records"><div className="h-8 w-full animate-pulse rounded-md bg-muted" /><div className="h-8 w-4/5 animate-pulse rounded-md bg-muted" /></div>
           : isNearbyError ? <div className="kyp-status-empty" role="alert">City business-license daycare records could not be loaded.<div className="kyp-btnrow"><RetryButton onRetry={onNearbyRetry} /></div></div>
             : nearbyData ? (
@@ -470,11 +481,13 @@ export function DaycareAnalysis({
                 <Evidence>Cached records from the City of Chicago Business Licenses dataset r5kz-chrr, matched by location; snapshot generated 2026-06-05. These records do not establish current operation, current licensure, or expiration. The endpoint returns up to 20 records within the requested radius. Business names link to a Google Maps search for the name and address because the city-license records do not provide Maps listing URLs.</Evidence>
               </>
             ) : <div className="kyp-status-empty" role="status">City business-license daycare records are not available.</div>}
+        </div>
       </section>
 
       <section id="section-google-places-daycare">
         <KypSubhead subsection={subsections.maps}><span className="lbl">Google Maps Competitors</span><span className="ct">Google Places</span></KypSubhead>
         <ProjectUseGoogleMaps
+          contentInset
           data={googleData}
           isLoading={isGoogleLoading}
           isError={isGoogleError}

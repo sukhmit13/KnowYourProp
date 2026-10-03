@@ -610,6 +610,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
       )}
 
       <KypSubhead subsection={subsections.details}><span className="lbl">Ownership details</span><span className="rule" /></KypSubhead>
+      <div className="px-4">
       <div className="kyp-owner">
         <span className="olab">Owner</span>
         <span className="onm">{owner}</span>
@@ -637,10 +638,12 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
           )}
         </div>
       )}
+      </div>
 
       {showTimeline && (
         <div className="kyp-otl" data-testid="ownership-timeline">
           <KypSubhead subsection={subsections.timeline}><span className="lbl">Ownership &amp; debt timeline</span><span className="ct">{timelineEvents.length > 12 ? `Latest 12 of ${timelineEvents.length} events · complete instrument index below` : `${timelineEvents.length} recorded event${timelineEvents.length === 1 ? "" : "s"}`}</span><span className="rule" /></KypSubhead>
+          <div className="px-4">
           <div className="kyp-otlplot">
             <div className="kyp-timeline-line" />
             <div className="kyp-timeline-events">
@@ -679,6 +682,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
               {change.droppedPins?.length ? `Dropped ${change.droppedPins.map(formatPin).join(", ")}.` : ""}
             </div>
           ))}
+          </div>
         </div>
       )}
 
@@ -697,6 +701,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
         <span className="ct">{sales.length} qualifying transfer{sales.length === 1 ? "" : "s"}</span>
         <span className="rule" />
       </KypSubhead>
+      <div className="px-4">
       {sales.length === 0 && <div className="kyp-status-empty">No qualifying sale with a declared price was found in the available transfer record.</div>}
       {sales.map((sale: DerivedSale, index: number) => (
         <div id={`ownership-sale-${targetToken(sale.docNo || sale.ms)}`} className="kyp-xact" key={`${sale.docNo || sale.ms}-${index}`} data-testid={index === 0 ? "sale-recent" : `sale-item-${index}`}>
@@ -729,12 +734,14 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
             : <div className="kyp-status-empty unknown">{isLoadingLiens ? "Deed records are loading." : "No deed instruments were returned for this PIN."}</div>}
         </div>
       </details>
+      </div>
 
       <KypSubhead subsection={subsections.debt}>
         <span className="lbl">Debt on title</span>
         <span className="ct">{debtSnapshotReady ? `current owner · ${active.length} unreleased · ${released.length} historical/cleared` : "resolved snapshot required"}</span>
         <span className="rule" />
       </KypSubhead>
+      <div className="px-4">
       {!debtSnapshotReady ? (
         <div className="kyp-status-empty unknown">
           <b>Debt status is not resolved yet.</b>{" "}
@@ -803,12 +810,14 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
       {active.length > 0 && !active.some((mortgage: any) => maturityRunway(mortgage, false)) && (
         <div className="kyp-method">A maturity runway needs a reliably extracted, recorded maturity date. Estimated dates, credit lines, and uncertain extractions do not produce a runway; check the instrument and any modifications for the actual terms.</div>
       )}
+      </div>
 
       <KypSubhead subsection={subsections.title}>
         <span className="lbl">Title status</span>
         <span className={`kyp-pill ${titleBadge[0]}`}>{titleBadge[1]}</span>
         <span className="rule" />
       </KypSubhead>
+      <div className="px-4">
       {!titleKnown ? (
         <div className="kyp-status-empty unknown" data-testid="ownership-title-unknown">
           <b>Title status is unavailable.</b>{" "}
@@ -882,12 +891,14 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
           )}
         </>
       )}
+      </div>
 
       <KypSubhead subsection={subsections.other}>
         <span className="lbl">Other Recorder instruments</span>
         <span className="ct">{lienData?.searchFailed ? "Search incomplete" : `${otherInstruments.length} indexed instrument${otherInstruments.length === 1 ? "" : "s"}`}</span>
         <span className="rule" />
       </KypSubhead>
+      <div className="px-4">
       <details className="kyp-recorder-details" data-testid="ownership-other-instruments">
         <summary><span className="kyp-recorder-label">View complete non-deed index</span><span className="kyp-recorder-count">{otherInstruments.length} record{otherInstruments.length === 1 ? "" : "s"}</span><span className="kyp-recorder-chevron" aria-hidden="true">⌄</span></summary>
         <div className="kyp-recorder-content">
@@ -898,6 +909,7 @@ export function OwnershipTitleSection({ pinLookupData, lienData, debtSnapRec, is
             : <div className="kyp-status-empty unknown">{isLoadingLiens ? "Recorder instruments are loading." : "No other Recorder instruments were returned for this PIN."}</div>}
         </div>
       </details>
+      </div>
       <OwnerLiensSection
         pin={pin || pinLookupData?.pin || lienData?.pin || null}
         city={city}

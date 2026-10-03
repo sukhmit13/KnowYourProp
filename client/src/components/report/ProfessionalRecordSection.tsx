@@ -146,26 +146,28 @@ export function ProfessionalRecordSection({
               {group.entries.length} name{group.entries.length === 1 ? "" : "s"} · {group.note ?? "most recent first"}
             </span>
           </KypSubhead>
-          <div className="kyp-biz-list pro">
-            {group.entries.map((entry) => (
-              <div className="kyp-biz-card pro" key={entry.key}>
-                <div className="kyp-professional-identity">
-                  {entry.discoveryUrl
-                    ? <a className="nm" href={entry.discoveryUrl}><b>{entry.name}</b><span className="ext">↗</span></a>
-                    : <b>{entry.name}</b>}
-                  <span className="addr">{entry.firm ? `${entry.role} · ${entry.firm}` : entry.role}</span>
+          <div className="px-4">
+            <div className="kyp-biz-list pro">
+              {group.entries.map((entry) => (
+                <div className="kyp-biz-card pro" key={entry.key}>
+                  <div className="kyp-professional-identity">
+                    {entry.discoveryUrl
+                      ? <a className="nm" href={entry.discoveryUrl}><b>{entry.name}</b><span className="ext">↗</span></a>
+                      : <b>{entry.name}</b>}
+                    <span className="addr">{entry.firm ? `${entry.role} · ${entry.firm}` : entry.role}</span>
+                  </div>
+                  <span className="kyp-biz-distance">{formatLastSeen(entry)}</span>
+                  <div className="kyp-biz-cardmeta">
+                    {entry.position && <span className="kyp-pill ind">{entry.position}</span>}
+                    {entry.outcome && <span className="kyp-pill ind">{entry.outcome}</span>}
+                    {entry.tag && <span className="kyp-tag rec">{entry.tag}</span>}
+                    {entry.facts.slice(0, 2).map((fact, factIndex) => (
+                      <span className="f" key={`${fact}-${factIndex}`}>{fact}</span>
+                    ))}
+                  </div>
                 </div>
-                <span className="kyp-biz-distance">{formatLastSeen(entry)}</span>
-                <div className="kyp-biz-cardmeta">
-                  {entry.position && <span className="kyp-pill ind">{entry.position}</span>}
-                  {entry.outcome && <span className="kyp-pill ind">{entry.outcome}</span>}
-                  {entry.tag && <span className="kyp-tag rec">{entry.tag}</span>}
-                  {entry.facts.slice(0, 2).map((fact, factIndex) => (
-                    <span className="f" key={`${fact}-${factIndex}`}>{fact}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
       ))}

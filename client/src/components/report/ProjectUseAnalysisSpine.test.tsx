@@ -152,6 +152,21 @@ test("Google Places counts verified distances, retains unknown rows separately, 
   assert.doesNotMatch(markup, /class="kyp-scopenote"/);
 });
 
+test("Google Places subsection content keeps the px-4 inset in ready and every availability state", () => {
+  const states = [
+    <ProjectUseGoogleMaps contentInset confirmed data={{ places: [{ name: "Cafe", address: "1 Main St", distanceMiles: 0.4 }], count: 1 }} />,
+    <ProjectUseGoogleMaps contentInset />,
+    <ProjectUseGoogleMaps contentInset confirmed isLoading />,
+    <ProjectUseGoogleMaps contentInset confirmed isError />,
+    <ProjectUseGoogleMaps contentInset confirmed data={{ places: [], totalFound: 0 }} />,
+  ];
+  for (const state of states) {
+    const markup = renderToStaticMarkup(state);
+    assert.match(markup, /^<div class="px-4">/);
+    assert.match(markup, /class="kyp-src"/);
+  }
+});
+
 test("Google Places caps at ten and reports unconfirmed, pending, error, and empty states without false zero blocks", () => {
   const places = Array.from({ length: 12 }, (_, index) => ({
     name: `Place ${index + 1}`,

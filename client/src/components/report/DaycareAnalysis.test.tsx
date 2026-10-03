@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { load } from "cheerio";
 import { buildDaycareTargets, daycareSupplyRankMatches, DaycareAnalysis } from "./DaycareAnalysis";
 
 test("daycare slot targets retain the three ratio calculations and only estimate added centers for positive gaps", () => {
@@ -29,6 +30,33 @@ test("supply rank is shown only when its source value matches the supply record"
   assert.equal(daycareSupplyRankMatches({ rank: 3 }, 55, 55), true);
   assert.equal(daycareSupplyRankMatches({ rank: 3 }, 64, 77), false);
   assert.equal(daycareSupplyRankMatches(null, 55, 55), false);
+});
+
+test("every daycare numbered subsection places its complete body inside the standard inset", () => {
+  const markup = renderToStaticMarkup(
+    <DaycareAnalysis
+      scope="zip"
+      onScopeChange={() => {}}
+      areaData={null}
+      enhancedData={null}
+      capacityData={null}
+      nearbyData={null}
+      zipCode="60622"
+      communityArea="West Town"
+    />,
+  );
+  const $ = load(markup);
+  for (const id of [
+    "print-section-childcare",
+    "print-section-childcare-demographics",
+    "print-section-daycare-estimator",
+    "print-section-childcare-capacity",
+    "print-section-site-daycare-details",
+    "print-section-nearby-business-daycare-centers",
+    "section-google-places-daycare",
+  ]) {
+    assert.equal($(`#${id}`).children().eq(1).hasClass("px-4"), true, `${id} body should be inset beneath its full-width subhead`);
+  }
 });
 
 test("daycare field map keeps the always-present site form, omits unknown outdoor space and missing city average", () => {

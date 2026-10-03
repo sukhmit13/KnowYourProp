@@ -71,17 +71,19 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
         <span className="ct">distinct businesses · select to filter</span>
         <span className="rule" />
       </KypSubhead>
-      <div className="kyp-biz-mix">
-        {rankedMix.slice(0, 8).map(([label, count]) => {
-          const active = filter === label;
-          return (
-            <button key={label} type="button" className={`kyp-hbar${active ? " active" : ""}`} onClick={() => { setFilter(active ? null : label); setShowAll(false); }}>
-              <span className="hl"><span className="kyp-liccat">{label.replace(/ only$/, "")}</span></span>
-              <span className="htrack"><i className="ind" style={{ width: `${(count / maxMix) * 100}%` }}><b className="hbar-count">{count}</b></i></span>
-            </button>
-          );
-        })}
-        {rankedMix.length > 8 && <div className="kyp-biz-overflow">+ {rankedMix.length - 8} smaller license mix{rankedMix.length - 8 === 1 ? "" : "es"} not shown</div>}
+      <div className="px-4">
+        <div className="kyp-biz-mix">
+          {rankedMix.slice(0, 8).map(([label, count]) => {
+            const active = filter === label;
+            return (
+              <button key={label} type="button" className={`kyp-hbar${active ? " active" : ""}`} onClick={() => { setFilter(active ? null : label); setShowAll(false); }}>
+                <span className="hl"><span className="kyp-liccat">{label.replace(/ only$/, "")}</span></span>
+                <span className="htrack"><i className="ind" style={{ width: `${(count / maxMix) * 100}%` }}><b className="hbar-count">{count}</b></i></span>
+              </button>
+            );
+          })}
+          {rankedMix.length > 8 && <div className="kyp-biz-overflow">+ {rankedMix.length - 8} smaller license mix{rankedMix.length - 8 === 1 ? "" : "es"} not shown</div>}
+        </div>
       </div>
 
       <KypSubhead className="fam-green" subsection={2}>
@@ -89,32 +91,34 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
         <span className="ct">nearest first · each business counted once</span>
         <span className="rule" />
       </KypSubhead>
-      <div className="kyp-biz-list">
-        {visible.map((business, index) => {
-          const earliest = business.licenses.reduce((oldest, license) => !oldest || license.startDate < oldest ? license.startDate : oldest, "");
-          return (
-            <article key={`${business.name}|${business.address}`} className="kyp-biz-card" data-testid={`row-license-${index}`}>
-              <div>
-                <b>{titleCaseBusiness(business.name)}</b>
-                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${business.name}, ${business.address}, Chicago, IL`)}`} target="_blank" rel="noreferrer">{titleCaseBusiness(business.address)}</a>
-              </div>
-              <span className="kyp-biz-distance">{business.distanceMiles.toFixed(2)} mi</span>
-              <div className="kyp-biz-cardmeta">
-                {business.corridor && <span className="kyp-corridor">{business.corridor.name}</span>}
-                {business.licenses.map((license) => <span className="kyp-liccat" key={`${license.licenseType}-${license.startDate}`}>{license.licenseType}</span>)}
-                {earliest && <span>License start {monthYear(earliest)}</span>}
-              </div>
-            </article>
-          );
-        })}
-      </div>
-      {filtered.length > 6 && (
-        <button type="button" className="kyp-morelink no-print" onClick={() => setShowAll((current) => !current)}>
-          {showAll ? "Show fewer businesses ↑" : `Show all ${filtered.length} businesses →`}
-        </button>
-      )}
-      <div className="kyp-src">
-        Source: Chicago Business Licenses. Initial license applications (ISSUE) only; renewals excluded. 1-mile radius, past 12 months. Existing businesses may receive new licenses; these records do not confirm new business openings. Businesses are grouped by business name and normalized street address, so multiple licenses at one establishment count once. Dates shown are license term start dates.
+      <div className="px-4">
+        <div className="kyp-biz-list">
+          {visible.map((business, index) => {
+            const earliest = business.licenses.reduce((oldest, license) => !oldest || license.startDate < oldest ? license.startDate : oldest, "");
+            return (
+              <article key={`${business.name}|${business.address}`} className="kyp-biz-card" data-testid={`row-license-${index}`}>
+                <div>
+                  <b>{titleCaseBusiness(business.name)}</b>
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${business.name}, ${business.address}, Chicago, IL`)}`} target="_blank" rel="noreferrer">{titleCaseBusiness(business.address)}</a>
+                </div>
+                <span className="kyp-biz-distance">{business.distanceMiles.toFixed(2)} mi</span>
+                <div className="kyp-biz-cardmeta">
+                  {business.corridor && <span className="kyp-corridor">{business.corridor.name}</span>}
+                  {business.licenses.map((license) => <span className="kyp-liccat" key={`${license.licenseType}-${license.startDate}`}>{license.licenseType}</span>)}
+                  {earliest && <span>License start {monthYear(earliest)}</span>}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        {filtered.length > 6 && (
+          <button type="button" className="kyp-morelink no-print" onClick={() => setShowAll((current) => !current)}>
+            {showAll ? "Show fewer businesses ↑" : `Show all ${filtered.length} businesses →`}
+          </button>
+        )}
+        <div className="kyp-src">
+          Source: Chicago Business Licenses. Initial license applications (ISSUE) only; renewals excluded. 1-mile radius, past 12 months. Existing businesses may receive new licenses; these records do not confirm new business openings. Businesses are grouped by business name and normalized street address, so multiple licenses at one establishment count once. Dates shown are license term start dates.
+        </div>
       </div>
     </div>
   );
