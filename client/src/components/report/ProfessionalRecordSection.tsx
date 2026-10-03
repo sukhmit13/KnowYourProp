@@ -146,7 +146,7 @@ export function ProfessionalRecordSection({
               {group.entries.length} name{group.entries.length === 1 ? "" : "s"} · {group.note ?? "most recent first"}
             </span>
           </KypSubhead>
-          <div className="px-4">
+          <div>
             <div className="kyp-biz-list pro">
               {group.entries.map((entry) => (
                 <div className="kyp-biz-card pro" key={entry.key}>

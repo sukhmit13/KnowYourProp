@@ -5300,12 +5300,12 @@ export default function RunDetail() {
                         <div className="kyp-block ind count"><div className="bv">{facts.zoning}</div><div><div className="bl">Zoning district</div><div className="bd">{zoningInfo?.name || facts.zoning}</div></div></div>
                       </div>
                       <KypSubhead subsection={1}><span className="lbl">What {facts.zoning} allows</span></KypSubhead>
-                      <div className="px-4"><p className="kyp-tax-muted">Choose Project Use to check whether your intended use is allowed here. The district’s listed uses are shown in the Zoning Details card above.</p></div>
+                      <div><p className="kyp-tax-muted">Choose Project Use to check whether your intended use is allowed here. The district’s listed uses are shown in the Zoning Details card above.</p></div>
                     </>
                   ) : isPlannedDevelopment ? (
                     <>
                       <KypSubhead subsection={1}><span className="lbl">The ruling</span></KypSubhead>
-                      <div className="px-4"><div className="kyp-status-empty unknown">This parcel is in a Planned Development. The adopted PD ordinance controls allowed uses; this report cannot determine whether {selectedProjectType} is permitted without that ordinance.</div></div>
+                      <div><div className="kyp-status-empty unknown">This parcel is in a Planned Development. The adopted PD ordinance controls allowed uses; this report cannot determine whether {selectedProjectType} is permitted without that ordinance.</div></div>
                     </>
                   ) : effectiveCompatibility && (() => {
                     const permission = effectiveCompatibility.permission;
@@ -5336,7 +5336,7 @@ export default function RunDetail() {
                     const wardLabel = facts?.ward ? `Ward ${facts.ward}` : 'your ward';
                     if (effectiveCompatibility.permission === 'permitted') {
                       return (
-                        <div className="px-4"><div className="kyp-verdict ok" data-testid="verdict-permitted">
+                        <div><div className="kyp-verdict ok" data-testid="verdict-permitted">
                             <span className="vk">Allowed by right</span>
                             <div className="vh">No zoning relief needed</div>
                             <p className="vp">
@@ -5353,7 +5353,7 @@ export default function RunDetail() {
                     }
                     if (effectiveCompatibility.permission === 'special_use') {
                       return (
-                        <div className="px-4"><div className="kyp-verdict watch" data-testid="verdict-special-use">
+                        <div><div className="kyp-verdict watch" data-testid="verdict-special-use">
                             <span className="vk">Special use required</span>
                             <div className="vh">A defined path, not a denial</div>
                             <p className="vp">
@@ -5368,7 +5368,7 @@ export default function RunDetail() {
                       );
                     }
                     return (
-                      <div className="px-4"><div className="kyp-verdict no" data-testid="verdict-not-permitted">
+                      <div><div className="kyp-verdict no" data-testid="verdict-not-permitted">
                           <span className="vk">Not permitted as-of-right</span>
                           <div className="vh">A map amendment, not a variance</div>
                           <p className="vp">
@@ -5388,7 +5388,7 @@ export default function RunDetail() {
                   {requiresZoningChange && wardNumber && (
                     <div id="print-section-zba">
                       <KypSubhead subsection={2}><span className="lbl">Who files in Ward {wardNumber}</span><span className="ct">last 5 years</span></KypSubhead>
-                      <div className="px-4"><button
+                      <div><button
                         type="button"
                         className="kyp-zba-toggle"
                         onClick={() => setZbaExpanded(!zbaExpanded)}
@@ -5554,7 +5554,7 @@ export default function RunDetail() {
                     return (
                       <>
                         <KypSubhead subsection={requiresZoningChange ? 3 : 2}><span className="lbl">Competition</span><span className="ct screen-only" data-testid="link-concept-to-competitors">Nearby Competitors ↓</span></KypSubhead>
-                        <div className="px-4">
+                        <div>
                         <div className="kyp-recgrid inline three cursor-pointer" data-testid="concept-scan" onClick={goToCompetitors} role="button" tabIndex={0} aria-label={`View nearby competitors for ${conceptLabel}`} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToCompetitors(); } }}>
                           <div className="hi"><span className="k">{conceptLabel}</span><span className="v">{halfMileCount}</span></div>
                           <div><span className="k">Radius</span><span className="v">½ mi</span></div>
@@ -5775,7 +5775,7 @@ export default function RunDetail() {
                            {listingSnapshot.status === 'not_found' ? (
                              <>
                                {listingSnapshot.whyHistorical && <div className="kyp-note"><b>Why this reads as historical.</b> {listingSnapshot.whyHistorical}</div>}
-                                {legacyListingFacts && <><KypSubhead subsection={subsectionNumbers.listing}><span className="lbl">What the prior listing says</span><span className="ct">saved listing details</span></KypSubhead><div className="px-4">{legacyListingFacts}</div></>}
+                                {legacyListingFacts && <><KypSubhead subsection={subsectionNumbers.listing}><span className="lbl">What the prior listing says</span><span className="ct">saved listing details</span></KypSubhead><div>{legacyListingFacts}</div></>}
                              </>
                            ) : <>
                              {heroBlocks > 0 && <div className={`kyp-blocks hero ${heroLayout}`} data-testid="listing-hero-facts">
@@ -5795,14 +5795,14 @@ export default function RunDetail() {
                                </div>}
                              </div>}
 
-                              {disclosures.length > 0 && <><KypSubhead subsection={subsectionNumbers.disclosures}><span className="lbl">What the seller disclosed</span><span className="ct">{disclosures.length} item{disclosures.length === 1 ? '' : 's'} · {disclosures.filter((d) => d.resolution).length} resolved, {disclosures.filter((d) => !d.resolution).length} outstanding</span></KypSubhead><div className="px-4">{disclosures.map((disclosure, index) => (
+                              {disclosures.length > 0 && <><KypSubhead subsection={subsectionNumbers.disclosures}><span className="lbl">What the seller disclosed</span><span className="ct">{disclosures.length} item{disclosures.length === 1 ? '' : 's'} · {disclosures.filter((d) => d.resolution).length} resolved, {disclosures.filter((d) => !d.resolution).length} outstanding</span></KypSubhead><div>{disclosures.map((disclosure, index) => (
                               <div key={index} className={`kyp-disc ${disclosure.kind === 'standard' ? 'noted' : disclosure.resolution ? 'cleared' : ''}`}>
                                 <span className="ic">{disclosure.resolution ? 'Cleared' : disclosure.kind === 'standard' ? 'Noted' : 'Finding'}</span>
                                  <div className="tx"><b>{disclosure.text}</b><div>{disclosure.consequence}</div>{disclosure.resolution && <div className="kyp-resolution"><span>{disclosure.resolution.because}</span> <button type="button" onClick={() => revealAnchor('section-permits')}>See Permits &amp; Violations ↓</button></div>}</div>
                               </div>
                             ))}</div></>}
 
-                              {listingChecks.length > 0 && <><KypSubhead subsection={subsectionNumbers.checks}><span className="lbl">Claims checked against the record</span><span className="ct">{listingChecks.filter((check) => check.result !== 'unavailable').length} of {listingChecks.length} checked automatically</span></KypSubhead><div className="px-4">
+                              {listingChecks.length > 0 && <><KypSubhead subsection={subsectionNumbers.checks}><span className="lbl">Claims checked against the record</span><span className="ct">{listingChecks.filter((check) => check.result !== 'unavailable').length} of {listingChecks.length} checked automatically</span></KypSubhead><div>
                                {listingChecks.map((check, index) => <div className="kyp-xrow" key={`${check.field}-${index}`}>
                                  <div><span className="k">THE LISTING CLAIMS</span><div className="v">{check.claimLabel}</div></div>
                                 <div><span className="k">{check.recordSource}</span><div className={`v ${check.result === 'unavailable' ? 'na' : ''}`}>{check.recordLabel}</div>{check.note && <div className="text-xs text-muted-foreground mt-1">{check.note}</div>}</div>
@@ -5811,7 +5811,7 @@ export default function RunDetail() {
                                {comparisonNote && <div className="kyp-note" data-testid="listing-comparison-note">{comparisonNote}</div>}
                              </div></>}
 
-                              {(hasRemarks || hasHighlights || listingData) && <><KypSubhead subsection={subsectionNumbers.listing}><span className="lbl">What the listing says</span><span className="ct">{hasRemarks ? "the broker's own words" : ""}{hasRemarks && hasHighlights ? ' · ' : ''}{hasHighlights ? `${listingSnapshot.keyFacts.length} highlights` : ''}</span></KypSubhead><div className="px-4">
+                              {(hasRemarks || hasHighlights || listingData) && <><KypSubhead subsection={subsectionNumbers.listing}><span className="lbl">What the listing says</span><span className="ct">{hasRemarks ? "the broker's own words" : ""}{hasRemarks && hasHighlights ? ' · ' : ''}{hasHighlights ? `${listingSnapshot.keyFacts.length} highlights` : ''}</span></KypSubhead><div>
                                {listingSnapshot.remarksSummary && <div className="lede">{listingSnapshot.remarksSummary}</div>}
                                {hasHighlights && <><div className="kyp-hl screen-only">{shownHighlights.map((fact, index) => <div key={index}>{fact}</div>)}</div><div className="kyp-hl print-only">{listingSnapshot.keyFacts.map((fact, index) => <div key={index}>{fact}</div>)}</div>{listingSnapshot.keyFacts.length > 6 && <button type="button" className="kyp-hlmore no-print" onClick={() => setListingHighlightsExpanded((expanded) => !expanded)}>{listingHighlightsExpanded ? 'Show fewer highlights ↑' : `Show all ${listingSnapshot.keyFacts.length} highlights →`}</button>}</>}
                                {legacyListingFacts}
@@ -6107,7 +6107,7 @@ export default function RunDetail() {
                         {filing && (
                           <>
                             <KypSubhead subsection={subsection.changed} data-testid="zoning-history-district-change"><span className="lbl">What changed</span><span className="rule" /></KypSubhead>
-                            <div className="px-4">
+                            <div>
                             <div className="kyp-xfer zone">
                               <div className="col"><div className="h">Before — prior districts</div><div className="v">{filing.fromZone || 'Not stated in the checked filing'}</div>{filing.fromZone && <div className="li"><b>{filing.fromZone !== filing.toZone ? 'Split-zoned' : 'Prior district'}</b> — {filing.fromZone !== filing.toZone ? 'one lot carrying two districts, which is why it could not be divided as it stood.' : 'the checked filing records this as the prior district.'}</div>}</div>
                               <div className="col"><div className="h">After — in force today</div><div className="v">{filing.toZone || facts?.zoning || 'Not stated in the checked filing'}</div><div className="li">{filing.toZone ? `${filing.toZone} across the whole lot.` : 'The resulting district is not stated in the checked filing.'}</div></div>
@@ -6120,7 +6120,7 @@ export default function RunDetail() {
                         {hasNarrative && (
                           <>
                             <KypSubhead subsection={subsection.establishes}><span className="lbl">What the record establishes</span><span className="ct">{view.boardConfiguration?.ordinanceId ? `Board order ${view.boardConfiguration.ordinanceId}` : ''}{view.boardConfiguration?.ordinanceId && filing?.applicationNumber ? ' · ' : ''}{filing?.applicationNumber ? `application ${filing.applicationNumber}` : ''}</span><span className="rule" /></KypSubhead>
-                            <div className="px-4">
+                            <div>
                             <div className="kyp-says lg">
                               <div className="sc">
                                 <div className="sh">Found in the record</div>
@@ -6150,7 +6150,7 @@ export default function RunDetail() {
                         {view.rows.length > 0 && (
                           <>
                             <KypSubhead subsection={subsection.record} data-testid="zoning-history-records"><span className="lbl">The record</span><span className="ct">{actionCountLabel}</span><span className="rule" /></KypSubhead>
-                            <div className="px-4">
+                            <div>
                             <div className="kyp-zrec">
                               {view.matters.length >= 2 ? view.matters.map((matter: any, matterIndex: number) => {
                                 const approved = matter.rows.filter((item: any) =>
@@ -6180,7 +6180,7 @@ export default function RunDetail() {
                         {contacts.length > 0 && (
                           <>
                             <KypSubhead subsection={subsection.filed} data-testid="zoning-history-professionals"><span className="lbl">Who filed them</span><span className="ct">{contacts.length} named</span><span className="rule" /></KypSubhead>
-                            <div className="px-4">
+                            <div>
                             {contacts.map(({ role, contact, rows: contactRows }, index) => {
                               const what = contactRows[0]?.type === 'legistar' ? 'map amendment' : contactRows[0]?.description || contactRows[0]?.title || 'zoning action';
                               const rankingDate = contactRows.map((row: any) => row.date || row.passedDate).filter(Boolean).sort().pop();
@@ -6202,7 +6202,7 @@ export default function RunDetail() {
                     {hasPending && (
                       <>
                         <KypSubhead subsection={subsection.pending}><span className="lbl">Pending applications</span><span className="ct">{pendingDpd.length}</span><span className="rule" /></KypSubhead>
-                        <div className="px-4">
+                        <div>
                         <div className="kyp-zrec" data-testid="zoning-history-dpd-context">
                           {pendingDpd.map(renderPendingRow)}
                           {zoningHistoryData?.dpdCoverage?.note && <div className="zgnote">{zoningHistoryData.dpdCoverage.note}</div>}
@@ -6288,7 +6288,7 @@ export default function RunDetail() {
           {isDaycareOrSchool && !isDaycare && (
           <div id="print-section-childcare">
             <KypSubhead subsection={projectUseSubsections.childcareAccess}><span className="lbl">Childcare access</span></KypSubhead>
-              <div className="px-4">
+              <div>
                 {childcareAccessTabs}
                 {!((areaViewMode === "zip" ? childcareData : communityChildcareData))
                   && !(areaViewMode === "zip" ? isLoadingChildcare : isLoadingCommunityChildcare) && (
@@ -6302,7 +6302,7 @@ export default function RunDetail() {
           {isDaycareOrSchool && !isDaycare && (childcareEnhancedZipData || childcareEnhancedData) && (
           <div id="print-section-childcare-demographics">
             <KypSubhead subsection={projectUseSubsections.childcareDemographics}><span className="lbl">Childcare demographics</span></KypSubhead>
-              <div className="px-4 space-y-6">
+              <div className="space-y-6">
                 {(areaViewMode === 'zip' ? isLoadingChildcareEnhancedZip : isLoadingChildcareEnhanced) ? (
                   <div className="space-y-3">
                     <Skeleton className="h-6 w-2/3" />
@@ -6338,7 +6338,7 @@ export default function RunDetail() {
           {isDaycareOrSchool && !isDaycare && (childcareEnhancedZipData || childcareEnhancedData) && (
           <div id="print-section-parents-labor">
             <KypSubhead subsection={projectUseSubsections.parentsLabor}><span className="lbl">Parents in labor force</span></KypSubhead>
-              <div className="px-4 space-y-4">
+              <div className="space-y-4">
                 {(() => {
                   const enhancedData = areaViewMode === 'zip' ? childcareEnhancedZipData : childcareEnhancedData;
                   if (!enhancedData) return null;
@@ -6371,7 +6371,7 @@ export default function RunDetail() {
           {isDaycareOrSchool && !isDaycare && (childcareData || communityChildcareData) && (
           <div id="print-section-daycare-estimator">
             <KypSubhead subsection={projectUseSubsections.daycareEstimator}><span className="lbl">Day care needs estimator</span></KypSubhead>
-              <div className="px-4">
+              <div>
                 {(() => {
                   // Use same data source as Childcare Access for consistency
                   const accessData = areaViewMode === 'zip' ? childcareData : communityChildcareData;
@@ -6483,7 +6483,7 @@ export default function RunDetail() {
           {isDaycareOrSchool && !isDaycare && (
           <div id="print-section-site-daycare-details">
             <KypSubhead subsection={projectUseSubsections.siteDetails}><span className="lbl">Site details</span></KypSubhead>
-              <div className="px-4">
+              <div>
                 {(() => {
                   // Priority: manual/listing data first, then property tax API, then commercial data (primary then co-parcel)
                   const buildingSqFt = run?.manualBuildingSqFt || propertyTaxData?.buildingSquareFeet || pinLookupData?.commercialData?.bldgSf || coParcelLookupData?.commercialData?.bldgSf || 0;
@@ -6685,7 +6685,7 @@ export default function RunDetail() {
           {hasSchoolCcap && (
           <div id="print-section-childcare-capacity">
             <KypSubhead subsection={projectUseSubsections.ccap}><span className="lbl">CCAP participation</span></KypSubhead>
-              <div className="px-4 space-y-4">
+              <div className="space-y-4">
                 {(() => {
                   const capData = areaViewMode === 'zip' ? childcareCapacityZipData : childcareCapacityData;
                   if (!capData) return (
@@ -6728,7 +6728,7 @@ export default function RunDetail() {
           {isGrocery && (
             <div id="print-section-grocery">
               <KypSubhead subsection={projectUseSubsections.grocery}><span className="lbl">Food Access</span></KypSubhead>
-                <div className="px-4">
+                <div>
                   <FoodAccessPanel data={areaViewMode === "zip" ? groceryData : communityGroceryData} loading={areaViewMode === "zip" ? isLoadingGrocery : isLoadingCommunityGrocery} error={areaViewMode === "zip" ? isGroceryError : isCommunityGroceryError} onRetry={areaViewMode === "zip" ? () => refetchGrocery() : () => refetchCommunityGrocery()} scope={areaViewMode} areaLabel={areaViewMode === "zip" ? facts?.zipCode ?? "unavailable" : facts?.communityArea ?? "unavailable"} />
                 </div>
             </div>
@@ -6737,7 +6737,7 @@ export default function RunDetail() {
           {isGrocery && (
             <div id="print-section-grocery-licenses">
               <KypSubhead subsection={projectUseSubsections.groceryLicenses}><span className="lbl">Licensed Grocery Stores</span></KypSubhead>
-              <div className="px-4">
+              <div>
                 <GroceryLicenseList
                   data={areaViewMode === "zip" ? groceryData : communityGroceryData}
                   loading={areaViewMode === "zip" ? isLoadingGrocery : isLoadingCommunityGrocery}
@@ -6755,14 +6755,14 @@ export default function RunDetail() {
           {hasAutoOwnershipPanel && (
             <div id="print-section-vehicle-ownership">
               <KypSubhead subsection={projectUseSubsections.vehicle}><span className="lbl">Vehicle ownership</span></KypSubhead>
-              <div className="px-4"><VehicleOwnershipPanel data={vehicleData} loading={isLoadingVehicle} error={isVehicleError} onRetry={() => refetchVehicle()} areaLabel={facts?.communityArea ?? "unavailable"} /></div>
+              <div><VehicleOwnershipPanel data={vehicleData} loading={isLoadingVehicle} error={isVehicleError} onRetry={() => refetchVehicle()} areaLabel={facts?.communityArea ?? "unavailable"} /></div>
             </div>
           )}
           {/* Senior Population Section - Shown only for senior care project uses */}
           {isSeniorCare && (
             <div id="print-section-seniors">
               <KypSubhead subsection={projectUseSubsections.seniors}><span className="lbl">Senior population</span></KypSubhead>
-              <div className="px-4">
+              <div>
                 <SeniorPopulationPanel
                   data={areaViewMode === "zip" ? seniorsZipData : seniorsData}
                   loading={areaViewMode === "zip" ? isLoadingSeniorsZip : isLoadingSeniors}
@@ -6778,7 +6778,7 @@ export default function RunDetail() {
           {isGasStation && (
             <div id="print-section-nearby-business">
               <KypSubhead subsection={projectUseSubsections.gasStations}><span className="lbl">Licensed Filling Stations</span></KypSubhead>
-                <div className="px-4">
+                <div>
                   {isLoadingGasStations ? (
                     <div className="space-y-3">
                       <Skeleton className="h-6 w-2/3" />
@@ -6810,20 +6810,20 @@ export default function RunDetail() {
           {hasEVRegistrationPanel && (
             <div id="print-section-ev-registrations">
               <KypSubhead subsection={projectUseSubsections.evRegistrations}><span className="lbl">EV registration trends</span></KypSubhead>
-              <div className="px-4"><EVRegistrationTrends data={evRegistrationsData} loading={isLoadingEvRegistrations} error={isEvRegistrationsError} onRetry={() => refetchEvRegistrations()} zipCode={facts?.zipCode ?? "unavailable"} /></div>
+              <div><EVRegistrationTrends data={evRegistrationsData} loading={isLoadingEvRegistrations} error={isEvRegistrationsError} onRetry={() => refetchEvRegistrations()} zipCode={facts?.zipCode ?? "unavailable"} /></div>
             </div>
           )}
           {isGasStation && (
             <div id="print-section-nearby-business-ev">
               <KypSubhead subsection={projectUseSubsections.evStations}><span className="lbl">EV Charging</span>{!isLoadingEvStations && !isEvStationsError && evStationsData && <span className="ct">{getEVChargingSiteCount(evStationsData.stations)} sites within 3 miles</span>}</KypSubhead>
-              <div className="px-4"><EVChargingTable stations={evStationsData?.stations} loading={isLoadingEvStations} error={isEvStationsError} onRetry={() => refetchEvStations()} /></div>
+              <div><EVChargingTable stations={evStationsData?.stations} loading={isLoadingEvStations} error={isEvStationsError} onRetry={() => refetchEvStations()} /></div>
             </div>
           )}
           {/* Nearby Hotels Section - Only shown when Hotel is selected */}
           {isHotel && (
             <div id="print-section-nearby-business-hotels">
               <KypSubhead subsection={projectUseSubsections.hotels}><span className="lbl">Nearby hotels</span></KypSubhead>
-                <div className="px-4">
+                <div>
                   {isLoadingHotels ? (
                     <div className="space-y-3">
                       <Skeleton className="h-6 w-2/3" />
@@ -6868,7 +6868,7 @@ export default function RunDetail() {
               <KypSubhead subsection={isRestaurant ? projectUseSubsections.restaurants : projectUseSubsections.coffee}>
                 <span className="lbl">{isRestaurant ? "Nearby restaurants" : "Nearby coffee shops"}</span>
               </KypSubhead>
-              <div className="px-4">
+              <div>
                 <LicensedBusinessPanel
                   data={isRestaurant ? restaurantsData : coffeeShopsData}
                   loading={isRestaurant ? isLoadingRestaurants : isLoadingCoffeeShops}
@@ -6885,7 +6885,7 @@ export default function RunDetail() {
           {isBar && (
             <div id="print-section-nearby-business-bars">
               <KypSubhead subsection={projectUseSubsections.bars}><span className="lbl">Nearby bars</span></KypSubhead>
-                <div className="px-4">
+                <div>
                   {isLoadingBars ? (
                     <div className="space-y-3">
                       <Skeleton className="h-6 w-2/3" />
@@ -6918,7 +6918,7 @@ export default function RunDetail() {
           {isCannabis && (
             <div id="print-section-cannabis">
               <KypSubhead subsection={projectUseSubsections.cannabis}><span className="lbl">Licensed dispensaries</span></KypSubhead>
-                <div className="px-4">
+                <div>
                   {isLoadingCannabis ? (
                     <div className="space-y-3">
                       <Skeleton className="h-6 w-2/3" />
@@ -6948,7 +6948,6 @@ export default function RunDetail() {
                 <span className="lbl">Nearby {selectedProjectType} · Google Maps</span>
               </KypSubhead>
               <ProjectUseGoogleMaps
-                contentInset
                 data={googlePlacesData}
                 isLoading={isLoadingGooglePlaces}
                 isError={isGooglePlacesError}
@@ -10023,7 +10022,7 @@ export default function RunDetail() {
                     </span>
                   </KypSubhead>
 
-                  <div className="px-4">
+                  <div>
                   {isLoadingPropertyTax && !propertyTaxData && (
                     <div className="kyp-tax-state" data-testid="tax-bill-loading">Loading the Treasurer record…</div>
                   )}
@@ -10133,7 +10132,7 @@ export default function RunDetail() {
                       {assessorClassCode ? ` · Class ${assessorClassCode}` : ""}
                     </span>
                   </KypSubhead>
-                  <div className="px-4">
+                  <div>
                   {(() => {
                     const assessmentHistory = propertyAssessments
                       .slice(0, 20)
@@ -10213,7 +10212,7 @@ export default function RunDetail() {
                       Cook County Assessor · {onFileExemptions.length} on file
                     </span>
                   </KypSubhead>
-                  <div className="px-4">
+                  <div>
                   <div className="kyp-recgrid inline kyp-tax-facts" data-testid="exemption-facts">
                     <div className="hi"><span className="k">On file</span><span className="v">{onFileExemptions.length ? onFileExemptions.map(([, name]) => name).join(", ") : "None recorded"}</span></div>
                     <div><span className="k">History</span><span className="v">{pinLookupData.exemptionHistory?.length ? `${pinLookupData.exemptionHistory.length} tax years` : "No history"}</span></div>
@@ -10256,7 +10255,7 @@ export default function RunDetail() {
                     <span className="lbl">Appeal history</span>
                     <span className="ct">Board of Review · {propertyAppeals.length} filings · {successfulAppeals.length} reductions</span>
                   </KypSubhead>
-                  <div className="px-4">
+                  <div>
                   {propertyAppeals.length === 0 ? (
                     <div className="kyp-tax-state" data-testid="appeal-history-empty">No appeal history on record for this PIN.</div>
                   ) : (
@@ -10502,7 +10501,7 @@ export default function RunDetail() {
 
                 {farAvailable && <section data-testid="development-envelope">
                   <KypSubhead subsection={subsection.envelope}><span className="lbl">The buildable envelope</span><span className="ct">{currentFAR != null && maxFAR != null ? `FAR ${currentFAR.toFixed(2)} of ${maxFAR} · ${Math.max(0, additionalSqFt || 0).toLocaleString()} sq ft unused` : 'FAR inputs incomplete'}</span><span className="rule" /></KypSubhead>
-                  <div className="px-4">
+                  <div>
                   {currentFAR != null && maxFAR != null && <div className="kyp-far">
                     <div className="kyp-farhd"><span className="l">FAR utilization</span><span className="p">{utilization?.toFixed(1)}<u>%</u></span></div>
                     <div className="kyp-farbar"><span className="built" style={{ width: `${Math.min(100, Math.max(0, maxFAR ? currentFAR / maxFAR * 100 : 0))}%` }}><span>BUILT · FAR {currentFAR.toFixed(2)}</span></span><span className="head" style={{ width: `${Math.max(0, Math.min(100, maxFAR ? (maxFAR - currentFAR) / maxFAR * 100 : 0))}%` }}><span>{overbuilt ? 'OVER LIMIT' : `+${Math.max(0, maxFAR - currentFAR).toFixed(2)} FAR`}</span></span></div>
@@ -10527,7 +10526,7 @@ export default function RunDetail() {
 
                 {(hasRent || isLoadingRentcast) && <section data-testid="development-rental-market">
                   <KypSubhead subsection={subsection.rental}><span className="lbl">Real-time rental market</span><span className="ct">RentCast · {rentcastData?.overall?.totalListings ?? '—'} listings in {facts?.zipCode || 'ZIP'} · {rentcastRadiusData?.totalListings ?? '—'} within 0.75 mi</span><span className="rule" /></KypSubhead>
-                  <div className="px-4">
+                  <div>
                   {isLoadingRentcast ? <div className="kyp-status-empty unknown">Rental market data is loading.</div> : !rentcastData ? <div className="kyp-status-empty">No rental market records found for {facts?.zipCode || 'this ZIP code'}.</div> : <>
                     <div className="kyp-blocks" data-testid="development-rental-blocks">
                       <div className="kyp-block ind">
@@ -10553,14 +10552,14 @@ export default function RunDetail() {
 
                 {(hasAirbnb || isLoadingAirbnb) && <section data-testid="development-airbnb-market">
                   <KypSubhead subsection={subsection.airbnb}><span className="lbl">Short-term rental (Airbnb)</span><span className="ct">Inside Airbnb · {airbnbData?.totalListings ?? '—'} listings · {facts?.communityArea || 'neighborhood'}</span><span className="rule" /></KypSubhead>
-                  <div className="px-4">
+                  <div>
                   {isLoadingAirbnb ? <div className="kyp-status-empty unknown">Short-term rental data is loading.</div> : !airbnbData ? <div className="kyp-status-empty">No Airbnb records found for {facts?.communityArea || 'this neighborhood'}.</div> : (() => { const entire = airbnbData.entireHome; const two = strBedroom(2); const unreported = entire ? Math.max(0, (entire.count || 0) - strRows.reduce((sum: number, row: any) => sum + (row.count || 0), 0)) : 0; return <><div className="kyp-blocks"><div className="kyp-block ind"><div className="bv">{money(two?.medianListedPrice)}<u>/nt</u></div><div><div className="bl">Median 2-bed nightly rate</div><div className="bd">{two?.count ?? '—'} entire-home listings</div></div></div><div className="kyp-block dark"><div className="bv">{two?.avgOccupancyPct ?? '—'}<u>%</u></div><div><div className="bl">2-bed occupancy</div><div className="bd">Derived from availability_365</div></div></div><div className="kyp-block ind"><div className="bv">{two?.avgListedPrice && two?.avgBookedNights ? money(two.avgListedPrice * two.avgBookedNights) : '—'}<u>/yr</u></div><div><div className="bl">Implied gross per year</div><div className="bd">Listed rate × booked nights</div></div></div></div><table className="kyp-dtab"><thead><tr><th>Room / bedroom</th><th>Count</th><th>Asked / night</th><th>Booked nights</th><th>Implied / yr</th></tr></thead><tbody>{strRows.map((row: any) => <tr key={row.label} className={!row.avgListedPrice ? 'dim' : ''}><td>{row.label}</td><td>{row.count ?? 0}</td><td>{row.avgListedPrice ? money(row.avgListedPrice) : 'no price listed'}</td><td>{row.avgBookedNights ?? '—'}</td><td>{row.avgListedPrice && row.avgBookedNights ? money(row.avgListedPrice * row.avgBookedNights) : '—'}</td></tr>)}{unreported > 0 && <tr className="dim"><td>Bedroom count not reported</td><td>{unreported}</td><td>—</td><td>—</td><td>—</td></tr>}{(['privateRoom', 'sharedRoom', 'hotelRoom'] as const).map((key) => { const room = airbnbData[key]; return room && room.count > 0 && !room.bedroomBreakdown?.length ? <tr className={!room.avgListedPrice ? 'dim' : ''} key={key}><td>{key === 'privateRoom' ? 'Private room' : key === 'sharedRoom' ? 'Shared room' : 'Hotel room'}</td><td>{room.count}</td><td>{room.avgListedPrice ? money(room.avgListedPrice) : 'no price listed'}</td><td>{room.avgBookedNights ?? '—'}</td><td>{room.avgListedPrice && room.avgBookedNights ? money(room.avgListedPrice * room.avgBookedNights) : '—'}</td></tr> : null; })}</tbody></table>{(airbnbData.peakMonths?.length || airbnbData.slowMonths?.length || entire?.avgOccupancyPct != null) && <div className="kyp-method"><b>Seasonality</b>{airbnbData.peakMonths?.length ? ` · Peak: ${airbnbData.peakMonths.join(', ')}` : ''}{airbnbData.slowMonths?.length ? ` · Slow: ${airbnbData.slowMonths.join(', ')}` : ''}{entire?.avgOccupancyPct != null ? ` · Blended occupancy: ${entire.avgOccupancyPct}%` : ''}</div>}<div className="kyp-method">Airbnb rates are what hosts ask; occupancy comes from availability_365.</div></>; })()}
                   </div>
                 </section>}
 
                 {hasCommercial && <section data-testid="development-commercial-market">
                   <KypSubhead subsection={subsection.commercial}><span className="lbl">Commercial lease market</span><span className="ct">LoopNet · {loopnetData?.count ?? '—'} for-lease listings · within {loopnetData?.radiusMilesUsed ?? '—'} mi</span><span className="rule" /></KypSubhead>
-                  <div className="px-4">
+                  <div>
                   {isLoadingLoopnet || loopnetData?.status === 'pending' ? <div className="kyp-status-empty unknown">Commercial lease records are loading.</div> : !loopnetData?.count ? <div className="kyp-status-empty">NONE ON RECORD · No active for-lease listings found in this search radius.</div> : <><div className="kyp-blocks"><div className="kyp-block ind"><div className="bv">{commercialMedian == null ? '—' : `$${commercialMedian}`}<u>/sf/yr</u></div><div><div className="bl">Median retail asking</div><div className="bd">Live LoopNet asking rates</div></div></div><div className="kyp-block dark"><div className="bv">{loopnetData.count}</div><div><div className="bl">Spaces available</div><div className="bd">Within {loopnetData.radiusMilesUsed ?? 'the search radius'} mi</div></div></div><div className="kyp-block ind"><div className="bv">{nearestCommercial?.distanceMiles == null ? '—' : nearestCommercial.distanceMiles}<u>mi</u></div><div><div className="bl">Nearest available space</div><div className="bd">{nearestCommercial?.address || 'Distance not reported'}</div></div></div></div><table className="kyp-dtab"><thead><tr><th>Space</th><th>Use</th><th>Size</th><th>Asking</th><th>Lease type</th><th>Distance</th></tr></thead><tbody>{commercialListings.map((listing: any, index: number) => <tr key={index}><td>{listing.address || 'Address unavailable'}</td><td>{listing.propertyType || '—'}</td><td>{listing.sizeSqFt ? `${listing.sizeSqFt.toLocaleString()} sf` : '—'}</td><td>{listing.pricePerSqFtYear ? `$${listing.pricePerSqFtYear}/sf/yr` : '—'}</td><td>{listing.leaseType || '—'}</td><td>{listing.distanceMiles != null ? `${listing.distanceMiles} mi` : '—'}</td></tr>)}</tbody></table></>}
                   </div>
                 </section>}
@@ -12134,7 +12133,7 @@ export default function RunDetail() {
               </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <div className="px-4 pb-4 space-y-4">
+              <div className="pb-4 space-y-4">
                 {isLoadingCityOwnedLots ? (
                   <p className="text-sm text-muted-foreground">Loading city-owned lot data...</p>
                 ) : cityOwnedLotsData && cityOwnedLotsData.count > 0 ? (
@@ -12652,7 +12651,7 @@ export default function RunDetail() {
                                 {/* ---- Day Care ---- */}
                                 <div className="subwrap" id="daycare">
                                   <KypSubhead subsection={schoolSubsections.childcare}><span className="lbl">Childcare</span><span className="ct">licensed early-childhood supply</span></KypSubhead>
-                                  <div className="px-4">
+                                  <div>
                                   {dcData ? (
                                     <ChildcareDemandMeter data={dcData} locationLabel={areaViewMode === 'zip' ? `ZIP ${facts?.zipCode ?? ''}` : facts?.communityArea ?? 'Community area'} />
                                   ) : (
@@ -12678,7 +12677,7 @@ export default function RunDetail() {
                                     {elem.length > 0 && (
                                       <div className="subwrap" id="elementary">
                                         <KypSubhead subsection={schoolSubsections.elementary}><span className="lbl">Elementary</span><span className="ct">{elem.length} within {radius} mi</span></KypSubhead>
-                                        <div className="px-4"><div>{elem.map((s: any) => schoolRow(s))}</div></div>
+                                        <div><div>{elem.map((s: any) => schoolRow(s))}</div></div>
                                       </div>
                                     )}
 
@@ -12686,7 +12685,7 @@ export default function RunDetail() {
                                     {middle.length > 0 && (
                                       <div className="subwrap" id="middleschools">
                                         <KypSubhead subsection={schoolSubsections.middle}><span className="lbl">Middle</span><span className="ct">{middle.length} within {radius} mi</span></KypSubhead>
-                                        <div className="px-4"><div>{middle.map((s: any) => schoolRow(s))}</div></div>
+                                        <div><div>{middle.map((s: any) => schoolRow(s))}</div></div>
                                       </div>
                                     )}
 
@@ -12694,7 +12693,7 @@ export default function RunDetail() {
                                     {high.length > 0 && (
                                       <div className="subwrap" id="highschools">
                                         <KypSubhead subsection={schoolSubsections.high}><span className="lbl">High schools</span><span className="ct">{high.length} within {radius} mi</span></KypSubhead>
-                                        <div className="px-4"><div>{high.map((s: any) => schoolRow(s))}</div></div>
+                                        <div><div>{high.map((s: any) => schoolRow(s))}</div></div>
                                       </div>
                                     )}
 
@@ -12751,7 +12750,7 @@ export default function RunDetail() {
                             {/* Michelin Guide Restaurants */}
                             <div className="ec-sub" id="ec-michelin" style={{ marginTop: mich.length + jba.length + murals.length + lms.length + gals.length > 0 ? undefined : 8 }}>
                               <KypSubhead subsection={cultureSubsections.michelin} data-testid="trigger-michelin-sub"><span className="lbl">Michelin Guide</span><span className="ct">{mich.length} within 1 mi</span></KypSubhead>
-                              <div className="px-4">
+                              <div>
                               {mich.length > 0 ? (
                                 <div data-testid="list-michelin-restaurants">
                                   {mich.map((r: any, idx: number) => (
@@ -12796,7 +12795,7 @@ export default function RunDetail() {
                             {/* James Beard Award Winners */}
                             <div className="ec-sub" id="ec-jamesbeard">
                               <KypSubhead subsection={cultureSubsections.jamesBeard} data-testid="trigger-jba-sub"><span className="lbl">James Beard</span><span className="ct">{jba.length} of {jbaData?.citywideTotal ?? '—'} citywide</span></KypSubhead>
-                              <div className="px-4">
+                              <div>
                               {jba.length > 0 ? (
                                 <div data-testid="list-jba-restaurants">
                                   {jba.map((r: any, idx: number) => (
@@ -12827,7 +12826,7 @@ export default function RunDetail() {
                             {/* Registered Murals */}
                             <div className="ec-sub" id="ec-murals">
                               <KypSubhead subsection={cultureSubsections.murals} data-testid="trigger-murals-sub"><span className="lbl">Registered murals</span><span className="ct">{murals.length} within {muralRad} mi</span></KypSubhead>
-                              <div className="px-4">
+                              <div>
                               {murals.length > 0 ? (
                                 <div data-testid="list-murals">
                                   {murals.map((m: any, idx: number) => (
@@ -12859,7 +12858,7 @@ export default function RunDetail() {
                             {/* Architectural Landmarks */}
                             <div className="ec-sub" id="ec-landmarks">
                               <KypSubhead subsection={cultureSubsections.landmarks} data-testid="trigger-landmarks-designated-sub"><span className="lbl">Architectural landmarks</span><span className="ct">{lms.length} within {lmRad} mi</span></KypSubhead>
-                              <div className="px-4">
+                              <div>
                               {lms.length > 0 ? (
                                 <div data-testid="list-designated-landmarks">
                                   {lms.map((l: any, idx: number) => (
@@ -12893,7 +12892,7 @@ export default function RunDetail() {
                             {/* Art Galleries */}
                             <div className="ec-sub" id="ec-galleries">
                               <KypSubhead subsection={cultureSubsections.galleries} data-testid="trigger-art-galleries-sub"><span className="lbl">Art galleries</span><span className="ct">{gals.length} within {galRad} mi</span></KypSubhead>
-                              <div className="px-4">
+                              <div>
                               {gals.length > 0 ? (
                                 <div data-testid="list-art-galleries">
                                   {gals.map((g: any, idx: number) => (
@@ -12943,7 +12942,7 @@ export default function RunDetail() {
                   )}
                   <span className="rule" />
                 </KypSubhead>
-                <div className="px-4">
+                <div>
                 {isLoadingPermits ? (
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-3/4" />
@@ -13077,7 +13076,7 @@ export default function RunDetail() {
                       <span className="ct">{dobDerived.professionals.length} · most recent first</span>
                       <span className="rule" />
                     </KypSubhead>
-                    <div className="px-4">
+                    <div>
                     {dobDerived.professionals.map((pro, pi) => {
                       const enr = dobEnrichFor(pro.name);
                       const isExpediter = /EXPEDIT/i.test(pro.role);
@@ -13131,7 +13130,7 @@ export default function RunDetail() {
                   )}
                   <span className="rule" />
                 </KypSubhead>
-                <div className="px-4">
+                <div>
                 {isLoadingViolations ? (
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-3/4" />
@@ -13311,7 +13310,7 @@ export default function RunDetail() {
                               return (
                                 <div id="crime-breakdown">
                                   <KypSubhead subsection={1}><span className="lbl">Around this address</span><span className="ct">trailing 12 mo</span><span className="rule" /></KypSubhead>
-                                  <div className="px-4">
+                                  <div>
                                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 6 }}>
                                     <button type="button" className={`kyp-block count ${blk}`} data-testid="crime-radius-250ft" aria-pressed={crimeRadius === 'nearby'} onClick={() => setCrimeRadius('nearby')}
                                          style={{ cursor: 'pointer', border: 'none', textAlign: 'left', font: 'inherit', boxShadow: crimeRadius === 'nearby' ? '0 0 0 2px var(--kyp-indigoL)' : 'none' }}>
@@ -13352,7 +13351,7 @@ export default function RunDetail() {
                                   <span className="lbl">{facts?.communityArea ? `${facts.communityArea} community area` : 'Community area'}</span>
                                   <span className="ct">per capita · last full year</span><span className="rule" />
                                 </KypSubhead>
-                                <div className="px-4">
+                                <div>
                                 {[
                                   { key: 'violent', label: 'Violent crime · per 1,000 residents', d: crimeTractData.violent },
                                   { key: 'property', label: 'Property & other crime · per 1,000 residents', d: crimeTractData.property },
@@ -13458,7 +13457,7 @@ export default function RunDetail() {
                       return (
                         <div id="transit-glance" data-testid="transit-glance">
                           <KypSubhead className="fam-indigo" subsection={transitSubsections.glance} style={{marginTop:6}}><span className="lbl">Closest Mode of Transport</span><span className="rule"/></KypSubhead>
-                          <div className="px-4">
+                          <div>
                           {<div className="kyp-modes">
                             {/* Bus */}
                             <div className="kyp-mtile" data-testid="glance-mode-bus">
@@ -13533,7 +13532,7 @@ export default function RunDetail() {
                     {transitData.ctaRail.length > 0 && (
                       <div>
                         <KypSubhead className="fam-indigo" subsection={transitSubsections.ctaRail}><span className="lbl">CTA Rail Stations</span><span className="ct">2 mi</span><span className="rule"/></KypSubhead>
-                          <div className="px-4 mt-2">
+                        <div className="mt-2">
                             <div className="space-y-1">
                               {transitData.ctaRail.map((stop, idx) => (
                                 <div key={idx} className="kyp-row" data-testid={`rail-station-row-${idx}`}>
@@ -13559,7 +13558,7 @@ export default function RunDetail() {
                     {transitData.ctaRail.length > 0 && (
                       <div id="transit-ridership">
                         <KypSubhead className="fam-indigo" subsection={transitSubsections.ctaRidership}><span className="lbl">CTA L Ridership</span><span className="rule"/></KypSubhead>
-                          <div className="px-4 mt-2">
+                        <div className="mt-2">
                             {isLoadingRidership ? (
                               <div className="space-y-3">
                                 <Skeleton className="h-6 w-2/3" />
@@ -13746,7 +13745,7 @@ export default function RunDetail() {
                     {/* Metra Ridership */}
                     {nearestMetraStopName && (metraRidershipData || isLoadingMetraRidership || metraLineData) && (
                       <div data-testid="trigger-metra-ridership-subsection">
-                          <div className="px-4 mt-2 space-y-5">
+                          <div className="mt-2 space-y-5">
                             {metraLineData && (() => {
                               const stations = (transitData?.metra ?? []).slice(0, 2);
                               const lineByName = new Map(metraLineData.lines.map((l) => [l.name, l]));
@@ -13960,7 +13959,7 @@ export default function RunDetail() {
                     {transitData.ctaBus.length > 0 && (
                       <div>
                         <KypSubhead className="fam-indigo" subsection={transitSubsections.ctaBus}><span className="lbl">CTA Bus Routes</span><span className="ct">0.5 mi</span><span className="rule"/></KypSubhead>
-                          <div className="px-4 mt-2">
+                          <div className="mt-2">
                             <div className="space-y-1">
                               {transitData.ctaBus.map((stop, idx) => (
                                 <div key={idx} className="kyp-row">
@@ -13978,7 +13977,7 @@ export default function RunDetail() {
                     {transitData.ctaBus.length > 0 && (
                       <div>
                         <KypSubhead className="fam-indigo" subsection={transitSubsections.ctaBusRidership}><span className="lbl">CTA Bus Ridership</span><span className="rule"/></KypSubhead>
-                          <div className="px-4 mt-2">
+                        <div className="mt-2">
                             {isLoadingBusRidership ? (
                               <div className="space-y-3">
                                 <Skeleton className="h-6 w-2/3" />
@@ -14135,7 +14134,7 @@ export default function RunDetail() {
                     {(isLoadingTraffic || trafficData) && (
                       <div>
                         <KypSubhead className="fam-indigo" subsection={transitSubsections.traffic}><span className="lbl">Street Traffic Volume</span><span className="rule"/></KypSubhead>
-                          <div className="px-4 mt-2 pb-4">
+                          <div className="mt-2 pb-4">
                             {isLoadingTraffic ? (
                               <div className="space-y-3">
                                 <Skeleton className="h-6 w-2/3" />
@@ -14241,11 +14240,11 @@ export default function RunDetail() {
                                onMetric={handleMarketMetricBadge}
                              />
                             <KypSubhead subsection={2}><span className="lbl">What Got Funded</span><span className="ct">{whatFundedText}</span></KypSubhead>
-                             <div className="px-4">{stats ? <HMDAMarketMixPanel stats={stats} view={view} /> : <p className="kyp-emptypanel">Funding breakdown is not available for this scope and year.</p>}</div>
+                             <div>{stats ? <HMDAMarketMixPanel stats={stats} view={view} /> : <p className="kyp-emptypanel">Funding breakdown is not available for this scope and year.</p>}</div>
                             <KypSubhead subsection={3}><span className="lbl">Who's Borrowing</span><span className="ct">{borrowingText}</span></KypSubhead>
-                             {hmdaData && <div className="px-4"><div className="kyp-market-buyer"><HMDABuyerProfile hmdaData={hmdaData} scope={scope} year={year} view={view} /></div></div>}
+                             {hmdaData && <div><div className="kyp-market-buyer"><HMDABuyerProfile hmdaData={hmdaData} scope={scope} year={year} view={view} /></div></div>}
                             <KypSubhead subsection={4}><span className="lbl">Active Lenders</span><span className="ct">{lendersText}</span></KypSubhead>
-                             <div className="px-4">{stats ? <HMDALenders lenders={stats.byLender ?? []} view={view} /> : <p className="kyp-emptypanel">Lender records are not available for this scope and year.</p>}</div>
+                             <div>{stats ? <HMDALenders lenders={stats.byLender ?? []} view={view} /> : <p className="kyp-emptypanel">Lender records are not available for this scope and year.</p>}</div>
                             <HMDAResidentialFooter scope={scope} communityArea={facts?.communityArea} tractGeoid={facts?.tractGeoid} />
                           </>;
                         }}
@@ -14257,7 +14256,7 @@ export default function RunDetail() {
                 {facts?.zipCode && (
                   <div id="print-section-transaction-trends">
                   <KypSubhead subsection={5} data-testid="trigger-transaction-trends-subsection"><span className="lbl">Area Transaction Trends</span><span className="ct">Cook County transfer records</span></KypSubhead>
-                      <div className="px-4">
+                      <div>
                       <div className="kyp-market-panel">
                         {transactionTrendsData?.isStale && (
                           <p className="text-xs text-muted-foreground" role="status" data-testid="transaction-trends-stale">
@@ -14396,7 +14395,7 @@ export default function RunDetail() {
                 {(compsData || isLoadingComps) && compPropertyClass && (
                   <div id="print-section-comparable-sales">
                     <KypSubhead subsection={6} data-testid="trigger-recently-sold-comps"><span className="lbl">Recently Sold Comps</span><span className="ct">within {compsData?.searchParams?.radiusMiles ?? 0.75} mi · class-matched</span></KypSubhead>
-                        <div className="px-4">
+                        <div>
                         <div className="kyp-market-panel">
                           <ComparableSalesView
                             compsData={compsData}
@@ -14412,7 +14411,7 @@ export default function RunDetail() {
                   <div id="print-section-sba-loans">
                     <SBAKpiStrip data={sbaLoansData} isLoading={isLoadingSBALoans} zipCode={facts.zipCode} />
                     <KypSubhead subsection={7} data-testid="trigger-sba-loans-subsection"><span className="lbl">Commercial Lending — SBA 504</span><span className="ct">owner-occupied CRE · borrower, not property address</span></KypSubhead>
-                      <div className="px-4">
+                      <div>
                       <div className="kyp-market-panel">
                         <SBALoansView
                           data={sbaLoansData}
@@ -14464,7 +14463,7 @@ export default function RunDetail() {
                           <div className="kyp-content">
                             {/* ── Subsection 1: Site-Specific Coverage — always rendered; an explicit "none" is a real finding ── */}
                                 <KypSubhead className="fam-slate" subsection={1}><span className="lbl">Site-Specific Coverage</span><span className="ct">{hasSite ? siteCount : 0}</span><span className="rule" /></KypSubhead>
-                                <div className="px-4">
+                                <div>
                                 {!hasSite ? (
                                   <div className="kyp-empty" data-testid="news-site-empty">No news coverage names this property.</div>
                                 ) : genSite ? (
@@ -14501,7 +14500,7 @@ export default function RunDetail() {
                             {hasNeighborhood && (
                               <>
                                 <KypSubhead className="fam-slate" subsection={2} id="print-section-neighborhood-news" style={{ marginTop: 34 }}><span className="lbl">Neighborhood News</span><span className="ct">{facts?.communityArea} · past year</span><span className="rule" /></KypSubhead>
-                                <div className="px-4">
+                                <div>
                                 {isLoadingNeighborhoodNews ? (
                                   <div className="space-y-2">
                                     <Skeleton className="h-4 w-3/4" />
@@ -14715,7 +14714,7 @@ export default function RunDetail() {
                   ? `ZIP ${languageZipData?.zipCode ?? facts?.zipCode ?? ''}`
                   : languageData?.communityArea ?? facts?.communityArea ?? 'Unavailable'}</span>
               </KypSubhead>
-              <div className="px-4">
+              <div>
               <div className="kyp-segrow">
                 <div className="kyp-seg" data-testid="tabs-languages-view">
                   <button type="button" className={languagesViewMode === "zip" ? "on" : ""} onClick={() => setLanguagesViewMode("zip")} data-testid="tab-languages-zip">By ZIP Code</button>
@@ -14805,7 +14804,7 @@ export default function RunDetail() {
                   ? `ZIP ${facts?.zipCode || 'unavailable'}`
                   : `Census Tract ${facts?.tractGeoid || 'unavailable'}`} · 2014–2018 vs 2019–2023</span>
               </KypSubhead>
-              <div className="px-4">
+              <div>
               <div className="space-y-4">
 
                   {/* ACS demographics — ZIP ⇄ Census Tract toggle (mirrors the HMDA scope control). Community Area removed: Chicago Data Portal snapshot was incomplete. */}
@@ -14892,7 +14891,7 @@ export default function RunDetail() {
                       <span className="lbl">Daytime Economy</span>
                       <span className="ct">Census Tract {facts?.tractGeoid || "unavailable"}</span>
                     </KypSubhead>
-                    <div className="px-4">
+                    <div>
                       {isLoadingLodes ? (
                         <div className="space-y-2">
                           <Skeleton className="h-4 w-full" />
@@ -14962,7 +14961,7 @@ export default function RunDetail() {
                 <span className="lbl" data-testid="text-political-title">Voting &amp; Civic</span>
                 <span className="ct">Community Area {facts?.communityArea || "unavailable"} · not rated</span>
               </KypSubhead>
-              <div className="px-4">
+              <div>
                   {isLoadingElection ? (
                     <div className="space-y-3">
                       <Skeleton className="h-6 w-2/3" />
@@ -15092,7 +15091,7 @@ export default function RunDetail() {
               <span className="lbl">Places of Worship</span>
               <span className="ct">{placesOfWorshipData?.totalCount ?? "—"} within 1 mile</span>
             </KypSubhead>
-            <div className="px-4 pb-2">
+            <div className="pb-2">
                   {isLoadingPlacesOfWorship ? (
                     <div className="space-y-2">
                       <Skeleton className="h-4 w-1/3" />

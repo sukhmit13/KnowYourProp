@@ -152,17 +152,17 @@ test("Google Places counts verified distances, retains unknown rows separately, 
   assert.doesNotMatch(markup, /class="kyp-scopenote"/);
 });
 
-test("Google Places subsection content keeps the px-4 inset in ready and every availability state", () => {
+test("Google Places content stays flush in ready and every availability state", () => {
   const states = [
-    <ProjectUseGoogleMaps contentInset confirmed data={{ places: [{ name: "Cafe", address: "1 Main St", distanceMiles: 0.4 }], count: 1 }} />,
-    <ProjectUseGoogleMaps contentInset />,
-    <ProjectUseGoogleMaps contentInset confirmed isLoading />,
-    <ProjectUseGoogleMaps contentInset confirmed isError />,
-    <ProjectUseGoogleMaps contentInset confirmed data={{ places: [], totalFound: 0 }} />,
+    <ProjectUseGoogleMaps confirmed data={{ places: [{ name: "Cafe", address: "1 Main St", distanceMiles: 0.4 }], count: 1 }} />,
+    <ProjectUseGoogleMaps />,
+    <ProjectUseGoogleMaps confirmed isLoading />,
+    <ProjectUseGoogleMaps confirmed isError />,
+    <ProjectUseGoogleMaps confirmed data={{ places: [], totalFound: 0 }} />,
   ];
   for (const state of states) {
     const markup = renderToStaticMarkup(state);
-    assert.match(markup, /^<div class="px-4">/);
+    assert.doesNotMatch(markup, /^<div class="(?:px|pl|pr)-4(?:\s|")/);
     assert.match(markup, /class="kyp-src"/);
   }
 });

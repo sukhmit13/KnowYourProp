@@ -373,7 +373,7 @@ export function CountyRecordSection({
   const modelled = isCommercial && commercial ? (
     <div data-testid="county-record-modelled">
       <KypSubhead subsection={2}><span className="lbl">How the assessor valued it</span><span className="ct">{taxYear ? `assessment year ${taxYear}` : "commercial assessment"}</span></KypSubhead>
-      <div className="px-4">
+      <div>
       <div className="kyp-modhd"><span className="t">Modelled valuation inputs</span><span className="w">These are <b>inputs to the assessor’s valuation model</b>, not operating results. Do not underwrite from them.</span></div>
       <div className="kyp-facts modelled">
         <div className="kyp-fact"><div className="kyp-fl">Market value</div><div className="kyp-fv dnum">{fmtMoney(commercial.marketValue)}</div><div className="kyp-fs">{commercial.marketValuePerSf != null ? `Value/SF · $${commercial.marketValuePerSf}` : "Value/SF · Not recorded"}{commercial.marketValuePerUnit != null ? ` · Value/Unit · ${fmtMoney(commercial.marketValuePerUnit)}` : ""}</div></div>
@@ -419,7 +419,7 @@ export function CountyRecordSection({
         {taxYear && <span className="ct">assessment year {taxYear}</span>}
         {submittedPin && <button type="button" className="kyp-morelink no-print kyp-parcel-refresh" data-testid="button-refresh-parcel-record" onClick={() => refreshPropertyTax.mutate(submittedPin)} disabled={refreshPropertyTax.isPending}><RefreshCw className={refreshPropertyTax.isPending ? "animate-spin" : ""} /> Refresh</button>}
       </KypSubhead>
-      <div className="px-4">
+      <div>
       <div className="kyp-tiles">
         <Tile label="Land" value={landSf !== null ? fmtNumber(landSf) : "—"} sub={landSf !== null ? "sq ft" : "not recorded"} tone="ind" />
         <Tile label="Building" value={buildingSf !== null ? fmtNumber(buildingSf) : "—"} sub={buildingSf !== null ? "sq ft" : "not recorded"} />

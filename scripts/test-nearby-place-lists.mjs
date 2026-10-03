@@ -40,13 +40,13 @@ function Fixture(){
  const [state,setState]=React.useState({key:"initial",evMode:"ready"});
  window.setNearbyFixture=value=>setState(s=>({...s,...value}));
  const row=(id,index,title,child)=>e(AccordionSection,{id,index,eyebrow:title,open:true,onToggle:()=>{},verdict:"context",takeaway:"Nearby list presentation check"},child);
-  // Mirror the report's full-width heading and existing px-4 body treatment.
-  const subsection=(title,body,wrap=true)=>e(React.Fragment,null,e(KypSubhead,{subsection:1},e("span",{className:"lbl"},title)),wrap?e("div",{className:"px-4"},body):body);
+  // Mirror the report's full-width heading and flush subsection body.
+  const subsection=(title,body,wrap=true)=>e(React.Fragment,null,e(KypSubhead,{subsection:1},e("span",{className:"lbl"},title)),wrap?e("div",null,body):body);
  return e("div",{className:"kyp-report",style:{maxWidth:1100,margin:"20px auto",padding:"0 12px"}},
    row("nearby",1,"Licensed filling stations",subsection("Licensed filling stations",e("div",{id:"nearby-places",className:"space-y-4"},
    e(ProjectUseCountBlocks,{counts:[{value:6,label:"Within 3 miles"}]}),
     e(ProjectUseBusinessList,{rows:nearby,listKey:state.key})))),
-   row("competitors",2,"Nearby competitors",subsection("Nearby competitors",e("div",{id:"nearby-competitors"},e(ProjectUseGoogleMaps,{contentInset:true,confirmed:true,data:{places,count:places.length,searchTerm:state.key}})),false)),
+   row("competitors",2,"Nearby competitors",subsection("Nearby competitors",e("div",{id:"nearby-competitors"},e(ProjectUseGoogleMaps,{confirmed:true,data:{places,count:places.length,searchTerm:state.key}})),false)),
    row("ev",3,"EV charging stations",subsection("EV Charging",e("div",{id:"nearby-ev"},e(EVChargingTable,{stations:state.evMode==="empty"?[]:stations,loading:state.evMode==="loading",error:state.evMode==="error",onRetry:()=>window.evRetried=true})))),
   row("control",4,"Unchanged record styles",e("div",{id:"unchanged-control",className:"kyp-biz-card"},e("b",null,"Other Record Name"),e("span",{className:"kyp-biz-distance"},"2025"))),
   row("daycare",5,"Childcare and daycare",e(DaycareAnalysis,{scope:"zip",onScopeChange:()=>{},areaData:null,enhancedData:null,capacityData:null,zipCode:"60660",
@@ -86,8 +86,7 @@ try {
     const foods = page.locator("#nearby-ev").locator(rowSelector).filter({ hasText: "Whole Foods Market" });
     assert.match(await foods.innerText(), /Access: Mon–Sun 8am–10pm/);
     assert.doesNotMatch(await foods.innerText(), /Tue:|Wed:|Thu:/);
-    // The subsection inset narrows the row; allow one natural metadata wrap.
-    if (width >= 1200) assert.ok(await foods.evaluate(row => row.getBoundingClientRect().height) < 64, "Whole Foods stays compact with the subsection inset");
+    if (width >= 1200) assert.ok(await foods.evaluate(row => row.getBoundingClientRect().height) < 42, "Whole Foods fits a single wide desktop row");
     assert.equal(await page.locator("#nearby-places").locator(`${rowSelector} ~ ${rowSelector}`).evaluateAll(rows =>
       rows.every(row => getComputedStyle(row).marginTop === "0px")), true, "Outer space-y-4 does not add gaps between filling-station rows");
     const daycare = page.locator("#print-section-nearby-business-daycare-centers");
@@ -100,16 +99,16 @@ try {
         const content = section.querySelector(".kyp-blocks").getBoundingClientRect();
         return {left: content.left-heading.left, right: heading.right-content.right};
       });
-      assert.deepEqual(inset,{left:16,right:16},"Subsection content has one consistent inset beneath its full-width heading");
+      assert.deepEqual(inset,{left:0,right:0},"Subsection content aligns flush with its full-width heading");
     }
     for (const body of await page.locator("#section-daycare .kyp-subhead").all()) {
       const inset = await body.evaluate(heading => {
         const wrapper=heading.nextElementSibling;
         const rect=heading.getBoundingClientRect();
-        const content=wrapper.firstElementChild.getBoundingClientRect();
+        const content=wrapper.getBoundingClientRect();
         return {left:content.left-rect.left,right:rect.right-content.right};
       });
-      assert.deepEqual(inset,{left:16,right:16},"Daycare numbered subsection content has the same inset");
+      assert.deepEqual(inset,{left:0,right:0},"Daycare numbered subsection bodies align flush with their headings");
     }
     for (const selector of ["#nearby-places", "#nearby-competitors", "#nearby-ev"]) {
       const fonts = await page.locator(selector).locator(rowSelector).first().evaluate(row => {
@@ -140,6 +139,7 @@ try {
     await page.waitForFunction(() => document.querySelectorAll("#nearby-competitors .kyp-project-use-nearby-row").length === 10);
     await page.locator("#section-ev").screenshot({ path: `/tmp/nearby-ev-${width}.png` });
     await page.locator("#section-nearby").screenshot({ path: `/tmp/nearby-places-${width}.png` });
+    await page.locator("#section-competitors").screenshot({ path: `/tmp/nearby-competitors-${width}.png` });
     await page.evaluate(() => window.setNearbyFixture({ evMode: "error" }));
     await page.locator("#nearby-ev").getByRole("alert").waitFor();
     await page.locator("#nearby-ev").getByRole("button", { name: "Retry" }).click();

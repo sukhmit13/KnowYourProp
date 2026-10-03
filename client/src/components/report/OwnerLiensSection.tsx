@@ -41,7 +41,7 @@ export function OwnerLiensSection({
         <span className="rule" />
       </KypSubhead>
 
-      <div className="px-4">
+      <div>
         <div className="kyp-owner-lien-tools">
           <div>
             <span className="tool-label">Name searched</span>

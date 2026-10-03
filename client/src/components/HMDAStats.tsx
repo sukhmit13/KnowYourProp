@@ -580,7 +580,7 @@ export function HMDAFinancingStats({ hmdaData, communityArea, tractGeoid, isLoad
           )}
 
           <KypSubhead subsection={1}><span className="lbl">Market Position</span><span className="ct">{activeScope === 'tract' ? `Census Tract ${tractGeoid || 'selected'}` : `Community Area ${communityArea || 'selected'}`} vs. the city</span></KypSubhead>
-          <div className="px-4">
+          <div>
           {(() => {
             const rankData: HmdaRank | null = activeScope === 'tract'
               ? yearData?.tractRank ?? null

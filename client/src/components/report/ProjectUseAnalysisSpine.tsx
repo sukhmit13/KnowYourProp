@@ -223,7 +223,6 @@ export interface ProjectUseGoogleMapsProps {
   isLoading?: boolean;
   isError?: boolean;
   confirmed?: boolean;
-  contentInset?: boolean;
   searchTerm?: string;
   footer?: ReactNode;
   onRetry?: () => void;
@@ -273,7 +272,6 @@ export function ProjectUseGoogleMaps({
   isLoading = false,
   isError = false,
   confirmed = false,
-  contentInset = false,
   searchTerm,
   footer,
   onRetry,
@@ -325,7 +323,7 @@ export function ProjectUseGoogleMaps({
   const loading = confirmed && !isError && (isLoading || status === "pending" || status === "loading");
 
   return (
-    <div className={contentInset ? "px-4" : undefined}>
+    <>
       {ready ? (
         <>
           <ProjectUseCountBlocks counts={[
@@ -364,6 +362,6 @@ export function ProjectUseGoogleMaps({
         )
       )}
       <GoogleMapsSource footer={footer} adjustedRating={adjustedRating} unknownCount={unknownCount} />
-    </div>
+    </>
   );
 }

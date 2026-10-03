@@ -241,7 +241,7 @@ export function DaycareAnalysis({
       />
       <section id="print-section-childcare">
         <KypSubhead subsection={subsections.supply}><span className="lbl">Childcare Supply</span><span className="ct">licensed slots · children under 5</span></KypSubhead>
-        <div className="px-4">
+        <div>
         {isAccessLoading ? <div className="space-y-3" aria-label="Loading childcare supply"><div className="h-8 w-2/3 animate-pulse rounded-md bg-muted" /><div className="h-16 w-full animate-pulse rounded-md bg-muted" /></div>
           : isAccessError ? <div className="kyp-status-empty" role="alert">Childcare supply records could not be loaded.<div className="kyp-btnrow"><RetryButton onRetry={onAccessRetry} /></div></div>
           : areaData ? <ChildcareDemandMeter data={areaData} locationLabel={currentArea} supplyRank={supplyRank} />
@@ -251,7 +251,7 @@ export function DaycareAnalysis({
 
       <section id="print-section-childcare-demographics">
         <KypSubhead subsection={subsections.demographics}><span className="lbl">Demographics &amp; Labor Force</span><span className="ct">American Community Survey</span></KypSubhead>
-        <div className="px-4">
+        <div>
         {isEnhancedLoading ? <div className="space-y-3" aria-label="Loading demographic records"><div className="h-8 w-full animate-pulse rounded-md bg-muted" /><div className="h-8 w-4/5 animate-pulse rounded-md bg-muted" /></div>
           : isEnhancedError && !enhancedData ? <div className="kyp-status-empty" role="alert">ACS demographic records could not be loaded.<div className="kyp-btnrow"><RetryButton onRetry={onEnhancedRetry} /></div></div>
           : enhancedData ? (
@@ -340,7 +340,7 @@ export function DaycareAnalysis({
 
       <section id="print-section-daycare-estimator">
         <KypSubhead subsection={subsections.estimator}><span className="lbl">Slot Gap Estimator</span><span className="ct">target scenarios</span></KypSubhead>
-        <div className="px-4">
+        <div>
         {areaData ? (
           <>
             <ProjectUseCountBlocks counts={[
@@ -367,7 +367,7 @@ export function DaycareAnalysis({
 
       <section id="print-section-childcare-capacity">
         <KypSubhead subsection={subsections.ccap}><span className="lbl">CCAP Participation</span><span className="ct">FY 2024</span></KypSubhead>
-        <div className="px-4">
+        <div>
         {isCapacityLoading ? <div className="space-y-3" aria-label="Loading CCAP records"><div className="h-8 w-full animate-pulse rounded-md bg-muted" /><div className="h-8 w-3/5 animate-pulse rounded-md bg-muted" /></div>
           : isCapacityError && !capacityData ? <div className="kyp-status-empty" role="alert">CCAP participation records could not be loaded.<div className="kyp-btnrow"><RetryButton onRetry={onCapacityRetry} /></div></div>
           : capacityData ? (
@@ -410,7 +410,7 @@ export function DaycareAnalysis({
 
       <section id="print-section-site-daycare-details">
         <KypSubhead subsection={subsections.capacity}><span className="lbl">Site Capacity</span><span className="ct">this building</span></KypSubhead>
-        <div className="px-4">
+        <div>
         <div className="kyp-blocks hero two">
           <div className="kyp-block ind">
           <div className="bv">{hasBuildingArea ? Math.floor((buildingSqFt as number) / 75).toLocaleString() : "—"}</div>
@@ -466,7 +466,7 @@ export function DaycareAnalysis({
 
       <section id="print-section-nearby-business-daycare-centers">
         <KypSubhead subsection={subsections.licensed}><span className="lbl">Licensed Competitors</span><span className="ct">City business-license records</span></KypSubhead>
-        <div className="px-4">
+        <div>
         {isNearbyLoading ? <div className="space-y-3" aria-label="Loading licensed daycare records"><div className="h-8 w-full animate-pulse rounded-md bg-muted" /><div className="h-8 w-4/5 animate-pulse rounded-md bg-muted" /></div>
           : isNearbyError ? <div className="kyp-status-empty" role="alert">City business-license daycare records could not be loaded.<div className="kyp-btnrow"><RetryButton onRetry={onNearbyRetry} /></div></div>
             : nearbyData ? (
@@ -487,7 +487,6 @@ export function DaycareAnalysis({
       <section id="section-google-places-daycare">
         <KypSubhead subsection={subsections.maps}><span className="lbl">Google Maps Competitors</span><span className="ct">Google Places</span></KypSubhead>
         <ProjectUseGoogleMaps
-          contentInset
           data={googleData}
           isLoading={isGoogleLoading}
           isError={isGoogleError}

@@ -32,7 +32,7 @@ test("supply rank is shown only when its source value matches the supply record"
   assert.equal(daycareSupplyRankMatches(null, 55, 55), false);
 });
 
-test("every daycare numbered subsection places its complete body inside the standard inset", () => {
+test("every daycare numbered subsection body aligns flush beneath its heading", () => {
   const markup = renderToStaticMarkup(
     <DaycareAnalysis
       scope="zip"
@@ -55,7 +55,7 @@ test("every daycare numbered subsection places its complete body inside the stan
     "print-section-nearby-business-daycare-centers",
     "section-google-places-daycare",
   ]) {
-    assert.equal($(`#${id}`).children().eq(1).hasClass("px-4"), true, `${id} body should be inset beneath its full-width subhead`);
+    assert.equal($(`#${id}`).children().eq(1).hasClass("px-4"), false, `${id} body should align flush beneath its full-width subhead`);
   }
 });
 

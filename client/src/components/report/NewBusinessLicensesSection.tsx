@@ -71,7 +71,7 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
         <span className="ct">distinct businesses · select to filter</span>
         <span className="rule" />
       </KypSubhead>
-      <div className="px-4">
+      <div>
         <div className="kyp-biz-mix">
           {rankedMix.slice(0, 8).map(([label, count]) => {
             const active = filter === label;
@@ -91,7 +91,7 @@ export function NewBusinessLicensesSection({ data, isLoading, isError }: Props) 
         <span className="ct">nearest first · each business counted once</span>
         <span className="rule" />
       </KypSubhead>
-      <div className="px-4">
+      <div>
         <div className="kyp-biz-list">
           {visible.map((business, index) => {
             const earliest = business.licenses.reduce((oldest, license) => !oldest || license.startDate < oldest ? license.startDate : oldest, "");
