@@ -83,3 +83,10 @@ Section-level navigation and print selection must target the actual accordion ro
 **Why:** A matching zoning label concealed a target pointing to the district summary card rather than the full section; success-only nearby-license anchors also disappeared when no records were available.
 
 **How to apply:** Check the actual target's DOM scope, verify include/exclude behavior for the whole row, and confirm unrelated context cards and sibling sections remain unaffected.
+
+## Source-footer consistency
+Keep the light-gray source citations and section-ending explanations at one consistent, readable size throughout the report.
+
+**Why:** The user requested a size just above the smaller News example and below the oversized Professional Record example, applied to every section rather than tuned individually.
+
+**How to apply:** Reuse the shared source-note treatment for new sections; check both direct text and nested paragraphs, including print, without shrinking ordinary body text.

@@ -50,7 +50,14 @@
 
 .kyp-stat{font-family:var(--kyp-disp);font-size:clamp(28px,3vw,38px);line-height:1;color:var(--kyp-ink)}
 .kyp-label{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kyp-ink2)}
-.kyp-src{font-family:var(--kyp-mono);font-size:10.5px;color:var(--kyp-muted);line-height:1.45;margin-top:12px;border-top:1px solid var(--kyp-line);padding-top:9px}
+.kyp-src{font-family:var(--kyp-mono);font-size:11.5px;color:var(--kyp-muted);line-height:1.45;margin-top:12px;border-top:1px solid var(--kyp-line);padding-top:9px}
+.kyp-src p,.kyp-src span,.kyp-src a{font-size:11.5px}
+/* A source note can sit inside .subsection-text, whose paragraph/list ramp is
+   intentionally larger. Keep the note's own copy and inline links uniform. */
+.subsection-text .kyp-src,
+.subsection-text .kyp-src p,
+.subsection-text .kyp-src span,
+.subsection-text .kyp-src a{font-size:11.5px}
 .kyp-construction-notes p{margin:0}
 .kyp-construction-notes p+p{margin:8px 0 0}
 .kyp-body{font-family:var(--kyp-sans);font-size:14px;line-height:1.5;color:var(--kyp-ink2)}
@@ -612,9 +619,9 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-cxcta .h{font-size:12.5px;font-weight:600;color:var(--kyp-ink);line-height:1.3}
 .kyp-cxcta .s{font-size:11px;color:var(--kyp-ink2);margin-top:2px}
 .kyp-cxcta .arr{color:var(--kyp-indigo);font-size:13px;flex:none;margin-left:auto}
-.kyp-cxfoot{font-size:11.5px;color:var(--kyp-muted);line-height:1.5;margin-top:14px;padding-top:12px;border-top:1px solid var(--kyp-line)}
+.kyp-cxfoot{line-height:1.5;margin-top:14px;padding-top:12px;border-top:1px solid var(--kyp-line)}
 .kyp-cxfoot a{color:var(--kyp-indigo);text-decoration:none;border-bottom:1px solid var(--kyp-indigoSoft)}
-.kyp-cxfoot .pin{font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-ink2)}
+.kyp-cxfoot .pin{font-family:var(--kyp-mono);color:var(--kyp-ink2)}
 .kyp-cxlink{display:inline-flex;align-items:center;gap:5px;font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--kyp-indigo);text-decoration:none;margin-top:11px}
 
 /* ---- Step 6: Permits & Violations hybrid ---- */

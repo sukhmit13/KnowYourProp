@@ -5129,7 +5129,7 @@ export default function RunDetail() {
                               <div key={i} className="kyp-cxb"><span className="dot"></span><span><b>{b.bold}</b> {b.text}</span></div>
                             ))}
                           </div>
-                          <div className="kyp-cxfoot">
+                          <div className="kyp-src kyp-cxfoot">
                             Data may not reflect recent rezonings.{' '}
                             <a href="https://gisapps.chicago.gov/ZoningMapWeb/?liab=1&config=zoning" target="_blank" rel="noopener noreferrer">Verify on the official map</a>
                             {' '}— search by {submittedPin ? (
@@ -9014,7 +9014,7 @@ export default function RunDetail() {
                             </div>
                           )}
 
-                          <div className="lmk-src">
+                          <div className="kyp-src lmk-src">
                             <a href="https://www.chicago.gov/city/en/depts/dcd/provdrs/hist.html" target="_blank" rel="noopener noreferrer">
                               <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>
                               Historic Preservation Division
@@ -11776,7 +11776,7 @@ export default function RunDetail() {
                                     </div>
                                   )}
 
-                                  <div className="abz-src">
+                                  <div className="kyp-src abz-src">
                                     Source: <a href={airbnbData.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Inside Airbnb</a> · {facts.communityArea} · snapshot {airbnbData.dataDate} · prices are average <em>listed</em> (not per-night booked) · occupancy estimated from availability_365
                                   </div>
                                 </div>
@@ -12667,7 +12667,7 @@ export default function RunDetail() {
                                       </div>
                                     )}
 
-                                    <div className="src">
+                                    <div className="kyp-src">
                                       Within {radius} mi · Source: {schoolsData?.dataSource} · <b>Boundary</b> = the school has an attendance area, not that this address falls inside it; address-level assignment has not been checked. <b>Open Enrollment</b> = application / lottery. Ratings are CPS School Quality Rating Policy (SQRP) levels — Level 1+ highest, then Level 1.
                                     </div>
                                   </>
@@ -14328,7 +14328,7 @@ export default function RunDetail() {
 
                               {/* ZIP ranking intentionally removed: only render a rank when benchmarked against N>1 real ZIPs (backend currently compares the ZIP against itself). */}
 
-                              <p className="ttfoot">Describes ZIP {facts?.zipCode}, not this address. Counts are transaction volume, not price. Median price is the most recent complete year only. Source: Cook County Assessor parcel sales.</p>
+                              <div className="kyp-src ttfoot">Describes ZIP {facts?.zipCode}, not this address. Counts are transaction volume, not price. Median price is the most recent complete year only. Source: Cook County Assessor parcel sales.</div>
                             </div>
                           );
                         })() : (

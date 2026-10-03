@@ -464,7 +464,12 @@ body[data-print-expanding] .recharts-responsive-container > .recharts-wrapper > 
   h2 { font-size: 13pt !important; font-weight: 700 !important; }
   h3 { font-size: 11pt !important; font-weight: 600 !important; }
   h4 { font-size: 10pt !important; font-weight: 600 !important; }
-  p, li, td, th, span, div { font-size: 9.5pt !important; }
+  p:not(.kyp-src):not(.kyp-src *),
+  li:not(.kyp-src):not(.kyp-src *),
+  td:not(.kyp-src):not(.kyp-src *),
+  th:not(.kyp-src):not(.kyp-src *),
+  span:not(.kyp-src):not(.kyp-src *),
+  div:not(.kyp-src):not(.kyp-src *) { font-size: 9.5pt !important; }
 
   /* ─── TABLES ─────────────────────────────────────────────────────── */
   table {
@@ -1125,7 +1130,7 @@ body[data-print-expanding] .recharts-responsive-container > .recharts-wrapper > 
 .ttbox .yc .n{font-family:var(--font-serif);font-size:26px;color:#141414;line-height:1;margin-bottom:8px;font-variant-numeric:tabular-nums}
 .ttbox .yc .chg{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-jbmono);font-size:12px;font-weight:700;color:#54544f}
 .ttbox .yc .chg svg{width:13px;height:13px;stroke:#54544f;fill:none}
-.ttbox .ttfoot{font-family:var(--font-jbmono);font-size:10.5px;color:#8b8a84;line-height:1.5}
+.ttbox .ttfoot{line-height:1.5}
 .ttbox .ttfoot b{color:#54544f}
 @media(max-width:760px){.ttbox .yoy{grid-template-columns:1fr 1fr}}
 
@@ -1563,7 +1568,7 @@ body[data-print-expanding] .recharts-responsive-container > .recharts-wrapper > 
 .abz-occ i{display:block;height:100%;background:var(--indigo)}
 .abz-season{font-size:12px;color:var(--ink2);margin-top:14px}
 .abz-season b{color:var(--ink)}
-.abz-src{font-size:10.5px;color:var(--na);margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.abz-src{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 
 /* ── Historic Landmark Status (lmk-), built to spec ── */
 .lmk-tag{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px 4px 11px;color:#fff}
@@ -1587,7 +1592,7 @@ body[data-print-expanding] .recharts-responsive-container > .recharts-wrapper > 
 .lmk-b .dot{width:5px;height:5px;border-radius:50%;flex:none;margin-top:6px}
 .lmk-b.con .dot{background:var(--caution)}.lmk-b.up .dot{background:var(--good)}.lmk-b.neu .dot{background:#9aa1b0}
 .lmk-b b{color:var(--ink);font-weight:600}
-.lmk-src{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px;color:var(--na);margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.lmk-src{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .lmk-src a{color:var(--indigo);text-decoration:none;font-weight:500;display:inline-flex;align-items:center;gap:5px}
 .lmk-src a:hover{text-decoration:underline}
 .lmk-src a svg{width:12px;height:12px;stroke:var(--indigo);fill:none}
@@ -2075,7 +2080,7 @@ body[data-print-expanding] .recharts-responsive-container > .recharts-wrapper > 
 .schbox .assigned svg{width:11px;height:11px;fill:var(--indigo);stroke:none}
 .schbox .sdist{font-family:var(--font-jbmono);font-size:10.5px;color:var(--ink2);white-space:nowrap}
 .schbox .sgrades{font-family:var(--font-jbmono);font-size:10.5px;color:var(--na);margin-top:5px}
-.schbox .src{font-family:var(--font-jbmono);font-size:10px;color:var(--na);margin-top:16px;line-height:1.5}
+.schbox .kyp-src{margin-top:10px;padding-top:8px}
 @media(max-width:640px){.schbox .g2{grid-template-columns:1fr}}
 
 /* ── Entertainment & Culture section (ecbox) — spec: report-entculture reference ── */
@@ -2354,7 +2359,6 @@ body[data-print-expanding] .recharts-responsive-container > .recharts-wrapper > 
 .schbox .step23-list-row .lvl,.schbox .step23-list-row .acc{font-size:8px;line-height:1.2;padding:2px 7px;white-space:nowrap}
 .schbox .step23-list-row .step23-meta,#print-section-worship .step23-list-row .step23-meta{font-size:11.5px;color:var(--kyp-muted);flex:1}
 .schbox .step23-list-row .step23-distance{font-family:var(--kyp-mono);font-size:11px;color:var(--kyp-muted);white-space:nowrap;margin-left:auto}
-.schbox .src{font-size:9.5px;line-height:1.5;margin-top:10px;padding-top:8px;border-top:1px solid var(--kyp-line)}
 
 .ecbox .kyp-blocks.hero.three{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
 .ecbox .kyp-block{min-width:0;border-radius:12px}
