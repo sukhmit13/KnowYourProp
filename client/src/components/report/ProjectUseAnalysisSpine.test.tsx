@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
@@ -16,7 +17,9 @@ test("business rows use one name link, a place URL or Chicago Maps search, plain
   );
   assert.equal((place.match(/<a\b/g) ?? []).length, 1);
   assert.match(place, /href="https:\/\/www\.google\.com\/maps\/place\/Matchbox"/);
-  assert.match(place, /<span class="addr">770 N Milwaukee Ave<\/span>/);
+  assert.match(place, /class="kyp-project-use-nearby-address">770 N Milwaukee Ave<\/span>/);
+  assert.match(place, /class="kyp-project-use-nearby-name">Matchbox<\/b>/);
+  assert.match(place, /class="kyp-project-use-nearby-row"/);
   assert.match(place, /0\.2 mi/);
   assert.match(place, /0 reviews/);
 
@@ -28,6 +31,14 @@ test("business rows use one name link, a place URL or Chicago Maps search, plain
   assert.doesNotMatch(search, /999/);
 });
 
+test("shared nearby row typography is scoped and matches the approved compact scale", () => {
+  const css = readFileSync("client/src/kyp-base.css", "utf8");
+  assert.match(css, /\.kyp-project-use-nearby-name\{[^}]*font-size:13\.5px;font-weight:600/);
+  assert.match(css, /\.kyp-project-use-nearby-address\{font-size:11\.5px;color:var\(--kyp-muted\)/);
+  assert.match(css, /\.kyp-project-use-nearby-distance\{[^}]*font-size:11px/);
+  assert.doesNotMatch(css, /\.kyp-biz-card\{[^}]*kyp-project-use-nearby/);
+});
+
 test("business list caps initial rows and exposes the visible count and expand affordance", () => {
   const rows = Array.from({ length: 12 }, (_, index) => ({
     name: `Business ${index + 1}`,
@@ -35,7 +46,7 @@ test("business list caps initial rows and exposes the visible count and expand a
     distance: index / 10,
   }));
   const markup = renderToStaticMarkup(<ProjectUseBusinessList rows={rows} />);
-  assert.equal((markup.match(/class="kyp-biz-card"/g) ?? []).length, 10);
+  assert.equal((markup.match(/class="kyp-project-use-nearby-row"/g) ?? []).length, 10);
   assert.equal((markup.match(/<a\b/g) ?? []).length, 10);
   assert.match(markup, /Showing 10 of 12/);
   assert.match(markup, /\+ Show all 12/);
@@ -103,7 +114,7 @@ test("Google Places caps at ten and reports unconfirmed, pending, error, and emp
   const populated = renderToStaticMarkup(
     <ProjectUseGoogleMaps confirmed data={{ places, count: 12, avgRating: null }} />,
   );
-  assert.equal((populated.match(/class="kyp-biz-card"/g) ?? []).length, 10);
+  assert.equal((populated.match(/class="kyp-project-use-nearby-row"/g) ?? []).length, 10);
   assert.match(populated, /Showing 10 of 12/);
   assert.match(populated, /Average rating/);
   assert.match(populated, /<div class="bv">—<\/div>/);

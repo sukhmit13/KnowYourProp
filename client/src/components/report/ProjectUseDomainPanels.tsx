@@ -393,26 +393,31 @@ export function EVChargingTable({ stations, loading, error, onRetry }: {
   const unique = deduplicateChargingStations(stations);
   const rows = unique.filter(station => !validChargingDistance(station.distanceMiles) || station.distanceMiles <= 3);
   const radiusCount = (radius: number) => unique.filter(station => validChargingDistance(station.distanceMiles) && station.distanceMiles <= radius).length;
-  const mapsLink = (station: typeof unique[number]) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${station.name}, ${station.address}, Chicago, IL`)}`;
+  const confirmedDate = (value: string | null | undefined) => value
+    ? value.split(" · ").map(date => Number.isFinite(new Date(date).getTime())
+      ? new Date(date).toLocaleDateString("en-US", /^\d{4}-\d{2}-\d{2}$/.test(date) ? { timeZone: "UTC" } : undefined)
+      : date).join(" · ")
+    : "Unknown";
+  const rowsData: ProjectUseBusinessListRow[] = rows.map(station => ({
+    name: station.name,
+    address: station.address,
+    distance: validChargingDistance(station.distanceMiles) ? station.distanceMiles : null,
+    meta: [
+      `Network: ${station.evNetwork || "Unknown"}`,
+      `Level 2 ports: ${station.evLevel2Count ?? "Unknown"}`,
+      `DC fast ports: ${station.dcFastCount ?? "Unknown"}`,
+      `Access: ${station.accessDays || "Unknown"}`,
+      `Confirmed: ${confirmedDate(station.dateLastConfirmed)}`,
+    ],
+  }));
   return <>
     <ProjectUseCountBlocks counts={[
       { value: radiusCount(1), label: "Within 1 mile" },
       { value: radiusCount(2), label: "Within 2 miles" },
       { value: radiusCount(3), label: "Within 3 miles" },
     ]} />
-    <div className="overflow-x-auto">
-      <table className="kyp-dtab">
-        <thead><tr><th>Station</th><th>Distance</th><th>Network</th><th>Level 2</th><th>DC Fast</th><th>Access</th><th>Confirmed</th></tr></thead>
-        <tbody>{rows.map((station, index) => <tr key={`${station.address}-${index}`}>
-          <td><a href={mapsLink(station)} target="_blank" rel="noopener noreferrer">{station.name}</a><span className="sm">{station.address}</span></td>
-           <td>{validChargingDistance(station.distanceMiles) ? `${station.distanceMiles.toFixed(1)} mi` : "Unknown"}</td>
-          <td>{station.evNetwork || "Unknown"}</td><td>{station.evLevel2Count ?? "—"}</td><td>{station.dcFastCount ?? "—"}</td>
-          <td>{station.accessDays || "—"}</td>
-           <td>{station.dateLastConfirmed ? station.dateLastConfirmed.split(" · ").map(date => Number.isFinite(new Date(date).getTime()) ? new Date(date).toLocaleDateString("en-US", /^\d{4}-\d{2}-\d{2}$/.test(date) ? { timeZone: "UTC" } : undefined) : date).join(" · ") : "—"}</td>
-        </tr>)}</tbody>
-      </table>
-    </div>
-    <div className="kyp-src">Scope: deduplicated returned public charging station addresses within 3 miles; unknown, invalid, nonfinite, and negative distances are listed as unknown but excluded from radius counts. Source: U.S. Department of Energy via Chicago Data Portal. Port figures sum available source counts across distinct records; repeated station IDs are not added again. Missing counts are not confirmed zeros, and two missing values remain unknown. Distinct network, access, and confirmation values are retained in their columns. Station names link to Google Maps search results.</div>
+    <ProjectUseBusinessList rows={rowsData} initialLimit={rowsData.length} listKey="ev-charging-stations" />
+    <div className="kyp-src">Scope: deduplicated returned public charging station addresses within 3 miles; unknown, invalid, nonfinite, and negative distances are listed as unknown but excluded from radius counts. Source: U.S. Department of Energy via Chicago Data Portal. Port figures sum available source counts across distinct records; repeated station IDs are not added again. Missing counts are not confirmed zeros, and two missing values remain unknown. Distinct network, access, and confirmation values are retained as labeled row metadata. Station names link to Google Maps search results.</div>
   </>;
 }
 

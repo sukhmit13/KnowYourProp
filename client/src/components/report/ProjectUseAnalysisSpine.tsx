@@ -39,21 +39,23 @@ export function ProjectUseBusinessRow({
 }: ProjectUseBusinessRowProps) {
   const mapsUrl = googleMapsUrl(url) ?? mapsSearchUrl(name, address);
   return (
-    <div className="kyp-biz-card" data-testid={testId}>
-      <div>
-        <a className="nm" href={mapsUrl} target="_blank" rel="noopener noreferrer">
-          <b>{name}</b><span className="ext" aria-hidden="true">↗</span>
-        </a>
-        <span className="addr">{address}</span>
+    <div className="kyp-project-use-nearby-row" data-testid={testId}>
+      <div className="kyp-project-use-nearby-content">
+        <div className="kyp-project-use-nearby-details">
+          <a className="kyp-project-use-nearby-link" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+            <b className="kyp-project-use-nearby-name">{name}</b><span className="kyp-project-use-nearby-ext" aria-hidden="true">↗</span>
+          </a>
+          <span className="kyp-project-use-nearby-address">{address}</span>
+          {!!meta?.length && (
+            <div className="kyp-project-use-nearby-meta">
+              {meta.map((item, index) => <span key={index}>{item}</span>)}
+            </div>
+          )}
+        </div>
       </div>
-      {showDistance && <span className="kyp-biz-distance">
+      {showDistance && <span className="kyp-project-use-nearby-distance">
         {distance != null && Number.isFinite(distance) ? `${distance.toFixed(1)} mi` : "distance unknown"}
       </span>}
-      {!!meta?.length && (
-        <div className="kyp-biz-cardmeta">
-          {meta.map((item, index) => <span key={index}>{item}</span>)}
-        </div>
-      )}
     </div>
   );
 }

@@ -57,11 +57,12 @@ test("zero stores remains zero and missing square-footage stays unknown, not inv
 
 test("grocery rows preserve reported distance and area metadata with name-only links", () => {
   const $ = load(html(<GroceryLicenseList data={grocery} loading={false} scope="zip" areaLabel="60612" coordinatesAvailable />));
-  assert.equal($(".kyp-biz-card").length, 3);
-  assert.equal($(".kyp-biz-card a").length, 3);
-  assert.equal($(".addr a").length, 0);
-  assert.match($(".kyp-biz-card").first().text(), /0\.4 mi/);
-  assert.match($(".kyp-biz-card").first().text(), /20,000/);
+  assert.equal($(".kyp-project-use-nearby-row").length, 3);
+  assert.equal($(".kyp-project-use-nearby-row a").length, 3);
+  assert.equal($(".kyp-project-use-nearby-address a").length, 0);
+  assert.match($(".kyp-project-use-nearby-row").first().text(), /0\.4 mi/);
+  assert.match($(".kyp-project-use-nearby-row").first().text(), /20,000/);
+  assert.equal($(".kyp-project-use-nearby-name").length, 3);
   assert.match($(".kyp-src").text(), /area aggregate|area-bounded|area inventory/i);
   assert.equal($(".kyp-src").length, 1);
 });
@@ -160,26 +161,42 @@ test("every domain loading/unavailable/error state keeps one source note at the 
   }
 });
 
-test("EV infrastructure preserves seven columns, deduped site counts and all grouped source attributes", () => {
+test("EV infrastructure preserves labeled attributes, all rows, deduped counts, and unknown-versus-zero values", () => {
   const stations = [
     { name: "Station A", address: "100 W Chicago Ave", distanceMiles: 0.4, evNetwork: "Network A", evLevel2Count: 2, dcFastCount: 0, accessDays: "24 hours", dateLastConfirmed: "2026-01-05" },
     { name: "Station B", address: "100 W Chicago Ave", distanceMiles: 0.4, evNetwork: "Network B", evLevel2Count: 3, dcFastCount: 1, accessDays: "Business hours", dateLastConfirmed: "2025-12-01" },
     { name: "Unknown station", address: "200 W Chicago Ave", distanceMiles: null, evNetwork: null, evLevel2Count: null, dcFastCount: null, accessDays: null, dateLastConfirmed: null },
+    { name: "Zero ports", address: "250 W Chicago Ave", distanceMiles: 0.2, evNetwork: "Independent", evLevel2Count: 0, dcFastCount: 0, accessDays: "Public", dateLastConfirmed: null },
+    ...Array.from({ length: 12 }, (_, index) => ({
+      name: `Extra station ${index + 1}`, address: `${index + 300} W Chicago Ave`,
+      distanceMiles: 2, evNetwork: null, evLevel2Count: null, dcFastCount: null,
+      accessDays: null, dateLastConfirmed: null,
+    })),
   ];
   const $ = load(html(<EVChargingTable stations={stations} loading={false} />));
-  assert.equal($(".kyp-dtab th").length, 7);
-  assert.equal($(".kyp-dtab tbody tr").length, 2);
-  const first = $(".kyp-dtab tbody tr").first().text();
+  assert.equal($(".kyp-project-use-nearby-row").length, 15);
+  const first = $(".kyp-project-use-nearby-row").first().text();
   assert.match(first, /Network A/); assert.match(first, /Network B/);
-  assert.match(first, /24 hours/); assert.match(first, /Business hours/);
+  assert.match(first, /Network:/);
+  assert.match(first, /Level 2 ports: 5/);
+  assert.match(first, /DC fast ports: 1/);
+  assert.match(first, /Access: 24 hours/); assert.match(first, /Business hours/);
+  assert.match(first, /Confirmed:/);
   assert.match(first, /1\/5\/2026|Jan 5, 2026|2026-01-05/);
   assert.match(first, /12\/1\/2025|Dec 1, 2025|2025-12-01/);
-  assert.match($(".kyp-dtab tbody tr").last().text(), /Unknown/);
-  assert.deepEqual($(".kyp-blocks .bv").toArray().map(node => $(node).text()), ["1", "1", "1"]);
+  const unknown = $(".kyp-project-use-nearby-row").eq(1).text();
+  assert.match(unknown, /Unknown station/);
+  assert.match(unknown, /Network: Unknown/);
+  assert.match(unknown, /Level 2 ports: Unknown/);
+  assert.match(unknown, /DC fast ports: Unknown/);
+  assert.match(unknown, /Access: Unknown/);
+  assert.match(unknown, /Confirmed: Unknown/);
+  assert.deepEqual($(".kyp-blocks .bv").toArray().map(node => $(node).text()), ["2", "14", "14"]);
   assert.doesNotMatch($.text(), /best for longer stops|best for quick stops/i);
-  const lastCells = $(".kyp-dtab tbody tr").last().find("td").toArray().map(node => $(node).text());
-  assert.equal(lastCells[3], "—");
-  assert.equal(lastCells[4], "—");
+  const zero = $(".kyp-project-use-nearby-row").eq(2).text();
+  assert.match(zero, /Level 2 ports: 0/);
+  assert.match(zero, /DC fast ports: 0/);
+  assert.match($(".kyp-src").text(), /Distinct network, access, and confirmation values are retained as labeled row metadata/);
 });
 
 test("hotel rental grouping is unnumbered, preserves zeros, and has no invented listing rows", () => {
@@ -190,7 +207,7 @@ test("hotel rental grouping is unnumbered, preserves zeros, and has no invented 
   assert.equal($(".kyp-biz-card").length, 0);
 });
 
-test("charging badge and table share address dedup, repeated IDs do not inflate ports or lose metadata", () => {
+test("charging badge and shared rows share address dedup, repeated IDs do not inflate ports or lose metadata", () => {
   const stations = [
     { id: "a", name: "First", address: "100 W Chicago Ave", distanceMiles: 0.5, evLevel2Count: 2 },
     { id: "b", name: "Second", address: "100 W Chicago Ave", distanceMiles: 0.4, evLevel2Count: 3 },
@@ -199,10 +216,10 @@ test("charging badge and table share address dedup, repeated IDs do not inflate 
   ];
   assert.equal(getEVChargingSiteCount(stations), 1);
   const $ = load(html(<EVChargingTable stations={stations} loading={false} />));
-  const cells = $(".kyp-dtab tbody tr").first().find("td");
-  assert.equal(cells.eq(3).text(), "5");
-  assert.equal(cells.eq(1).text(), "0.4 mi");
-  assert.match(cells.eq(2).text(), /Updated network/);
+  const row = $(".kyp-project-use-nearby-row").first().text();
+  assert.match(row, /Level 2 ports: 5/);
+  assert.match(row, /0\.4 mi/);
+  assert.match(row, /Network: Updated network/);
   assert.equal($(".kyp-blocks .bv").last().text(), String(getEVChargingSiteCount(stations)));
 });
 
@@ -212,8 +229,8 @@ test("the shared restaurant/coffee license component preserves zero-distance and
     { id: 2, name: "Farther", address: "200 W Chicago Ave", latitude: 41.8, longitude: -87.6, distanceMiles: 1.2 },
   ] };
   const $ = load(html(<LicensedBusinessPanel data={data} loading={false} category="Coffee shops" source="Chicago Business Licenses" listKey="coffee" />));
-  assert.equal($(".kyp-biz-card").length, 1);
-  assert.match($(".kyp-biz-card").text(), /0\.0 mi/);
+  assert.equal($(".kyp-project-use-nearby-row").length, 1);
+  assert.match($(".kyp-project-use-nearby-row").text(), /0\.0 mi/);
   assert.equal($(".kyp-blocks .bv").text(), "1");
   assert.equal($(".kyp-src").length, 1);
 });
@@ -225,6 +242,6 @@ test("source radius aggregates are not replaced by counts of capped license rows
   ] };
   const $ = load(html(<LicensedBusinessPanel data={data} loading={false} category="Restaurants" source="Chicago Business Licenses" listKey="restaurant" />));
   assert.equal($(".kyp-blocks .bv").text(), "24");
-  assert.equal($(".kyp-biz-card").length, 2);
+  assert.equal($(".kyp-project-use-nearby-row").length, 2);
   assert.match($(".kyp-src").text(), /detail list may be capped/);
 });

@@ -97,3 +97,10 @@ The top of a report section should contain summary badges and data. Qualificatio
 **Why:** The user explicitly rejected the Professional Record coverage notice above its summary badges.
 
 **How to apply:** Keep retrieval limitations and refresh qualifications in the section's source footer rather than adding a notice above populated data.
+
+## Nearby-place list standard
+Use the compact entertainment/culture, murals, architectural-landmark and nearby-school row style for nearby places and competitors across selected project uses, including EV charging stations.
+
+**Why:** The user approved this visual reference and explicitly limited this standardization to those lists; other list types will be reviewed independently.
+
+**How to apply:** Keep names prominent, supporting information muted, and distance right-aligned, while retaining source-specific details. Do not extend this approval to professional, news, financial, transit or other record lists without a new request.
