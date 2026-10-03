@@ -7,13 +7,13 @@ Each top-level accordion row should have one visible row header, not an addition
 
 Body wrappers beneath a standard numbered subsection heading should not add another top divider or stack their own top margin/padding onto the heading's existing spacing.
 
-All numbered subsection bodies should have the same horizontal inset as the EV-registration and EV-charging subsections. Keep the subsection heading and its rule full width; inset the information beneath it, including counts, records, state messages, and source notes.
-
-**Why:** The user pointed out that the Google Maps subsection was flush with its heading while adjacent subsections were indented, and explicitly requested proper indentation for all subsections.
-**How to apply:** Follow the existing 16px-per-side body inset. Check all states and avoid doubling the inset on bodies that already have padding.
-
 **Why:** Duplicate headers, mixed short rules, and an extra outer frame made recently added education and culture rows look structurally different from the surrounding report. Borrower charts also showed a redundant gray divider and oversized gap from a legacy body wrapper.
 **How to apply:** When promoting older panels into report rows or adding new sections, keep the accordion as the only section-level toggle and use the standard subsection pattern for content below it. Local controls such as year/scope selectors and "show 10 more" lists may remain interactive. Preserve intentional borders on individual data cards and controls.
+
+Numbered subsection content should align flush with its heading, like the original Nearby Gas Station · Google Maps subsection, rather than use the EV-registration/EV-charging body inset.
+
+**Why:** The user reversed the indentation direction: “instead of having that indent, we should just have it inline ... I think it looks better the other way.”
+**How to apply:** Do not add an extra subsection-level horizontal inset. Preserve padding inside individual cards and controls, and check all content states when applying the flush layout.
 
 Expanded subsections should primarily present records and measurements, not repeat an interpretation or tell users to perform obvious actions. The one-sentence takeaway belongs in the accordion header; deeper insights belong in the separately generated report. Keep factual scope, missing-evidence qualifiers, and cross-PIN loan/collateral context when they prevent misleading interpretations.
 
