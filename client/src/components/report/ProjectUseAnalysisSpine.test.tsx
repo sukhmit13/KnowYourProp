@@ -39,6 +39,31 @@ test("shared nearby row typography is scoped and matches the approved compact sc
   assert.doesNotMatch(css, /\.kyp-biz-card\{[^}]*kyp-project-use-nearby/);
 });
 
+test("nearby names and addresses use strict title case without changing source searches or metadata", () => {
+  const cases = [
+    ["AMOCO OIL COMPANY", "Amoco Oil Company"],
+    ["BEST PLACE USA ROGERS PARK", "Best Place Usa Rogers Park"],
+    ["eDgElUx SPACE #5 · EDGELUX SPACE #6", "Edgelux Space #5 · Edgelux Space #6"],
+    ["PATIO GAS- MARATHON / AUTOTECH LLC", "Patio Gas- Marathon / Autotech Llc"],
+    ["McDONALD'S & O’BRIEN", "Mcdonald's & O’brien"],
+    ["ÉLÈVE CAFÉ", "Élève Café"],
+    ["HF HF-1", "Hf Hf-1"],
+    ["8TH STREET", "8th Street"],
+  ];
+  const address = "5657 N BROADWAY, EDGEWATER";
+  for (const [name, expected] of cases) {
+    const markup = renderToStaticMarkup(
+      <ProjectUseBusinessRow name={name} address={address} distance={0.1} meta={["Network: ChargePoint", "Access: Mon–Sun 8am–10pm"]} />,
+    );
+    assert.ok(markup.includes(renderToStaticMarkup(<b className="kyp-project-use-nearby-name">{expected}</b>)));
+    assert.match(markup, /5657 N Broadway, Edgewater/);
+    const query = encodeURIComponent(`${name}, ${address}, Chicago, IL`);
+    assert.ok(markup.includes(`query=${query.replace(/'/g, "&#x27;")}`), "Maps search retains the original source spelling");
+    assert.match(markup, /Network: ChargePoint/);
+    assert.match(markup, /Access: Mon–Sun 8am–10pm/);
+  }
+});
+
 test("business list caps initial rows and exposes the visible count and expand affordance", () => {
   const rows = Array.from({ length: 12 }, (_, index) => ({
     name: `Business ${index + 1}`,

@@ -1,5 +1,12 @@
 import React, { useEffect, useState, type ReactNode } from "react";
 
+function titleCaseNearbyText(value: string): string {
+  return value.toLocaleLowerCase("en-US").replace(
+    /(^|[^\p{L}\p{N}'’])(\p{L})/gu,
+    (_, separator: string, letter: string) => separator + letter.toLocaleUpperCase("en-US"),
+  );
+}
+
 export interface ProjectUseBusinessRowProps {
   name: string;
   address: string;
@@ -43,9 +50,9 @@ export function ProjectUseBusinessRow({
       <div className="kyp-project-use-nearby-content">
         <div className="kyp-project-use-nearby-details">
           <a className="kyp-project-use-nearby-link" href={mapsUrl} target="_blank" rel="noopener noreferrer">
-            <b className="kyp-project-use-nearby-name">{name}</b><span className="kyp-project-use-nearby-ext" aria-hidden="true">↗</span>
+            <b className="kyp-project-use-nearby-name">{titleCaseNearbyText(name)}</b><span className="kyp-project-use-nearby-ext" aria-hidden="true">↗</span>
           </a>
-          <span className="kyp-project-use-nearby-address">{address}</span>
+          <span className="kyp-project-use-nearby-address">{titleCaseNearbyText(address)}</span>
           {!!meta?.length && (
             <div className="kyp-project-use-nearby-meta">
               {meta.map((item, index) => <span key={index}>{item}</span>)}

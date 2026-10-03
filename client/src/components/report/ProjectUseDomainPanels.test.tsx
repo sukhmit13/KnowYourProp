@@ -185,7 +185,7 @@ test("EV infrastructure preserves labeled attributes, all rows, deduped counts, 
   assert.match(first, /1\/5\/2026|Jan 5, 2026|2026-01-05/);
   assert.match(first, /12\/1\/2025|Dec 1, 2025|2025-12-01/);
   const unknown = $(".kyp-project-use-nearby-row").eq(1).text();
-  assert.match(unknown, /Unknown station/);
+  assert.match(unknown, /Unknown Station/);
   assert.match(unknown, /Network: Unknown/);
   assert.match(unknown, /Level 2 ports: Unknown/);
   assert.match(unknown, /DC fast ports: Unknown/);

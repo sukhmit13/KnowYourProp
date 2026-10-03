@@ -111,3 +111,10 @@ Consolidate repeated daily opening hours into consecutive-day ranges rather than
 **Why:** The user identified the Whole Foods charging-station schedule as unnecessarily causing multiple lines and requested a concise day-range presentation.
 
 **How to apply:** Combine only days with matching reported hours; retain different weekend hours, closed days and access qualifications. This is a presentation change, not permission to infer missing hours or omit source details.
+
+## Nearby-list capitalization
+Display nearby-list names and addresses with the first letter of each word capitalized and the remaining letters lowercase, rather than preserving all-caps company suffixes or acronyms.
+
+**Why:** The user explicitly requested this casing to standardize inconsistent dataset capitalization.
+
+**How to apply:** Apply this presentation rule to the accepted shared nearby lists. Preserve the original source strings for record matching and Maps searches; do not expand the rule to unrelated report sections.

@@ -24,8 +24,8 @@ import {DaycareAnalysis} from "/src/components/report/DaycareAnalysis.tsx";
 import "/src/index.css";
 import "/src/kyp-base.css";
 const e=React.createElement;
-const names=["Test Filling Station","Test Hotel","Test Bar","Test Dispensary","Test Grocery Store","Test Licensed Shop"];
-const nearby=names.map((name,i)=>({name,address:(i+1)+" Sample Avenue, Chicago, IL",distance:i===5?null:.3,meta:["License record"],testId:"nearby-"+i}));
+const names=["AMOCO OIL COMPANY","Test Hotel","Test Bar","Test Dispensary","Test Grocery Store","Test Licensed Shop"];
+const nearby=names.map((name,i)=>({name,address:(i+1)+" SAMPLE AVENUE, CHICAGO, IL",distance:i===5?null:.3,meta:["License record"],testId:"nearby-"+i}));
 const places=Array.from({length:13},(_,i)=>({name:"Test Competitor "+(i+1),address:(i+1)+" Example Street",distanceMiles:.5,rating:4.6,reviewsCount:i===0?0:17}));
 const stations=[
  {id:"a",name:"Test Charging Station",address:"1 Example Street",distanceMiles:.3,evNetwork:"Network A",evLevel2Count:2,dcFastCount:0,accessDays:"24 hours",dateLastConfirmed:"2026-01-01"},
@@ -67,6 +67,9 @@ try {
     await page.goto(`${base}/nearby-lists-check`);
     await page.locator("#nearby-ev").locator(rowSelector).first().waitFor();
     assert.equal(await page.locator("#nearby-places").locator(rowSelector).count(), 6);
+    assert.equal(await page.locator("#nearby-places .kyp-project-use-nearby-name").first().textContent(), "Amoco Oil Company");
+    assert.equal(await page.locator("#nearby-places .kyp-project-use-nearby-address").first().textContent(), "1 Sample Avenue, Chicago, Il");
+    assert.match(await page.locator("#nearby-places a").first().getAttribute("href"), /AMOCO%20OIL%20COMPANY/);
     assert.equal(await page.locator("#nearby-competitors").locator(rowSelector).count(), 10);
     assert.equal(await page.locator("#nearby-ev").locator(rowSelector).count(), 13, "All EV sites remain visible");
     assert.equal(await page.locator("#nearby-ev table").count(), 0, "EV stations no longer use the tiny-name table");
