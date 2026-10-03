@@ -2,6 +2,45 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import express from "express";
 import { registerProfessionalRecordRoutes } from "./professionalRecordRoutes";
+import { db } from "./db";
+import { zbaCases } from "@shared/schema";
+
+test("a successful empty property ZBA lookup is available, not partial", async t => {
+  t.mock.method(db, "select", (() => ({
+    from: (table: unknown) => table === zbaCases ? { where: async () => [] } : Promise.resolve([]),
+  })) as any);
+  const app = express();
+  app.use(express.json());
+  registerProfessionalRecordRoutes(app, async () => ({ address: "1 N TEST ST, CHICAGO, IL" }));
+  const server = app.listen(0, "127.0.0.1");
+  t.after(() => server.close());
+  await new Promise<void>(resolve => server.once("listening", resolve));
+  const port = (server.address() as { port: number }).port;
+  const response = await fetch(`http://127.0.0.1:${port}/api/runs/test/professional-record`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ city: "Chicago" }),
+  });
+  assert.equal(response.status, 200);
+  const record = await response.json();
+  assert.equal(record.sourceCoverage.zba.status, "available");
+  assert.deepEqual(record.groups, []);
+});
+
+test("a failed ZBA retrieval stays unavailable instead of becoming a no-records finding", async t => {
+  t.mock.method(db, "select", (() => { throw new Error("Source lookup failed"); }) as any);
+  const app = express();
+  app.use(express.json());
+  registerProfessionalRecordRoutes(app, async () => ({ address: "1 N TEST ST, CHICAGO, IL" }));
+  const server = app.listen(0, "127.0.0.1");
+  t.after(() => server.close());
+  await new Promise<void>(resolve => server.once("listening", resolve));
+  const port = (server.address() as { port: number }).port;
+  const response = await fetch(`http://127.0.0.1:${port}/api/runs/test/professional-record`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
+  });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).sourceCoverage.zba.status, "unavailable");
+});
 
 test("private and public routes use separate access checks and reject malformed evidence", async t => {
   const app = express();

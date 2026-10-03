@@ -3,7 +3,38 @@ import test from "node:test";
 import { rollUp } from "./professionalRecord";
 import { normalizeProName } from "../shared/normalizeProName";
 import { fetchPermitHistory } from "./permits";
+test("successful empty histories are available, not partial", () => {
+  const record = rollUp({
+    permitData: { permits: [], olderPermits: [] },
+    zoningHistoryData: { items: [], coverage: {
+      cityCouncil: { complete: true },
+      zba: { complete: false, checked: true, earliestIndexedDate: "1993-06-01" },
+    } },
+    zbaData: { cases: [] },
+    taxAppealData: [],
+    lienData: { documents: [], searchFailed: false },
+  });
+  assert.deepEqual(record.groups, []);
+  assert.equal(record.totalNames, 0);
+  assert.ok(Object.values(record.sourceCoverage).every(source => source.status === "available"));
+});
 
+test("real retrieval failures and omitted permit details retain their qualifications", () => {
+  const failed = rollUp({
+    permitData: { permits: [], apiError: true },
+    zoningHistoryData: { items: [], coverage: { cityCouncil: { complete: false } } },
+    lienData: { documents: [], searchFailed: true },
+  });
+  assert.equal(failed.sourceCoverage.permits.status, "unavailable");
+  assert.equal(failed.sourceCoverage.zoning.status, "unavailable");
+  assert.equal(failed.sourceCoverage.recorder.status, "unavailable");
+  const incomplete = rollUp({
+    permitData: { permits: [], olderPermits: [], olderPermitsSummary: { count: 3 } },
+    zoningHistoryData: { items: [{ type: "ordinance", date: "2025-01-01" }], coverage: { cityCouncil: { complete: false } } },
+  });
+  assert.equal(incomplete.sourceCoverage.permits.status, "partial");
+  assert.equal(incomplete.sourceCoverage.zoning.status, "partial");
+});
 test("suffix variants dedupe with latest display spelling and one count per permit", () => {
   const rec = rollUp({ permits: [
     { id: "old", issueDate: "2020-01-01", contractors: [{ name: "NORCON INC", type: "General Contractor" }] },

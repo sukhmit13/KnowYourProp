@@ -72,6 +72,8 @@ try {
     assert.deepEqual(await root.locator(".n").allTextContents(), ["25.1","25.2","25.3","25.4","25.5","25.6"]);
     assert.equal(await root.locator(".kyp-block").count(), 3);
     assert.equal(await root.locator(".kyp-src p").count(), 1);
+    assert.equal(await root.evaluate(n => n.firstElementChild.className), "kyp-blocks", "Loaded records start with the summary badges");
+    assert.doesNotMatch(await root.innerText(), /Coverage is partial/);
     assert.equal(await root.locator(".kyp-biz-card.pro").count(), 7);
     assert.equal(await root.locator(".kyp-biz-card.pro a").count(), 1);
     assert.equal(await root.locator(".kyp-block.grn,.kyp-block.orange,.kyp-block.red,.kyp-pill.good,.kyp-pill.bad,.kyp-pill.watch").count(), 0);
@@ -103,6 +105,15 @@ try {
     assert.equal(await root.locator(".kyp-block").count(), 3);
     assert.equal(await root.locator(".kyp-src p").count(), 1);
     assert.doesNotMatch(await root.innerText(), /Lenders|Permit Expediters|No .* on record/);
+    await page.evaluate(() => window.setProfessionalFixture({
+      data: { ...window.professionalFull, sourceCoverage: { permits: { status: "unavailable" }, zoning: { status: "partial" } } },
+    }));
+    await page.waitForFunction(() => document.querySelector(".kyp-professional-record .kyp-src").textContent.includes("no-record result is not confirmed"));
+    assert.match(await root.locator(".kyp-src").innerText(), /building-permit contact records were unavailable/);
+    assert.match(await root.locator(".kyp-src").innerText(), /Zoning history was only partly retrieved/);
+    assert.equal(await root.evaluate(n => n.firstElementChild.className), "kyp-blocks");
+    assert.doesNotMatch(await root.locator(".kyp-blocks").innerText(), /unavailable|partial|not confirmed/);
+    await page.screenshot({ path: `/tmp/professional-record-coverage-${width}.png`, fullPage: true });
     await page.screenshot({ path: `/tmp/professional-record-thin-${width}.png`, fullPage: true });
     for (const selected of [[], ["professional-record"]]) {
       const excluded = await page.evaluate(({ selected, printJs }) => {

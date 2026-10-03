@@ -39,5 +39,6 @@ export interface ProfessionalRecord {
   groupCount: number;
   firstYear: number | null;
   lastYear: number | null;
+  /** Retrieval status: successful empty results are available, not partial. */
   sourceCoverage: Record<string, { status: "available" | "partial" | "unavailable" }>;
 }

@@ -53,8 +53,15 @@ export function rollUp(input: RollUpInput): ProfessionalRecord {
   const taxResults = new Map<string, Map<string, string>>();
   const coverage: Coverage = input.sourceCoverage ?? {
     permits: { status: input.permits || input.permitData?.permits ? input.permitData?.apiError || input.permitData?.parseError ? "unavailable" : input.permitData?.olderPermitsSummary?.count > 0 && !input.permitData?.olderPermits?.length ? "partial" : "available" : "unavailable" },
-    zoning: { status: input.zoningHistoryData?.items ? "partial" : "unavailable" },
-    zba: { status: input.zbaData?.cases || input.zbaData?.approvals ? "partial" : "unavailable" },
+    // An empty, successfully retrieved list is a valid no-records result.
+    // City Council's incomplete-search flag is distinct from the ZBA archive's
+    // ordinary historical date bounds, which do not indicate retrieval failure.
+    zoning: { status: Array.isArray(input.zoningHistoryData?.items)
+      ? input.zoningHistoryData?.coverage?.cityCouncil?.complete === false
+        ? (input.zoningHistoryData?.items?.length ?? 0) > 0 ? "partial" : "unavailable"
+        : "available"
+      : "unavailable" },
+    zba: { status: Array.isArray(input.zbaData?.cases) || Array.isArray(input.zbaData?.approvals) ? "available" : "unavailable" },
     taxAppeals: { status: Array.isArray(input.taxAppealData) ? "available" : "unavailable" },
     recorder: { status: input.lienData && !input.lienData.searchFailed ? "available" : "unavailable" },
   };

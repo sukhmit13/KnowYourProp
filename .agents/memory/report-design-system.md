@@ -90,3 +90,10 @@ Keep the light-gray source citations and section-ending explanations at one cons
 **Why:** The user requested a size just above the smaller News example and below the oversized Professional Record example, applied to every section rather than tuned individually.
 
 **How to apply:** Reuse the shared source-note treatment for new sections; check both direct text and nested paragraphs, including print, without shrinking ordinary body text.
+
+## Qualification placement
+The top of a report section should contain summary badges and data. Qualifications and clarifications belong at the bottom.
+
+**Why:** The user explicitly rejected the Professional Record coverage notice above its summary badges.
+
+**How to apply:** Keep retrieval limitations and refresh qualifications in the section's source footer rather than adding a notice above populated data.

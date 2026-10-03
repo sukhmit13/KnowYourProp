@@ -45,9 +45,28 @@ function yearSpan(data: ProfessionalRecord): string {
     : `${data.firstYear}–${data.lastYear}`;
 }
 
-function hasPartialCoverage(data: ProfessionalRecord): boolean {
-  return Object.values(data.sourceCoverage ?? {}).some(({ status }) => status !== "available");
-}
+const SOURCE_QUALIFICATIONS: Record<string, { partial: string; unavailable: string }> = {
+  permits: {
+    partial: "Chicago building-permit contact records were only partly retrieved.",
+    unavailable: "Chicago building-permit contact records were unavailable; a no-record result is not confirmed.",
+  },
+  zoning: {
+    partial: "Zoning history was only partly retrieved.",
+    unavailable: "Zoning history was unavailable; a no-record result is not confirmed.",
+  },
+  zba: {
+    partial: "Zoning Board of Appeals resolutions were only partly retrieved.",
+    unavailable: "Zoning Board of Appeals resolutions were unavailable; a no-record result is not confirmed.",
+  },
+  taxAppeals: {
+    partial: "Cook County Board of Review tax appeal records were only partly retrieved.",
+    unavailable: "Cook County Board of Review tax appeal records were unavailable; a no-record result is not confirmed.",
+  },
+  recorder: {
+    partial: "Cook County Recorder records were only partly retrieved.",
+    unavailable: "Cook County Recorder records were unavailable; a no-record result is not confirmed.",
+  },
+};
 
 export function ProfessionalRecordSection({
   data,
@@ -66,14 +85,7 @@ export function ProfessionalRecordSection({
     ? "Professional records are loading."
     : error && !data
       ? "Professional records could not be loaded."
-      : error && data
-        ? "Refresh failed; showing the available record data."
-      : data && hasPartialCoverage(data)
-        ? "Coverage is partial; some source records may be unavailable."
-        : data && groups.length === 0
-          ? "No professional entries are available in this record."
-          : null;
-  const partialCoverage = data ? hasPartialCoverage(data) : false;
+      : null;
 
   if (!data) {
     return (
@@ -93,30 +105,37 @@ export function ProfessionalRecordSection({
   }
 
   const span = yearSpan(data);
+  const incompleteRetrieval = Object.values(data.sourceCoverage ?? {}).some(source => source.status !== "available");
+  const qualifications = Object.entries(data.sourceCoverage ?? [])
+    .flatMap(([key, coverage]) => {
+      const source = SOURCE_QUALIFICATIONS[key];
+      if (!source || coverage.status === "available") return [];
+      return [coverage.status === "partial" ? source.partial : source.unavailable];
+    });
+  if (error) qualifications.unshift("Refresh failed; showing the available record data.");
+  if (groups.length === 0) qualifications.push("No professional entries are available in this record.");
+  if (data.firstYear == null || data.lastYear == null) {
+    qualifications.push("Filing-year bounds are incomplete; the earliest and latest filing years could not both be confirmed.");
+  }
+  qualifications.push("A profession with no record is not shown.");
+  qualifications.push("Zoning Board of Appeals entries reflect indexed published resolutions, not an exhaustive history across all years.");
   return (
     <div id="print-section-professional-record" className="kyp-professional-record">
-      {status && <div className="kyp-body" role="status">{status}</div>}
       <div className="kyp-blocks">
         <div className="kyp-block ind">
-          <div className="bv">{partialCoverage && data.totalNames === 0 ? "—" : data.totalNames}</div>
+          <div className="bv">{incompleteRetrieval && data.totalNames === 0 ? "—" : data.totalNames}</div>
           <div className="bl">Name{data.totalNames === 1 ? "" : "s"} on record</div>
           <div className="bd">permits, zoning, liens and tax appeals</div>
         </div>
         <div className="kyp-block slate">
-          <div className="bv">{partialCoverage && data.groupCount === 0 ? "—" : data.groupCount}</div>
+          <div className="bv">{incompleteRetrieval && data.groupCount === 0 ? "—" : data.groupCount}</div>
           <div className="bl">Profession{data.groupCount === 1 ? "" : "s"} represented</div>
-          <div className="bd">a profession with no record is not shown</div>
+          <div className="bd">distinct recorded professions</div>
         </div>
         <div className="kyp-block slate">
           <div className="bv txt">{span}</div>
           <div className="bl">Years covered</div>
-          <div className="bd">
-            {data.firstYear == null || data.lastYear == null
-              ? "filing years not fully available"
-              : data.firstYear === data.lastYear
-                ? "one filing year on record"
-                : "earliest and latest filing"}
-          </div>
+          <div className="bd">earliest and latest filing</div>
         </div>
       </div>
       {groups.map((group, index) => (
@@ -151,7 +170,7 @@ export function ProfessionalRecordSection({
         </section>
       ))}
       <div className="kyp-src">
-        <p>Sources: Chicago Building Permits (contact fields), Chicago DPD zoning applications, Zoning Board of Appeals, Cook County Recorder, Cook County Board of Review tax appeal records. Names are normalized before grouping, so one firm filed under several spellings appears once.</p>
+        <p>{qualifications.length > 0 && <>{qualifications.join(" ")} </>}Sources: Chicago Building Permits (contact fields), Chicago DPD zoning applications, Zoning Board of Appeals, Cook County Recorder, Cook County Board of Review tax appeal records. Names are normalized before grouping, so one firm filed under several spellings appears once.</p>
       </div>
     </div>
   );

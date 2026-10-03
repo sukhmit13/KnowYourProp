@@ -70,6 +70,7 @@ test("rich roll-up uses a fixed profession order, neutral chips, and no person-l
   assert.doesNotMatch(html, /kyp-block [^"]*\b(grn|orange|red|bad)\b|kyp-pill (good|watch|bad)/);
   assert.equal((html.match(/<p>/g) ?? []).length, 1, "the source is exactly one paragraph");
   assert.equal((html.match(/class="kyp-src"/g) ?? []).length, 1);
+  assert.match(html, /class="kyp-professional-record"><div class="kyp-blocks">/, "loaded data starts with summary badges");
   assert.equal((html.match(/<a\b/g) ?? []).length, 1, "only the eligible Discovery name is linked");
   assert.match(html, /Diaz Plumbing/);
   assert.doesNotMatch(html, /href="[^"]*diaz/);
@@ -93,7 +94,9 @@ test("thin and shuffled data omits empty and unknown groups and numbers survivin
   assert.doesNotMatch(html, /25\.2|Lenders|Contractors|Unknown|Not shown/);
   assert.match(html, /Northstar Permits/);
   assert.match(html, />—</);
-  assert.match(html, /one filing year on record/);
+  assert.match(html, /earliest and latest filing/);
+  assert.match(html, /A profession with no record is not shown/);
+  assert.doesNotMatch(html.slice(0, html.indexOf('class="kyp-src"')), /A profession with no record/);
   assert.doesNotMatch(html, /No .* on record|kyp-emptypanel/);
 });
 
@@ -105,7 +108,7 @@ test("missing year bounds display an em dash, and missing dates are never inferr
   assert.match(html, /class="kyp-biz-distance">—</);
 });
 
-test("loading, error, partial coverage, and cached refresh errors do not claim complete zero", () => {
+test("loading and error without data remain useful; source qualifications and refresh failures stay in the footer", () => {
   const loading = renderToStaticMarkup(<ProfessionalRecordSection loading />);
   const failed = renderToStaticMarkup(<ProfessionalRecordSection error />);
   assert.match(loading, /Professional records are loading/);
@@ -116,12 +119,44 @@ test("loading, error, partial coverage, and cached refresh errors do not claim c
   const partial = record([], {
     totalNames: 0,
     groupCount: 0,
-    sourceCoverage: { permits: { status: "partial" }, tax: { status: "unavailable" } },
+    sourceCoverage: { permits: { status: "partial" }, taxAppeals: { status: "unavailable" } },
   });
   const partialHtml = render(partial);
-  assert.match(partialHtml, /Coverage is partial/);
-  assert.doesNotMatch(partialHtml, /No professional entries are available/);
-  assert.match(render(partial, { error: true }), /Refresh failed; showing the available record data/);
+  const footerIndex = partialHtml.indexOf('class="kyp-src"');
+  assert.ok(footerIndex > partialHtml.indexOf('class="kyp-blocks"'));
+  const footer = partialHtml.slice(footerIndex);
+  assert.match(footer, /Chicago building-permit contact records were only partly retrieved/);
+  assert.match(footer, /Cook County Board of Review tax appeal records were unavailable; a no-record result is not confirmed/);
+  assert.match(footer, /No professional entries are available in this record/);
+  assert.doesNotMatch(partialHtml, /Coverage is partial/);
+  assert.doesNotMatch(partialHtml.slice(0, footerIndex), /only partly retrieved|unavailable; a no-record result/);
+  assert.match(partialHtml, /class="bv">—</);
+  assert.doesNotMatch(partialHtml, /class="bv">0</);
+
+  const refreshed = render(record([{ key: "contractors", label: "Contractors", entries: [entry("Northstar", "north")] }]), { error: true });
+  assert.match(refreshed.slice(refreshed.indexOf('class="kyp-src"')), /Refresh failed; showing the available record data/);
+  assert.doesNotMatch(refreshed.slice(0, refreshed.indexOf('class="kyp-src"')), /Refresh failed/);
+});
+
+test("successful empty source searches show confirmed zeros without a warning", () => {
+  const empty = record([], {
+    totalNames: 0,
+    groupCount: 0,
+    sourceCoverage: {
+      permits: { status: "available" },
+      zoning: { status: "available" },
+      zba: { status: "available" },
+      taxAppeals: { status: "available" },
+      recorder: { status: "available" },
+    },
+  });
+  const html = render(empty);
+  assert.match(html, /class="bv">0</);
+  assert.match(html, /class="bv">0<\/div><div class="bl">Professions represented/);
+  assert.doesNotMatch(html, /class="bv">—</);
+  assert.doesNotMatch(html, /partial|unavailable|not confirmed|Refresh failed/i);
+  assert.match(html, /Zoning Board of Appeals entries reflect indexed published resolutions, not an exhaustive history across all years/);
+  assert.match(html, /No professional entries are available in this record/);
 });
 
 test("date formatting preserves supplied precision and uses an em dash for invalid records", () => {

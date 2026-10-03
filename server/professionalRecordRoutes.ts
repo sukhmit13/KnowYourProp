@@ -25,15 +25,16 @@ export function registerProfessionalRecordRoutes(app: Express, authorize: (req: 
         .replace(/\s+(AVE(?:NUE)?|ST(?:REET)?|BLVD|BOULEVARD|RD|ROAD|DR|DRIVE|CT|COURT|PL|PLACE)\.?$/i, "")
         .replace(/[%_]/g, "").trim();
       let cases: any[] = [];
-      let zbaStatus: "partial" | "unavailable" = "unavailable";
+      let zbaStatus: "available" | "unavailable" = "unavailable";
       if (street) {
         try {
           const rows = await db.select().from(zbaCases).where(ilike(zbaCases.propertyAddress, `%${street.split(/\s+/).join("%")}%`));
           const verified = await db.select().from(ardcVerifications);
           const ardcNames = new Set(verified.filter(v => v.isAttorney === true).map(v => normalizeProName(v.representativeNorm)));
           cases = rows.map(c => ({ ...c, ardcVerified: ardcNames.has(normalizeProName(c.representativeRaw)) }));
-          // The historic index does not claim exhaustive coverage of all years.
-          zbaStatus = "partial";
+          // Successful empty results are not retrieval failures. The archive's
+          // historical scope is explained separately in the section footer.
+          zbaStatus = "available";
         } catch (error) {
           console.error("[professional-record] ZBA source unavailable:", error instanceof Error ? error.message : "lookup failed");
         }
