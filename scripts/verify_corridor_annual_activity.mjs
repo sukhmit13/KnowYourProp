@@ -80,8 +80,12 @@ try {
     assert.doesNotMatch(await section.innerText(), /90 days/);
     assert.match(await page.locator("#unknown").innerText(), /Historical license comparison unavailable/i);
     const nearby = page.locator("#section-newBusinessLicenses");
+    if (width === 390) {
+      const titleWidth = await nearby.locator(".kyp-acchd .mid").evaluate(el => el.clientWidth);
+      assert.ok(titleWidth >= 200, "phone header must retain readable title space rather than squeeze beside the badge");
+    }
     assert.equal(await nearby.locator(".kyp-biz-heroes .bv").first().textContent(), "8");
-    assert.match(await nearby.innerText(), /Different name at recorded address/);
+    assert.match(await nearby.innerText(), /Different name at known address/);
     assert.match(await nearby.innerText(), /Former Cafe/);
     assert.doesNotMatch(await nearby.innerText(), /400%|business count change/);
     assert.equal(await nearby.locator(".kyp-biz-card").count(), 6);
@@ -90,6 +94,25 @@ try {
     assert.match(await nearby.innerText(), /Additional license for previously observed business/);
     await nearby.locator("button.kyp-hbar").filter({hasText:"Liquor"}).click();
     assert.equal(await nearby.locator(".kyp-biz-card").count(), 4, "license-mix filtering still works");
+    await nearby.getByRole("button", {name:/^Different names at known addresses/}).click();
+    assert.equal(await nearby.locator(".kyp-biz-card").count(), 0, "history and license-mix filters intersect");
+    assert.match(await nearby.innerText(), /No.*match.*filter/i);
+    await nearby.getByRole("button", {name:/^Clear filters/}).click();
+    assert.equal(await nearby.locator(".kyp-biz-card").count(), 6);
+    await nearby.getByRole("button", {name:/^Different names at known addresses/}).click();
+    assert.equal(await nearby.locator(".kyp-biz-card").count(), 1);
+    assert.match(await nearby.innerText(), /Former Cafe/);
+    await nearby.getByRole("button", {name:/^Recurring businesses/}).click();
+    assert.equal(await nearby.locator(".kyp-biz-card").count(), 1);
+    assert.match(await nearby.innerText(), /Additional license for previously observed business/);
+    await nearby.getByRole("button", {name:/^Previously unseen addresses/}).click();
+    assert.equal(await nearby.locator(".kyp-biz-card").count(), 6);
+    await nearby.locator("button.kyp-morelink").filter({hasText:/Show all/}).click();
+    assert.equal(await nearby.locator(".kyp-biz-card").count(), 8);
+    await nearby.getByRole("button", {name:/^All businesses/}).click();
+    assert.equal(await nearby.locator(".kyp-biz-card").count(), 6, "changing history filter resets show-all");
+    await nearby.scrollIntoViewIfNeeded();
+    if (width === 1280 || width === 390) await nearby.screenshot({path:`/tmp/nearby-history-display-${width}.png`});
     assert.match(await page.locator("#nearby-empty").innerText(), /current observations: 0/);
     assert.equal(await page.locator("#nearby-empty table").count(), 1, "prior history stays visible when current observations are zero");
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2);

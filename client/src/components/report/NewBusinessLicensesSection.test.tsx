@@ -74,6 +74,8 @@ test("new license records are not presented as confirmed business openings", () 
   );
   assert.match(markup, /Businesses with new licenses/);
   assert.match(markup, /History unavailable/);
+  assert.match(markup, /History unclassified/);
+  assert.doesNotMatch(markup, /<span>Previously unseen addresses<\/span>/, "missing history must not display a verified zero-count unseen category");
   assert.doesNotMatch(markup, /Year-over-year change|-50%/);
   assert.match(markup, /1 business with new licenses/);
   assert.match(markup, /ISSUE initial license applications only, renewals excluded/);
@@ -95,12 +97,32 @@ test("nearby replacements are flagged by previous name and excluded from unseen-
     isLoading={false} isError={false}
   />);
   assert.match(markup, /Previously unseen licensed addresses/);
-  assert.match(markup, /Change in unseen addresses/);
-  assert.match(markup, /Different name at recorded address/);
+  assert.match(markup, /Recurring businesses/);
+  assert.match(markup, /Different name at known address/);
   assert.match(markup, /Prior Cafe/);
-  assert.match(markup, /Possible-turnover businesses/);
-  assert.match(markup, /not net growth/);
+  assert.match(markup, /Different names at known addresses/);
+  assert.match(markup, /History distinction/);
+  assert.match(markup, /do not confirm any of those or establish net growth/);
   assert.doesNotMatch(markup, /business count change|Year-over-year change/);
+});
+
+test("recurring licenses and names at unseen addresses remain separate from possible turnover", () => {
+  const base = populatedData.licenses[0];
+  const current = [
+    { ...base, businessName: "Established Cafe", startDate: "2026-01-01" },
+    { ...base, businessName: "New Recorded Name", address: "200 N Main St", startDate: "2026-01-01" },
+  ];
+  const issuanceComparison = compareCorridorLicenses([
+    { ...base, businessName: "Established Cafe", startDate: "2025-01-01" }, ...current,
+  ], new Date("2026-10-03T12:00:00Z"));
+  const markup = renderToStaticMarkup(<NewBusinessLicensesSection
+    data={{ ...populatedData, licenses: current, totalCount: 2, licenseCount: 2, issuanceComparison }}
+    isLoading={false} isError={false}
+  />);
+  assert.match(markup, /Additional license for previously observed business/);
+  assert.match(markup, /Previously unseen address/);
+  assert.match(markup, /aria-pressed="true"/);
+  assert.doesNotMatch(markup, /Change in unseen addresses|Year-over-year change/);
 });
 
 test("a zero-current result retains prior history and zero comparisons instead of hiding the metrics", () => {
