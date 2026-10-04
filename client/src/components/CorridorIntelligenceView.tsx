@@ -106,6 +106,8 @@ const fmtCost = (amount: number) =>
     : amount >= 1_000
       ? `$${Math.round(amount / 1_000)}K`
       : `$${amount.toLocaleString()}`;
+const monthLabel = (iso: string) =>
+  new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", { month: "short", year: "numeric" });
 
 function revealAnchor(event: MouseEvent<HTMLAnchorElement>, id: string) {
   event.preventDefault();
@@ -255,57 +257,6 @@ export default function CorridorIntelligenceView({
                 )) : (
                   <div className="kyp-corrrow"><span className="x">{sourceNote(statusFor("licenses")) ?? "No corridor-matched records returned."}</span></div>
                 )}
-                {corridor.licenseComparison ? (
-                  <div className="kyp-corrsec" data-testid={`corridor-license-comparison-${corridor.key}`}>
-                    <div className="kyp-corrcolh">License issuance comparison</div>
-                    <div className="x" style={{ marginBottom: 8 }}>
-                      Latest 12 mo <time dateTime={corridor.licenseComparison.current.start}>{corridor.licenseComparison.current.start}</time>–&lt;<time dateTime={corridor.licenseComparison.current.end}>{corridor.licenseComparison.current.end}</time>
-                      {" · "}Prior 12 mo <time dateTime={corridor.licenseComparison.prior.start}>{corridor.licenseComparison.prior.start}</time>–&lt;<time dateTime={corridor.licenseComparison.prior.end}>{corridor.licenseComparison.prior.end}</time>
-                      {" · "}End dates are exclusive.
-                    </div>
-                    <table aria-label={`License issuance counts for ${corridor.name}: latest 12 months compared with prior 12 months`} style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.88em" }}>
-                      <thead>
-                        <tr>
-                          <th scope="col" style={{ textAlign: "left" }}>Measure</th>
-                          <th scope="col" style={{ textAlign: "right" }}>Latest 12 mo</th>
-                          <th scope="col" style={{ textAlign: "right" }}>Prior 12 mo</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {([
-                          ["Businesses with new licenses", "businessesWithNewLicenses"],
-                          ["Licensed addresses", "licensedAddresses"],
-                          ["Recurring businesses", "recurringBusinesses"],
-                          ["Previously unseen addresses", "previouslyUnseenAddresses"],
-                          ["Different names at known addresses", "differentNamesAtKnownAddresses"],
-                        ] as const).map(([label, key]) => (
-                          <tr key={key}>
-                            <th scope="row" style={{ textAlign: "left", fontWeight: 400 }}>{label}</th>
-                            <td style={{ textAlign: "right" }}>{corridor.licenseComparison!.current[key].toLocaleString()}</td>
-                            <td style={{ textAlign: "right" }}>{corridor.licenseComparison!.prior[key].toLocaleString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <div className="x" style={{ marginTop: 8 }}>
-                      These are gross license issuances, not net growth. Different names at a known address may indicate turnover or a name change; closures or replacements are not verified. Previously unseen means no matching address in the preceding 12 months of issue history, not a confirmed new business location.
-                    </div>
-                    {corridor.licenseComparison.possibleTurnover.length > 0 && (
-                      <div className="x" style={{ marginTop: 8 }}>
-                        <b>Possible name changes at known addresses</b>
-                        {corridor.licenseComparison.possibleTurnover.map((entry, entryIndex) => (
-                          <div key={`${entry.address}-${entry.name}-${entryIndex}`}>
-                            {entry.name} · {entry.address} <span aria-label="previously listed as">(previously: {entry.previousNames.join(", ")})</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="kyp-corrrow" data-testid={`corridor-license-comparison-unavailable-${corridor.key}`}>
-                    <span className="x">{licenseIsLoading ? "Loading historical license comparison…" : "Historical license comparison unavailable."}</span>
-                  </div>
-                )}
               </div>
 
               <div>
@@ -344,6 +295,61 @@ export default function CorridorIntelligenceView({
                 )}
               </div>
             </div>
+
+            {corridor.licenseComparison ? (
+              <div className="kyp-corrsec" data-testid={`corridor-license-comparison-${corridor.key}`}>
+                <div className="kyp-charttitle">
+                  License issuance comparison{" "}
+                  <i>
+                    Latest 12mo: {monthLabel(corridor.licenseComparison.current.start)}–{monthLabel(corridor.licenseComparison.current.end)}
+                    {" · "}Prior 12mo: {monthLabel(corridor.licenseComparison.prior.start)}–{monthLabel(corridor.licenseComparison.prior.end)}
+                  </i>
+                </div>
+                <div
+                  className="kyp-ledger cmp"
+                  role="table"
+                  aria-label={`License issuance counts for ${corridor.name}: latest 12 months compared with prior 12 months`}
+                >
+                  <div className="kyp-lrow lhead" role="row">
+                    <div className="l" role="columnheader">Measure</div>
+                    <div className="v" role="columnheader">Latest 12mo</div>
+                    <div className="v" role="columnheader">Prior 12mo</div>
+                  </div>
+                  {([
+                    ["Businesses with new licenses", "businessesWithNewLicenses"],
+                    ["License issuances", "licenseIssuances"],
+                    ["Licensed addresses", "licensedAddresses"],
+                    ["Previously unseen addresses", "previouslyUnseenAddresses"],
+                    ["Recurring businesses", "recurringBusinesses"],
+                    ["Different names at known addresses", "differentNamesAtKnownAddresses"],
+                  ] as const).map(([label, key]) => (
+                    <div className="kyp-lrow" role="row" key={key}>
+                      <div className="l" role="rowheader">{label}</div>
+                      <div className="v" role="cell">{corridor.licenseComparison!.current[key].toLocaleString()}</div>
+                      <div className="v" role="cell">{corridor.licenseComparison!.prior[key].toLocaleString()}</div>
+                    </div>
+                  ))}
+                </div>
+                {corridor.licenseComparison.possibleTurnover.length > 0 && (
+                  <div className="x" style={{ marginTop: 8 }} data-testid={`corridor-license-name-changes-${corridor.key}`}>
+                    <b>Possible name changes at known addresses</b>
+                    {corridor.licenseComparison.possibleTurnover.map((entry, entryIndex) => (
+                      <div key={`${entry.address}-${entry.name}-${entryIndex}`}>
+                        {entry.name} · {entry.address} <span aria-label="previously listed as">(previously: {entry.previousNames.join(", ")})</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="kyp-src">
+                  <p>Describes license issuances on this corridor within 1 mile, not this address. End dates are exclusive.</p>
+                  <p>Gross issuances, not net growth. <b>Previously unseen</b> means no matching address in the preceding 12 months of issue history, not a confirmed opening; <b>different names at a known address</b> may be turnover or a renaming, and closures are not verified.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="kyp-corrrow" data-testid={`corridor-license-comparison-unavailable-${corridor.key}`}>
+                <span className="x">{licenseIsLoading ? "Loading historical license comparison…" : "Historical license comparison unavailable."}</span>
+              </div>
+            )}
 
             {corridor.zoning.length > 0 && (
               <div className="kyp-corrsec">

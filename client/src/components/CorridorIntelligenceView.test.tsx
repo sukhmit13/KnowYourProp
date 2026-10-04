@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import CorridorIntelligenceView, { type CorridorCardData, type CorridorKpis } from "./CorridorIntelligenceView";
@@ -48,6 +49,93 @@ function render(corridors: CorridorCardData[], options: Partial<Parameters<typeo
     <CorridorIntelligenceView kpis={kpis} corridors={corridors} {...options} />,
   );
 }
+
+const period = {
+  businessesWithNewLicenses: 3,
+  licenseIssuances: 7,
+  licensedAddresses: 3,
+  previouslyUnseenAddresses: 3,
+  recurringBusinesses: 0,
+  firstObservedBusinesses: 3,
+  differentNamesAtKnownAddresses: 0,
+};
+
+const comparison: NonNullable<CorridorCardData["licenseComparison"]> = {
+  current: { ...period, start: "2025-10-05", end: "2026-10-05" },
+  prior: { ...period, businessesWithNewLicenses: 1, licenseIssuances: 2, licensedAddresses: 1, previouslyUnseenAddresses: 1, firstObservedBusinesses: 1, start: "2024-10-05", end: "2025-10-05" },
+  businessChange: 2,
+  businessChangePct: 200,
+  addressChange: 2,
+  unseenAddressChange: 2,
+  possibleTurnover: [],
+  currentObservations: [],
+};
+
+test("corridor comparison renders the existing ledger with labeled value columns, not a bare table", () => {
+  const html = render([corridor({ licenseComparison: comparison })]);
+  assert.match(html, /class="kyp-ledger cmp"/);
+  assert.match(html, /class="kyp-lrow lhead"/);
+  assert.doesNotMatch(html, /<table/);
+  assert.match(html, /Latest 12mo/);
+  assert.match(html, /Prior 12mo/);
+});
+
+test("corridor comparison uses month labels rather than interval notation or ISO dates", () => {
+  const html = render([corridor({ licenseComparison: comparison })]);
+  assert.doesNotMatch(html, /–&lt;|–<|\d{4}-\d{2}-\d{2}/);
+  assert.match(html, /Latest 12mo: Oct 2025–Oct 2026/);
+  assert.match(html, /Prior 12mo: Oct 2024–Oct 2025/);
+});
+
+test("the comparison follows both compact lists and keeps methodology in its footer", () => {
+  const html = render([corridor({ licenseComparison: comparison })]);
+  const start = html.indexOf('data-testid="corridor-license-comparison-broadway"');
+  assert.ok(start > html.indexOf('data-testid="corridor-construction-broadway-0"'));
+  const comparisonHtml = html.slice(start);
+  const beforeLedger = comparisonHtml.split('class="kyp-ledger')[0];
+  assert.doesNotMatch(beforeLedger, /not net growth|End dates are exclusive/i);
+  assert.match(comparisonHtml, /class="kyp-src"[\s\S]*not net growth/);
+  assert.match(comparisonHtml, /within 1 mile, not this address\. End dates are exclusive/);
+  assert.match(comparisonHtml, /closures are not verified/);
+});
+
+test("all six comparison measures remain ordered, with license totals distinct from businesses and zero rows visible", () => {
+  const html = render([corridor({ licenseComparison: comparison })]);
+  assert.equal((html.match(/class="kyp-lrow"/g) ?? []).length, 6);
+  const labels = [
+    "Businesses with new licenses", "License issuances", "Licensed addresses",
+    "Previously unseen addresses", "Recurring businesses", "Different names at known addresses",
+  ];
+  const ledger = html.slice(html.indexOf('class="kyp-ledger cmp"'));
+  let previous = -1;
+  for (const label of labels) {
+    const index = ledger.indexOf(label);
+    assert.ok(index > previous, `${label} should retain the requested order`);
+    previous = index;
+  }
+  assert.match(ledger, /License issuances<\/div><div[^>]*>7<\/div><div[^>]*>2<\/div>/);
+  assert.match(ledger, /Recurring businesses<\/div><div[^>]*>0<\/div><div[^>]*>0<\/div>/);
+  assert.match(ledger, /Different names at known addresses<\/div><div[^>]*>0<\/div><div[^>]*>0<\/div>/);
+});
+
+test("prior names remain available and unavailable history is not shown as measured zeros", () => {
+  const html = render([corridor({ licenseComparison: {
+    ...comparison,
+    possibleTurnover: [{ name: "Current Cafe", address: "100 N Broadway", previousNames: ["Former Cafe"] }],
+  } })]);
+  assert.match(html, /Current Cafe/);
+  assert.match(html, /Former Cafe/);
+  assert.match(html, /previously/);
+  const unavailable = render([corridor({ licenseComparison: null })]);
+  assert.match(unavailable, /Historical license comparison unavailable/);
+  assert.doesNotMatch(unavailable, /class="kyp-ledger cmp"/);
+  assert.match(render([corridor({ licenseComparison: null })], { licensesLoading: true }), /Loading historical license comparison/);
+});
+
+test("the nearby-license comparison is not changed to the corridor ledger", () => {
+  const nearby = readFileSync("client/src/components/report/NewBusinessLicensesSection.tsx", "utf8");
+  assert.doesNotMatch(nearby, /kyp-ledger cmp/);
+});
 
 test("renders the five-block rollup and every compact corridor record with owning-section links", () => {
   const html = render([corridor()], {

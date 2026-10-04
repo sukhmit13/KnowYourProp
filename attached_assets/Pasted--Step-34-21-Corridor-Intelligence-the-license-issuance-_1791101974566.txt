@@ -1,0 +1,266 @@
+# Step 34 — §21 Corridor Intelligence: the license issuance comparison renders raw
+
+Audited against **`e2cdcf5`** (origin/main, 2026-10-03 22:18 UTC).
+
+**Read this first — this spec has no line numbers, on purpose.**
+
+The license issuance comparison is not in the published repository. The live page reports build
+`2026-10-04 03:27 UTC`; the newest commit is five hours older, and none of the strings on the page
+exist anywhere in `client/src`, `server` or `shared`:
+
+```
+grep -rn "End dates are exclusive" client/src server shared   → 0
+grep -rn "Previously unseen addresses" client/src server shared → 0
+grep -rn "gross license issuances" client/src server shared     → 0
+```
+
+So this step is written against **strings and structure**, not line numbers. Every edit below names
+what to search for. If a search returns nothing, the file is not what this step assumed — stop and
+report rather than creating a new component.
+
+---
+
+## The problem
+
+§21 Corridor Intelligence renders the comparison with browser defaults inside a styled report: a
+17px body paragraph for the date range, a bare `<table>` with bold sans headers, and a second body
+paragraph of explanation. Everything around it — the five count blocks, the corridor header, the
+two business lists — is in the design language. This one block is not.
+
+**§16 New License Issuances Nearby already renders the same comparison correctly**, with a mono
+`MEASURE / LATEST 12MO / PRIOR 12MO` header and right-aligned numerals. This step makes §21 match
+§16. It is not a new design; it is one block that never had the design language applied.
+
+---
+
+## Part A — find the code
+
+The block is rendered inside the corridor panel, after the two-column
+`Businesses with new licenses` / `New construction` lists. Search in this order:
+
+```
+grep -rn "End dates are exclusive" client/src
+grep -rn "Prior 12 mo\|Latest 12 mo" client/src
+grep -rn "gross license issuances" client/src
+```
+
+One of those lands on the component. Expect it to be in a corridor component under
+`client/src/components/report/` or in the corridor block of `RunDetail.tsx`. Confirm before editing
+that the match is the **§21 corridor** copy and not the §16 copy — §16's version is already correct
+and **must not be changed by this step**. Tell them apart by what encloses them: the §21 copy sits
+inside the per-corridor panel, below the corridor's own two lists; the §16 copy sits directly under
+that section's three count blocks.
+
+---
+
+## Part B — the markup
+
+Replace the whole block — the date paragraph, the `<table>`, and the trailing explanation — with
+this. The values and the row set do not change; only the markup and where the prose sits.
+
+```tsx
+      <div className="kyp-charttitle">
+        License issuance comparison
+        <i>Latest 12mo: {latestLabel} · Prior 12mo: {priorLabel}</i>
+      </div>
+
+      <div className="kyp-ledger cmp">
+        <div className="kyp-lrow lhead">
+          <div className="l">Measure</div>
+          <div className="v">Latest 12mo</div>
+          <div className="v">Prior 12mo</div>
+        </div>
+        {MEASURES.map((m) => (
+          <div className="kyp-lrow" key={m.key}>
+            <div className="l">{m.label}</div>
+            <div className="v">{m.latest}</div>
+            <div className="v">{m.prior}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="kyp-src">
+        <p>Describes license issuances on this corridor within 1 mile, not this address. End dates are exclusive.</p>
+        <p>Gross issuances, not net growth. <b>Previously unseen</b> means no matching address in the preceding 12 months of issue history, not a confirmed opening; <b>different names at a known address</b> may be turnover or a renaming, and closures are not verified.</p>
+      </div>
+```
+
+`.kyp-ledger` / `.kyp-lrow` already ship — `kyp-base.css:2041` and `:2046`. They were built for the
+valuation statement in Step 30 and are already a three-column `label + two values` grid with
+hairline rows and a card border. The comparison is the same shape, so **no new table primitive is
+needed**. `.kyp-charttitle` at `:64` is the same label the corridor panel already uses for
+*Businesses with new licenses*; the `<i>` is the muted trailing clause.
+
+---
+
+## Part C — four copy changes
+
+### 1. The date range is developer notation today
+
+```
+Latest 12 mo 2025-10-05–<2026-10-05 · Prior 12 mo 2024-10-05–<2025-10-05 · End dates are exclusive.
+```
+
+The `<` is half-open interval syntax and the dates are ISO. Neither belongs on a page a buyer
+reads. §16 already renders `Oct 2025–Oct 2026`. Format the same way:
+
+```ts
+const monthLabel = (iso: string) =>
+  new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+const latestLabel = `${monthLabel(latestStart)}–${monthLabel(latestEnd)}`;
+const priorLabel  = `${monthLabel(priorStart)}–${monthLabel(priorEnd)}`;
+```
+
+### 2. The range moves into the block label
+
+It is a scope statement about the table, not a sentence. It belongs beside the label, muted, the
+way §16 does it — not as a 17px paragraph above the numbers.
+
+### 3. "End dates are exclusive" moves to the footer
+
+It is a fact about how the window was counted, not about any number in the table. Footer, line one,
+with the scope.
+
+### 4. The explanation becomes the footer's second line
+
+Same rule as §22 in Step 32: **what this describes, then how it was counted.** The current
+paragraph is 54 words of method sitting between the reader and the next corridor. Shortened to the
+two definitions that actually change how a number is read — *previously unseen* and *different
+names at a known address* — and moved to the end of the block.
+
+---
+
+## Part D — one row is missing
+
+The live §21 table shows five measures. §16 shows six — §21 is missing **`License issuances`**.
+
+That matters here more than in §16: *License issuances* and *Businesses with new licenses* differ
+exactly when one business takes several licenses, which is routine for food and liquor. Without
+that row a reader cannot tell 3 businesses with 3 licenses from 3 businesses with 7.
+
+Add it, in §16's order:
+
+```
+Businesses with new licenses
+License issuances
+Licensed addresses
+Previously unseen addresses
+Recurring businesses
+Different names at known addresses
+```
+
+If the corridor roll-up genuinely does not compute issuances, say so in this step's reply rather
+than rendering a blank row — that is a server question, not a markup one.
+
+**Keep the zero rows.** `Recurring businesses 0 / 0` and `Different names 0 / 0` are measured
+zeros, which is information. Do not suppress rows per corridor: two corridors with different row
+sets cannot be compared, and the table stops being a table.
+
+---
+
+## Part E — CSS
+
+Append to the END of `client/src/kyp-base.css`. **Two rules.**
+
+```css
+/* ============================================================
+   PATCH 34 — §21 Corridor Intelligence, license issuance comparison
+   Append to client/src/kyp-base.css.
+
+   Two rules. The comparison table is built entirely from
+   .kyp-ledger / .kyp-lrow, which already ship (Step 30, lines
+   2041 and 2046) and are already a three-column label-plus-two-
+   values grid. Only two things are missing.
+   ============================================================ */
+
+/* ── column headers for a two-value ledger ───────────────────
+   .kyp-ledger .lh is a single-line strip, not a 3-column row, so
+   the table has no way to label its two value columns. .lhead is
+   the same grid as .kyp-lrow, so the headers sit exactly over
+   their columns. Mono, uppercase, muted — the treatment .lh and
+   .kyp-charttitle already use, so nothing new enters the system. */
+.kyp-lrow.lhead{background:var(--kyp-wash);padding-top:8px;padding-bottom:8px}
+.kyp-lrow.lhead .l,.kyp-lrow.lhead .v{font-family:var(--kyp-mono);font-size:9.5px;
+  font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--kyp-muted)}
+
+/* ── fixed value columns ─────────────────────────────────────
+   .kyp-lrow is `1fr auto auto`, sized for a ledger whose two
+   trailing cells are a tag and a dollar figure. With two bare
+   integers the columns collapse against each other and the
+   headers no longer sit over their own numbers. A comparison
+   table needs its periods to line up, so .cmp fixes both.     */
+.kyp-ledger.cmp .kyp-lrow{grid-template-columns:1fr 104px 104px}
+.kyp-ledger.cmp .kyp-lrow .v{font-variant-numeric:tabular-nums}
+```
+
+**Do not add `.kyp-src p` / `.kyp-src p+p`** — they already ship at `kyp-base.css:2109–2110` from
+Step 32, and the two-paragraph footer above depends on them.
+
+---
+
+## Part F — tests
+
+```ts
+test("the comparison renders as a ledger, not a bare table", () => {
+  const html = renderCorridorPanel(fixture);
+  assert.match(html, /class="kyp-ledger cmp"/);
+  assert.match(html, /class="kyp-lrow lhead"/);
+  assert.doesNotMatch(html, /<table/);
+});
+
+test("no interval notation or ISO dates reach the page", () => {
+  const html = renderCorridorPanel(fixture);
+  assert.doesNotMatch(html, /–&lt;|–<|\d{4}-\d{2}-\d{2}/);
+  assert.match(html, /Latest 12mo: \w{3} \d{4}–\w{3} \d{4}/);
+});
+
+test("method prose sits in the footer, not between the numbers", () => {
+  const html = renderCorridorPanel(fixture);
+  const beforeLedger = html.split('class="kyp-ledger')[0];
+  assert.doesNotMatch(beforeLedger, /gross license issuances|not net growth/i);
+  assert.match(html, /class="kyp-src"[\s\S]*not net growth/);
+});
+
+test("all six measures render, including zero rows", () => {
+  const html = renderCorridorPanel(fixture);
+  assert.equal((html.match(/class="kyp-lrow"/g) || []).length, 6);
+  assert.match(html, /License issuances/);
+  assert.match(html, /Recurring businesses/);
+});
+
+test("§16 is untouched by this step", () => {
+  const sixteen = readFileSync("client/src/components/report/NewBusinessLicensesSection.tsx", "utf8");
+  assert.doesNotMatch(sixteen, /kyp-ledger cmp/);
+});
+```
+
+---
+
+## Not part of this step — for the repo owner, not the agent
+
+Do not act on either of these as part of Step 34.
+
+**Three live API keys** in `.replit` lines 65–71, present in four commits, with a `.gitignore`
+whose missing newline (`*.tar.gzserver/cache/`) means neither pattern matches. Rotate all three,
+move them to Replit Secrets, `git rm --cached .replit`, fix the newline. Rotating matters more than
+removing the file — they are already in history.
+
+**This feature is unpublished.** Publishing before running this step would let the next audit use
+line numbers instead of string searches.
+
+---
+
+## Verify
+
+- `grep -rc "kyp-ledger cmp" client/src` → **1** (the §21 corridor panel only)
+- `grep -rn "<table" client/src/components/report/` → no match in the corridor panel
+- `grep -rn "–<\|&lt;20\|End dates are exclusive" client/src` → the only match is inside a `.kyp-src`
+- `grep -rn "\d{4}-\d{2}-\d{2}" ` on the rendered corridor panel → **0**
+- `grep -c "kyp-src p" client/src/kyp-base.css` → **3** (unchanged — this step adds none)
+- The corridor panel renders exactly **one** `.kyp-src`, after the ledger
+- Visual: the comparison is a bordered card with a wash header strip, `MEASURE` left, two
+  right-aligned mono columns whose digits line up, hairline row rules
+- Visual: nothing between the block label and the table, and nothing between the table and the
+  footer
+- Visual, §16: unchanged
+- Visual, phone: the two value columns hold at 104px and the label wraps; no horizontal scroll

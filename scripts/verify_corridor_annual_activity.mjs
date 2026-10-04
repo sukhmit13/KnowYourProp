@@ -72,10 +72,33 @@ try {
       });
       assert.ok(geometry.height <= geometry.line + 1, `${width}px corridor header should stay one line`);
     }
-    const table = section.locator("table");
-    assert.equal(await table.count(), 1);
-    assert.match(await table.innerText(), /Previously unseen addresses/);
+    const comparison = section.locator('[data-testid="corridor-license-comparison-broadway"]');
+    const ledger = comparison.locator(".kyp-ledger.cmp");
+    assert.equal(await section.locator("table").count(), 0);
+    assert.equal(await ledger.count(), 1);
+    assert.equal(await ledger.locator(".kyp-lrow:not(.lhead)").count(), 6);
+    assert.match(await ledger.innerText(), /Previously unseen addresses/);
+    assert.match(await ledger.innerText(), /License issuances/);
+    assert.doesNotMatch(await comparison.innerText(), /–<|\d{4}-\d{2}-\d{2}/);
+    assert.match(await comparison.locator(".kyp-charttitle").innerText(), /Latest 12mo: Oct 2025–Oct 2026/i);
+    assert.equal(await comparison.locator(".kyp-src").count(), 1);
+    assert.match(await comparison.locator(".kyp-src").innerText(), /not net growth/);
+    const columns = await ledger.locator(".kyp-lrow").evaluateAll(rows => rows.map(row => {
+      const cells = [...row.children].map(cell => cell.getBoundingClientRect());
+      return { grid: getComputedStyle(row).gridTemplateColumns, latestX: cells[1].x, priorX: cells[2].x, latestY: cells[1].y, priorY: cells[2].y };
+    }));
+    for (const row of columns) {
+      assert.match(row.grid, /104px 104px$/, "period columns retain fixed widths");
+      assert.equal(row.latestX, columns[0].latestX, "latest values align with their header");
+      assert.equal(row.priorX, columns[0].priorX, "prior values align with their header");
+      assert.equal(row.latestY, row.priorY, "period values must not stack on phones");
+    }
+    if (width === 390) {
+      const labelWidth = await ledger.locator(".kyp-lrow:not(.lhead) .l").first().evaluate(el => el.clientWidth);
+      assert.ok(labelWidth >= 60, "phone labels must retain room for readable words");
+    }
     assert.match(await section.innerText(), /Former Cafe/);
+    if (width === 1280 || width === 390) await comparison.screenshot({path:`/tmp/corridor-ledger-${width}.png`});
     assert.match(await section.innerText(), /past 12 months|last 12 mo|last 12 months/i);
     assert.doesNotMatch(await section.innerText(), /90 days/);
     assert.match(await page.locator("#unknown").innerText(), /Historical license comparison unavailable/i);
