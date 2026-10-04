@@ -17,4 +17,10 @@ Both Corridor Intelligence and New License Issuances Nearby must distinguish inc
 
 **How to apply:** Compare equal annual windows, deduplicate issuances, show recurring names and address-level observations separately, and surface possible name changes with prior names. Use equal historical lookback for both periods. Without closure and operating-status evidence, do not claim net operating-business growth.
 
+Preserve both insight views: business arrivals/turnover and changing offerings, alongside commercial occupancy/expansion. Do not discard a new operator simply because it enters an existing commercial space.
+
+**Why:** During brainstorming, the user explicitly agreed that “we should totally have both” after distinguishing changes in the business mix from growth in occupied or newly created commercial locations.
+
+**How to apply:** Keep these two questions separate when developing business insights. Retain possible replacements as useful activity, without labeling them net additions. Occupancy, vacancy, closure, cuisine, and demographic conclusions require evidence beyond initial license applications.
+
 Source: https://data.cityofchicago.org/Community-Economic-Development/Business-Licenses/r5kz-chrr
