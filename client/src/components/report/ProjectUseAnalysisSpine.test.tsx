@@ -11,6 +11,15 @@ import {
   ProjectUseGoogleMaps,
 } from "./ProjectUseAnalysisSpine";
 
+test("competition remains in Project Use Analysis rather than a duplicate zoning concept scan", () => {
+  const report = readFileSync("client/src/pages/RunDetail.tsx", "utf8");
+  assert.doesNotMatch(report, /data-testid="concept-scan"|data-testid="link-concept-to-competitors"/);
+  assert.match(report, /id="section-google-places-inline"/, "Project Use Analysis retains nearby Google Maps results");
+  assert.match(report, /section-google-places-daycare/, "daycare competition remains available");
+  assert.match(report, /data-testid="tie-note"/, "the zoning use-selection note is preserved");
+  assert.match(report, /data-testid="zba-city-table"/, "zoning's legal-record section remains intact");
+});
+
 test("business rows use one name link, a place URL or Chicago Maps search, plain address, and explicit unknown distance", () => {
   const place = renderToStaticMarkup(
     <ProjectUseBusinessRow name="Matchbox" address="770 N Milwaukee Ave" distance={0.24} url="https://www.google.com/maps/place/Matchbox" meta={["★ 4.5", "0 reviews"]} />,

@@ -5,6 +5,12 @@ description: User-requested scope, classification, and ranking rules for Project
 
 Project Use Analysis uses one ZIP/community-area control for its area-scoped panels. Radius-only uses must not display that control. Its body presents numbers, source classifications, and evidence limitations rather than takeaway prose.
 
+Competition belongs in Project Use Analysis, not Zoning & Allowed Uses.
+
+**Why:** The user explicitly said competition should not be in Zoning & Allowed Uses because Project Use Analysis already covers it.
+
+**How to apply:** Keep nearby-competitor displays in Project Use Analysis; do not add duplicate competitor counts or competition subsections to zoning. Preserve zoning permissions and the intended-use selection there.
+
 **Why:** The user requested a common structure across project uses and explicitly removed duplicate controls and interpretive sentences.
 
 **How to apply:** Preserve the shared geographic selection when adding panels, keep license and Google Maps competitors separate, and put each subsection's scope and source information once at its end.

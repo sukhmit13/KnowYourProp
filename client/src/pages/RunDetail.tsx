@@ -5534,38 +5534,6 @@ export default function RunDetail() {
                     </div>
                   )}
 
-                  {/* Concept scan — nearby-competition count sharpened by the specific concept */}
-                  {selectedProjectType && placesConfirmed && (() => {
-                    const scanData = isDaycare ? googlePlacesDaycareData : googlePlacesData;
-                    if (!scanData || scanData.status === 'pending' || !Array.isArray(scanData.places)) return null;
-                    const halfMileCount = scanData.places.filter((p: any) => p.distanceMiles != null && p.distanceMiles <= 0.5).length;
-                    const conceptLabel = confirmedFreeform || selectedProjectType;
-                    const goToCompetitors = () => {
-                      setAccOpen((m) => ({ ...m, analysis: true }));
-                      setAccHidden((m) => ({ ...m, analysis: false }));
-                      setAccOpen((current) => ({ ...current, analysis: true }));
-                      if (isDaycare) {
-                        setSectionOpen('googlePlacesDaycareSection', true);
-                        revealAnchor('section-google-places-daycare');
-                      } else {
-                        setSectionOpen('googlePlacesSection', true);
-                        revealAnchor('section-google-places-inline');
-                      }
-                    };
-                    return (
-                      <>
-                        <KypSubhead subsection={requiresZoningChange ? 3 : 2}><span className="lbl">Competition</span><span className="ct screen-only" data-testid="link-concept-to-competitors">Nearby Competitors ↓</span></KypSubhead>
-                        <div>
-                        <div className="kyp-recgrid inline three cursor-pointer" data-testid="concept-scan" onClick={goToCompetitors} role="button" tabIndex={0} aria-label={`View nearby competitors for ${conceptLabel}`} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToCompetitors(); } }}>
-                          <div className="hi"><span className="k">{conceptLabel}</span><span className="v">{halfMileCount}</span></div>
-                          <div><span className="k">Radius</span><span className="v">½ mi</span></div>
-                          <div><span className="k">Source</span><span className="v">Google Maps</span></div>
-                        </div>
-                        </div>
-                      </>
-                    );
-                  })()}
-
                   {/* Tailoring hook — one source feeding Insight Report + valuation */}
                   {selectedProjectType && (
                     <div className="kyp-note" data-testid="tie-note">
