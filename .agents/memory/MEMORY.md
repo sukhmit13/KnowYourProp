@@ -9,6 +9,7 @@
 - [claude-sonnet-5 API quirks](claude-sonnet-5-api-quirks.md) — rejects temperature; thinking tokens eat max_tokens; join all text blocks and fail hard on truncation/empty output.
 - [Report design system](report-design-system.md) — shared primitives, evidence-scoped section names, and browser/type-baseline verification.
 - [Report section hierarchy](report-section-hierarchy.md) — each accordion row gets one header; subsection labels use full-width standard rules without a second icon/short line or extra outer frame.
+- [Removed report subsections](removed-report-subsections.md) — City-Owned Lots is permanently out of scope, including UI, exports, references, and data requests.
 - [Metra station name matching](metra-station-matching.md) — GTFS vs RTAMS survey names differ; alias table + hint-only fuzzy match, ambiguous → 404, never guess.
 - [Contractor rankings pipeline](contractor-rankings-pipeline.md) — permits-only data; rank by trade-specific counts, compute activity live, rebuilds fail hard + atomic.
 - [Auth & run ownership](auth-run-ownership.md) — new run endpoints need cookie+bearer auth, case-insensitive email ownership, 404 for non-owned; paid calls need lock+cooldown.

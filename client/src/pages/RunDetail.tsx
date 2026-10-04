@@ -15,7 +15,7 @@ import { formatNewsDate } from "@/lib/newsDate";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { levelRating, closestSchool, ratingScore, ratingTier } from "@/lib/schoolsDisplay";
-import { useListingSnapshot, useGenerateListingSnapshot, useUpdateRunLabel, useRun, usePublicRun, useGeocodeLookup, useZoningInfo, useBusinessUses, useZoningCompatibility, useChildcareAccess, useCommunityAreaChildcareAccess, useGroceryAccess, useCommunityAreaGroceryAccess, useSbifEligibility, useNmtcEligibility, useMmrpEligibility, useHubZoneEligibility, useQctEligibility, useChaOpportunityArea, useTransitProximity, useTODStatus, useEvStations, useGasStations, useHotels, useRestaurants, useCoffeeShops, useBars, useNearbyDayCares, usePropertyTax, useRefreshPropertyTax, useLienSearch, usePinLookup, useProximityData, useMichelinNearby, useMuralsNearby, useDesignatedLandmarksNearby, useZbaWardSummary, useZbaCitySummary, useEVRegistrations, useCannabisDispensariesByZip, useUpdateProjectType, useUpdateFunnelAnswers, useUpdateManualProperty, useCensusACS, useCombinedPermitViolations, useCrimeStats, useCrimeTractRanking, useCrimeTakeaway, useGenerateCrimeTakeaway, useHmdaTakeaway, useGenerateHmdaTakeaway, useNewsTakeaway, useGenerateNewsTakeaway, useNeighborhoodNewsTakeaway, useGenerateNeighborhoodNewsTakeaway, useTransitTakeaway, useGenerateTransitTakeaway, useElectionData, useVehicleOwnership, useSeniorsData, useSeniorsZipData, useLanguageData, useLanguageZipData, useChildcareEnhancedData, useChildcareEnhancedZipData, useLandmarkStatus, useChildcareCapacity, useChildcareCapacityZip, useFairMarketRent, useCtaRidership, useCtaBusRidership, useMetraRidership, useMetraLineRidership, useNewConstruction, useNearbyNewConstruction, useNearbyBusinessLicenses, useNearbyArtGalleries, useAddressNews, useNeighborhoodNews, useCorridorNews, useVacantBuildingsNearby, useMortgageRate, useToggleFavorite, useHmdaStats, usePlacesOfWorship, useUpcomingDevelopments, useComparableSales, useSBALoans, useSchoolsNearby, useAirbnbStats, useRentcast, useRentcastRadius, useJBANearby, useLocationIncentives, useZbaApprovals, useRelatedParcels, useCityOwnedLots, useLoopNet, usePeerspace, useZoningHistory, useTransactionTrends, useSidewalkCafe, useBusinessLicenseHistory, useGooglePlaces, useTrafficCount, useLodesData, useListingData, useIncentivesCheck, useSbaRates, useDebtSnapshot, useBuildDebtSnapshot } from "@/hooks/use-runs";
+import { useListingSnapshot, useGenerateListingSnapshot, useUpdateRunLabel, useRun, usePublicRun, useGeocodeLookup, useZoningInfo, useBusinessUses, useZoningCompatibility, useChildcareAccess, useCommunityAreaChildcareAccess, useGroceryAccess, useCommunityAreaGroceryAccess, useSbifEligibility, useNmtcEligibility, useMmrpEligibility, useHubZoneEligibility, useQctEligibility, useChaOpportunityArea, useTransitProximity, useTODStatus, useEvStations, useGasStations, useHotels, useRestaurants, useCoffeeShops, useBars, useNearbyDayCares, usePropertyTax, useRefreshPropertyTax, useLienSearch, usePinLookup, useProximityData, useMichelinNearby, useMuralsNearby, useDesignatedLandmarksNearby, useZbaWardSummary, useZbaCitySummary, useEVRegistrations, useCannabisDispensariesByZip, useUpdateProjectType, useUpdateFunnelAnswers, useUpdateManualProperty, useCensusACS, useCombinedPermitViolations, useCrimeStats, useCrimeTractRanking, useCrimeTakeaway, useGenerateCrimeTakeaway, useHmdaTakeaway, useGenerateHmdaTakeaway, useNewsTakeaway, useGenerateNewsTakeaway, useNeighborhoodNewsTakeaway, useGenerateNeighborhoodNewsTakeaway, useTransitTakeaway, useGenerateTransitTakeaway, useElectionData, useVehicleOwnership, useSeniorsData, useSeniorsZipData, useLanguageData, useLanguageZipData, useChildcareEnhancedData, useChildcareEnhancedZipData, useLandmarkStatus, useChildcareCapacity, useChildcareCapacityZip, useFairMarketRent, useCtaRidership, useCtaBusRidership, useMetraRidership, useMetraLineRidership, useNewConstruction, useNearbyNewConstruction, useNearbyBusinessLicenses, useNearbyArtGalleries, useAddressNews, useNeighborhoodNews, useCorridorNews, useVacantBuildingsNearby, useMortgageRate, useToggleFavorite, useHmdaStats, usePlacesOfWorship, useUpcomingDevelopments, useComparableSales, useSBALoans, useSchoolsNearby, useAirbnbStats, useRentcast, useRentcastRadius, useJBANearby, useLocationIncentives, useZbaApprovals, useRelatedParcels, useLoopNet, usePeerspace, useZoningHistory, useTransactionTrends, useSidewalkCafe, useBusinessLicenseHistory, useGooglePlaces, useTrafficCount, useLodesData, useListingData, useIncentivesCheck, useSbaRates, useDebtSnapshot, useBuildDebtSnapshot } from "@/hooks/use-runs";
 import { buildDebtCardModel } from "@shared/debtCardModel";
 import { withoutRepeatedNews } from "@/components/report/newsArticleDedup";
 import { classifyArticle } from "@shared/articleSubject";
@@ -676,7 +676,6 @@ interface SectionStates {
   farAnalysis: boolean;
   fmrSubsection: boolean;
   vacantBuildings: boolean;
-  cityOwnedLots: boolean;
   proximityDetails: boolean;
   transitAccess: boolean;
   dob: boolean;
@@ -856,7 +855,7 @@ function HistoricStatusPanel({
 const DEFAULT_SECTION_STATES: SectionStates = {
   addressNews: false, neighborhoodNews: false, corridorNews: false,
   locationIncentives: false, propertyDetails: false, developmentPotential: false,
-  farAnalysis: true, fmrSubsection: true, vacantBuildings: false, cityOwnedLots: false,
+  farAnalysis: true, fmrSubsection: true, vacantBuildings: false,
   proximityDetails: false, transitAccess: false,
   dob: false, recentLicenses: false, landmark: false,
   parcel: false, crime: false, proximity: false, entertainment: false,
@@ -1552,8 +1551,6 @@ export default function RunDetail() {
   const setIsFmrSubsectionOpen = useCallback((v: boolean) => setSectionOpen('fmrSubsection', v), [setSectionOpen]);
   const isVacantBuildingsOpen = sectionStates.vacantBuildings;
   const setIsVacantBuildingsOpen = useCallback((v: boolean) => setSectionOpen('vacantBuildings', v), [setSectionOpen]);
-  const isCityOwnedLotsOpen = sectionStates.cityOwnedLots;
-  const setIsCityOwnedLotsOpen = useCallback((v: boolean) => setSectionOpen('cityOwnedLots', v), [setSectionOpen]);
   const isProximityDetailsOpen = sectionStates.proximityDetails;
   const setIsProximityDetailsOpen = useCallback((v: boolean) => setSectionOpen('proximityDetails', v), [setSectionOpen]);
   const isTransitAccessOpen = sectionStates.transitAccess;
@@ -2153,7 +2150,6 @@ export default function RunDetail() {
   const { data: locationIncentivesData, isLoading: isLoadingLocationIncentives } = useLocationIncentives(facts?.lat, facts?.lon);
   const nofEligible = locationIncentivesData?.nofEligibleArea?.inEligibleArea ?? false;
   const investSwEligible = locationIncentivesData?.investSouthWest?.inArea ?? false;
-  const { data: cityOwnedLotsData, isLoading: isLoadingCityOwnedLots } = useCityOwnedLots(facts?.lat, facts?.lon);
   const { data: transitData, isLoading: isLoadingTransit } = useTransitProximity(facts?.lat, facts?.lon);
   const { data: trafficData, isLoading: isLoadingTraffic } = useTrafficCount(facts?.lat, facts?.lon);
   const { data: lodesData, isLoading: isLoadingLodes } = useLodesData(facts?.tractGeoid);
@@ -12090,167 +12086,6 @@ export default function RunDetail() {
               </motion.div>
             );
           })()}</>)}
-          <KypSubhead subsection={buildSubsectionNumbers([["cityOwnedLots", true]]).cityOwnedLots}>
-            <span className="lbl">City-Owned Lots</span>
-            <span className="ct">City acquisition opportunities nearby</span>
-            <span className="rule" />
-          </KypSubhead>
-          <Collapsible open={isCityOwnedLotsOpen} onOpenChange={setIsCityOwnedLotsOpen}>
-            <CollapsibleTrigger asChild>
-              <div className="flex items-center justify-between cursor-pointer hover-elevate rounded-lg p-3 -mx-1">
-                <h3 className="chead chead-icon">
-                  <Building2 className="w-4 h-4" />
-                  City-Owned Lots
-                </h3>
-                <div className="flex items-center gap-2">
-                  {!isCityOwnedLotsOpen && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {isLoadingCityOwnedLots ? (
-                        <Badge variant="secondary" className="text-xs">Loading...</Badge>
-                      ) : cityOwnedLotsData ? (
-                        cityOwnedLotsData.count > 0 ? (
-                          <>
-                            <Badge variant="secondary" className="text-xs">
-                              {cityOwnedLotsData.count} within &frac12; mi
-                            </Badge>
-                            {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length > 0 && (
-                              <Badge variant="default" className="text-xs">
-                                {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length} within &frac14; mi
-                              </Badge>
-                            )}
-                            {cityOwnedLotsData.lots.some(l => l.salesStatus === 'For Sale') && (
-                              <Badge className="text-xs bg-green-600 text-white border-green-600">For Sale Available</Badge>
-                            )}
-                          </>
-                        ) : (
-                          <Badge variant="secondary" className="text-xs">None within &frac12; mi</Badge>
-                        )
-                      ) : (
-                        <Badge variant="secondary" className="text-xs">Not Available</Badge>
-                      )}
-                    </div>
-                  )}
-                  <span className="text-muted-foreground text-sm">{isCityOwnedLotsOpen ? '▼' : '▶'}</span>
-                </div>
-              </div>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="pb-4 space-y-4">
-                {isLoadingCityOwnedLots ? (
-                  <p className="text-sm text-muted-foreground">Loading city-owned lot data...</p>
-                ) : cityOwnedLotsData && cityOwnedLotsData.count > 0 ? (
-                  <>
-                    <div className="dir-facts dir-facts-4">
-                      <div className="dir-fact">
-                        <div className="dir-fact-top"><span className="dir-fact-icon"><MapPin className="w-3 h-3" /></span><span className="dir-fact-label">&frac14; Mile Lots</span></div>
-                        <p className="dir-fact-value">{cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length} lots</p><p className="dir-fact-qualifier">within ¼ mile</p>
-                      </div>
-                      <div className="dir-fact">
-                        <div className="dir-fact-top"><span className="dir-fact-icon"><MapPin className="w-3 h-3" /></span><span className="dir-fact-label">&frac12; Mile Lots</span></div>
-                        <p className="dir-fact-value">{cityOwnedLotsData.count} lots</p><p className="dir-fact-qualifier">within ½ mile</p>
-                      </div>
-                      <div className="dir-fact">
-                        <div className="dir-fact-top"><span className="dir-fact-icon"><Ruler className="w-3 h-3" /></span><span className="dir-fact-label">Nearest</span></div>
-                        <p className="dir-fact-value">{Math.round(cityOwnedLotsData.lots[0].distanceFt).toLocaleString()} ft away</p><p className="dir-fact-qualifier">closest city-owned lot</p>
-                      </div>
-                      <div className="dir-fact">
-                        <div className="dir-fact-top"><span className="dir-fact-icon"><Tag className="w-3 h-3" /></span><span className="dir-fact-label">For Sale</span></div>
-                        <p className="dir-fact-value">{cityOwnedLotsData.lots.filter(l => l.salesStatus === 'For Sale').length} lots</p><p className="dir-fact-qualifier">currently available</p>
-                      </div>
-                    </div>
-
-                    {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length > 0 && (
-                      <div className="space-y-2">
-                        <div className="lot-lbl">Within &frac14; Mile <span className="lot-pill">{cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length} lot{cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).length !== 1 ? 's' : ''}</span></div>
-                        <div className="space-y-2">
-                          {cityOwnedLotsData.lots.filter(l => l.distanceFt <= 1320).map((lot, i) => (
-                            <div key={i} className="dir-row" data-testid={`city-lot-quarter-${i}`}>
-                              <div className="dir-row-body">
-                                <div className="dir-name-line">
-                                  <a
-                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((lot.address || '') + ', Chicago, IL')}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="dir-name hover:underline"
-                                  >
-                                    {lot.address || 'Unknown Address'}
-                                  </a>
-                                  <span className={`lot-st ${(lot.saleOfferingStatus || lot.salesStatus) === 'For Sale' ? 'avail' : ''}`}>{lot.saleOfferingStatus || lot.salesStatus}</span>
-                                </div>
-                                <p className="dir-meta">
-                                  {Math.round(lot.distanceFt).toLocaleString()} ft away
-                                  {lot.zoning ? ` · Zoned ${lot.zoning}` : ''}
-                                  {lot.sqFt ? ` · ${lot.sqFt.toLocaleString()} sq ft` : ''}
-                                </p>
-                              </div>
-                              {(lot.landValue || lot.applicationUrl) && (
-                                <div className="flex flex-col items-end gap-0.5 flex-none text-right">
-                                  {lot.landValue && <span className="lot-val">City est. ${lot.landValue.toLocaleString()}</span>}
-                                  {lot.applicationUrl && (
-                                    <a href={lot.applicationUrl} target="_blank" rel="noopener noreferrer" className="lot-apply hover:underline">
-                                      <ExternalLink className="w-3 h-3" /> Apply
-                                    </a>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).length > 0 && (
-                      <div className="space-y-2">
-                        <div className="lot-lbl">&frac14; – &frac12; Mile <span className="lot-pill">{cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).length} lot{cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).length !== 1 ? 's' : ''}</span></div>
-                        <div className="space-y-2">
-                          {cityOwnedLotsData.lots.filter(l => l.distanceFt > 1320).map((lot, i) => (
-                            <div key={i} className="dir-row" data-testid={`city-lot-half-${i}`}>
-                              <div className="dir-row-body">
-                                <div className="dir-name-line">
-                                  <a
-                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((lot.address || '') + ', Chicago, IL')}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="dir-name hover:underline"
-                                  >
-                                    {lot.address || 'Unknown Address'}
-                                  </a>
-                                  <span className={`lot-st ${(lot.saleOfferingStatus || lot.salesStatus) === 'For Sale' ? 'avail' : ''}`}>{lot.saleOfferingStatus || lot.salesStatus}</span>
-                                </div>
-                                <p className="dir-meta">
-                                  {Math.round(lot.distanceFt).toLocaleString()} ft away
-                                  {lot.zoning ? ` · Zoned ${lot.zoning}` : ''}
-                                  {lot.sqFt ? ` · ${lot.sqFt.toLocaleString()} sq ft` : ''}
-                                </p>
-                              </div>
-                              {(lot.landValue || lot.applicationUrl) && (
-                                <div className="flex flex-col items-end gap-0.5 flex-none text-right">
-                                  {lot.landValue && <span className="lot-val">City est. ${lot.landValue.toLocaleString()}</span>}
-                                  {lot.applicationUrl && (
-                                    <a href={lot.applicationUrl} target="_blank" rel="noopener noreferrer" className="lot-apply hover:underline">
-                                      <ExternalLink className="w-3 h-3" /> Apply
-                                    </a>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <p className="text-xs text-muted-foreground pt-2 border-t border-border">
-                      Source: City of Chicago Open Data — City-Owned Land Inventory (DPD)
-                    </p>
-                  </>
-                ) : cityOwnedLotsData && cityOwnedLotsData.count === 0 ? (
-                  <p className="text-sm text-muted-foreground">No city-owned lots found within &frac12; mile of this property.</p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">Unable to load city-owned lot data.</p>
-                )}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
           </AccordionSection>
 
           {/* Property Proximity Details Section - Contains Crime Statistics and Proximity Info */}
@@ -12591,7 +12426,7 @@ export default function RunDetail() {
                               </div>
                             )}
                           </div>
-                          <div className="kyp-src">City of Chicago Data Portal, data year {proximityData.dataYear}. Distances are straight-line from the parcel centroid. City-owned lots are covered in Development Potential.</div>
+                          <div className="kyp-src">City of Chicago Data Portal, data year {proximityData.dataYear}. Distances are straight-line from the parcel centroid.</div>
                         </div>
                       ) : !pinLookupData?.pin ? (
                         <p className="text-sm text-muted-foreground">PIN lookup required for proximity information</p>

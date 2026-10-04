@@ -6992,53 +6992,6 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     }
   });
 
-  // === CITY-OWNED LOTS ===
-
-  function haversineFt(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 3958.8 * 5280;
-    const toRad = (d: number) => d * Math.PI / 180;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
-  app.post('/api/city-owned-lots/nearby', async (req, res) => {
-    try {
-      const { lat, lon, radiusMiles = 0.5 } = req.body;
-      if (typeof lat !== 'number' || typeof lon !== 'number') {
-        return res.status(400).json({ error: 'lat and lon are required as numbers' });
-      }
-      const radiusMeters = Math.round(radiusMiles * 1609.34);
-      const url = `https://data.cityofchicago.org/resource/aksk-kvfp.json?$where=within_circle(location,${lat},${lon},${radiusMeters})&$limit=50&$order=:id`;
-      const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
-      if (!response.ok) {
-        throw new Error(`City-owned lots API returned ${response.status}`);
-      }
-      const raw: any[] = await response.json();
-      const lots = raw
-        .filter(r => r.latitude && r.longitude)
-        .map(r => ({
-          pin: r.pin || null,
-          address: r.address || null,
-          salesStatus: r.sales_status || 'Unknown',
-          saleOfferingStatus: r.sale_offering_status || null,
-          sqFt: r.square_footage_city_estimate ? parseInt(r.square_footage_city_estimate) : null,
-          landValue: r.land_value ? parseInt(r.land_value) : null,
-          zoning: r.zoning_classification || null,
-          ward: r.ward || null,
-          communityArea: r.community_area_name || null,
-          applicationUrl: r.application_url?.url || null,
-          distanceFt: haversineFt(lat, lon, parseFloat(r.latitude), parseFloat(r.longitude)),
-        }))
-        .sort((a, b) => a.distanceFt - b.distanceFt);
-      res.json({ count: lots.length, lots });
-    } catch (err) {
-      console.error('City-owned lots error:', err);
-      res.status(500).json({ error: 'Failed to fetch city-owned lots' });
-    }
-  });
-
   // === MICHELIN RESTAURANTS ===
 
   const michelinRestaurants = JSON.parse(

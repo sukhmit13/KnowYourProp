@@ -1069,12 +1069,6 @@ body[data-print-expanding] .recharts-responsive-container > .recharts-wrapper > 
 .market-fmr-tile>.market-fmr-value{font-family:var(--font-serif);font-size:30px;line-height:1;color:#141414;font-weight:400;letter-spacing:normal;margin:7px 0 3px}
 .market-fmr-tile>.market-fmr-unit{font-family:var(--font-sans);font-size:11px;line-height:1.2;font-weight:400;color:#8b8a84}
 .market-overview{margin-top:4px}.market-overview-label{margin:0 0 10px}.market-overview-head,.market-overview-row{display:grid;grid-template-columns:1fr 90px 100px;gap:10px;align-items:center}.market-overview-head{padding-bottom:9px;border-bottom:1px solid var(--sb-line)}.market-overview-head span{font-family:var(--font-jbmono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#565651;text-align:right}.market-overview-head span:first-child{text-align:left}.market-overview-row{padding:10px 0;border-bottom:1px solid var(--sb-line)}.market-overview-row:last-child{border-bottom:0}.market-overview-row .metric{font-size:12.5px;font-weight:600;color:#141414}.market-overview-row .amount{text-align:right;font-size:12.5px;font-weight:700;color:#141414;font-variant-numeric:tabular-nums}.market-overview-row .days{text-align:right;font-size:12.5px;font-weight:700;color:#141414}.market-overview-row .days small{font-size:11px;font-weight:400;color:#8b8a84}
-.lot-lbl{font-family:var(--font-jbmono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#565651;margin:20px 0 2px;display:flex;align-items:center;gap:9px}
-.lot-pill{font-family:var(--font-jbmono);font-size:10px;background:#f1efe9;color:#565651;border-radius:5px;padding:2px 7px;font-weight:600}
-.lot-st{font-size:10px;font-weight:700;border-radius:5px;padding:2px 8px;text-transform:uppercase;background:#f1efe9;color:#565651;display:inline-flex;align-items:center;line-height:1.4;white-space:nowrap}
-.lot-st.avail{background:#edf6ef;color:#2f7d3f}
-.lot-val{font-size:13px;font-weight:600;color:#141414}
-.lot-apply{font-size:12px;color:#2b3a9e;font-weight:600;display:inline-flex;align-items:center;gap:3px}
 @media(max-width:640px){.dir-facts,.dir-facts-4{grid-template-columns:repeat(2,minmax(0,1fr))}.dir-row{gap:8px}}
 #print-section-transit .bg-amber-500{background:#edf6ef!important;color:#2f7d3f!important;border-color:#edf6ef!important}
 #print-section-transit .bg-red-500{background:#fbecea!important;color:#d13b26!important;border-color:#fbecea!important}

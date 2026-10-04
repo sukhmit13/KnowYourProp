@@ -2044,49 +2044,6 @@ export function useProximityData(pin: string | null | undefined) {
 }
 
 // ============================================
-// CITY-OWNED LOTS HOOKS
-// ============================================
-
-export interface CityOwnedLot {
-  pin: string | null;
-  address: string | null;
-  salesStatus: string;
-  saleOfferingStatus: string | null;
-  sqFt: number | null;
-  landValue: number | null;
-  zoning: string | null;
-  ward: string | null;
-  communityArea: string | null;
-  applicationUrl: string | null;
-  distanceFt: number;
-}
-
-export interface CityOwnedLotsResult {
-  count: number;
-  lots: CityOwnedLot[];
-}
-
-export function useCityOwnedLots(lat: number | null | undefined, lon: number | null | undefined) {
-  return useQuery<CityOwnedLotsResult | null>({
-    queryKey: ['/api/city-owned-lots/nearby', lat, lon],
-    enabled: lat !== null && lat !== undefined && lon !== null && lon !== undefined,
-    queryFn: async () => {
-      if (lat === null || lat === undefined || lon === null || lon === undefined) return null;
-      const res = await fetch('/api/city-owned-lots/nearby', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat, lon }),
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error('Failed to fetch city-owned lots');
-      return await res.json();
-    },
-    staleTime: 1000 * 60 * 60 * 24,
-    refetchOnWindowFocus: false,
-  });
-}
-
-// ============================================
 // MICHELIN RESTAURANTS HOOKS
 // ============================================
 
