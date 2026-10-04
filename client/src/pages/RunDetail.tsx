@@ -3969,6 +3969,7 @@ export default function RunDetail() {
     newsTakeaway: newsTakeaway as any,
     hasSiteNews: !!(newsTakeaway?.meta?.length) || (addressNewsData?.articles?.length || 0) + (coParcelAddressNewsData?.articles?.length || 0) > 0,
     nnTakeaway: nnTakeaway as any,
+    corridor: corridorRollupReady ? corridorNewsData : null,
     lienDistress,
     lienData,
     isLoadingLiens: isCheckingTitle,

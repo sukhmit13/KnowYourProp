@@ -47,6 +47,11 @@ export interface ScanCtx {
   /** true when any site-specific (parcel/adjacent) coverage exists — gates the neighborhood fallback */
   hasSiteNews?: boolean;
   nnTakeaway?: { takeaway?: { title?: string }; kpis?: { momentumLabel?: string; momentumScore?: number } } | null;
+  corridor?: {
+    is_near_corridor?: boolean;
+    kpis?: { permits?: number | null; licenses?: number | null; zoningAppeals?: number | null; dpdApplications?: number | null; articles?: number | null };
+    sourceCoverage?: Record<string, { status?: string }>;
+  } | null;
   /** Permits & Violations — computed in RunDetail from dobDerived + violationsData */
   dobScan?: { headline?: string | null; openViolations?: number | null; notClosedCount?: number | null } | null;
   /** Ownership & Title — shared distress resolution and recorder-search state. */
@@ -193,15 +198,28 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
     };
   }
 
-  // 10 · Corridor — neighborhood-news takeaway title + momentum label.
-  //     Tone follows the label: only high momentum reads green; low/moderate stay neutral.
-  const momentum = ctx.nnTakeaway?.kpis?.momentumLabel;
-  if (ctx.nnTakeaway?.takeaway?.title || momentum) {
-    const momTone: VerdictTone = /high/i.test(momentum || "") ? "good" : "context";
+  // Corridor counts are independent of neighborhood-news momentum.
+  if (ctx.corridor && ctx.corridor.is_near_corridor !== false) {
+    const counts = [
+      ["permits", "permit", "permits"],
+      ["licenses", "new license", "new licenses"],
+      ["zoningAppeals", "zoning appeal", "zoning appeals"],
+      ["dpdApplications", "DPD application", "DPD applications"],
+      ["articles", "article", "articles"],
+    ].flatMap(([key, singular, plural]) => {
+      const count = num(ctx.corridor?.kpis?.[key as keyof NonNullable<ScanCtx["corridor"]>["kpis"]]);
+      const status = ctx.corridor?.sourceCoverage?.[key]?.status;
+      if (count == null || !Number.isInteger(count) || count < 0 || status === "unavailable" || (count === 0 && status !== "available")) return [];
+      const compact = new Intl.NumberFormat("en-US", { notation: count >= 1000 ? "compact" : "standard", maximumFractionDigits: 1 }).format(count);
+      return [{ count, label: `${compact} ${count === 1 ? singular : plural}` }];
+    });
+    const positive = counts.filter(({ count }) => count > 0);
+    const label = (positive.length ? positive : counts).slice(0, 2).map(({ label }) => label).join(" · ");
+    if (label) {
     dyn.corridor = {
-      takeaway: mdEmph(ctx.nnTakeaway?.takeaway?.title),
-      verdict: momentum ? { tone: momTone, label: momentum } : undefined,
+      verdict: { tone: "context", label },
     };
+    }
   }
 
   // 13 · Incentives — eligible counts

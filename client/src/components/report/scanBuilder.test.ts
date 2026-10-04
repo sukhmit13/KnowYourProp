@@ -11,6 +11,45 @@ test("Corridor Intelligence uses a concise default summary", () => {
   assert.equal(section?.summary, "Nearby major corridors and recent activity.");
 });
 
+test("Corridor badge uses recorded activity, not neighborhood-news momentum", () => {
+  const section = buildScanSections({
+    corridor: { kpis: { permits: 3, licenses: 5, zoningAppeals: 2, articles: null } },
+    nnTakeaway: { takeaway: { title: "An unrelated neighborhood headline" }, kpis: { momentumLabel: "High" } },
+  }).find(({ id }) => id === "corridor");
+  assert.deepEqual(section?.verdict, { tone: "context", label: "3 permits · 5 new licenses" });
+  assert.equal(section?.takeaway, undefined);
+  assert.equal(section?.summary, "Nearby major corridors and recent activity.");
+});
+
+test("Corridor badge preserves source-specific unknowns and singular counts", () => {
+  const section = buildScanSections({
+    corridor: { kpis: { permits: null, licenses: 1, zoningAppeals: 2 } },
+  }).find(({ id }) => id === "corridor");
+  assert.equal(section?.verdict?.label, "1 new license · 2 zoning appeals");
+  for (const corridor of [
+    { kpis: { permits: 0, licenses: null } },
+    { kpis: { permits: 3 }, sourceCoverage: { permits: { status: "unavailable" } } },
+    { is_near_corridor: false, kpis: { permits: 3 } },
+    { kpis: { permits: -1, licenses: NaN } },
+  ]) {
+    assert.equal(buildScanSections({ corridor }).find(({ id }) => id === "corridor")?.verdict, undefined);
+  }
+});
+
+test("Corridor badge shows verified zeros without implying no activity across unknown sources", () => {
+  const section = buildScanSections({
+    corridor: { kpis: { permits: 0, licenses: null }, sourceCoverage: { permits: { status: "available" } } },
+  }).find(({ id }) => id === "corridor");
+  assert.equal(section?.verdict?.label, "0 permits");
+});
+
+test("Corridor badge keeps large activity counts compact", () => {
+  const section = buildScanSections({
+    corridor: { kpis: { permits: 12000, licenses: 2300 } },
+  }).find(({ id }) => id === "corridor");
+  assert.equal(section?.verdict?.label, "12K permits · 2.3K new licenses");
+});
+
 test("Mortgage & Lending Market scan hero counts returned comparables", () => {
   const section = buildScanSections({ compsData: { comparables: [{}, {}, {}] } }).find(({ id }) => id === "market");
   assert.deepEqual(section?.hero, { value: "3", label: "comps" });
