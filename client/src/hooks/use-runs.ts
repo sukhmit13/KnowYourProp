@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
+import { countyLookupState } from "@/lib/countyLookupState";
 import type { ListingClaim } from "@shared/listingChecks";
 import { api, buildUrl, type RunInput, type ScenarioInput, type LookupInput } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
@@ -1596,6 +1597,7 @@ export function usePropertyTax(pin: string | null | undefined, city?: string | n
   return useQuery<PropertyTaxResult | null>({
     queryKey: ['/api/property-tax', pin, city || null],
     enabled: isValidPin,
+    retry: 1,
     // Poll when stale (background refresh) OR when paymentStatus is null (first-time Treasurer scrape running in background)
     refetchInterval: (query) => {
       const data = query.state.data;
@@ -1898,6 +1900,7 @@ export function usePinLookup(address: string | null | undefined, lat?: number, l
   return useQuery<PinLookupResult | null>({
     queryKey: ['/api/pins/resolve', address, lat ?? null, lon ?? null],
     enabled: !!address && address.length > 5,
+    retry: 1,
     queryFn: async () => {
       if (!address) return null;
       const res = await fetch('/api/pins/resolve', {
@@ -1912,6 +1915,27 @@ export function usePinLookup(address: string | null | undefined, lat?: number, l
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
     refetchOnWindowFocus: false,
   });
+}
+
+/** Resolve the tax query's input directly; do not depend on a UI state-copy effect. */
+export function useReportCountyRecords(address: string | null | undefined, lat?: number, lon?: number, submittedPin?: string | null, city?: string | null) {
+  const pinLookup = usePinLookup(address, lat, lon);
+  const pin = submittedPin || pinLookup.data?.pin || null;
+  // A manual override must not reuse another parcel's assessment/sale history.
+  const normalizePin = (value: string) => value.replace(/[^0-9a-z]/gi, "").toUpperCase();
+  const lookupData = pinLookup.data?.pin && pin && normalizePin(pinLookup.data.pin) !== normalizePin(pin)
+    ? undefined : pinLookup.data;
+  const propertyTax = usePropertyTax(pin, city, address);
+  const state = countyLookupState({
+    hasAddress: !!address,
+    pin,
+    pinLoading: pinLookup.isFetching,
+    pinError: pinLookup.isError,
+    taxLoading: propertyTax.isFetching,
+    taxError: propertyTax.isError || !!propertyTax.data?.error,
+    hasTaxData: !!propertyTax.data && !propertyTax.data.error,
+  });
+  return { pinLookup, lookupData, propertyTax, pin, state };
 }
 
 // ============================================

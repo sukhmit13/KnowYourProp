@@ -58,6 +58,8 @@ import { computeValuationMetrics, computeNoiModel, computeDscrLoanRatio, isSbaRe
 import StatTile from "@/components/StatTile";
 import InsightReportSection from "@/components/InsightReportSection";
 import { CountyRecordSection } from "@/components/report/CountyRecordSection";
+import { CountyLookupStatus } from "@/components/report/CountyLookupStatus";
+import { useReportCountyRecords } from "@/hooks/use-runs";
 import { DaycareAnalysis } from "@/components/report/DaycareAnalysis";
 import { ProjectUseAreaControl, ProjectUseBusinessList, ProjectUseCountBlocks, ProjectUseGoogleMaps } from "@/components/report/ProjectUseAnalysisSpine";
 import { EVChargingTable, EVRegistrationTrends, FoodAccessPanel, GroceryLicenseList, getEVChargingSiteCount, HotelShortTermRentalGroup, LicensedBusinessPanel, SeniorPopulationPanel, VehicleOwnershipPanel } from "@/components/report/ProjectUseDomainPanels";
@@ -1237,7 +1239,7 @@ export default function RunDetail() {
   const [confirmedFreeform, setConfirmedFreeform] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [propertyPin, setPropertyPin] = useState<string>("");
-  const [submittedPin, setSubmittedPin] = useState<string | null>(null);
+  const [pinSubmission, setPinSubmission] = useState<{ runKey: string; pin: string | null } | null>(null);
   const [pinManuallyEdited, setPinManuallyEdited] = useState(false);
   const [printDialogOpen, setPrintDialogOpen] = useState(false);
   const [mobileFactsCollapsed, setMobileFactsCollapsed] = useState(false);
@@ -1631,6 +1633,11 @@ export default function RunDetail() {
   const { data: regularRun, isLoading: isRegularRunLoading } = useRun(isStandaloneReport ? null : id);
   const { data: publicRun, isLoading: isPublicRunLoading } = usePublicRun(isStandaloneReport ? id : null);
   const run = isStandaloneReport ? publicRun : regularRun;
+  const pinRunKey = `${run?.id ?? ""}:${run?.address ?? ""}`;
+  const submittedPin = pinSubmission?.runKey === pinRunKey ? pinSubmission.pin : null;
+  const setSubmittedPin = useCallback((pin: string | null) => {
+    setPinSubmission({ runKey: pinRunKey, pin });
+  }, [pinRunKey]);
   const isRunLoading = isStandaloneReport ? isPublicRunLoading : isRegularRunLoading;
   const { data: listingData } = useListingData(run?.id);
   const { data: listingSnapshot, isFetched: listingSnapshotFetched, isError: isListingSnapshotError, error: listingSnapshotError } = useListingSnapshot(run?.id);
@@ -1762,11 +1769,14 @@ export default function RunDetail() {
       geocode.reset();
       geocode.mutate({ address: run.address });
     }
-    // Reset PIN state for new run
+  }, [run?.id, run?.address, isReportUnlocked]);
+
+  // An unlock/auth update is not a new parcel; do not clear a resolved or manual PIN.
+  useEffect(() => {
     setPropertyPin("");
     setSubmittedPin(null);
     setPinManuallyEdited(false);
-  }, [run?.id, run?.address, isReportUnlocked]);
+  }, [run?.id, run?.address]);
 
   // Restore project use and concept state when the run loads or its saved
   // project use changes. Kept separate so it never triggers a geocode reset.
@@ -2374,13 +2384,21 @@ export default function RunDetail() {
     isCannabis
   );
 
-  const { data: propertyTaxData, isLoading: isLoadingPropertyTax } = usePropertyTax(submittedPin, facts?.city, facts?.formattedAddress || run?.address);
-  const refreshPropertyTax = useRefreshPropertyTax();
-  const { data: pinLookupData, isLoading: isLoadingPinLookup } = usePinLookup(
+  const countyRecords = useReportCountyRecords(
     run?.address,
     facts?.lat,
-    facts?.lon
+    facts?.lon,
+    submittedPin,
+    facts?.city,
   );
+  const { isLoading: isLoadingPinLookup } = countyRecords.pinLookup;
+  const pinLookupData = countyRecords.lookupData;
+  const { data: propertyTaxData, isLoading: isLoadingPropertyTax } = countyRecords.propertyTax;
+  const refreshPropertyTax = useRefreshPropertyTax();
+  const retryCountyLookup = () => {
+    if (countyRecords.state.retry === "tax") void countyRecords.propertyTax.refetch();
+    else void countyRecords.pinLookup.refetch();
+  };
 
   const { data: proximityResponse, isLoading: isLoadingProximity } = useProximityData(pinLookupData?.pin);
   const proximityData = proximityResponse?.found ? proximityResponse.data : null;
@@ -4284,7 +4302,12 @@ export default function RunDetail() {
   const projectAnalysisApplicable = (isDaycareOrSchool || isGrocery || isGasStation || isAutoService || isSeniorCare || isHotel || isRestaurant || isCoffeeShop || isBar || isCannabis || !!googlePlacesSearchTerm);
   const headerFallbackStates: Record<string, HeaderBadgeState> = {
     ownership: { loading: isCheckingTitle, hasData: !!lienData, error: !!lienData?.searchFailed, emptyLabel: "Status unknown" },
-    propertyTax: { loading: isLoadingPropertyTax, checked: !!submittedPin, hasData: !!propertyTaxData, emptyLabel: "Status unverified" },
+    propertyTax: {
+      checked: !!run?.address || !!countyRecords.pin,
+      hasData: !!propertyTaxData && !propertyTaxData.error,
+      label: !propertyTaxData || propertyTaxData.error ? countyRecords.state.label : undefined,
+      emptyLabel: "Status unverified",
+    },
     historic: {
       loading: isLoadingLandmark, checked: headerHasCoordinates, hasData: !!landmarkData,
       label: landmarkData?.colorTag ? `${landmarkData.colorTag}-rated` : undefined,
@@ -4313,8 +4336,9 @@ export default function RunDetail() {
       hasData: !!listingSnapshot, emptyLabel: "Listed · Checks incomplete",
     },
     countyRecord: {
-      loading: isLoadingPinLookup || isLoadingPropertyTax, checked: !!submittedPin || !!pinLookupData?.pin,
-      hasData: !!pinLookupData || !!propertyTaxData, label: headerCountyFacts, emptyLabel: "Year / area unavailable",
+      checked: !!run?.address || !!countyRecords.pin,
+      hasData: !!pinLookupData || !!propertyTaxData,
+      label: headerCountyFacts || countyRecords.state.label, emptyLabel: "Year / area unavailable",
     },
     permits: { loading: isLoadingPermitsViolations, hasData: !!combinedPermitViolations, emptyLabel: "Status not verified" },
     analysis: {
@@ -9969,15 +9993,8 @@ export default function RunDetail() {
                 </div>
               )}
 
-              {!isLoadingPropertyTax && !propertyTaxData && !pinLookupData && (
-                <div className="kyp-tax-state" data-testid="property-tax-no-data">
-                  Enter a Cook County PIN to load Treasurer bills, Assessor values, exemptions and appeal history.
-                </div>
-              )}
-              {!isLoadingPropertyTax && !propertyTaxData && !!pinLookupData && (
-                <div className="kyp-tax-state" data-testid="tax-bill-unavailable">
-                  No Treasurer bill or payment status was returned for this PIN. Verify directly with Cook County.
-                </div>
+              {(!propertyTaxData || propertyTaxData.error) && (
+                <CountyLookupStatus state={countyRecords.state} onRetry={retryCountyLookup} />
               )}
 
               {propertyTaxSubsections.bill !== undefined && (
@@ -10343,10 +10360,12 @@ export default function RunDetail() {
               isLoadingPropertyTax={isLoadingPropertyTax}
               isLoadingPinLookup={isLoadingPinLookup}
               refreshPropertyTax={refreshPropertyTax}
-              submittedPin={submittedPin}
+              submittedPin={countyRecords.pin}
               propertyPin={propertyPin}
               setPropertyPin={setPropertyPin}
               setSubmittedPin={setSubmittedPin}
+              lookupState={countyRecords.state}
+              onRetryLookup={retryCountyLookup}
               run={run}
               showManualEntryForm={showManualEntryForm}
               setShowManualEntryForm={setShowManualEntryForm}

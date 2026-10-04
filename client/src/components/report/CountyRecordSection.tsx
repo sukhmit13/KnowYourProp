@@ -3,6 +3,8 @@ import { ExternalLink, Info, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KypSubhead } from "@/components/report/AccordionSection";
+import { CountyLookupStatus } from "./CountyLookupStatus";
+import type { CountyLookupState } from "@/lib/countyLookupState";
 
 type TaxRecord = any;
 type LookupRecord = any;
@@ -17,6 +19,8 @@ interface CountyRecordSectionProps {
   propertyPin: string;
   setPropertyPin: (value: string) => void;
   setSubmittedPin: (value: string | null) => void;
+  lookupState?: CountyLookupState;
+  onRetryLookup?: () => void;
   run: any;
   showManualEntryForm: boolean;
   setShowManualEntryForm: (value: boolean) => void;
@@ -234,6 +238,8 @@ export function CountyRecordSection({
   propertyPin,
   setPropertyPin,
   setSubmittedPin,
+  lookupState,
+  onRetryLookup,
   run,
   showManualEntryForm,
   setShowManualEntryForm,
@@ -279,7 +285,7 @@ export function CountyRecordSection({
   const treasurerUrl = propertyTaxData?.treasurerBillUrl || pinLookupData?.treasurerBillUrl;
   const lookupSource = pinLookupData?.source as string | undefined;
   const hasPin = !!(pinLookupData?.pin || submittedPin || propertyTaxData?.pin);
-  const noPin = forcePinEntry || (!isLoadingPinLookup && !pinLookupData?.pin && !propertyTaxData?.pin);
+  const noPin = forcePinEntry || (!isLoadingPinLookup && !pinLookupData?.pin && !propertyTaxData?.pin && !submittedPin);
 
   const provenance = hasPin ? (
     <div className="kyp-src" data-testid="county-record-source">
@@ -301,7 +307,9 @@ export function CountyRecordSection({
   if (noPin) {
     return (
       <div id="print-section-county-record">
-        <div className="kyp-caveat" data-testid="county-record-no-pin"><b>PIN needed.</b> We could not resolve a Cook County Property Index Number for this address. Enter the 14-digit PIN to read the county record.</div>
+        {lookupState && onRetryLookup && !forcePinEntry
+          ? <CountyLookupStatus state={lookupState} onRetry={onRetryLookup} />
+          : <div className="kyp-caveat" data-testid="county-record-no-pin"><b>PIN needed.</b> {forcePinEntry ? "Enter the correct 14-digit PIN to read that parcel's county record." : "We could not resolve a Cook County Property Index Number for this address. Enter the 14-digit PIN to read the county record."}</div>}
         <div className="flex gap-2 no-print mt-3">
           <Input type="text" placeholder="Enter 14-digit PIN (e.g., 17-16-123-456-0000)" value={propertyPin} onChange={(event) => setPropertyPin(event.target.value)} data-testid="input-property-pin" className="flex-1" />
           <Button onClick={() => { const normalized = propertyPin.replace(/\D/g, ""); if (normalized.length === 14) { setSubmittedPin(normalized); setForcePinEntry(false); } }} disabled={propertyPin.replace(/\D/g, "").length !== 14} className="btn-indigo" data-testid="button-lookup-tax">Look Up</Button>
@@ -312,6 +320,9 @@ export function CountyRecordSection({
 
   const caveats = (
     <>
+      {!propertyTaxData && lookupState?.retry === "tax" && onRetryLookup && (
+        <CountyLookupStatus state={lookupState} onRetry={onRetryLookup} />
+      )}
       {lookupSource === "geo_fallback" && (
         <div className="kyp-caveat" data-testid="county-record-geo-fallback"><b>Nearest-parcel match.</b> The figures below describe {pinLookupData?.nearestAddress || "the nearest parcel we could match"} — not this address.</div>
       )}
