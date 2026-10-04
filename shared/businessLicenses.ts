@@ -38,6 +38,8 @@ export interface NearbyLicensesResponse {
   changePct: number | null;
   radiusMiles: number;
   periodMonths: number;
+  /** Optional ISSUE history for corridor comparisons; never an operating-business census. */
+  issuanceHistory?: NearbyLicense[];
 }
 
 export interface LicenseEstablishment {

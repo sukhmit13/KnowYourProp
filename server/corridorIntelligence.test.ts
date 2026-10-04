@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { getDevelopmentCorridor } from "./developmentPipeline";
-import { buildCorridorRollup, dpdCoverageStatus, validateCorridorNewsInput } from "./corridorIntelligence";
+import { buildCorridorRollup, dpdCoverageStatus, validateCorridorNewsInput, CORRIDOR_NEWS_DAYS } from "./corridorIntelligence";
 import { withoutRepeatedNews } from "@shared/newsArticleDedup";
-import { deriveNewsFeedCoverageStatus } from "./newsMonitor";
+import { deriveNewsFeedCoverageStatus, corridorHistoricalSearches } from "./newsMonitor";
 
 const coverage = {
   permits: { status: "partial" as const },
@@ -126,5 +126,35 @@ const rssEmptyAfterFailure = buildCorridorRollup({
 });
 assert.equal(rssEmptyAfterFailure.cards[0].counts.articles, null, "empty partial RSS coverage is not rendered as zero");
 assert.equal(rssEmptyAfterFailure.kpis.articles, null);
+
+assert.equal(CORRIDOR_NEWS_DAYS, 365, "corridor coverage spans a year, not one quarter");
+const historySearches = corridorHistoricalSearches(["broadway"], 365, new Date("2026-10-03T12:00:00Z"));
+assert.equal(historySearches.length, 4, "older articles have bounded searches across the entire annual window");
+assert.equal(historySearches[0].start, "2025-10-04");
+assert.equal(historySearches[3].end, "2026-10-04");
+for (let i = 0; i < historySearches.length; i++) {
+  const feed = historySearches[i];
+  const query = new URL(feed.url).searchParams.get("q")!;
+  assert.match(query, /"broadway" Chicago/i);
+  assert.ok(query.includes(`after:${feed.start} before:${feed.end}`));
+  if (i > 0) assert.equal(historySearches[i - 1].end, feed.start, "historical queries leave no gaps");
+}
+assert.equal(corridorHistoricalSearches(["unknown_corridor"], 365).length, 0);
+
+const issuance = (name: string, date: string) => ({
+  businessName: name, address: "100 W Chicago Ave", licenseType: "Food", licenseCategory: "food" as const,
+  startDate: date, distanceMiles: 0.1, ...point, corridor: chicagoCorridor,
+});
+const compared = buildCorridorRollup({
+  corridors, sourceCoverage: { ...coverage, licenses: { status: "available" } },
+  licenses: [issuance("New Cafe", "2026-01-01")],
+  licenseHistory: [issuance("Former Cafe", "2025-01-01"), issuance("New Cafe", "2026-01-01")],
+  asOf: new Date("2026-10-03T12:00:00Z"),
+});
+assert.equal(compared.cards[0].licenseComparison?.current.differentNamesAtKnownAddresses, 1);
+assert.equal(compared.cards[0].licenseComparison?.current.previouslyUnseenAddresses, 0);
+assert.equal(compared.cards[0].licenseComparison?.businessChange, 0);
+assert.equal(compared.kpis.licenses, 1, "historical rows never inflate the current license KPI");
+assert.equal(result.cards[0].licenseComparison, null, "missing historical coverage does not create zero trend");
 
 console.log("Corridor intelligence tests passed");

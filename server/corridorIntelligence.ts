@@ -7,6 +7,9 @@ import {
 import { withoutRepeatedNews } from "@shared/newsArticleDedup";
 import { buildDevelopmentPipeline, getDevelopmentCorridor } from "./developmentPipeline";
 import { Buffer } from "node:buffer";
+import { compareCorridorLicenses, type CorridorLicenseComparison } from "@shared/corridorLicenseComparison";
+
+export const CORRIDOR_NEWS_DAYS = 365;
 
 export interface CorridorNewsInput {
   lat: number;
@@ -54,10 +57,13 @@ type Card = {
     licenses: number | null; permits: number | null; zoningAppeals: number | null;
     dpdApplications: number | null; articles: number | null;
   };
+  licenseComparison?: CorridorLicenseComparison | null;
 };
 
 interface RollupRecords {
   licenses?: NearbyLicense[];
+  licenseHistory?: NearbyLicense[];
+  asOf?: Date;
   permits?: any[];
   zoning?: any[];
   dpdApplications?: any[];
@@ -136,6 +142,9 @@ export function buildCorridorRollup(records: RollupRecords): {
       distanceMi: corridor.distanceMiles,
       onCorridor: corridor.distanceMiles === 0,
       blurb: corridor.description,
+      licenseComparison: records.sourceCoverage.licenses.status === "available" && records.licenseHistory
+        ? compareCorridorLicenses(records.licenseHistory.filter(row => row.corridor?.key === key), records.asOf)
+        : null,
       licenses: corridorLicenses.map(item => ({
         name: item.name,
         address: item.address,
@@ -262,12 +271,12 @@ export async function getCorridorNews(input: CorridorNewsInput) {
   const corridors = findNearbyCorridors(input.lat, input.lng, input.address);
   const corridorKeys = corridors.map(corridor => corridor.corridorKey);
   const [licenseResult, permitResult, zbaResult, dpdResult, articlesResult, podcastsResult] = await Promise.allSettled([
-    import("./businessLicenses").then(({ getNearbyBusinessLicenses }) => getNearbyBusinessLicenses(input.lat, input.lng, 1)),
+    import("./businessLicenses").then(({ getNearbyBusinessLicenses }) => getNearbyBusinessLicenses(input.lat, input.lng, 1, true)),
     import("./newConstruction").then(({ getNearbyNewConstruction }) => getNearbyNewConstruction(input.lat, input.lng, input.communityArea, 1)),
     import("./zbaApprovals").then(({ getAllZbaActivitySnapshot }) => getAllZbaActivitySnapshot()),
     import("./dpdApplications").then(({ getDpdApplications }) => getDpdApplications()),
     corridorKeys.length
-      ? findCorridorArticlesWithCoverage(corridorKeys, 90)
+      ? findCorridorArticlesWithCoverage(corridorKeys, CORRIDOR_NEWS_DAYS)
       : Promise.resolve({ articles: [], coverage: { status: "unavailable" as const, successfulFeeds: 0, totalFeeds: 0 } }),
     corridorKeys.length ? findCorridorPodcasts(corridorKeys, 90) : Promise.resolve([]),
   ]);
@@ -280,7 +289,7 @@ export async function getCorridorNews(input: CorridorNewsInput) {
     // RSS coverage functions do not report per-feed completeness, so successful
     // rows are useful but cannot justify an all-clear completeness claim.
     articles: articlesResult.status === "fulfilled"
-      ? { status: articlesResult.value.coverage.status }
+      ? { status: articlesResult.value.coverage.status === "unavailable" ? "unavailable" as const : "partial" as const }
       : { status: "unavailable" as const },
     zoningAppeals: zbaResult.status === "fulfilled"
       ? { status: zbaResult.value.coverage.status, refreshing: zbaResult.value.coverage.refreshing }
@@ -296,6 +305,11 @@ export async function getCorridorNews(input: CorridorNewsInput) {
       corridor: corridorFromPoint(license.address, license.latitude, license.longitude),
     }))
     : [];
+  const licenseHistory = licenseResult.status === "fulfilled" && licenseResult.value.issuanceHistory
+    ? licenseResult.value.issuanceHistory.map(license => ({
+      ...license,
+      corridor: corridorFromPoint(license.address, license.latitude, license.longitude),
+    })) : undefined;
   const permits = permitResult.status === "fulfilled"
     ? permitResult.value.permits.map(permit => ({
       ...permit,
@@ -359,7 +373,7 @@ export async function getCorridorNews(input: CorridorNewsInput) {
   const articles = dedupedArticles.slice(0, 30);
   const podcasts = podcastsResult.status === "fulfilled" ? podcastsResult.value : [];
   const rollup = buildCorridorRollup({
-    corridors, licenses, permits, zoning, dpdApplications, articles: dedupedArticles,
+    corridors, licenses, licenseHistory, permits, zoning, dpdApplications, articles: dedupedArticles,
     sourceCoverage, exclusions: [],
   });
   return {

@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode, type MouseEvent } from "react";
 import { KypSubhead } from "@/components/report/AccordionSection";
+import type { CorridorLicenseComparison } from "@shared/corridorLicenseComparison";
 
 export interface CorrLicense {
   name: string;
@@ -75,6 +76,7 @@ export interface CorridorCardData {
   zoning: CorrZoning[];
   dpdApplications: CorrDpdApplication[];
   counts?: CorridorCounts;
+  licenseComparison?: CorridorLicenseComparison | null;
 }
 
 export interface CorridorKpis {
@@ -199,7 +201,7 @@ export default function CorridorIntelligenceView({
         <CompactCountBlock
           value={kpis.articles}
           label="News articles"
-          detail={sourceNote(sourceCoverage?.articles) ?? "last 90 days"}
+          detail={`${sourceNote(sourceCoverage?.articles) ?? "Retrieved coverage"} · past 12 months`}
         />
         <CompactCountBlock
           value={kpis.zoningAppeals}
@@ -252,6 +254,57 @@ export default function CorridorIntelligenceView({
                   </div>
                 )) : (
                   <div className="kyp-corrrow"><span className="x">{sourceNote(statusFor("licenses")) ?? "No corridor-matched records returned."}</span></div>
+                )}
+                {corridor.licenseComparison ? (
+                  <div className="kyp-corrsec" data-testid={`corridor-license-comparison-${corridor.key}`}>
+                    <div className="kyp-corrcolh">License issuance comparison</div>
+                    <div className="x" style={{ marginBottom: 8 }}>
+                      Latest 12 mo <time dateTime={corridor.licenseComparison.current.start}>{corridor.licenseComparison.current.start}</time>–&lt;<time dateTime={corridor.licenseComparison.current.end}>{corridor.licenseComparison.current.end}</time>
+                      {" · "}Prior 12 mo <time dateTime={corridor.licenseComparison.prior.start}>{corridor.licenseComparison.prior.start}</time>–&lt;<time dateTime={corridor.licenseComparison.prior.end}>{corridor.licenseComparison.prior.end}</time>
+                      {" · "}End dates are exclusive.
+                    </div>
+                    <table aria-label={`License issuance counts for ${corridor.name}: latest 12 months compared with prior 12 months`} style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.88em" }}>
+                      <thead>
+                        <tr>
+                          <th scope="col" style={{ textAlign: "left" }}>Measure</th>
+                          <th scope="col" style={{ textAlign: "right" }}>Latest 12 mo</th>
+                          <th scope="col" style={{ textAlign: "right" }}>Prior 12 mo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {([
+                          ["Businesses with new licenses", "businessesWithNewLicenses"],
+                          ["Licensed addresses", "licensedAddresses"],
+                          ["Recurring businesses", "recurringBusinesses"],
+                          ["Previously unseen addresses", "previouslyUnseenAddresses"],
+                          ["Different names at known addresses", "differentNamesAtKnownAddresses"],
+                        ] as const).map(([label, key]) => (
+                          <tr key={key}>
+                            <th scope="row" style={{ textAlign: "left", fontWeight: 400 }}>{label}</th>
+                            <td style={{ textAlign: "right" }}>{corridor.licenseComparison!.current[key].toLocaleString()}</td>
+                            <td style={{ textAlign: "right" }}>{corridor.licenseComparison!.prior[key].toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div className="x" style={{ marginTop: 8 }}>
+                      These are gross license issuances, not net growth. Different names at a known address may indicate turnover or a name change; closures or replacements are not verified. Previously unseen means no matching address in the preceding 12 months of issue history, not a confirmed new business location.
+                    </div>
+                    {corridor.licenseComparison.possibleTurnover.length > 0 && (
+                      <div className="x" style={{ marginTop: 8 }}>
+                        <b>Possible name changes at known addresses</b>
+                        {corridor.licenseComparison.possibleTurnover.map((entry, entryIndex) => (
+                          <div key={`${entry.address}-${entry.name}-${entryIndex}`}>
+                            {entry.name} · {entry.address} <span aria-label="previously listed as">(previously: {entry.previousNames.join(", ")})</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="kyp-corrrow" data-testid={`corridor-license-comparison-unavailable-${corridor.key}`}>
+                    <span className="x">{licenseIsLoading ? "Loading historical license comparison…" : "Historical license comparison unavailable."}</span>
+                  </div>
                 )}
               </div>
 
@@ -346,7 +399,7 @@ export default function CorridorIntelligenceView({
       })}
 
       <div className="kyp-src" data-testid="corridor-footer">
-        Describes commercial corridors within ~0.5 mi of this address, measured to each corridor’s nearest point, not parcel-specific conditions. <b>Tier 1</b> = primary commercial corridor · <b>Tier 2</b> = secondary or emerging. Every matched record is listed once; each business, permit, zoning, and DPD name/address links to its full record in the owning section. Permits, licenses and zoning activity are searched within 1 mile of the property; DPD applications within 0.5 mile. Permit records begin January 1, {new Date().getFullYear() - 3}; the unit estimate uses only permits issued within 18 months, deduplicated by address, and is estimated from descriptions—not proof of active construction. Permit-row distances are measured from the property. Licenses cover the past 12 months; dates shown are license term starts. Businesses are grouped by name and address; established businesses may receive additional licenses, so a new license does not confirm a new opening. News covers 90 days. Zoning includes recent decisions and upcoming hearings; DPD records are applications, not approvals. Partial feeds show observed records only; missing counts remain unknown. Unlocated corridor news is associated by reporting text, not a verified parcel location. Permit costs are reported estimates, not completed construction costs. Sources: City Building Permits · Chicago Business Licenses · Zoning Board of Appeals · Chicago DPD Plan Commission · Block Club · Curbed · local news.
+        Describes commercial corridors within ~0.5 mi of this address, measured to each corridor’s nearest point, not parcel-specific conditions. <b>Tier 1</b> = primary commercial corridor · <b>Tier 2</b> = secondary or emerging. Every matched record is listed once; each business, permit, zoning, and DPD name/address links to its full record in the owning section. Permits, licenses and zoning activity are searched within 1 mile of the property; DPD applications within 0.5 mile. Permit records begin January 1, {new Date().getFullYear() - 3}; the unit estimate uses only permits issued within 18 months, deduplicated by address, and is estimated from descriptions—not proof of active construction. Permit-row distances are measured from the property. Licenses cover the past 12 months; dates shown are license term starts. Businesses are grouped by name and address; established businesses may receive additional licenses, so a new license does not confirm a new opening. Historical comparisons count ISSUE-only records for selected food, liquor, entertainment, manufacturing, hotel, and art license types; term-start dates define the windows and businesses are grouped by name and address. Coverage and operating status may be partial. These issuance counts do not measure net operating-business growth: closures and renewals are not measured. Names changing at an address are possible turnover, not verified closures or replacements; previously unseen addresses were not seen in the preceding 12 months of issue history, not confirmed new locations. News covers the past 12 months; retrieved feeds and search results do not establish complete archives or a news-volume trend. Zoning includes recent decisions and upcoming hearings; DPD records are applications, not approvals. Partial feeds show observed records only; missing counts remain unknown. Unlocated corridor news is associated by reporting text, not a verified parcel location. Permit costs are reported estimates, not completed construction costs. Sources: City Building Permits · Chicago Business Licenses · Zoning Board of Appeals · Chicago DPD Plan Commission · Block Club · Curbed · local news.
       </div>
     </div>
   );

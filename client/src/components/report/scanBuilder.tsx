@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { type ScanSection, type VerdictTone } from "./CollapsibleSection";
+import { type ScanSection } from "./CollapsibleSection";
 import { SECTION_META, SECTION_ORDER } from "./sectionRegistry";
 
 /** Convert the AI takeaways' own **bold** markers into our serif-italic emphasis. */
@@ -207,7 +207,7 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
       ["dpdApplications", "DPD application", "DPD applications"],
       ["articles", "article", "articles"],
     ].flatMap(([key, singular, plural]) => {
-      const count = num(ctx.corridor?.kpis?.[key as keyof NonNullable<ScanCtx["corridor"]>["kpis"]]);
+      const count = num(ctx.corridor?.kpis?.[key as keyof NonNullable<NonNullable<ScanCtx["corridor"]>["kpis"]>]);
       const status = ctx.corridor?.sourceCoverage?.[key]?.status;
       if (count == null || !Number.isInteger(count) || count < 0 || status === "unavailable" || (count === 0 && status !== "available")) return [];
       const compact = new Intl.NumberFormat("en-US", { notation: count >= 1000 ? "compact" : "standard", maximumFractionDigits: 1 }).format(count);
@@ -216,9 +216,9 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
     const positive = counts.filter(({ count }) => count > 0);
     const label = (positive.length ? positive : counts).slice(0, 2).map(({ label }) => label).join(" · ");
     if (label) {
-    dyn.corridor = {
-      verdict: { tone: "context", label },
-    };
+      dyn.corridor = {
+        verdict: { tone: "context", label },
+      };
     }
   }
 

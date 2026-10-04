@@ -1,4 +1,5 @@
 import * as turf from '@turf/turf';
+import { licenseComparisonDates } from '@shared/corridorLicenseComparison';
 import {
   groupLicenseEstablishments,
   type LicenseCategory,
@@ -71,13 +72,11 @@ async function fetchRecentLicenses(): Promise<RawLicense[]> {
     return cachedLicenses;
   }
 
-  const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - 24);
-  const startDate = cutoff.toISOString().split('T')[0];
+  const { historyStart: startDate, end: endDate } = licenseComparisonDates();
 
   const licenseFilter = LICENSE_TYPES.map(t => `license_description='${t}'`).join(' OR ');
   const whereClause = encodeURIComponent(
-    `license_status='AAI' AND application_type='ISSUE' AND license_start_date>='${startDate}' AND (${licenseFilter})`
+    `license_status='AAI' AND application_type='ISSUE' AND license_start_date>='${startDate}' AND license_start_date<'${endDate}' AND (${licenseFilter})`
   );
   const selectFields = encodeURIComponent(
     'id,license_id,legal_name,doing_business_as_name,address,city,state,zip_code,license_description,business_activity,license_start_date,license_status,latitude,longitude,application_type'
@@ -92,7 +91,7 @@ async function fetchRecentLicenses(): Promise<RawLicense[]> {
   ];
   const activityFilter = BUSINESS_ACTIVITY_TYPES.map(t => `business_activity='${t}'`).join(' OR ');
   const activityWhereClause = encodeURIComponent(
-    `license_status='AAI' AND application_type='ISSUE' AND license_start_date>='${startDate}' AND (${activityFilter})`
+    `license_status='AAI' AND application_type='ISSUE' AND license_start_date>='${startDate}' AND license_start_date<'${endDate}' AND (${activityFilter})`
   );
 
   const queries = [
@@ -104,7 +103,7 @@ async function fetchRecentLicenses(): Promise<RawLicense[]> {
     let offset = 0;
     let hasMore = true;
     while (hasMore) {
-      const url = `https://data.cityofchicago.org/resource/r5kz-chrr.json?$select=${selectFields}&$where=${q.where}&$limit=${pageSize}&$offset=${offset}&$order=license_start_date%20DESC`;
+      const url = `https://data.cityofchicago.org/resource/r5kz-chrr.json?$select=${selectFields}&$where=${q.where}&$limit=${pageSize}&$offset=${offset}&$order=license_start_date%20DESC,id%20ASC`;
       try {
         const response = await fetch(url, { signal: AbortSignal.timeout(12000) });
         if (!response.ok) throw new Error(`API returned ${response.status} for ${q.label}`);
@@ -124,7 +123,7 @@ async function fetchRecentLicenses(): Promise<RawLicense[]> {
 
   const seen = new Map<string, RawLicense>();
   for (const l of allLicenses) {
-    const key = `${l.license_id}`;
+    const key = l.id || `${l.license_id}|${l.license_start_date}|${l.doing_business_as_name || l.legal_name}|${l.address}`;
     const existing = seen.get(key);
     if (!existing || (l.license_start_date || '') > (existing.license_start_date || '')) {
       seen.set(key, l);
@@ -132,19 +131,17 @@ async function fetchRecentLicenses(): Promise<RawLicense[]> {
   }
   const deduped = Array.from(seen.values());
 
-  console.log(`[BUSINESS LICENSES] Fetched ${allLicenses.length} raw, deduplicated to ${deduped.length} (last 24 months)`);
+  console.log(`[BUSINESS LICENSES] Fetched ${allLicenses.length} raw, deduplicated to ${deduped.length} (last 36 months)`);
   cachedLicenses = deduped;
   cacheTimestamp = Date.now();
   return deduped;
 }
 
-export async function getNearbyBusinessLicenses(lat: number, lng: number, radiusMiles = 1): Promise<NearbyLicensesResponse> {
+export async function getNearbyBusinessLicenses(lat: number, lng: number, radiusMiles = 1, includeHistory = false): Promise<NearbyLicensesResponse> {
   const licenses = await fetchRecentLicenses();
   const fromPoint = turf.point([lng, lat]);
   const nearby: NearbyLicense[] = [];
-  const currentCutoff = new Date();
-  currentCutoff.setMonth(currentCutoff.getMonth() - 12);
-  const currentDate = currentCutoff.toISOString().slice(0, 10);
+  const { currentStart: currentDate, priorStart: priorDate, end: endDate } = licenseComparisonDates();
 
   for (const l of licenses) {
     const pLat = parseFloat(l.latitude);
@@ -167,8 +164,8 @@ export async function getNearbyBusinessLicenses(lat: number, lng: number, radius
     }
   }
 
-  const currentLicenses = nearby.filter((license) => license.startDate >= currentDate);
-  const priorLicenses = nearby.filter((license) => license.startDate < currentDate);
+  const currentLicenses = nearby.filter((license) => license.startDate >= currentDate && license.startDate < endDate);
+  const priorLicenses = nearby.filter((license) => license.startDate >= priorDate && license.startDate < currentDate);
 
   currentLicenses.sort((a, b) => {
     const distDiff = a.distanceMiles - b.distanceMiles;
@@ -186,6 +183,7 @@ export async function getNearbyBusinessLicenses(lat: number, lng: number, radius
       : Math.round(((groupLicenseEstablishments(currentLicenses).length - groupLicenseEstablishments(priorLicenses).length) / groupLicenseEstablishments(priorLicenses).length) * 1000) / 10,
     radiusMiles,
     periodMonths: 12,
+    ...(includeHistory ? { issuanceHistory: nearby } : {}),
   };
 }
 

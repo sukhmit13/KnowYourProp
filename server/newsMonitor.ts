@@ -841,14 +841,35 @@ export function findNearbyCorridors(
 
 export async function findCorridorArticles(
   corridorKeys: string[],
-  days = 90
+  days = 365
 ): Promise<NewsArticle[]> {
   return (await findCorridorArticlesWithCoverage(corridorKeys, days)).articles;
 }
 
+/** Date-bounded searches retrieve older reporting that short publisher RSS feeds omit. */
+export function corridorHistoricalSearches(corridorKeys: string[], days = 365, asOf = new Date()) {
+  const end = new Date(Date.UTC(asOf.getUTCFullYear(), asOf.getUTCMonth(), asOf.getUTCDate() + 1));
+  const start = new Date(end.getTime() - days * 86400000);
+  const feeds: Array<{ key: string; name: string; url: string; start: string; end: string }> = [];
+  for (const key of corridorKeys) {
+    const corridor = CORRIDOR_KEYWORDS[key];
+    if (!corridor) continue;
+    for (let cursor = start.getTime(); cursor < end.getTime(); cursor += 92 * 86400000) {
+      const from = new Date(cursor).toISOString().slice(0, 10);
+      const to = new Date(Math.min(cursor + 92 * 86400000, end.getTime())).toISOString().slice(0, 10);
+      const query = `"${corridor.names[0]}" Chicago after:${from} before:${to} (site:blockclubchicago.org OR site:chicagobusiness.com OR site:chicagoyimby.com OR site:therealdeal.com OR site:chicago.urbanize.city OR site:chicagotribune.com)`;
+      feeds.push({
+        key, name: `corridor_history_${key}_${from}_${to}`, start: from, end: to,
+        url: `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`,
+      });
+    }
+  }
+  return feeds;
+}
+
 export async function findCorridorArticlesWithCoverage(
   corridorKeys: string[],
-  days = 90,
+  days = 365,
 ): Promise<{ articles: NewsArticle[]; coverage: { status: NewsFeedState; successfulFeeds: number; totalFeeds: number } }> {
   if (corridorKeys.length === 0) {
     return { articles: [], coverage: { status: "unavailable", successfulFeeds: 0, totalFeeds: 0 } };
@@ -1006,6 +1027,12 @@ export async function findCorridorArticlesWithCoverage(
     addFeed(`chicagoreader_corridor_${key}`, url);
   }
 
+  const historicalPerCorridor = corridorHistoricalSearches(corridorKeys, days).map(feed => {
+    const record = { key: feed.key, promiseIndex: feedPromises.length };
+    addFeed(feed.name, feed.url);
+    return record;
+  });
+
   const results = await Promise.allSettled(feedPromises);
   const regularFeedCount = feedNames.filter(name => RSS_FEEDS[name]).length;
   const regularArticles: NewsArticle[] = [];
@@ -1016,12 +1043,25 @@ export async function findCorridorArticlesWithCoverage(
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - days);
 
-  // Google News searches index older content — allow up to 180 days for supplemental sources
+  // All corridor sources use the same requested window, including supplemental searches.
   const extendedCutoff = new Date();
-  extendedCutoff.setDate(extendedCutoff.getDate() - 180);
+  extendedCutoff.setDate(extendedCutoff.getDate() - days);
 
   const seenUrls = new Set<string>();
   const filtered: NewsArticle[] = [];
+
+  for (const { key, promiseIndex } of historicalPerCorridor) {
+    const result = results[promiseIndex];
+    if (result.status !== "fulfilled") continue;
+    for (const article of result.value) {
+      if (!article.url || seenUrls.has(article.url)) continue;
+      const published = new Date(article.published);
+      if (isNaN(published.getTime()) || published < cutoff || published > new Date()) continue;
+      if (!articleMentionsCorridor(article, key) && !corridorKeys.some(k => articleMentionsCorridor(article, k))) continue;
+      seenUrls.add(article.url);
+      filtered.push(article);
+    }
+  }
 
   for (const { key, promiseIndex } of crainsPerCorridor) {
     const result = results[promiseIndex];

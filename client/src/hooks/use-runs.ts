@@ -3321,7 +3321,7 @@ export function useCorridorNews(
 ) {
   const refreshStartedAt = useRef<number | null>(null);
   return useQuery<any>({
-    queryKey: ['/api/corridor-news', 'rollup', lat, lng, address, neighborhood, communityArea, excludeArticles],
+    queryKey: ['/api/corridor-news', 'annual-license-history', lat, lng, address, neighborhood, communityArea, excludeArticles],
     enabled: Number.isFinite(lat) && Number.isFinite(lng),
     queryFn: async () => {
       const res = await fetch(
