@@ -5,6 +5,7 @@
 - [Property context guardrails](property-context-guardrails.md) — extraction must stay cache-only (hidden live-fetch traps); derived metrics need verified:true; coverage field owned by saveContext; lock is in-process only.
 - [Insight report evidence](insight-report-evidence.md) — geo-null silently drops zoning/transit/demo/childcare blocks with no markers; prod→dev run replication needs 4 tables; DIAG measures fullContext only.
 - [Owner intel & IL SOS access](owner-intel-sos-access.md) — ilsos.gov 403s datacenter IPs; SOS scraping must use ScrapingBee (quota resets monthly); fail loudly to manual link.
+- [ScrapingBee availability](scrapingbee-availability.md) — HTTP 401 can mean exhausted quota, not invalid credentials; inspect a redacted provider error before asking for another key.
 - [claude-sonnet-5 API quirks](claude-sonnet-5-api-quirks.md) — rejects temperature; thinking tokens eat max_tokens; join all text blocks and fail hard on truncation/empty output.
 - [Report design system](report-design-system.md) — shared primitives, evidence-scoped section names, and browser/type-baseline verification.
 - [Report section hierarchy](report-section-hierarchy.md) — each accordion row gets one header; subsection labels use full-width standard rules without a second icon/short line or extra outer frame.

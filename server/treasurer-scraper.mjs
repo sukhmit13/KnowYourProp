@@ -21,7 +21,7 @@ async function solveRecaptchaV3() {
   }
 
   process.stderr.write('[scraper] Submitting reCAPTCHA v3 to 2captcha...\n');
-  const submitUrl = `https://2captcha.com/in.php?key=${TWOCAPTCHA_API_KEY}&method=userrecaptcha&googlekey=${RECAPTCHA_SITE_KEY}&pageurl=${encodeURIComponent(searchUrl)}&version=v3&action=submit_v3&score=0.7&json=1`;
+  const submitUrl = `https://2captcha.com/in.php?key=${TWOCAPTCHA_API_KEY}&method=userrecaptcha&googlekey=${RECAPTCHA_SITE_KEY}&pageurl=${encodeURIComponent(searchUrl)}&version=v3&action=submit_v3&min_score=0.7&json=1`;
 
   let submitRes;
   try {

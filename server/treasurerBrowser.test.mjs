@@ -32,6 +32,12 @@ test("manual refresh reuses the background job instead of waiting past the HTTP 
   assert.match(readFileSync("script/build.ts", "utf8"), /cp\("server\/treasurerBrowser\.mjs", "dist\/treasurerBrowser\.mjs"\)/);
 });
 
+test("v3 captcha requests use the HTTP API's min_score parameter, not the SDK alias", () => {
+  const source = readFileSync("server/treasurer-scraper.mjs", "utf8");
+  assert.match(source, /&min_score=0\.7&json=1/);
+  assert.doesNotMatch(source, /&score=/);
+});
+
 test("proxy authentication failure is explicit and does not wait for nonexistent PIN fields", async () => {
   await assert.rejects(loadTreasurerSearchForm({
     goto: async () => ({ status: () => 407 }),

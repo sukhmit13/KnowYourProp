@@ -16,3 +16,11 @@ A tax refresh response can acknowledge a background lookup without verifying a n
 **Why:** a Treasurer browser lookup can outlast the HTTP request deadline; synchronous manual refreshes timed out while their scrape was still running.
 
 **How to apply:** use the background lookup for manual retries too, poll while it is pending, and never label a successful request as a successfully retrieved bill before source verification.
+
+## Captcha HTTP API parameters
+
+2Captcha's direct v3 HTTP API takes `min_score`, not the `score` alias found in some SDK examples.
+
+**Why:** the existing direct request used the SDK-style name. Official HTTP API documentation specifies `min_score`; a solved token alone does not establish that the county accepted it.
+
+**How to apply:** use the direct API documentation when changing request parameters, and verify the resulting county response independently. Do not treat a captcha solver's success as proof of a retrieved bill.
