@@ -56,7 +56,7 @@ export const SECTION_META: Record<string, SectionMeta> = {
     summary: "Michelin and James Beard dining, murals, landmarks and galleries within a mile.",
     info: ["Michelin Guide and James Beard restaurants", "Registered murals and architectural landmarks", "Licensed art galleries"] },
   corridor: { id: "corridor", anchorId: "print-section-corridor-news", title: "Corridor Intelligence",
-    summary: "Which commercial corridors this address sits on, and how much is happening on each.",
+    summary: "Nearby major corridors and recent activity.",
     info: ["Corridors within ~0.5 mi", "Activity counts linked to their source section", "Corridor news coverage"] },
   development: { id: "development", anchorId: "print-section-upcoming-developments", title: "Nearby Development & Construction",
     summary: "Units under construction and in the approval pipeline nearby.",

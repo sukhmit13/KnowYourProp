@@ -6,6 +6,11 @@ import { buildScanSections } from "./scanBuilder";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
+test("Corridor Intelligence uses a concise default summary", () => {
+  const section = buildScanSections({}).find(({ id }) => id === "corridor");
+  assert.equal(section?.summary, "Nearby major corridors and recent activity.");
+});
+
 test("Mortgage & Lending Market scan hero counts returned comparables", () => {
   const section = buildScanSections({ compsData: { comparables: [{}, {}, {}] } }).find(({ id }) => id === "market");
   assert.deepEqual(section?.hero, { value: "3", label: "comps" });
