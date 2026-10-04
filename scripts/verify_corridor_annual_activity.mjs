@@ -18,6 +18,7 @@ import React from ${JSON.stringify(react)};
 import ReactDOM from ${JSON.stringify(dom)};
 import {AccordionSection} from "/src/components/report/AccordionSection.tsx";
 import CorridorIntelligenceView from "/src/components/CorridorIntelligenceView.tsx";
+import {NewBusinessLicensesSection} from "/src/components/report/NewBusinessLicensesSection.tsx";
 import {buildScanSections} from "/src/components/report/scanBuilder.tsx";
 import {compareCorridorLicenses} from "/@fs${process.cwd()}/shared/corridorLicenseComparison.ts";
 import "/src/index.css";
@@ -33,11 +34,22 @@ licenses:[{name:"Current Cafe",address:"100 W Test Ave",date:"2026-01-01",tags:[
 construction:[],coverage:[{title:"Older article within the full year",source:"Example",url:"https://example.com/older",date:"2026-01-01",summary:"Older reporting retained."}],
 zoning:[],dpdApplications:[],counts:{licenses:5,permits:3,articles:1,zoningAppeals:2,dpdApplications:null},licenseComparison:comparison};
 const sources={permits:"available",licenses:"available",articles:"partial",zoningAppeals:"partial",dpdApplications:"unavailable"};
+const current=[record("Current Cafe","2026-01-01"),...Array.from({length:8},(_,i)=>({...record("New License Name "+i,"2026-02-01"),address:(200+i*100)+" W Test Ave",licenseType:i%2?"Tavern":"Retail Food",licenseCategory:i%2?"liquor":"food",distanceMiles:.2+i*.02})),
+{...record("Recurring Cafe","2026-01-01"),address:"2000 W Test Ave",distanceMiles:.9}];
+const nearbyHistory=[record("Original Cafe","2024-01-01"),record("Former Cafe","2025-01-01"),
+{...record("Recurring Cafe","2025-01-01"),address:"2000 W Test Ave"},...current];
+const nearbyComparison=compareCorridorLicenses(nearbyHistory,new Date("2026-10-03T12:00:00Z"));
+const nearbyData={licenses:current,totalCount:10,licenseCount:10,priorPeriodCount:2,changePct:400,radiusMiles:1,periodMonths:12,issuanceComparison:nearbyComparison};
+const nearbyScan=buildScanSections({businessLicenses:nearbyData}).find(s=>s.id==="newBusinessLicenses");
+const emptyData={...nearbyData,licenses:[],totalCount:0,licenseCount:0,issuanceComparison:compareCorridorLicenses(nearbyHistory.filter(r=>r.startDate<"2025-10-04"),new Date("2026-10-03T12:00:00Z"))};
 function Fixture(){const [open,setOpen]=React.useState(true);return e("div",{style:{padding:24},className:"test-report"},
 e("style",null,"@media(min-width:721px){.test-report{margin-left:210px}}"),
 e(AccordionSection,{id:"corridor",index:21,order:21,eyebrow:scan.title,takeaway:scan.summary,verdict:"context",badge:scan.verdict.label,badgeTone:"c",open,onToggle:()=>setOpen(!open),onToggleOff:()=>{}},
 e(CorridorIntelligenceView,{kpis,corridors:[card],sourceCoverage:sources})),
-e("div",{id:"unknown"},e(CorridorIntelligenceView,{kpis,corridors:[{...card,key:"unknown",name:"Unknown history corridor",licenseComparison:null}],sourceCoverage:sources})))}
+e("div",{id:"unknown"},e(CorridorIntelligenceView,{kpis,corridors:[{...card,key:"unknown",name:"Unknown history corridor",licenseComparison:null}],sourceCoverage:sources})),
+e(AccordionSection,{id:"newBusinessLicenses",index:12,order:12,eyebrow:nearbyScan.title,takeaway:nearbyScan.takeaway,verdict:"context",badge:nearbyScan.verdict.label,open:true,onToggle:()=>{}},
+e(NewBusinessLicensesSection,{data:nearbyData,isLoading:false,isError:false})),
+e("div",{id:"nearby-empty"},e(NewBusinessLicensesSection,{data:emptyData,isLoading:false,isError:false})))}
 ReactDOM.createRoot(document.getElementById("root")).render(e(Fixture));
 `;
 const browser = await chromium.launch({ headless: true });
@@ -67,6 +79,19 @@ try {
     assert.match(await section.innerText(), /past 12 months|last 12 mo|last 12 months/i);
     assert.doesNotMatch(await section.innerText(), /90 days/);
     assert.match(await page.locator("#unknown").innerText(), /Historical license comparison unavailable/i);
+    const nearby = page.locator("#section-newBusinessLicenses");
+    assert.equal(await nearby.locator(".kyp-biz-heroes .bv").first().textContent(), "8");
+    assert.match(await nearby.innerText(), /Different name at recorded address/);
+    assert.match(await nearby.innerText(), /Former Cafe/);
+    assert.doesNotMatch(await nearby.innerText(), /400%|business count change/);
+    assert.equal(await nearby.locator(".kyp-biz-card").count(), 6);
+    await nearby.locator("button.kyp-morelink").click();
+    assert.equal(await nearby.locator(".kyp-biz-card").count(), 10);
+    assert.match(await nearby.innerText(), /Additional license for previously observed business/);
+    await nearby.locator("button.kyp-hbar").filter({hasText:"Liquor"}).click();
+    assert.equal(await nearby.locator(".kyp-biz-card").count(), 4, "license-mix filtering still works");
+    assert.match(await page.locator("#nearby-empty").innerText(), /current observations: 0/);
+    assert.equal(await page.locator("#nearby-empty table").count(), 1, "prior history stays visible when current observations are zero");
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2);
     assert.equal(overflow, false, `${width}px should not create horizontal page overflow`);
     if (width === 1280) await page.screenshot({ path: "/tmp/corridor-annual-comparison.png", fullPage: true });

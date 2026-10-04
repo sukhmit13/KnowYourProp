@@ -1,3 +1,5 @@
+import type { CorridorLicenseComparison } from "./corridorLicenseComparison";
+
 export type LicenseCategory =
   | 'liquor'
   | 'food'
@@ -40,6 +42,8 @@ export interface NearbyLicensesResponse {
   periodMonths: number;
   /** Optional ISSUE history for corridor comparisons; never an operating-business census. */
   issuanceHistory?: NearbyLicense[];
+  /** Same turnover-aware annual comparison used by Corridor Intelligence. */
+  issuanceComparison?: CorridorLicenseComparison;
 }
 
 export interface LicenseEstablishment {

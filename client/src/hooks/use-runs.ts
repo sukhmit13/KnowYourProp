@@ -3176,7 +3176,7 @@ export function useMetraLineRidership(enabled: boolean) {
 
 export function useNearbyBusinessLicenses(lat: number | undefined, lon: number | undefined) {
   return useQuery<NearbyLicensesResponse>({
-    queryKey: ['/api/nearby-business-licenses', lat, lon],
+    queryKey: ['/api/nearby-business-licenses', 'turnover-aware-annual', lat, lon],
     enabled: !!lat && !!lon,
     queryFn: async () => {
       const res = await fetch('/api/nearby-business-licenses', {

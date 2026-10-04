@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 import { type ScanSection } from "./CollapsibleSection";
 import { SECTION_META, SECTION_ORDER } from "./sectionRegistry";
+import type { CorridorLicenseComparison } from "@shared/corridorLicenseComparison";
 
 /** Convert the AI takeaways' own **bold** markers into our serif-italic emphasis. */
 function mdEmph(s?: string | null): ReactNode {
@@ -64,7 +65,7 @@ export interface ScanCtx {
     searchFailed?: boolean;
   } | null;
   isLoadingLiens?: boolean;
-  businessLicenses?: { totalCount: number; priorPeriodCount: number; changePct: number | null } | null;
+  businessLicenses?: { totalCount: number; priorPeriodCount: number; changePct: number | null; issuanceComparison?: CorridorLicenseComparison } | null;
   newConstruction?: { subject?: { totalPermits?: number }; activePermitCount?: number; trend?: { changePct?: number | null; suppressed?: boolean } } | null;
   development?: { pipeline?: { unitsUnderConstruction?: number | null; observedUnitsUnderConstruction?: number | null; permitUnitsUnknownAddressCount?: number; permitUnitsSource?: string; potentialUnits?: number | null } | null } | null;
   professionalCount?: number | null;
@@ -175,13 +176,17 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
 
   const licenseCount = ctx.businessLicenses?.totalCount;
   if (licenseCount != null) {
-    const change = ctx.businessLicenses?.changePct;
+    const comparison = ctx.businessLicenses?.issuanceComparison;
+    const unseen = comparison?.current.previouslyUnseenAddresses;
+    const change = comparison?.unseenAddressChange;
     dyn.newBusinessLicenses = {
-      takeaway: <><em>{licenseCount} business{licenseCount === 1 ? "" : "es"} with new license{licenseCount === 1 ? "" : "s"}</em> within a mile in the past year.</>,
+      takeaway: unseen == null
+        ? <><em>{licenseCount} business{licenseCount === 1 ? "" : "es"} with new license{licenseCount === 1 ? "" : "s"}</em> within a mile in the past year.</>
+        : <><em>{unseen} previously unseen licensed address{unseen === 1 ? "" : "es"}</em> within a mile.</>,
       verdict: change == null
-        ? { tone: "context", label: "No prior baseline" }
-        : { tone: change >= 0 ? "good" : "attention", label: `${change > 0 ? "+" : ""}${change}% business count change` },
-      hero: { value: String(licenseCount), label: "businesses with new licenses" },
+        ? { tone: "context", label: "History unavailable" }
+        : { tone: "context", label: change === 0 ? "Unseen sites unchanged" : `${change > 0 ? "+" : ""}${change} unseen sites vs prior year` },
+      hero: { value: String(unseen ?? licenseCount), label: unseen == null ? "businesses with new licenses" : "previously unseen licensed addresses" },
     };
   }
 

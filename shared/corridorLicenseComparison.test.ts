@@ -31,6 +31,7 @@ test("different names replacing each other do not manufacture new licensed addre
   assert.equal(result.businessChange, 0);
   assert.equal(result.addressChange, 0);
   assert.deepEqual(result.possibleTurnover[0].previousNames, ["Second Cafe"]);
+  assert.equal(result.currentObservations[0].kind, "possible-turnover");
 });
 
 test("additional licenses for a recurring name are not first-observed businesses", () => {
@@ -44,6 +45,7 @@ test("additional licenses for a recurring name are not first-observed businesses
   assert.equal(result.current.previouslyUnseenAddresses, 1);
   assert.equal(result.current.differentNamesAtKnownAddresses, 0);
   assert.equal(result.businessChangePct, 100);
+  assert.deepEqual(result.currentObservations.map(row => row.kind), ["recurring", "previously-unseen-address"]);
 });
 
 test("same-period name changes share one address and expose their earlier name", () => {

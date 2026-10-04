@@ -34,9 +34,13 @@ test("corridor history loads 36 months of ISSUE records while current/prior coun
     assert.equal(result.priorPeriodCount, 1);
     assert.equal(result.changePct, 0);
     assert.equal(result.issuanceHistory?.length, 3, "duplicate query hits deduplicate by source transaction");
+    assert.equal(result.issuanceComparison?.current.previouslyUnseenAddresses, 0);
+    assert.equal(result.issuanceComparison?.current.differentNamesAtKnownAddresses, 1);
+    assert.deepEqual(result.issuanceComparison?.currentObservations[0].previousNames, ["Prior Cafe"]);
     assert.deepEqual(result.licenses.map(row => row.businessName), ["Current Cafe"]);
     const withoutHistory = await getNearbyBusinessLicenses(41.896, -87.69, 1);
     assert.equal(withoutHistory.issuanceHistory, undefined, "ordinary consumers do not receive a large extra history payload");
+    assert.deepEqual(withoutHistory.issuanceComparison, result.issuanceComparison, "nearby and corridor consumers share the same turnover comparison");
   } finally {
     globalThis.fetch = originalFetch;
   }

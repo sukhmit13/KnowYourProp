@@ -4,6 +4,7 @@ export interface LicensePeriodComparison {
   start: string;
   end: string;
   businessesWithNewLicenses: number;
+  licenseIssuances: number;
   licensedAddresses: number;
   recurringBusinesses: number;
   firstObservedBusinesses: number;
@@ -19,7 +20,19 @@ export interface CorridorLicenseComparison {
   addressChange: number;
   unseenAddressChange: number;
   possibleTurnover: Array<{ name: string; address: string; previousNames: string[] }>;
+  currentObservations: Array<{
+    key: string;
+    kind: "recurring" | "possible-turnover" | "previously-unseen-address" | "new-name-at-shared-address";
+    previousNames: string[];
+  }>;
 }
+
+const nameKey = (name: string) => name.toUpperCase().replace(/[.,]/g, "").replace(/\s+/g, " ").trim();
+const addressKey = (address: string) => normalizeLicenseAddress(address)
+  .replace(/\bAVENUE\b/g, "AVE").replace(/\bSTREET\b/g, "ST").replace(/\bBOULEVARD\b/g, "BLVD")
+  .replace(/\bROAD\b/g, "RD").replace(/\bDRIVE\b/g, "DR");
+export const licenseComparisonKey = (row: Pick<NearbyLicense, "businessName" | "address">) =>
+  licenseEstablishmentKey({ businessName: nameKey(row.businessName), address: addressKey(row.address) });
 
 /** UTC calendar windows, with an equal 12-month lookback for each comparison period. */
 export function licenseComparisonDates(asOf = new Date()) {
@@ -35,11 +48,7 @@ export function licenseComparisonDates(asOf = new Date()) {
 /** ISSUE-only observations are not an operating-business census or proof of net growth. */
 export function compareCorridorLicenses(history: NearbyLicense[], asOf = new Date()): CorridorLicenseComparison {
   const dates = licenseComparisonDates(asOf);
-  const nameKey = (name: string) => name.toUpperCase().replace(/[.,]/g, "").replace(/\s+/g, " ").trim();
-  const addressKey = (address: string) => normalizeLicenseAddress(address)
-    .replace(/\bAVENUE\b/g, "AVE").replace(/\bSTREET\b/g, "ST").replace(/\bBOULEVARD\b/g, "BLVD")
-    .replace(/\bROAD\b/g, "RD").replace(/\bDRIVE\b/g, "DR");
-  const key = (row: NearbyLicense) => licenseEstablishmentKey({ businessName: nameKey(row.businessName), address: addressKey(row.address) });
+  const key = licenseComparisonKey;
   const rows = history.filter(row => {
     const date = row.startDate;
     return row.businessName?.trim() && row.address?.trim()
@@ -68,10 +77,22 @@ export function compareCorridorLicenses(history: NearbyLicense[], asOf = new Dat
       ).map(other => other.businessName)));
       return previousNames.length ? [{ name: row.businessName, address: row.address, previousNames }] : [];
     });
+    const turnoverByKey = new Map(possibleTurnover.map(row => [
+      key({ businessName: row.name, address: row.address }), row.previousNames,
+    ]));
+    const observations = Array.from(grouped).map(([id, row]) => ({
+      key: id,
+      kind: previousKeys.has(id) ? "recurring" as const
+        : turnoverByKey.has(id) ? "possible-turnover" as const
+          : !knownAddresses.has(addressKey(row.address)) ? "previously-unseen-address" as const
+            : "new-name-at-shared-address" as const,
+      previousNames: turnoverByKey.get(id) || [],
+    }));
     return {
       summary: {
         start, end,
         businessesWithNewLicenses: grouped.size,
+        licenseIssuances: selected.length,
         licensedAddresses: new Set(Array.from(grouped.values()).map(row => addressKey(row.address))).size,
         recurringBusinesses: recurring.length,
         firstObservedBusinesses: firstObserved.length,
@@ -79,6 +100,7 @@ export function compareCorridorLicenses(history: NearbyLicense[], asOf = new Dat
         differentNamesAtKnownAddresses: possibleTurnover.length,
       },
       possibleTurnover,
+      observations,
     };
   }
   const current = period(dates.currentStart, dates.end, dates.priorStart);
@@ -91,5 +113,6 @@ export function compareCorridorLicenses(history: NearbyLicense[], asOf = new Dat
     addressChange: current.summary.licensedAddresses - prior.summary.licensedAddresses,
     unseenAddressChange: current.summary.previouslyUnseenAddresses - prior.summary.previouslyUnseenAddresses,
     possibleTurnover: current.possibleTurnover,
+    currentObservations: current.observations,
   };
 }

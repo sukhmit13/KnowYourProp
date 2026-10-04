@@ -3,6 +3,7 @@ import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { buildScanSections } from "./scanBuilder";
+import { compareCorridorLicenses } from "@shared/corridorLicenseComparison";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -67,7 +68,28 @@ test("Business License scan describes license issuances without asserting busine
   assert.match(text, /4 businesses with new licenses/);
   assert.doesNotMatch(text, /opened|opening|formation/i);
   assert.deepEqual(section?.hero, { value: "4", label: "businesses with new licenses" });
-  assert.equal(section?.verdict?.label, "+100% business count change");
+  assert.equal(section?.verdict?.label, "History unavailable");
+});
+
+test("Nearby-license header does not equate more same-address issuances with growth", () => {
+  const observation = (businessName: string, startDate: string) => ({
+    businessName, startDate, address: "100 W Test Ave", licenseCategory: "food" as const,
+    licenseType: "Food", latitude: 41.9, longitude: -87.6, distanceMiles: 0.1,
+  });
+  const issuanceComparison = compareCorridorLicenses([
+    observation("Old Cafe", "2024-01-01"),
+    observation("Prior Cafe", "2025-01-01"),
+    observation("New Cafe", "2026-01-01"),
+    observation("Another Name", "2026-07-01"),
+  ], new Date("2026-10-03T12:00:00Z"));
+  const section = buildScanSections({
+    businessLicenses: { totalCount: 2, priorPeriodCount: 1, changePct: 100, issuanceComparison },
+  }).find(({ id }) => id === "newBusinessLicenses");
+  assert.deepEqual(section?.verdict, { tone: "context", label: "Unseen sites unchanged" });
+  assert.deepEqual(section?.hero, { value: "0", label: "previously unseen licensed addresses" });
+  const text = renderToStaticMarkup(React.createElement(React.Fragment, null, section?.takeaway));
+  assert.match(text, /0 previously unseen licensed addresses/);
+  assert.doesNotMatch(text, /100%|growth|new businesses/);
 });
 
 test("Professional Record scan kicker is dynamic and uses neutral context language", () => {

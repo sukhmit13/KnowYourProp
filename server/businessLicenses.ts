@@ -1,5 +1,5 @@
 import * as turf from '@turf/turf';
-import { licenseComparisonDates } from '@shared/corridorLicenseComparison';
+import { licenseComparisonDates, compareCorridorLicenses } from '@shared/corridorLicenseComparison';
 import {
   groupLicenseEstablishments,
   type LicenseCategory,
@@ -183,6 +183,7 @@ export async function getNearbyBusinessLicenses(lat: number, lng: number, radius
       : Math.round(((groupLicenseEstablishments(currentLicenses).length - groupLicenseEstablishments(priorLicenses).length) / groupLicenseEstablishments(priorLicenses).length) * 1000) / 10,
     radiusMiles,
     periodMonths: 12,
+    issuanceComparison: compareCorridorLicenses(nearby),
     ...(includeHistory ? { issuanceHistory: nearby } : {}),
   };
 }
