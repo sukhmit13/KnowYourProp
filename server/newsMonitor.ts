@@ -1645,6 +1645,7 @@ function parseAddressForSearch(address: string): { abbrev: string; full: string 
  * Courthouse News, and a broad all-sources search — all via Google News RSS (no API key needed).
  */
 export async function findAddressArticles(address: string, days = 1095): Promise<NewsArticle[]> {
+  const { articleTextMentionsAddress } = await import("./newsArticleLocation");
   const parsed = parseAddressForSearch(address);
   if (!parsed) return [];
 
@@ -1683,33 +1684,20 @@ export async function findAddressArticles(address: string, days = 1095): Promise
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - days);
 
-  // Normalize text for matching: strip periods after direction letters so
-  // "801 W. Madison" and "801 W Madison" both match "801 w madison".
-  const normalizeText = (s: string) =>
-    s.toLowerCase().replace(/\b([nsewNSEW])\./g, '$1').replace(/\s+/g, ' ');
-
-  const abbrevNorm = normalizeText(abbrev);
-  const fullNorm   = full ? normalizeText(full) : '';
   const seenUrls   = new Set<string>();
   const filtered: NewsArticle[] = [];
 
   for (let i = 0; i < results.length; i++) {
     const result = results[i];
-    const isSiteSpecific = queries[i][2];
     if (result.status !== 'fulfilled') continue;
     for (const article of result.value) {
       if (!article.url || seenUrls.has(article.url)) continue;
       const pubDate = new Date(article.published);
       if (isNaN(pubDate.getTime()) || pubDate < cutoff) continue;
 
-      if (!isSiteSpecific) {
-        // For broad searches, require the address to appear in title/summary
-        // (Google RSS snippets can be noisy for non-site-specific queries)
-        const text = normalizeText(`${article.title} ${article.summary}`);
-        if (!text.includes(abbrevNorm) && !(fullNorm && text.includes(fullNorm))) continue;
-      }
-      // For site-specific queries, trust Google's exact-phrase match —
-      // the RSS snippet is often truncated and may not repeat the address.
+      // Google can return unrelated articles even for a quoted, site-limited query.
+      // Require article-owned evidence for every publisher, never just search provenance.
+      if (!articleTextMentionsAddress(`${article.title} ${article.summary ?? ""}`, address)) continue;
 
       seenUrls.add(article.url);
       filtered.push(article);

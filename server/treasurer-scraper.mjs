@@ -1,6 +1,7 @@
 // Standalone Playwright scraper for Cook County Treasurer
 // Run as child process: node treasurer-scraper.mjs <pin>
 // Output: JSON result on stdout
+import { openTreasurerSearchBrowser } from "./treasurerBrowser.mjs";
 
 const pin = process.argv[2];
 if (!pin) {
@@ -71,22 +72,14 @@ async function solveRecaptchaV3() {
 }
 
 const { chromium } = await import('playwright');
-const browser = await chromium.launch({
-  headless: true,
-  args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-gpu',
-  ],
-});
+let browser;
 
 try {
-  const page = await browser.newPage();
-  await page.setViewportSize({ width: 1280, height: 800 });
-
   process.stderr.write(`[scraper] Loading page...\n`);
-  await page.goto(searchUrl, { waitUntil: 'networkidle', timeout: 60000 });
+  const opened = await openTreasurerSearchBrowser(chromium, process.env.LOOPNET_PROXY_URL, searchUrl,
+    message => process.stderr.write(`[scraper] ${message}\n`));
+  browser = opened.browser;
+  const page = opened.page;
   process.stderr.write(`[scraper] Page loaded at: ${page.url()}\n`);
 
   // Solve captcha
@@ -130,7 +123,7 @@ try {
   // Wait for navigation concurrently with the click so we don't miss the redirect.
   // waitForURL handles the full navigation cycle cleanly without polling.
   const [navResult] = await Promise.allSettled([
-    page.waitForURL(url => url.includes('yourpropertytax') || url.includes('Error.aspx'), { timeout: 60000 }),
+    page.waitForURL(url => url.includes('yourpropertytax') || url.includes('Error.aspx'), { waitUntil: 'domcontentloaded', timeout: 60000 }),
     page.locator('input[id*="cmdContinue"]').click(),
   ]);
 
@@ -182,5 +175,5 @@ try {
   process.stderr.write(`[scraper] Error: ${err.message}\n`);
   process.stdout.write(JSON.stringify({ error: err.message }));
 } finally {
-  await browser.close();
+  await browser?.close();
 }

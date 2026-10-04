@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import { countyLookupState } from "@/lib/countyLookupState";
 import type { ListingClaim } from "@shared/listingChecks";
 import { api, buildUrl, type RunInput, type ScenarioInput, type LookupInput } from "@shared/routes";
@@ -1638,8 +1638,8 @@ export function useRefreshPropertyTax() {
     onSuccess: (_, pin) => {
       queryClient.invalidateQueries({ queryKey: ['/api/property-tax', pin] });
       toast({
-        title: "Tax data refreshed",
-        description: "Property tax information has been updated.",
+        title: "Tax lookup started",
+        description: "Checking the Treasurer. Existing records stay visible while the bill lookup finishes.",
       });
     },
     onError: (err) => {
@@ -4065,10 +4065,10 @@ export interface ListingSnapshotData {
   checkedAt: string;
 }
 
-export function useListingSnapshot(runId: number | null | undefined) {
+export function useListingSnapshot(runId: number | null | undefined, enabled = true) {
   return useQuery<ListingSnapshotData | null>({
     queryKey: ['/api/runs', runId, 'listing-snapshot'],
-    enabled: !!runId,
+    enabled: !!runId && enabled,
     queryFn: async () => {
       const res = await fetch(`/api/runs/${runId}/listing-snapshot`, { credentials: 'include', headers: listingSnapshotAuthHeaders() });
       if (!res.ok) {
@@ -4084,9 +4084,10 @@ export function useListingSnapshot(runId: number | null | undefined) {
 
 export function useGenerateListingSnapshot(runId: number | null | undefined) {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (opts?: { force?: boolean }) => {
-      const res = await fetch(`/api/runs/${runId}/listing-snapshot`, {
+  const mutation = useMutation({
+    mutationFn: async (opts: { runId: number | null; force?: boolean }) => {
+      if (!opts.runId) throw new Error("A report is required for the listing lookup.");
+      const res = await fetch(`/api/runs/${opts.runId}/listing-snapshot`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', ...listingSnapshotAuthHeaders() },
@@ -4098,10 +4099,19 @@ export function useGenerateListingSnapshot(runId: number | null | undefined) {
       }
       return res.json();
     },
-    onSuccess: (data) => {
-      queryClient.setQueryData(['/api/runs', runId, 'listing-snapshot'], data);
+    onSuccess: (data, opts) => {
+      queryClient.setQueryData(['/api/runs', opts.runId, 'listing-snapshot'], data);
     },
   });
+  const mutate = useCallback((opts?: { force?: boolean }) => {
+    mutation.mutate({ runId: runId ?? null, force: opts?.force });
+  }, [runId, mutation.mutate]);
+  return {
+    ...mutation,
+    mutate,
+    isPending: mutation.isPending && mutation.variables?.runId === runId,
+    isError: mutation.isError && mutation.variables?.runId === runId,
+  };
 }
 
 // Crime Takeaway — cached AI summary rendered atop the crime section.

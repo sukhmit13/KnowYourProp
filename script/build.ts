@@ -61,6 +61,7 @@ async function buildAll() {
   await cp("server/recorder-scraper.mjs", "dist/recorder-scraper.mjs");
   await cp("server/recorder-name-scraper.mjs", "dist/recorder-name-scraper.mjs");
   await cp("server/treasurer-scraper.mjs", "dist/treasurer-scraper.mjs");
+  await cp("server/treasurerBrowser.mjs", "dist/treasurerBrowser.mjs");
 
   console.log("installing playwright browsers...");
   const browsersDir = path.join(process.cwd(), "playwright-browsers");

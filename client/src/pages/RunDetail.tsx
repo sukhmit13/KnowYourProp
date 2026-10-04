@@ -60,6 +60,7 @@ import InsightReportSection from "@/components/InsightReportSection";
 import { CountyRecordSection } from "@/components/report/CountyRecordSection";
 import { CountyLookupStatus } from "@/components/report/CountyLookupStatus";
 import { useReportCountyRecords } from "@/hooks/use-runs";
+import { useAutoListingCheck } from "@/hooks/use-auto-listing-check";
 import { DaycareAnalysis } from "@/components/report/DaycareAnalysis";
 import { ProjectUseAreaControl, ProjectUseBusinessList, ProjectUseCountBlocks, ProjectUseGoogleMaps } from "@/components/report/ProjectUseAnalysisSpine";
 import { EVChargingTable, EVRegistrationTrends, FoodAccessPanel, GroceryLicenseList, getEVChargingSiteCount, HotelShortTermRentalGroup, LicensedBusinessPanel, SeniorPopulationPanel, VehicleOwnershipPanel } from "@/components/report/ProjectUseDomainPanels";
@@ -1640,15 +1641,24 @@ export default function RunDetail() {
   }, [pinRunKey]);
   const isRunLoading = isStandaloneReport ? isPublicRunLoading : isRegularRunLoading;
   const { data: listingData } = useListingData(run?.id);
-  const { data: listingSnapshot, isFetched: listingSnapshotFetched, isError: isListingSnapshotError, error: listingSnapshotError } = useListingSnapshot(run?.id);
+  const { isSubscriber, user: authUser, isLoading: isAuthLoading } = useAuth();
+  const isReportUnlocked = isSubscriber || !!run?.purchasedAt;
+  const { data: listingSnapshot, isFetched: listingSnapshotFetched, isError: isListingSnapshotError, error: listingSnapshotError, refetch: retryListingSnapshot } = useListingSnapshot(run?.id, !isAuthLoading && !!authUser && !isStandaloneReport);
   const generateListingSnapshot = useGenerateListingSnapshot(run?.id);
+  useAutoListingCheck({
+    runId: run?.id,
+    enabled: isReportUnlocked && !isAuthLoading && !!authUser && !isStandaloneReport,
+    fetched: listingSnapshotFetched,
+    hasSnapshot: !!listingSnapshot,
+    loadError: isListingSnapshotError,
+    pending: generateListingSnapshot.isPending,
+    lookupError: generateListingSnapshot.isError,
+    generate: generateListingSnapshot.mutate,
+  });
   const updateRunLabel = useUpdateRunLabel();
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [labelDraft, setLabelDraft] = useState('');
   // Declare early so the geocode useEffect below can reference it
-  const { isSubscriber, user: authUser, isLoading: isAuthLoading } = useAuth();
-  // Report is unlocked if user is a subscriber or the run has been purchased
-  const isReportUnlocked = isSubscriber || !!run?.purchasedAt;
   // Do not flash or partially blur a report while the initial session check is
   // still in flight. Lock only after auth has reached a confirmed state.
   const shouldLockReport = !isAuthLoading && !isReportUnlocked;
@@ -4085,7 +4095,9 @@ export default function RunDetail() {
       : propertyTaxData?.paymentStatus === "sold"
         ? "Tax sale recorded"
         : propertyTaxData?.paymentStatus === "unknown"
-          ? "Status unverified"
+          ? propertyTaxYears.length === 0 && propertyTaxData.totalAnnualTaxAmount == null ? "Treasurer unavailable" : "Status unverified"
+          : propertyTaxData?.paymentStatus === null && propertyTaxYears.length === 0
+            ? "Loading bill"
           : null;
   const propertyTaxTakeaway = propertyTaxData?.paymentStatus === "delinquent"
     ? "Delinquent balance reported — verify the payoff with the Treasurer before closing."
@@ -4111,8 +4123,8 @@ export default function RunDetail() {
     ["exemptions", !!pinLookupData],
     ["appeals", !!pinLookupData],
   ]);
-  const listingChecking = generateListingSnapshot.isPending;
-  const listingNeverChecked = !listingSnapshot && !isListingSnapshotError && !listingChecking;
+  const listingChecking = generateListingSnapshot.isPending || (!listingSnapshotFetched && !isListingSnapshotError);
+  const listingNeverChecked = !listingSnapshot && !isListingSnapshotError && !generateListingSnapshot.isError && !listingChecking;
   const listingStillChecking = listingChecking || listingNeverChecked;
   const listingCheckedDate = listingSnapshot?.checkedAt && !Number.isNaN(new Date(listingSnapshot.checkedAt).getTime())
     ? new Date(listingSnapshot.checkedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -4154,10 +4166,10 @@ export default function RunDetail() {
   const listingTakeaway = listingChecking ? (
     <Skeleton className="h-4 w-64" data-testid="listing-takeaway-skeleton" />
   ) : listingNeverChecked ? (
-    "Not yet checked — run the lookup to search listing sites for this address."
+    "The listing lookup starts automatically when this report is unlocked."
   ) : listingSnapshot?.status === "not_found" ? (
     `No public listing found on the major listing sites. Checked ${listingCheckedDate}.`
-  ) : isListingSnapshotError ? (
+  ) : isListingSnapshotError || generateListingSnapshot.isError ? (
     "Listing check unavailable — try again."
   ) : listingSnapshot ? (
     <>
@@ -4332,7 +4344,7 @@ export default function RunDetail() {
     businessLicenses: { loading: isLoadingBizLicenseHistory, hasData: !!bizLicenseHistoryData, emptyLabel: "Status not verified" },
     valuation: { hasData: true, label: valuationMetricBadge, emptyLabel: "Inputs needed" },
     listing: {
-      loading: listingChecking, checked: !listingNeverChecked, error: isListingSnapshotError,
+      loading: listingChecking, checked: !listingNeverChecked, error: isListingSnapshotError || generateListingSnapshot.isError,
       hasData: !!listingSnapshot, emptyLabel: "Listed · Checks incomplete",
     },
     countyRecord: {
@@ -5664,7 +5676,7 @@ export default function RunDetail() {
             )}
           </AccordionSection>
 
-          {/* Active Listing Snapshot — on-demand AI web-search lookup of the live listing.
+          {/* Active Listing Snapshot — automatic initial check, cached results, manual re-check.
               THIRD-PARTY LISTING CLAIMS, not verified data — labeled prominently as such. */}
           <AccordionSection {...accProps("listing")}>
           <motion.div
@@ -5678,6 +5690,7 @@ export default function RunDetail() {
                       <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800" data-testid="listing-snapshot-load-error">
                         <p className="font-medium">We couldn’t load the saved listing check.</p>
                         <p className="mt-1 text-xs">{(listingSnapshotError as Error)?.message || 'Please try again.'}</p>
+                         <button type="button" className="kyp-morelink no-print" onClick={() => void retryListingSnapshot()}>Retry loading saved check</button>
                       </div>
                     )}
 
@@ -5689,7 +5702,7 @@ export default function RunDetail() {
                           className="bg-[#2b3a9e] hover:bg-[#22307f] text-white no-print"
                         >
                           <Search className="w-4 h-4 mr-2" />
-                          Check for active listing
+                          {generateListingSnapshot.isError ? "Retry listing check" : "Check for active listing"}
                         </Button>
                         {generateListingSnapshot.isError && (
                           <p className="text-xs text-red-600">{(generateListingSnapshot.error as Error)?.message || 'Lookup failed — please try again.'}</p>
@@ -10029,11 +10042,12 @@ export default function RunDetail() {
                       {propertyTaxData.paymentStatus === "unknown" && (
                         <p className="kyp-note" data-testid="text-tax-status-unavailable">
                           The Treasurer did not return a verifiable bill or payment status. Confirm the current amount and status directly with Cook County.
+                          {countyRecords.pin && <button type="button" className="kyp-morelink no-print" disabled={refreshPropertyTax.isPending || propertyTaxData.isStale} onClick={() => refreshPropertyTax.mutate(countyRecords.pin!)}>Retry Treasurer lookup</button>}
                         </p>
                       )}
                       {propertyTaxYears.length === 0 && propertyTaxData.totalAnnualTaxAmount == null && propertyTaxData.paymentStatus !== "unknown" && (
                         <div className="kyp-tax-state" data-testid="tax-bill-no-data">
-                          No bill history was returned. Verify directly with the Cook County Treasurer.
+                          {propertyTaxData.paymentStatus === null ? "Loading the Treasurer bill. Assessor records are available while the county lookup runs." : "No bill history was returned. Verify directly with the Cook County Treasurer."}
                         </div>
                       )}
                       {propertyTaxYears.length === 0 && propertyTaxData.totalAnnualTaxAmount != null && (

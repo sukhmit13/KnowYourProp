@@ -643,10 +643,9 @@ export async function getPropertyTax(pin: string, options: { forceRefresh?: bool
   let treasurerDataToCache: TreasurerData | undefined;
   let isStaleResult = false;
 
-  // For any non-forced scrape (stale cache OR first-time lookup), return immediately and
-  // background-scrape the Treasurer so the page isn't blocked for 15-30 seconds.
-  // Only a forced refresh (user clicked "Refresh") waits synchronously.
-  const shouldBackgroundScrape = needsTreasurerScrape && !options.forceRefresh;
+  // Refresh requests also use the existing background job. The scraper can take
+  // minutes, whereas the HTTP route times out at 25s; waiting guarantees a failed refresh.
+  const shouldBackgroundScrape = needsTreasurerScrape || backgroundScrapes.has(normalizedPin);
 
   if (shouldBackgroundScrape) {
     // Use whatever treasurer data we already have in cache (may be null for first-time lookups)
@@ -675,29 +674,6 @@ export async function getPropertyTax(pin: string, options: { forceRefresh?: bool
         })
         .catch(err => console.error(`[TREASURER] Background scrape failed for ${normalizedPin}:`, err.message))
         .finally(() => backgroundScrapes.delete(normalizedPin));
-    }
-  } else if (needsTreasurerScrape) {
-    // forceRefresh only — synchronous scrape
-    const scraped = await scrapeTreasurerData(normalizedPin).catch(err => {
-      console.error('Treasurer scrape failed:', err.message);
-      return null;
-    });
-    const cachedTreasurer = getCachedTreasurerData(cachedData);
-    treasurerDataToCache = scraped ?? undefined;
-
-    if (hasUsableTreasurerData(scraped)) {
-      finalTreasurer = scraped;
-    } else if (cachedTreasurer) {
-      finalTreasurer = {
-        ...cachedTreasurer,
-        paymentStatus: derivePaymentStatus(
-          cachedTreasurer.taxYears,
-          cachedTreasurer.paymentStatus === 'sold',
-        ),
-      };
-      isStaleResult = true;
-    } else {
-      finalTreasurer = scraped;
     }
   } else {
     // Cache is fresh — use it directly

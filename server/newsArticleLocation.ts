@@ -48,6 +48,22 @@ export function articleTextMentionsAddress(text: string, address: string): boole
 }
 
 /** Extract only explicit street addresses appearing in article title/snippet text. */
+export function filterArticlesMentioningAddress<T extends { title?: string; summary?: string; snippet?: string | null }>(articles: T[], address: string): T[] {
+  return articles.filter(article => articleTextMentionsAddress(`${article.title ?? ""} ${article.summary ?? article.snippet ?? ""}`, address));
+}
+
+/** Cached search associations cannot establish parcel identity on their own. */
+export function cachedNewsHasAddressEvidence(snapshot: any, subjectAddress: string): boolean {
+  if (!Array.isArray(snapshot?.meta)) return false;
+  return snapshot.meta.every((item: any) => {
+    if (item.tier !== "parcel" && item.tier !== "adjacent") return false;
+    const target = item.tier === "parcel" ? subjectAddress : item.matched_address;
+    return typeof target === "string" && articleTextMentionsAddress(
+      `${item.title ?? ""} ${item.addressEvidenceSnippet ?? ""}`, target,
+    );
+  });
+}
+
 export function extractArticleAddresses(text: string, limit = 5): string[] {
   const matches = Array.from(text.matchAll(ARTICLE_ADDRESS_PATTERN), match => match[0].replace(/\s+/g, " ").trim());
   const unique = new Map<string, string>();

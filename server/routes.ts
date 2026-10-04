@@ -2194,6 +2194,10 @@ export async function registerRoutes(
     if (!run) return;
     const cached = (run as any).newsTakeaway;
     if (!cached) return res.json(null);
+    const { cachedNewsHasAddressEvidence } = await import("./newsArticleLocation");
+    // Old cached takeaways may contain unrelated search hits and parcel-specific
+    // verification built from those hits. Reject the whole derived result.
+    if (!cachedNewsHasAddressEvidence(cached, run.address)) return res.json(null);
     const meta = Array.isArray(cached.meta)
       ? await enrichNewsMetaWithCachedArticleLocation(cached.meta, run.address)
       : [];
@@ -2214,6 +2218,7 @@ export async function registerRoutes(
       coParcelAddress = rawCo;
     }
     const { findAddressArticles } = await import('./newsMonitor');
+    const { filterArticlesMentioningAddress } = await import("./newsArticleLocation");
     const [subjectArticles, coArticles] = await Promise.all([
       findAddressArticles(run.address, 1095).catch(() => []),
       coParcelAddress ? findAddressArticles(coParcelAddress, 1095).catch(() => []) : Promise.resolve([]),
@@ -2236,12 +2241,12 @@ export async function registerRoutes(
       url: String(a.url || ''),
     });
     const merged: any[] = [];
-    for (const a of subjectArticles) {
+    for (const a of filterArticlesMentioningAddress(subjectArticles, run.address)) {
       if (!a.url || seenUrls.has(a.url)) continue;
       seenUrls.add(a.url);
       merged.push({ raw: a, tier: 'parcel' as const, matched: run.address });
     }
-    for (const a of coArticles) {
+    for (const a of coParcelAddress ? filterArticlesMentioningAddress(coArticles, coParcelAddress) : []) {
       if (!a.url || seenUrls.has(a.url)) continue;
       seenUrls.add(a.url);
       merged.push({ raw: a, tier: 'adjacent' as const, matched: coParcelAddress! });
@@ -2270,7 +2275,7 @@ export async function registerRoutes(
       const mo = article.date ? monthsOld(article.date) : null;
       return {
         ...safeArticle,
-        snippet: undefined,
+        addressEvidenceSnippet: article.snippet || null,
         age_flag: mo != null && mo > 12 ? (mo >= 24 ? `~${Math.round(mo / 12)} yr old` : `~${mo} mo old`) : null,
       };
     });
@@ -2311,7 +2316,7 @@ export async function registerRoutes(
     const asOf = todayIso;
     const { createHash } = await import('crypto');
     const dataHash = createHash('sha256').update(JSON.stringify({
-      pv: 1, // prompt version
+      pv: 2, // Require article-owned address evidence; invalidate old search-associated takeaways.
       arts: inputArticles.map(a => [a.url, a.date, a.tier]),
       lic: activeLicenses,
       ls: listingStatus,

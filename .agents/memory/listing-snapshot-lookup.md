@@ -12,3 +12,11 @@ The Active Listing feature is an Anthropic web-search call (no deterministic scr
 **Access facts:** Redfin (pages + stingray API) 403s datacenter IPs AND the residential proxy (bot challenge). The LOOPNET_PROXY_URL secret is host:port:user:pass format (nonstandard — must reformat before use).
 
 **How to apply:** treat listing-site search metadata as the only reliable status evidence for fetch-blocked sites; a newer MLS number alone is recency evidence, never status evidence. Test prompt changes multiple times — output varies run to run.
+
+## Initial listing checks
+
+Start an initial listing lookup automatically for an authenticated owner opening an unlocked report with no saved snapshot. Read the saved result first; reuse existing results, including “not found,” and leave forced refresh explicit.
+
+**Why:** the user reported that Active Listing required a manual button click. Listing searches are paid AI calls, so restoring automatic initial checks must not regenerate saved snapshots or create retry loops.
+
+**How to apply:** wait for authentication and a successful saved-snapshot read, attempt once per report, preserve manual retry after failure, and bind late results to the report that started the request.
