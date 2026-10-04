@@ -592,7 +592,7 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-ctxc .sub{font-size:12.5px;color:var(--kyp-ink2);margin-top:3px;line-height:1.35}
 .kyp-ctxc .sub b{color:var(--kyp-ink);font-weight:600}
 .kyp-ctxc .chev{flex:none;width:26px;height:26px;border-radius:7px;border:1px solid var(--kyp-line);display:flex;align-items:center;justify-content:center;color:var(--kyp-muted);font-size:11px}
-.kyp-ctxc .body{padding:0 18px 18px 75px;border-top:1px solid var(--kyp-line)}
+.kyp-ctxc .body{padding:0 18px 18px;border-top:1px solid var(--kyp-line)}
 .kyp-ctxc .body.closed{display:none}
 
 /* stacked rows — ward contacts AND zoning allow-list share this shape */

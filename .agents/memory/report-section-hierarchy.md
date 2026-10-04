@@ -15,6 +15,12 @@ All report subsection content should align flush with its heading, like the orig
 **Why:** The user reversed the indentation direction and clarified: “I only want to just fix the indent and make it flush for every subsection.”
 **How to apply:** Do not add an extra subsection-level horizontal inset. Preserve padding inside individual cards and controls, and check all content states when applying the flush layout.
 
+Ward/Alderperson and Zoning card bodies should remain left-aligned with equal small gutters on both sides, not indented to match header text after the icon.
+
+**Why:** The user found the unequal gutters visibly off-center and approved removing the extra indent to match the other report content.
+
+**How to apply:** Keep border clearance within these cards without centering the text or restoring an icon-width body offset.
+
 Expanded subsections should primarily present records and measurements, not repeat an interpretation or tell users to perform obvious actions. The one-sentence takeaway belongs in the accordion header; deeper insights belong in the separately generated report. Keep factual scope, missing-evidence qualifiers, and cross-PIN loan/collateral context when they prevent misleading interpretations.
 
 **Why:** repeated gray instructions next to visible tax bills and released lien records cluttered the report and implied an unresolved state the evidence did not establish.
