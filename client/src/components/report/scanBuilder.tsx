@@ -187,7 +187,7 @@ export function buildScanSections(ctx: ScanCtx): ScanSection[] {
     const trend = ctx.newConstruction?.trend;
     const estimated = ctx.development?.pipeline?.permitUnitsSource === "description";
     dyn.development = {
-      takeaway: <><em>{estimated ? "~" : ""}{constructionUnits} units</em> in permits issued within 18 months.{fullConstructionUnits == null ? " Readable counts only; some permitted addresses have unknown units." : ""}</>,
+      takeaway: <><em>{estimated ? "~" : ""}{constructionUnits} known units</em> permitted in the past 18 months.</>,
       verdict: trend?.suppressed || trend?.changePct == null ? { tone: "context", label: "Trend limited" } : { tone: "context", label: `${trend.changePct > 0 ? "+" : ""}${trend.changePct}% activity` },
       hero: { value: `${estimated ? "~" : ""}${constructionUnits}`, label: "units" },
     };

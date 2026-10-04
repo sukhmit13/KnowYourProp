@@ -52,7 +52,7 @@ test("merged development scan leads with recent-permit units, not permit counts 
   assert.deepEqual(development?.hero, { value: "~48", label: "units" });
   assert.equal(development?.verdict?.tone, "context");
   const text = renderToStaticMarkup(React.createElement(React.Fragment, null, development?.takeaway));
-  assert.match(text, /~48 units/);
+  assert.match(text, /~48 known units<\/em> permitted in the past 18 months\./);
   assert.doesNotMatch(text, /235|187|55 new-construction/);
 });
 
@@ -69,7 +69,9 @@ test("unknown permit descriptions never create a zero hero; readable counts are 
   const partial = buildScanSections({ development: { pipeline: { unitsUnderConstruction: null, observedUnitsUnderConstruction: 12, permitUnitsUnknownAddressCount: 1, permitUnitsSource: "description" } } })
     .find(({ id }) => id === "development");
   assert.deepEqual(partial?.hero, { value: "~12", label: "units" });
-  assert.match(renderToStaticMarkup(React.createElement(React.Fragment, null, partial?.takeaway)), /Readable counts only/);
+  const text = renderToStaticMarkup(React.createElement(React.Fragment, null, partial?.takeaway));
+  assert.match(text, /~12 known units<\/em> permitted in the past 18 months\./);
+  assert.doesNotMatch(text, /Readable counts only|some permitted addresses/);
 });
 
 const ownership = (ctx: Parameters<typeof buildScanSections>[0]) =>
