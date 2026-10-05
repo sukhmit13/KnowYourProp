@@ -17,6 +17,12 @@ Both Corridor Intelligence and New License Issuances Nearby must distinguish inc
 
 **How to apply:** Compare equal annual windows, deduplicate issuances, show recurring names and address-level observations separately, and surface possible name changes with prior names. Use equal historical lookback for both periods. Without closure and operating-status evidence, do not claim net operating-business growth.
 
+When starting with nearby competitors, check each location's prior same-use business history before calling it an addition.
+
+**Why:** The user confirmed that a new daycare license at an address previously occupied by a daycare must be considered as a possible replacement, just as in the existing additions-versus-replacements analysis.
+
+**How to apply:** Match the selected project use in both current competitors and prior location records. Keep additional locations, possible replacements, established operators, and insufficient-history cases distinct. A replacement daycare is not automatically added childcare capacity; any capacity change needs separate evidence.
+
 Preserve both insight views: business arrivals/turnover and changing offerings, alongside commercial occupancy/expansion. Do not discard a new operator simply because it enters an existing commercial space.
 
 **Why:** During brainstorming, the user explicitly agreed that “we should totally have both” after distinguishing changes in the business mix from growth in occupied or newly created commercial locations.
