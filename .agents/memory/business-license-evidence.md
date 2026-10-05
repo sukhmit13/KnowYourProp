@@ -23,6 +23,12 @@ When starting with nearby competitors, check each location's prior same-use busi
 
 **How to apply:** Match the selected project use in both current competitors and prior location records. Keep additional locations, possible replacements, established operators, and insufficient-history cases distinct. A replacement daycare is not automatically added childcare capacity; any capacity change needs separate evidence.
 
+Display competitor-history classifications as tags within Nearby Competitors, keeping their geographic scope separate from area-level demand and supply.
+
+**Why:** The user specified “just tag and display that info in the nearby competitors” and emphasized that site-radius competitors are not the same geography as ZIP-code or community-area childcare data.
+
+**How to apply:** Enrich the existing competitor list rather than widening it to the entire ZIP code. Show each location's evidence-backed history and keep historical area-level childcare totals unchanged unless a separate, compatible geographic and capacity analysis supports an update.
+
 Preserve both insight views: business arrivals/turnover and changing offerings, alongside commercial occupancy/expansion. Do not discard a new operator simply because it enters an existing commercial space.
 
 **Why:** During brainstorming, the user explicitly agreed that “we should totally have both” after distinguishing changes in the business mix from growth in occupied or newly created commercial locations.
