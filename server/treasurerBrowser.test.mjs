@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
-import { loadTreasurerSearchForm, openTreasurerSearchBrowser, treasurerProxyConfig } from "./treasurerBrowser.mjs";
+import { isTreasurerResultsUrl, loadTreasurerSearchForm, openTreasurerSearchBrowser, treasurerProxyConfig } from "./treasurerBrowser.mjs";
+
+test("results navigation accepts Playwright URL objects, not just strings", () => {
+  assert.equal(isTreasurerResultsUrl(new URL("https://www.cookcountytreasurer.com/yourpropertytaxoverviewresults.aspx")), true);
+  assert.equal(isTreasurerResultsUrl(new URL("https://www.cookcountytreasurer.com/Error.aspx")), true);
+  assert.equal(isTreasurerResultsUrl(new URL("https://www.cookcountytreasurer.com/setsearchparameters.aspx")), false);
+});
 
 test("proxy formats are handled without including credentials in the server address", () => {
   const expected = { server: "http://proxy.example:8000", username: "user", password: "pass:word" };

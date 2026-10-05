@@ -96,10 +96,10 @@ interface TreasurerData {
   mailingOwnerName: string | null;
 }
 
-function hasUsableTreasurerData(data: TreasurerData | null | undefined): data is TreasurerData {
+export function hasUsableTreasurerData(data: TreasurerData | null | undefined): data is TreasurerData {
   if (!data) return false;
-  return data.paymentStatus !== 'unknown'
-    || data.totalAnnualTaxAmount !== null
+  // A status keyword without a parsed bill is not a successful bill retrieval.
+  return data.totalAnnualTaxAmount !== null
     || data.taxYears.length > 0;
 }
 
@@ -211,7 +211,10 @@ function derivePaymentStatus(
   return 'unknown';
 }
 
-function parseTreasurerText(bodyText: string): TreasurerData {
+export function parseTreasurerText(bodyText: string): TreasurerData {
+  // innerText preserves the county's non-breaking spaces in year headings.
+  // Normalize horizontal spacing without removing the year-block line breaks.
+  bodyText = bodyText.replace(/[\u00a0\u202f]/g, ' ');
   const taxYears: TaxYearEntry[] = [];
 
   // Extract only the "Are Your Taxes Paid?" section to avoid nav menu false matches
@@ -225,7 +228,7 @@ function parseTreasurerText(bodyText: string): TreasurerData {
   // Match each tax year block: "Tax Year YYYY (billed in YYYY)"
   // Lookahead requires the full header format (preceded by \n) to avoid stopping early at
   // installment labels like "1st INSTALLMENT - Tax Year 2024" within the block.
-  const yearBlockRegex = /Tax Year (\d{4}) \(billed in \d{4}\)\s*Total Amount Billed:\s*\$([0-9,]+\.?\d*)([\s\S]*?)(?=\nTax Year \d{4} \(billed in \d{4}\)|$)/g;
+  const yearBlockRegex = /Tax\s+Year\s+(\d{4})\s+\(billed\s+in\s+\d{4}\)\s*Total\s+Amount\s+Billed:\s*\$([0-9,]+\.?\d*)([\s\S]*?)(?=\n\s*Tax\s+Year\s+\d{4}\s+\(billed\s+in\s+\d{4}\)|$)/g;
   let match;
 
   while ((match = yearBlockRegex.exec(paymentsSection)) !== null) {
@@ -266,7 +269,9 @@ function parseTreasurerText(bodyText: string): TreasurerData {
     }
 
     let status: TaxYearEntry['status'];
-    if (hasDelinquent && amountDue > 0) {
+    if (!inst2Match) {
+      status = 'unknown'; // A paid first installment cannot prove the year is paid.
+    } else if (hasDelinquent && amountDue > 0) {
       status = amountDue < billed ? 'partial' : 'unpaid';
     } else if (amountDue === 0 && billed > 0) {
       status = 'paid';
@@ -284,7 +289,9 @@ function parseTreasurerText(bodyText: string): TreasurerData {
   // Sort by year descending
   taxYears.sort((a, b) => b.year - a.year);
 
-  const mostRecentBill = taxYears[0]?.billed ?? null;
+  // A newly issued first installment is not a complete annual bill. Keep its
+  // year in the history, but use the latest year with both installments.
+  const mostRecentBill = taxYears.find(year => year.installment2 > 0)?.billed ?? null;
 
   // Check if taxes were sold — look in the "Sold Taxes" section specifically
   const soldSection = (() => {
@@ -584,7 +591,10 @@ export function isTreasurerCacheStale(cached: any): boolean {
   // after 1 hour — but not sooner, to avoid an infinite scraping loop.
   const taxYearsJson = cached.taxYearsJson ?? cached.taxYears;
   const taxYears = Array.isArray(taxYearsJson) ? taxYearsJson : [];
-  if (cached.paymentStatus === 'unknown' && taxYears.length === 0 && cached.totalAnnualTaxAmount === null) {
+  if (taxYears.length === 0 && cached.totalAnnualTaxAmount == null) {
+    // Repair old parser failures immediately: these incorrectly marked a
+    // status-only response as verified and otherwise kept it for 90 days.
+    if (cached.paymentStatus !== 'unknown') return true;
     const ONE_HOUR_MS = 60 * 60 * 1000;
     return msSinceScraped > ONE_HOUR_MS;
   }

@@ -24,3 +24,11 @@ A tax refresh response can acknowledge a background lookup without verifying a n
 **Why:** the existing direct request used the SDK-style name. Official HTTP API documentation specifies `min_score`; a solved token alone does not establish that the county accepted it.
 
 **How to apply:** use the direct API documentation when changing request parameters, and verify the resulting county response independently. Do not treat a captcha solver's success as proof of a retrieved bill.
+
+## Visually ordinary county headings are not ordinary spaces
+
+The Treasurer results page can use non-breaking spaces in its tax-year headings while showing valid installment amounts. Browser navigation callbacks receive URL objects, not strings; a rejected wait can make a scrape appear to have reached the results page before its bill section has rendered. A payment-status word alone is not evidence that a bill was parsed.
+
+**Why:** A live county response contained several complete tax years, but literal-space year parsing returned no amounts and cached an incidental delinquency keyword as if retrieval had succeeded.
+
+**How to apply:** Test parsers with live-response-shaped whitespace and both installment lines, wait for the visible bill section before reading it, and only treat an actual amount or parsed tax year as usable. Existing status-only cache entries must be eligible for a retry instead of living for the verified-bill TTL.

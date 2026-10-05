@@ -1,4 +1,9 @@
 /** Pure adapter: configuration is supplied by the scraper, never logged. */
+export function isTreasurerResultsUrl(url) {
+  const pathname = new URL(String(url)).pathname;
+  return /yourpropertytax|\/Error\.aspx/i.test(pathname);
+}
+
 export function treasurerProxyConfig(raw) {
   if (!raw) return undefined;
   raw = raw.trim().replace(/^["']|["']$/g, "");

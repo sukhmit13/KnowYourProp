@@ -1,7 +1,7 @@
 // Standalone Playwright scraper for Cook County Treasurer
 // Run as child process: node treasurer-scraper.mjs <pin>
 // Output: JSON result on stdout
-import { openTreasurerSearchBrowser } from "./treasurerBrowser.mjs";
+import { isTreasurerResultsUrl, openTreasurerSearchBrowser } from "./treasurerBrowser.mjs";
 
 const pin = process.argv[2];
 if (!pin) {
@@ -123,7 +123,7 @@ try {
   // Wait for navigation concurrently with the click so we don't miss the redirect.
   // waitForURL handles the full navigation cycle cleanly without polling.
   const [navResult] = await Promise.allSettled([
-    page.waitForURL(url => url.includes('yourpropertytax') || url.includes('Error.aspx'), { waitUntil: 'domcontentloaded', timeout: 60000 }),
+    page.waitForURL(isTreasurerResultsUrl, { waitUntil: 'domcontentloaded', timeout: 60000 }),
     page.locator('input[id*="cmdContinue"]').click(),
   ]);
 
@@ -143,7 +143,9 @@ try {
   try {
     await page.waitForLoadState('networkidle', { timeout: 15000 });
   } catch { }
-  await page.waitForTimeout(1000);
+  // Navigation completion alone does not prove the bill section has rendered.
+  await page.getByText('Are Your Taxes Paid?', { exact: true }).first()
+    .waitFor({ state: 'visible', timeout: 20000 });
 
   // page.evaluate(innerText) gives the exact visible text the browser renders,
   // preserving newlines at block boundaries — which parseTreasurerText relies on.
