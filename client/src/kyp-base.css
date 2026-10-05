@@ -1124,8 +1124,9 @@ svg .kyp-gl{stroke:#eae8e2;stroke-width:1}
 .kyp-tax-filer-list{margin-top:16px}
 .kyp-rep{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;padding:12px 0;border-top:1px solid #f0eee7;font-size:12px;color:var(--kyp-ink2)}
 .kyp-rep:first-of-type{border-top:0}
+.kyp-rep>span:first-child{min-width:0;overflow-wrap:anywhere}
 .kyp-rep>span:last-child{text-align:right;font-family:var(--kyp-mono);font-size:10px}
-.kyp-rep .sm{font-family:var(--kyp-sans)}
+.kyp-rep .sm{display:block;margin-top:3px;font-family:var(--kyp-sans);color:var(--kyp-muted);line-height:1.4}
 .kyp-tax-parcel{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--kyp-muted)}
 .kyp-tax-coparcel{border-top:1px solid var(--kyp-line);margin-top:24px;padding-top:2px}
 .kyp-tax-coparcel-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:18px 0 8px;font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-ink2)}
