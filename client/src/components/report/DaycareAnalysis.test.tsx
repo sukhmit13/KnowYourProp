@@ -120,7 +120,7 @@ test("daycare field map keeps the always-present site form, omits unknown outdoo
   assert.match(markup, /Slots serving CCAP children/);
   assert.match(markup, /<div class="bv">0%<\/div>/);
   assert.doesNotMatch(markup, /Chicago average/);
-  assert.equal((markup.match(/<input\b/g) ?? []).length, 3);
+  assert.equal((markup.match(/<input\b/g) ?? []).length, 4, "rate plus building, land and stories are editable");
   assert.match(markup, /Correct the building record/);
   assert.match(markup, /Building-area record unavailable/);
   assert.match(markup, /Land size<\/td><td>0 sq ft/);

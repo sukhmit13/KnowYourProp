@@ -1,0 +1,134 @@
+/* ============================================================
+   PATCH 36 — §Valuation & Cashflow, the complete rebuild
+   Append to the END of client/src/kyp-base.css.
+
+   Supersedes patch 35, which never shipped. Everything it
+   contained is here.
+
+   THE SHIPPED BUG THIS FIXES FIRST: the input labels have never
+   been styled. .kyp-label exists at kyp-base.css:52 and is
+   exactly right — mono, 10px, uppercase, muted. Nothing applies
+   it. .kyp-field at :1911 is only
+   `display:flex;flex-direction:column;gap:5px`, so every label
+   inside falls through to body type: 16px sans, full ink.
+   Thirty-eight of them run down the calculator at the same
+   weight as the content.
+
+   The two call-site shapes differ, so this is fixed on the
+   container rather than on a span:
+     ValuationInputs.tsx:39   <label class="kyp-field"><span>…
+     DaycareAnalysis.tsx:447  <label class="kyp-field">bare text
+   ============================================================ */
+
+/* ── the field label ─────────────────────────────────────────  */
+.kyp-field{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--kyp-ink2)}
+
+/* ── …but never the value the user typed ─────────────────────
+   .kyp-input sets its own font-family and font-size but not
+   text-transform, so without this an entered value renders
+   UPPERCASE. The affix, tag and lock need the same release.    */
+.kyp-field .kyp-input,.kyp-field .kyp-inprefix .fx,.kyp-field .kyp-tag,
+.kyp-field .kyp-lock{text-transform:none;letter-spacing:normal;font-weight:400}
+.kyp-field .kyp-input{color:var(--kyp-ink)}
+
+/* ── two-line step footers ───────────────────────────────────  */
+.kyp-src p{margin:0}
+.kyp-src p+p{margin-top:5px;margin-left:0}
+
+/* ── a select that looks like a select ───────────────────────
+   Two <select> elements wear className="kyp-input" — the TEXT
+   INPUT class — so a dropdown is indistinguishable from a field
+   you type into (ValuationInputs.tsx:57, ValuationCalculator
+   .tsx:477). Mono because an option here is a datum, not prose:
+   it matches .kyp-lock, the other place a number arrives already
+   decided. The chevron is a control affordance, never a verdict,
+   so it takes no palette color.                                 */
+.kyp-select{font-family:var(--kyp-mono);font-size:12px;
+  appearance:none;-webkit-appearance:none;padding-right:34px;cursor:pointer;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%235b5a54' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center}
+.kyp-select::-ms-expand{display:none}
+
+/* ── a decision gets its own band ────────────────────────────
+   The financing path and the income source rewrite the fields
+   below them, so they are not the grid's first row.            */
+.kyp-selectrow{margin:2px 0 20px;max-width:430px}
+
+/* ── accounting figures ──────────────────────────────────────
+   Tabular so a 7 occupies the same width as a 1; without it the
+   thousands separators of two fields in a row do not line up.  */
+.kyp-input.num{font-family:var(--kyp-mono);text-align:right;font-variant-numeric:tabular-nums;
+  letter-spacing:.01em}
+.kyp-inprefix .fx{font-variant-numeric:tabular-nums}
+
+/* ── Deal Inputs: groups stacked, fields across ──────────────
+   .kyp-calcgrid is repeat(3,1fr) with fields STACKED inside each
+   column, so the grid stands as tall as its tallest column and
+   every field is sized for the widest value in the section. The
+   replacement is one row per group, each field sized by the
+   grid it sits in.                                              */
+.kyp-dealgrid{display:flex;flex-direction:column;gap:13px;background:var(--kyp-card);
+  border:1px solid var(--kyp-line);border-radius:14px;padding:16px 18px}
+.kyp-dealgroup .ch{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--kyp-ink);padding-bottom:8px;
+  border-bottom:1px solid var(--kyp-line);margin-bottom:11px}
+.kyp-dealfields{display:grid;gap:12px}
+.kyp-dealfields.one{grid-template-columns:minmax(0,260px)}
+.kyp-dealfields.two{grid-template-columns:1fr 1fr}
+.kyp-dealfields.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:720px){.kyp-dealfields.two,.kyp-dealfields.three{grid-template-columns:1fr}}
+
+/* ── a derived number is not an input ────────────────────────
+   "Operating income" was a third of an input grid holding one
+   sentence. It leaves the grid and becomes a readout, which also
+   gives the Save button a home.                                 */
+.kyp-readout{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;background:var(--kyp-wash);
+  border:1px solid var(--kyp-line);border-radius:11px;padding:12px 15px;margin-top:12px}
+.kyp-readout .rl{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--kyp-muted)}
+.kyp-readout .rv{font-family:var(--kyp-disp);font-size:24px;line-height:1;color:var(--kyp-ink)}
+.kyp-readout .rn{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted);line-height:1.5}
+.kyp-readout .rn a{color:var(--kyp-indigo);font-weight:700;text-decoration:none}
+.kyp-readout .kyp-tag,.kyp-readout .kyp-btn{margin-left:auto}
+
+/* ── our estimate, beside their override ─────────────────────
+   Shown whenever the client has entered their own figure, so the
+   number we derived is never silently discarded and the variance
+   is visible. Plain text, no verdict color: a client 8% above us
+   may know something we do not.                                 */
+.kyp-ourest{display:flex;flex-direction:column;gap:3px;background:var(--kyp-wash);
+  border:1px solid var(--kyp-line);border-radius:10px;padding:10px 13px;align-self:start}
+.kyp-ourest .cl{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--kyp-muted)}
+.kyp-ourest .cv{font-family:var(--kyp-mono);font-size:15px;font-weight:700;color:var(--kyp-ink)}
+.kyp-ourest .cd{font-family:var(--kyp-mono);font-size:9.5px;color:var(--kyp-muted);line-height:1.5}
+.kyp-btn.sm{font-size:9px;padding:6px 10px;margin-top:6px;align-self:flex-start}
+
+/* ── a field sized to its content ────────────────────────────  */
+.kyp-field.sm .kyp-inprefix,.kyp-field.sm .kyp-input{max-width:168px}
+
+/* ── a value set somewhere else ──────────────────────────────
+   .kyp-lock (patch 30) gains a trailing link, so it says where
+   to go and not only that the door is shut.                     */
+.kyp-lock a{margin-left:auto;padding-left:10px;color:var(--kyp-indigo);font-weight:700;
+  text-decoration:none;white-space:nowrap}
+.kyp-lock.wide{display:flex;width:100%;max-width:430px;box-sizing:border-box;margin-bottom:16px}
+
+/* ── an unsaved shared edit ──────────────────────────────────
+   The building area is owned by two sections. Indigo, never
+   orange: an unsaved edit is a state, not a problem.            */
+.kyp-dirty{display:inline-flex;align-items:center;gap:6px;font-family:var(--kyp-mono);
+  font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--kyp-indigo);background:var(--kyp-indigoSoft);border:1px solid #dfe3f7;
+  border-radius:6px;padding:4px 8px;margin-left:8px}
+
+/* ── the expense-ratio band ──────────────────────────────────
+   Context from transaction data, not a target, with its source
+   named. No verdict color.                                      */
+.kyp-band2{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-ink2);line-height:1.6;
+  background:var(--kyp-wash);border:1px solid var(--kyp-line);border-radius:9px;
+  padding:10px 12px;margin-top:10px}
+.kyp-band2 b{color:var(--kyp-ink)}
+.kyp-band2 s{display:block;text-decoration:none;color:var(--kyp-muted);margin-top:5px;
+  font-size:9.5px}

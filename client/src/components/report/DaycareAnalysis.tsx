@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { computeDaycareScenarios, formatNumberInput } from "@/lib/valuation";
 import { KypSubhead, buildSubsectionNumbers } from "./AccordionSection";
+import { validateSiteDetails } from "./siteDetailsValidation";
 import { ChildcareDemandMeter } from "@/components/ChildcareDemandMeter";
 import {
   ProjectUseAreaControl,
@@ -122,6 +124,10 @@ interface DaycareAnalysisProps {
   updateProperty?: (data: { id: number; data: Record<string, number | null> }) => Promise<unknown>;
   updatePending?: boolean;
   runId?: number;
+  daycareScenarioKey?: string;
+  onDaycareScenarioKeyChange?: (key: string) => void;
+  daycareRevenueRate?: string;
+  onDaycareRevenueRateChange?: (rate: string) => void;
 }
 
 export function DaycareAnalysis({
@@ -131,6 +137,8 @@ export function DaycareAnalysis({
   onNearbyRetry, googleData, isGoogleLoading, isGoogleError, onGoogleRetry, googleConfirmed,
   googleSearchTerm, buildingSqFt, buildingType, landSqFt,
   stories, buildingSource, landSource, storiesSource, updateProperty, updatePending, runId,
+  daycareScenarioKey = "100_efficient", onDaycareScenarioKeyChange,
+  daycareRevenueRate = "2,275", onDaycareRevenueRateChange,
 }: DaycareAnalysisProps) {
   const subsections = useMemo(() => buildSubsectionNumbers([
     ["supply", true], ["demographics", true], ["estimator", true], ["ccap", true],
@@ -181,36 +189,41 @@ export function DaycareAnalysis({
     ? rankText(underFiveRank, "most")
     : undefined;
   const demographicSupplyCountDiffers = !!areaData && enhancedData?.childrenUnder5 !== areaData.childrenUnder5;
+  const revenueScenarios = computeDaycareScenarios({
+    buildingSqFt: hasBuildingArea ? buildingSqFt as number : 0,
+    revenuePerChildMonthly: Number(daycareRevenueRate.replace(/,/g, "")) || 0,
+  });
+  const scenarioOrder = ["100_efficient", "75_efficient", "100_comfortable", "75_comfortable"];
+  const orderedRevenueScenarios = scenarioOrder.map((key) => revenueScenarios.find((scenario) => scenario.key === key)).filter(Boolean);
+  const activeRevenueScenario = revenueScenarios.find((scenario) => scenario.key === daycareScenarioKey) ?? revenueScenarios[0];
+  const revenueRateKnown = daycareRevenueRate.trim() !== "" && Number.isFinite(Number(daycareRevenueRate.replace(/,/g, "")));
+  const selectedSiteRevenueKnown = hasBuildingArea && revenueRateKnown;
 
   async function saveSiteDetails(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError("");
-    const building = Number(buildingInput);
-    const land = landInput === "" ? null : Number(landInput);
-    const storyCount = storiesInput === "" ? null : Number(storiesInput);
     if (!runId || !updateProperty) {
       setFormError("Site details cannot be updated for this record.");
       return;
     }
-    if (!Number.isFinite(building) || building <= 0 ||
-      (land != null && (!Number.isFinite(land) || land < 0)) ||
-      (storyCount != null && (!Number.isInteger(storyCount) || storyCount <= 0))) {
-      setFormError("Enter a positive building area, optional land area of zero or more, and a positive whole-number story count.");
+    const validation = validateSiteDetails({ building: buildingInput, land: landInput, stories: storiesInput });
+    if (!validation.value) {
+      setFormError(validation.error ?? "Check the site details and try again.");
       return;
     }
     try {
       await updateProperty?.({
         id: runId,
         data: {
-          manualBuildingSqFt: Math.round(building),
-          manualLandSqFt: land == null ? null : Math.round(land),
-          manualStories: storyCount == null ? null : Math.round(storyCount),
+          manualBuildingSqFt: validation.value.manualBuildingSqFt,
+          manualLandSqFt: validation.value.manualLandSqFt,
+          manualStories: validation.value.manualStories,
         },
       });
       const next = {
-        building: String(Math.round(building)),
-        land: land == null ? "" : String(Math.round(land)),
-        stories: storyCount == null ? "" : String(Math.round(storyCount)),
+        building: String(validation.value.manualBuildingSqFt),
+        land: validation.value.manualLandSqFt == null ? "" : String(validation.value.manualLandSqFt),
+        stories: validation.value.manualStories == null ? "" : String(validation.value.manualStories),
       };
       dirtySiteRef.current = false;
       setSavedSite(next);
@@ -409,8 +422,29 @@ export function DaycareAnalysis({
       </section>
 
       <section id="print-section-site-daycare-details">
-        <KypSubhead subsection={subsections.capacity}><span className="lbl">Site Capacity</span><span className="ct">this building</span></KypSubhead>
+        <KypSubhead subsection={subsections.capacity}><span className="lbl">Site Capacity &amp; Revenue</span><span className="ct">this building · planning scenarios</span></KypSubhead>
         <div>
+        <div className="kyp-calcgrid two">
+          <label className="kyp-field"><span>Monthly revenue per child · editable assumption · $2,275 default</span>
+            <input className="kyp-input num" inputMode="decimal" value={daycareRevenueRate}
+              onChange={(event) => onDaycareRevenueRateChange?.(formatNumberInput(event.currentTarget.value))} />
+          </label>
+          <label className="kyp-field"><span>Capacity &amp; enrollment scenario</span>
+            <select className="kyp-input kyp-select" aria-label="Daycare capacity and enrollment scenario"
+              value={activeRevenueScenario?.key ?? daycareScenarioKey}
+              onChange={(event) => onDaycareScenarioKeyChange?.(event.currentTarget.value)}>
+              {orderedRevenueScenarios.map((scenario) => scenario && <option key={scenario.key} value={scenario.key}>
+                {scenario.key.includes("efficient") ? "Efficient" : "Comfortable"} at {scenario.key.startsWith("75") ? "75%" : "100%"} · {scenario.children} children · {selectedSiteRevenueKnown ? `$${scenario.annualRevenue.toLocaleString()}/yr` : "revenue unavailable"}
+              </option>)}
+            </select>
+          </label>
+        </div>
+        <div className="kyp-blocks three">
+          <div className="kyp-block ind"><div className="bv">{selectedSiteRevenueKnown && activeRevenueScenario ? `$${activeRevenueScenario.annualRevenue.toLocaleString()}` : "—"}</div><div className="bl">Annual revenue</div><div className="bd">{activeRevenueScenario?.label}</div></div>
+          <div className="kyp-block slate"><div className="bv">{hasBuildingArea ? activeRevenueScenario?.children.toLocaleString() ?? "—" : "—"}</div><div className="bl">Children in scenario</div><div className="bd">Planning estimate, not licensed capacity</div></div>
+          <div className="kyp-block slate"><div className="bv">{selectedSiteRevenueKnown && activeRevenueScenario ? `$${activeRevenueScenario.monthlyRevenue.toLocaleString()}` : "—"}</div><div className="bl">Monthly revenue</div><div className="bd">At entered monthly rate</div></div>
+        </div>
+        <p className="kyp-calchelp">The rate and scenario flow into <a href="#valuation-calculator-section">§ Valuation &amp; Cashflow</a>; a manual revenue entry there does not replace this planning estimate.</p>
         <div className="kyp-blocks hero two">
           <div className="kyp-block ind">
           <div className="bv">{hasBuildingArea ? Math.floor((buildingSqFt as number) / 75).toLocaleString() : "—"}</div>
@@ -442,16 +476,19 @@ export function DaycareAnalysis({
           </tbody>
         </table>
         <form className="kyp-form" onSubmit={saveSiteDetails}>
-          <div className="fh">Correct the building record</div>
+          <div className="fh">Correct the building record
+            {(Number(buildingInput.replace(/,/g, "")) !== Number(buildingSqFt || 0) || Number(landInput.replace(/,/g, "")) !== Number(landSqFt || 0) || Number(storiesInput.replace(/,/g, "")) !== Number(stories || 0)) &&
+              <span className="kyp-dirty">Unsaved · §17.5 shows {number(buildingSqFt)} sq ft</span>}
+          </div>
           <div className="kyp-fields">
             <label className="kyp-field">Building sq ft *
-              <input className="kyp-input" type="number" min="1" required value={buildingInput} onChange={(event) => { dirtySiteRef.current = true; setBuildingInput(event.target.value); }} />
+              <input className="kyp-input num" inputMode="decimal" value={buildingInput} onChange={(event) => { dirtySiteRef.current = true; setBuildingInput(formatNumberInput(event.target.value)); }} />
             </label>
             <label className="kyp-field">Land sq ft
-              <input className="kyp-input" type="number" min="0" value={landInput} onChange={(event) => { dirtySiteRef.current = true; setLandInput(event.target.value); }} />
+              <input className="kyp-input num" inputMode="decimal" value={landInput} onChange={(event) => { dirtySiteRef.current = true; setLandInput(formatNumberInput(event.target.value)); }} />
             </label>
             <label className="kyp-field">Stories
-              <input className="kyp-input" type="number" min="1" step="1" value={storiesInput} onChange={(event) => { dirtySiteRef.current = true; setStoriesInput(event.target.value); }} />
+              <input className="kyp-input num" inputMode="decimal" value={storiesInput} onChange={(event) => { dirtySiteRef.current = true; setStoriesInput(formatNumberInput(event.target.value)); }} />
             </label>
           </div>
           {formError && <div className="kyp-status-empty" role="alert">{formError}</div>}
@@ -460,7 +497,8 @@ export function DaycareAnalysis({
             <button className="kyp-btn ghost" type="button" onClick={cancelSiteEdit}>Cancel</button>
           </div>
         </form>
-        <Evidence>Building and land areas are from the source record unless entered here. DCFS requires 35 sq ft of indoor space per child; practical capacity scenarios use 75–90 sq ft per child. Estimated outdoor area is land area minus building footprint (building area ÷ stories); DCFS requires 75 sq ft of outdoor space per child.</Evidence>
+        <Evidence>Revenue is a planning scenario only: selected whole-child capacity and enrollment multiplied by the editable monthly rate. It is not a published average or an expense verdict.
+          {" "}Area is from the displayed source record or a saved manual override. Capacity uses floor area ÷ 75 or 90 sq ft/child, above the DCFS 35 sq ft indoor minimum, not licensed capacity. Estimated outdoor area is land minus footprint (building area ÷ stories); DCFS requires 75 sq ft outdoors per child.</Evidence>
         </div>
       </section>
 

@@ -5,9 +5,9 @@ description: Transparent NOI build-up in the valuation calculator — one model,
 
 # Valuation model rules
 
-Every deal has two income halves. Property taxes and building insurance belong only in the property half. Business expenses are entered by the operator and exclude occupancy, property taxes, and building insurance. Debt service is subtracted once, after NOI. Space occupied by the business produces no property rent; leased-space income covers only space leased to others.
+Every deal has two income halves. Property taxes and building insurance belong only in the property half. Combined business + real-estate operating expenses exclude occupancy, property taxes, and building insurance. Business-only Simple expenses include leased occupancy; Detailed separates that cost. Debt service is subtracted once, after NOI. Space occupied by the business produces no property rent; leased-space income covers only space leased to others.
 
-**Why:** The user's valuation specification requires an auditable model without charging occupancy or property costs twice. Unverified trade-expense defaults cannot substitute for an operator's costs.
+**Why:** The user's valuation specifications require an auditable model without charging occupancy or property costs twice. The complete rebuild explicitly permits editable planning defaults of 75% for business-only leases and 60% for business + real estate, distinguished from verified operator costs.
 
 **How to apply:** Preserve one resolved NOI, including negative values, across statements, metrics, saved reports, and exports. Rental detail tiers and daycare detail tiers are views of identical arithmetic. SBA Simple versus Detailed selects different explicitly entered income models; seller add-backs are claims, not verified earnings. A business-inclusive yield is not a comparable real-estate cap rate.
 
@@ -22,3 +22,15 @@ Unknown inputs must stay unknown, not become assumed zero expenses, zero purchas
 **Why:** Empty business expense fields can otherwise produce apparently positive income and misleading coverage classifications.
 
 **How to apply:** An explicit zero is a valid assumption; an empty required field is not. Consumers of incomplete calculator snapshots may retain raw inputs but must not treat numerical outputs as evidence. Classify calculated coverage against reference thresholds without predicting financing approval.
+
+Presentation rebuilds must preserve the existing calculation formulas and numerical daycare scenarios by key; reference HTML supplies layout, not numerical inputs.
+
+**Why:** The user explicitly required “No arithmetic changes” in the complete rebuild, while requesting new labels and density-grouped presentation order.
+
+**How to apply:** Capture numerical baselines before changing presentation. Simple percentage and Detailed dollar views must resolve to the same NOI for equivalent expenses. Treat the supplied BizBuySell SDE figures as neutral reference context, not underwriting targets or verified property costs.
+
+Manual income drafts survive automation refreshes and source switching. Building-area changes take effect in both sections only after saving the existing shared property override.
+
+**Why:** The user required that typed values never be silently discarded or overwritten, and specified “on save, not per keystroke” for shared area updates.
+
+**How to apply:** Keep derived estimates visible beside manual income, distinguish empty overrides from explicit zero, and use one persisted building-area owner with shared validation.

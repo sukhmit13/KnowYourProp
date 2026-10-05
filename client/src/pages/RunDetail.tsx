@@ -1691,6 +1691,8 @@ export default function RunDetail() {
   // Valuation Calculator state
   const [valuationPurchasePrice, setValuationPurchasePrice] = useState<string>("");
   const [valuationNoiOption, setValuationNoiOption] = useState<string>("100_efficient");
+  const [daycareScenarioKey, setDaycareScenarioKey] = useState<string>("100_efficient");
+  const [daycareRevenueRate, setDaycareRevenueRate] = useState<string>("2,275");
   const [valuationManualNoi, setValuationManualNoi] = useState<string>(""); // Manual NOI input for non-daycare
   const [valuationLoanType, setValuationLoanType] = useState<string>("conventional");
   const [valuationInterestRate, setValuationInterestRate] = useState<string>("");
@@ -6265,6 +6267,10 @@ export default function RunDetail() {
                 updateProperty={({ id: propertyId, data }) => updateManualProperty.mutateAsync({ id: propertyId, data: data as any })}
                 updatePending={updateManualProperty.isPending}
                 runId={run?.id}
+                daycareScenarioKey={daycareScenarioKey}
+                onDaycareScenarioKeyChange={setDaycareScenarioKey}
+                daycareRevenueRate={daycareRevenueRate}
+                onDaycareRevenueRateChange={setDaycareRevenueRate}
               />
             ) : (
             <React.Fragment>
@@ -14999,6 +15005,8 @@ export default function RunDetail() {
             runId={id}
             isDaycare={isDaycare}
             buildingSqFt={run?.manualBuildingSqFt || propertyTaxData?.buildingSquareFeet || pinLookupData?.commercialData?.bldgSf || coParcelLookupData?.commercialData?.bldgSf || 0}
+            buildingAreaSource={run?.manualBuildingSqFt != null ? "Manual site entry" : propertyTaxData?.buildingSquareFeet != null ? "Cook County Assessor building record" : pinLookupData?.commercialData?.bldgSf != null || coParcelLookupData?.commercialData?.bldgSf != null ? "Commercial property record" : "No site-area record"}
+            onUpdateProperty={({ id: propertyId, data }) => updateManualProperty.mutateAsync({ id: propertyId, data: data as any })}
             annualCountyTaxes={parseFormattedNumber(valuationAnnualTaxes)}
             annualInsuranceEstimate={parseFormattedNumber(valuationAnnualInsurance)}
             taxesInput={valuationAnnualTaxes}
@@ -15007,6 +15015,7 @@ export default function RunDetail() {
             onTaxesChange={setValuationAnnualTaxes}
             onInsuranceChange={(value) => { setInsuranceEstimated(false); setValuationAnnualInsurance(value); }}
             initialPurchasePrice={valuationPurchasePrice}
+            listingListPrice={listingSnapshot?.status === "active" ? listingSnapshot.listPrice ?? null : null}
             onPurchasePriceChange={(value) => setValuationPurchasePrice(formatNumberWithCommas(value))}
             onSavePrice={handleSaveAskingPrice}
             savePending={updateManualProperty.isPending}
@@ -15057,10 +15066,13 @@ export default function RunDetail() {
               const nextRentalNoi = inputs.rentSource === "direct" ? "" : inputs.rentSource;
               const nextGrossIncome = inputs.grossIncomeForReport == null ? "" : String(Math.round(Number(inputs.grossIncomeForReport)));
               setValuationNoiOption((current) => current === nextNoiOption ? current : nextNoiOption);
+              if (snapshot.daycareModel) setDaycareScenarioKey((current) => current === nextNoiOption ? current : nextNoiOption);
               setValuationManualNoi((current) => current === nextManualNoi ? current : nextManualNoi);
               setValuationRentalNoiOption((current) => current === nextRentalNoi ? current : nextRentalNoi);
               setValuationGrossIncome((current) => current === nextGrossIncome ? current : nextGrossIncome);
             }}
+            daycareScenarioKey={daycareScenarioKey}
+            daycareRevenueRate={daycareRevenueRate}
             taxRecordLabel="Cook County property tax record"
             listingStatedNoi={listingSnapshot?.status === "active" ? listingSnapshot.statedNoi ?? null : null}
             listingRevenue={listingSnapshot?.status === "active" ? (listingSnapshot as any).revenue ?? null : null}

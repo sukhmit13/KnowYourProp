@@ -1,0 +1,661 @@
+# Step 36 — §Valuation & Cashflow, the complete rebuild
+
+Audited against **`e2cdcf5`** (origin/main).
+
+**This supersedes Step 35, which was never run.** Everything in that step is here. One paste, one
+revert point.
+
+Files touched: `ValuationCalculator.tsx`, `ValuationInputs.tsx`, `ValuationLedger.tsx`,
+`DaycareAnalysis.tsx`, `RunDetail.tsx`, `lib/valuation.ts`, `kyp-base.css`.
+
+**No arithmetic changes.** `computeValuationMetrics` and `computeDaycareScenarios` produce
+identical numbers before and after. There is a test for this and it is the one that matters most.
+
+### Reference files — do not add them to the repo
+
+Two static HTML files accompany this step:
+
+- **`val-scenarios.html`** — all five scenarios rendered at the same scale: primary residence,
+  single-family rental, multifamily, business only, business + real estate.
+- **`income-source.html`** — the derived / overridden / blank states of an income number.
+
+They are reference pictures, not source. Shape, not values. **The finished section must look like
+these** — that is the acceptance test for this step.
+
+---
+
+## What is wrong today, measured
+
+| Carrier | Count | Words |
+|---|---:|---:|
+| `.kyp-src` step footers | 8 | 499 |
+| `.kyp-calchelp` notes under fields | 17 | 322 |
+| `.kyp-calcsub` lines under step headers | 2 | 17 |
+| `.kyp-empty` | 2 | 45 |
+| `.kyp-receipt` | 2 | 37 |
+| **Total** | **32** | **923** |
+
+Plus: 38 input fields whose labels have never been styled, two `<select>` elements wearing the
+text-input class, numbers that never get thousands separators, a column header that names one rung
+of the income ladder and displays another, and a day care revenue the client cannot override.
+
+---
+
+## Part A — the shipped CSS bug, first
+
+**The input labels have never been styled.** `.kyp-label` exists at `kyp-base.css:52` — mono, 10px,
+uppercase, `--kyp-ink2` — and nothing applies it. `.kyp-field` at `:1911` is only
+`display:flex;flex-direction:column;gap:5px`, so all 38 labels fall through to 16px sans at full
+ink and compete with the step headers.
+
+Fixed on the container because the two call sites differ in shape
+(`ValuationInputs.tsx:39` wraps in a `<span>`, `DaycareAnalysis.tsx:447` uses a bare text node).
+See the CSS in Part K, including the reset that keeps typed values out of uppercase.
+
+**Check `DaycareAnalysis.tsx` visually after this lands** — its four `.kyp-field` labels pick up the
+same treatment, which is intended, but that form is not otherwise in scope.
+
+---
+
+## Part B — one footer per step, two lines, each rule once
+
+Every `.kyp-src` becomes two short paragraphs: **what this step is**, then **how it was counted**.
+
+### The rule that is stated five times
+
+*"Excludes occupancy, property taxes and building insurance"* appears at `.kyp-calchelp` notes 3, 5
+and 17 and in two `.kyp-src` blocks. *"Blank is unknown, not a zero"* appears five times too. That
+rule is what stops taxes being counted twice — it needed **one** authoritative statement at the end
+of the step it governs.
+
+Replace each footer with the text below. Keep conditional clauses that name a real condition
+(`loanType === "fha_va"`, `combined`, `sbaOnly`); delete ones that restate a rule stated elsewhere.
+
+**Site Cashflow** — 69 → 35 words:
+```tsx
+<div className="kyp-src">
+  <p>Revenue only — no expenses are applied at this step.</p>
+  <p>Capacity is floor area ÷ 75 or 90 sq ft per child, a planning convention above the DCFS 35 sq ft minimum, not a licensed capacity. Area: {buildingAreaSource}.</p>
+</div>
+```
+
+**Deal Inputs** — 90 → 30 words, and **both `.kyp-calcsub` lines are deleted**; the SBA 51% sentence
+becomes the footer's first line because it is the one fact that changes how the inputs behave:
+```tsx
+<div className="kyp-src">
+  <p>{sbaOnly ? "Business-only financing models one business note; property taxes and insurance are set to zero on this path."
+    : dominant ? "Real estate is at least 51% of the combined price, so both notes use the real-estate term convention."
+    : "Real estate is below 51% of the combined price, so the business and real-estate notes use separate term conventions."}</p>
+  <p>Rates and terms are estimates, not lender offers.{!isSba && mortgageRate != null ? ` Benchmark: Freddie Mac 30-year average ${mortgageRate}%${mortgageRateDate ? ` · ${mortgageRateDate}` : ""}.` : ""}{loan.loanType === "fha_va" ? " FHA mortgage insurance is not included." : ""} Only the price is saved on reload.</p>
+</div>
+```
+
+**Nothing renders between a step header and its first field.** That is the locked rule and this is
+where it was being broken.
+
+**Income → NOI** — 66 → 45 words, and this footer carries the exclusion rule:
+```tsx
+<div className="kyp-src">
+  <p>Business expenses exclude occupancy, county taxes and building insurance — those are deducted once, here, in the property half. A blank line is unknown, not zero.</p>
+  <p>The expense figure stays fixed when enrollment changes. The property half earns no rent because the business occupies the building. Taxes may change after sale; insurance is an estimate until replaced by a quote.</p>
+</div>
+```
+Apply the same first line to the SBA income footer, which runs 99 words today. Its
+property-defaults sentence (*"10% vacancy, 6% management imputed even if self-managed, $1,250
+repairs…"*) is six numbers already visible as field defaults — cut it.
+
+**Deal at a Glance** — 69 → 25 words:
+```tsx
+<div className="kyp-src">
+  <p>{combined || sbaOnly ? "Blended yield includes business goodwill and is not a real-estate cap rate." : "Cap rate is NOI ÷ purchase price at the inputs shown."}</p>
+  <p>Estimates at the inputs shown. Not investment, legal, tax or financing advice.</p>
+</div>
+```
+Cut the ±$250 break-even sentence (it explains a visible band), the FHA sentence (coverage already
+names whose rule 1.25× is), and **"A real-estate cap rate above 10% is unusual"** — a verdict this
+product invented, which the §Valuation exception rules out.
+
+**Coverage Check** — 23 → 20 words. **How It's Calculated** — 29 → 12 words. Both in
+`val-scenarios.html`.
+
+---
+
+## Part C — delete 14 of the 17 `.kyp-calchelp` notes
+
+322 words sitting **between input fields**, which is the position the design language reserves for
+nothing at all. Each is now stated once in its step footer, or is already visible:
+
+`Default only — not a published average.` · `Excludes occupancy, property taxes and building
+insurance…` · `No operating NOI is shown until expenses are entered…` (the block already reads `—`)
+· `Business operating costs exclude occupancy…` · `The business-occupied portion produces no rent
+here…` · `Enter 0 explicitly if no space is leased…` · `Enter the business-only leased-occupancy
+expense…` · `Blank is unknown and not a reported zero…` · `Current Cook County bill; reassessment
+after sale…` · `{insuranceEdited ? … : "Floor-area estimate; verify with an insurance quote."}` (the
+field's tag already says `Estimate` / `Edited`) · `Listing-stated NOI is shown as reported…` ·
+`Direct NOI is treated as fully net…` · `Excluding occupancy, property taxes and building
+insurance…` · `Read from the Income → NOI statement below…`
+
+**Keep three**, each stating a condition visible nowhere else:
+```
+Revenue prefilled from active listing · seller claim
+Listing seller claims · SDE … · EBITDA …. Claims are not verified or used as expense lines.
+The existing property is commercial-only. Residential market-rent estimates are not counted…
+```
+
+Where a note said *"blank is unknown, not zero"* for one field, that moves onto the field as a
+`ValuationTag` — `Unknown` when blank, `Entered` when filled.
+
+**The two `.kyp-empty` strings** shorten to the instruction only:
+`Enter the remaining inputs above to calculate deal metrics.` ·
+`Building square footage is needed. Enter it in Day Care Details above.`
+
+---
+
+## Part D — Deal Inputs: groups stacked, fields across
+
+`.kyp-calcgrid` is `repeat(3,1fr)` with fields **stacked inside each column**
+(`ValuationInputs.tsx:62`). Three problems: the grid stands as tall as its tallest column; every
+field is full column width, so `10`, `25` and `6.0` sit in boxes sized for `$1,110,000`; and the
+third column is not an input at all.
+
+```tsx
+      <div className="kyp-dealgrid">
+        {groups.map((g) => (
+          <div className="kyp-dealgroup" key={g.head}>
+            <div className="ch">{g.head}</div>
+            <div className={`kyp-dealfields ${g.fields.length >= 3 ? "three" : g.fields.length === 2 ? "two" : "one"}`}>
+              {g.fields}
+            </div>
+          </div>
+        ))}
+      </div>
+```
+
+Groups per path — exactly as drawn in `val-scenarios.html`:
+
+| Path | Groups |
+|---|---|
+| Primary residence | `Purchase & financing` (price, down, rate) · `Property costs` (taxes, insurance) |
+| 1–4 unit / multifamily | `Purchase & financing` (price, down, rate) |
+| SBA business only | `Purchase` (business price) · `Financing` (down, term, rate) |
+| SBA business + RE | `Purchase` (business price, real estate price) · `Financing` (down, term, rate) |
+
+---
+
+## Part E — "Operating income" is mislabeled, and leaves the grid
+
+`ValuationInputs.tsx:100` labels the third column **"Operating income"** and puts
+`$643,040 annual NOI` inside it — a header naming one rung of the income ladder and a value from
+another, while *"Business operating income"* is a separate real line in the ledger below.
+
+The ladder, which the section must name consistently:
+
+```
+Revenue                      $1,692,600   what comes in
+− business expenses (60%)   −$1,015,560
+= Business operating income    $677,040
+− property taxes, insurance    −$34,000
+= NOI                          $643,040
+− debt service                −$111,744
+= Cash flow                    $531,296
+```
+
+**Delete the phrase "Operating income".** The column becomes a readout outside the grid:
+
+```tsx
+      <div className="kyp-readout">
+        <span className="rl">{hasNoi ? "NOI" : "Monthly payment"}</span>
+        <span className="rv">{hasNoi ? fmt(selectedNoi) : fmt(monthlyPiti)}</span>
+        <span className="rn">{hasNoi ? `per year at these inputs · built in ${sectionPrefix}.2 below`
+          : `principal, interest, taxes and insurance · built in ${sectionPrefix}.2 below`}</span>
+        <button type="button" className="kyp-btn ghost" onClick={onSavePrice}>Save to this run</button>
+      </div>
+```
+
+Same primitive, different content per path. The Save button moves here from under the Purchase
+column.
+
+---
+
+## Part F — selects that look like selects, and Title Case presets
+
+`ValuationInputs.tsx:57` and `ValuationCalculator.tsx:477` are `<select>` elements with
+`className="kyp-input"` — the **text-input** class. Add `kyp-select` to both, and wrap each in
+`<div className="kyp-selectrow">` so a control that rewrites the fields below it is not read as
+their first row.
+
+`ValuationInputs.tsx:19–24`, labels only — keys, down payments and terms unchanged:
+
+| was | becomes |
+|---|---|
+| `Conventional` | `Conventional · 20% Down, 30 Years` |
+| `FHA / VA` | `FHA / VA · 5% Down, 30 Years` |
+| `SBA · business only` | `SBA · Business Only` |
+| `SBA · business + real estate` | `SBA · Business + Real Estate` |
+
+**The income-source dropdown is not Title Cased.** Its leading clause is a name; what follows
+(`62 children · $1,692,600/yr`) is data, and `62 Children · $1,692,600/Yr` would be wrong.
+
+---
+
+## Part G — accounting format on every numeric input
+
+`parseFormattedNumber` at `valuation.ts:5` strips commas on read; nothing ever writes them. Add
+beside it:
+
+```ts
+/** Group a numeric input for display. Keeps a trailing "." and any decimals the
+ *  user is mid-way through typing, so the caret never fights the formatter. */
+export function formatNumberInput(raw: string): string {
+  if (raw.trim() === "") return "";
+  const negative = raw.trim().startsWith("-");
+  const cleaned = raw.replace(/[^\d.]/g, "");
+  if (cleaned === "") return negative ? "-" : "";
+  const [whole, ...rest] = cleaned.split(".");
+  const grouped = whole === "" ? "" : Number(whole).toLocaleString("en-US");
+  const decimals = rest.length ? `.${rest.join("").slice(0, 2)}` : (cleaned.endsWith(".") ? "." : "");
+  return `${negative ? "-" : ""}${grouped}${decimals}`;
+}
+```
+
+Apply on change and to seeded values in both field components, and add `num` to the input class:
+`<input className="kyp-input num" inputMode="decimal" … />`. Percent and year fields keep `num` so a
+row of inputs reads as one column.
+
+Do not add a masking library. If mid-string editing proves awkward in testing, format on blur
+instead.
+
+---
+
+## Part H — every derived income number can be overridden
+
+**This is the rule, and it has no exceptions.** Wherever income comes from an automation — day care
+capacity × rate, unit count × market rent, a listing rent roll — the source list's **last option is
+`Enter my own`**. The pattern already exists for rent at `ValuationCalculator.tsx:477`; make it
+universal. Three states, drawn in `income-source.html`:
+
+**1 · Derived.** The list names the automation. The readout repeats it, carries a `Derived` tag, and
+links to the page that produced it.
+
+**2 · Overridden.** Choosing `Enter my own` swaps the readout for a field, and **our estimate stays
+beside it** with the variance and a revert button:
+
+```tsx
+  <div className="kyp-dealfields two">
+    <NumberField label="Annual revenue" value={ownRevenue} onChange={setOwnRevenue}
+      tag={<ValuationTag kind="assume">{ownRevenue ? "Entered" : "Unknown"}</ValuationTag>} />
+    <div className="kyp-ourest">
+      <span className="cl">Our estimate</span>
+      <span className="cv">{fmt(derivedRevenue)}</span>
+      <span className="cd">{derivedLabel}{ownRevenue ? ` · ${variancePct}` : " · available if you want it"}</span>
+      <button type="button" className="kyp-btn ghost sm" onClick={useOurs}>Use ours instead</button>
+    </div>
+  </div>
+```
+
+Two invariants, both testable:
+- **A typed value is never silently discarded.**
+- **A typed value is never silently overwritten when the automation refreshes** — not when the
+  listing updates, not when the building area changes in §17.5.
+
+The variance line is plain text, never colored. A client 8% above us may know something we do not.
+
+**3 · Blank.** An empty override is *unknown*, not zero. NOI renders `—`, nothing downstream
+calculates, and our estimate stays one click away.
+
+---
+
+## Part I — revenue moves to §17.5, and §Valuation echoes it
+
+`valuation.ts:285–290` already models a 2×2 — `efficient` at 75 sq ft/child and `comfortable` at 90,
+each at 100% and 75%. **The arithmetic does not change.** Labels only:
+
+| key | becomes |
+|---|---|
+| `100_efficient` | `Efficient at 100%` |
+| `75_efficient` | `Efficient at 75%` |
+| `100_comfortable` | `Comfortable at 100%` |
+| `75_comfortable` | `Comfortable at 75%` |
+
+Order: Efficient 100, Efficient 75, Comfortable 100, Comfortable 75 — grouped by density so the list
+reads as two pairs.
+
+`daycareChoice` is local state in `ValuationCalculator` today; two sections need it, so lift it to
+`RunDetail.tsx` as `daycareScenarioKey` with its setter. One owner, one setter, one number.
+
+**§17.5 Site Capacity & Revenue** gains the dropdown, three blocks (annual revenue, children,
+monthly revenue — **all indigo or slate**, since no scenario is better than another), the
+monthly-rate input, and a line linking forward to §Valuation.
+
+**Delete the `siteCashflow` fragment** at `ValuationCalculator.tsx:351–379` — step header, rate
+input, four scenario buttons, band footer, 69-word footnote. Day care now starts at Deal Inputs like
+every other path, so every `isDaycare ? n : n-1` ternary collapses to a plain number.
+
+§Valuation shows the arriving number with `.kyp-lock wide` carrying a link back — **and the source
+dropdown from Part H above it**, so the client can still enter their own.
+
+---
+
+## Part J — the building area is editable in both sections
+
+**No state lifting needed. The owner already exists.** `DaycareAnalysis.tsx:185–222` persists it:
+
+```tsx
+await updateProperty?.({ id: runId, data: { manualBuildingSqFt: Math.round(building), … } });
+```
+
+`manualBuildingSqFt` is a server-persisted override and `buildingSqFt` arrives as a prop that
+re-syncs on `[runId, buildingSqFt, landSqFt, stories]` (`:154–159`). §Valuation calls **the same
+mutation** — no second write path, no second copy.
+
+Because it is a server write, "automatically" means **on save**, not per keystroke. Edit, press
+Save, both sections re-render from the refreshed prop and capacity recomputes. While the draft
+differs from what is saved, show `<span className="kyp-dirty">Unsaved · 17.5 shows {fmt(buildingSqFt)}</span>`.
+
+**Reuse `saveSiteDetails`' validation** rather than writing a second validator — a calculator that
+accepts `0 sq ft` while the day care form does not is a bug waiting to be filed.
+
+---
+
+## Part K — the Simple-tier expense ratio
+
+In Simple, business operating expenses are **a percentage of revenue**, not a dollar figure. Both
+tiers must produce the same NOI; there is a test.
+
+The percentage **excludes occupancy, county taxes and building insurance** — the boundary that
+keeps the property half and business half from double-counting. Beside it, show the all-in
+conversion so an operator can check against a ratio from their own books:
+
+> **67.0% all-in** once county taxes ($21,400) and building insurance ($12,600) are added — compare
+> this with a ratio taken from an operator's own P&L, which usually has occupancy inside it.
+
+**Defaults, tagged with their source and editable:**
+
+| Path | Default | Why |
+|---|---|---|
+| Business only (leases) | **75%** | rent is inside the ratio |
+| Business + real estate (owns) | **60%** | rent excluded; the 15-point gap *is* occupancy at 15% of revenue |
+
+Band shown as context, not a target:
+
+> Across **425 day cares sold 2021–2025**, median revenue was **$584,126** against median owner
+> earnings of **$132,779** — SDE at **22.7% of revenue**, so expenses ran **77.3%** with rent
+> inside. Excluding occupancy that puts this field near **62–68%**.
+> *BizBuySell valuation benchmarks, sold listings · SDE is before owner compensation*
+
+Slate, uncolored. Nobody authoritative published cut points, so it cannot be a verdict.
+
+**Debt service is never inside either percentage.** The order is expenses → business operating
+income → taxes and insurance → **NOI** → debt service → cash flow. `valuation.ts:189` already does
+this; keep it.
+
+---
+
+## Part L — purchase price prefills from the active listing
+
+`server/listingSnapshot.ts:14` already returns `listPrice: number | null` and nothing consumes it.
+
+```tsx
+purchasePrice: initialPurchasePrice
+  || (listingListPrice != null ? String(Math.round(listingListPrice)) : ""),
+```
+
+On the SBA combined path the listing price is the **real estate** price, never the business price —
+a listing sells the building. The field carries a `From listing` tag that disappears once edited,
+and **a typed value is never overwritten when the listing refreshes**.
+
+---
+
+## Part M — CSS
+
+Append to the END of `client/src/kyp-base.css`. Thirty-four rules. **Patch 35 never shipped; this
+contains it.**
+
+```css
+/* ============================================================
+   PATCH 36 — §Valuation & Cashflow, the complete rebuild
+   Append to the END of client/src/kyp-base.css.
+
+   Supersedes patch 35, which never shipped. Everything it
+   contained is here.
+
+   THE SHIPPED BUG THIS FIXES FIRST: the input labels have never
+   been styled. .kyp-label exists at kyp-base.css:52 and is
+   exactly right — mono, 10px, uppercase, muted. Nothing applies
+   it. .kyp-field at :1911 is only
+   `display:flex;flex-direction:column;gap:5px`, so every label
+   inside falls through to body type: 16px sans, full ink.
+   Thirty-eight of them run down the calculator at the same
+   weight as the content.
+
+   The two call-site shapes differ, so this is fixed on the
+   container rather than on a span:
+     ValuationInputs.tsx:39   <label class="kyp-field"><span>…
+     DaycareAnalysis.tsx:447  <label class="kyp-field">bare text
+   ============================================================ */
+
+/* ── the field label ─────────────────────────────────────────  */
+.kyp-field{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--kyp-ink2)}
+
+/* ── …but never the value the user typed ─────────────────────
+   .kyp-input sets its own font-family and font-size but not
+   text-transform, so without this an entered value renders
+   UPPERCASE. The affix, tag and lock need the same release.    */
+.kyp-field .kyp-input,.kyp-field .kyp-inprefix .fx,.kyp-field .kyp-tag,
+.kyp-field .kyp-lock{text-transform:none;letter-spacing:normal;font-weight:400}
+.kyp-field .kyp-input{color:var(--kyp-ink)}
+
+/* ── two-line step footers ───────────────────────────────────  */
+.kyp-src p{margin:0}
+.kyp-src p+p{margin-top:5px;margin-left:0}
+
+/* ── a select that looks like a select ───────────────────────
+   Two <select> elements wear className="kyp-input" — the TEXT
+   INPUT class — so a dropdown is indistinguishable from a field
+   you type into (ValuationInputs.tsx:57, ValuationCalculator
+   .tsx:477). Mono because an option here is a datum, not prose:
+   it matches .kyp-lock, the other place a number arrives already
+   decided. The chevron is a control affordance, never a verdict,
+   so it takes no palette color.                                 */
+.kyp-select{font-family:var(--kyp-mono);font-size:12px;
+  appearance:none;-webkit-appearance:none;padding-right:34px;cursor:pointer;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%235b5a54' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center}
+.kyp-select::-ms-expand{display:none}
+
+/* ── a decision gets its own band ────────────────────────────
+   The financing path and the income source rewrite the fields
+   below them, so they are not the grid's first row.            */
+.kyp-selectrow{margin:2px 0 20px;max-width:430px}
+
+/* ── accounting figures ──────────────────────────────────────
+   Tabular so a 7 occupies the same width as a 1; without it the
+   thousands separators of two fields in a row do not line up.  */
+.kyp-input.num{font-family:var(--kyp-mono);text-align:right;font-variant-numeric:tabular-nums;
+  letter-spacing:.01em}
+.kyp-inprefix .fx{font-variant-numeric:tabular-nums}
+
+/* ── Deal Inputs: groups stacked, fields across ──────────────
+   .kyp-calcgrid is repeat(3,1fr) with fields STACKED inside each
+   column, so the grid stands as tall as its tallest column and
+   every field is sized for the widest value in the section. The
+   replacement is one row per group, each field sized by the
+   grid it sits in.                                              */
+.kyp-dealgrid{display:flex;flex-direction:column;gap:13px;background:var(--kyp-card);
+  border:1px solid var(--kyp-line);border-radius:14px;padding:16px 18px}
+.kyp-dealgroup .ch{font-family:var(--kyp-mono);font-size:10px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--kyp-ink);padding-bottom:8px;
+  border-bottom:1px solid var(--kyp-line);margin-bottom:11px}
+.kyp-dealfields{display:grid;gap:12px}
+.kyp-dealfields.one{grid-template-columns:minmax(0,260px)}
+.kyp-dealfields.two{grid-template-columns:1fr 1fr}
+.kyp-dealfields.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:720px){.kyp-dealfields.two,.kyp-dealfields.three{grid-template-columns:1fr}}
+
+/* ── a derived number is not an input ────────────────────────
+   "Operating income" was a third of an input grid holding one
+   sentence. It leaves the grid and becomes a readout, which also
+   gives the Save button a home.                                 */
+.kyp-readout{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;background:var(--kyp-wash);
+  border:1px solid var(--kyp-line);border-radius:11px;padding:12px 15px;margin-top:12px}
+.kyp-readout .rl{font-family:var(--kyp-mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--kyp-muted)}
+.kyp-readout .rv{font-family:var(--kyp-disp);font-size:24px;line-height:1;color:var(--kyp-ink)}
+.kyp-readout .rn{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-muted);line-height:1.5}
+.kyp-readout .rn a{color:var(--kyp-indigo);font-weight:700;text-decoration:none}
+.kyp-readout .kyp-tag,.kyp-readout .kyp-btn{margin-left:auto}
+
+/* ── our estimate, beside their override ─────────────────────
+   Shown whenever the client has entered their own figure, so the
+   number we derived is never silently discarded and the variance
+   is visible. Plain text, no verdict color: a client 8% above us
+   may know something we do not.                                 */
+.kyp-ourest{display:flex;flex-direction:column;gap:3px;background:var(--kyp-wash);
+  border:1px solid var(--kyp-line);border-radius:10px;padding:10px 13px;align-self:start}
+.kyp-ourest .cl{font-family:var(--kyp-mono);font-size:9px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--kyp-muted)}
+.kyp-ourest .cv{font-family:var(--kyp-mono);font-size:15px;font-weight:700;color:var(--kyp-ink)}
+.kyp-ourest .cd{font-family:var(--kyp-mono);font-size:9.5px;color:var(--kyp-muted);line-height:1.5}
+.kyp-btn.sm{font-size:9px;padding:6px 10px;margin-top:6px;align-self:flex-start}
+
+/* ── a field sized to its content ────────────────────────────  */
+.kyp-field.sm .kyp-inprefix,.kyp-field.sm .kyp-input{max-width:168px}
+
+/* ── a value set somewhere else ──────────────────────────────
+   .kyp-lock (patch 30) gains a trailing link, so it says where
+   to go and not only that the door is shut.                     */
+.kyp-lock a{margin-left:auto;padding-left:10px;color:var(--kyp-indigo);font-weight:700;
+  text-decoration:none;white-space:nowrap}
+.kyp-lock.wide{display:flex;width:100%;max-width:430px;box-sizing:border-box;margin-bottom:16px}
+
+/* ── an unsaved shared edit ──────────────────────────────────
+   The building area is owned by two sections. Indigo, never
+   orange: an unsaved edit is a state, not a problem.            */
+.kyp-dirty{display:inline-flex;align-items:center;gap:6px;font-family:var(--kyp-mono);
+  font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--kyp-indigo);background:var(--kyp-indigoSoft);border:1px solid #dfe3f7;
+  border-radius:6px;padding:4px 8px;margin-left:8px}
+
+/* ── the expense-ratio band ──────────────────────────────────
+   Context from transaction data, not a target, with its source
+   named. No verdict color.                                      */
+.kyp-band2{font-family:var(--kyp-mono);font-size:10px;color:var(--kyp-ink2);line-height:1.6;
+  background:var(--kyp-wash);border:1px solid var(--kyp-line);border-radius:9px;
+  padding:10px 12px;margin-top:10px}
+.kyp-band2 b{color:var(--kyp-ink)}
+.kyp-band2 s{display:block;text-decoration:none;color:var(--kyp-muted);margin-top:5px;
+  font-size:9.5px}
+```
+
+---
+
+## Part N — tests
+
+```ts
+test("nothing about the arithmetic changed", () => {
+  assert.deepEqual(computeValuationMetrics(INPUT), SNAPSHOT_BEFORE_STEP_36);
+  assert.deepEqual(computeDaycareScenarios({ buildingSqFt: 5600, revenuePerChildMonthly: 2275 })
+    .map((s) => s.annualRevenue), SNAPSHOT_REVENUE_BEFORE_STEP_36);
+});
+
+test("each step carries one footer, and nothing sits between header and fields", () => {
+  const html = render(daycareFixture);
+  assert.equal((html.match(/class="kyp-src"/g) || []).length, 5);
+  assert.doesNotMatch(html, /kyp-calcstep[\s\S]{0,200}?kyp-calcsub/);
+  assert.ok((html.match(/class="kyp-calchelp"/g) || []).length <= 3);
+});
+
+test("the exclusion rule is stated once, not five times", () => {
+  assert.equal((render(daycareFixture).match(/exclude[s]? occupancy/gi) || []).length, 1);
+});
+
+test("input labels are mono and typed values are not uppercased", () => {
+  const css = readFileSync("client/src/kyp-base.css", "utf8");
+  assert.match(css, /\.kyp-field\{[^}]*text-transform:uppercase/);
+  assert.match(css, /\.kyp-field \.kyp-input[^{]*\{[^}]*text-transform:none/);
+});
+
+test("both selects are dropdowns; presets are Title Case", () => {
+  const html = render(fixture);
+  assert.equal((html.match(/<select[^>]*kyp-select/g) || []).length, 2);
+  assert.match(html, /SBA · Business \+ Real Estate/);
+  assert.match(html, /\d+ children · \$[\d,]+\/yr/);   // data stays lowercase
+});
+
+test("numbers are grouped", () => {
+  assert.equal(formatNumberInput("1450000"), "1,450,000");
+  assert.equal(formatNumberInput("1450000."), "1,450,000.");
+  assert.equal(parseFormattedNumber(formatNumberInput("1450000")), 1450000);
+});
+
+test("every derived income number can be overridden, and the override survives", () => {
+  const html = render(daycareFixture);
+  assert.match(html, /Enter my own/);
+  const after = rerenderWithRefreshedAutomation({ ownRevenue: "1840000" });
+  assert.match(after, /1,840,000/);          // not overwritten
+  assert.match(after, /kyp-ourest/);         // ours still shown
+});
+
+test("a blank override is unknown, not zero", () => {
+  const html = render({ ...daycareFixture, ownRevenue: "" });
+  assert.doesNotMatch(html, /\$0 .*NOI/);
+  assert.match(html, /—/);
+});
+
+test("Operating income is gone and Site Cashflow is gone", () => {
+  const src = readFileSync("client/src/components/report/ValuationInputs.tsx", "utf8")
+    + readFileSync("client/src/components/report/ValuationCalculator.tsx", "utf8");
+  assert.doesNotMatch(src, /Operating income/);
+  assert.doesNotMatch(src, /Site Cashflow/);
+  assert.doesNotMatch(src, /isDaycare \? \d/);
+});
+
+test("building area has one owner and one write path", () => {
+  assert.doesNotMatch(readFileSync("client/src/components/report/ValuationCalculator.tsx", "utf8"),
+    /useState[^;]*buildingSqFt/);
+});
+
+test("no invented verdict survives", () => {
+  assert.doesNotMatch(render(fixtureWithHighCapRate), /cap rate above 10% is unusual/i);
+});
+```
+
+---
+
+## Not part of this step
+
+**The scenario router.** One control at the top — *what are you doing with this property?* — driving
+which financing paths are offered, which steps exist and what the yield is called. It also adds the
+owner-occupied 2–4 unit case the section cannot currently express. Bigger structural change; the
+calculator does not need it to be correct, only to be complete.
+
+**Progressive disclosure.** Removing Site Cashflow takes day care from six steps to five. Re-measure
+after this before building a stepper.
+
+**Three live API keys** in `.replit` lines 65–71, in four commits, with a `.gitignore` whose missing
+newline (`*.tar.gzserver/cache/`) means neither pattern matches. Rotate all three, move them to
+Replit Secrets, `git rm --cached .replit`, fix the newline. Rotating matters more than removing the
+file — they are already in history.
+
+---
+
+## Verify
+
+- `grep -c 'kyp-calchelp' client/src/components/report/ValuationCalculator.tsx` → **≤ 3**
+- `grep -c 'kyp-calcsub' client/src/components/report/ValuationCalculator.tsx` → **0**
+- `grep -rc 'Operating income\|Site Cashflow' client/src/components/report/` → **0**
+- `grep -c 'isDaycare ? [0-9]' client/src/components/report/ValuationCalculator.tsx` → **0**
+- `grep -c 'kyp-dealgrid\|kyp-readout' client/src/components/report/` → **≥ 2**
+- `grep -c 'class="kyp-input"' ` on any `<select>` → **0**
+- `grep -c 'formatNumberInput' client/src/` → **≥ 4**
+- `grep -ci 'excludes\? occupancy' client/src/components/report/ValuationCalculator.tsx` → **1**
+- `grep -c 'cap rate above 10' client/src/` → **0**
+- Every `.kyp-src` holds exactly two `<p>`, except the last step which holds one
+- **Visual, against `val-scenarios.html`:** Deal Inputs is two rows of side-by-side fields, not three
+  stacked columns; the readout sits below it reading `NOI` or `Monthly payment`; labels are small
+  mono uppercase; typed values are sentence case and comma-grouped with their decimals aligned
+- **Visual, against `income-source.html`:** every income source list ends in `Enter my own`;
+  choosing it shows the field with our estimate beside it and a revert button
+- **Numbers:** open the same day care, the same 6-unit and the same house before and after — every
+  figure in Deal at a Glance, Coverage Check and the receipt is identical

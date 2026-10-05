@@ -7,6 +7,19 @@ export function parseFormattedNumber(value: string): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+/** Accounting display without losing a trailing decimal during input. */
+export function formatNumberInput(raw: string): string {
+  if (raw.trim() === "") return "";
+  const negative = raw.trim().startsWith("-");
+  const cleaned = raw.replace(/[^\d.]/g, "");
+  if (cleaned === "") return negative ? "-" : "";
+  const [whole, ...rest] = cleaned.split(".");
+  // Group the digits directly so display formatting never rounds a large input.
+  const grouped = whole.replace(/^0+(?=\d)/, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const decimals = rest.length ? `.${rest.join("").slice(0, 2)}` : "";
+  return `${negative ? "-" : ""}${grouped}${decimals}`;
+}
+
 // PMT helper - rate is passed as percentage (e.g., 6.0 for 6%)
 export function calculatePMT(principal: number, rate: number, years: number): number {
   const safePrincipal = Number.isFinite(principal) ? Math.max(0, principal) : 0;
@@ -283,10 +296,10 @@ export function computeDaycareScenarios(input: {
     comfortable: Math.floor(sqft / 90),
   };
   const scenarios: Array<Omit<DaycareScenario, 'monthlyRevenue' | 'annualRevenue'>> = [
-    { key: '100_efficient', label: '100% · Efficient (75 sq ft/child)', capacity: capacities.efficient, children: capacities.efficient },
-    { key: '100_comfortable', label: '100% · Comfortable (90 sq ft/child)', capacity: capacities.comfortable, children: capacities.comfortable },
-    { key: '75_efficient', label: '75% · Efficient (75 sq ft/child)', capacity: capacities.efficient, children: Math.floor(capacities.efficient * 0.75) },
-    { key: '75_comfortable', label: '75% · Comfortable (90 sq ft/child)', capacity: capacities.comfortable, children: Math.floor(capacities.comfortable * 0.75) },
+    { key: '100_efficient', label: 'Efficient at 100%', capacity: capacities.efficient, children: capacities.efficient },
+    { key: '100_comfortable', label: 'Comfortable at 100%', capacity: capacities.comfortable, children: capacities.comfortable },
+    { key: '75_efficient', label: 'Efficient at 75%', capacity: capacities.efficient, children: Math.floor(capacities.efficient * 0.75) },
+    { key: '75_comfortable', label: 'Comfortable at 75%', capacity: capacities.comfortable, children: Math.floor(capacities.comfortable * 0.75) },
   ];
   return scenarios.map(scenario => {
     const monthlyRevenue = finiteOutput(scenario.children * revenuePerChild);
