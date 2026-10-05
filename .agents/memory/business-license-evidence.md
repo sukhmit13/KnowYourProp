@@ -29,6 +29,12 @@ Display competitor-history classifications as tags within Nearby Competitors, ke
 
 **How to apply:** Enrich the existing competitor list rather than widening it to the entire ZIP code. Show each location's evidence-backed history and keep historical area-level childcare totals unchanged unless a separate, compatible geographic and capacity analysis supports an update.
 
+Favor Google Places for competitor discovery while retaining the separate nearby-license/daycare list as supporting evidence.
+
+**Why:** The user considers Google Places the best competitor source because it is pulling accurately, and noted that the two existing lists sometimes overlap and sometimes do not.
+
+**How to apply:** Use confident business-and-location matches to attach license history to Google competitors. Do not force unmatched records together or interpret absence from either list as proof of closure.
+
 Preserve both insight views: business arrivals/turnover and changing offerings, alongside commercial occupancy/expansion. Do not discard a new operator simply because it enters an existing commercial space.
 
 **Why:** During brainstorming, the user explicitly agreed that “we should totally have both” after distinguishing changes in the business mix from growth in occupied or newly created commercial locations.
