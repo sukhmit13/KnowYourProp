@@ -6800,7 +6800,7 @@ export default function RunDetail() {
                         { value: gasStationsData.within2Miles ?? gasStationsData.stations.filter(s => s.distanceMiles != null && s.distanceMiles <= 2).length, label: "Within 2 miles" },
                         { value: gasStationsData.within3Miles ?? gasStationsData.totalFound, label: "Within 3 miles" },
                       ]} />
-                      <ProjectUseBusinessList listKey={`gas-${facts?.lat}-${facts?.lon}`} rows={gasStationsData.stations.filter(station => station.distanceMiles == null || station.distanceMiles <= 3).map(station => ({
+                      <ProjectUseBusinessList projectUse={selectedProjectType || run?.lastProjectType || undefined} listKey={`gas-${facts?.lat}-${facts?.lon}`} rows={gasStationsData.stations.filter(station => station.distanceMiles == null || station.distanceMiles <= 3).map(station => ({
                         name: station.name, address: `${station.address}${station.neighborhood ? `, ${station.neighborhood}` : ""}`,
                         distance: station.distanceMiles ?? null,
                       }))} />
@@ -6852,7 +6852,7 @@ export default function RunDetail() {
                         ]} />
                       </div>
 
-                      {hotelsData.locations.length > 0 && <ProjectUseBusinessList listKey={`hotels-${facts?.lat}-${facts?.lon}`} rows={hotelsData.locations.filter(l => l.distanceMiles == null || l.distanceMiles <= 3).map(loc => ({
+                      {hotelsData.locations.length > 0 && <ProjectUseBusinessList projectUse={selectedProjectType || run?.lastProjectType || undefined} listKey={`hotels-${facts?.lat}-${facts?.lon}`} rows={hotelsData.locations.filter(l => l.distanceMiles == null || l.distanceMiles <= 3).map(loc => ({
                         name: loc.name, address: `${loc.address}${loc.neighborhood ? `, ${loc.neighborhood}` : ""}`, distance: loc.distanceMiles ?? null,
                       }))} />}
                       {!hotelsData.locations.length && <div className="kyp-status-empty" role="status">No hotel license rows were returned.</div>}
@@ -6907,7 +6907,7 @@ export default function RunDetail() {
                         { value: barsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 2).length, label: "Within 2 miles" },
                         { value: barsData.locations.filter(l => l.distanceMiles != null && l.distanceMiles <= 3).length, label: "Within 3 miles" },
                       ]} />
-                      <ProjectUseBusinessList listKey={`bars-${facts?.lat}-${facts?.lon}`} rows={barsData.locations.filter(l => l.distanceMiles == null || l.distanceMiles <= 3).map(loc => ({
+                      <ProjectUseBusinessList projectUse={selectedProjectType || run?.lastProjectType || undefined} listKey={`bars-${facts?.lat}-${facts?.lon}`} rows={barsData.locations.filter(l => l.distanceMiles == null || l.distanceMiles <= 3).map(loc => ({
                         name: loc.name, address: `${loc.address}${loc.neighborhood ? `, ${loc.neighborhood}` : ""}`,
                         distance: loc.distanceMiles ?? null,
                       }))} />
@@ -6935,7 +6935,7 @@ export default function RunDetail() {
                   ) : cannabisData && cannabisData.locations.length > 0 ? (
                     <div className="space-y-4">
                       <ProjectUseCountBlocks counts={[{ value: cannabisData.locations.length, label: `In ZIP ${facts?.zipCode ?? "—"}` }]} />
-                      <ProjectUseBusinessList listKey={`cannabis-${facts?.zipCode ?? ""}`} rows={cannabisData.locations.map(loc => ({
+                      <ProjectUseBusinessList projectUse={selectedProjectType || run?.lastProjectType || undefined} listKey={`cannabis-${facts?.zipCode ?? ""}`} rows={cannabisData.locations.map(loc => ({
                         name: loc.name, address: loc.address, distance: null,
                       }))} />
                     </div>
@@ -6961,6 +6961,7 @@ export default function RunDetail() {
                 isError={isGooglePlacesError}
                 confirmed={!!googlePlacesSearchTerm}
                 searchTerm={googlePlacesSearchTerm || undefined}
+                projectUse={selectedProjectType || run?.lastProjectType || undefined}
                 onRetry={() => refetchGooglePlaces()}
               />
             </div>
@@ -11963,6 +11964,7 @@ export default function RunDetail() {
                                   isError={isGooglePlacesError}
                                   confirmed={!!googlePlacesSearchTerm}
                                   searchTerm={googlePlacesSearchTerm || undefined}
+                                  projectUse={selectedProjectType || run?.lastProjectType || undefined}
                                 />
                               </div>
                             </CollapsibleContent>

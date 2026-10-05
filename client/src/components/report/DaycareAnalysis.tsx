@@ -179,6 +179,7 @@ export function DaycareAnalysis({
     name: location.name || "Name unavailable",
     address: location.address || "Address unavailable",
     distance: typeof location.distanceMiles === "number" ? location.distanceMiles : null,
+    licenseNumber: location.licenseNumber || undefined,
     testId: `licensed-daycare-${index}`,
   }));
   const underFiveRank = enhancedData?.ranks?.childrenUnder5 as
@@ -514,7 +515,7 @@ export function DaycareAnalysis({
                   { value: nearbyData.within2Miles ?? null, label: "Within 2 miles" },
                   { value: nearbyData.within3Miles ?? nearbyData.totalFound ?? null, label: "Within 3 miles" },
                 ]} />
-                {licensedRows.length ? <ProjectUseBusinessList listKey="licensed-daycare" rows={licensedRows} initialLimit={10} />
+                {licensedRows.length ? <ProjectUseBusinessList listKey="licensed-daycare" rows={licensedRows} initialLimit={10} projectUse="Day Care Center" />
                   : <div className="kyp-status-empty" role="status">No matching day-care business-license records were returned.</div>}
                 <Evidence>Cached records from the City of Chicago Business Licenses dataset r5kz-chrr, matched by location; snapshot generated 2026-06-05. These records do not establish current operation, current licensure, or expiration. The endpoint returns up to 20 records within the requested radius. Business names link to a Google Maps search for the name and address because the city-license records do not provide Maps listing URLs.</Evidence>
               </>
@@ -531,6 +532,7 @@ export function DaycareAnalysis({
           onRetry={onGoogleRetry}
           confirmed={googleConfirmed}
           searchTerm={googleSearchTerm}
+          projectUse="Day Care Center"
           footer={<>Source: Google Maps Places. Results use the existing confirmed project-use search term; they do not identify licensed providers or this address. Ratings are Google user ratings, not a quality measure.</>}
         />
       </section>

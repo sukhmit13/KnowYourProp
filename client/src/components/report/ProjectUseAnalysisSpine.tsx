@@ -1,4 +1,5 @@
 import React, { useEffect, useState, type ReactNode } from "react";
+import CompetitorLicenseHistory from "@/components/report/CompetitorLicenseHistory";
 
 const NEARBY_ACRONYMS = new Set("USA US UK LLC LLP LP INC LTD CO CORP BP EV DC AC HVAC BBQ".split(" "));
 const STATE_ABBREVIATIONS = new Set("AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY DC".split(" "));
@@ -22,6 +23,8 @@ export interface ProjectUseBusinessRowProps {
   meta?: ReactNode[];
   testId?: string;
   showDistance?: boolean;
+  projectUse?: string;
+  licenseNumber?: string;
 }
 
 function mapsSearchUrl(name: string, address: string): string {
@@ -50,6 +53,8 @@ export function ProjectUseBusinessRow({
   meta,
   testId,
   showDistance = true,
+  projectUse,
+  licenseNumber,
 }: ProjectUseBusinessRowProps) {
   const mapsUrl = googleMapsUrl(url) ?? mapsSearchUrl(name, address);
   return (
@@ -60,6 +65,7 @@ export function ProjectUseBusinessRow({
             <b className="kyp-project-use-nearby-name">{titleCaseNearbyText(name)}</b><span className="kyp-project-use-nearby-ext" aria-hidden="true">↗</span>
           </a>
           <span className="kyp-project-use-nearby-address">{titleCaseNearbyText(address, true)}</span>
+          {projectUse && <CompetitorLicenseHistory name={name} address={address} projectUse={projectUse} licenseNumber={licenseNumber} />}
           {!!meta?.length && (
             <div className="kyp-project-use-nearby-meta">
               {meta.map((item, index) => <span key={index}>{item}</span>)}
@@ -82,18 +88,22 @@ export interface ProjectUseBusinessListRow {
   meta?: ReactNode[];
   testId?: string;
   showDistance?: boolean;
+  projectUse?: string;
+  licenseNumber?: string;
 }
 
 export interface ProjectUseBusinessListProps {
   rows: ProjectUseBusinessListRow[];
   initialLimit?: number;
   listKey?: string;
+  projectUse?: string;
 }
 
 export function ProjectUseBusinessList({
   rows,
   initialLimit = 10,
   listKey,
+  projectUse,
 }: ProjectUseBusinessListProps) {
   const [expanded, setExpanded] = useState(false);
   useEffect(() => {
@@ -107,7 +117,7 @@ export function ProjectUseBusinessList({
   return (
     <div className="kyp-project-use-nearby-list">
       {visibleRows.map((row, index) => (
-        <ProjectUseBusinessRow key={`${row.testId ?? row.name}-${index}`} {...row} />
+        <ProjectUseBusinessRow key={`${row.testId ?? row.name}-${index}`} {...row} projectUse={row.projectUse ?? projectUse} />
       ))}
       {isSliced && (
         <>
@@ -226,6 +236,7 @@ export interface ProjectUseGoogleMapsProps {
   searchTerm?: string;
   footer?: ReactNode;
   onRetry?: () => void;
+  projectUse?: string;
 }
 
 function finiteNumber(value: unknown): number | null {
@@ -275,6 +286,7 @@ export function ProjectUseGoogleMaps({
   searchTerm,
   footer,
   onRetry,
+  projectUse,
 }: ProjectUseGoogleMapsProps) {
   const status = data?.status?.toLowerCase();
   const places = Array.isArray(data?.places) ? data.places : null;
@@ -344,6 +356,7 @@ export function ProjectUseGoogleMaps({
               url: place.url,
               meta: placeMeta(place),
               testId: `google-place-${index}`,
+              projectUse,
             }))}
           />
         </>

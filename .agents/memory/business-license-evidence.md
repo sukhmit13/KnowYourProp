@@ -35,6 +35,12 @@ Use both existing Google Places and nearby-license/daycare lists as starting poi
 
 **How to apply:** Keep both lists intact and enrich their business rows with earliest observed licensing at that location and evidence-backed addition/replacement history for the selected use. Resolve identities internally without adding unmatched-source or inferred operating-status tags. Use Google's explicit closed status where applicable; do not infer closure from absence in either source. Insufficient history must not become a confirmed start date or addition.
 
+For a clear prior same-use operator sequence at the same location, use “Replacement,” not “Possible replacement.” A completed search with no earlier same-use operator supports an addition label scoped to the available City license history.
+
+**Why:** The user explicitly requested definite replacement/addition tags based on checking the address's prior same-use license records.
+
+**How to apply:** Separate predecessors from simultaneous tenants and distinct suites before labeling a replacement. Do not turn incomplete retrieval or missing historical coverage into a claim that a business never existed there, and do not call a licensing date a company formation or verified opening date.
+
 Preserve both insight views: business arrivals/turnover and changing offerings, alongside commercial occupancy/expansion. Do not discard a new operator simply because it enters an existing commercial space.
 
 **Why:** During brainstorming, the user explicitly agreed that “we should totally have both” after distinguishing changes in the business mix from growth in occupied or newly created commercial locations.

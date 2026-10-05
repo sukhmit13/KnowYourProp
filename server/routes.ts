@@ -9555,6 +9555,26 @@ ${contextBlocks.map((b, i) => isCompare ? `--- Property ${i + 1} ---\n${b}` : b)
     }
   });
 
+  app.post('/api/competitor-license-history', async (req, res) => {
+    try {
+      const bearer = req.headers.authorization?.startsWith("Bearer ")
+        ? await resolveUserFromToken(req.headers.authorization.slice(7).trim()) : null;
+      if (!req.user?.email && !bearer?.email) return res.status(401).json({ message: "Sign in required" });
+      const input = z.object({
+        name: z.string().trim().min(1).max(200),
+        address: z.string().trim().min(1).max(240),
+        projectUse: z.string().trim().min(1).max(120),
+        licenseNumber: z.string().trim().max(40).optional(),
+      }).safeParse(req.body);
+      if (!input.success) return res.status(400).json({ message: "A business name, address, and selected project use are required." });
+      const { getCompetitorLicenseHistory } = await import("./competitorLicenseHistory");
+      res.json(await getCompetitorLicenseHistory(input.data));
+    } catch (error) {
+      console.error("[competitor-history] Request failed:", error instanceof Error ? error.message : "Unknown error");
+      res.status(500).json({ message: "License history lookup could not be completed." });
+    }
+  });
+
   app.get('/api/google-places', async (req, res) => {
     try {
       const lat = parseFloat(req.query.lat as string);
