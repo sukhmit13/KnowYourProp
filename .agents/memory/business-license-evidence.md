@@ -29,11 +29,11 @@ Display competitor-history classifications as tags within Nearby Competitors, ke
 
 **How to apply:** Enrich the existing competitor list rather than widening it to the entire ZIP code. Show each location's evidence-backed history and keep historical area-level childcare totals unchanged unless a separate, compatible geographic and capacity analysis supports an update.
 
-Favor Google Places for competitor discovery while retaining the separate nearby-license/daycare list as supporting evidence.
+Use both existing Google Places and nearby-license/daycare lists as starting points for retrospective license-history lookup; do not prioritize or restructure one as the main list.
 
-**Why:** The user considers Google Places the best competitor source because it is pulling accurately, and noted that the two existing lists sometimes overlap and sometimes do not.
+**Why:** The user clarified: “We just need to use both of those lists as a way to backtrack into the new business license history and find out when they started,” then determine whether each is an additional business of the selected project use or a replacement. They rejected the proposed extra matching/status treatment.
 
-**How to apply:** Use confident business-and-location matches to attach license history to Google competitors. Do not force unmatched records together or interpret absence from either list as proof of closure.
+**How to apply:** Keep both lists intact and enrich their business rows with earliest observed licensing at that location and evidence-backed addition/replacement history for the selected use. Resolve identities internally without adding unmatched-source or inferred operating-status tags. Use Google's explicit closed status where applicable; do not infer closure from absence in either source. Insufficient history must not become a confirmed start date or addition.
 
 Preserve both insight views: business arrivals/turnover and changing offerings, alongside commercial occupancy/expansion. Do not discard a new operator simply because it enters an existing commercial space.
 
